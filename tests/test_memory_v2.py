@@ -21,7 +21,7 @@ from cybertron.kernel import Kernel
 import cybertron_golden_cases as GC
 from test_cybertron_golden import _sha
 
-V1 = ["context.memory_text=v1", "context.dm_delta=false", "context.history.enabled=false"]
+V1 = ["context.memory_text=v1", "context.dm_delta=false", "context.history.enabled=false", "context.world_name=Charter"]   # world_name: engine 18
 OFF = ["context.history.enabled=false"]          # these tests cover the fixed layers (history mode: test_history.py)
 V1_PROMPTS = Path(__file__).parent / "fixtures" / "memory_v1_prompts.json"   # the prompt goldens from before review 20
 

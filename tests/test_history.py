@@ -57,6 +57,7 @@ def test_history_off_reproduces_every_prompt_from_before(name, tmp_path, monkeyp
     monkeypatch.setitem(__import__("cybertron.goals").goals.SCORING_DEFAULTS, "fixes", False)   # engine 10 rewords Dynasty's text
     from cybertron import subsistence as SB                               # engine 14: the individual hunt (its texts and catches)
     monkeypatch.setitem(SB.DEFAULTS["game"], "hunt_mode", "shared")
+    monkeypatch.setitem(__import__("cybertron.context").context.DEFAULTS, "world_name", "Charter")   # engine 18 drops the world's name
     monkeypatch.setattr(SB, "_CFG", {})
     from cybertron import laweffects as LE                                # laws that work or fail loudly: the behaviour before
     from cybertron import schema as SC
