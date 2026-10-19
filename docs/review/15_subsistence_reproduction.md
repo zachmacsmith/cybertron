@@ -666,19 +666,19 @@ prompts are frozen (D-4) and never see subsistence.
 
 | Change | Off-state guarantee | Test |
 |---|---|---|
-| Feature row `F("subsistence", "charter.subsistence", "subsistence", state=("subsistence",), rng=("subsistence",), live="subsistence", skip_off=True)` | `skip_off` skips every phase entry | `test_charter_features` (state keys absent when off) |
+| Feature row `F("subsistence", "cybertron.subsistence", "subsistence", state=("subsistence",), rng=("subsistence",), live="subsistence", skip_off=True)` | `skip_off` skips every phase entry | `test_cybertron_features` (state keys absent when off) |
 | New `PHASES` entries: init `("subsistence", "install")` after camps; round_end `("subsistence", "end_of_round")` after `("camps", "world_update")`; death `("subsistence", "on_death")` after `("life", "on_death")`; new `TAILS` entries | Skipped when off; tails return `{}`/`[]` | Golden suite unchanged |
 | New camp types `forest`, `fields` with `role = "subsistence"`, `standard = False`, `wildcard_ok = False` | `framework.compose` picks by the five standard roles and `wildcard_ok`, so registry growth changes no draw | A composition golden over 20 seeds |
 | The subsistence composer appends camps with its own stream `"{seed}\|subsistence\|camps"` | No draw on `"{seed}\|camptypes"` | Same |
 | `food` unit value added to `sp["unit_values"]` only by the subsistence composer (**not** to `resources.VALUE`, which `framework.generate` copies into every typed world) | Typed worlds' `unit_values` unchanged | Snapshot golden |
 | `mortality.CAUSES += ("starvation",)`, `CAUSE_TEXT`, `dispatch/changes/lifecycle.LIFE_CAUSES` | Not reachable when off. No report enumerates `CAUSES` (checked with grep) | Contract test |
 | `Act.fed` field (default −1) | Consulted only when the feature is on | Prompt fingerprint tests |
-| `life.reproduction.mode` default `makers`; `life.parents` key created only by pair births | Off: `life` state keys unchanged | `test_charter_life`, golden |
-| `life.scale` (default `run`), `life.age_structure` (default `elapsed`), `life.age_sampling` (v2, S0) | Defaults reproduce today's draws exactly (same stream, same calls); `stationary` uses the same `"{seed}\|life\|lifespan"` stream but only when selected | `test_charter_life`: default draws byte-identical; stationary: deaths per round ≤ ⌈N/μ⌉ |
+| `life.reproduction.mode` default `makers`; `life.parents` key created only by pair births | Off: `life` state keys unchanged | `test_cybertron_life`, golden |
+| `life.scale` (default `run`), `life.age_structure` (default `elapsed`), `life.age_sampling` (v2, S0) | Defaults reproduce today's draws exactly (same stream, same calls); `stationary` uses the same `"{seed}\|life\|lifespan"` stream but only when selected | `test_cybertron_life`: default draws byte-identical; stationary: deaths per round ≤ ⌈N/μ⌉ |
 | Default heirs (v2, S0) behind `life.default_heirs` (default `reserve` = today; subsistence presets `children`) | Off: estates go to the reserve as today | Golden suite; mortality tests for gestation shares |
-| Primitive rows `eat`, `hunger`, `spoil`, `sow`, `reap`, `build`, `conceive` | Rows exist; no event without the feature | `test_charter_contract` completeness |
+| Primitive rows `eat`, `hunger`, `spoil`, `sow`, `reap`, `build`, `conceive` | Rows exist; no event without the feature | `test_cybertron_contract` completeness |
 | `accounts.RESOLVERS["store:"]`, `"gest:"` escrow prefix, `SOURCES_SINKS["spoil"]`, `["eat"]`, `["sow"]` | — | Accounts conservation test on a subsistence scripted run |
-| Schema: `subsistence.*`, `life.reproduction.*` | Defaults from module `DEFAULTS`; not in base.yaml | `test_charter_schema`; `resources.upkeep.enabled` and `subsistence.enabled` together is an error |
+| Schema: `subsistence.*`, `life.reproduction.*` | Defaults from module `DEFAULTS`; not in base.yaml | `test_cybertron_schema`; `resources.upkeep.enabled` and `subsistence.enabled` together is an error |
 | New presets `nature_subsistence` (state of nature + design arm + subsistence + pairs) and `society_subsistence` (scaffolded + `code: today` + Tillers' Right Act) | No existing preset edited (review 14: `full10` untouched) | — |
 
 ---
@@ -804,7 +804,7 @@ pooled):**
    `greedy`, `idle`, chosen by `subsistence.bot_policy`, with the toy's rules (invest order: rotation, tool, irrigation, seed
    selection, store, clearing; relief to agents below 1 food from those above 5; conceive with probability `bot_conceive` 0.2 when
    eligible and holding the price plus 4).
-2. **Sweep** (`python -m charter calibrate subsistence`, a small harness like `camptypes/calibrate.py`): a Latin hypercube over
+2. **Sweep** (`python -m cybertron calibrate subsistence`, a small harness like `camptypes/calibrate.py`): a Latin hypercube over
    `forest.regrowth`, `forest.yield`, `fields.mult`, `fields.plots_per_agent`, `fields.fertility.loss`, `spoil`,
    `reproduction.provisions`, `ladder` costs and the lifespan mean, at N = 10, 24 and 100, R = 20, 40, 80, 3 seeds each, scripted
    only. Report the §9.1 metrics, including the ablations (ladder off, no relief, each rung off) and old-age deaths per round.
@@ -852,14 +852,14 @@ institution" (review 14 §5.2).
 | WP | Content | Files | Depends on | Size |
 |---|---|---|---|---|
 | **S0** (v2, first; useful without subsistence) | Absolute lifespans (`life.scale: none`), stationary founder ages with systematic sampling (§2.6; uniform closed form, tabulated inverse for the normal), `spec check` warning when N/μ exceeds the estimated birth capacity (audit C1); the audit's inheritance fixes B4, B5 and default heirs R7 behind `life.default_heirs` (§11.1) | `life.py` (`_draw_lifespan`, `install`, `_set_lifespan`, `_refund`, `_birth`), `mortality.py` (`_group`, `_unborn`, `_reserve_dst`), `schema.py`, `spec check` | — (rebase on `fix/haiku-run-issues`) | S-M |
-| **S1** | Food, the ration, stages, hazard, spoilage; `Act.fed` gate; state lines and rules text; `starvation` cause; primitive rows `eat`, `hunger`, `spoil`; feature row and phases; scripted bot (eat-only); accounts sink | `charter/subsistence.py` (new), `features.py`, `action_registry.py`, `actions.py`, `mortality.py`, `primitives.py`, `eventtypes.py`, `accounts.py`, `schema.py`, `runner.py` (actions after hunger), `sections` | — | M |
+| **S1** | Food, the ration, stages, hazard, spoilage; `Act.fed` gate; state lines and rules text; `starvation` cause; primitive rows `eat`, `hunger`, `spoil`; feature row and phases; scripted bot (eat-only); accounts sink | `cybertron/subsistence.py` (new), `features.py`, `action_registry.py`, `actions.py`, `mortality.py`, `primitives.py`, `eventtypes.py`, `accounts.py`, `schema.py`, `runner.py` (actions after hunger), `sections` | — | M |
 | **S2** | Forest and fields types (with fertility and sowing from 1 food); the hunt via `weak_link` with food; the subsistence composer; subsistence camps ignore `typed.open_classes` (§2.8); `farm` action; `sow` and `reap` primitives; food unit value | `camptypes/forest.py`, `camptypes/fields.py`, `camptypes/framework.py` (composer hook, `open_classes`), `action_registry.py` | S1 | M-L |
 | ~~S2b~~ | *Folded into S11* | | | |
 | **S3** | Stores: `build`, `withdraw`, `store:` accounts, store spoilage, institution ownership | `subsistence.py`, `accounts.py`, `primitives.py` | S1 | M |
 | **S4** | Pair reproduction: offers, match, gestation escrow (5 + 1 per parent, payable from own store), trait mixing, two-parent birth via `begin_life`, `life.parents`, lineage readers, minors, household draw, investment ledger, cap check; gestations count as `@children` heirs | `life.py`, `subsistence.py`, `history.py`, `mortality.py`, `jurisdictions.assign_newborn` (coparent), `goals` (draw) | S0, S1 | M-L |
 | **S4b** | Makers under `both`: food pricing, ordered goal as provisional, linked upgrades | `life.py` | S4, S5, audit B1, B2, B6 (§11.1) | S-M |
 | **S5** | Children's goals: random primary, provisional inherited secondary, texts, maturity draw, `set_goal` boundary | `subsistence.py`, `events.py` (a shared boundary helper), `goals.py` text | S4 | M |
-| **S6** | Law surface: reads, `before_conceive`, `before_sow`/`before_reap`, `before_build`, `before_practice` hooks, `set_birth_rules` extension, library templates (Relief Act, Tillers' Right, Granary Charter, Household, Child Support, **Cooperative, Tenancy, Day labour, School**); default-code Act "Tillers' Right" for scaffolded presets | `lawapi.py`, `library`, `charter/code/` | S2, S3, S4, S11 | M |
+| **S6** | Law surface: reads, `before_conceive`, `before_sow`/`before_reap`, `before_build`, `before_practice` hooks, `set_birth_rules` extension, library templates (Relief Act, Tillers' Right, Granary Charter, Household, Child Support, **Cooperative, Tenancy, Day labour, School**); default-code Act "Tillers' Right" for scaffolded presets | `lawapi.py`, `library`, `cybertron/code/` | S2, S3, S4, S11 | M |
 | **S7** | Calibration harness, bot policies (with the toy's investment and relief rules), sweep over N × R, presets `nature_subsistence` and `society_subsistence` | `subsistence.py`, `camptypes/calibrate.py` pattern, `specs/` | S0-S5, S11 | M |
 | **S8** | Measurement: §10 metrics in `report` (v2 rows included), History accessors | `history.py`, `report.py` | S1-S5, S11 | S-M |
 | ~~S9~~ | *Folded into S0* | | | |
@@ -887,7 +887,7 @@ give the food economy, testable with Makers mode.
 
 ### Test plan
 
-**Unit tests (`tests/test_charter_subsistence.py`):**
+**Unit tests (`tests/test_cybertron_subsistence.py`):**
 
 - Ration: an agent with 1.0 food eats and has 0; with 0.999999999 it eats (tolerance); with 0.6 it misses and keeps 0.6.
 - Stages: fed → −1 → −2 → −2. A starving agent that eats is hungry; then fed after a second meal.

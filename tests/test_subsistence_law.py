@@ -1,23 +1,23 @@
 """The law surface over subsistence and reproduction (review 15 S6, §3.4, §4.7; review 19 §7; D-42): the law reads (minors,
 gestations, food_totals, forest, hunger), the hooks the templates rely on (before_conceive for both parents, after_begin_life with
 both parents, before_withdraw, before_hunt, before_harvest, before_cast_vote, on_round_end before the ration), store scoping for
-polity laws, and every food and family template of the library (charter/library.py FOOD_TEMPLATES) enacted in a scripted world
+polity laws, and every food and family template of the library (cybertron/library.py FOOD_TEMPLATES) enacted in a scripted world
 with its effect checked. No model calls."""
 from __future__ import annotations
 
 import pytest
 
-from charter import accounts as AC
-from charter import actions as A
-from charter import contracts as KC
-from charter import generator
-from charter import library as LB
-from charter import life as LF
-from charter import mortality as MO
-from charter import pairs as PR
-from charter import spec as S
-from charter import subsistence as SB
-from charter.kernel import Kernel
+from cybertron import accounts as AC
+from cybertron import actions as A
+from cybertron import contracts as KC
+from cybertron import generator
+from cybertron import library as LB
+from cybertron import life as LF
+from cybertron import mortality as MO
+from cybertron import pairs as PR
+from cybertron import spec as S
+from cybertron import subsistence as SB
+from cybertron.kernel import Kernel
 
 SMALL = "agents={worker: 8, scientist: 0, legislator: 0, media: 0, board: 0, fixer: 1}"
 SOC = ["subsistence.enabled=true", "law.v2=true", "contracts.enabled=true"]
@@ -122,7 +122,7 @@ def test_every_template_checks_and_is_listed_only_where_its_needs_hold():
             KC.check_code(e["code"])
         assert LB.code(e["name"]) == e["code"] and LB.info2(e["name"])["params"] == LB.params(e["name"])
         assert "intent" in e["code"] and e["doc"]
-    from charter import actions as AA
+    from cybertron import actions as AA
     plain = S.apply_overrides(S.load("society"), ["law.v2=true", "contracts.enabled=true", "shared_archive.enabled=false"])
     assert LB.food_templates(plain) == []
     sub = S.apply_overrides(plain, ["subsistence.enabled=true"])
@@ -142,7 +142,7 @@ def test_every_template_checks_and_is_listed_only_where_its_needs_hold():
 def test_a_template_instantiates_with_new_constants():
     src = LB.instantiate("Relief Act", {"BUDGET": 9, "STAGES": ["starving"]})
     assert "BUDGET = 9" in src and "STAGES = ['starving']" in src
-    from charter import regimes as RG
+    from cybertron import regimes as RG
     assert "BUDGET = 9" in RG.template_code("Relief Act", {"BUDGET": 9})
 
 
@@ -195,7 +195,7 @@ def before_conceive(p, chain):
 
 
 def test_before_conceive_binds_the_accepting_parents_laws_too(monkeypatch):
-    from charter import jurisdictions as J
+    from cybertron import jurisdictions as J
     inst, k = world(PAIRS)
     a, b = eaters(k)[:2]
     for x in (a, b):
@@ -404,7 +404,7 @@ def test_granary_charter_duties_arrears_and_withdrawal_rules():
 
 
 def J_of(k, lid):
-    from charter import jurisdictions as J
+    from cybertron import jurisdictions as J
     return J.law_jur(k, lid)
 
 
@@ -538,7 +538,7 @@ def test_forest_territory_binds_members_only():
     with pytest.raises(A.ActionError, match="another polity"):
         A.act(k, a, "harvest", {"camp": f})
     assert k.w["camps"][f]["harvested_this_round"] == 0 and a not in SB.state(k)["forage"]   # refused: nothing taken or counted
-    from charter import jurisdictions as J
+    from cybertron import jurisdictions as J
     k.w["jur"]["member"].pop(b)                                             # b belongs to no polity: the law cannot reach it
     assert J.member_of(k, b) is None
     assert A.act(k, b, "hunt", {"camp": f}).startswith("You hunt")
@@ -569,7 +569,7 @@ def test_common_pool_management_ties_the_quota_to_the_stock():
 
 
 def test_a_forest_counts_its_polity_quota_per_jurisdiction(monkeypatch):
-    from charter import jurisdictions as J
+    from cybertron import jurisdictions as J
     inst, k = world(SOC)
     a = eaters(k)[0]
     f = forest(k)

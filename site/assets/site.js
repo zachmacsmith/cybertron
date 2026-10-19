@@ -1,5 +1,5 @@
-// Shared page chrome and helpers for the Charter site.
-import { openDataset } from "../lib/charter-data.js";
+// Shared page chrome and helpers for the Cybertron site.
+import { openDataset } from "../lib/cybertron-data.js";
 
 export const GITHUB = "https://github.com/zachmacsmith/charter";
 export const DATASET_REPO = "zachmacsmith/charter-runs";
@@ -9,12 +9,12 @@ const THEMES = [["swiss", "Swiss"], ["broadsheet", "Broadsheet"], ["night", "Nig
 // ------------------------------------------------------------------ theme (set before paint by the inline snippet in each page)
 export function currentTheme() {
   const q = new URLSearchParams(location.search).get("theme");
-  if (q) { try { localStorage.setItem("charter-theme", q); } catch (e) {} return q; }
-  try { return localStorage.getItem("charter-theme") || "broadsheet"; } catch (e) { return "broadsheet"; }
+  if (q) { try { localStorage.setItem("cybertron-theme", q); } catch (e) {} return q; }
+  try { return localStorage.getItem("cybertron-theme") || "broadsheet"; } catch (e) { return "broadsheet"; }
 }
 function setTheme(t) {
   document.documentElement.dataset.theme = t;
-  try { localStorage.setItem("charter-theme", t); } catch (e) {}
+  try { localStorage.setItem("cybertron-theme", t); } catch (e) {}
   document.querySelectorAll(".themes button").forEach((b) => b.classList.toggle("on", b.dataset.t === t));
   document.dispatchEvent(new CustomEvent("themechange", { detail: t }));
 }
@@ -38,7 +38,7 @@ export function chrome(active) {
   const head = document.createElement("header");
   head.className = "site-head";
   head.innerHTML = `<div class="wrap">
-    <a class="brand" href="index.html">Charter</a>
+    <a class="brand" href="index.html">Cybertron</a>
     <nav class="nav">${nav.map(([h, t, k]) => `<a href="${h}" class="${k === active ? "on" : ""}">${t}</a>`).join("")}
       <a href="${GITHUB}">GitHub</a><a href="${DATASET_URL}">Dataset</a></nav>
     ${new URLSearchParams(location.search).has("themes") ? `<div class="themes" title="Design">${THEMES.map(([k, t]) => `<button data-t="${k}">${t}</button>`).join("")}</div>` : ""}</div>`;
@@ -47,7 +47,7 @@ export function chrome(active) {
   setTheme(currentTheme());
   const foot = document.createElement("footer");
   foot.className = "site-foot";
-  foot.innerHTML = `<div class="wrap"><span>Charter: societies of LLM agents</span>
+  foot.innerHTML = `<div class="wrap"><span>Cybertron: societies of LLM agents</span>
     <a href="${GITHUB}">Code (MIT)</a><a href="${DATASET_URL}">Data (CC BY 4.0)</a>
     <a href="https://zachmacsmith.com">Zach Macsmith</a></div>`;
   document.body.append(foot);

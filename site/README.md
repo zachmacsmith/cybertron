@@ -1,6 +1,6 @@
 # site
 
-The Charter website: static HTML, CSS and ES modules (no node, no bundler), reading runs straight from the Hugging Face dataset.
+The Cybertron website: static HTML, CSS and ES modules (no node, no bundler), reading runs straight from the Hugging Face dataset.
 
 | Page | What |
 |---|---|
@@ -14,23 +14,23 @@ The design is Broadsheet. Swiss and Night remain as CSS variables in `assets/sit
 ## Run it locally
 ```bash
 python site/build.py                                   # notes/index.json, assets/mascots.svg
-python -m charter publish RUN... --card site/cards.yaml --stories site/stories.yaml --with-viewer-json --staging charter/out/site-data
-ln -sfn ../charter/out/site-data site/_data            # the site reads _data on localhost, the Hub elsewhere
+python -m cybertron publish RUN... --card site/cards.yaml --stories site/stories.yaml --with-viewer-json --staging cybertron/out/site-data
+ln -sfn ../cybertron/out/site-data site/_data            # the site reads _data on localhost, the Hub elsewhere
 python site/serve.py                                   # http://localhost:8790, caching off
 ```
 `?data=hf` reads the published dataset instead of `_data`; `?data=URL` reads any copy.
 
 ## Pieces
-- `lib/charter-data.js`: the data layer (catalog, run tables, channels, threads, inboxes, turns); commit-pinned, cached, lazy.
+- `lib/cybertron-data.js`: the data layer (catalog, run tables, channels, threads, inboxes, turns); commit-pinned, cached, lazy.
   Follows export schema 2 (docs/data_format.md) and derives messages/channels from `events` for older exports.
 - `assets/run/`: the run page. `model.js` turns a run's data into rounds, ballots, threads and law histories (the event semantics of
-  charter/viewer/template.html); `views.js` renders each section as of the shared round; `square.js` is the animated society map;
+  cybertron/viewer/template.html); `views.js` renders each section as of the shared round; `square.js` is the animated society map;
   `mascots.js` draws each agent.
-- `cards.yaml`: curated titles, descriptions, tags and featured flags for `charter publish --card`.
-- `stories.yaml`: the stories registry (title, subtitle, verbatim quote, agent, run). `python -m charter publish --stories site/stories.yaml --push`
+- `cards.yaml`: curated titles, descriptions, tags and featured flags for `cybertron publish --card`.
+- `stories.yaml`: the stories registry (title, subtitle, verbatim quote, agent, run). `python -m cybertron publish --stories site/stories.yaml --push`
   uploads it as `stories.json` on its own; the home page shows them in a new random order on every visit (`assets/stories.js`).
 
 ## Temporary (until export schema 2 lands)
 - The run page loads `viewer.json` (written by `publish --with-viewer-json`) into `assets/run/model.js`. Once the export tables carry
-  everything, build the same input from them through `lib/charter-data.js` (one adapter) and drop the flag and the file.
+  everything, build the same input from them through `lib/cybertron-data.js` (one adapter) and drop the flag and the file.
 - Conversations use the schema-1 fallback (messages derived from `events`) until the exporter writes `messages`/`channels`.

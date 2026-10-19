@@ -1,15 +1,15 @@
 # Engine versions
 
-`charter/provenance.py` `ENGINE_VERSION` names the simulation's behaviour: bump it, in the same commit, whenever a code default flips
+`cybertron/provenance.py` `ENGINE_VERSION` names the simulation's behaviour: bump it, in the same commit, whenever a code default flips
 or the engine's behaviour changes on purpose, add a line below, and list every default flip in `provenance.ENGINE_FLIPS`
 (machine-readable: the settings target, key path, old and new value, and the commit that made the version). Runs record it
 (run.json `engine_version`, instance.json `settings.engine_version`, export `runs.engine_version`).
 
-How it is used (ARCHITECTURE D-43, `charter/settings.py`): a run made since frozen settings carries every default it read, so a flip
+How it is used (ARCHITECTURE D-43, `cybertron/settings.py`): a run made since frozen settings carries every default it read, so a flip
 cannot reach it. A run made before has its settings inferred on resume, fork or replay: its engine version is the newest version
 whose commit is an ancestor of the run's recorded git sha, and the flips of every version it lacks are set back to their old value.
 When the sha is unknown the resume is refused (`--allow-code-drift` overrides it, recorded). A behaviour change that is not a
-default (the "behaviour" entries below) cannot be set back: `python -m charter rerun RUN_DIR` plays the run's command again under
+default (the "behaviour" entries below) cannot be set back: `python -m cybertron rerun RUN_DIR` plays the run's command again under
 its own code.
 
 | version | commit(s) | default flips | behaviour changes |
@@ -30,7 +30,7 @@ its own code.
 | 14 | b7bdd6a | `subsistence.game.hunt_mode` shared -> individual; `subsistence.forest.clearing` 5 -> 0; `subsistence.fields.plots_per_agent` 0.4 -> 1.0, `plots_max_per_agent` 0.8 -> 1.5, `mult` 3.5 -> 3.0 (fields stay off by default: `fields.enabled` false) | farming (docs/review/31_institutions/01b_farming.md): farms (plots held by an agent or an institution; only the holder, its members or officers and whom it allows work them), `start.farms`, `tend`, `improve` (terraces, irrigation, shed, plough) with upkeep, `practice` (rotation, seed selection), `clear` (forest -> a plot held by the clearer), crops and blight in `subsistence.shocks`; the hunt draws per hunter (a forest generated before 14 has no mode and hunts shared); felling clears no plots; the hunt's and fields' prompt texts change. Old runs replay identically under their frozen settings; `subsistence.cfg`'s cache now keys on the settings swap (`settings.GENERATION`), so a process that played under other defaults never serves a stale merge |
 | 15 | 524646a | `law.effects`, `law.call_failures`, `law.expects`, `institutions.amend_offices` false -> true (schema.EXTRA) | laws that work or fail loudly: amending an Offices Act updates its offices (changing an existing office's holders is refused unless `institutions.reseat: apply`; the `reseat()` law function reseats explicitly); every enactment, amendment and repeal publishes a `law_effect` diff, flagged inert when it changed nothing; failed law calls (move, fine, grant, ...) are recorded; `preview_law` previews amendments and the enactment diff; laws may declare `expects` postconditions. All off under earlier versions' frozen settings |
 | 16 | 20aaf70, e0829f2 | `channels.business` false -> true | channels that carry business: per-channel `delivery` (push, pull, edition) and `followed_by`; pull boards with unread counts and headlines in the state; `channel_posts(channel, since, by)` for laws; the Market Board template; `channels.notices` posts the official record each round; under `channels.business`: the manual describes each channel's real delivery, search_board finds channel posts, narrowing readers is a visible `channel_resealed` event, reads are logged (`channel_read`). New keys `channels.square_delivery`, `channels.notices`, `channels.board_headlines` (no effect unset) |
-| 17 | 7c8ac2d | `contracts.pay_institutions`, `contracts.applicant_lines` false -> true | economic plumbing: agents and offices pay into institutions' treasuries (A<n>, J0); J0 employs (Payroll from start.wages); `start.contracts`, `start.allowances`, `start.escrow`; the Standing Contract core (charter/standing.py: legs, could-not vs would-not misses, arrears, notice by price, bond, penalty, forum) with presets Supply, Board, Payroll, Quota, Grant, Charge, Retainer and a terms line per contract in each party's state; the Licence template; officers see applicants |
+| 17 | 7c8ac2d | `contracts.pay_institutions`, `contracts.applicant_lines` false -> true | economic plumbing: agents and offices pay into institutions' treasuries (A<n>, J0); J0 employs (Payroll from start.wages); `start.contracts`, `start.allowances`, `start.escrow`; the Standing Contract core (cybertron/standing.py: legs, could-not vs would-not misses, arrears, notice by price, bond, penalty, forum) with presets Supply, Board, Payroll, Quota, Grant, Charge, Retainer and a terms line per contract in each party's state; the Licence template; officers see applicants |
 
 Versions 2 and 3 were made on parallel branches (3 on wp/dm-capacity, merged in 8259b83), so a sha may have 3 without 2; the
 inference checks each version's commit separately. Version 10 was likewise made on wp/survival-exp, parallel to 8 and 9 (it

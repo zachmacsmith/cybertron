@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Run · Charter</title>
-<script>try{document.documentElement.dataset.theme=new URLSearchParams(location.search).get("theme")||localStorage.getItem("charter-theme")||"broadsheet"}catch(e){}</script>
+<title>Run · Cybertron</title>
+<script>try{document.documentElement.dataset.theme=new URLSearchParams(location.search).get("theme")||localStorage.getItem("cybertron-theme")||"broadsheet"}catch(e){}</script>
 <link rel="stylesheet" href="assets/site.css">
 <link rel="stylesheet" href="assets/run/run.css">
 </head>
@@ -25,16 +25,16 @@
   const ds = await dataset();
   const entry = (await ds.catalog()).find((r) => r.run_id === id);
   if (!entry) { main.innerHTML = `<p class="loading">No run called ${V.esc(id)}. <a href="runs.html">All runs</a></p>`; throw new Error("no run"); }
-  document.title = `${entry.title} · Charter`;
+  document.title = `${entry.title} · Cybertron`;
   const run = ds.run(entry);
   const D = await (await fetch(`${ds.root}/${entry.path}/viewer.json`)).json();   // TEMPORARY source (site/README.md)
   const S = prepare(D);
   const dark = document.documentElement.dataset.theme === "night";
   buildSprite(S, dark);
   const st = { S, entry, root: ds.root, datasetUrl: DATASET_URL, dark, round: S.lastRound, section: "front", target: null, filter: "",
-    order: (() => { try { return localStorage.getItem("charter-diary-order") || "asc"; } catch (e) { return "asc"; } })(),
-    hide: new Set((() => { try { return JSON.parse(localStorage.getItem("charter-diary-hide") || "[]"); } catch (e) { return []; } })()),
-    fold: (() => { try { return localStorage.getItem("charter-diary-fold2") === "on"; } catch (e) { return false; } })() };
+    order: (() => { try { return localStorage.getItem("cybertron-diary-order") || "asc"; } catch (e) { return "asc"; } })(),
+    hide: new Set((() => { try { return JSON.parse(localStorage.getItem("cybertron-diary-hide") || "[]"); } catch (e) { return []; } })()),
+    fold: (() => { try { return localStorage.getItem("cybertron-diary-fold2") === "on"; } catch (e) { return false; } })() };
   const keep = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
 
   main.innerHTML = `
@@ -193,9 +193,9 @@
     const lm = e.target.closest(".tlm.long");
     if (lm && !e.target.closest("a")) { lm.classList.toggle("open"); V.layoutNotes(view); return; }
     const kind = e.target.closest("[data-kind]");
-    if (kind) { const k = kind.dataset.kind; st.hide.has(k) ? st.hide.delete(k) : st.hide.add(k); keep("charter-diary-hide", JSON.stringify([...st.hide]));
+    if (kind) { const k = kind.dataset.kind; st.hide.has(k) ? st.hide.delete(k) : st.hide.add(k); keep("cybertron-diary-hide", JSON.stringify([...st.hide]));
       kind.classList.toggle("on", !st.hide.has(k)); view.querySelector(".timeline").classList.toggle("hide-" + k, st.hide.has(k)); V.layoutNotes(view); return; }
-    if (e.target.closest("[data-foldall]")) { st.fold = !st.fold; keep("charter-diary-fold2", st.fold ? "on" : "off");
+    if (e.target.closest("[data-foldall]")) { st.fold = !st.fold; keep("cybertron-diary-fold2", st.fold ? "on" : "off");
       const y = scrollY; render(); scrollTo({ top: y }); return; }
     const fold = e.target.closest(".tl-fold") || (e.target.closest(".tl-round.quiet:not(.folded) .tl-head") && !e.target.closest("a") ? e.target.closest(".tl-round") : null);
     if (fold) { fold.closest(".tl-round").classList.toggle("folded"); V.layoutNotes(view); return; }
@@ -210,7 +210,7 @@
     const b = e.target.closest("[data-order]");
     if (!b || b.dataset.order === st.order) return;
     st.order = b.dataset.order;
-    try { localStorage.setItem("charter-diary-order", st.order); } catch (err) {}
+    try { localStorage.setItem("cybertron-diary-order", st.order); } catch (err) {}
     const y = scrollY; render(); scrollTo({ top: y });
   });
   // opening an agent at an earlier round: bring that round into view (at the last round, start from the top of the diary)

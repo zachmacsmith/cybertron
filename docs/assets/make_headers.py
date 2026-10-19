@@ -1,4 +1,4 @@
-"""README header candidates built from the story viewer's mascots (charter/viewer/template.html, mascotSymbol + accessory).
+"""README header candidates built from the story viewer's mascots (cybertron/viewer/template.html, mascotSymbol + accessory).
 
     python docs/assets/make_headers.py                # writes docs/assets/header.svg and header_dark.svg (the README header)
     python docs/assets/make_headers.py --candidates   # also the other designs, in docs/assets/candidates/
@@ -138,7 +138,7 @@ class Doc:
 def wordmark(d, x, y, size=72, anchor="start", tag=True, tag_y=None):
     t = d.t
     d.add(f'<text x="{x}" y="{y}" font-family="{SERIF}" font-size="{size}" font-weight="500" letter-spacing="-1.5" '
-          f'fill="{t["text"]}" text-anchor="{anchor}">Charter</text>')
+          f'fill="{t["text"]}" text-anchor="{anchor}">Cybertron</text>')
     if tag:
         d.add(f'<text x="{x}" y="{tag_y or y + 34}" font-family="{SANS}" font-size="19" fill="{t["muted"]}" text-anchor="{anchor}">'
               'Societies of LLM agents that write their own laws</text>')
@@ -169,7 +169,7 @@ def header_lineup(theme=LIGHT):
         x += s - 6
     d.add(f'<text x="{600 + 4 * 66 + 52}" y="{262 - 104 - 4}" font-size="22" text-anchor="middle">👑</text>')
     d.m("Gus", 1188, 40, 46, "ok", opacity=.55)                          # the hidden observer, half out of view
-    return d.svg("Charter: societies of LLM agents that write their own laws")
+    return d.svg("Cybertron: societies of LLM agents that write their own laws")
 
 
 # ------------------------------------------------------------------ B: the chamber (hemicycle)
@@ -191,11 +191,11 @@ def header_chamber(theme=LIGHT):
             i += 1
     d.add(f'<rect x="{cx - 130}" y="{cy - 82}" width="260" height="80" rx="14" fill="{t["surface"]}" stroke="{t["line"]}"/>')
     d.add(f'<text x="{cx}" y="{cy - 34}" font-family="{SERIF}" font-size="46" font-weight="500" letter-spacing="-1" fill="{t["text"]}" '
-          f'text-anchor="middle">Charter</text>')
+          f'text-anchor="middle">Cybertron</text>')
     d.add(f'<text x="{cx}" y="{cy - 12}" font-family="{SANS}" font-size="13" fill="{t["muted"]}" text-anchor="middle">'
           'LLM agents govern themselves in code</text>')
     d.m("Gus", 1210, 18, 40, "ok", opacity=.45)
-    return d.svg("Charter: a chamber of LLM agents")
+    return d.svg("Cybertron: a chamber of LLM agents")
 
 
 # ------------------------------------------------------------------ C: the story (speech bubbles with real lines)
@@ -214,7 +214,7 @@ def header_story(theme=LIGHT):
         bubble(d, x, y - 12, w + 160, text)
     d.m("Gus", 1200, 278, 44, "ok", opacity=.5)
     d.add(f'<text x="1222" y="270" font-family="{MONO}" font-size="11" fill="{t["muted"]}" text-anchor="middle" opacity=".7">watching</text>')
-    return d.svg("Charter: what the agents said")
+    return d.svg("Cybertron: what the agents said")
 
 
 # ------------------------------------------------------------------ C2: quotes (wrapped chat bubbles in two columns)
@@ -290,7 +290,7 @@ def header_quotes(quotes=None, theme=LIGHT, big=None):
     d = Doc(W, H, theme)
     t = d.t
     mid = H / 2
-    d.add(f'<text x="64" y="{mid - 30}" font-family="{SERIF}" font-size="76" font-weight="500" letter-spacing="-1.5" fill="{t["text"]}">Charter</text>')
+    d.add(f'<text x="64" y="{mid - 30}" font-family="{SERIF}" font-size="76" font-weight="500" letter-spacing="-1.5" fill="{t["text"]}">Cybertron</text>')
     for k, line in enumerate(["Societies of LLM agents", "that write their own laws"]):
         d.add(f'<text x="66" y="{mid + 12 + 27 * k}" font-family="{SANS}" font-size="21" fill="{t["muted"]}">{line}</text>')
     d.add(f'<text x="66" y="{mid + 98}" font-family="{MONO}" font-size="13" fill="{t["accent"]}">real lines from 14 runs of Claude agents</text>')
@@ -320,7 +320,7 @@ def header_quotes(quotes=None, theme=LIGHT, big=None):
             d.add(f'<text x="{bx + pad}" y="{y + pad + 24 + round(fs * .8) + k * lh}" font-family="{SANS}" font-size="{fs}" fill="{t["text"]}"{style}>'
                   f'{_html.escape(line)}</text>')
     d.m("Gus", W - 60, 18, 38, "ok", opacity=.45)
-    return d.svg("Charter: real lines from LLM agents governing themselves")
+    return d.svg("Cybertron: real lines from LLM agents governing themselves")
 
 
 # ------------------------------------------------------------------ C3: comic strip (two speakers, bubbles above their heads)
@@ -331,7 +331,7 @@ def header_comic(quotes=None, theme=LIGHT):
     W, H = 1280, 340
     d = Doc(W, H, theme)
     t = d.t
-    d.add(f'<text x="64" y="156" font-family="{SERIF}" font-size="80" font-weight="500" letter-spacing="-1.5" fill="{t["text"]}">Charter</text>')
+    d.add(f'<text x="64" y="156" font-family="{SERIF}" font-size="80" font-weight="500" letter-spacing="-1.5" fill="{t["text"]}">Cybertron</text>')
     for k, line in enumerate(["Societies of LLM agents", "that write their own laws"]):
         d.add(f'<text x="67" y="{202 + 28 * k}" font-family="{SANS}" font-size="21" fill="{t["muted"]}">{line}</text>')
     ground = 306
@@ -371,7 +371,7 @@ def header_comic(quotes=None, theme=LIGHT):
               f'<text x="{lx}" y="{ground - 29}" font-family="{SANS}" font-size="13.5" fill="{t["muted"]}">{model} {cls}</text>'
               f'<text x="{lx}" y="{ground - 11}" font-family="{SANS}" font-size="12.5" fill="{t["muted"]}"{style}>{kind}</text>')
     d.m("Gus", W - 58, 18, 36, "ok", opacity=.4)
-    return d.svg("Charter: societies of LLM agents that write their own laws")
+    return d.svg("Cybertron: societies of LLM agents that write their own laws")
 
 
 # ------------------------------------------------------------------ E: editorial pull-quotes (no boxes)
@@ -382,7 +382,7 @@ def header_pullquotes(quotes=None, theme=LIGHT):
     W, H = 1280, 340
     d = Doc(W, H, theme)
     t = d.t
-    d.add(f'<text x="64" y="156" font-family="{SERIF}" font-size="80" font-weight="500" letter-spacing="-1.5" fill="{t["text"]}">Charter</text>')
+    d.add(f'<text x="64" y="156" font-family="{SERIF}" font-size="80" font-weight="500" letter-spacing="-1.5" fill="{t["text"]}">Cybertron</text>')
     for k, line in enumerate(["Societies of LLM agents", "that write their own laws"]):
         d.add(f'<text x="67" y="{202 + 28 * k}" font-family="{SANS}" font-size="21" fill="{t["muted"]}">{line}</text>')
     d.add(f'<line x1="500" y1="56" x2="500" y2="{H - 56}" stroke="{t["line"]}" stroke-width="1.5"/>')
@@ -407,7 +407,7 @@ def header_pullquotes(quotes=None, theme=LIGHT):
             d.add(f'<line x1="{x_t}" y1="{y + gap / 2 - 6}" x2="{x_t + 48}" y2="{y + gap / 2 - 6}" stroke="{t["line"]}" stroke-width="2"/>')
             y += gap
     d.m("Gus", W - 56, H - 50, 34, "ok", opacity=.35)
-    return d.svg("Charter: societies of LLM agents that write their own laws")
+    return d.svg("Cybertron: societies of LLM agents that write their own laws")
 
 
 # ------------------------------------------------------------------ F: quote wall (many quotes, sizes by importance, no boxes)
@@ -441,7 +441,7 @@ def header_wall(theme=LIGHT):
     W, H = 1280, 360
     d = Doc(W, H, theme)
     t = d.t
-    d.add(f'<text x="64" y="164" font-family="{SERIF}" font-size="78" font-weight="500" letter-spacing="-1.5" fill="{t["text"]}">Charter</text>')
+    d.add(f'<text x="64" y="164" font-family="{SERIF}" font-size="78" font-weight="500" letter-spacing="-1.5" fill="{t["text"]}">Cybertron</text>')
     for k, line in enumerate(["Societies of LLM agents", "that write their own laws"]):
         d.add(f'<text x="67" y="{208 + 27 * k}" font-family="{SANS}" font-size="20" fill="{t["muted"]}">{line}</text>')
     d.add(f'<text x="67" y="{292}" font-family="{MONO}" font-size="12.5" fill="{t["accent"]}">said by Claude agents in the runs</text>')
@@ -474,7 +474,7 @@ def header_wall(theme=LIGHT):
                   f'fill="{shade}">{_html.escape(text)}</text>')
             x += w + gap_x
         y += rh + gap_y
-    return d.svg("Charter: societies of LLM agents that write their own laws, and what they said")
+    return d.svg("Cybertron: societies of LLM agents that write their own laws, and what they said")
 
 
 # ------------------------------------------------------------------ G: four short lines on a strict grid
@@ -496,7 +496,7 @@ def header_grid(theme=LIGHT):
     block = wm * .72 + 22 + tag * 1.35 * 2
     top = (H - block) / 2
     d.add(f'<text x="72" y="{top + wm * .72:.0f}" font-family="{SERIF}" font-size="{wm}" font-weight="500" letter-spacing="-1.8" '
-          f'fill="{t["text"]}">Charter</text>')
+          f'fill="{t["text"]}">Cybertron</text>')
     for k, line in enumerate(["Societies of LLM agents", "that write their own laws"]):
         d.add(f'<text x="75" y="{top + wm * .72 + 22 + tag * 1.35 * (k + 1) - 6:.0f}" font-family="{SANS}" font-size="{tag}" '
               f'fill="{t["muted"]}">{line}</text>')
@@ -523,7 +523,7 @@ def header_grid(theme=LIGHT):
         d.add(f'<text x="{tx + 1}" y="{base + 12 + cap_fs:.1f}" font-family="{SANS}" font-size="{cap_fs}" fill="{t["muted"]}">'
               f'<tspan font-weight="600" fill="{ink}">{name}</tspan>, {_html.escape(cap)}</text>')
         y += h + gap
-    return d.svg("Charter: societies of LLM agents that write their own laws")
+    return d.svg("Cybertron: societies of LLM agents that write their own laws")
 
 
 # ------------------------------------------------------------------ H: Swiss/editorial version of G (own identity, not the viewer palette)
@@ -565,7 +565,7 @@ def header_swiss(theme=PAPER):
     block = wm * .72 + 20 + tag
     top = (H - block) / 2
     d.add(f'<text x="72" y="{top + wm * .72:.0f}" font-family="{HELV}" font-size="{wm}" font-weight="700" letter-spacing="-4" '
-          f'fill="{t["text"]}">Charter</text>')
+          f'fill="{t["text"]}">Cybertron</text>')
     d.add(f'<text x="76" y="{top + wm * .72 + 20 + tag * .8:.0f}" font-family="{HELV}" font-size="{tag}" fill="{t["muted"]}">'
           'Societies of LLM agents</text>')
     divider = 456
@@ -591,7 +591,7 @@ def header_swiss(theme=PAPER):
         d.add(f'<text x="{tx + 1}" y="{base + 13 + cap_fs:.1f}" font-family="{HELV}" font-size="{cap_fs}" letter-spacing="1.1" '
               f'fill="{t["muted"]}"><tspan font-weight="700" fill="{t["text"]}">{name.upper()}</tspan><tspan dx="9">{_html.escape(cap.upper())}</tspan></text>')
         y += h + gap
-    return d.svg("Charter: societies of LLM agents")
+    return d.svg("Cybertron: societies of LLM agents")
 
 
 # ------------------------------------------------------------------ D: wealth chart (mascots sized by holdings)
@@ -615,7 +615,7 @@ def header_wealth(theme=DARK):
         x += s + 10
     d.add(f'<text x="{crown[0]}" y="{crown[1] + 2}" font-size="24" text-anchor="middle">👑</text>')
     d.m("Gus", 1214, 18, 36, "ok", opacity=.5)
-    return d.svg("Charter: societies of LLM agents (dark)")
+    return d.svg("Cybertron: societies of LLM agents (dark)")
 
 
 def main():

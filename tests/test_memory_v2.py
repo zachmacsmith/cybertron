@@ -11,15 +11,15 @@ from types import SimpleNamespace
 
 import pytest
 
-from charter import action_registry as AR
-from charter import agents as AG
-from charter import context as CX
-from charter import generator, llm, manual, runner
-from charter import spec as S
-from charter.kernel import Kernel
+from cybertron import action_registry as AR
+from cybertron import agents as AG
+from cybertron import context as CX
+from cybertron import generator, llm, manual, runner
+from cybertron import spec as S
+from cybertron.kernel import Kernel
 
-import charter_golden_cases as GC
-from test_charter_golden import _sha
+import cybertron_golden_cases as GC
+from test_cybertron_golden import _sha
 
 V1 = ["context.memory_text=v1", "context.dm_delta=false", "context.history.enabled=false"]
 OFF = ["context.history.enabled=false"]          # these tests cover the fixed layers (history mode: test_history.py)
@@ -47,7 +47,7 @@ def test_v1_reproduces_the_prompts_from_before(name):
 
 def test_defaults_are_v2_and_delta():
     assert CX.DEFAULTS["memory_text"] == "v2" and CX.DEFAULTS["dm_delta"] is True
-    from charter import schema
+    from cybertron import schema
     assert schema.validate(S.apply_overrides(S.load("society"), V1)) == []
     assert any("memory_text" in e for e in schema.validate(S.apply_overrides(S.load("society"), ["context.memory_text=v3"])))
 
@@ -323,7 +323,7 @@ def test_next_round_shows_last_rounds_whole_exchange_in_order(tmp_path, sets):
 
 
 def test_the_export_tells_delta_and_full_dm_replies_apart(tmp_path):
-    from charter import export as X
+    from cybertron import export as X
     on, _ = _dry(tmp_path / "on", [])
     off, _ = _dry(tmp_path / "off", V1)
     X.export([on, off], tmp_path / "ds", fmt="csv")

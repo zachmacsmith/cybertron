@@ -450,7 +450,7 @@ It is readable through `read_law` on each SC, and NEW: a `contracts` lookup list
 | Part | The Mint | The Treasury | The Labour Office | The Reserve Bank |
 |---|---|---|---|---|
 | Purpose | issue the penny under a rule | collect and spend | staff the state; employer of last resort | par, lending, lender of last resort |
-| Charter piece | Central Bank Charter (`library.py:2781`) | Payment Levy + Harvest Levy; office with `controls: [treasury]` | NEW: Civil List (Payroll as a J0 law) with `hire`/`fire`/`enlist` | Reserve Bank Act (`library.py:135`), Treasury Bonds, Bailout Act |
+| Cybertron piece | Central Bank Charter (`library.py:2781`) | Payment Levy + Harvest Levy; office with `controls: [treasury]` | NEW: Civil List (Payroll as a J0 law) with `hire`/`fire`/`enlist` | Reserve Bank Act (`library.py:135`), Treasury Bonds, Bailout Act |
 | Roles | Governor (Opus) | Treasurer (Opus), Auditor (Sonnet) | Paymaster (Sonnet), clerk (Haiku, also Registrar) | run by the Governor (merged: a deliberate concentration) |
 | Automatic | publishes supply and P; MAX_ISSUE 2% a round into the treasury when invoked | levies collected; Civil List paid | payroll; floor-wage posts while the budget lasts | lends 10₱ to a worker per round while the ratio is ≥ 0.5; last-resort loans |
 | Decisions | `issue` (how much, when) | pay outside the Civil List (`transfer as J0`); propose a budget law; hide or publish accounts | hire, fire, transfer, set floor posts | `suspend_redemption` (law), rate |
@@ -468,7 +468,7 @@ the payroll and P. Their pay is on the Civil List.
 | Part | Common Fund (A1, the co-op's treasury) | Duty roster | Mutual credit ledger |
 |---|---|---|---|
 | Purpose | members' equity, common store, credit union | share work and pay fairly | trade without coin |
-| Charter piece | association with shares (`create_currency("share")`, NAV) | NEW: Duty Roster (roster SC; rotation every R rounds; equal output share) | NEW: Mutual Credit (ledger in law state; `pay_credit(to, qty)` is a defined action for members; limit L per member) |
+| Cybertron piece | association with shares (`create_currency("share")`, NAV) | NEW: Duty Roster (roster SC; rotation every R rounds; equal output share) | NEW: Mutual Credit (ledger in law state; `pay_credit(to, qty)` is a defined action for members; limit L per member) |
 | Roles | Treasurer (elected, 4-round term, Sonnet), Auditor (by lot, Haiku) | rota keeper (Haiku) | none (automatic); the meeting sets L |
 | Automatic | dues leg; equal dividend of surplus | rotation; output pulled into the common store | balances; limits enforced |
 | Decisions | lend from the fund (ballot); spend | swap duties; exempt the sick | raise or lower L; write off a defaulter |
@@ -593,7 +593,7 @@ The J0 reserve backs it at P = 2: 400 timber (400), 240 stone (480) and 280 copp
 ## 9. Spec sketch (Private world; real `start:` keys, NEW templates marked)
 
 ```yaml
-# Harrowgate: a private-regime town (sketch). Keys under start: are charter/start.py SECTIONS; templates marked NEW do not exist.
+# Harrowgate: a private-regime town (sketch). Keys under start: are cybertron/start.py SECTIONS; templates marked NEW do not exist.
 agents: {worker: 24, scientist: 0, legislator: 0, media: 0, board: 0, fixer: 0,
          names: [Hale, Mira, Tuck, Fen, Ada, Rook, Lise, Moss, Cade, Orrin, Pell, Quill, Dace, Bram, Sela, Wren, Holt, Ivy,
                  Garr, Tess, Vane, Nim, Lark, Pike]}

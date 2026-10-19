@@ -1,4 +1,4 @@
-/* Charter site: one structure, three themes (data-theme on <html>): swiss (default), broadsheet, night. */
+/* Cybertron site: one structure, three themes (data-theme on <html>): swiss (default), broadsheet, night. */
 :root, [data-theme="swiss"] {
   --bg: #ffffff; --surface: #ffffff; --surface-2: #f6f6f6; --ink: #111111; --muted: #6f6f6f; --faint: #a3a3a3; --line: #e6e6e6;
   --accent: #111111; --accent-ink: #ffffff; --link: #111111; --chip: #f2f2f2;

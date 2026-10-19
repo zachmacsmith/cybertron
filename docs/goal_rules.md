@@ -1,6 +1,6 @@
 # Goal text and scoring rule
 
-*Generated from `charter/goal_registry.py` (`python -c "from charter import goal_registry as GR; print(GR.rules_markdown(), end='')" > docs/goal_rules.md`); a test checks it is current. Do not edit by hand.*
+*Generated from `cybertron/goal_registry.py` (`python -c "from cybertron import goal_registry as GR; print(GR.rules_markdown(), end='')" > docs/goal_rules.md`); a test checks it is current. Do not edit by hand.*
 
 Each catalogue goal has a **text** (what the agent is told; `{x}` are its sampled parameters) and a **rule** (a faithful description of today's scorer, version 1). The rule is not yet shown to agents. The owner decides each goal's rule from this table; changing a scorer or a rule bumps that goal's `version`.
 

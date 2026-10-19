@@ -1,7 +1,7 @@
 # Published data format (export schema 2)
 
-Status: **built** (schema 2.1: 2.0 plus the channels v2 columns). `charter/export.py` implements it; `docs/export.md` holds the generated column tables and wins
-where the two differ. This page fixes the contract the site reader and `charter publish` code against. Where the build had to
+Status: **built** (schema 2.1: 2.0 plus the channels v2 columns). `cybertron/export.py` implements it; `docs/export.md` holds the generated column tables and wins
+where the two differ. This page fixes the contract the site reader and `cybertron publish` code against. Where the build had to
 depart from the agreed spec, the text below says so in a **Built:** note.
 
 ## Layers
@@ -9,7 +9,7 @@ depart from the agreed spec, the text below says so in a **Built:** note.
 - **Raw run directory** (`events.jsonl`, `turns.jsonl`, `reasoning.jsonl`, `calls.jsonl`, `snapshots.json`, `run.json`, ...): what
   the simulator appends while it runs. The record. Never published with `checkpoint.pkl` or `checkpoints/` (pickles execute code
   when loaded).
-- **Export** (`python -m charter export RUN --out DIR`, `charter.export.export(runs, out, ...)`): typed tables plus
+- **Export** (`python -m cybertron export RUN --out DIR`, `cybertron.export.export(runs, out, ...)`): typed tables plus
   `manifest.json`, rebuilt from the raw directory at any time. Old raw runs are re-exported, never migrated.
 
 ## Stability promises
@@ -42,14 +42,14 @@ oldest layout, turns.jsonl without reasoning.jsonl). `provenance.LOG_FORMAT` is 
 
 ## Frozen settings and the engine version (D-43)
 
-`instance.json` gains `settings`: `{"engine_version": N, "defaults": {"charter.context.DEFAULTS": {...}, ...}}`, the value at
-generation of every code default the run reads (each registered module `DEFAULTS` dict, `charter.schema.EXTRA` and every event
-type's defaults; `charter/settings.py` TARGETS). A run plays, resumes, forks and replays under these, never under the code's
+`instance.json` gains `settings`: `{"engine_version": N, "defaults": {"cybertron.context.DEFAULTS": {...}, ...}}`, the value at
+generation of every code default the run reads (each registered module `DEFAULTS` dict, `cybertron.schema.EXTRA` and every event
+type's defaults; `cybertron/settings.py` TARGETS). A run plays, resumes, forks and replays under these, never under the code's
 current defaults. Instances without it (made before this change) get them inferred on resume from run.json's git sha
 (`docs/engine_versions.md`); the result is stored in run.json `settings_inferred` (same shape, plus `source`, and `code_drift`
 when `--allow-code-drift` continued under the current defaults). Each run.json segment records `settings` {engine_version,
 source[, code_drift]}; run.json gains `engine_version` (the code's, `provenance.ENGINE_VERSION`) and `code.engine`. The export's
-`runs.engine_version` (schema 2.3) is the settings' engine version. `charter rerun RUN_DIR` plays a run's recorded command again
+`runs.engine_version` (schema 2.3) is the settings' engine version. `cybertron rerun RUN_DIR` plays a run's recorded command again
 in a git worktree at its sha; the copy's run.json gets `rerun_of` {run, run_id, sha, command, source}.
 
 ## New tables
@@ -59,7 +59,7 @@ Types: `str`, `int`, `float`, `bool`, `json` (JSON text). Every column may be nu
 ### `messages` (one row per message; a copy of the communication events, sorted by `channel_id, seq`)
 
 Which events: every event type whose registry kind is `communication`, plus the notice types the registry flags `messages`
-(gazette, notify, contract_notice, world_event, ...). The set comes from `charter/eventtypes.py`, so new message types appear
+(gazette, notify, contract_notice, world_event, ...). The set comes from `cybertron/eventtypes.py`, so new message types appear
 without exporter changes.
 
 **Built:** today's set (`export.message_types()`): post, anon_post, story, report, digest, channel_post, dm, edition, submission,
@@ -294,7 +294,7 @@ under changed code). With `--with-prompts`, `blobs` rows of kind `interview_prom
 
 ## Layout on Hugging Face (publish's concern, recorded for reference)
 
-`charter publish` (`charter/publish.py`) writes, in one commit to the dataset `zachmacsmith/charter-runs`:
+`cybertron publish` (`cybertron/publish.py`) writes, in one commit to the dataset `zachmacsmith/charter-runs`:
 
 - `catalog.parquet`, `catalog.json`: one row per run (the curated card, key run facts, `era`, `engine_version`).
 - `runs/<spec>/<run_id>/<table>.parquet` plus `manifest.json` and `card.json`.
@@ -311,10 +311,10 @@ simulation designs), else `current`; a card's `era` overrides it. Legacy runs ar
 
 ## Versions and releases
 
-Every person or agent publishing follows these rules (also in `charter/publish.py`'s module docstring).
+Every person or agent publishing follows these rules (also in `cybertron/publish.py`'s module docstring).
 
 - **Releases are git tags** on the dataset repo: `vMAJOR.MINOR` or `vMAJOR.MINOR.PATCH`, created on the commit that publishes
-  the release. Publish with `python -m charter publish RUN... --push --release v1.1 --notes "..."`. That commit also prepends
+  the release. Publish with `python -m cybertron publish RUN... --push --release v1.1 --notes "..."`. That commit also prepends
   an entry to `CHANGELOG.md` and to the card's "Changelog" section (earlier entries are read from the Hub and kept); the tag is
   then created at it. A push without `--release` uploads exactly as before, with no tag and no entry, and prints a reminder:
   use it only for work in progress, and mention it in the next release's notes.

@@ -219,7 +219,7 @@ the gain per extra hunter shrinks.
 
 ## 7. Versioning and old runs
 
-Engine 14 (`charter/provenance.py`, `docs/engine_versions.md`). `ENGINE_FLIPS[14]` lists every default that moved:
+Engine 14 (`cybertron/provenance.py`, `docs/engine_versions.md`). `ENGINE_FLIPS[14]` lists every default that moved:
 `game.hunt_mode` shared -> individual, `forest.clearing` 5 -> 0, `fields.plots_per_agent` 0.4 -> 1.0, `fields.plots_max_per_agent`
 0.8 -> 1.5, `fields.mult` 3.5 -> 3.0. A run of an earlier engine plays under its frozen settings (or, before frozen settings, under
 the flips set back), and its forests carry no `hunt_mode`, so it hunts shared: the `subsistence_small` and `pairs_small` golden runs

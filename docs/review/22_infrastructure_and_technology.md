@@ -66,7 +66,7 @@ Where I need numbers, I assume P = 1 + weapon quality and D = 1 + fort. Recomput
 
 ### 1.2 What the two LLM runs measured
 
-Source: `charter/out/ashwood/ashwood_seed1_cb354900/events.jsonl` and `charter/out/ashwood2/ashwood2_seed1_69c5781a/events.jsonl`
+Source: `cybertron/out/ashwood/ashwood_seed1_cb354900/events.jsonl` and `cybertron/out/ashwood2/ashwood2_seed1_69c5781a/events.jsonl`
 (in the `wt-sub` checkout). Both: 60 rounds, 36 agents, 3 forests with K = 81.7 plants each, conflict on with grace 2, projects off.
 
 | Measure | Ashwood | Ashwood2 |
@@ -97,7 +97,7 @@ What the runs show:
 
 ## 2. When an investment mechanic is worth adding
 
-Charter studies emergent institutions; it is not a city builder. A mechanic earns its place if it passes most of these tests:
+Cybertron studies emergent institutions; it is not a city builder. A mechanic earns its place if it passes most of these tests:
 
 1. **A long horizon.** Payback over 5-30 rounds, so that saving, credit and trust matter. If payback is immediate, it is just a
    better harvest. If it is longer than a lifetime (about 60 rounds), nobody builds.
@@ -210,7 +210,7 @@ farms entirely. That is a valid result. Do not raise `mult` to force adoption.
 
 The realism behind the request is sound. Firearms were **equalisers**, needing less strength and skill than a blade. They also
 **beat armour** and made old fortifications obsolete, which pushed defence toward collective forms: bastions, standing armies,
-states. Both effects are interesting for Charter, and both can be had without ending the run.
+states. Both effects are interesting for Cybertron, and both can be had without ending the run.
 
 ### 4.2 A bounded tier path (in harm terms)
 
@@ -342,7 +342,7 @@ feature is off, the prompt is unchanged (the skip_off contract, as for `subsiste
 
 | # | Item | Build | Settings |
 |---|---|---|---|
-| 1 | **Structure record; stores migrated; decay and repair** | New `charter/structures.py` (catalogue, record, work, repair, decay, law read). `k.w["subsistence"]["stores"]` becomes a view. Feature row `structures` | `structures.enabled: false`. When on: store decay 0.02, repair +0.25 for 2 timber |
+| 1 | **Structure record; stores migrated; decay and repair** | New `cybertron/structures.py` (catalogue, record, work, repair, decay, law read). `k.w["subsistence"]["stores"]` becomes a view. Feature row `structures` | `structures.enabled: false`. When on: store decay 0.02, repair +0.25 for 2 timber |
 | 2 | **Farms with clearing** | Un-park fields. Apply the §3.2 settings: 0.1 N plots, clearing 4, `mult` 3.0, `clear_game` 0.5, crop × season, witness | `subsistence.fields.enabled` stays false. Ashwood3 turns it on |
 | 3 | **Irrigation** | Kind with effect `plot_bonus`, site = plot. Anyone may irrigate any plot (liberty); whoever sows gets the bonus | 6 stone + 4 timber, labour 2, +1.0 mult, blight ×0.5, decay 0.03 |
 | 4 | **Granary** | Kind with effect `container` | 30 timber + 20 stone, labour 6, capacity 150, spoilage 1%, decay 0.015 |

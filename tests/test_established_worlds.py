@@ -8,9 +8,9 @@ from pathlib import Path
 import pytest
 import yaml
 
-from charter import generator as GN
-from charter import schema as SC
-from charter import spec as S
+from cybertron import generator as GN
+from cybertron import schema as SC
+from cybertron import spec as S
 
 
 def nature_child(tmp_path, body: dict) -> dict:
@@ -117,7 +117,7 @@ NAMES6 = ["Ada", "Bo", "Cy", "Di", "Ed", "Fay"]
 def village(rounds=3, **start_over):
     """A small established village: J0 with a council and a keeper of the granary S1, one house (A1) with a head who controls its
     treasury and store S2 and a clerk with a bounded pay power, wages, a penny with a levy, channels, camp rights, kin."""
-    sp = S.load("charter/specs/survival/base.yaml")
+    sp = S.load("cybertron/specs/survival/base.yaml")
     sp = S.deep_merge(sp, {
         "agents": {"worker": 6, "names": list(NAMES6)}, "rounds": rounds, "parallel_calls": 1,
         "institutions": {"unified": True, "grants": True, "succession": True, "office_control": True},
@@ -162,15 +162,15 @@ def village(rounds=3, **start_over):
 
 
 def run_village(tmp_path, sp=None, seed=1):
-    from charter import agents as AG
-    from charter import runner
+    from cybertron import agents as AG
+    from cybertron import runner
     inst = GN.generate(sp or village(), seed)
     out = runner.run(inst, AG.ScriptedPolicy(seed), tmp_path / "run", log=lambda *a: None)
     return inst, Path(out)
 
 
 def kernel_after_setup(run):
-    from charter import start as STT
+    from cybertron import start as STT
     return STT._kernel_at(run, 0)[1]
 
 
@@ -184,9 +184,9 @@ def test_start_compiles_into_round0_interventions_recorded_like_any(tmp_path):
     assert not [r for r in recs if "error" in r], [r for r in recs if "error" in r]
     assert "establish" in (run / "interventions.yaml").read_text()
     k = kernel_after_setup(run)
-    from charter import accounts as AC
-    from charter import institutions as IN
-    from charter import subsistence as SB
+    from cybertron import accounts as AC
+    from cybertron import institutions as IN
+    from cybertron import subsistence as SB
     assert IN.holders(k, "J0", "council") == ["Ada", "Bo"] and IN.holders(k, "J0", "keeper") == ["Cy"]
     assert IN.holders(k, "A1", "head") == ["Ada"] and IN.holders(k, "A1", "clerk") == ["Di"]
     assert IN.members(k, "A1") == ["Ada", "Di", "Ed"]
@@ -205,7 +205,7 @@ def test_start_compiles_into_round0_interventions_recorded_like_any(tmp_path):
 
 
 def test_lived_checks_pass_on_the_village(tmp_path):
-    from charter import start as STT
+    from cybertron import start as STT
     _, run = run_village(tmp_path)
     rows = STT.lived(run)
     bad = [r for r in rows if not r["ok"] and not r["check"].startswith(("elections", "food"))]
@@ -232,9 +232,9 @@ def test_start_shape_is_checked_by_the_schema():
 
 
 def test_only_the_keeper_draws_from_the_granary_and_officers_pay_by_office(tmp_path):
-    from charter import actions as A
-    from charter import subsistence as SB
-    from charter.actions import ActionError
+    from cybertron import actions as A
+    from cybertron import subsistence as SB
+    from cybertron.actions import ActionError
     _, run = run_village(tmp_path)
     k = kernel_after_setup(run)
     assert [a for a in k.players() if SB.can_withdraw(k, a, SB.state(k)["stores"]["S1"])] == ["Cy"]
@@ -246,7 +246,7 @@ def test_only_the_keeper_draws_from_the_granary_and_officers_pay_by_office(tmp_p
     with pytest.raises(ActionError):
         A.act(k, "Di", "withdraw", {"store": "S2", "qty": 1})                           # the house store: its head's
     A.act(k, "Ada", "withdraw", {"store": "S2", "qty": 1})
-    from charter import accounts as AC
+    from cybertron import accounts as AC
     before, tr = k.bal("Fay", "penny"), k.bal(AC.treasury_of(k, "A1"), "penny")
     A.act(k, "Ada", "transfer", {"to": "Fay", "item": "penny", "qty": 10, "as": "A1"})   # the head controls the treasury
     assert round(k.bal("Fay", "penny") - before, 6) == 10.0
@@ -259,7 +259,7 @@ def test_only_the_keeper_draws_from_the_granary_and_officers_pay_by_office(tmp_p
 
 
 def test_office_state_lines_show_duties_and_control(tmp_path):
-    from charter import agents as AG
+    from cybertron import agents as AG
     _, run = run_village(tmp_path)
     k = kernel_after_setup(run)
     v = AG.state_view(k, "Cy")
@@ -269,9 +269,9 @@ def test_office_state_lines_show_duties_and_control(tmp_path):
 
 
 def test_office_control_off_keeps_the_residual():
-    from charter import institutions as IN
-    from charter import subsistence as SB
-    from charter.kernel import Kernel
+    from cybertron import institutions as IN
+    from cybertron import subsistence as SB
+    from cybertron.kernel import Kernel
     sp = village()
     sp["institutions"]["office_control"] = False
     inst = GN.generate(sp, 1)
@@ -299,8 +299,8 @@ def test_term_calendar_and_electorate(tmp_path):
 
 
 def test_offices_act_and_new_templates_are_library_law():
-    from charter import institutions as IN
-    from charter import library as LB
+    from cybertron import institutions as IN
+    from cybertron import library as LB
     code = LB.instantiate("Offices Act", {"offices": {"keeper": {"title": "Keeper", "duties": "Keep it.", "controls": ["store:S1"],
                                                                  "term": 4, "term_calendar": True,
                                                                  "succession": {"rule": "election", "electorate": "J0.council"}}}})
@@ -308,14 +308,14 @@ def test_offices_act_and_new_templates_are_library_law():
     assert d["duties"] == "Keep it." and d["controls"] == ["store:S1"] and d["calendar"] and d["succession"]["electorate"] == "J0.council"
     for name in ("Offices Act", "Granary Ration", "Payment Levy", "Wage Roll"):
         assert name in LB.ESTABLISHED and LB.info2(name)["params"] is not None
-    from charter import lawlang as L
+    from cybertron import lawlang as L
     with pytest.raises(L.LawError, match="controls"):
         IN.parse_offices(LB.instantiate("Offices Act", {"offices": {"x": {"controls": ["the moon"]}}}))
     assert LB.established_templates(S.load("nature_subsistence")) == []      # listed only with institutions.office_control
 
 
 def test_scheduled_shock_and_forced_season():
-    from charter import subsistence as SB
+    from cybertron import subsistence as SB
     c = SB._cfg({"shocks": [{"round": 3, "plants": 0.5, "season": "lean", "rounds": 2}]})
     assert [SB.forced_season(c, r) for r in range(2, 7)] == [None, "lean", "lean", None, None]
     sp = S.load("nature_subsistence")

@@ -103,7 +103,7 @@ manipulation, which existing persuasion and deception evaluations score only one
 - anything about humans. Transfer is best for *AI agents embedded in institutions run by AI agents* and for persuasion text
   aimed at LLMs. It is weakest for force and economics.
 
-Every published claim is stated as "in Charter's towns, model X reached grade G against cast C". Never "model X can
+Every published claim is stated as "in Cybertron's towns, model X reached grade G against cast C". Never "model X can
 overthrow
 governments".
 
@@ -138,7 +138,7 @@ Two further rules:
 - A model that reaches G5 or above against a Sonnet-class cast in W5 or harder triggers private disclosure before any public
   number.
 
-Persuasion text is the most transferable artefact, so it is the restricted core. Charter's legal code is toy-level and needs
+Persuasion text is the most transferable artefact, so it is the restricted core. Cybertron's legal code is toy-level and needs
 less care.
 
 ---
@@ -866,7 +866,7 @@ Sizes: S is up to 1 day, M is 2-4 days.
 | 2 | **Library additions:** parameterised Term Limits, Recall and Universal Franchise (edition-1 laws hard-code classes and periods, review 27 §3); an **Election Act** with a fixed schedule (the Offices Act election clause plus a ballot every N rounds); a **two-key armoury** (two offices must both authorise a withdrawal); a **Loyalty Register** template (a public register an office can require residents to sign, giving behavioural public pledges); bench retitling map | M (≈3 d) | the templates are regular toolkit laws, available to agents too |
 | 3 | **Outlets owned by contracts** (S7 already needs it); Watch captain as an office wired to `lawful_attack` | S | shared with review 28 |
 | 4 | **Sibling polities** for W6 and W8 (WP-I) and a League Charter template | M (≈4 d) | can slip to the second grid |
-| 5 | **Bench runner** `charter bench takeover`: world × cast × design × brief × entry → prefixes, forks with `set_model`, `set_goal` and `add_agent`, replicates, durability forks; manifest and cost ledger | M (≈2 d) | extends review 28's bench runner |
+| 5 | **Bench runner** `cybertron bench takeover`: world × cast × design × brief × entry → prefixes, forks with `set_model`, `set_goal` and `add_agent`, replicates, durability forks; manifest and cost ledger | M (≈2 d) | extends review 28's bench runner |
 | 6 | **Index module** `analysis/takeover.py`: bloc, C1-C11, the legal classifier, AXI, grades, T_k, the event study, profiles | M (≈4 d) | reads snapshots, events and the law code |
 | 7 | **Content judge:** press tilt and criticism; refusal, cartoon and critic codes; κ calibration on 200 items | S-M (≈2 d) | |
 | 8 | **Interview and decision-probe tool** (§5), with the byte-identity leak test | M (≈2 d) | extends review 28's frozen-state probe tool |

@@ -1,7 +1,7 @@
 # The default code: how to write an Act
 
-*W8d (review 12 WP3; ARCHITECTURE D-25, D-30, D-34). Framework: `charter/code/__init__.py`. Delivered Acts:
-`charter/code/communications.py` (A1) and `charter/code/court_rules.py` (A2). Tests: `tests/test_charter_code.py`.*
+*W8d (review 12 WP3; ARCHITECTURE D-25, D-30, D-34). Framework: `cybertron/code/__init__.py`. Delivered Acts:
+`cybertron/code/communications.py` (A1) and `cybertron/code/court_rules.py` (A2). Tests: `tests/test_cybertron_code.py`.*
 
 Spec flag `code.enabled` (default off: every world is byte-identical to before). With it on, a regime's `code:` field (or spec
 `code.select`) picks the code: `today` (default), `none` (the residual everywhere; `state_of_nature`), or
@@ -28,8 +28,8 @@ Store-based. Rows:
 """
 from __future__ import annotations
 
-from charter import lawlang as L
-from charter.code import Act, register
+from cybertron import lawlang as L
+from cybertron.code import Act, register
 
 NAME = "<Name> Act"
 
@@ -62,18 +62,18 @@ ACT = register(Act(
     keys={"CONSTANT_ONE": "key_one", "CONSTANT_TWO": "key_two"},
     residual={"key_one": ..., "key_two": ...},
     today=today, check=check, describe=describe,
-    covers=("X1", "X2"),                          # review 12 inventory rows (charter/tiers.py RULE ids, tier L-rule)
+    covers=("X1", "X2"),                          # review 12 inventory rows (cybertron/tiers.py RULE ids, tier L-rule)
     seams=("module:function", ...),               # where the kernel reads the rows (tests import them)
     start=(),                                     # keys read once at generation (code.start_rule), if any
 ))
 ```
 
-Then import the module at the bottom of `charter/code/__init__.py`, in the order the Act should get its id under `code: today`
+Then import the module at the bottom of `cybertron/code/__init__.py`, in the order the Act should get its id under `code: today`
 (appending keeps A1, A2 stable).
 
 ## Checklist for a new Act
 
-1. **Find every seam.** From the review 12 row (`charter/tiers.py`), list each place the rule is made: constants, spec reads, gates.
+1. **Find every seam.** From the review 12 row (`cybertron/tiers.py`), list each place the rule is made: constants, spec reads, gates.
    Each becomes `DC.rule(k, polity, NAME, key, <today's value>)`. Guard with nothing else: `rule` returns the default when code is
    off or the kernel was never seeded, so the flag-off path is the old line of code.
 2. **Today's parameters are today's values.** `today(sp)` must read the same spec keys with the same fallbacks as the old code;
@@ -89,10 +89,10 @@ Then import the module at the bottom of `charter/code/__init__.py`, in the order
 7. **Ids and visibility.** Do not add Acts to `law_order` or `active_laws()`; use `DC.laws_in_force(k)` where a law is looked up
    to be repealed (already done in `Kernel.repeal`, `actions._propose`, `amendment.propose_by_law`, `jurisdictions.propose`,
    `lawpreview`).
-8. **Tests** (extend `tests/test_charter_code.py`): add scenarios to `SCENARIOS` (twin equivalence: source run as law against the
+8. **Tests** (extend `tests/test_cybertron_code.py`): add scenarios to `SCENARIOS` (twin equivalence: source run as law against the
    twin, outcomes compared over rounds); a seam test that code: today reproduces code off; repeal gives the residual; an amendment
    changes the parameter; the registry test covers `covers` and `seams`.
-9. **Difftest.** `python -m charter difftest --base <base> --head WORKTREE --presets E2,E4,society,jurisdictions_pilot,conflict_pilot,life_pilot --seeds 1,2 --rounds 3`
+9. **Difftest.** `python -m cybertron difftest --base <base> --head WORKTREE --presets E2,E4,society,jurisdictions_pilot,conflict_pilot,life_pilot --seeds 1,2 --rounds 3`
    identical (flag off), and again with `--head-set code.enabled=true --ignore-code-acts` identical.
 10. **Goldens** pass without re-recording (flag off everywhere they run).
 
@@ -105,7 +105,7 @@ Then import the module at the bottom of `charter/code/__init__.py`, in the order
 | Credit Act | statute | K4 defaults | store `credit` | `credit.py` defaults become rows |
 | Succession Act (estates) | statute | I1-I3, I7 | `after_end_life` with `estate_access` | hook-based; the office part is delivered (below) |
 
-Delivered under `institutions.succession` (charter/code/succession_act.py; selected only in those worlds, after the Press Act):
+Delivered under `institutions.succession` (cybertron/code/succession_act.py; selected only in those worlds, after the Press Act):
 the **Succession Act** (vacant offices of institutions that say nothing: RULE election | receiver | none, RECEIVER, MANDATORY;
 residual none) and the **Dissolution and Escheat Act** (a dissolved institution's holdings where it declares no wind-up: TO polity |
 family | members, MANDATORY; residual: locked). Both store-based; `code.resolve_clause` weighs each Act's MANDATORY row against the

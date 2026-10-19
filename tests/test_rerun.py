@@ -1,4 +1,4 @@
-"""charter rerun (charter/rerun.py): a run's command again, under the git sha it recorded, in a temporary worktree. Scripted bots
+"""cybertron rerun (cybertron/rerun.py): a run's command again, under the git sha it recorded, in a temporary worktree. Scripted bots
 only, no model calls."""
 from __future__ import annotations
 
@@ -7,15 +7,15 @@ from pathlib import Path
 
 import pytest
 
-from charter import __main__ as M
-from charter import provenance as PV
-from charter import rerun as RR
-from charter import spec as S
+from cybertron import __main__ as M
+from cybertron import provenance as PV
+from cybertron import rerun as RR
+from cybertron import spec as S
 
 HEAD = (PV._git("rev-parse", "HEAD") or "").strip() or None
 pytestmark = pytest.mark.skipif(HEAD is None, reason="needs the git repository")
 SETS = ["rounds=2", "shared_archive.enabled=false"]
-ARGV = ["/somewhere/charter/__main__.py", "run", "society", "--seed", "1", "--dry", "--sandbox", "off"] + \
+ARGV = ["/somewhere/cybertron/__main__.py", "run", "society", "--seed", "1", "--dry", "--sandbox", "off"] + \
        [x for s in SETS for x in ("--set", s)]
 
 

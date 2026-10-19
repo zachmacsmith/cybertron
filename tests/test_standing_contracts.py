@@ -1,5 +1,5 @@
 """The Standing Contract core and its presets (review 31: docs/review/31_institutions/03_money_labour.md §2, 08_integration.md §2.1;
-charter/standing.py): start.contracts, start.allowances and start.escrow, J0 as an employer (start.wages employer J0: the Payroll
+cybertron/standing.py): start.contracts, start.allowances and start.escrow, J0 as an employer (start.wages employer J0: the Payroll
 polity form), roster and bilateral forms, could-not vs would-not misses, bond, penalty, notice priced by an exit fee, the forums,
 the terms line, and a 3-round zero-attention world where a Board feeds its subscribers and Payrolls pay their workers."""
 from __future__ import annotations
@@ -9,9 +9,9 @@ from pathlib import Path
 
 import pytest
 
-from charter import generator as GN
-from charter import schema as SC
-from charter import spec as S
+from cybertron import generator as GN
+from cybertron import schema as SC
+from cybertron import spec as S
 
 NAMES = ["Ada", "Bo", "Cy", "Di", "Ed", "Fay"]
 
@@ -19,7 +19,7 @@ NAMES = ["Ada", "Bo", "Cy", "Di", "Ed", "Fay"]
 def world(rounds=3, **start_over):
     """A small established town: J0 with a keeper and a watch (paid by J0 out of its reserve: start.wages employer J0), a shop A1
     (Ada's) with a store S2, a Board open to its members, a Payroll and a Supply Contract; the granary S1 of J0."""
-    sp = S.load("charter/specs/survival/base.yaml")
+    sp = S.load("cybertron/specs/survival/base.yaml")
     sp = S.deep_merge(sp, {
         "agents": {"worker": 6, "names": list(NAMES)}, "rounds": rounds, "parallel_calls": 1,
         "institutions": {"unified": True, "grants": True, "succession": True, "office_control": True},
@@ -65,8 +65,8 @@ class Idle:
 
 
 def run(tmp_path, sp, policy=None, seed=1):
-    from charter import agents as AG
-    from charter import runner
+    from cybertron import agents as AG
+    from cybertron import runner
     inst = GN.generate(sp, seed)
     out = runner.run(inst, policy or Idle(), tmp_path / "run", log=lambda *a: None)
     return inst, Path(out)
@@ -77,7 +77,7 @@ def events(run_dir):
 
 
 def kernel_at(run_dir, n):
-    from charter import start as STT
+    from cybertron import start as STT
     return STT._kernel_at(run_dir, n)[1]
 
 
@@ -92,9 +92,9 @@ def moves(evs, lid, **match):
 
 
 def test_the_presets_are_contract_templates_that_check():
-    from charter import contracts as KC
-    from charter import library as LB
-    from charter import standing as SD
+    from cybertron import contracts as KC
+    from cybertron import library as LB
+    from cybertron import standing as SD
     for name in SD.PRESETS:
         e = LB.ESTABLISHED[name]
         assert e["kind"] == "contract" and e["rank"] == "bylaw"
@@ -119,8 +119,8 @@ def test_spec_checks():
 def test_zero_attention_three_rounds_board_feeds_and_payrolls_pay(tmp_path):
     """Framework §11 check 2: 3 rounds with no agent action. The Board feeds its subscribers from the shop's store and charges them;
     the shop's Payroll pays its workers; J0 pays the watch (an office, whoever holds it) and Fay out of its reserve."""
-    from charter import accounts as AC
-    from charter import agents as AG
+    from cybertron import accounts as AC
+    from cybertron import agents as AG
     inst, rd = run(tmp_path, world(rounds=3))
     recs = [json.loads(x) for x in (rd / "interventions.jsonl").read_text().splitlines()]
     assert not [r for r in recs if "error" in r], [r for r in recs if "error" in r]
@@ -167,7 +167,7 @@ def step(k, n=1):
 
 
 def act(k, aid, name, **args):
-    from charter import actions as A
+    from cybertron import actions as A
     return A.act(k, aid, name, args)
 
 
@@ -181,8 +181,8 @@ def since(k, n0, t=None):
 
 # ---------------------------------------------------------------------- Phase 0: paying institutions
 def test_agents_and_offices_pay_into_institutions(tmp_path):
-    from charter import accounts as AC
-    from charter.actions import ActionError
+    from cybertron import accounts as AC
+    from cybertron.actions import ActionError
     k = setup(tmp_path, world())
     a1 = AC.treasury_of(k, "A1")
     t0, r0, f0 = k.bal(a1, "penny"), k.bal("reserve", "penny"), k.bal("Fay", "penny")
@@ -204,7 +204,7 @@ def test_agents_and_offices_pay_into_institutions(tmp_path):
 
 
 def test_paying_institutions_is_off_with_the_flag(tmp_path):
-    from charter.actions import ActionError
+    from cybertron.actions import ActionError
     sp = world()
     sp["contracts"]["pay_institutions"] = False
     k = setup(tmp_path, sp)
@@ -213,7 +213,7 @@ def test_paying_institutions_is_off_with_the_flag(tmp_path):
 
 
 def test_a_levy_applies_to_payments_into_a_treasury(tmp_path):
-    from charter import accounts as AC
+    from cybertron import accounts as AC
     sp = world(laws=[{"template": "Payment Levy", "params": {"ITEM": "penny", "RATE": 0.1}}])
     k = setup(tmp_path, sp)
     t0, f0 = k.bal(AC.treasury_of(k, "A1"), "penny"), k.bal("Fay", "penny")
@@ -234,11 +234,11 @@ def test_a_contract_law_pays_j0_a_grant(tmp_path):
 
 # ---------------------------------------------------------------------- Payroll: hire, set_wage, fire; arrears
 def test_payroll_office_actions_and_arrears(tmp_path):
-    from charter import accounts as AC
-    from charter.actions import ActionError
+    from cybertron import accounts as AC
+    from cybertron.actions import ActionError
     k = setup(tmp_path, world())
     act(k, "Fay", "join_contract", contract="A1")                       # closed: an applicant
-    assert "Applicants to A1: Fay" in __import__("charter.agents", fromlist=["x"]).state_view(k, "Ada")
+    assert "Applicants to A1: Fay" in __import__("cybertron.agents", fromlist=["x"]).state_view(k, "Ada")
     act(k, "Ada", "invoke", action="A1.hire", args=["Fay", 2])
     act(k, "Ada", "invoke", action="A1.set_wage", args=["Fay", 4])
     with pytest.raises(ActionError):
@@ -271,7 +271,7 @@ def supply_world(**extra):
 
 
 def test_supply_delivers_into_the_store_and_pays_per_unit(tmp_path):
-    from charter import subsistence as SB
+    from cybertron import subsistence as SB
     k = setup(tmp_path, supply_world())
     sup = law(k, "A1", "Supply Contract")
     s0, b0 = SB.state(k)["stores"]["S2"]["holdings"]["food"], k.bal("Bo", "penny")
@@ -287,7 +287,7 @@ def test_supply_delivers_into_the_store_and_pays_per_unit(tmp_path):
 
 
 def test_withdrawn_allowance_is_a_breach_after_grace_with_the_penalty_from_the_bond(tmp_path):
-    from charter import accounts as AC
+    from cybertron import accounts as AC
     k = setup(tmp_path, supply_world())
     sup = law(k, "A1", "Supply Contract")
     act(k, "Bo", "set_allowance", contract="A1", item="food", qty=0)    # would not: a strike by allowance
@@ -303,7 +303,7 @@ def test_withdrawn_allowance_is_a_breach_after_grace_with_the_penalty_from_the_b
 
 
 def test_leaving_without_notice_costs_the_exit_fee_and_notice_ends_the_terms(tmp_path):
-    from charter import accounts as AC
+    from cybertron import accounts as AC
     k = setup(tmp_path, supply_world())
     sup = law(k, "A1", "Supply Contract")
     n0 = len(k.events)
@@ -343,8 +343,8 @@ def bilateral(**params):
 
 
 def test_bilateral_contract_runs_and_exit_without_notice_pays_the_other_party(tmp_path):
-    from charter import accounts as AC
-    from charter import agents as AG
+    from cybertron import accounts as AC
+    from cybertron import agents as AG
     k = setup(tmp_path, bilateral())
     assert AC.assocs(k)["A2"]["members"] == ["Bo", "Fay"]
     lid = AC.assocs(k)["A2"]["laws"][0]
@@ -367,7 +367,7 @@ def test_bilateral_contract_runs_and_exit_without_notice_pays_the_other_party(tm
 
 
 def test_bilateral_notice_ends_it_and_refunds_bonds(tmp_path):
-    from charter import accounts as AC
+    from cybertron import accounts as AC
     k = setup(tmp_path, bilateral())
     act(k, "Fay", "invoke", action="A2.sc_notice")
     step(k)
@@ -378,7 +378,7 @@ def test_bilateral_notice_ends_it_and_refunds_bonds(tmp_path):
 
 
 def test_arbiter_forum_awards_from_the_bond(tmp_path):
-    from charter import accounts as AC
+    from cybertron import accounts as AC
     k = setup(tmp_path, bilateral(FORUM="arbiter:Cy", GRACE=0, extra_parties={"Cy": "arbiter"}))
     act(k, "Fay", "set_allowance", contract="A2", item="penny", qty=0)   # Fay holds the money but will not pay
     step(k)
@@ -388,13 +388,13 @@ def test_arbiter_forum_awards_from_the_bond(tmp_path):
     b0 = k.bal("Bo", "penny")
     act(k, "Cy", "invoke", action="A2.sc_award", args=[1, 3])
     assert k.bal("Bo", "penny") == b0 + 3 and AC.assocs(k)["A2"]["escrow"]["Fay"]["penny"] == 2
-    from charter.actions import ActionError
+    from cybertron.actions import ActionError
     with pytest.raises(ActionError):
         act(k, "Bo", "invoke", action="A2.sc_award", args=[1, 3])
 
 
 def test_court_forum_names_the_victim_only_when_the_bond_falls_short(tmp_path):
-    from charter import accounts as AC
+    from cybertron import accounts as AC
     k = setup(tmp_path, bilateral(FORUM="court", GRACE=0, PENALTY={"item": "penny", "qty": 8}))
     act(k, "Fay", "set_allowance", contract="A2", item="penny", qty=0)
     step(k)
@@ -408,7 +408,7 @@ def test_court_forum_names_the_victim_only_when_the_bond_falls_short(tmp_path):
 
 
 def test_parties_procedure_needs_every_party(tmp_path):
-    from charter import accounts as AC
+    from cybertron import accounts as AC
     k = setup(tmp_path, bilateral())
     rec = AC.assocs(k)["A2"]
     lid = rec["laws"][0]
@@ -422,7 +422,7 @@ def test_parties_procedure_needs_every_party(tmp_path):
 
 # ---------------------------------------------------------------------- Quota (J0, compulsory), Charge, start sections
 def test_quota_takes_into_the_granary_and_pays(tmp_path):
-    from charter import subsistence as SB
+    from cybertron import subsistence as SB
     sp = world(contracts=[{"template": "Quota", "in": "J0", "roster": {"Bo": {"quota": 3}, "Di": {}},
                            "params": {"TERMS": {"store": "store:S1"}, "FINE": 1}}],
                holdings={"Bo": {"penny": 20, "food": 12}, "Di": {"penny": 20}, "Fay": {"penny": 10}})
@@ -449,7 +449,7 @@ def test_charge_drops_a_member_who_will_not_pay(tmp_path):
 
 
 def test_top_level_allowances_and_escrow(tmp_path):
-    from charter import accounts as AC
+    from cybertron import accounts as AC
     sp = world(allowances=[{"agent": "Bo", "contract": "A1", "item": "food", "qty": 2}],
                escrow=[{"agent": "Di", "contract": "A1", "item": "penny", "qty": 4}])
     k = setup(tmp_path, sp)
@@ -470,7 +470,7 @@ def test_piece_rate_pays_per_unit_of_the_harvest_share(tmp_path):
                 k.w["agents"]["Bo"]["rights"])
     c = k.w["camps"][camp]
     x = [1] * c["dials"] if c.get("dials") else [1]
-    from charter import accounts as AC
+    from cybertron import accounts as AC
     t0 = k.bal(AC.treasury_of(k, "A1"), "copper")
     act(k, "Bo", "harvest", camp=camp, x=x)                               # a sealed input: harvested at the end of the round
     b0 = k.bal("Bo", "penny")
@@ -532,7 +532,7 @@ def test_scale_twenty_subscribers_and_workers_within_gas(tmp_path):
 
 # ---------------------------------------------------------------------- the Licence template (one gate for camps, posts, forges)
 def test_licence_gates_posting_by_right_roster_registrar_and_fee(tmp_path):
-    from charter.actions import ActionError
+    from cybertron.actions import ActionError
     sp = world(channels=[{"id": "market", "owner": "J0", "by": "Cy", "purpose": "prices", "readers": {"all": True},
                           "writers": {"all": True}}],
                laws=[{"template": "Licence", "params": {"GATES": ["post"], "TARGETS": ["market"], "RIGHT": "trader",

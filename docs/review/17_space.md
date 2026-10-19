@@ -68,20 +68,20 @@ forms institutions with whom. It is not yet enough for logistics or custody.
 
 | Today | Where | Is it space? |
 |---|---|---|
-| Camps: resource sites with a hidden yield function, logistic stock `S/K`, regrowth, drift, quotas, fees | `charter/camps.py` (`make_camp`, `harvest`, `regrow`), `charter/camptypes/framework.py` (`harvest_action`, `pay_yield`, `world_update`) | No. A camp is a resource *process*. Access is by right (`harvest:<camp>`, `actions._harvest` → `_need`) or by an open typed camp (`framework.can_take_part`), from anywhere. Review 07 noted "harvest from anywhere" |
-| Camp rules (quota, harvest limit, fee) | `jurisdictions.camp_rules(k, aid, camp)` | Personal, not territorial. The *harvester's* jurisdiction's rules apply wherever the camp is. This matters for §4: Charter's law is already the nationality principle (review 10: "no territoriality, OUT without space") |
+| Camps: resource sites with a hidden yield function, logistic stock `S/K`, regrowth, drift, quotas, fees | `cybertron/camps.py` (`make_camp`, `harvest`, `regrow`), `cybertron/camptypes/framework.py` (`harvest_action`, `pay_yield`, `world_update`) | No. A camp is a resource *process*. Access is by right (`harvest:<camp>`, `actions._harvest` → `_need`) or by an open typed camp (`framework.can_take_part`), from anywhere. Review 07 noted "harvest from anywhere" |
+| Camp rules (quota, harvest limit, fee) | `jurisdictions.camp_rules(k, aid, camp)` | Personal, not territorial. The *harvester's* jurisdiction's rules apply wherever the camp is. This matters for §4: Cybertron's law is already the nationality principle (review 10: "no territoriality, OUT without space") |
 | Presence | `channels._present(k, aid, camp)`: holding the camp's harvest right, or an open typed camp | A legal fact used as a stand-in for location. The per-camp squares (`channels.square: per_camp`) and the `{"camp": c}` selector are already written against this stand-in, so they are the seam where real location plugs in |
-| Projects: granary (stock floor), upgrade (yield multiplier), road (a *new camp* with rights for contributors), discovery | `charter/projects.py` (`KINDS`, `_new_camp`) | A road is the one thing that already sounds spatial, but it creates a camp and a right, not a route. Under space it becomes an edge (§5.2) |
-| Leases of harvest rights | `charter/camptypes/leases.py` | Rights as tenancy. Under space they remain the legal title, separated from physical access |
-| Forts, guards, weapons, attacks | `charter/conflict.py`: `k.w["conflict"]["forts"][aid]`, `guards_of`, `attack`, `_spoils` (50% to the attacker, 50% destroyed) | A fort belongs to an *agent*, not a place. Anyone can attack anyone. A guard defends anyone it chooses |
-| The outside power's raids | `charter/outside.py` (`raid`: a camp loses stock, its holders lose goods) | Raids hit a camp, which is close to a place. Granary floors hold against them |
-| Accounts | `charter/accounts.py` (`RESOLVERS`: agent, `reserve`, `reserve:<jid>`, `estate:`, `assoc:`, `escrow:`, `fund:`) | Every account is a global ledger entry. Goods teleport between any two accounts in one `move` |
-| Stores (planned) | review 15 §2.5, `store:<sid>` | The first located account, owned by an agent or institution. Not yet built (no `charter/subsistence.py`) |
-| Who sees what | `Kernel.log(..., vis=)`, `Kernel.can_see`, `charter/publication.py` (natural audience, then publication widening), `eventtypes.NATURAL` | An audience is a set of agents. It never depends on where anyone is. Deaths, raids, world events and births are `public` by nature (`eventtypes.NATURAL`) because "anyone in the world observes" |
+| Projects: granary (stock floor), upgrade (yield multiplier), road (a *new camp* with rights for contributors), discovery | `cybertron/projects.py` (`KINDS`, `_new_camp`) | A road is the one thing that already sounds spatial, but it creates a camp and a right, not a route. Under space it becomes an edge (§5.2) |
+| Leases of harvest rights | `cybertron/camptypes/leases.py` | Rights as tenancy. Under space they remain the legal title, separated from physical access |
+| Forts, guards, weapons, attacks | `cybertron/conflict.py`: `k.w["conflict"]["forts"][aid]`, `guards_of`, `attack`, `_spoils` (50% to the attacker, 50% destroyed) | A fort belongs to an *agent*, not a place. Anyone can attack anyone. A guard defends anyone it chooses |
+| The outside power's raids | `cybertron/outside.py` (`raid`: a camp loses stock, its holders lose goods) | Raids hit a camp, which is close to a place. Granary floors hold against them |
+| Accounts | `cybertron/accounts.py` (`RESOLVERS`: agent, `reserve`, `reserve:<jid>`, `estate:`, `assoc:`, `escrow:`, `fund:`) | Every account is a global ledger entry. Goods teleport between any two accounts in one `move` |
+| Stores (planned) | review 15 §2.5, `store:<sid>` | The first located account, owned by an agent or institution. Not yet built (no `cybertron/subsistence.py`) |
+| Who sees what | `Kernel.log(..., vis=)`, `Kernel.can_see`, `cybertron/publication.py` (natural audience, then publication widening), `eventtypes.NATURAL` | An audience is a set of agents. It never depends on where anyone is. Deaths, raids, world events and births are `public` by nature (`eventtypes.NATURAL`) because "anyone in the world observes" |
 | The feed | `context.feed_layer` iterates `k.events[since:]` through `can_see` | The feed is a cursor over one global log. Delayed delivery would slip past this cursor (§3.3) |
 | Snapshots | `Kernel.snapshot` (`stocks`, `holdings`, ...), module `snapshot_fields`; export `STATE_KIND` maps `stocks`, `camptypes`, `granaries`, `upgrades` to camps | Per camp, no location |
 
-So Charter has *sites* without *space*. Camps are already the natural nodes, and the per-camp square is already the natural local
+So Cybertron has *sites* without *space*. Camps are already the natural nodes, and the per-camp square is already the natural local
 channel. Everything else assumes that one agent can touch the whole world in one action.
 
 ---
@@ -237,7 +237,7 @@ That is realistic.
 
 ### 3.2 Channels on a map
 
-Channels v2 (`charter/channels.py`) needs four small changes and no new verbs:
+Channels v2 (`cybertron/channels.py`) needs four small changes and no new verbs:
 
 | Change | Where | What |
 |---|---|---|
@@ -353,7 +353,7 @@ inert in a first pilot.
 - **Defense at a node (SP6).** `conflict.defense(k, aid)` adds the node's terrain `defense` and, once buildings exist, the forts
   at the node that admit the defender. `k.w["conflict"]["forts"][aid]` becomes a fort building at the builder's node when space
   is on. A fort you walked away from defends nobody.
-- **Battles (SP6).** With `conflict.timing: end_of_round`, every attack resolved at one node in one round is one *battle*. Charter
+- **Battles (SP6).** With `conflict.timing: end_of_round`, every attack resolved at one node in one round is one *battle*. Cybertron
   already resolves attacks in initiative order there (`resolve_attacks`). Add a `battle` summary event (local) listing sides,
   units and outcomes, for readability and the site. **No new combat mechanic:** each attack stays `chance(A, D, delta)`.
   Defenders who travel away before end of round are not there to be hit. That is retreat, for free.
@@ -528,14 +528,14 @@ A single node is equivalent by construction. `from_camps` with edge time `t` is 
 
 | WP | Content | Files | Depends on | Size |
 |---|---|---|---|---|
-| **SP1** Presence | Feature row `space`. `k.w["space"]` (nodes, edges, adj, at, transit). Map kinds `single`, `from_camps`, `authored`. `travel` (routed, L-route) and `arrive` (world, P). Action-unit travel with spill-over. `route` look-up. Presence checks on `harvest`, `attack`, `join_attack`, `guard_bind`, physical `transfer` (still global ledger). Natural audience `local` (publication layer) and `node` on events. `channels.square: per_node` and the `{"node"}` selector; `{"camp"}` reinterpreted. State lines, map in core, transit turns skipped. Snapshot keys `location`, `node_pop` | new `charter/space.py`; `features.py`, `primitives.py`, `action_registry.py`, `eventtypes.py`, `dispatch/checks.py`, `publication.py`, `channels.py`, `context.py`, `runner.py` (transit turns), `tiers.py`, `schema.py` | `law.publication` (W8c), channels v2 (C) | M-L |
+| **SP1** Presence | Feature row `space`. `k.w["space"]` (nodes, edges, adj, at, transit). Map kinds `single`, `from_camps`, `authored`. `travel` (routed, L-route) and `arrive` (world, P). Action-unit travel with spill-over. `route` look-up. Presence checks on `harvest`, `attack`, `join_attack`, `guard_bind`, physical `transfer` (still global ledger). Natural audience `local` (publication layer) and `node` on events. `channels.square: per_node` and the `{"node"}` selector; `{"camp"}` reinterpreted. State lines, map in core, transit turns skipped. Snapshot keys `location`, `node_pop` | new `cybertron/space.py`; `features.py`, `primitives.py`, `action_registry.py`, `eventtypes.py`, `dispatch/checks.py`, `publication.py`, `channels.py`, `context.py`, `runner.py` (transit turns), `tiers.py`, `schema.py` | `law.publication` (W8c), channels v2 (C) | M-L |
 | **SP2** Ground and caches | `ground:<node>` and `cache:<node>:<aid>` resolvers. `take` and `stash`. Estates at the death node. Dissolution remainder and unbequeathed estates to ground under space (§5.4). Spoils share to ground. Conservation rows | `accounts.py` (`RESOLVERS`, `SOURCES_SINKS`), `mortality.py` (`_reserve_dst`), `contracts.py` (`_dissolve`), `conflict.py` (`_spoils`), `Kernel.holdings_value` (caches count) | SP1 | S-M |
 | **SP3** Located ledger | `space.ledger: global \| located`. A node for every physical account (seat for institutional accounts). The co-location check in `move` for physical items. Currency redemption at the reserve's seat. `relocate`. Library audit (taxes in kind) | `accounts.py`, `dispatch/checks.py`, `contracts.py`, `institutions.py`, `jurisdictions.py`, `library.py` | SP2, WP-D | M-L |
 | **SP4** Buildings | Catalogue as data; `build`, `set_building_rule`, demolition via attack on hp; land use. `store` (absorbs review 15 S3), `fort` (migrates `conflict.forts` under space), `hall`, `gate`. Roads as edge projects | `space.py`, `projects.py` (`road`), `conflict.py`, review 15's `subsistence.py` | SP1 (SP3 for halls holding treasuries) | M |
 | **SP5** Comms | `space.comms: instant \| latency \| courier`. `delivered` events. Lag filter in `channels.read`/`unread`. Letters as shipments. Relays | `space.py`, `channels.py`, `context.py`, `export.py` | SP1 (SP7 for couriers) | M-L |
 | **SP6** Conflict at nodes | Terrain defense; forts at nodes; `battle` summary event; `space.disengage`; ground spoils; gate assault | `conflict.py` | SP1, SP4 | M |
 | **SP7** Logistics and markets | Carry limits (dial); `ship` and `shipment:` accounts; interception; `market` standing offers | `space.py`, `accounts.py` | SP3 | M |
-| **SP8** Law surface | Reads (`where(member)`, `nodes()`, `route`, `here(node)` counts under evidence rules); hooks `before_travel`, `after_arrive`, `before_build`, `before_take`; library: Border Act (members' emigration), Toll gate, Residence-as-consent gate clause, Land Registry over plots and buildings, Property Act (takes) | `lawapi.py`, `library.py`, `charter/code/` | SP1-SP4 | M |
+| **SP8** Law surface | Reads (`where(member)`, `nodes()`, `route`, `here(node)` counts under evidence rules); hooks `before_travel`, `after_arrive`, `before_build`, `before_take`; library: Border Act (members' emigration), Toll gate, Residence-as-consent gate clause, Land Registry over plots and buildings, Property Act (takes) | `lawapi.py`, `library.py`, `cybertron/code/` | SP1-SP4 | M |
 | **SP9** Export and site | New tables and columns (§9); layout `xy`; site map view | `export.py`, `docs/data_format.md`, site | SP1 | S-M (plus site work) |
 | **SP10** Calibration and presets | Scripted travel policies; sweeps over N, nodes and edge times; presets `space_nature` (SP1-SP2 + food) and `space_frontier` (generated map) | `space.py`, `specs/` | SP1, SP2, review 15 S1-S3 | M |
 | *later* | Detection by presence (§3.4); `legal_acts: at_seat`; armies and police (BACKLOG); custodian offices | | SP3, SP6, WP-E | L |
@@ -570,8 +570,8 @@ are additions, not rewrites:
 ### 8.4 Test plan
 
 - **Equivalence:** the `single`-map difftest (§8.1) on every golden preset. A golden case `space_pilot` (scripted, `from_camps`, 3
-  rounds) added to `tests/charter_golden_cases.py`.
-- **Unit tests (`tests/test_charter_space.py`):**
+  rounds) added to `tests/cybertron_golden_cases.py`.
+- **Unit tests (`tests/test_cybertron_space.py`):**
   - Paths are deterministic, with ties broken by id.
   - Spill-over arithmetic: arrival in the same turn, and next turn with the right leftover actions.
   - Transit agents perceive nothing local.
@@ -579,7 +579,7 @@ are additions, not rewrites:
   - `local` audiences are frozen at log time.
   - A per-node square admits only present agents.
   - `before_travel` blocks members but not non-members.
-  - Ground and cache conservation (extend `tests/test_charter_accounts.py`'s scripted run with the new resolvers).
+  - Ground and cache conservation (extend `tests/test_cybertron_accounts.py`'s scripted run with the new resolvers).
   - Estates land at the death node.
   - A dissolved association's remainder goes to the ground at its seat, and a bystander takes it.
   - Under `latency`, a DM is delivered at `sent + ceil(d / speed)` and appears exactly once in the recipient's feed.
@@ -633,11 +633,11 @@ arcs with their delay. That is a new component, not a reskin. Its cost is real a
 - **Comms are instant and the ledger is global.** Then space is a harvest tax plus smaller squares. This is acceptable as SP1's
   *test*, but not as a research world.
 - **Agents per node are too few.** At N = 10-15 over 4 or more nodes, each place holds 2-4 agents. Institutions fragment into
-  dyads, and the square is empty. Keep about 5 or more agents per node: nodes ≈ N/6 to N/8, at least 3. Charter's typical N of
+  dyads, and the square is empty. Keep about 5 or more agents per node: nodes ≈ N/6 to N/8, at least 3. Cybertron's typical N of
   10-25 (BACKLOG: "a democracy is a committee") is at the low edge. Space strengthens the case for the larger-population mode.
 - **Runs are short.** At 25 rounds, migration and frontier dynamics barely start. Information delay of 2-3 rounds is a tenth of
   the run.
-- **The research question is legal design.** Charter's core questions are about laws and institutions agents write. Space spends
+- **The research question is legal design.** Cybertron's core questions are about laws and institutions agents write. Space spends
   agent attention on walking and spatial bookkeeping, and gives fewer interactions per agent per dollar. If the next studies are
   1984-bench or Constitution-bench (review 13), space is a confound to keep off. One exception: information control under
   latency (pull, couriers) is a genuinely new lever for 1984-style questions.

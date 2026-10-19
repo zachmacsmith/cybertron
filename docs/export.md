@@ -1,24 +1,24 @@
-# Analysis dataset: `charter export`
+# Analysis dataset: `cybertron export`
 
-`charter/export.py` (ARCHITECTURE P5.5; docs/review/04 §4.7; charter/docs/architecture_review.md §3.4) turns run directories
+`cybertron/export.py` (ARCHITECTURE P5.5; docs/review/04 §4.7; cybertron/docs/architecture_review.md §3.4) turns run directories
 into a tidy, versioned, cross-run dataset: long-format tables, one row per run / agent / agent-round / event / model call / law /
 law version / intervention / score / message / channel / turn / snapshot leaf / directory file / event type, every row stamped
 with `run_id`. `docs/data_format.md` is the published contract (what the site reader codes against); this page holds the
 generated column tables and wins where the two differ.
 
 ```
-python -m charter export RUN [RUN...] --out DIR [--format parquet|csv] [--running-scores] [--root DIR] [--with-prompts]
+python -m cybertron export RUN [RUN...] --out DIR [--format parquet|csv] [--running-scores] [--root DIR] [--with-prompts]
 ```
 
-- `RUN` is a run directory, or a directory holding run directories (a fork's `rep1..repK`, `charter/out/<spec>/`), searched for
+- `RUN` is a run directory, or a directory holding run directories (a fork's `rep1..repK`, `cybertron/out/<spec>/`), searched for
   them. Several runs are concatenated; a `run_id` that occurs twice (two forks' `rep1`) gets a `~<hash of its path>` suffix.
 - Format: parquet when `pyarrow` is importable, else CSV (pyarrow is not a dependency). `--format parquet` without pyarrow is an
   error.
 - `DIR/manifest.json`: `schema_version`, `schema_minor`, `format`, the runs exported (`run_id`, `run_dir`), the exporting code (its
   commit sha and a sha of export.py), and per table its file, row count and `[column, type]` list. Parquet files also carry
   `schema_version`, `schema_minor` and `table` in their file metadata. A table with no rows is still written.
-- Reading back: `charter.export.load(DIR)` gives `{table: [row dicts]}` with each column of its type in either format;
-  `charter.export.frames(DIR)` gives pandas DataFrames with nullable dtypes (pandas required).
+- Reading back: `cybertron.export.load(DIR)` gives `{table: [row dicts]}` with each column of its type in either format;
+  `cybertron.export.frames(DIR)` gives pandas DataFrames with nullable dtypes (pandas required).
 - CSV cells: empty = null (an empty string is exported as null in both formats), booleans `true`/`false`, `json` columns hold
   compact JSON text (sorted keys) in both formats.
 - Exporting only reads the run directory. Scores come from `score.json` when present; otherwise `scorer.goal_scores` is run in
@@ -49,7 +49,7 @@ Conventions:
 Schema 2 (this version) = schema 1 + `runs.schema_minor`, `runs.log_format`, portable `run_dir` / `parent_run` (the meaning change
 that bumps the major), and the tables below `scores`:
 
-- **`messages`**: the events of every type the registry (charter/eventtypes.py) gives kind `communication` or flags `messages`,
+- **`messages`**: the events of every type the registry (cybertron/eventtypes.py) gives kind `communication` or flags `messages`,
   one row each, sorted by `channel_id, seq` within a run. `channel_id` grammar: `dm:<a>|<b>` (a message two agents saw),
   `group:<a>|<b>|...` (3+), `ch:<id>` (a kernel channel, vis `channel:<id>`), `public`, `outlet:<outlet id>` (editions, placement
   offers, polls, subscribers-only annotations), `submissions:<outlet>` (leaks and poll answers to an outlet's editor; media2
@@ -61,11 +61,11 @@ that bumps the major), and the tables below `scores`:
 - **`turns`**: reasoning.jsonl rows (every phase: decide, dm_reply_<n>, editorial, the observer's steps), else turns.jsonl (phase
   `decide`, positions from the `turn` events). `blobs` (with `--with-prompts`) holds each distinct prompt once.
 - **`state`**: every snapshots.json round flattened to leaves; a new snapshot key becomes new `key` values, never columns.
-- **`documents`**: directory stores (charter/directories.py): `base` from directories/base.json, `file` from state.json's last
+- **`documents`**: directory stores (cybertron/directories.py): `base` from directories/base.json, `file` from state.json's last
   write-back, `record` from records-<store>.md. Run-scoped stores are not on disk and are not exported.
 - **`attacks`** (minor 5): one row per attack under the harm combat model (conflict.model, docs/review/21_combat.md), from its
   monitor-only `attack_outcome` event: strengths, odds, the roll, the outcome and the target's blow.
-- **`interviews`** (minor 6): every answer stored under `<run>/interviews/` by `python -m charter interview` (charter/interview.py,
+- **`interviews`** (minor 6): every answer stored under `<run>/interviews/` by `python -m cybertron interview` (cybertron/interview.py,
   docs/interview.md): one row per agent, question and sample, with the parsed answer, the prompt's sha and whether the rebuilt
   context matched the run's recorded prompts. Interviews stored elsewhere (`--out`) are not exported. With `--with-prompts`,
   `blobs` also holds each interview's whole prompt (kind `interview_prompt`).
@@ -83,7 +83,7 @@ Dataset schema version **2.6** (`schema_version` 2, `schema_minor` 6). Types: `s
 | column | type | meaning |
 |---|---|---|
 | `run_id` | str | the run's id (run.json run_id, else the directory name; made unique within an export) |
-| `schema_version` | int | dataset schema version (SCHEMA_VERSION of charter/export.py) |
+| `schema_version` | int | dataset schema version (SCHEMA_VERSION of cybertron/export.py) |
 | `schema_minor` | int | additive schema changes since the major version (SCHEMA_MINOR) |
 | `log_format` | int | raw log format of the run directory (run.json log_format; absent = 0) |
 | `run_dir` | str | the run directory, portable: relative to export(root=) when given, else its last two parts (<spec>/<run>) |
@@ -103,7 +103,7 @@ Dataset schema version **2.6** (`schema_version` 2, `schema_minor` 6). Types: `s
 | `git_diff_sha` | str | sha of `git diff HEAD` when dirty |
 | `python` | str | interpreter version |
 | `code_sha` | str | sha over the per-module code hashes of run.json code.modules (one id for the code version) |
-| `code_modules_json` | json | run.json code.modules: sha per charter module |
+| `code_modules_json` | json | run.json code.modules: sha per cybertron module |
 | `state_schema` | int | kernel state schema version |
 | `law_api` | int | law API version |
 | `scoring_version` | int | scoring rules version (scorer.SCORING_VERSION) the run started under |
@@ -529,7 +529,7 @@ Dataset schema version **2.6** (`schema_version` 2, `schema_minor` 6). Types: `s
 | column | type | meaning |
 |---|---|---|
 | `run_id` | str | the run's id (run.json run_id, else the directory name; made unique within an export) |
-| `interview_id` | str | the interview (<run>/interviews/<id>.jsonl; charter/interview.py, docs/interview.md) |
+| `interview_id` | str | the interview (<run>/interviews/<id>.jsonl; cybertron/interview.py, docs/interview.md) |
 | `round` | int | round (0-based) whose context the agent was asked in |
 | `at` | str | end (after the agent's last call of the round) or start (before its decide call) |
 | `agent` | str | agent asked |
@@ -559,7 +559,7 @@ Dataset schema version **2.6** (`schema_version` 2, `schema_minor` 6). Types: `s
 | column | type | meaning |
 |---|---|---|
 | `run_id` | str | the run's id (run.json run_id, else the directory name; made unique within an export) |
-| `type` | str | event type (charter/eventtypes.py; types in the log the registry does not know have only n_events) |
+| `type` | str | event type (cybertron/eventtypes.py; types in the log the registry does not know have only n_events) |
 | `module` | str | the module that logs it |
 | `kind` | str | communication, primitive, legal_act, output, summary, truth, record |
 | `vis_json` | json | the visibility classes call sites may use |

@@ -2,11 +2,11 @@
 dm_rules can only cap it) vs legacy (the limit set by law, else the Communications Act's LIMIT + extra, else the hard cap)."""
 from __future__ import annotations
 
-from charter import agents as AG
-from charter import code as DC
-from charter import generator
-from charter import spec as S
-from charter.kernel import Kernel
+from cybertron import agents as AG
+from cybertron import code as DC
+from cybertron import generator
+from cybertron import spec as S
+from cybertron.kernel import Kernel
 
 SMALL = ["rounds=6", "agents={worker: 10, scientist: 0, legislator: 0, media: 0, board: 0, fixer: 1}"]
 

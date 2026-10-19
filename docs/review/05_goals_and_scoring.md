@@ -1,6 +1,6 @@
 # Review 05: goal definition and scoring
 
-*7 Oct 2026. Read-only review of `charter/goals.py`, `scorer.py`, `events.py` (segments), `life.py` (lineage scoring), `generator.py`,
+*7 Oct 2026. Read-only review of `cybertron/goals.py`, `scorer.py`, `events.py` (segments), `life.py` (lineage scoring), `generator.py`,
 `agents.py`/`context.py` (goal text), `roles.py`, `observer.py`, `archetypes.py`, `kernel.py`/`runner.py` (snapshots). V = verified
 by reading or an in-memory check, S = suspected. Reviews 01-04 are assumed; this one covers only goals and scoring.*
 
@@ -23,7 +23,7 @@ not constrain it. The per-goal timing table in §4.5 is illustrative only.
 
   So the job is less "make scoring a function of history" (it already is) than "move those two global rules into each goal, and make
   the goal text say what the scorer does."
-- **The draft depends on a change it calls unseen, but that change is in this clone.** `charter/docs/TODO.md` is the draft
+- **The draft depends on a change it calls unseen, but that change is in this clone.** `cybertron/docs/TODO.md` is the draft
   word for word. `goals.score_at_end` (default true) exists in events.py:722 and scorer.py:324. The "best of own and lineage" rule
   is at scorer.py:328, and the agent-facing sentences are at context.py:870 and life.py:937/1005. I assessed the code including
   that change. If the GitHub main differs, the review's §3.1 and §3.3 describe the newer state.
@@ -186,7 +186,7 @@ Other inputs are similarly limited:
 - **Jurisdiction blindness (V).** The top-level `vote_weight`, `decisive_set` and `franchise_share` describe the global
   procedure (kernel.py:1107-1120). An agent who rules a declared breakaway jurisdiction scores 0 on Power and Sovereign. Guardian
   ignores the breakaway's franchise.
-- **No golden test for scores.** `test_charter_golden.py` fingerprints `instance`, `events` and `snapshots` only.
+- **No golden test for scores.** `test_cybertron_golden.py` fingerprints `instance`, `events` and `snapshots` only.
   `test_every_scorer_runs_on_a_played_game` checks only that each score falls in [0, 1].
 
 ## 4. Refined design
@@ -194,7 +194,7 @@ Other inputs are similarly limited:
 ### 4.1 The registry entry (the single source for draw, text and score)
 
 ```python
-# charter/goal_registry.py
+# cybertron/goal_registry.py
 @dataclass(frozen=True)
 class Goal:
     name: str
@@ -354,7 +354,7 @@ should count, because a law the agent passed keeps working. The `rule` text must
 
 1. **Score goldens first.** Add `score.json` goal-score fingerprints for the five golden dry runs. Add a forced-goals dry run that
    sets `goals.explicit` so every one of the 70 goals is held by someone across a few seeds. Promote the `_gt` hand-built
-   fixtures (test_charter.py:569) into per-goal `examples`. **Half a day.**
+   fixtures (test_cybertron.py:569) into per-goal `examples`. **Half a day.**
 2. **History over today's `gt`.** Build `History.load(run_dir)` and adapt the old signature with `legacy_gt(h)`, so every `s_*`
    runs unchanged. Golden: identical numbers. **One day.**
 3. **The registry.** Generate `GOALS` from `CATALOGUE`, `SCORERS`, the gates, slots and `sample_params`. Replace `describe`, both
@@ -373,7 +373,7 @@ should count, because a law the agent passed keeps working. The `rule` text must
    - delete the global timing sentences.
 
    Prompts change here, so new runs are not comparable with old runs on the affected goals. `score.json` records per-goal
-   versions, and `charter rescore RUN --goal-version v1` can still produce old numbers because every old scorer stays importable
+   versions, and `cybertron rescore RUN --goal-version v1` can still produce old numbers because every old scorer stays importable
    under its version.
 7. **Rescore old runs.** Store `score.json` alongside, with `score_version`, as review 04 §4.2 proposes.
 

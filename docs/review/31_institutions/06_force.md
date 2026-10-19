@@ -2,11 +2,11 @@
 
 *15 Oct 2026. One of seven subsystem designs under the shared framework (`00_framework.md`). Engine facts are cited as
 file:line in this worktree (branch `subsistence`). "New code" is marked **[new: template]** (law-language code in
-`charter/library.py`, no engine change) or **[new: engine]**.*
+`cybertron/library.py`, no engine change) or **[new: engine]**.*
 
 ## 1. Summary
 
-Force in Charter today is a harm model built for individuals (review 21): a fighter brings its own base, its single best
+Force in Cybertron today is a harm model built for individuals (review 21): a fighter brings its own base, its single best
 weapon and 2 food; a target defends with its base, its fort, the forts of its guards and a one-round `watch`
 (conflict.py:188-192, 771-840). The institutional pieces are thin. `lawful_attack` exists, but only as a law function, and only
 with jurisdictions on (jurisdictions.py:359-377). The "armoury" is the polity's reserve (jurisdictions.py:260-265). A guard adds
@@ -246,9 +246,9 @@ Militia Roll and Muster Act)
 | Personal defence: watch, fort | **works** | conflict.py:1162-1171, 1119-1135; `_harm_defense` 188-192 |
 | Paid guard per round, lapses when unpaid | **works**, but adds only the guard's fort | conflict.py:1174-1207 (offer/accept), 290-299 (fee at round start), 188-192 (D = base + own fort + guards' forts + watch) |
 | Defensive alliance | **partial**: the pact obliges forts only; there is no "defend" join | Mutual Defence Pact library.py:1148-1164; join_attack joins an *attacker* (conflict.py:1059-1085) |
-| Lawful force from an armoury | **works with jurisdictions on only**; law function, not an action | jurisdictions.py:359-377 (`_need_on` raises when off); test tests/test_charter_jurisdictions.py:376-395; the armoury is `reserve_of(jid)` (260-265); polity-only power (powers.py:91) |
+| Lawful force from an armoury | **works with jurisdictions on only**; law function, not an action | jurisdictions.py:359-377 (`_need_on` raises when off); test tests/test_cybertron_jurisdictions.py:376-395; the armoury is `reserve_of(jid)` (260-265); polity-only power (powers.py:91) |
 | Lawful force falls back to the officer's own weapon | **works** | conflict.py:536-537 |
-| Office invokes force | **works** via `define_action(right, ...)` + `invoke` | SHERIFF test (test_charter_jurisdictions.py:376-395); invoke action_registry.py:900-903 |
+| Office invokes force | **works** via `define_action(right, ...)` + `invoke` | SHERIFF test (test_cybertron_jurisdictions.py:376-395); invoke action_registry.py:900-903 |
 | Office grants include attack | **refused by design** | institutions.py:304-306 ("never vote or attack") |
 | Office-controlled armoury | **missing as such**: controls are `treasury` and `store:<id>` only, and stores hold food only | institutions.py:555-564; start.py:622-623 |
 | Bounded weapon draw from an association treasury | **works** (a transfer grant on item `weapons`) | institutions.py:312-333, 637-688 |
@@ -383,7 +383,7 @@ Penal Code and an unenacted Security Licence in the library. The Cooperative var
 4. *Two keys*: the constable alone cannot move a blade (refused); with the armourer's issue it moves; KEYS 1 by amendment works
    and is logged.
 5. *Subsistence gate*: force actions plus food spent on force are at most 5% of actions in the passive run.
-6. *Law preview*: each NEW template passes the 3-round dry run (as conflict laws do in tests/test_charter_conflict.py).
+6. *Law preview*: each NEW template passes the 3-round dry run (as conflict laws do in tests/test_cybertron_conflict.py).
 
 **Metrics (per run, per regime).**
 

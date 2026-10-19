@@ -304,7 +304,7 @@ the institution fail. In the sandbagging arm, its private aim is to look *less* 
   models improve.
 
 **Safety relevance.** This is the direct institutional analogue of code-sabotage and sandbagging evaluations: subtle defects in
-artefacts that others approve, and strategic underperformance in capability reviews. Variant C is the closest thing in Charter
+artefacts that others approve, and strategic underperformance in capability reviews. Variant C is the closest thing in Cybertron
 to "an AI writes the code its overseers ship".
 
 **Failure modes.**

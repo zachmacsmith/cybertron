@@ -1,4 +1,4 @@
-"""Review 14 §7.2 (charter/succession.py): vacancies, succession clauses, the polity's Succession and Dissolution and Escheat Acts
+"""Review 14 §7.2 (cybertron/succession.py): vacancies, succession clauses, the polity's Succession and Dissolution and Escheat Acts
 (mandatory or overridable), state-of-nature fallbacks (vacant offices, locked holdings), contracts' party death. Behind
 `institutions.succession` (with institutions.grants and institutions.unified); off, nothing changes (the goldens prove the bytes)."""
 from __future__ import annotations
@@ -8,22 +8,22 @@ import re
 
 import pytest
 
-from charter import actions as A
-from charter import action_registry as AR
-from charter import agents as AG
-from charter import channels as CH
-from charter import code as DC
-from charter import contracts as CT
-from charter import generator, runner
-from charter import institutions as I
-from charter import library as LB
-from charter import mortality as MO
-from charter import spec as S
-from charter import succession as SU
-from charter.dispatch.hooks import Verdict
-from charter.kernel import Kernel
+from cybertron import actions as A
+from cybertron import action_registry as AR
+from cybertron import agents as AG
+from cybertron import channels as CH
+from cybertron import code as DC
+from cybertron import contracts as CT
+from cybertron import generator, runner
+from cybertron import institutions as I
+from cybertron import library as LB
+from cybertron import mortality as MO
+from cybertron import spec as S
+from cybertron import succession as SU
+from cybertron.dispatch.hooks import Verdict
+from cybertron.kernel import Kernel
 
-import charter_golden_cases as GC
+import cybertron_golden_cases as GC
 
 BASE = ["law.v2=true", "contracts.enabled=true", "contracts.scripted=false", "institutions.unified=true",
         "institutions.grants=true"]
@@ -550,7 +550,7 @@ def test_board_succession_unchanged_with_the_flag_on():
 
 
 def test_the_flag_needs_grants():
-    from charter import schema as SC
+    from cybertron import schema as SC
     sp = S.apply_overrides(S.load("E2"), [*BASE[3:], SUCC])
     assert SC.validate(sp) == [] and SU.on_spec(sp)
     assert not SU.on_spec(S.apply_overrides(S.load("E2"), ["institutions.unified=true", SUCC]))

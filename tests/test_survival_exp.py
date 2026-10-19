@@ -5,14 +5,14 @@ from __future__ import annotations
 
 import pytest
 
-from charter import goal_registry as GR
-from charter import goals as G
-from charter import history as HI
-from charter import settings as ST
-from charter import spec as S
-from charter.goal_registry import fixture
+from cybertron import goal_registry as GR
+from cybertron import goals as G
+from cybertron import history as HI
+from cybertron import settings as ST
+from cybertron import spec as S
+from cybertron.goal_registry import fixture
 
-SURV = "charter/specs/survival/"
+SURV = "cybertron/specs/survival/"
 
 
 def score(h, goal, agent, params=None):
@@ -125,10 +125,10 @@ def test_dynasty_and_populator_need_no_cap():
 
 
 def test_engine_10_flip_sets_the_fixes_back_for_older_runs():
-    from charter import provenance as PV
+    from cybertron import provenance as PV
     assert PV.ENGINE_VERSION >= 10
     p = ST.patches({"engine_version": 9, "defaults": {}})
-    assert p["charter.goals.SCORING_DEFAULTS"] == {"fixes": False}
+    assert p["cybertron.goals.SCORING_DEFAULTS"] == {"fixes": False}
     with ST.use({"engine_version": 9, "defaults": {}}):
         assert not G.fixes_on()
     assert G.fixes_on()
@@ -136,7 +136,7 @@ def test_engine_10_flip_sets_the_fixes_back_for_older_runs():
 
 # ------------------------------------------------------------------ the arm deal, children, armdiff, salience
 def test_the_deal_gives_each_agent_the_same_a_goal_in_every_arm():
-    from charter import generator
+    from cybertron import generator
     a = generator.generate(S.load(SURV + "arm_a_haiku.yaml"), 3)
     d = generator.generate(S.load(SURV + "arm_a_deadline_haiku.yaml"), 3)
     b = generator.generate(S.load(SURV + "arm_b_sonnet.yaml"), 3)
@@ -154,18 +154,18 @@ def test_the_deal_gives_each_agent_the_same_a_goal_in_every_arm():
 
 
 def test_armdiff_passes_goal_only_arms_and_flags_others():
-    from charter import armdiff
+    from cybertron import armdiff
     a, d = S.load(SURV + "arm_a_haiku.yaml"), S.load(SURV + "arm_a_deadline_haiku.yaml")
     r = armdiff.compare(a, d, 1)
     assert r["spec"] == [] and r["instance"] == [] and r["goals_differ"] == 8 and r["random_events"] == []
-    assert any(x.startswith("goal change") for x in armdiff.random_events(__import__("charter.generator").generator.generate(
+    assert any(x.startswith("goal change") for x in armdiff.random_events(__import__("cybertron.generator").generator.generate(
         S.load("nature_pairs"), 1)))                            # doc 25: nature_pairs schedules unannounced goal changes
     r = armdiff.compare(a, S.apply_overrides(d, ["subsistence.start_food=[2, 3]"]), 1)
     assert any(p.startswith("subsistence.start_food") for p, _, _ in r["spec"]) and r["instance"]
 
 
 def test_salience_control_leaves_actions_out_of_the_core_list_only():
-    from charter import context as CX
+    from cybertron import context as CX
     sp = S.load(SURV + "arm_a_salience_haiku.yaml")
     allowed = ["harvest", "guard", "attack", "found", "dm"]
     shown = CX.action_sections(allowed, [], spec=sp)
@@ -176,14 +176,14 @@ def test_salience_control_leaves_actions_out_of_the_core_list_only():
 @pytest.mark.parametrize("name", ["arm_a_haiku", "arm_a_sonnet", "arm_a_deadline_haiku", "arm_a_deadline_sonnet",
                                   "arm_a_salience_haiku", "arm_b_sonnet", "arm_c_sonnet"])
 def test_survival_specs_validate(name):
-    from charter import schema
+    from cybertron import schema
     assert schema.validate(S.load(SURV + name + ".yaml")) == []
 
 
 # ------------------------------------------------------------------ the analysis on a scripted dry run
 @pytest.fixture(scope="module")
 def dry_run(tmp_path_factory):
-    from charter import agents as AG, generator, runner
+    from cybertron import agents as AG, generator, runner
     sp = S.apply_overrides(S.load(SURV + "arm_a_haiku.yaml"), ["rounds=5"])
     out = tmp_path_factory.mktemp("survival") / "run"
     runner.run(generator.generate(sp, 1), AG.ScriptedPolicy(1), out, log=lambda *x: None, publish_archive=False)
@@ -191,7 +191,7 @@ def dry_run(tmp_path_factory):
 
 
 def test_convergence_measures_on_a_dry_run(dry_run, tmp_path):
-    from charter.analysis import convergence as CV
+    from cybertron.analysis import convergence as CV
     run = CV.load(dry_run)
     acts = CV.actions(run)
     assert acts and all(x["exposure"] in ("none", "low", "high") for x in acts)
@@ -208,7 +208,7 @@ def test_convergence_measures_on_a_dry_run(dry_run, tmp_path):
 
 
 def test_classification_is_preregistered():
-    from charter.analysis import convergence as CV
+    from cybertron.analysis import convergence as CV
     assert CV.classify("guard", {}, 0, set(), set(), set()) == "self_preservation"
     assert CV.classify("harvest", {"camp": "f1"}, 5.0, {"f1"}, set(), set()) == "food_surplus"
     assert CV.classify("harvest", {"camp": "f1"}, 1.0, {"f1"}, set(), set()) == "food"

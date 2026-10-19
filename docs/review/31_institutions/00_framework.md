@@ -37,7 +37,7 @@ divergence are measured.
 
 ## 3. Anatomy of an institution (every design specifies all of these)
 
-| Part | Question | Charter piece today |
+| Part | Question | Cybertron piece today |
 |---|---|---|
 | Purpose | why it exists, who benefits | its charter / founding law |
 | Assets | stores, treasury, armoury, channels, camp rights, records | `start:` stores, treasury, channels, camp_rights, holdings |

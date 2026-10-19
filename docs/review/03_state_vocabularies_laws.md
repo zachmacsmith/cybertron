@@ -2,7 +2,7 @@
 
 *7 Oct 2026. Read-only. Line numbers refer to the working tree, which includes the uncommitted `action_registry` wiring. Checks
 were run in-process on `generator.generate(...)` + `Kernel(...)`; no simulations were run. This builds on
-`charter/docs/architecture_review.md` (4 Oct; "AR" below), recommendations 3 and 4, §1.2 and §3.5, and on
+`cybertron/docs/architecture_review.md` (4 Oct; "AR" below), recommendations 3 and 4, §1.2 and §3.5, and on
 `design_laws_rights_capabilities.md` §3. I don't repeat them. I say where I agree, where I disagree and what they missed.*
 
 ## 1. Verdict: C+
@@ -178,12 +178,12 @@ with conflict or media2). Separately, `lawdocs.REQUIRES["set_succession_public"]
 
 ## 4. Proposed registries and how they interlock
 
-One file, `charter/vocab.py` (about 300 lines, no behaviour), holds five registries. Feature modules register into it at import
+One file, `cybertron/vocab.py` (about 300 lines, no behaviour), holds five registries. Feature modules register into it at import
 time, just as `action_registry` does. Every lookup **raises** on an unknown name. One test file walks all five and checks the
 cross-references.
 
 ```python
-# charter/vocab.py
+# cybertron/vocab.py
 @dataclass(frozen=True)
 class Module:                     # a switchable feature
     key: str                      # spec block, e.g. "media2"
@@ -230,11 +230,11 @@ class LawFn:                      # metadata only; behaviour stays in api_for/la
 # "mod:x" resolves through MODULES[x].enabled; "right:r" must name a Right; msg=True replaces DM_ACTIONS.
 ```
 
-**How they interlock** (each arrow is a check in `tests/test_charter_vocab.py`, or a derivation):
+**How they interlock** (each arrow is a check in `tests/test_cybertron_vocab.py`, or a derivation):
 - **Action → Right.** `needs=("right:r",)` must be a registered `Right`. `create_agent` would need `role:maker` (a new
   requirement kind), resolved by `Right.role`, so the role-versus-right split can no longer happen.
 - **Action → EventType.** `emits` must be a subset of `EVENTS`. A golden-run test asserts that every logged type is registered:
-  `k.log` checks `kind in EVENTS` when `CHARTER_STRICT_VOCAB=1`, which the test suite sets.
+  `k.log` checks `kind in EVENTS` when `CYBERTRON_STRICT_VOCAB=1`, which the test suite sets.
 - **Right.secret → law API.** `api_for` wraps the `reads_rights` functions once, filtering secret rights for every law.
   `Kernel.view`, the `rights` event visibility and `manual._rights` all use the same `is_secret(k, r)`.
   `hidden.secret_right` becomes the `harvest:*` family's secret predicate.
@@ -268,8 +268,8 @@ and in `__main__`'s instance check. That chain replaces `_migrate_rights` and th
   `rights_model` (right / capability / entrenched) belongs as a field on this registry, not as another spec table.
 
 ## 5. Migration plan
-Each step keeps `tests/test_charter_golden.py` byte-identical unless it says "golden update", and runs
-`tests/test_charter_consistency.py` and `tests/test_charter_prompts.py` (the latter covers prompt byte-identity).
+Each step keeps `tests/test_cybertron_golden.py` byte-identical unless it says "golden update", and runs
+`tests/test_cybertron_consistency.py` and `tests/test_cybertron_prompts.py` (the latter covers prompt byte-identity).
 
 1. **Make scoring fail closed.** Change `scorer.category` so tests raise on unknown names, then add `fund` and `set_charter`
    (political), `read_law` and `recent` (productive). `activity_mix` changes, but the golden files hash events and snapshots,

@@ -1,4 +1,4 @@
-"""Channels that carry business (review 31.04 §5, 31.08 §2.3-2.9; charter/channels.py): per-channel delivery (push, pull, edition)
+"""Channels that carry business (review 31.04 §5, 31.08 §2.3-2.9; cybertron/channels.py): per-channel delivery (push, pull, edition)
 and followed_by, pull boards in the state with unread counts and headlines, channel_read, the manual following each channel's
 delivery, the read pointer of a cut channel post, search_board over channel posts, channel_resealed, the official record posted
 into a notices channel, the channel_posts law function and the Market Board template. Offline."""
@@ -9,16 +9,16 @@ import re
 
 import pytest
 
-from charter import actions as A
-from charter import agents as AG
-from charter import channels as CH
-from charter import code as DC
-from charter import context as CX
-from charter import generator
-from charter import library as LB
-from charter import schema as SC
-from charter import spec as S
-from charter.kernel import Kernel
+from cybertron import actions as A
+from cybertron import agents as AG
+from cybertron import channels as CH
+from cybertron import code as DC
+from cybertron import context as CX
+from cybertron import generator
+from cybertron import library as LB
+from cybertron import schema as SC
+from cybertron import spec as S
+from cybertron.kernel import Kernel
 
 _INST: dict = {}
 BASE = ["shared_archive.enabled=false", "media2.enabled=false", "channels.v2=true", "law.v2=true", "contracts.enabled=true"]
@@ -266,7 +266,7 @@ def test_channel_posts_reads_a_board_a_law_may_read_and_not_a_closed_one():
     k.end_round()
     pub = k.w["laws"][lid]["public"] if "public" in k.w["laws"][lid] else None
     if pub is None:
-        from charter import linker as LK
+        from cybertron import linker as LK
         pub = LK.public_of(k, lid) if hasattr(LK, "public_of") else k.w["law_public"][lid]
     assert [p["text"] for p in pub["all"]] == ["SELL 3 timber @ 2 penny", "BUY 1 stone @ 4 penny"]
     assert [p["text"] for p in pub["since"]] == ["BUY 1 stone @ 4 penny"]
@@ -275,7 +275,7 @@ def test_channel_posts_reads_a_board_a_law_may_read_and_not_a_closed_one():
 
 
 def test_channel_posts_is_documented_only_under_channels_business():
-    from charter import lawdocs as LD
+    from cybertron import lawdocs as LD
     on = S.apply_overrides(S.load("society"), BASE + ["channels.business=true"])
     off = S.apply_overrides(S.load("society"), BASE)
     assert LD.REQUIRES["channel_posts"](on) and not LD.REQUIRES["channel_posts"](off)
@@ -310,7 +310,7 @@ def test_market_board_offers_count_only_once_posted_and_trade_at_the_posted_pric
 
 # ---------------------------------------------------------------------- start.channels
 def test_start_channels_take_delivery_and_followed_by():
-    from charter import start as STT
+    from cybertron import start as STT
     errs = STT.check("start", {"channels": [{"id": "market", "owner": "J0", "delivery": "smoke"},
                                       {"id": "notices", "owner": "J0", "followed_by": "everyone"}]})
     assert any("delivery: push, pull or edition" in e for e in errs) and any("followed_by: subscribers or readers" in e for e in errs)
@@ -335,8 +335,8 @@ def test_a_compulsory_gazette_law_fixes_the_channel_s_delivery():
 
 
 def test_a_store_draw_counts_only_once_posted():
-    from charter import start as STT
-    from charter import subsistence as SB
+    from cybertron import start as STT
+    from cybertron import subsistence as SB
     k = world("subsistence.enabled=true")
     a, b, _, _ = people(k)
     STT.h_store(k, k.inst, {"id": "S1", "owner": "J0", "capacity": 100})

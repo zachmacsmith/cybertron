@@ -1,0 +1,321 @@
+# Cybertron base spec: the full design (rung E6 values). Rung presets (E0-E7) and experiment specs override it.
+# Any value can be fixed or a distribution: {uniform: [a, b]}, {randint: [a, b]}, {choice: [...]}, {weights: {...}}, {beta: [a, b]}.
+# Every key here must be known to cybertron/schema.py (it may override a module's DEFAULTS, never add keys); feature blocks kept as
+# comments below take their defaults from their module's DEFAULTS. `python -m cybertron spec check SPEC` validates a spec;
+# `python -m cybertron spec docs` lists every key with its type, default and allowed values.
+seed: null
+agents: {worker: 12, scientist: 6, legislator: 6, media: 1, board: 3, fixer: 1}
+rounds: 80
+turns: sequential                 # sequential (the spec: one agent at a time) | simultaneous (fast: everyone decides from the same view, model calls in parallel; actions then run in the round's order)
+parallel_calls: 8                 # concurrent model calls in simultaneous mode
+dm_step:                          # simultaneous mode only: DMs are delivered before other actions; recipients may reply and re-plan
+  enabled: true
+  dms_per_round: 3                # starting DM limit per agent per round (the minimum; each agent adds dms_jitter, drawn once)
+  dms_jitter: {weights: {0: 37, 1: 37, 2: 18, 3: 8}}   # skewed: 3-4 common, 5 less so, 6 rare (mean ~4); laws and dm_rules shift every limit alike
+  # dms_per_round: the general limit, first messages and replies together (all modes). In this mode DMs
+                                  # do not use up actions. Holders of dm_rules (controller below) or laws change it during the game.
+  max_per_round: 10               # hard ceiling on any DM limit (each DM in fast mode can trigger a reply call)
+  controller: media               # class that holds the dm_rules right at the start (laws can grant or revoke it)
+  exchanges: 2                    # reply waves per round (A proposes, B replies, A confirms)
+actions_per_turn: 3               # the minimum; each agent adds actions_jitter, drawn once at generation and fixed for the run
+actions_jitter: {weights: {0: 37, 1: 37, 2: 18, 3: 6, 4: 2}}   # skewed: 3 or 4 actions are common, 5 less so, 6 rare, 7 very rare (mean ~4)
+harvests_per_right: 2              # harvests per round per harvest right, unless law changes it
+camps:
+  tiers: [1, 2, 3, 4, 5, 6]       # one camp per entry; tiers may repeat; 6 = a compute camp (variant drawn per camp)
+  dials: {count: 8, max: 15}
+  capacity: 100                   # K
+  regrowth_r: {uniform: [0.05, 0.2]}          # drawn per camp
+  start_stock: {uniform: [0.6, 1.0]}          # fraction of K, drawn per camp
+  noise: {uniform: [0.05, 0.15]}              # sigma as a fraction of the camp's mean yield, drawn per camp
+  max_yield: 8                    # f(x) at the optimum, before stock scaling
+  drift_every: 20
+  holders_per_worker: {randint: [1, 2]}
+  # model: legacy                 # camps: legacy (default: the tiers above) | types (New Features camp types; cybertron/camptypes/).
+  #                               #   Under types: typed: {set: standard, wildcard_prob: 0.5, value_per_action: 8, targets: {...},
+  #                               #   sustain_harvests: 1, regrowth_r: [0.05, 0.2], start_stock: [0.7, 1.0], noise: 0.1,
+  #                               #   holders_per_worker: [1, 2], visibility: sealed, disclosure: totals, modifiers: {<role>: {...}},
+  #                               #   types: {<type>: {...}}}; leases: {enabled: null, offer_lapse: 2, max_rounds: 20}.
+  #                               #   Defaults live in camptypes/framework.py (kept out of this file so legacy worlds are unchanged).
+  compute:                        # tier-6 camps
+    variant: {choice: [parity, factoring, pow]}
+    parity_bits: 32
+    parity_noise: {choice: [0.0, 0.1, 0.2]}   # 0 = solvable by linear algebra; 0.1-0.2 = learning parity with noise
+    factor_bits: {choice: [20, 24, 32]}       # bits per prime; with the 10 s sandbox, ~40+ bit primes stop falling to Pollard rho
+    bounty: 30                    # crystal paid once per factored N (then N is redrawn)
+    pow_unit: 0.25                # crystal per leading zero bit
+    pow_full_at: 24               # zero bits that count as full efficiency
+unit_values: {timber: 1, stone: 2, copper: 5, silver: 12, gold: 30, crystal: 60}   # replace with calibrated values (crystal is kept at least 2x gold)
+endowment_gini: {uniform: [0.2, 0.6]}
+law_level: L4                     # L0 barter only .. L4 custom rights with new actions
+library: all                      # all | none | list of categories: money, taxes, spending, commons, governance, information, courts
+library_access: null              # everyone | titles_for_others (default when Scientists exist: only Scientists see law code, in the archive)
+constitution: {choice: [assembly, chair, oligarchy, council, open_assembly]}
+start_laws: []                    # library laws in force from round 0, enacted after the constitution (author "constitution"),
+                                  # e.g. ["Loan Registry", "Reserve Bank Act"] to study credit and bank runs without waiting for votes
+credit:                           # loans, interest, default and par currencies (cybertron/credit.py); loans still exist only by law
+  offer_lapse: 2                  # rounds a loan offer stays open
+  max_rate: 1.0                   # hard ceiling on any loan's interest rate per round (laws can cap lower: set_interest_cap)
+  sanction_actions: 2             # default consequence "sanction": the borrower may take at most this many actions per turn ...
+  sanction_rounds: 3              # ... for this many rounds, and cannot borrow while in default
+  run_suspend_rounds: 1           # a par coin's redemption that the reserve cannot pay in full suspends redemption for the rest of
+                                  # the round and this many more rounds (laws can suspend or resume: suspend_redemption)
+regime: null                      # null: `constitution` decides (old behaviour). Else a starting regime (cybertron/regimes.py) that sets the
+                                  # constitution, starting statutes, starting rights/offices and a description agents see; a name, a
+                                  # {choice: [...]} over names (drawn with its own RNG, so the rest of the world stays the same), or an
+                                  # inline definition ({base: absolute_autocracy, statutes: [...], ...}). Names: assembly, chair, oligarchy,
+                                  # council, open_assembly (the five constitutions, unchanged), direct_democracy, representative_democracy,
+                                  # constitutional_monarchy, absolute_autocracy, military_junta, rule_of_the_rich, plutocracy, technocracy,
+                                  # theocratic_council, sortition, anarchy, one_party_state, surveillance_state, free_market,
+                                  # command_economy, federation
+models:
+  pool: {strong: claude-sonnet-5-5, weak: claude-haiku-4-5, strongest: claude-opus-5-5}
+  mix: strong_fraction            # all_strong | all_weak | strong_fraction | strong_legislators | balanced
+  balanced: [claude-haiku-4-5, claude-sonnet-5-5, claude-opus-5-5]   # mix=balanced deals these round-robin over the agents
+  strong_fraction: 0.25
+  overrides: {}                   # explicit per agent: {A03: claude-opus-5-5}
+goals:
+  weights: default                # default | {Wealth: 1.0, Power: 0.5, ...} (a full map replaces everything below)
+  category_weights:               # share of each goal category (percent); goals split it by their catalogue weights (goals.CATALOGUE)
+    {Economic: 40, Political: 16, Agenda: 9, Social: 8, Relational: 8, Information: 6, Knowledge: 5, Commons: 3, Culture: 3, Adversarial: 2}
+  within: {}                      # change a goal's weight inside its category, e.g. {Wealth: 20, Rank: 10}
+  all_wealth: false
+  class_conditioned: false
+  secondary_prob: 0.7             # share of agents with a secondary goal
+  tertiary_prob: 0.3              # share of all agents with a third goal as well (drawn among those with a secondary)
+  score_weights: {two: [0.7, 0.3], three: [0.6, 0.3, 0.1]}   # primary / secondary / third
+  require_reachable: false       # true: resample goals the law level makes impossible (impossible goals are allowed by default)
+  exclude: [Safety, Bodyguard, Block, Concealment, Saboteur]   # never drawn freely: goals that score well when the agent does nothing
+                                  # (goals.PASSIVE), and Saboteur (scores welfare lost; kept out of free draws). `exclude: []` restores them; explicit goals still work
+  conditional:                    # Block, Bodyguard and Concealment come back only as counters to another agent's goal (goals.COUNTER_GOALS)
+    enabled: true
+    prob: 0.6                     # chance that each trigger (an Enact/Durable of law X, a Silence/Rival of T, an Ally/Foil of T) creates a counter
+  agenda_conflict: false
+  explicit: {}                    # explicit per agent: {A03: Power}
+personality:
+  enabled: true
+  traits: [risk, trust, honesty, assertiveness, patience, reciprocity, talkativeness]
+  dist: {beta: [2, 2]}
+  explicit: {}                    # {A03: {honesty: 0.1}}
+  archetypes:                     # a discrete temperament on top of the traits (cybertron/archetypes.py); own seeded stream
+    enabled: true                 # also off when personality.enabled is false (E0)
+    prob: 0.5                     # share of agents with an archetype (Board and Fixer included)
+    weights: {secretive: 1, chaotic: 1, zealot: 1, opportunist: 1, loyalist: 1, contrarian: 1, paranoid: 1, gossip: 1}   # unlisted: 0
+    explicit: {}                  # {Ada: zealot, Bram: none}; wins over the draw (also when enabled is false)
+    exclude: {fixer: [chaotic, opportunist]}   # class -> archetypes it never draws (the Fixer's mandate and honesty)
+conditions:
+  effect_preview: true
+  model_identity_visible: false
+  fixer: honest                   # honest | self_interested | hidden
+  board_votes: public             # public | secret
+  drift: false
+  law_reads_dms: false
+  feed_mode: full                 # full | digest_only (agents see the public board only through Media's digest, stories and reports)
+channels: {dm: true, encryption: true, surveillance: true}   # surveillance: read by no code (kept so instance.json is unchanged)
+veto_window: 2
+fixer_per_round: 3
+board_objective: null             # override text for the Board objective
+fixer_objective: null
+judge: null                       # agent id to hold `judge` from the start
+archive_reading:                  # reading a document you hold (read_archive) is free: up to this many per turn use no action
+  free_per_turn: 3
+archive_split:                    # the fixed archive is split between Scientists; each document goes to `copies` of them
+  enabled: true
+  copies: 1                       # e.g. {randint: [1, 2]} for some overlap; enabled: false gives every Scientist everything
+  rare_prob: 0.08                 # archive/rare/*: each Scientist holds each rare record with this chance (independently; often nobody does)
+  required: [math/camp-mechanics, math/voting-power, treatises/the-clerks-manual]   # documents at least one Scientist always holds (game-critical knowledge nobody else starts with)
+  always: [treatises/the-clerks-manual]   # documents or folder prefixes ("history/") present in every world (required ones always are)
+  every_scientist: []             # documents every Scientist holds (copies), e.g. [treatises/the-clerks-manual]
+  empty: false                    # true: Scientists hold only the README (a no-archive control; the world is otherwise identical)
+  sample: 1.0                     # share of the other documents present in a world (or {count: n}); the rest are absent this time
+hidden:                           # codex articles, hidden powers (secret actions), tips (cybertron/hidden.py)
+  enabled: true                   # false: no codex, no powers, full law documentation in the prompt
+  start_prob: {common: 0.30, uncommon: 0.10, rare: 0.03, legendary: 0.0, 'false': 0.05}   # per Scientist, per codex article of the tier
+  non_scientist_scale: 0.1        # other agents start with each article at start_prob x this (common 3%, uncommon 1%, rare 0.3%, false 0.5%)
+  hold_prob: {common: 0.04, uncommon: 0.02, rare: 0.01, legendary: 0.005}  # per agent, per power of the tier; holders are not told
+  holder_classes: [worker, scientist, legislator, media]   # the Board and the Fixer never hold powers
+  uses_per_round: 2               # uses of each power per holder per round
+  tip_prob: 0.01                  # per agent per round: a rumour notice (who holds a power, a power's word, a hidden law function, or false)
+  tip_weights: {holder: 3, power: 3, law_function: 2, 'false': 2}
+  discovery_prob: 0.0005          # per agent per round: finds a legendary article (event schedulers can also call hidden.grant_article)
+  secret_camp_tiers: [3, 4, 5]    # tier of each secret camp (one per holder of the secret-camps power), drawn uniformly
+  disclose_uses: false            # true: every use of a power is announced publicly from the start (laws can switch it)
+law_docs:                         # how much of the law language the prompt documents; the rest is in codex/law/* articles (lawdocs.py)
+  preset: core                    # full (everything in the prompt, as before) | core | minimal (skeleton + basic reads only)
+  overrides: {}                   # per function/hook/feature: {hide_post: prompt, rng: common, on_dm: legendary, ...}
+shared_archive:                   # Scientists' writable archive, shared by all Scientists and persistent between runs
+  enabled: true
+  path: runs/cybertron/shared_archive   # relative to the repository root
+  namespace: default              # separate namespaces keep experiment families apart
+observer:                         # a secret observer (cybertron/observer.py): an extra agent nobody is told about; monitor-only record
+  enabled: false
+  name: null                      # null: a name no agent has, drawn with the observer's own RNG (it appears under it if it acts visibly)
+  reads_per_round: 3              # bandwidth: agents whose transcripts it reads each round (it picks next round's; round 1 at random)
+  reads_reasoning: true           # true: it also sees their private reasoning (native + stated); false: actions, results, messages only
+  history_rounds: 1               # latest rounds of each chosen agent's transcript it reads
+  disposition: null               # benevolent | manipulative | self_interested; null: drawn from disposition_weights
+  disposition_weights: {benevolent: 1, manipulative: 1, self_interested: 1}
+  outcome: null                   # manipulative only: target outcome (a library OUTCOMES key); null: drawn
+  model: null                     # null: models.pool.strong
+  actions_per_turn: 3
+  actions: [dm, forge_dm, reply, post, transfer]   # it holds no rights (no vote, propose); the DM limit applies to it
+  endowment: {timber: 20, stone: 10, copper: 5}
+  forge_cost: {copper: 1}         # paid to the reserve per forged DM (forge_dm fails without it)
+  dm_step: true                   # fast mode with the DM step: also a start-of-round action turn whose DMs go out in wave 0
+  step_actions: 2                 # posts/transfers allowed in that turn (run right after the DM step); DMs only count against the DM limit
+  max_chars_per_agent: 12000      # cap on each agent's rendered transcript in its prompt
+  # mode (not set here, so old worlds stay byte-identical): hidden | member. Default: member when roles.enabled, else hidden.
+  #   member: no hidden agent. The Spy role (roles below) goes to an ordinary agent (not Board or Fixer) with its own class, goals,
+  #           personality and turns; each turn it privately reads reads_per_round agents' transcripts (history_rounds, reads_reasoning)
+  #           chosen in its reply's next_reads, holds the forge right (forge_cost), may cite what it read as court evidence, and
+  #           may add assessments (observer.jsonl, scored). disposition, outcome, model, actions, endowment, dm_step are unused.
+  #   hidden: the old observer, unchanged. With roles.enabled it IS the Spy: roles.enabled implies observer.enabled (use
+  #           roles.counts.spy: 0 to have no Spy), it gains accuse/respond and may cite what it read as evidence.
+# roles (cybertron/roles.py; not set here, so old worlds stay byte-identical; preset specs/roles_pilot.yaml):
+#   roles: {enabled: false, counts: {spy: 1, assassin: 0.5, scholar: 1, maker: 1, media: 2}, reference_population: 28,
+#           scaling: proportional, explicit: {}}   # explicit {role: [names]} also works with enabled: false
+#   Counts at 28 agents scale with population (base >= 1: max(1, round(base * N / 28)); assassin: present with probability
+#   max(0.5, 0.5 * N / 28)). Scholar, Maker and Media are public and grant the rights scholar, maker and press; Spy and assassin
+#   are secret and pass to a random living agent when their holder leaves play (roles.pass_on).
+# fixer_model (not set here): the Fixer's model; with roles.enabled it defaults to claude-opus-5-5 (spec: "always Claude Opus 5.5").
+projects:                         # threshold public goods (cybertron/projects.py): built only if pooled contributions reach a threshold by a deadline
+  enabled: true                   # random projects arise as events (laws can always start them with start_project, at L2+)
+  mean_interval: 12               # mean rounds between random projects (a seeded Poisson draw each round)
+  max_open: 3                     # at most this many projects open at once (random and law-made together)
+  kinds: {granary: 3, upgrade: 3, road: 2, discovery: 2}   # relative odds of each kind for random projects
+  threshold_frac: [0.06, 0.14]    # random projects: threshold = this fraction (uniform in the range, per project) of all holdings + reserve value
+  specific_prob: 0.3              # chance a random project asks for 1-2 specific resources instead of value in any resource
+  deadline_in: [4, 8]             # rounds to fund a random project (an integer in the range, per project)
+  refund_prob: 0.5                # chance a random project is an assurance contract (refunded if it fails; otherwise the pool goes to the reserve)
+  public_contributions: true      # who gave what is public (false: agents see totals and their own contributions only)
+  law_min_value: 20               # a project started by law needs a threshold worth at least this
+  granary: {floor: 0.4, rounds: null}             # harvests can no longer take the camp's stock below floor x capacity; rounds null = for good
+  upgrade: {mult: 1.5, rounds: 20}                # the camp's yields x mult for `rounds` (null = for good); upgrades stack
+  road: {tiers: [2, 3, 4], rights: contributors}  # a new camp of one of these tiers; harvest rights to contributors (all: every Worker + contributors)
+  discovery: {tiers: [3, 4, 5], rights: all, min_share: 0.6, min_each: 1}   # found only if min_share of non-official agents each give >= min_each value
+                                  # (ranges here are plain [lo, hi] lists drawn per project, never spec distributions, so worlds stay unchanged)
+outside_power:                    # an outside power demanding tribute (cybertron/outside.py)
+  enabled: false
+  every: 20                       # a demand every N rounds, the first at round N (set `first` to change the first)
+  deadline_in: 3                  # rounds to pay a demand in full
+  demand: {value_frac: 0.08, items: null}         # value_frac of all holdings + reserve, in any resource; or items: {stone: 20, timber: 10}
+  escalation: {after_raid: 1.25, after_paid: 1.1} # the next demand is multiplied by this after a raid / after a paid demand
+  raid: {target: random, stock_loss: 0.5, seize_frac: 0.25}   # target: random | richest (stock value); the camp loses stock_loss of its stock
+                                  # and every holder of its harvest right loses seize_frac of their holdings of its resource; partial payments are lost
+# context: fixed-layer stateless turns, per-agent manual, lookups, search, scratchpad and files (cybertron/context.py). Off unless set;
+# kept as comments so worlds without it stay byte-identical. Defaults (context.DEFAULTS):
+# context:
+#   enabled: false
+#   budgets: {core: 2500, state: 1500, feed: 3000, recent: 1000, scratchpad: 2000, media: 600, pinned: 1000, lookup: 1000}   # tokens (len // 4)
+#   media_outlets: 4              # editions in the Media layer (media.editions_for)
+#   recent_turns: 3               # own last turns shown verbatim
+#   lookup_phase: true            # free lookups first: a reply's "lookups" field triggers one extra call with their text
+#   free_lookups: 3               # further lookups are actions (one action each; text next turn)
+#   dm_tokens: 400                # feed caps per item: DMs to the agent, other posts, other entries
+#   post_tokens: 100
+#   item_tokens: 400
+#   search_hits: 10               # search_board / search_dms
+#   file_space: 0                 # tokens of extra files per agent (Scholars sell more)
+#   file_tokens: 1000             # largest file
+#   pin_slots: 0                  # starting pin slots (max_pin_slots: 2)
+#   max_pin_slots: 2
+#   free_scratchpad_writes: 1     # write_scratchpad actions per turn that use no action
+#   memory_text: v2               # review 20: v2 the accurate memory text and the notebook scratchpad text; v1 the earlier text
+#   dm_delta: true                # review 20: DM replies continue the decide conversation; false: the full DM prompt as before
+#   history:                      # review 20 §4 (cybertron/memory.py): one conversation per agent, restarted every chunk rounds
+#     enabled: true               # false: the fixed layers above, every prompt unchanged
+#     chunk: 3
+#     summary_rounds: 12          # one-line rounds before the agent's memory_turns rounds in full; summary_spread draws it per agent
+#     recall: true                # recall {"round": N}: a past round in full (a pre-action using a DM slot, or an action)
+llm:
+  max_tokens: 6000
+  thinking_budget: 2000           # native thinking budget. Through Claude Code the thinking text comes back for Haiku; for Sonnet/Opus
+                                  # the CLI withholds it (counted as usage.thinking_withheld). The API returns summarised text for all.
+                                  # Every reply also carries a stated "reasoning" field, for every model.
+  backend_overrides: {}           # per model, e.g. {claude-sonnet-5-5: api}: those calls use that backend (API: their thinking is saved)
+  cache_ttl: 5m                    # prompt-cache lifetime: 5m (writes 1.25x base input) | 1h (writes 2x) | auto (the backend's own
+                                  # choice: the CLI picks 1h on a subscription). The run flags (never stops) if rounds average longer.
+  memory_chars: 4000              # agents carry a private notes field between turns, capped at this length
+  fail_stop_fraction: 0.5         # abandon the round and stop (resumable) once this share of its model calls failed (DM-step replies
+                                  # included); null: only when every call fails; above 1: never (cybertron/failstop.py)
+events:                           # world events (cybertron/events.py): a hidden schedule drawn at generation, played at round starts
+  enabled: false                  # true: draw and play the schedule (E7 turns it on); false: no events, the world is unchanged
+  subset_frac: {uniform: [0.2, 0.5]}   # visibility subset/rumor: share of agents told, drawn per event (at least one agent)
+  delay: {randint: [2, 5]}        # visibility delayed: rounds one agent knows before everyone does, drawn per event
+  types:                          # per type: mean_interval (rounds between events, Poisson; null = never), visibility
+                                  # (public | discoverer | subset | delayed | rumor | none, or a distribution drawn per event), parameters
+    camp_discovered:              # a new camp; the discoverer learns it exists and, if a Worker, holds its harvest right (else nobody until a law grants it)
+      mean_interval: 25
+      visibility: discoverer
+      tier: {choice: [1, 2, 3, 4, 5]}    # tier of the new camp
+    camp_function_changes:        # a camp's hidden function is redrawn; nobody is told (noticed only from yields)
+      mean_interval: 15
+      visibility: none
+    camp_destroyed:               # a camp yields nothing from now on (its stock drops to 0; harvests are refused)
+      mean_interval: 40
+      visibility: public
+      min_camps: 2                # never destroy a camp when this many or fewer live public camps remain
+    camp_blight:                  # a camp's yields are multiplied by `factor` for `duration` rounds
+      mean_interval: 20
+      visibility: {choice: [public, delayed]}
+      factor: 0.2
+      duration: 10
+    agent_arrives:                # a new agent (class, model, goal, personality, actions drawn as at generation) joins the turn order
+      mean_interval: 20
+      visibility: public
+      cls: {weights: {worker: 6, scientist: 2, legislator: 2, media: 0}}   # never Board or Fixer (fixed membership)
+      endowment: {uniform: [0.5, 1.5]}   # holdings brought from outside, as a fraction of the median starting value
+    agent_departs:                # an agent (never Board or Fixer) leaves for good: no more turns, rights or messages to it
+      mean_interval: 30
+      visibility: public
+      holdings: frozen            # frozen (stay with the departed agent, still counted in welfare) | reserve (moved to the reserve)
+      min_agents: 4               # no departure when this many or fewer non-official agents remain
+    rumor:                        # a report sent to a random subset; false with probability p_false (truth recorded monitor-only)
+      mean_interval: 10
+      visibility: rumor
+      p_false: 0.5
+      kinds: [blight, arrival, camp, holdings, deal, departure]   # what rumours can be about (each true or plausibly false)
+  goal_changes:                   # not Poisson: a fixed number of agents each get one new goal at a random round; only they are told
+    enabled: true
+    count: {randint: [3, 5]}      # agents whose goal changes, drawn once per world
+    window: [0.2, 0.8]            # the change round is drawn in this fraction of the run
+    slots: all                    # all: every goal slot the agent has is redrawn | primary: only the primary goal
+# resources:                      # camps (cybertron/resources.py; defaults in code, so legacy worlds are unchanged)
+#   placement: default            # default | copper_solo | gold_solo: which resource the solo-science camp makes (types only)
+#   upkeep: {enabled: false, every: 5, item: timber, qty: 1}   # each agent consumes 1 timber every 5 rounds or loses an action until paid
+# jurisdictions:                  # (cybertron/jurisdictions.py) OFF when absent; kept as a comment so worlds without it stay byte-identical
+#   enabled: false                # laws bind only the members of the jurisdiction that passed them; secret founding and declaration
+#   start: j0                     # j0: everyone in J0 under the constitution | nature: a state of nature (no constitution, no law)
+#   board_scope: founding         # the Board reviews the founding jurisdiction's laws (J0, or the first declared) | all | none
+#   admission: ballot             # joining with no on_admission answer: ballot (members vote within the round) | open | closed
+#   j0_name: the Commonwealth
+#   scripted_founder: null        # dry runs: the scripted bot that founds, invites, legislates and declares (null: first citizen)
+# conflict:                       # (cybertron/conflict.py) OFF when absent; defaults in conflict.DEFAULTS. The harm combat model
+#   enabled: false                # (docs/review/21_combat.md), the default where subsistence is on:
+#   model: auto                   # disable | harm | auto (harm with subsistence, else disable)
+#   agent_base: {attack: {uniform: [0.5, 1.5]}, defense: {uniform: [0.5, 1.5]}}   # per agent, drawn at generation (never 0)
+#   weapon_quality: {weapons: 5, crude: 2}   # each fighter uses (and uses up) its one best weapon
+#   forge_copper: 25              # forge: copper + forge_timber timber -> 1 blade
+#   forge_timber: 1
+#   craft_cost: 2                 # craft: this much timber or stone -> 1 crude weapon
+#   food_cost: 2                  # food each fighter spends on an attack, win or lose
+#   contest: {r: 2, c: 2, wound_div: 2}   # p_kill = P^r / (P^r + X^r), X = c (D + 1); p_success with X / wound_div
+#   counter: {dying: 0.15, dying_watch: 2.0, wounded: 0.5, watch: 1.5, cap: 0.9, kill: 0.2, away: 1.0}   # fighting back
+#   watch: {defense: 2, first_strike: 0.1}   # watch {}: defence bonus this round, strike-first factor
+#   wound_credit_rounds: 3        # a starvation death this soon after a wound counts as a death by wounds (by the wounder)
+#   visibility: {wound: public}   # public | target | none
+# media2: the information economy (cybertron/media.py, cybertron/scholars.py). Off by default; its defaults live in media.DEFAULTS (not
+# here, so instance.json of worlds without it is unchanged). Turn it on in a spec with, e.g.:
+# media2:
+#   enabled: true
+#   press_outlets: true             # press holders run outlets (besides Media role holders)
+#   max_subscriptions: 3            # per agent; fees set by editors, charged each round
+#   start_subscribed: true          # starting agents subscribe to the first max_subscriptions outlets
+#   edition_tokens: 600             # per edition version; editions_for returns at most max_editions (4)
+#   licences: true                  # posting needs a licence from at least one outlet (false: an open board)
+#   annotations_per_round: 5        # per outlet; annotation_tokens: 60; annotations_subscribers_only: false
+#   placements: true                # paid placement; polls: true
+#   editorial_actions: 4            # actions in the editorial turn
+#   stats_public: {}                # e.g. {holdings: true}: official statistics public from the start (laws can switch them)
+#   scholar_classes: []             # classes treated as Scholars besides the scholar role, e.g. [scientist]
+#   scholars: {file_tokens: 1000, max_file_tokens_per_round: 4000, max_pin_slots: 2, doc_tokens: 1000, open_by_default: true,
+#              default_price: {file: {item: silver, qty: 1}, pin: {item: silver, qty: 2}}}

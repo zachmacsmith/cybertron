@@ -1,18 +1,18 @@
 # 27. Systems inventory and established starting worlds
 
 Read-only audit of `subsistence` at the branch point of `doc/27-systems-inventory`. No model calls: every run below is `--dry`
-(scripted bots). Sources: module docstrings, `python -m charter spec docs` (649 keys today, not ~412), every preset under
-`charter/specs/` resolved with `spec.load` (61 files: 57 presets, 2 fragments, 2 model overlays), `tests/`, and three dry runs of
-an "established village" written for this review (section 2.3). grand35 is in the repo (`charter/specs/grand35.yaml`), so its
+(scripted bots). Sources: module docstrings, `python -m cybertron spec docs` (649 keys today, not ~412), every preset under
+`cybertron/specs/` resolved with `spec.load` (61 files: 57 presets, 2 fragments, 2 model overlays), `tests/`, and three dry runs of
+an "established village" written for this review (section 2.3). grand35 is in the repo (`cybertron/specs/grand35.yaml`), so its
 preset was used directly instead of the Hub archive.
 
 ## 0. Verdict
 
 - **The libraries exist; the starting-world surface doesn't.** A spec can choose a constitution, a list of laws (with parameters)
   in force at round 0, rights by class, offices drawn by lot, role holders and module switches. That is the `regime:` block
-  (`charter/regimes.py:1-48`). It can't put a store, a treasury balance, a loan, a contract, a channel, a family, a second polity
+  (`cybertron/regimes.py:1-48`). It can't put a store, a treasury balance, a loan, a contract, a channel, a family, a second polity
   or a code-declared office into the world at round 0. Those exist only after an agent action or a law's `on_enact`. The only
-  route to them today is an intervention schedule (`run --apply`, `charter/interventions.py`), which is outside the spec.
+  route to them today is an intervention schedule (`run --apply`, `cybertron/interventions.py`), which is outside the spec.
 - **Institutions with people in them are carried by the engine but can't be configured.** Interventions produced:
   - named office holders with terms and succession;
   - a council chamber readable by the council and the press;
@@ -38,7 +38,7 @@ preset was used directly instead of the Hub archive.
 
 Legend. **Presets** counts the 57 presets in which the resolved spec turns the feature on. Where a regime sets it,
 "+N regime" adds the 19 state-of-nature presets. **Tests** counts the test files importing the module directly; golden means
-`tests/charter_golden_cases.py`. **Status**:
+`tests/cybertron_golden_cases.py`. **Status**:
 
 - live: used by a current preset family.
 - legacy-live: an old path that is still the default for the E-ladder and society families.
@@ -64,7 +64,7 @@ Legend. **Presets** counts the 57 presets in which the resolved spec turns the f
 | channels (1173) | channels v2: owned logs, inboxes, squares, pull/push | `channels.v2` (false) | 16 | 1 + test_channels_v2 | live; v1 legacy-live |
 | media (1589) / scholars (299) | outlets, editions, licences, polls, placements; Scholars' market | `media2.enabled` (false) | 14 | 11 / 3 | live; legacy Media class (`press` + digest) legacy-live in E-ladder |
 | roles (582) | spy, assassin, scholar, maker, media, historian | `roles.enabled` (false); `roles.explicit` | 36 | 12 | live |
-| directories (846) | owned file trees; the Historian's chronicle is one configuration | `directories.enabled` (false), `chronicle.enabled: null` | 0 / 5 chronicle | 2 + test_charter_historian | generic stores dead, chronicle live |
+| directories (846) | owned file trees; the Historian's chronicle is one configuration | `directories.enabled` (false), `chronicle.enabled: null` | 0 / 5 chronicle | 2 + test_cybertron_historian | generic stores dead, chronicle live |
 | hidden (665) | codex articles, hidden powers, tips | `hidden.enabled` (base true) | 32 | 3 | legacy-live (off in the arms, survival and nature presets) |
 | observer (734) | secret observer, or the member Spy | `observer.enabled`, `observer.mode: null` | 21 | 2 | live; `mode: hidden` superseded |
 | projects (627) | threshold public goods (granary, upgrade, road, discovery) | `projects.enabled` (base true) | 32 | 2 | legacy-live; its "granary" is a camp-stock floor, unrelated to subsistence stores |
@@ -82,7 +82,7 @@ Legend. **Presets** counts the 57 presets in which the resolved spec turns the f
 | dispatch/ (16 files) | primitive dispatcher, hooks, cascades, ranks; `legacy.py` keeps the v1 path | `law.v2` (false) | 31 v2 | 3+ | v1 legacy-live (E-ladder, society, grand35) |
 | primitives (1122) / lawapi (571) / accounts (378) / powers (236) | registries of state changes, law functions, accounts, the power table | always | all | 14 / 14 / 11 / 3 | core |
 | linker (498), amendment (231), stages (319), courts (402), evidence (246), lawpreview (625), digest (307), publication (358) | law.v2 imports and exports, amendment, multi-stage ballots, courts v2, evidence reads, previews, legal digest, publication layer | `law.v2`, `law.publication`, `law.digest` | 31 | 1-3 each | live in the arms, pilot2, survival and nature families |
-| code/ (5 files) | the default code: today's hard-coded social rules as Acts (Communications, Press, Court Rules, Succession) | `code.enabled` (false) | 31 | test_charter_code | live |
+| code/ (5 files) | the default code: today's hard-coded social rules as Acts (Communications, Press, Court Rules, Succession) | `code.enabled` (false) | 31 | test_cybertron_code | live |
 | library (4865) | law library: LIB (76), LIB2 (13), BLOCKS (8), TOOLKIT (50), FOOD_TEMPLATES (15), CONTRACT_TEMPLATES (1), CONSTITUTIONS (5), SUCCESSION_CLAUSES (7) | `library`, `law.library.*` | all | 28 | live; edition 2 dead (0 presets, golden E2_library2_6 only) |
 | regimes (936) | 23 REGIMES, 4 LAW_SET_REGIMES, 11 extra constitutions, 4 STATUTES; rights, offices by lot, law sets | `regime: null` | 3 direct_democracy, 19 state_of_nature, full10/haiku100 draw 9 | 8 | live; the 4 law-set regimes are dead (0 presets); `anarchy` is frozen |
 | lawset (613) | static composability of a starting law set | with regime laws | (none) | 2 | live but unused by presets |
@@ -172,7 +172,7 @@ The target: a village under subsistence with a council of 3 elected offices, a g
 a currency held by all, two merchants with camp rights, a press, and a constable office. This was the best spec-only attempt:
 
 ```yaml
-extends: [charter/specs/survival/base.yaml]
+extends: [cybertron/specs/survival/base.yaml]
 agents: {worker: 12, scientist: 0, legislator: 0, media: 0, board: 0, fixer: 0}
 law_level: L4
 regime:
@@ -268,7 +268,7 @@ don't exist as a concept. And control is coarse: per institution rather than per
 | contracts `TEMPLATES` | 6 (club, company, crowdfund, cartel, exchange, standing_order) |
 | constitutions | 5 in the library + 11 in `regimes.CONSTITUTIONS` |
 | regimes | 23 `REGIMES` and 4 `LAW_SET_REGIMES` (common_law_democracy, civil_code_democracy, creditor_market, debtor_market) |
-| code Acts | 4 in `charter/code/` |
+| code Acts | 4 in `cybertron/code/` |
 | roles | 6 fixed `roles.ROLES` (spy, assassin, scholar, maker, media, historian). No role library: a role is a right plus code scattered across modules (`press` in media, `maker` in life, `scholar` in scholars) |
 | classes | 6 fixed (`generator.CLASS_RIGHTS`) |
 | goals | 77 catalogue goals (`goal_registry`) plus review 24's survival goals |
@@ -327,7 +327,7 @@ are derived. This is the closest thing to "specs over libraries", and it works. 
 
 ## 5. Cleanup candidates
 
-Ranked by maintenance cost against what retiring them would lose. Frozen settings and `charter rerun` at the run's sha keep old
+Ranked by maintenance cost against what retiring them would lose. Frozen settings and `cybertron rerun` at the run's sha keep old
 runs playable, so retiring a path costs only same-sha resumes and replays of runs made under it.
 
 | rank | candidate | cost today | what retiring loses |
@@ -430,7 +430,7 @@ templates.
 ### 7.2 "Lived" checks before any model run
 
 An institution exists on paper when its records are present. It is lived when agents can see it and actually use it. Proposed
-checks, run by the scripted bots and a preview (`python -m charter check-start SPEC --seed N`, M):
+checks, run by the scripted bots and a preview (`python -m cybertron check-start SPEC --seed N`, M):
 
 1. Every position has a living holder, and the holder's prompt names the position, its powers and its duties (prompt preview).
 2. Every institution channel has at least one reader and one writer, and a scripted post by a writer reaches every reader.

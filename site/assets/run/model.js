@@ -1,5 +1,5 @@
 // The run model: turns a run's data (instance, events, snapshots, ground truth, reasoning, scores) into what the run page shows.
-// The event semantics follow charter/viewer/template.html (prepare); presentation lives in the views, not here.
+// The event semantics follow cybertron/viewer/template.html (prepare); presentation lives in the views, not here.
 //
 // Input today: the story viewer's viewer.json ({instance, events, snapshots, truth, reasoning, score, name}). When the export
 // tables carry everything, build the same object from them (one adapter), and nothing below changes.

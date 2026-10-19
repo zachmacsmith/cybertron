@@ -1,4 +1,4 @@
-# Charter review, 7 Oct 2026: synthesis
+# Cybertron review, 7 Oct 2026: synthesis
 
 Six read-only reviews of the code at `c5aa40d` (action registry wired into the core prompt and manual):
 
@@ -22,7 +22,7 @@ Later reviews (design documents, 7-9 Oct):
 | [10](10_legal_expressiveness.md) | Legal expressiveness |
 | [11](11_enforcement_spectrum.md) | The enforcement spectrum |
 | [12](12_hardcoded_inventory.md) | What is hard-coded, and what should be law (tiers P/E/X/L) |
-| [13](13_benchmark_suite.md) | A safety benchmark suite on Charter |
+| [13](13_benchmark_suite.md) | A safety benchmark suite on Cybertron |
 | [14](14_state_of_nature.md) | The state of nature; institutions; channels as their fabric |
 | [15](15_subsistence_reproduction.md) | Subsistence, hunger and two-parent reproduction |
 | [16](16_economy_audit.md) | Economy and population audit of the first Haiku runs |
@@ -84,14 +84,14 @@ And the instrument (04, 05):
   state checkpoint every round, `run.json` (git SHA, backend, dry flag). Not event sourcing: laws are arbitrary Python and ~36 places write state directly.
 - **Causes**: a cause stack in the kernel read by `k.log`, so every event carries round, turn, action, law, intervention.
 - **Interventions**: typed, scheduled by round and phase, applied through existing kernel functions, recorded so never applied twice, with a recorded
-  `python` escape hatch. `charter fork RUN --at N --apply iv.yaml --replicates K`, `rewind`, `replay`.
+  `python` escape hatch. `cybertron fork RUN --at N --apply iv.yaml --replicates K`, `rewind`, `replay`.
 - **Split RNG streams** so an intervention does not reshuffle all later turn orders.
 - **History**: one read-only object loaded from the run store, used for live scoring, post-hoc rescoring and analysis. Goals declare `probes` for values
   that need the live kernel (Enact/Block/Durable predicates), which the runner records each round.
 
 ## Order of work
 
-1. **Safety net** (under a day). Commit `tests/fixtures/charter_golden.json`; add a golden case with the post-review modules on; add prompt/manual
+1. **Safety net** (under a day). Commit `tests/fixtures/cybertron_golden.json`; add a golden case with the post-review modules on; add prompt/manual
    fingerprints and score goldens; make the category and action consistency tests able to fail.
 2. **Bugs** in the table above (1-2 days). Each small.
 3. **Recording** (half a day to start). `run.json`, per-call prompt hashes and raw replies, the observer resume fix.

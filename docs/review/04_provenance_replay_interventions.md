@@ -1,6 +1,6 @@
 # 04. Provenance, replay, forking and interventions
 
-*Review of 7 Oct 2026. Read-only. This review builds on `charter/docs/architecture_review.md` (section 3 and recommendation 2) and does
+*Review of 7 Oct 2026. Read-only. This review builds on `cybertron/docs/architecture_review.md` (section 3 and recommendation 2) and does
 not repeat its per-call and dataset proposals; it covers what that review left out: determinism, resume, fork and rewind,
 interventions, and causal provenance. Evidence comes from reading the code and from in-memory kernel experiments (no runner, no
 model calls). V = verified, S = suspected.*
@@ -9,7 +9,7 @@ model calls). V = verified, S = suspected.*
 
 **Grade: C+ as a research instrument, built on a B+ engine.** The hard part is already done, and done well:
 
-- **The engine is deterministic given its inputs.** Golden dry-run fingerprints (`tests/test_charter_golden.py`) and eight tests
+- **The engine is deterministic given its inputs.** Golden dry-run fingerprints (`tests/test_cybertron_golden.py`) and eight tests
   where a resumed run must equal an uninterrupted one (events, observer, life, jurisdictions, conflict, projects, fail-stop) prove it.
 - **The state can be checkpointed.** `Kernel.checkpoint_state` saves law module data, closures and patched callbacks. I checked it
   in memory with the society spec, seed 5, and 40 library laws: 3 rounds, checkpoint, 4 more rounds gave the same `k.w` and the same
@@ -63,7 +63,7 @@ The file inventory is in the earlier review (3.1); it is still accurate. Additio
 
 1. **Model replies.** No seed or temperature is set or recorded, and there is no cache. This is the dominant source.
 2. **Retries and fail-stop.** Which attempt succeeded is invisible. An abandoned round is replayed with fresh samples.
-3. **The shared archive.** It is live disk state shared by concurrent runs (`runs/charter/shared_archive/<namespace>`). Scientists'
+3. **The shared archive.** It is live disk state shared by concurrent runs (`runs/cybertron/shared_archive/<namespace>`). Scientists'
    reads depend on what other runs wrote, and its state at round N cannot be rebuilt.
 4. **The Docker sandbox.** It has a 10 s wall-clock timeout, and agent code may call `time` or `random`.
 5. **One kernel RNG for several purposes.** `k.rng` drives turn order (`runner.py:197`), harvest noise (`actions.py:229,234`) and
@@ -235,7 +235,7 @@ attributable operation.
 The registry mirrors `events.REGISTRY`:
 
 ```python
-# charter/interventions.py
+# cybertron/interventions.py
 OPS = {}
 def op(name, *, phases=("round_start",)):
     def deco(fn): OPS[name] = {"fn": fn, "phases": phases}; return fn
@@ -279,11 +279,11 @@ and cursors into `k.w`.
 ### 4.6 Fork, rewind and the CLI
 
 ```
-charter fork RUN --at 12 [--apply iv.yaml] [--replicates 5] [--replay strict|prompt-match|none] [--code current|parent]
-charter rewind RUN --to 12               # same as fork with no interventions, a new branch; never destroys the parent
-charter replay RUN [--until 20]          # re-execute from calls.jsonl; must reproduce events.jsonl byte for byte
-charter branches RUN                     # the lineage tree from run.json parent pointers
-charter intervene RUN --apply iv.yaml    # schedule on a stopped or running run (picked up at its next round boundary)
+cybertron fork RUN --at 12 [--apply iv.yaml] [--replicates 5] [--replay strict|prompt-match|none] [--code current|parent]
+cybertron rewind RUN --to 12               # same as fork with no interventions, a new branch; never destroys the parent
+cybertron replay RUN [--until 20]          # re-execute from calls.jsonl; must reproduce events.jsonl byte for byte
+cybertron branches RUN                     # the lineage tree from run.json parent pointers
+cybertron intervene RUN --apply iv.yaml    # schedule on a stopped or running run (picked up at its next round boundary)
 ```
 
 `fork` does the following:
@@ -340,7 +340,7 @@ Each step is small, testable, and keeps the existing goldens or updates them del
 8. **`RunState` object; then the interventions module** with `move`, `gazette`, `notify`, `set_goal`, `enact_law` and `python`
    first. Tests: one per op; a resume after an intervention does not re-apply it; the scheduled `--notice` and `--live` options
    become thin wrappers over it.
-9. **`charter fork`/`rewind`/`replay`/`branches`.** Test: forking with an empty intervention set under strict replay reproduces the
+9. **`cybertron fork`/`rewind`/`replay`/`branches`.** Test: forking with an empty intervention set under strict replay reproduces the
    parent's suffix exactly.
 10. **`rng_version: 2` substreams.** New goldens; `rng_version: 1` stays loadable.
 11. **Shared-archive overlay and freeze; sandbox outputs stored as blobs** (replayed on `Replay`).

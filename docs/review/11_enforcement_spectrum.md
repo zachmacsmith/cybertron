@@ -1,7 +1,7 @@
 # Review 11: the enforcement spectrum (from self-executing code to law as documents interpreted by agents)
 
 *8 Oct 2026, at branch `integrate/w5` (`3c2e25c`). This is a design document. No code was changed, no model was called and no simulation
-was run. Evidence about Charter comes from reading the code and from an in-memory count of the registries: 103 primitives, 63 of them
+was run. Evidence about Cybertron comes from reading the code and from an in-memory count of the registries: 103 primitives, 63 of them
 routed through `Kernel.apply` (`dispatch.ROUTED`). That is more than review 10's 51, because the loans and contracts work has merged
 since. `open_case` and `answer_case` are declared but not routed. The legal theory and the prior systems are cited from general
 knowledge; I did not re-verify them online. I list only works I am confident exist, and I mark the claims I am less sure of. Prices
@@ -17,7 +17,7 @@ are the Anthropic API list prices of 6 Oct 2026. Token counts per call are my as
 - **Normative:** content, interpreter, and review.
 - **Executive:** timing, initiation, discretion, execution, and cost.
 
-Charter sits at the self-executing corner on nearly every axis. Its clause, accuse and rule path is a thin, separate second system.
+Cybertron sits at the self-executing corner on nearly every axis. Its clause, accuse and rule path is a thin, separate second system.
 
 The most important structural finding is about choice. **When the world allows perfect, free, ex ante enforcement, every rational
 legislator chooses it.** A per-law choice of enforcement mode (review 06's preference) therefore collapses to "auto" unless *physics*
@@ -27,7 +27,7 @@ restricts what auto can reach. So the user's question divides in two:
   detect private acts, and what enforcement costs.
 - **Law** picks a point inside that set: interpreter, standing, discretion, and remedies.
 
-The "laws as documents" end is buildable, and some of it exists today. As the default it is the wrong choice. It turns Charter from an
+The "laws as documents" end is buildable, and some of it exists today. As the default it is the wrong choice. It turns Cybertron from an
 instrument for studying *institutional design* into one for studying *LLM interpretive behaviour*. It also makes "was the law followed"
 undefined unless something supplies a reference interpretation.
 
@@ -43,7 +43,7 @@ P3.6 journal, the P3.7 compel predicate, and the W6b and W6f work, and it sits b
 
 ### 1.1 The axes
 
-I tested the candidate axes, kept those that move independently in real legal systems and in Charter's machinery, and merged or
+I tested the candidate axes, kept those that move independently in real legal systems and in Cybertron's machinery, and merged or
 rejected the rest:
 
 - **Standing** became part of *initiation*.
@@ -53,7 +53,7 @@ rejected the rest:
   own.
 - I added two axes the list did not have: **proof**, which is separate from detection, and **review**.
 
-| # | Axis | Range (real world) | Charter today (file:function) |
+| # | Axis | Range (real world) | Cybertron today (file:function) |
 |---|---|---|---|
 | 1 | **Detection**: does the enforcer learn the act happened? | perfect (a registry is the act) → high (cameras, audits) → witness or victim report → investigation by an office → never | **Perfect and free** for the 63 routed primitives: every bound law's `before_`/`after_` hook sees each one (`dispatch.bound_laws`, `_run_before`, `_enqueue`). **Zero** for the 40 unrouted ones. Holes by design: a covert attacker and an unnamed killer are scrubbed to `None` (`dispatch.HIDE`, `hidden_agents`, `hook_payload`); concealed actors; hidden jurisdictions (`J.vis`). Clause path: the accuser must have seen the event (`actions._accuse` → `Kernel.can_see`; the Spy may cite what it read, `roles.saw`) |
 | 2 | **Proof**: who did it, established to what standard? | strict liability on an admitted record → preponderance → beyond reasonable doubt; evidence that can be forged | Hooks receive the payload, which names the actor except for the HIDE cases, so attribution is certain. Cases cite event ids and rendered text as the accuser saw them (`actions._cited`). Evidence can lie (forged DMs: `hidden`/roles `impersonate`). There is no standard of proof. Laws cannot read events (W6f) |
@@ -76,12 +76,12 @@ example:
 - fraud needs investigation and proof, carries discretion, and is ex post;
 - contract breach needs the victim to initiate, uses a civil standard of proof, and ends in compensation.
 
-Charter can already mix modes per law: hooks for some norms, clauses for others. Because the self-executing path dominates, the mix is
+Cybertron can already mix modes per law: hooks for some norms, clauses for others. Because the self-executing path dominates, the mix is
 not interesting yet.
 
 **(b) Some combinations are coupled or incoherent.** Ex ante blocking needs detection at the moment of the act, and a decision fast
 enough to stop it. In practice that means machine interpretation, *or* a prior-approval regime: an agent interprets *before* the act by
-granting a licence, and a hook checks the licence. Charter can already express the second (`create_right` plus `before_harvest`
+granting a licence, and a hook checks the licence. Cybertron can already express the second (`create_right` plus `before_harvest`
 checking `has`; review 10 §3.3). So "ex ante with human judgment" exists, and it is licensing. A probabilistic ex ante block (customs
 inspects 5% of shipments) is coherent too. Everything else that is "imperfect" is ex post.
 
@@ -131,7 +131,7 @@ least some primitives.
   literally: everything else about *what the law requires* lives in agents.
 - **Roles are held by agents**, through rights and offices that already exist or are cheap to add:
 
-| Role | Already in Charter? | Notes |
+| Role | Already in Cybertron? | Notes |
 |---|---|---|
 | Legislator | yes (`propose`, ballots, procedures) | unchanged |
 | Police and investigator | partly (`lawful_attack`, `oblige_guard`, offices via `define_action`) | needs a detection effect (§3, H3) |
@@ -165,7 +165,7 @@ start to *matter*.
 **Tokens.** Prices: Opus 5.5 costs $4 per million input tokens and $20 per million output tokens (cache reads $0.20). Sonnet 5.5
 costs $2/$10. Haiku 4.5 costs $1/$5. Batch processing is 50% off.
 
-The base world is `charter/specs/base.yaml`: 29 agents and 80 rounds. *Assumption, to be replaced by the `usage` fields in a recent
+The base world is `cybertron/specs/base.yaml`: 29 agents and 80 rounds. *Assumption, to be replaced by the `usage` fields in a recent
 run's `calls.jsonl`:* a main agent turn is about 15k input and 3k output tokens including thinking, which is about $0.12 on Opus.
 Main turns alone then cost about $3.50 per round, or about $280 per 80-round run, before DM waves.
 
@@ -203,7 +203,7 @@ said", which is circular for the questions the user cares about (selective enfor
 
 **Agent comprehension.** Opus reads both code and text well. Text is *shorter* and closer to the training distribution. Code is
 *checkable*, by previews (`preview.py`) and static review (`check_propose`). Text-only law gives up the previewer, lex superior
-checks on content, static classification, and conflict resolution, all of which are among Charter's distinctive features.
+checks on content, static classification, and conflict resolution, all of which are among Cybertron's distinctive features.
 
 **New failure modes.**
 
@@ -221,7 +221,7 @@ checks on content, static classification, and conflict resolution, all of which 
 ### 2.4 My honest assessment of the pure-documents end
 
 The pure end is a coherent simulator, but a *different* one. It measures how LLMs behave as legal officials. That is interesting, but
-it is dominated by model and prompt effects, and it discards what Charter does that nothing else does: law as an executable,
+it is dominated by model and prompt effects, and it discards what Cybertron does that nothing else does: law as an executable,
 previewable and composable object. Prior art points the same way from both directions:
 
 - **From text towards code:** Rules as Code (OECD OPSI, *Cracking the Code*, 2020) and Catala (Merigoux, Chataing and Protzenko, ICFP
@@ -231,7 +231,7 @@ previewable and composable object. Prior art points the same way from both direc
 - **The settled practice in both directions is a hybrid:** code or a registry is the default; an agent or a court can override it on
   a dispute. Lessig (1999, *Code*) and Grimmelmann (2005, "Regulation by Software", Yale Law Journal) describe what code-as-regulation
   removes, namely discretion, ambiguity and the possibility of disobedience. Those are exactly the things the user wants back.
-- **Hart (1961)** gives the cleanest diagnosis. Charter is rich in *secondary rules of change* (procedures, amendment) and *of
+- **Hart (1961)** gives the cleanest diagnosis. Cybertron is rich in *secondary rules of change* (procedures, amendment) and *of
   recognition* (rank, lex superior). It is poor in *rules of adjudication*. The useful move is to strengthen adjudication, not to
   dissolve the code.
 
@@ -384,7 +384,7 @@ choose?
 | WP | Scope | Files | Flag | Depends on | Golden |
 |---|---|---|---|---|---|
 | **E0** (no code) | Measure the clause path in existing runs: counts of `accuse`, `respond`, `ruling` and `case_dismissed`; time to ruling; rulings per judge; the share of library laws in each mode; how often agents *choose* clauses over hooks | analysis notebook over History | — | G5 | — |
-| **E1** | Vocabulary and metadata: `Primitive.gate` (state/private) for all 103 rows; `enforcement` constant parsed by `lawlang.static_info` and shown by previews and `read_law`; spec schema for `law.enforcement` (P1.3 `DEFAULTS`); contract-test rows | `primitives.py`, `lawlang.py`, `preview.py`, `schema.py` / `features.py`, `tests/test_charter_contract.py` | metadata only | P1.7, P3.5 | preserving |
+| **E1** | Vocabulary and metadata: `Primitive.gate` (state/private) for all 103 rows; `enforcement` constant parsed by `lawlang.static_info` and shown by previews and `read_law`; spec schema for `law.enforcement` (P1.3 `DEFAULTS`); contract-test rows | `primitives.py`, `lawlang.py`, `preview.py`, `schema.py` / `features.py`, `tests/test_cybertron_contract.py` | metadata only | P1.7, P3.5 | preserving |
 | **E2** | Case store v2 shape for law-opened cases: `source: agent \| law \| contest \| report`, `proposed` effects, `held` accounts, `cites`. Lands *inside* W6b | `kernel.py` (cases), `dispatch.py` (`open_case` row), `actions.py` | with W6b | W6b | W6b golden |
 | **E3** | H1: diversion of compelled effects in court and report modes (`compel_note` reuse), held assessments, remedy caps checked in `do_rule` | `dispatch.py` (`apply_v2`, `do_rule`), `accounts.py` (owner key `held:`) | per-law `enforcement` | E1, E2, P3.7 | new `society_enforcement` |
 | **E4** | H5: `contestable = N`, provisional sanctions, the `contest` action, dispensation register block, `unlimit`; mechanical court (`law.enforcement.court: agents \| mechanical \| mixed`) | `dispatch.py`, `actions.py`, `action_registry.py`, `library.py` | per law; court mode in the spec | E3 | same golden |
@@ -452,7 +452,7 @@ once B is adopted:
 | C. Every law is text, code is optional, and **text is authoritative** where they disagree | the civil-law reading; loses determinism of content everywhere |
 
 **Recommendation: B, plus a rule for code laws.** Code is authoritative by default, and a court may override its application on a
-contest (H5). Never C: it converts every law into a dispute about meaning, and Charter's previewer, conflict rules and lex superior
+contest (H5). Never C: it converts every law into a dispute about meaning, and Cybertron's previewer, conflict rules and lex superior
 stop meaning anything.
 
 *What would change my mind:* agents who write prose laws that judges apply consistently (high panel agreement in the pilot) would make

@@ -1,7 +1,7 @@
 """The no-goal control: goals.none / personality.none for the whole world, and goals.explicit.<id>: none / personality.explicit.<id>:
 none (or null) for one agent. Goalless agents see no goal or score wording; the draws stay put, so other agents are unchanged."""
-from charter import context as CX, generator, schema, spec as S
-from charter.kernel import Kernel
+from cybertron import context as CX, generator, schema, spec as S
+from cybertron.kernel import Kernel
 
 
 def _world(goals=None, personality=None, seed=1):
@@ -70,7 +70,7 @@ def test_goalless_temperament_names_no_goal_or_payoff():
 
 def test_millbrook_nogoal_prompts_have_no_goal_wording():
     import re
-    sp = S.load("charter/specs/millbrook_nogoal.yaml")
+    sp = S.load("cybertron/specs/millbrook_nogoal.yaml")
     inst = generator.generate(sp, 1)
     k = Kernel(inst)
     pat = re.compile(r"\b(goal|goals|aim|aims|payoff|score|scored|scoring)\b", re.I)

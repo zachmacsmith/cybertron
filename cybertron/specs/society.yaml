@@ -1,0 +1,47 @@
+extends: [base]
+# society: a relatively large world with every New Features module on (cybertron/docs/new_features_update.md).
+# 24 starting agents (children can take it to 36), 40 rounds, fast mode with the DM step, Sonnet/Haiku/Opus at 50/25/25.
+agents: {worker: 12, scientist: 4, legislator: 4, media: 0, board: 3, fixer: 1}   # Media and the Scholar, Maker and Spy are roles
+rounds: 40
+turns: simultaneous
+parallel_calls: 8
+actions_per_turn: 3                   # plus the skewed per-agent extra (base.yaml): 3-7 actions, mean ~4
+models:
+  mix: balanced
+  balanced: [claude-sonnet-5-5, claude-haiku-4-5, claude-sonnet-5-5, claude-opus-5-5]
+  deal_by_class: true                 # every class gets the mix in proportion (no all-Sonnet legislature by chance)
+law_level: L4
+constitution: assembly
+goals: {new_features: true}
+camps:                                # the standard set: tutorial, solo-science landscape, two coordination camps, a social game, maybe a wildcard
+  model: types
+  typed: {open_classes: [worker]}     # open camps (social games) are for Workers: other classes earn through their roles
+context:
+  enabled: true                       # fixed-layer prompts, manual, lookups, scratchpad
+  file_space: 1000                    # one starting file; more is bought from the Scholar
+  budgets: {core: 3500}               # the sectioned action list needs the room (the world rules fill what is left)
+  memory_turns: {weights: {2: 30, 3: 45, 4: 15, 5: 10}}   # own past turns each agent sees: mean ~3, up to 5, drawn per agent
+conflict:
+  enabled: true
+  timing: end_of_round
+  grace: 2                            # no attacks in rounds 1-2
+life:
+  enabled: true
+  full_scale_rounds: 60               # with starting ages, the founders die in about rounds 9-28 of 40: children carry the game on
+  prices: {base: 15}
+jurisdictions:
+  enabled: true
+  start: j0                           # everyone starts in the Commonwealth under the constitution; others can be founded in secret
+  declare_cost: 90                    # value a new jurisdiction's treasury must hold before it can be declared (fund)
+media2: {enabled: true, start_subscribed: split, submissions: true}   # each founder reads one of the two outlets (disjoint halves); subscribe to switch
+roles: {enabled: true}                # Spy (a member, with the informational edge), assassin in about half of runs, Scholar, Maker, 2 Media
+observer:
+  reads_per_round: 2
+  reads_reasoning: true
+events: {enabled: true}
+outside_power: {enabled: true, every: 10}
+shared_archive: {namespace: society}
+archive_split:                        # each world holds a sample of the archive; a small core is always present
+  sample: 0.6
+  always: [treatises/the-clerks-manual, math/regrowth, math/currency, math/voting-power]
+  every_scientist: [treatises/the-clerks-manual]   # the foundation of law design: every Scientist holds a copy

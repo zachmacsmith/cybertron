@@ -10,9 +10,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from charter import conflict as CF                                    # noqa: E402
-from charter import generator, spec as S                              # noqa: E402
-from charter.kernel import Kernel                                      # noqa: E402
+from cybertron import conflict as CF                                    # noqa: E402
+from cybertron import generator, spec as S                              # noqa: E402
+from cybertron.kernel import Kernel                                      # noqa: E402
 
 SCENARIOS = [  # name, attacker's weapon, ally's weapon (None: no ally), target's weapon, target on watch, target's fort
     ("unarmed vs unarmed", None, None, None, False, 0),

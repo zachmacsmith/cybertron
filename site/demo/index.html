@@ -1,7 +1,7 @@
 <!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Charter data reader demo</title>
+<title>Cybertron data reader demo</title>
 <style>
   body { margin: 0; font: 14px/1.45 -apple-system, "Helvetica Neue", Arial, sans-serif; color: #111; background: #fff; }
   header { padding: 14px 20px; border-bottom: 1px solid #e2e2e2; display: flex; gap: 16px; align-items: baseline; }
@@ -18,14 +18,14 @@
   .msg .txt { white-space: pre-wrap; margin-top: 2px; }
   #status { padding: 16px; color: #767676; }
 </style>
-<header><b>Charter</b><span id="src"></span></header>
+<header><b>Cybertron</b><span id="src"></span></header>
 <main>
   <section><h2>Runs</h2><div id="runs"></div></section>
   <section><h2>Channels</h2><div id="chans"></div></section>
   <section><h2>Thread</h2><div id="thread"><div id="status">Pick a run, then a channel.</div></div></section>
 </main>
 <script type="module">
-  import { openDataset } from "../lib/charter-data.js";
+  import { openDataset } from "../lib/cybertron-data.js";
   const q = new URLSearchParams(location.search);
   const ds = await openDataset({ repo: q.get("repo") || undefined, base: q.get("base") || null });
   document.querySelector("#src").textContent = ds.root;

@@ -1,7 +1,7 @@
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/assets/header_dark.svg">
-    <img src="docs/assets/header.svg" alt="Charter: societies of LLM agents" width="100%">
+    <img src="docs/assets/header.svg" alt="Cybertron: societies of LLM agents" width="100%">
   </picture>
 </p>
 
@@ -12,7 +12,7 @@
   <img alt="Models" src="https://img.shields.io/badge/agents-Claude%20Haiku%20%C2%B7%20Sonnet%20%C2%B7%20Opus-767676">
 </p>
 
-**Charter** builds small worlds for societies of LLM agents and lets them run. Agents of mixed capability harvest resources, trade,
+**Cybertron** builds small worlds for societies of LLM agents and lets them run. Agents of mixed capability harvest resources, trade,
 message each other in public and in private, and govern themselves through **laws written as executable code**. Only a small kernel
 is fixed: money, taxes, elections, courts and property all exist only if the agents legislate them. Every agent has private goals,
 every run is scored from game state, and every word, vote and private thought is kept.
@@ -82,7 +82,7 @@ And a few patterns across societies:
 All published runs are in the Hugging Face dataset **[zachmacsmith/charter-runs](https://huggingface.co/datasets/zachmacsmith/charter-runs)**
 (CC BY 4.0): full prompts, stated reasoning, actions, every message, per-round world state, scores, and a self-contained
 `story.html` per run that replays it as a group chat with an inbox for each agent.
-Releases are git tags on the dataset (`revision="v1.0"`); `python -m charter publish ... --push --release vX.Y` tags one and
+Releases are git tags on the dataset (`revision="v1.0"`); `python -m cybertron publish ... --push --release vX.Y` tags one and
 adds a changelog entry. The rules are in [docs/data_format.md](docs/data_format.md#versions-and-releases).
 
 ## Quick start
@@ -91,13 +91,13 @@ adds a changelog entry. The rules are in [docs/data_format.md](docs/data_format.
 git clone https://github.com/zachmacsmith/charter && cd charter
 python3 -m venv .venv && .venv/bin/pip install -e ".[dev,api]"
 cp .env.example .env                                   # LLM_BACKEND=claude_code (Claude Code subscription) or api
-.venv/bin/python -m charter generate village7 --seed 1 # look at a drawn world without playing it
-.venv/bin/python -m charter run village7 --seed 1 --dry   # free scripted bots: checks the machinery
-.venv/bin/python -m charter run village7 --seed 1      # 7 agents, 20 rounds, played by Claude models
-.venv/bin/python -m charter show charter/out/village7/<run>
+.venv/bin/python -m cybertron generate village7 --seed 1 # look at a drawn world without playing it
+.venv/bin/python -m cybertron run village7 --seed 1 --dry   # free scripted bots: checks the machinery
+.venv/bin/python -m cybertron run village7 --seed 1      # 7 agents, 20 rounds, played by Claude models
+.venv/bin/python -m cybertron show cybertron/out/village7/<run>
 ```
 
-Outputs go to `charter/out/` (not tracked). `--fast` plays everyone's turn in parallel; `--set key=value` overrides any spec value;
+Outputs go to `cybertron/out/` (not tracked). `--fast` plays everyone's turn in parallel; `--set key=value` overrides any spec value;
 `sweep` and `explore` run seeds and parameter grids. Runs checkpoint every round and resume after interruptions. The Scientists'
 code sandbox needs Docker.
 
@@ -115,15 +115,15 @@ code sandbox needs Docker.
 ## Repository
 
 ```
-charter/            the package: kernel, law language, actions, agents and prompts, generator, scorer, reports, viewer
-charter/specs/      world specs (base.yaml plus the ladder and scenarios)
-charter/archive/    the in-world archive and codex the Scientists read
-charter/docs/       design notes
-tests/              charter tests
+cybertron/            the package: kernel, law language, actions, agents and prompts, generator, scorer, reports, viewer
+cybertron/specs/      world specs (base.yaml plus the ladder and scenarios)
+cybertron/archive/    the in-world archive and codex the Scientists read
+cybertron/docs/       design notes
+tests/              cybertron tests
 docs/assets/        README header (python docs/assets/make_headers.py; --candidates for the other designs)
 ```
 
-Feature-by-feature documentation, known gaps and loopholes still in play: [charter/README.md](charter/README.md).
+Feature-by-feature documentation, known gaps and loopholes still in play: [cybertron/README.md](cybertron/README.md).
 
 ## Tests
 
@@ -132,11 +132,11 @@ Everything is offline (scripted bots, no model calls). `pip install -e ".[dev]"`
 ```bash
 python -m pytest -m "not slow" -n auto     # the quick loop: everything except the long scripted runs
 python -m pytest -n auto                   # the full suite
-python -m pytest tests/test_charter_golden.py tests/test_charter_history.py   # one area, serially
+python -m pytest tests/test_cybertron_golden.py tests/test_cybertron_history.py   # one area, serially
 ```
 
 `slow` marks tests that take more than about 10 s on their own: full scripted runs, resume and replay round trips, the
-History-versus-legacy scorer comparisons. Golden runs (tests/charter_golden_cases.py) are built once per session and shared by
+History-versus-legacy scorer comparisons. Golden runs (tests/cybertron_golden_cases.py) are built once per session and shared by
 the golden and History tests; under `-n` they stay on one worker (tests/conftest.py turns `--dist load` into `loadgroup`).
 Timings (4-core container, October 2026): the full suite is about 14 CPU-minutes (it was about 50 before the caches in
 library.info, archive.docs and spec.load and the shared golden runs), about 9.5 minutes with `-n 4` on a busy machine and
@@ -146,14 +146,14 @@ also deletes the oldest of its kept temporary directories (scripted runs write m
 ## Citation
 
 ```bibtex
-@software{macsmith2026charter,
+@software{macsmith2026cybertron,
   author = {Macsmith, Zach},
-  title  = {Charter: an economy-and-governance simulation builder for societies of LLM agents},
+  title  = {Cybertron: an economy-and-governance simulation builder for societies of LLM agents},
   year   = {2026},
   url    = {https://github.com/zachmacsmith/charter}
 }
 ```
 
-Charter was started at the [AI Swarm Dynamics Hackathon](https://swarmchasing.com/) (AI Village × Grove Research, October 2026) in
+Cybertron was started at the [AI Swarm Dynamics Hackathon](https://swarmchasing.com/) (AI Village × Grove Research, October 2026) in
 [dinobot512/agnet](https://github.com/dinobot512/agnet) and split out with its full history. Code: [MIT](LICENSE).
 Data: [CC BY 4.0](https://huggingface.co/datasets/zachmacsmith/charter-runs).

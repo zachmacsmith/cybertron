@@ -1,4 +1,4 @@
-"""Laws that work or fail loudly (docs/review/31_institutions/07_rules_courts.md §4; charter/laweffects.py): amendments reach the
+"""Laws that work or fail loudly (docs/review/31_institutions/07_rules_courts.md §4; cybertron/laweffects.py): amendments reach the
 offices their law declares, reseat, law_effect with `inert`, previews of amendments and of the enactment itself, failed law calls,
 expects, and the Millbrook keeper lesson."""
 from __future__ import annotations
@@ -8,13 +8,13 @@ from pathlib import Path
 
 import pytest
 
-from charter import actions as A
-from charter import agents as AG
-from charter import generator as GN
-from charter import institutions as IN
-from charter import runner
-from charter import start as STT
-from charter.actions import ActionError
+from cybertron import actions as A
+from cybertron import agents as AG
+from cybertron import generator as GN
+from cybertron import institutions as IN
+from cybertron import runner
+from cybertron import start as STT
+from cybertron.actions import ActionError
 
 import test_established_worlds as TW
 
@@ -54,7 +54,7 @@ def enact(k, code, author="Ada"):
 
 def amend_now(k, target, code, author="Ada"):
     """An amendment draft enacted at once (as if its ballot passed)."""
-    from charter import amendment as AM
+    from cybertron import amendment as AM
     lid = AM.amendment_draft(k, target, code, author, "test")
     k.enact(lid)
     return lid
@@ -87,7 +87,7 @@ def test_millbrook_keeper_amendment_reseats_under_apply(village_run):
     assert "office J0.keeper holders: Cy -> Bo" in fx["changes"]
     filled = events(k, "office_filled", n)
     assert filled and filled[-1]["data"]["rule"] == "reseat" and filled[-1]["agent"] == "Bo"
-    from charter import succession as SU
+    from cybertron import succession as SU
     assert all(v["status"] != "open" for v in SU.state(k)["vacancies"] if v["office"] == "keeper")   # filled: no election
 
 
@@ -211,8 +211,8 @@ def test_expects_refuses_at_dry_run_and_is_published_in_force(village_run):
 
 
 def test_expects_shapes():
-    from charter import laweffects as LE
-    from charter import lawlang as L
+    from cybertron import laweffects as LE
+    from cybertron import lawlang as L
     assert LE.parse_expects('expects = [{"store": "S1", "item": "food", "at_least": 1}]')
     for bad in ('expects = {"x": 1}', 'expects = [{"store": "S1", "item": "food"}]', 'expects = [{"office": "J0.k"}]',
                 'expects = [{"store": "S1", "holding": "Ada", "item": "food", "at_least": 1}]'):
@@ -222,7 +222,7 @@ def test_expects_shapes():
 
 # ---------------------------------------------------------------------- the previewer
 def test_preview_law_previews_amendments_and_the_enactment(village_run):
-    from charter import lawpreview as LP
+    from cybertron import lawpreview as LP
     k = kernel(village_run, "apply")
     off = dict(offices_act(k))
     before = copy.deepcopy(k.w)

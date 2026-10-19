@@ -1,7 +1,7 @@
 # Review 01: the core engine and the feature-module system
 
 *7 Oct 2026. Read-only review of the working tree, including the uncommitted `action_registry` wiring. Builds on
-`charter/docs/architecture_review.md` (4 Oct, "AR-1" below). Line numbers are for the current working tree.*
+`cybertron/docs/architecture_review.md` (4 Oct, "AR-1" below). Line numbers are for the current working tree.*
 
 ## 1. Verdict
 
@@ -29,7 +29,7 @@ then the convention it described has roughly doubled in reach. AR-1 also missed 
 
 ## 2. How it works today
 
-**Plug-in mechanism: none. Each feature calls into shared files at marked points.** `charter/docs/parallel_build_contracts.md:18-28`
+**Plug-in mechanism: none. Each feature calls into shared files at marked points.** `cybertron/docs/parallel_build_contracts.md:18-28`
 made this the rule ("keep additions small and clearly marked, e.g. `# conflict:`"). The de facto hook set, as each feature
 spells it:
 
@@ -61,7 +61,7 @@ trampolines, about 200 lines: `return CF.act_fortify(k, aid, qty, unlock)` and s
 Evidence: `fortify` appears in 5 files and `contribute` in 4. Adding a module like conflict touched kernel (5 places), actions,
 agents (5 places), action_registry, scorer, runner (6 calls) and composition: **8 shared files**. A new action touches **5–6 files**.
 
-**Dependencies.** There are 250 function-level `from charter import …` statements; context.py has 33, life.py 27 and actions.py 24.
+**Dependencies.** There are 250 function-level `from cybertron import …` statements; context.py has 33, life.py 27 and actions.py 24.
 The core imports every feature at module level, and the features import back into the core:
 - `conflict`, `media`, `hidden` and `scholars` import `actions` for `ActionError` and the private `_dm_check`/`_deliver`
   (conflict.py:92, 624; hidden.py:455);
@@ -95,7 +95,7 @@ of `absent_actions`.
 ## 3. Problems, ranked by cost
 
 1. **The safety net is weaker than it looks. Fix this first.**
-   - `tests/fixtures/charter_golden.json` does not exist and was never committed, so `test_golden_dry_run` cannot pass as checked
+   - `tests/fixtures/cybertron_golden.json` does not exist and was never committed, so `test_golden_dry_run` cannot pass as checked
      out. The fingerprints have to be generated locally, which means a refactor is compared against whatever the tree held that
      day.
    - The five golden cases (E2, E4, E6, E7, E4+observer) enable **none** of conflict, media2, jurisdictions, life, mortality,
@@ -182,7 +182,7 @@ R("fortify", "turn stone into a fort: defence", "FORCE", core=True, needs=("mod:
   `k.w[...]`.
 - `mod:<key>` resolves through the feature table below, which removes the special cases in `_mod`.
 
-**4.2 A rights table**, with about 20 rows, in `charter/rights.py`:
+**4.2 A rights table**, with about 20 rows, in `cybertron/rights.py`:
 
 ```python
 @dataclass(frozen=True)
@@ -199,7 +199,7 @@ This replaces `KERNEL_RIGHTS`, both `ENTRENCHED`s, `NEVER`/`FIXER_NEVER`, `SECRE
 fixes the manual bug. Add one kernel method, `k.set_rights(aid, rights, why)`, that logs. The seven direct mutations go through it.
 Seat succession, which really does change class, gets an explicit `k.seat_board(aid, from_aid)`.
 
-**4.3 A feature table with standard hook names and explicit phases** (`charter/features.py`). This builds on AR-1's `Feature`, made
+**4.3 A feature table with standard hook names and explicit phases** (`cybertron/features.py`). This builds on AR-1's `Feature`, made
 lighter: the record holds *data*, the module holds *functions* under fixed names, and the core runs **named phases** whose order is
 one reviewed list.
 
@@ -207,14 +207,14 @@ one reviewed list.
 @dataclass(frozen=True)
 class Feature:
     name: str                 # "conflict"
-    module: str               # "charter.conflict"
+    module: str               # "cybertron.conflict"
     spec_key: str             # "conflict"
     default_on: bool = False  # projects: True
     def on(self, spec) -> bool: ...          # the ONE enabled check (replaces 10 helper names + 13 inline checks)
 
 FEATURES = [Feature("credit", ...), Feature("projects", ..., default_on=True), Feature("outside", ...), Feature("hidden", ...),
-            Feature("context", ...), Feature("roles", ...), Feature("camps", "charter.camptypes.framework", "camps"),
-            Feature("life", ...), Feature("conflict", ...), Feature("jurisdictions", ...), Feature("media", "charter.media", "media2")]
+            Feature("context", ...), Feature("roles", ...), Feature("camps", "cybertron.camptypes.framework", "camps"),
+            Feature("life", ...), Feature("conflict", ...), Feature("jurisdictions", ...), Feature("media", "cybertron.media", "media2")]
 
 # Optional module functions, fixed names and signatures (a test checks every module's signatures):
 #   install(k)  law_api(k, lid) -> dict  snapshot_fields(k) -> dict  state_lines(k, aid) -> list  truth(k, inst) -> dict
@@ -238,8 +238,8 @@ reaches `snapshots.json` bytes and law-API key collisions resolve last-wins.
 (manual.py:132-144) into credit.py and projects.py. Delete `KNOWN_MODULES`/`_module_sections`.
 
 **4.5 Shared leaf modules.**
-- `charter/errors.py` holds `ActionError` (re-exported from actions for compatibility).
-- `charter/messaging.py` holds `dm_check`, `deliver` and `forge_message`, now public. This also delivers AR-1's single forge core.
+- `cybertron/errors.py` holds `ActionError` (re-exported from actions for compatibility).
+- `cybertron/messaging.py` holds `dm_check`, `deliver` and `forge_message`, now public. This also delivers AR-1's single forge core.
 
 Both remove the feature → actions back-edges.
 
@@ -282,7 +282,7 @@ about 8 shared files to 2–3. The drift class of bug in §3.2 becomes a failing
 Every step is one PR, keeps the tests green and has a stated golden effect.
 
 0. **Safety net (blocking).**
-   - Commit `tests/fixtures/charter_golden.json`, generated on the current tree. The WIP touches prompts only and
+   - Commit `tests/fixtures/cybertron_golden.json`, generated on the current tree. The WIP touches prompts only and
      `ScriptedPolicy` ignores prompts, so the hashes are unaffected.
    - Add golden cases for `society` (3 rounds, simultaneous; this turns on every module) and for `conflict_pilot`,
      `jurisdictions_pilot`, `life_pilot`, `media2_pilot` and `camps_pilot`, 3 rounds each.

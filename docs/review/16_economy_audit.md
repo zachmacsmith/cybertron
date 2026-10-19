@@ -3,7 +3,7 @@
 
 Read-only audit of `/home/user/wt-w8` (branch integrate/w8). Data: three Haiku 5.5 runs (society 24x20, haiku100 100x30, haiku10
 10x20 with Life off) plus 10 scripted dry runs at different settings (scratch specs in `scratchpad/econ/specs/`, outputs in
-`charter/out/econ_*`). Analysis scripts: `scratchpad/econ/{an,summ,comm}.py`.
+`cybertron/out/econ_*`). Analysis scripts: `scratchpad/econ/{an,summ,comm}.py`.
 
 ## 1. Summary
 

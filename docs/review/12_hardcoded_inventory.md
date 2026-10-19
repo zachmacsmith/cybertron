@@ -287,7 +287,7 @@ and 42 are L-rule.
 - Every agent act is a routed primitive.
 - The kernel's own rule for every L item is the **residual** (liberty, natural perception, no offices).
 
-**Default code.** A library of Acts in `charter/code/` (law-language source, readable). The regime seeds them at round 0, before the
+**Default code.** A library of Acts in `cybertron/code/` (law-language source, readable). The regime seeds them at round 0, before the
 constitution:
 
 | Act | Rank | Reproduces today | Mechanism |
@@ -376,13 +376,13 @@ Work packages are listed in dependency order. Every package is behaviour-preserv
 
 | WP | Content | Files | Flag | Byte-identity strategy | Tests | Cost |
 |---|---|---|---|---|---|---|
-| **WP0** | Classification as data: `EventType.publication` (`natural` audience class; `public_by_nature` bool) and an `Act.gate` classification; a contract test that every `k.log` site and every `needs` gate is tagged P, E, X or L, and every L tag names its Act | `eventtypes.py`, `action_registry.py`, `tests/test_charter_contract.py` | none | Metadata only | Contract test | S |
+| **WP0** | Classification as data: `EventType.publication` (`natural` audience class; `public_by_nature` bool) and an `Act.gate` classification; a contract test that every `k.log` site and every `needs` gate is tagged P, E, X or L, and every L tag names its Act | `eventtypes.py`, `action_registry.py`, `tests/test_cybertron_contract.py` | none | Metadata only | Contract test | S |
 | **WP1** | Route the 31 L-route primitives (channels first, C2), `invoke`, and the law rule setters. Fix the false `sites` entries. Add the V18 `redact` for `dm`/`post` | `dispatch.py` (or its successor), `actions.py`, `jurisdictions.py`, `media.py`, `scholars.py`, `mortality.py`, `life.py`, `primitives.py` | V18 behind `law.v2` (re-record v2 DM goldens once) | Difftest on every preset: events identical (routing adds hooks, no events) | Per-primitive hook tests (`before_found` refuses a channel, ...) | M-L |
 | **WP2** | The publication layer (§4): natural audiences, the `publish` step, store, generated "today" table | `kernel.py` (`log`), `eventtypes.py`, the new `publication.py`, `evidence.py`, `jurisdictions.vis` | `law.publication` | Generated table plus the reproduction test on all goldens | Golden reproduction; a "private channel" test; V17 | L |
-| **WP3** | The default code framework: `charter/code/`, `A` namespace, native twins, `regimes.FIELDS["code"]`, `code: today` in presets, digest and prompt rendering | `library.py`/`code/`, `regimes.py`, `lawset.py`, `digest.py`, `agents.py`/`context.py` | `code.enabled` | Flag on with `code: today` against flag off: difftest normaliser drops `A*` enact records (logged monitor-only at round 0) | Twin-equivalence tests (source run as law code against native, scripted scenarios); difftest | M |
+| **WP3** | The default code framework: `cybertron/code/`, `A` namespace, native twins, `regimes.FIELDS["code"]`, `code: today` in presets, digest and prompt rendering | `library.py`/`code/`, `regimes.py`, `lawset.py`, `digest.py`, `agents.py`/`context.py` | `code.enabled` | Flag on with `code: today` against flag off: difftest normaliser drops `A*` enact records (logged monitor-only at round 0) | Twin-equivalence tests (source run as law code against native, scripted scenarios); difftest | M |
 | **WP4** | Acts whose seams are already stores or are simple: Publication, Association, Communications, Court Rules, Credit, Succession, Press (statistics) | `code/*.law`, seams in `actions.py`, `kernel.py`, `mortality.py`, `credit.py`, `media.py` | `code.enabled` | Per Act: the seam reads the store with today's default when absent | Per Act: repeal gives the residual; amend changes the parameter | M |
 | **WP5** | Franchise, Founding and Nationality Acts (hooks on legal acts and membership) | `actions._propose`, `jurisdictions.py`, `generator.py`/`regimes.apply_rights` | `code.enabled` | `refuse(reason)` reproduces `ActionError` texts; the action listing is derived from the Act | Jurisdictions-on and state-of-nature difftest | M |
-| **WP6** | Board Charter (D-10 milestone), then optionally the Land Registry Act (D8) | `kernel.py` (veto queue), `powers.py`, `mortality.py`, scorer goals `Board`/`Seat` | `code.board` | Charter at rank 4 reproduces the window, scope, quorum, succession and secrecy | Board goldens; a scorer migration test | L |
+| **WP6** | Board Charter (D-10 milestone), then optionally the Land Registry Act (D8) | `kernel.py` (veto queue), `powers.py`, `mortality.py`, scorer goals `Board`/`Seat` | `code.board` | Cybertron at rank 4 reproduces the window, scope, quorum, succession and secrecy | Board goldens; a scorer migration test | L |
 
 **Interactions with work in flight:**
 

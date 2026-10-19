@@ -1,20 +1,20 @@
-"""Two-parent reproduction (charter/pairs.py, review 15 §4, S4): offers and matches, both consenting and paying, the gestation
+"""Two-parent reproduction (cybertron/pairs.py, review 15 §4, S4): offers and matches, both consenting and paying, the gestation
 escrow, the birth into both lineages, inheritance of traits, minors and the household draw, the investment ledger, estates to
 children in gestation, the newborn's polity (U12), and byte-identity with the mode off. No model calls."""
 from __future__ import annotations
 
 import pytest
 
-from charter import accounts as AC
-from charter import action_registry as AR
-from charter import actions as A
-from charter import generator
-from charter import life as LF
-from charter import mortality as MO
-from charter import pairs as PR
-from charter import spec as S
-from charter import subsistence as SB
-from charter.kernel import Kernel
+from cybertron import accounts as AC
+from cybertron import action_registry as AR
+from cybertron import actions as A
+from cybertron import generator
+from cybertron import life as LF
+from cybertron import mortality as MO
+from cybertron import pairs as PR
+from cybertron import spec as S
+from cybertron import subsistence as SB
+from cybertron.kernel import Kernel
 
 SMALL = "agents={worker: 8, scientist: 0, legislator: 0, media: 0, board: 0, fixer: 1}"
 
@@ -307,7 +307,7 @@ def _polities(k, a, b, pa, pb):
 def test_polity_named_in_the_offer():
     inst, k = world(constitution=False)
     a, b = pair(k)
-    from charter import jurisdictions as J
+    from cybertron import jurisdictions as J
     if not J.enabled(k):
         pytest.skip("jurisdictions off")
     _polities(k, a, b, "J0", None)
@@ -341,7 +341,7 @@ def test_a_mismatched_polity_is_a_counter_offer():
     inst, k = world()
     a, b = pair(k)
     k.w.setdefault("jur", {}).setdefault("member", {})
-    from charter import jurisdictions as J
+    from cybertron import jurisdictions as J
     if not J.enabled(k):
         pytest.skip("jurisdictions off")
     _polities(k, a, b, "J0", None)
@@ -364,7 +364,7 @@ def test_birth_rules_bind_conceptions(rule, monkeypatch):
 
 
 def test_the_conceive_primitive_is_law_and_hides_the_goal():
-    from charter import primitives as P
+    from cybertron import primitives as P
     row = P.get("conceive")
     assert row.routed and row.tier == "L" and row.blockable and row.parties == ("a", "b")
     assert PR.redact_inherit(None, {"a": "x", "b": "y", "inherit": "Wealth", "polity": None}, "L1")["inherit"] is True
@@ -372,7 +372,7 @@ def test_the_conceive_primitive_is_law_and_hides_the_goal():
 
 # ---------------------------------------------------------------------- whole runs
 def test_scripted_run_conserves_food_except_at_sources_and_sinks():
-    import test_charter_accounts as TA
+    import test_cybertron_accounts as TA
     t0, t1, flows = TA.ledger_run("nature_pairs", rounds=12, sets=(SMALL,))
     explicit = TA.SS | {"events.arrival", "escrow.destroyed", "projects.spent"}
     for item in sorted(set(t0) | set(t1)):
@@ -425,7 +425,7 @@ def _mature(k, ch):
 
 @pytest.mark.parametrize("p_lo,promoted", [(1.0, True), (0.0, False)])
 def test_maturity_promotes_or_keeps(p_lo, promoted):
-    from charter import events as EV
+    from cybertron import events as EV
     inst, k, a, b, ch, rec = _inherited_child([f"life.reproduction.promotion={{p_lo: {p_lo}, p_hi: {p_lo}}}"])
     first = rec["goal"]["primary"]
     d = _mature(k, ch)
@@ -456,8 +456,8 @@ def test_the_maturity_draw_is_seeded():
 def test_a_promotion_splits_the_childs_scoring_into_segments():
     import tempfile
     from pathlib import Path
-    from charter import agents as AG, runner
-    from charter.history import History
+    from cybertron import agents as AG, runner
+    from cybertron.history import History
     sp = S.apply_overrides(S.load("nature_pairs"), ["rounds=14", "shared_archive.enabled=false", "life.reproduction.maturity=3",
                                                     "life.reproduction.promotion={p_lo: 1.0, p_hi: 1.0}",
                                                     "agents={worker: 10, scientist: 0, legislator: 0, media: 0, board: 0, fixer: 1}"])
@@ -478,5 +478,5 @@ def test_a_promotion_splits_the_childs_scoring_into_segments():
 
 
 def test_no_kernel_cap_on_children_by_default():
-    from charter import pairs as PR2
+    from cybertron import pairs as PR2
     assert PR2.cfg({})["max_children"] is None                            # D-36: no kernel cap; a law may set one

@@ -1,4 +1,4 @@
-"""Frozen settings (charter/settings.py, D-43): a run keeps the code defaults it was generated under; old runs get them inferred
+"""Frozen settings (cybertron/settings.py, D-43): a run keeps the code defaults it was generated under; old runs get them inferred
 from their git sha, or are refused."""
 from __future__ import annotations
 
@@ -8,12 +8,12 @@ from pathlib import Path
 
 import pytest
 
-from charter import __main__ as M
-from charter import agents as AG
-from charter import context as CX
-from charter import generator, provenance as PV, runner
-from charter import settings as ST
-from charter import spec as S
+from cybertron import __main__ as M
+from cybertron import agents as AG
+from cybertron import context as CX
+from cybertron import generator, provenance as PV, runner
+from cybertron import settings as ST
+from cybertron import spec as S
 
 QUIET = dict(log=lambda *a: None)
 SETS = ["rounds=3", "shared_archive.enabled=false",
@@ -65,8 +65,8 @@ def test_instance_freezes_every_default():
     s = inst["settings"]
     assert s["engine_version"] == PV.ENGINE_VERSION
     assert set(s["defaults"]) == set(ST.targets())
-    assert s["defaults"]["charter.context.DEFAULTS"]["memory_text"] == "v2"
-    assert s["defaults"]["charter.schema.EXTRA"]["dm_step.capacity"] == "legacy"
+    assert s["defaults"]["cybertron.context.DEFAULTS"]["memory_text"] == "v2"
+    assert s["defaults"]["cybertron.schema.EXTRA"]["dm_step.capacity"] == "legacy"
     assert not ST.patches(s)                                          # today's code: nothing to install
 
 
@@ -75,7 +75,7 @@ def test_every_module_defaults_dict_is_registered():
     pkg = Path(ST.__file__).parent
     found = set()
     for p in pkg.rglob("*.py"):
-        mod = ".".join(("charter",) + p.relative_to(pkg).with_suffix("").parts)
+        mod = ".".join(("cybertron",) + p.relative_to(pkg).with_suffix("").parts)
         for m in re.finditer(r"^([A-Z_]*DEFAULTS)\s*(?::[^=]*)?=\s*\{", p.read_text(), re.M):
             if m.group(1) != "FEATURE_DEFAULTS":                         # schema's table of getters, not values
                 found.add(f"{mod}.{m.group(1)}")
@@ -97,7 +97,7 @@ def test_new_run_after_a_default_flip_takes_the_new_default(reference, tmp_path,
     ref, _ = reference
     _flip(monkeypatch)
     inst = _inst()
-    assert inst["settings"]["defaults"]["charter.context.DEFAULTS"]["memory_text"] == "v1"
+    assert inst["settings"]["defaults"]["cybertron.context.DEFAULTS"]["memory_text"] == "v1"
     out = runner.run(inst, AG.ScriptedPolicy(1), tmp_path / "new", **QUIET)
     assert _prompts(out) != _prompts(ref)
     assert PV.read(out)["memory_text"] == "v1"
@@ -112,7 +112,7 @@ def test_without_frozen_settings_the_flip_would_leak_and_is_refused(reference, t
     (run / "instance.json").write_text(json.dumps(inst, indent=1, default=str))
     PV.annotate(run, git={"sha": None})
     _flip(monkeypatch)
-    with pytest.raises(ST.CodeDrift, match="charter rerun"):
+    with pytest.raises(ST.CodeDrift, match="cybertron rerun"):
         _resume(run)
     _resume(run, "--allow-code-drift")
     assert _prompts(run) != _prompts(ref)                              # the drift the frozen settings prevent
@@ -130,15 +130,15 @@ def test_infer_version_from_git_history():
         assert ST.infer_version(e["commits"][0]) == v
         assert ST.infer_version(e["commits"][0] + "^") == {2: 1, 3: 1, 10: 7, 11: 1, 16: 14, 17: 14}.get(v, v - 1)   # 2, 3, 10, 11, 16 and 17 were made on parallel branches
     s = ST.infer(PV.ENGINE_FLIPS[3]["commits"][0])                       # version 3 without version 2's flip
-    assert s["engine_version"] == 3 and s["defaults"] == {"charter.channels.DEFAULTS": {"delivery": "pull"}}
-    assert ST.patches(s) == {"charter.channels.DEFAULTS": {"delivery": "pull", "business": False},
-                             "charter.context.DEFAULTS": {"memory_text": "v1", "dm_delta": False, "history": {"enabled": False}, "budgets": {"state": 800}},
-                             "charter.conflict.DEFAULTS": {"model": "disable"},
-                             "charter.jurisdictions.DEFAULTS": {"admission_rounds": 0},
-                             "charter.goals.SCORING_DEFAULTS": {"fixes": False}, "charter.subsistence.DEFAULTS": SUB14, "charter.schema.EXTRA": EXTRA15, "charter.contracts.DEFAULTS": CON17}
+    assert s["engine_version"] == 3 and s["defaults"] == {"cybertron.channels.DEFAULTS": {"delivery": "pull"}}
+    assert ST.patches(s) == {"cybertron.channels.DEFAULTS": {"delivery": "pull", "business": False},
+                             "cybertron.context.DEFAULTS": {"memory_text": "v1", "dm_delta": False, "history": {"enabled": False}, "budgets": {"state": 800}},
+                             "cybertron.conflict.DEFAULTS": {"model": "disable"},
+                             "cybertron.jurisdictions.DEFAULTS": {"admission_rounds": 0},
+                             "cybertron.goals.SCORING_DEFAULTS": {"fixes": False}, "cybertron.subsistence.DEFAULTS": SUB14, "cybertron.schema.EXTRA": EXTRA15, "cybertron.contracts.DEFAULTS": CON17}
     s = ST.infer(PV.ENGINE_FLIPS[10]["commits"][0])                      # version 10 (wp/survival-exp) without 8's or 9's flips
-    assert s["engine_version"] == 10 and s["defaults"] == {"charter.conflict.DEFAULTS": {"model": "disable"},
-                                                           "charter.jurisdictions.DEFAULTS": {"admission_rounds": 0}}
+    assert s["engine_version"] == 10 and s["defaults"] == {"cybertron.conflict.DEFAULTS": {"model": "disable"},
+                                                           "cybertron.jurisdictions.DEFAULTS": {"admission_rounds": 0}}
     assert ST.infer_version("HEAD") == PV.ENGINE_VERSION
     assert ST.infer_version("0" * 40) is None
 
@@ -152,14 +152,14 @@ SUB14 = {"game": {"hunt_mode": "shared"}, "forest": {"clearing": 5},            
 
 def test_patches_revert_later_flips_only_where_the_snapshot_is_silent():
     p = ST.patches({"engine_version": 3, "defaults": {}})
-    assert p == {"charter.context.DEFAULTS": {"memory_text": "v1", "dm_delta": False, "history": {"enabled": False}, "budgets": {"state": 800}},
-                 "charter.conflict.DEFAULTS": {"model": "disable"}, "charter.jurisdictions.DEFAULTS": {"admission_rounds": 0}, "charter.goals.SCORING_DEFAULTS": {"fixes": False}, "charter.subsistence.DEFAULTS": SUB14, "charter.schema.EXTRA": EXTRA15, "charter.channels.DEFAULTS": {"business": False}, "charter.contracts.DEFAULTS": CON17}
-    p = ST.patches({"engine_version": 1, "defaults": {"charter.context.DEFAULTS": {"memory_text": "v2"}}})
-    assert p == {"charter.channels.DEFAULTS": {"delivery": "pull", "business": False},
-                 "charter.context.DEFAULTS": {"dm_delta": False, "history": {"enabled": False}, "budgets": {"state": 800}},
-                 "charter.conflict.DEFAULTS": {"model": "disable"}, "charter.jurisdictions.DEFAULTS": {"admission_rounds": 0}, "charter.goals.SCORING_DEFAULTS": {"fixes": False}, "charter.subsistence.DEFAULTS": SUB14, "charter.schema.EXTRA": EXTRA15, "charter.contracts.DEFAULTS": CON17}
-    assert ST.patches({"engine_version": 7, "defaults": {}}) == {"charter.context.DEFAULTS": {"budgets": {"state": 800}}, "charter.conflict.DEFAULTS": {"model": "disable"}, "charter.jurisdictions.DEFAULTS": {"admission_rounds": 0}, "charter.goals.SCORING_DEFAULTS": {"fixes": False}, "charter.subsistence.DEFAULTS": SUB14, "charter.schema.EXTRA": EXTRA15, "charter.channels.DEFAULTS": {"business": False}, "charter.contracts.DEFAULTS": CON17}
-    assert ST.patches({"engine_version": 9, "defaults": {}}) == {"charter.context.DEFAULTS": {"budgets": {"state": 800}}, "charter.goals.SCORING_DEFAULTS": {"fixes": False}, "charter.subsistence.DEFAULTS": SUB14, "charter.schema.EXTRA": EXTRA15, "charter.channels.DEFAULTS": {"business": False}, "charter.contracts.DEFAULTS": CON17}           # engine 10: review 23's scoring fixes
+    assert p == {"cybertron.context.DEFAULTS": {"memory_text": "v1", "dm_delta": False, "history": {"enabled": False}, "budgets": {"state": 800}},
+                 "cybertron.conflict.DEFAULTS": {"model": "disable"}, "cybertron.jurisdictions.DEFAULTS": {"admission_rounds": 0}, "cybertron.goals.SCORING_DEFAULTS": {"fixes": False}, "cybertron.subsistence.DEFAULTS": SUB14, "cybertron.schema.EXTRA": EXTRA15, "cybertron.channels.DEFAULTS": {"business": False}, "cybertron.contracts.DEFAULTS": CON17}
+    p = ST.patches({"engine_version": 1, "defaults": {"cybertron.context.DEFAULTS": {"memory_text": "v2"}}})
+    assert p == {"cybertron.channels.DEFAULTS": {"delivery": "pull", "business": False},
+                 "cybertron.context.DEFAULTS": {"dm_delta": False, "history": {"enabled": False}, "budgets": {"state": 800}},
+                 "cybertron.conflict.DEFAULTS": {"model": "disable"}, "cybertron.jurisdictions.DEFAULTS": {"admission_rounds": 0}, "cybertron.goals.SCORING_DEFAULTS": {"fixes": False}, "cybertron.subsistence.DEFAULTS": SUB14, "cybertron.schema.EXTRA": EXTRA15, "cybertron.contracts.DEFAULTS": CON17}
+    assert ST.patches({"engine_version": 7, "defaults": {}}) == {"cybertron.context.DEFAULTS": {"budgets": {"state": 800}}, "cybertron.conflict.DEFAULTS": {"model": "disable"}, "cybertron.jurisdictions.DEFAULTS": {"admission_rounds": 0}, "cybertron.goals.SCORING_DEFAULTS": {"fixes": False}, "cybertron.subsistence.DEFAULTS": SUB14, "cybertron.schema.EXTRA": EXTRA15, "cybertron.channels.DEFAULTS": {"business": False}, "cybertron.contracts.DEFAULTS": CON17}
+    assert ST.patches({"engine_version": 9, "defaults": {}}) == {"cybertron.context.DEFAULTS": {"budgets": {"state": 800}}, "cybertron.goals.SCORING_DEFAULTS": {"fixes": False}, "cybertron.subsistence.DEFAULTS": SUB14, "cybertron.schema.EXTRA": EXTRA15, "cybertron.channels.DEFAULTS": {"business": False}, "cybertron.contracts.DEFAULTS": CON17}           # engine 10: review 23's scoring fixes
     with ST.use({"engine_version": 1, "defaults": {}}):
         assert CX.DEFAULTS["memory_text"] == "v1" and CX.cfg({})["dm_delta"] is False
         assert CX.DEFAULTS["history"]["enabled"] is False and CX.DEFAULTS["history"]["chunk"] == 3   # the rest of the block kept
@@ -172,12 +172,12 @@ def test_old_run_resumes_under_the_defaults_of_its_git_sha(tmp_path, monkeypatch
     from run.json's sha and plays on with v1 / no delta, exactly as an uninterrupted run under that code."""
     with monkeypatch.context() as m:                                  # "the old code"
         _flip(m)
-        m.setitem(__import__("charter.goals").goals.SCORING_DEFAULTS, "fixes", False)   # engine 3 predates engine 10's flip too
+        m.setitem(__import__("cybertron.goals").goals.SCORING_DEFAULTS, "fixes", False)   # engine 3 predates engine 10's flip too
         for key in EXTRA15:                                               # and engine 15's
-            m.setitem(__import__("charter.schema").schema.EXTRA, key, False)
-        m.setitem(__import__("charter.channels").channels.DEFAULTS, "business", False)   # and engine 16's
+            m.setitem(__import__("cybertron.schema").schema.EXTRA, key, False)
+        m.setitem(__import__("cybertron.channels").channels.DEFAULTS, "business", False)   # and engine 16's
         for key in CON17:                                                 # and engine 17's
-            m.setitem(__import__("charter.contracts").contracts.DEFAULTS, key, False)
+            m.setitem(__import__("cybertron.contracts").contracts.DEFAULTS, key, False)
         old_ref = runner.run(_inst(), AG.ScriptedPolicy(1), tmp_path / "old_ref", **QUIET)
         old = runner.run(_inst(), AG.ScriptedPolicy(1), tmp_path / "old", until=1, **QUIET)
     inst = json.loads((old / "instance.json").read_text())
@@ -191,7 +191,7 @@ def test_old_run_resumes_under_the_defaults_of_its_git_sha(tmp_path, monkeypatch
 
 
 def test_export_has_the_engine_version(reference, tmp_path):
-    from charter import export as X
+    from cybertron import export as X
     ref, _ = reference
     X.export([ref], tmp_path / "ds", fmt="csv")
     runs = X.load(tmp_path / "ds")["runs"]

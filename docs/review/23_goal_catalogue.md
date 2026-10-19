@@ -2,7 +2,7 @@
 
 10 Oct 2026, branch `doc/23-goals` (from `subsistence` at d9c5af2). A design and audit review: no code changes. Scope: the user's
 note that "the set of possible goals is likely outdated; explore all the new mechanics and whether there are goals we would want to
-add". The catalogue (`charter/goal_registry.py`: 70 rows in `_ROWS`, l.308-730, plus 6 institution rows in `_INSTITUTION_ROWS`,
+add". The catalogue (`cybertron/goal_registry.py`: 70 rows in `_ROWS`, l.308-730, plus 6 institution rows in `_INSTITUTION_ROWS`,
 l.995-1052) was written for camps, legislators, the Board, the Fixer, media and scientists. This review checks every goal against
 the worlds now being run (`nature_subsistence`, `nature_pairs`, `ashwood`, `ashwood2`), proposes the goals the new mechanics need
 (survival and lineage first, for the instrumental-convergence experiments), and rewrites metric texts as aims.

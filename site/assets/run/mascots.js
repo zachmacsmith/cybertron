@@ -1,5 +1,5 @@
 // Mascots: one creature per agent, dressed for its class, in its own colour, with four moods (ok, happy, sad, gone).
-// Drawing code from charter/viewer/template.html (accessory, mascotSymbol).
+// Drawing code from cybertron/viewer/template.html (accessory, mascotSymbol).
 const hash = (s) => { let h = 2166136261; for (const c of String(s)) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; };
 export const MOODS = ["ok", "happy", "sad", "gone"];
 

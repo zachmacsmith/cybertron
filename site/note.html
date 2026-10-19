@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Note · Charter</title>
-<script>try{document.documentElement.dataset.theme=new URLSearchParams(location.search).get("theme")||localStorage.getItem("charter-theme")||"broadsheet"}catch(e){}</script>
+<title>Note · Cybertron</title>
+<script>try{document.documentElement.dataset.theme=new URLSearchParams(location.search).get("theme")||localStorage.getItem("cybertron-theme")||"broadsheet"}catch(e){}</script>
 <link rel="stylesheet" href="assets/site.css">
 </head>
 <body>
@@ -19,7 +19,7 @@
   const el = document.querySelector("#note");
   if (!text || !meta) { el.innerHTML = `<p class="loading">No note called ${esc(slug)}. <a href="notes.html">All notes</a></p>`; }
   else {
-    document.title = `${meta.title} · Charter`;
+    document.title = `${meta.title} · Cybertron`;
     const body = text.replace(/^---\n[\s\S]*?\n---\n/, "");
     el.innerHTML = `<div class="label"><a href="notes.html">Notes</a> · ${esc(meta.date)} · ${meta.minutes} min read</div>
       <h1>${esc(meta.title)}</h1><div class="body">${marked.parse(body)}</div>`;

@@ -71,7 +71,7 @@ No plugin framework is needed. Behaviour stays in modules under fixed names; ord
 | RNG streams | string seeds `f"{seed}|conflict|..."` by convention (≈40 sites) | M | none |
 | Lifecycle | `start_round` kernel.py:1067, `end_round` :1091, runner (events, editorial turns), death fan-out in `mortality.disable` mortality.py:72-121 | H | none |
 | Checkpoint | free (plain `k.w`); `STATE_SCHEMA` kernel.py:1282 | R | provenance |
-| Golden | tests/test_charter_golden.py:36 (`society_small_4` turns most modules on) | R | fixtures |
+| Golden | tests/test_cybertron_golden.py:36 (`society_small_4` turns most modules on) | R | fixtures |
 
 **Feature × kind** (columns: St state, Ac actions, Rt rights, Ev events, LF law functions, LD law docs, Pv previews, Lb library and
 regimes, Dc codex and archive, Gl goals, Sn snapshot and truth, Pr prompt/leverage/Also, Mn manual, Fx facts, Sp spec, Ph phases, Gd golden):
@@ -144,7 +144,7 @@ Two things are accidental:
 
 ```python
 @dataclass(frozen=True)
-class Primitive:                          # charter/primitives.py: metadata only, behaviour stays where it is
+class Primitive:                          # cybertron/primitives.py: metadata only, behaviour stays where it is
     name: str                             # "guard"
     feature: str                          # "conflict"
     effect: str                           # read | move | create | destroy | relation | rule | reveal
@@ -168,7 +168,7 @@ P("dm", "core", "reveal", act="dm", gate="on_dm", emits=("dm",), why={"compel": 
 **What the row generates or checks:**
 - **LawFn rows** for `compel`, `reads` and the gate. `cls` comes from `effect`: reads are `read`; compel and gate are structural,
   except `rule` gates that are ordinary today, which an override covers.
-- **Agent parameters**, checked against the real signature as `test_charter_jurisdictions.py:326-336` does now.
+- **Agent parameters**, checked against the real signature as `test_cybertron_jurisdictions.py:326-336` does now.
 - **`API_GROUPS` membership and the `HOOKS` entry** for an `auto` gate.
 - **A lawdocs Hooks skeleton**, with the signature taken by `inspect`; the prose is still required.
 - **EventType rows**, with `feed` defaulting from `compel_vis`.
@@ -195,17 +195,17 @@ every feed in law-heavy runs, and so every golden.
 ## 4. The Feature contract
 
 The contract has three parts.
-1. **A feature row** in `charter/features.py`: identity and wiring only.
+1. **A feature row** in `cybertron/features.py`: identity and wiring only.
 2. **Rows in each registry tagged `module=`**: actions, rights, events, LawFns, primitives, goals, library laws, archive docs.
 3. **Module-level names with fixed signatures.** No decorators decide order. The two order-sensitive tables (actions in
    `action_registry.py`, phases in `features.py`) are central and reviewed.
 
 ```python
-# charter/features.py
+# cybertron/features.py
 @dataclass(frozen=True)
 class Feature:
     name: str                      # "conflict"
-    module: str                    # "charter.conflict"
+    module: str                    # "cybertron.conflict"
     spec_key: str | None           # "conflict"; None: core, always on
     default_on: bool = False       # projects: True
     implied_by: tuple = ()         # mortality: ("life", "conflict")
@@ -215,9 +215,9 @@ class Feature:
     def on(self, x) -> bool: ...   # THE enabled check; replaces 10 helper spellings and 13 inline checks
 
 FEATURES = [F("credit", ..., state=("loans", "credit")), F("projects", ..., default_on=True), F("outside", ...),
-            F("hidden", ...), F("context", ...), F("roles", ...), F("camps", "charter.camptypes.framework", "camps"),
+            F("hidden", ...), F("context", ...), F("roles", ...), F("camps", "cybertron.camptypes.framework", "camps"),
             F("life", ...), F("mortality", ..., implied_by=("life", "conflict")), F("conflict", ...),
-            F("jurisdictions", ...), F("media", "charter.media", "media2"), F("scholars", ..., "media2"), F("events", ...)]
+            F("jurisdictions", ...), F("media", "cybertron.media", "media2"), F("scholars", ..., "media2"), F("events", ...)]
 # FEATURES order = today's merge order for law_api, snapshot, state_lines, truth, render (snapshot key order reaches bytes).
 
 PHASES = {                         # one reviewed list per phase; ("core", x) is kernel code, ("law", hook) runs law hooks
@@ -291,7 +291,7 @@ PHASES = {                         # one reviewed list per phase; ("core", x) is
 stricter as they land.
 
 ```python
-# tests/test_charter_feature_contract.py
+# tests/test_cybertron_feature_contract.py
 KNOWN_GAPS = {...}                 # (feature, check) pairs open today; the set may only shrink (asserted against a frozen copy)
 
 @pytest.mark.parametrize("f", FEATURES, ids=lambda f: f.name)

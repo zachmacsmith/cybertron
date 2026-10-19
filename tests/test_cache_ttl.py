@@ -1,7 +1,7 @@
 """llm.cache_ttl: the prompt-cache lifetime reaches both backends, and a run flags (never stops) rounds averaging longer."""
 import pytest
 
-from charter import llm as LLM
+from cybertron import llm as LLM
 
 
 @pytest.fixture(autouse=True)
@@ -42,8 +42,8 @@ def test_flag_only_when_rounds_average_longer_than_the_ttl():
 
 
 def test_runner_flags_slow_rounds_without_stopping(tmp_path, monkeypatch):
-    from charter import agents as AG, generator, provenance as PV, runner
-    from charter import spec as S
+    from cybertron import agents as AG, generator, provenance as PV, runner
+    from cybertron import spec as S
     inst = generator.generate(S.apply_overrides(S.load("society"), ["rounds=3", "shared_archive.enabled=false"]), 1)
     assert inst["spec"]["llm"]["cache_ttl"] == "5m"
     clock = iter(range(0, 10_000, 400))                         # every time.time() call advances 400s

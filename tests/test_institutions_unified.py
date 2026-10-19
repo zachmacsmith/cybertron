@@ -1,4 +1,4 @@
-"""Review 14 WP-D (P4.6 done properly; charter/institutions.py): one institution store behind `institutions.unified`.
+"""Review 14 WP-D (P4.6 done properly; cybertron/institutions.py): one institution store behind `institutions.unified`.
 
 The same scenarios run with the flag off and on give the same agent-visible outcomes (action replies, events, holdings, rights,
 snapshots) for founding, joining, leaving (exit as law, D-26), offices, companies (incorporation) and dissolution, and the views
@@ -14,16 +14,16 @@ import types
 
 import pytest
 
-from charter import accounts as AC
-from charter import actions as A
-from charter import agents as AG
-from charter import generator, runner
-from charter import institutions as I
-from charter import jurisdictions as J
-from charter import spec as S
-from charter.kernel import Kernel
+from cybertron import accounts as AC
+from cybertron import actions as A
+from cybertron import agents as AG
+from cybertron import generator, runner
+from cybertron import institutions as I
+from cybertron import jurisdictions as J
+from cybertron import spec as S
+from cybertron.kernel import Kernel
 
-import charter_golden_cases as GC
+import cybertron_golden_cases as GC
 
 ON = ["law.v2=true", "contracts.enabled=true", "contracts.scripted=false"]
 FLAG = "institutions.unified=true"
@@ -437,7 +437,7 @@ def test_jurisdictions_scripted_dry_run_runs_the_same_with_the_flag_on(tmp_path)
 
 
 def test_the_flag_is_in_the_schema():
-    from charter import schema as SC
+    from cybertron import schema as SC
     sp = S.apply_overrides(S.load("E2"), [FLAG])
     assert SC.validate(sp) == [] and I.unified_spec(sp) and not I.unified_spec(S.load("E2"))
     assert isinstance(I.view(types.SimpleNamespace(w={}), "polity"), type(I._EMPTY))

@@ -1,7 +1,7 @@
 """Shared test configuration.
 
-- `golden_runs`: the golden cases (tests/charter_golden_cases.py), each run once per session and shared, read-only, by
-  test_charter_golden.py and test_charter_history.py.
+- `golden_runs`: the golden cases (tests/cybertron_golden_cases.py), each run once per session and shared, read-only, by
+  test_cybertron_golden.py and test_cybertron_history.py.
 - Under pytest-xdist, plain `--dist load` (what `-n N` picks) becomes `loadgroup`, so tests marked
   `xdist_group("golden_runs")` share one worker and the golden runs are built once rather than once per worker. Everything
   else is distributed as with `load`.
@@ -15,13 +15,13 @@ from __future__ import annotations
 
 import pytest
 
-import charter_golden_cases as GC
+import cybertron_golden_cases as GC
 
 
 def pytest_configure(config):
     winput = getattr(config, "workerinput", None)
     if winput is not None:                             # an xdist worker: it re-parses the command line, so it is told here
-        if winput.get("charter_loadgroup"):
+        if winput.get("cybertron_loadgroup"):
             config.option.loadgroup = True             # (xdist tags grouped test ids with "@group" when this is set)
     elif config.pluginmanager.hasplugin("xdist") and getattr(config.option, "dist", "no") == "load":
         config.option.dist = "loadgroup"
@@ -29,18 +29,18 @@ def pytest_configure(config):
 
 @pytest.hookimpl(optionalhook=True)
 def pytest_configure_node(node):                       # xdist hook (controller side): pass the scheduling choice on
-    node.workerinput["charter_loadgroup"] = node.config.getoption("dist") == "loadgroup"
+    node.workerinput["cybertron_loadgroup"] = node.config.getoption("dist") == "loadgroup"
 
 
 @pytest.fixture(scope="session")
 def golden_runs(tmp_path_factory):
-    """name -> (run directory, in-memory parts) for every golden case, built on first use (charter_golden_cases.Runs)."""
+    """name -> (run directory, in-memory parts) for every golden case, built on first use (cybertron_golden_cases.Runs)."""
     return GC.Runs(tmp_path_factory.mktemp("golden_runs"))
 
 
 @pytest.fixture(autouse=True)
 def _library_registry_is_restored():
-    from charter import library as LB
+    from cybertron import library as LB
     before = dict(LB.LIB)
     yield
     if LB.LIB != before:

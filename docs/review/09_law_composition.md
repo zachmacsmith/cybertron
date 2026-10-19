@@ -106,7 +106,7 @@ stopped.) This is not a sandbox escape, but limited death must cover it (§9.6).
 ### 4.1 The chokepoint
 
 ```python
-# charter/kernel.py (P2.1)
+# cybertron/kernel.py (P2.1)
 def apply(self, name: str, /, **payload) -> Outcome:
     """Apply primitive `name`. Runs physics checks, before-hooks (synchronously), the change, charges, and queues after-hooks.
     Raises PhysicsError when the change is impossible (insufficient balance, entrenched right, unknown agent). The caller converts
@@ -116,7 +116,7 @@ def apply(self, name: str, /, **payload) -> Outcome:
 `Outcome` is a frozen record: `ok: bool`, `blocked_by: tuple[str, ...]` (law ids), `charges: tuple[Charge, ...]`,
 `result: dict` (primitive-specific, for example `{"moved": 3.0}`), `refused: str | None` (`"depth"`, `"halted"`, a physics reason).
 
-A primitive is declared once in `charter/primitives.py` (metadata; behaviour is the `apply` function it names). The row schema is in
+A primitive is declared once in `cybertron/primitives.py` (metadata; behaviour is the `apply` function it names). The row schema is in
 ARCHITECTURE §3.3. The fields that matter here:
 
 | Field | Meaning for hooks |
@@ -162,7 +162,7 @@ argument adapter. Old laws therefore see exactly the events they see today, in t
 new-style hooks see law-, world- and intervention-caused changes.
 
 ```python
-# charter/primitives.py
+# cybertron/primitives.py
 @dataclass(frozen=True)
 class HookAlias:
     name: str                 # "on_transfer"
@@ -463,7 +463,7 @@ Before-hooks run **immediately** (their verdict is needed before the change). Af
 and drained when the root frame exits. That makes reactions breadth-first, keeps Python recursion shallow, and gives an exact order.
 
 ```python
-# charter/dispatch.py (P2.1 skeleton without new semantics; P3.1 full)
+# cybertron/dispatch.py (P2.1 skeleton without new semantics; P3.1 full)
 def apply(k, name, payload):
     P = PRIMITIVES[name]
     cas = k.cascade                                  # opened by the innermost root frame; None outside any (kernel-internal)
@@ -619,7 +619,7 @@ Today's `dry_run` (3 rounds of round hooks, a `view()` diff) stays as the propos
 to every agent as a free pre-action and to the proposal procedure:
 
 ```python
-# charter/preview.py (P3.5)
+# cybertron/preview.py (P3.5)
 def preview(k, code: str, *, requester: str, jurisdiction: str | None = None, amends: str | None = None,
             scenarios: str | list = "default", rounds: int = 3) -> dict:
     """Run a draft against the whole legal system visible to `requester`, in a transaction, and report."""

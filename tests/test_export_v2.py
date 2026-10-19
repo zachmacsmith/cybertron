@@ -1,4 +1,4 @@
-"""Export schema 2 (docs/data_format.md; charter/export.py): the messages / channels / channel_members / turns / state / documents /
+"""Export schema 2 (docs/data_format.md; cybertron/export.py): the messages / channels / channel_members / turns / state / documents /
 event_types / blobs tables, portable paths, log_format, and the frozen run fixtures of every raw log format.
 
 Fixtures: a scripted E0 run, a fork of it, a copy with synthetic message, channel and snapshot records appended (each channel_id
@@ -15,11 +15,11 @@ from pathlib import Path
 
 import pytest
 
-from charter import agents as AG
-from charter import eventtypes as ET
-from charter import export as X
-from charter import generator, provenance as PV, replay as RP, runner, scorer
-from charter import spec as S
+from cybertron import agents as AG
+from cybertron import eventtypes as ET
+from cybertron import export as X
+from cybertron import generator, provenance as PV, replay as RP, runner, scorer
+from cybertron import spec as S
 
 QUIET = dict(log=lambda *a: None)
 FROZEN = Path(__file__).resolve().parent / "fixtures" / "export_runs"

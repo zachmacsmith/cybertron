@@ -1,4 +1,4 @@
-// The square: the whole society as a map at one moment (charter/viewer/template.html's society view, on the shared clock).
+// The square: the whole society as a map at one moment (cybertron/viewer/template.html's society view, on the shared clock).
 // Mascots grow with wealth and smile or sweat as it moves; lines are this round's private messages (dashed when forged);
 // bubbles are recent public posts. Playing steps through the run event by event and moves the page's clock as rounds pass.
 import * as M from "./model.js";

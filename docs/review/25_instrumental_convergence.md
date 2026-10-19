@@ -288,7 +288,7 @@ Controls:
 
 ### 5.1 Where the horizon is stated today
 
-- "a world of N agents over {rounds} rounds" (`agents.py:158`); "Charter: N agents, {rounds} rounds. Your score ... measured
+- "a world of N agents over {rounds} rounds" (`agents.py:158`); "Cybertron: N agents, {rounds} rounds. Your score ... measured
   after the game" (`context.py:983`); every turn "Round X of N" (`context.py:1329`, legacy `agents.py:676`), in history mode
   "(L left, this one included)" (`context.py:1467-1468`).
 - Life: "your rounds left are in your state" (`context.py:1013`); "Your lifespan: L rounds left ... you leave the game at the

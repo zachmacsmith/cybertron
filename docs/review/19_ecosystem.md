@@ -3,10 +3,10 @@
 10 Oct 2026, branch `wp/sub-forage` (from `subsistence` at e00b89c). Scope: the user's question, "investigate how you should model
 the ecosystem, carrying capacity etc. How does the speed at which they hunt impact population?", read against the user's decisions
 of the same day (food comes from forests, not camps; hunting is better in groups but open to anyone; fields parked). This review
-recommends a model, gives its parameters, shows toy simulations behind them, and records what was implemented in charter and what
+recommends a model, gives its parameters, shows toy simulations behind them, and records what was implemented in cybertron and what
 scripted dry runs of `nature_subsistence` showed.
 
-Everything numeric here comes from a toy model in the scratchpad (pure Python, no charter imports, no model calls; `eco/toy.py`,
+Everything numeric here comes from a toy model in the scratchpad (pure Python, no cybertron imports, no model calls; `eco/toy.py`,
 `sweep2.py`, `speed.py`) and from scripted dry runs of the simulator (§11). None of it is Haiku or any LLM. The toy's agents follow
 three fixed policies; real agents will do something else, and that difference is the experiment.
 
@@ -330,7 +330,7 @@ seasons are persistent.
 
 A quota near 1.2-1.5 N forest actions a round recovers about half of what greed loses; a closed season protects the game but
 pushes the pressure onto plants (plants end at 0.21-0.31). Neither reaches restraint's 0.91, because greedy open access also loses
-people to distribution: the unlucky and the already hungry (who gather less) fall behind while others' surplus spoils. In charter
+people to distribution: the unlucky and the already hungry (who gather less) fall behind while others' surplus spoils. In cybertron
 the quota is the existing camp rule (`set_quota` on a forest), the closed season is a `before_hunt` hook reading `forest(camp)`, and
 territories are a `before_hunt` / `before_harvest` hook on who may use which forest.
 
@@ -380,7 +380,7 @@ press on it, but births are too slow for the population to follow.
 ## 7. Tragedy of the commons, and where institutions can change it
 
 The forest is open access by default (U1's residual: liberty), and each agent's best reply is to take more, since a unit left in the
-forest is shared with everyone. The model gives institutions four levers, all of them law in charter:
+forest is shared with everyone. The model gives institutions four levers, all of them law in cybertron:
 
 - **Quotas** (the camp rule `set_quota`, per forest per round): the most effective single rule in the toy.
 - **Seasons** (a `before_hunt` hook that refuses while `forest(camp)["game"]` is scarce): protects the game, shifts pressure to plants.
@@ -440,10 +440,10 @@ weak_link hunt (party_food 2) is gone.
 
 ## 10. What was implemented
 
-- `charter/camptypes/forest.py`: two stocks per forest, the forage and fell actions, the hunt's resolution at the round's end
+- `cybertron/camptypes/forest.py`: two stocks per forest, the forage and fell actions, the hunt's resolution at the round's end
   (party by party, its own stream `"{seed}|subsistence|hunt|{camp}|{round}|{party}"`), kill chances and the expected catch, the
   coarse game word.
-- `charter/subsistence.py`: the composer (forests only; fields behind `fields.enabled`), game regrowth and seasons
+- `cybertron/subsistence.py`: the composer (forests only; fields behind `fields.enabled`), game regrowth and seasons
   (`_ecology`, `_next_season`, own stream `"{seed}|subsistence|season|{round}"`), the `hunt` action and its routed primitive (L,
   `before_hunt`), the law read `forest(camp)`, state lines (plants share, game word, season, one's own hunting entry), the Food
   manual section, the dry-run bot (`bot_hunt`, `bot_effort`: bands of about four by roster order).
@@ -453,7 +453,7 @@ weak_link hunt (party_food 2) is gone.
 - With two-parent reproduction (S4), a minor forages and hunts at x0.5 (`subsistence.minor_yield`, review 15 §4.4).
 - World events no longer destroy or blight forests (a destroyed sole forest ended a dry run; §12 Q3).
 - With subsistence off nothing changes: every golden fixture but the subsistence-on cases (`subsistence_small`, `pairs_small`) is
-  unchanged, and `python -m charter difftest --base 9ba0667 --head WORKTREE` on society, nature_design, life_pilot, E4 and
+  unchanged, and `python -m cybertron difftest --base 9ba0667 --head WORKTREE` on society, nature_design, life_pilot, E4 and
   jurisdictions_pilot (seeds 1-2, 3 rounds) reports every case identical.
 
 ## 11. Scripted dry runs of nature_subsistence

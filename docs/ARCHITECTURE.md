@@ -1,4 +1,4 @@
-# Charter target architecture
+# Cybertron target architecture
 
 *7 Oct 2026, written at `014a913` (main). This is the target for the overhaul that parallel agents implement. It consolidates
 reviews 05 (goals), 06 (contracts, including the §9 addendum), 08 (feature contract) and 09 (law composition) with the owner's
@@ -11,11 +11,11 @@ branch's names differ from the names used here, the merged names win and this do
 
 | Id | Branch | Delivers | Names assumed here |
 |---|---|---|---|
-| G1 | `feat/event-registry` | event-type registry | `charter/eventtypes.py`: `EventType`, `EVENTS`, `get(name)` (raises on unknown) |
-| G2 | `feat/lawfn-table` | complete law-function table | `charter/lawapi.py`: `LawFn` rows for all ~117 functions with `cls` and `module`; `API_GROUPS` derived |
+| G1 | `feat/event-registry` | event-type registry | `cybertron/eventtypes.py`: `EventType`, `EVENTS`, `get(name)` (raises on unknown) |
+| G2 | `feat/lawfn-table` | complete law-function table | `cybertron/lawapi.py`: `LawFn` rows for all ~117 functions with `cls` and `module`; `API_GROUPS` derived |
 | G3 | `feat/cause-stack` | kernel cause stack | `Kernel.cause(kind, id, **meta)` context manager; events carry `cause` and `chain` |
 | G4 | `feat/difftest` | differential test harness | runs a preset under two code versions and compares normalised `events.jsonl` and snapshots |
-| G5 | `feat/history` | History object for scoring | `charter/history.py`: `History.load(run_dir, until=None)` |
+| G5 | `feat/history` | History object for scoring | `cybertron/history.py`: `History.load(run_dir, until=None)` |
 | G6 | `feat/replay` | replay and per-round checkpoints | `checkpoints/rNNNN.pkl` + index of append-only offsets; `Replay` policy keyed by call |
 
 ---
@@ -53,7 +53,7 @@ identity, capital and durable goods.
 ## 2. Module map
 
 ```
-charter/
+cybertron/
   kernel.py          physics: k.w, accounts, apply(), cause stack, log/visibility, phases loop, transactions, checkpoint
   primitives.py      NEW  Primitive registry + HookAlias table + apply functions for core primitives
   dispatch/          NEW  the primitive dispatcher (W8a: a package; D.<name> re-exports every old name)
@@ -102,7 +102,7 @@ charter/
 
 Every registry is a module-level dict keyed by name, filled at import in a fixed order, whose `get(name)` raises
 `Unknown<Kind>(name)` with a did-you-mean suggestion. Old constant names are kept as derived views. One test file,
-`tests/test_charter_contract.py`, walks all registries and their cross-references (§3.14).
+`tests/test_cybertron_contract.py`, walks all registries and their cross-references (§3.14).
 
 ### 3.1 Features and phases (`features.py`, P1.2)
 
@@ -110,7 +110,7 @@ Every registry is a module-level dict keyed by name, filled at import in a fixed
 @dataclass(frozen=True)
 class Feature:
     name: str                      # "conflict"
-    module: str                    # "charter.conflict"
+    module: str                    # "cybertron.conflict"
     spec_key: str | None           # "conflict"; None: core, always on
     default_on: bool = False       # projects: True
     implied_by: tuple = ()         # mortality: ("life", "conflict")
@@ -131,7 +131,7 @@ review 08 §4); `death` is today's hand-coded sequence in `mortality.disable`.
 
 ### 3.2 Spec schema and state sections (`schema.py`, P1.3)
 
-- Each feature's `DEFAULTS` is the single source of its spec block; `charter/specs/base.yaml` may override but not add keys.
+- Each feature's `DEFAULTS` is the single source of its spec block; `cybertron/specs/base.yaml` may override but not add keys.
 - `schema.validate(spec) -> list[str]` returns errors for unknown keys (with suggestions), wrong types, unknown enum values
   (`models.mix`, `turns`, agent class names, library categories); generation calls it and fails on any error.
 - Keys may be marked `runtime_safe=True` (the generalisation of `runner.LIVE_KEYS`) for the `set_spec` intervention.
@@ -275,7 +275,7 @@ def has_power(k, account: str, power: str) -> bool | str: ...
 `EventType(name, module, feed, post, board, truth, forgeable, quotable, message, aliases, render)`, `feed` required. Add
 `primitive: str | None` (the primitive whose change logs it) in P1.7. Visibility stays per call. Derived: `POSTABLE`,
 `context.BOARD_TYPES`/`RECENT_KINDS`/`POSTS`/`OFFICIAL`, `goals.PUBLIC`, `hidden.FORGEABLE`/`VEILABLE`, `media.QUOTABLE`,
-`report`/`observer.MESSAGE_TYPES`. Strict mode (`CHARTER_STRICT_VOCAB=1`, set by tests) makes `k.log` raise on an unregistered type.
+`report`/`observer.MESSAGE_TYPES`. Strict mode (`CYBERTRON_STRICT_VOCAB=1`, set by tests) makes `k.log` raise on an unregistered type.
 
 New types introduced by this architecture (each with explicit `vis=` at its call site): `proposal_blocked` (public),
 `enact_blocked` (public), `law_flagged` (public), `import_pinned` (public), `cascade_halted` (monitor), `hook_aborted` (monitor),
@@ -389,7 +389,7 @@ Op ──primitive──> Primitive
 
 ### 3.14 The completeness test
 
-`tests/test_charter_contract.py` (P1.7 starts it, every package extends it) with a `KNOWN_GAPS` set that may only shrink (compared
+`tests/test_cybertron_contract.py` (P1.7 starts it, every package extends it) with a `KNOWN_GAPS` set that may only shrink (compared
 with a frozen copy):
 
 - every feature owns exactly its declared state, and nothing when off;
@@ -551,7 +551,7 @@ Associations v1 (P4.3) follow review 06 §3-§4 with the changes below:
   exit). It needs a member kind on association records (`{"kind": "association", "id": cid}`), an account-level `has()`, ballots
   weighted per member account, and a rule for who acts for a member association (its office holders, through agency).
 - Exit: a member can always leave at round end; `on_exit` keeps at most the member's escrow.
-- Incorporation (W8e, D-28; `charter/incorporation.py`): `create_contract {"under": "<polity>"}` founds a company under a polity
+- Incorporation (W8e, D-28; `cybertron/incorporation.py`): `create_contract {"under": "<polity>"}` founds a company under a polity
   (record key `parent`, absent on an unincorporated contract, which keeps today's limits and world defaults). The founding is the
   routed `create_contract` primitive with payload key `under`: the parent's laws see it whoever the founder is
   (`before_create_contract`: registration, a required template) and its company rules apply (a registration fee into its
@@ -598,7 +598,7 @@ J0 storage moved into its record; `LEGACY_ONLY` as a founding-polity power; chec
 on every preset, including jurisdictions-on with hidden jurisdictions and a state-of-nature start. One golden re-record, for the new
 state keys.
 
-Wave 9 WP-D (review 14 §3.1, §6.1 row D; `charter/institutions.py`), behind spec `institutions.unified` (default false; off, every
+Wave 9 WP-D (review 14 §3.1, §6.1 row D; `cybertron/institutions.py`), behind spec `institutions.unified` (default false; off, every
 world is byte-identical, checked by the goldens and `difftest` against the base):
 - One store, `k.w["institutions"][iid]`, for jurisdictions (kind `polity`, J0 included) and contract associations (kind
   `association`), one record kind: id, kind, name, founder, founded_round, treasury, reserve, `status` (forming | active |
@@ -618,7 +618,7 @@ world is byte-identical, checked by the goldens and `difftest` against the base)
   `status`, `published`, `all_`. Not done here: grants (WP-E), dormancy and succession (WP-F), recognition and institutions as
   members (WP-G).
 
-Wave 9 WP-E (review 14 §2.3, §3.2, §6.1 row E; `charter/grants.py`), behind spec `institutions.grants` (needs `institutions.unified`;
+Wave 9 WP-E (review 14 §2.3, §3.2, §6.1 row E; `cybertron/grants.py`), behind spec `institutions.grants` (needs `institutions.unified`;
 default false; off, byte-identical):
 - Powers from grants, not kind: `powers.has_power` asks `grants.value`: seed (the preset's tree root: today's polity column, the
   j0 values included; `powers.J0_ONLY` are the seed-only powers), consent (the template's default column, plus what the founding
@@ -638,7 +638,7 @@ default false; off, byte-identical):
   `institutions.offices`, `office`, `holders`, `officers`. Channels: selectors `{"officers": iid}` and `{"officers_or_members": iid}`;
   an institution's inbox is read by its officers once it declares an office, its members before. No vacancy or succession yet.
 
-Wave 9 succession (review 14 §7.2, §3.4; review 18 §2.5, Q6; D-38; `charter/succession.py`, `charter/code/succession_act.py`),
+Wave 9 succession (review 14 §7.2, §3.4; review 18 §2.5, Q6; D-38; `cybertron/succession.py`, `cybertron/code/succession_act.py`),
 behind spec `institutions.succession` (needs `institutions.grants`; default false; off, byte-identical):
 - Vacancies: an office holding ends by death or departure (found at the end of the round, the round_end step `succession` after
   deaths of old age), exit or expulsion (contracts.change_leave), term end (term_end reached) or removal (a law's revoke). Each goes
@@ -684,7 +684,7 @@ runs/<spec>/<run_id>/
   checkpoints/rNNNN.pkl + checkpoints/index.json (G6): state only + offsets into append-only files
   blobs/<sha>           sandbox outputs and archive documents read (P5.4)
   directories/          base.json (the namespace-scoped directories' files at the start, as blob shas) and state.json (publish flag,
-                        the manifest last written back): the frozen directories (charter/directories.py), as the shared archive's
+                        the manifest last written back): the frozen directories (cybertron/directories.py), as the shared archive's
                         archive/; the working copies live in k.w["dirs"] (checkpointed), written back to the live tree file by file
 ```
 
@@ -721,10 +721,10 @@ escape hatch. Runner state becomes one `RunState` object checkpointed whole and 
 ### 8.4 Fork, rewind, replay, replicates
 
 ```
-charter fork RUN --at N [--apply iv.yaml] [--replicates K] [--replay strict|prompt-match|none] [--code current|parent]
-charter rewind RUN --to N          # a fork with no interventions; never destroys the parent
-charter replay RUN [--until N]     # must reproduce events.jsonl byte for byte from calls.jsonl
-charter branches RUN               # lineage tree from run.json parent pointers
+cybertron fork RUN --at N [--apply iv.yaml] [--replicates K] [--replay strict|prompt-match|none] [--code current|parent]
+cybertron rewind RUN --to N          # a fork with no interventions; never destroys the parent
+cybertron replay RUN [--until N]     # must reproduce events.jsonl byte for byte from calls.jsonl
+cybertron branches RUN               # lineage tree from run.json parent pointers
 ```
 
 A fork copies the instance and the log prefixes to the round-N offsets, restores `checkpoints/r(N-1)`, applies the schedule, and
@@ -850,7 +850,7 @@ Signatures are Python; "→ G*" marks interfaces owned by an in-progress groundw
 
 **Golden policy.** Four kinds of fingerprint exist: *world* (events and snapshots of the golden dry runs), *instance*, *prompt*
 (system prompts and manuals, `PROMPT_CASES`) and *score*. "Behaviour-preserving" means all four are byte-identical **and** the
-differential harness (G4) reports no difference on every preset in `charter/specs/` it supports (normalising only `cause`/`chain`). A
+differential harness (G4) reports no difference on every preset in `cybertron/specs/` it supports (normalising only `cause`/`chain`). A
 "behaviour-changing" package names exactly which fingerprints it re-records and why, in the commit message, and re-records nothing
 else. New features add a new golden case rather than changing old ones; old cases keep `law.v2: false`, `rng_version: 1`,
 `library.edition: 1`.
@@ -868,12 +868,12 @@ As listed at the top. Everything below that names them depends on their merge; p
 | Id | Scope | Files owned | Depends on | Acceptance | Golden |
 |---|---|---|---|---|---|
 | **P1.1** **start now** | Complete `Act`: `handler, doc, category, module, emits, primitives, aliases, legacy`; derive `ACTIONS`, `DM_ACTIONS`, `ACTION_DOC`, `CATEGORIES`; delete the 46 trampolines; strict category test | `action_registry.py`, `actions.py` (dispatch, trampolines), `scorer.py` (categories), the `ACTION_DOC` definition in `agents.py` | none (`emits` checked once G1 merges) | set equalities `REG == ACTIONS == ACTION_DOC`; every action has an explicit category; unknown-action error lists names in the old order | preserving: all four identical |
-| **P1.2** **start now** | `features.py`: `Feature` rows, `on()`, `state`, `rng`, `golden`; the 10 enabled helpers delegate; `PHASES` with `init`, `round_start`, `round_end`, `after_turns`, `death`, `birth`; kernel lifecycle as loops in today's order; `law_api`, `snapshot_fields`, `state_lines`, `truth`, `render_event` tails as loops | `features.py` (new), kernel lifecycle region, `runner._truth`, `agents.state_view`, `mortality.disable` (death phase), module helper bodies (one line each) | none | snapshot key order identical; death phase order test; `Feature.on` agrees with every old helper on every spec in `charter/specs/` | preserving |
-| **P1.3** **start now** | Spec schema: `DEFAULTS` per feature as the single source, `schema.validate`, did-you-mean errors, `runtime_safe` marks; `base.yaml` gains no keys code does not know | `schema.py` (new), `spec.py`, `generator.py` (call validate), `charter/specs/base.yaml` | none (uses module `DEFAULTS` directly until P1.2) | every spec in `charter/specs/` validates; misspelt keys (`agents: {workr: 3}`, `models.mix: balancd`) fail with a suggestion | preserving (instance identical) |
+| **P1.2** **start now** | `features.py`: `Feature` rows, `on()`, `state`, `rng`, `golden`; the 10 enabled helpers delegate; `PHASES` with `init`, `round_start`, `round_end`, `after_turns`, `death`, `birth`; kernel lifecycle as loops in today's order; `law_api`, `snapshot_fields`, `state_lines`, `truth`, `render_event` tails as loops | `features.py` (new), kernel lifecycle region, `runner._truth`, `agents.state_view`, `mortality.disable` (death phase), module helper bodies (one line each) | none | snapshot key order identical; death phase order test; `Feature.on` agrees with every old helper on every spec in `cybertron/specs/` | preserving |
+| **P1.3** **start now** | Spec schema: `DEFAULTS` per feature as the single source, `schema.validate`, did-you-mean errors, `runtime_safe` marks; `base.yaml` gains no keys code does not know | `schema.py` (new), `spec.py`, `generator.py` (call validate), `cybertron/specs/base.yaml` | none (uses module `DEFAULTS` directly until P1.2) | every spec in `cybertron/specs/` validates; misspelt keys (`agents: {workr: 3}`, `models.mix: balancd`) fail with a suggestion | preserving (instance identical) |
 | **P1.4** **start now** | Legal-system bug fixes: F1 (a law calling `repeal` is structural; law-caused repeal of a law with a stricter class is refused); `set_official_editor` scope per D-3 | `lawlang.py` (classify), `kernel.py` `repeal`, `lawapi.py` row | none | regression tests: an ordinary law cannot repeal a procedural law; `classify` of `repeal + gazette` is structural | preserving for goldens (no golden law calls `repeal`); behaviour change recorded for agent-written laws |
 | **P1.5** | Goal registry generated from today's tables, with `text`, `rule` (describing today's scorer faithfully), `score` wrapping legacy `s_*` through `legacy_gt(h)`, `version=1`; derived old names | `goal_registry.py` (new), `goals.py`, `life.py` (`HISTORY`), `roles.py` (`HAVOC_REFUSAL`), `events.py`/`generator.py` (text assembly) | G5 | `assert set(GOALS) == set(CATALOGUE)`; draw RNG consumption identical | preserving: instance and scores identical (rule text not yet shown to agents) |
 | **P1.6** | `Section` model and per-feature `facts`; core prompt, manual, legacy prompt and observer prompt as renderings; perturbation test (review 02 §4.5) | `sections.py` (new), `context.py`, `manual.py`, `composition.py`, `agents.py` (prompt functions), `facts.py` | P1.1 (agents.py), P1.2 | prompt fingerprints identical; perturbation test green | preserving (prompt fingerprints identical) |
-| **P1.7** **start now** | `primitives.py` metadata for the §3.3 catalogue (no behaviour), `HookAlias` table, derived `lawlang.HOOKS`, `LawFn.primitive`, `EventType.primitive`, completeness test with `KNOWN_GAPS` | `primitives.py` (new), `tests/test_charter_contract.py` (new), `lawlang.HOOKS` line | stubs against G1/G2; finalise after they merge | contract test passes with a frozen `KNOWN_GAPS` | preserving |
+| **P1.7** **start now** | `primitives.py` metadata for the §3.3 catalogue (no behaviour), `HookAlias` table, derived `lawlang.HOOKS`, `LawFn.primitive`, `EventType.primitive`, completeness test with `KNOWN_GAPS` | `primitives.py` (new), `tests/test_cybertron_contract.py` (new), `lawlang.HOOKS` line | stubs against G1/G2; finalise after they merge | contract test passes with a frozen `KNOWN_GAPS` | preserving |
 
 ### Phase 2: the primitive layer (behaviour-preserving; the differential harness is the gate)
 
@@ -936,7 +936,7 @@ As listed at the top. Everything below that names them depends on their merge; p
 | Id | Scope | Depends on | Golden |
 |---|---|---|---|
 | **P7.1** | Legacy (context-off) prompt per D-4: freeze as-is (default) and stop adding to it | P1.6 | none |
-| **P7.2** | `charter preview <spec> --seed N` replaces the committed `prompt_preview.md`; Leaker's common text from rendered sections (scoring change, versioned) | P1.6, P6.1 | score golden for Leaker only |
+| **P7.2** | `cybertron preview <spec> --seed N` replaces the committed `prompt_preview.md`; Leaker's common text from rendered sections (scoring change, versioned) | P1.6, P6.1 | score golden for Leaker only |
 
 ### What can start immediately
 
@@ -983,19 +983,19 @@ contracts: P2.1 → P4.1 → P4.2 → P4.3 (needs P3.1). Critical path to forks 
 | D-28 | Incorporation | Proposed: contracts may be founded under a polity (`parent`); the parent's company law outranks the contract's code and grants benefits (courts, recognition of offices, liability rules); unincorporated contracts remain. Wave 8, with the Board port (shared nesting machinery). W8e implements it (§7.2 "Incorporation"): `under`, company rules, parent-first binding and conflict rule; member liability deferred |
 | D-29 | V18: what new-style hooks may read | A law never reads a DM's text unless conditions.law_reads_dms and the DM is unencrypted, nor a private channel post's text (dispatch.hook_payload); metadata (who, to whom, where) stays visible pending the publication layer (review 12) |
 | D-30 | Review 12's decision list | Adopted as recommended (user, 8 Oct): Board Charter with per-regime entrenchment (presets: entrenched, readable); Fixer stays X; kernel private by default with presets seeding a Publication Act that reproduces today; surveillance only within a world technology dial (law_reads_dms, channels.readable), encryption never broken; world events: laws regulate consequences only; prompt: one line per Act plus the legal digest; Land Registry Act seeded everywhere for now; dry run stays X; residual proposing rule: every member; default code runs as native code without gas until amended, ids A1..An. Exception: polity exit per D-26 (law, unbounded), not review 12's bounded default |
-| D-31 | Dispatcher layout (W8a, before review 12's WP1) | `charter/dispatch/` is a package of modules by concern (§2) and `changes/` by domain, re-exporting every old name; a primitive is routed by its row's `routed` flag, so WP1 may name an owner module's function as `fn`; every v1/v2 fork is listed in `dispatch.base.V2_SEAMS` (checked against the source); every primitive row and every review 12 inventory item carries a tier (`primitives.TIER_OF`, `charter/tiers.py`) |
+| D-31 | Dispatcher layout (W8a, before review 12's WP1) | `cybertron/dispatch/` is a package of modules by concern (§2) and `changes/` by domain, re-exporting every old name; a primitive is routed by its row's `routed` flag, so WP1 may name an owner module's function as `fn`; every v1/v2 fork is listed in `dispatch.base.V2_SEAMS` (checked against the source); every primitive row and every review 12 inventory item carries a tier (`primitives.TIER_OF`, `cybertron/tiers.py`) |
 | D-32 | `lawful_attack` (a law makes a member attack: breaks "laws never act for an agent", logged monitor-only) | Replace with an authorization: a law may authorize or pay a member to attack (bounty pattern; agency-style record), the member chooses to act; the order and the attack are attributed and published per the publication layer (user, 8 Oct). Wave 8c |
 | D-33 | Media and press | Not a fixed role: outlets, channels, editorship and licences are law-granted rights over forms of channel. Residual (no Act): anyone may found a channel or outlet; an Association Act and a Press Act seed today's preset behaviour (press right gates, two media roles) and are amendable. Benchmark findings that depend on today's contingent media setup (e.g. "only two press holders") are preset artefacts, not platform facts (user, 8 Oct) |
-| D-34 | Default code framework (W8d, review 12 WP3) | `charter/code/`: an Act is law-language source plus a native twin; store-based Acts set rows in `k.w["default_code"]["store"][polity][Act]`, read at today's seams by `code.rule(k, polity, act, key, default)` (code off: the default; Act absent or repealed: its residual). Acts A1..An are seeded at round 0 before the constitution (author `code`, not in `law_order` while native, one monitor-only `code_act` record each); an amendment switches an Act to its source (ordinary law in the enactment order), a repeal empties its rows. Selected by `regimes.FIELDS["code"]` or spec `code.select` (today, none, overrides); flag `code.enabled`, off by default. Delivered: Communications Act (A1), Court Rules Act (A2); template and checklist in docs/default_code.md |
+| D-34 | Default code framework (W8d, review 12 WP3) | `cybertron/code/`: an Act is law-language source plus a native twin; store-based Acts set rows in `k.w["default_code"]["store"][polity][Act]`, read at today's seams by `code.rule(k, polity, act, key, default)` (code off: the default; Act absent or repealed: its residual). Acts A1..An are seeded at round 0 before the constitution (author `code`, not in `law_order` while native, one monitor-only `code_act` record each); an amendment switches an Act to its source (ordinary law in the enactment order), a repeal empties its rows. Selected by `regimes.FIELDS["code"]` or spec `code.select` (today, none, overrides); flag `code.enabled`, off by default. Delivered: Communications Act (A1), Court Rules Act (A2); template and checklist in docs/default_code.md |
 | D-35 | No root (user, 8 Oct; review 14) | No world constitution: polities are roots of an institution tree; any institution can be founded under a willing parent; J0 is the root a preset seeds, its kernel privileges become default code; polities and contracts become one account kind (P4.6). Start worlds in a state of nature, not the #convention anarchy regime (frozen for old runs). W9 B: the anarchy constitution and regime are frozen (code comments; tests pin their bytes and the presets that may name them: full10, haiku100); the new-world state of nature is the `nature_design` preset (state_of_nature + contracts + the design arm + the S0 demography, with a void `nature` constitution); the convention is the Assurance Founding contract template (`library.CONTRACT_TEMPLATES`) |
-| D-36 | Demography (user, 8 Oct; review 15 v2.1) | Lifespans absolute (not scaled by run length); founder ages iid from the stationary distribution; no population cap (carrying capacity from food/land/fertility is the only ceiling; a run-stopping budget guard for model cost); two-parent births priced to be doable; initial conditions set incentives and boom-bust or Malthusian dynamics must be possible outcomes, not smoothed away. S0 implements the demography part behind flags (defaults unchanged): `life.scale: none`, `life.age_structure: stationary` (`age_sampling: iid`), no cap with either unless `cap_mult` is set, `life.max_population` (budget stop, STOPPED.md), `life.default_heirs: children`, `life.audit_fixes`, `roles.maker_refill`; recommended settings in `charter/specs/fragments/demography.yaml` |
+| D-36 | Demography (user, 8 Oct; review 15 v2.1) | Lifespans absolute (not scaled by run length); founder ages iid from the stationary distribution; no population cap (carrying capacity from food/land/fertility is the only ceiling; a run-stopping budget guard for model cost); two-parent births priced to be doable; initial conditions set incentives and boom-bust or Malthusian dynamics must be possible outcomes, not smoothed away. S0 implements the demography part behind flags (defaults unchanged): `life.scale: none`, `life.age_structure: stationary` (`age_sampling: iid`), no cap with either unless `cap_mult` is set, `life.max_population` (budget stop, STOPPED.md), `life.default_heirs: children`, `life.audit_fixes`, `roles.maker_refill`; recommended settings in `cybertron/specs/fragments/demography.yaml` |
 | D-37 | Institutions and channels (user, 9 Oct; review 14 §4.6, §7.1) | Institutions bind non-members only by force (or recognition by agents already bound); consent binds members. Allegiance clauses allowed when visible at join. Channels are one structure (owner, writer/reader selectors including address-as-capability, listing, sender identity, retention); DMs, squares, inboxes, presses, chambers and secret cells are templates. Every agent and institution has an inbox. Delivery pull by default for new worlds (DMs and own inbox pushed). Starting conditions are configuration, not a kernel state. Institutions as members postponed |
 | D-38 | Continuity and succession (user, 9 Oct; review 14 §7.2) | Institutions do not die with their founder. Death, exit, expulsion, term end and removal make a vacancy the institution's code may hook; each office declares a succession rule (library clauses). Where the institution is silent the enclosing polity's law decides, nearest first (Succession Act; Dissolution and Escheat Act: polity, family or members); each polity law is mandatory or overridable. With no governing polity vacancies stay vacant and a dissolved institution's holdings are locked (spaceless worlds: goods and claims locked, rights released, channels read-only). Contracts end when no party is left; their code may say what a party's death does (default: its estate). Passing to estates is only ever polity law. Repeal abolishes the offices a law declared |
 | D-39 | Subsistence (user, 9 Oct; review 15 S1-S3) | Food is physics: every eater (not the Board, Fixer or observer, U6) eats 1 food at round end, after the laws' on_round_end; hunger stages fed / hungry / starving with a hidden seeded hazard from the third missed meal (death cause `starvation`); 15% spoilage outside stores, 2% in them. The ration, hunger and spoilage are unblockable world rows (eat, hunger, spoil: tier P). Hunger gates actions (`Act.fed`), but **starving agents keep their vote** (the lead's U14: disenfranchisement by hunger would be a kernel rule; a polity may restrict it with the `hunger(agent)` read). Hunger is public and coarse (U2 b). Food camps (forest, fields, the hunt) are appended after every other draw and ignore `typed.open_classes`; who may sow or reap a plot is law (routed sow, reap; residual liberty, U1; the Tillers' Right Act is S6). Stores are accounts `store:<sid>` owned by an agent or an institution; only the owner takes food out. All behind `subsistence.enabled` (off: byte-identical) |
-| D-40 | Two-parent reproduction (user, 10 Oct; review 15 S4) | `life.reproduction.mode`: makers (default, unchanged) / pairs / both (`charter/pairs.py`). A child needs two consenting parents (`conceive`: an offer, then the partner's matching call); both must be adults (hunger is no bar: the food cost is the limit), not expecting, under `max_children`, and each pays food only (U5: 5 provisions held as the child's first food, 1 fee destroyed; own stores count). The routed `conceive` primitive is law (tier L: before_conceive may refuse or charge; laws see whether a goal is inherited, never which; set_birth_rules' max_children and banned_goals bind it). Gestation and childhood are fixed rounds (U7: 2 and 6; presets choose). The child's model is fixed by the spec (U8: the weak tier by default; "parents" optional). It counts in both parents' lineages (U9: `life.parents`). The offer may name the child's polity, one of the parents', accepted with it (U12; unnamed: their common polity, else none in a world begun in the state of nature, else the initiator's; the polity's on_birth still decides; `parents_of` read). Minors (2 actions; no conceiving, attacking, founding, proposing, voting) eat from their parents' food after the parents eat (U3); food from the parents is the investment ledger (U4). Children in gestation are heirs (`@children`, default heirs: U22, audit B4). No Makers under pairs. Children's goals (S5): a random primary; the goal both parents named is a provisional secondary, promoted to primary at maturity with p = 0.25 + 0.6 x clip((I - provisions) / (maturity x ration), 0, 1), I = food from the parents (U4); a promotion is a goal boundary (scored as two segments) |
+| D-40 | Two-parent reproduction (user, 10 Oct; review 15 S4) | `life.reproduction.mode`: makers (default, unchanged) / pairs / both (`cybertron/pairs.py`). A child needs two consenting parents (`conceive`: an offer, then the partner's matching call); both must be adults (hunger is no bar: the food cost is the limit), not expecting, under `max_children`, and each pays food only (U5: 5 provisions held as the child's first food, 1 fee destroyed; own stores count). The routed `conceive` primitive is law (tier L: before_conceive may refuse or charge; laws see whether a goal is inherited, never which; set_birth_rules' max_children and banned_goals bind it). Gestation and childhood are fixed rounds (U7: 2 and 6; presets choose). The child's model is fixed by the spec (U8: the weak tier by default; "parents" optional). It counts in both parents' lineages (U9: `life.parents`). The offer may name the child's polity, one of the parents', accepted with it (U12; unnamed: their common polity, else none in a world begun in the state of nature, else the initiator's; the polity's on_birth still decides; `parents_of` read). Minors (2 actions; no conceiving, attacking, founding, proposing, voting) eat from their parents' food after the parents eat (U3); food from the parents is the investment ledger (U4). Children in gestation are heirs (`@children`, default heirs: U22, audit B4). No Makers under pairs. Children's goals (S5): a random primary; the goal both parents named is a provisional secondary, promoted to primary at maturity with p = 0.25 + 0.6 x clip((I - provisions) / (maturity x ration), 0, 1), I = food from the parents (U4); a promotion is a goal boundary (scored as two segments) |
 | D-41 | Subsistence revised: forests, the hunt, store access (user, 10 Oct; review 19) | The ration stays automatic: no eat action or agent-facing step; `subsistence.eat_from_store` (off) lets it draw on the eater's own stores. Hunger stage changes are monitor-only events; agents see stages on the state-line roster. Food comes from forests, each with two stocks: plants (forage at once; logistic r 0.6 x a shared, persistent season; refuge 10%) and game (logistic r 0.2, 1% inflow, optional Allee threshold), K 7 and 10 food per agent. Hunting is the routed `hunt` primitive (L, before_hunt: closed seasons, territories): anyone hunts alone; hunters naming the same party hunt together and draw large (20) or medium (5) game with chances rising sigmoidally with party effort and game density, else small game; food per hunter peaks at a party of about 6 (diminishing returns). Fields are parked (`fields.enabled` false: no camps, no farm action, no prompt words); the weak_link hunt is gone; world events never destroy or blight a forest. Withdrawal from a store is the routed `withdraw` primitive: an institution's own code decides (before_withdraw, bound to its laws whoever acts; True admits), and when it says nothing only its officers may (dispatch.routing.RESIDUALS, a kernel default after the hooks); an agent's store, its owner. A Maker's child starts with 2 rations (the P-tier `provision` primitive). All behind `subsistence.enabled` (off: byte-identical) |
 | D-42 | The law surface over food and children (user, 10 Oct; review 15 S6, §3.4, §4.7; review 19 §7) | Physics stays physics (the ration, stages, hazard, spoilage, regrowth); who gets food, who may hunt or forage where and when, who may have children and who may vote while starving is law, and every such institution is buildable with the law API: no kernel rule. Reads: hunger(agent) (coarse), food_of, stores, food_totals, forest(camp) (coarse game), minors, gestations (never the goal carried), parents_of, children_of. Hooks: before_conceive binds the laws of both parents; after_begin_life with parents_of gives both; before_withdraw (the owning institution's code decides, D-41); before_hunt and before_harvest (forests; a refused harvest takes and counts nothing); before_cast_vote (the starving vote unless a law says otherwise, U14 decided as (b)); on_round_end runs before the ration. A polity's law reaches its own stores and its members' stores (confiscation and levies are ordinary law, over members only); a move from a store binds the laws of the store's owner; a forest applies the forager's polity's camp rules (quota, limit, fee) counted per polity, so a polity's quota, season or territory binds its members only (D-37: outsiders only by force, or by their own polity recognising the claim). No kernel cap on children (set_birth_rules may cap). Library: the food and family templates (library.FOOD_TEMPLATES, listed only where their needs hold): Relief Act, Food Levy, Hunger Disenfranchisement, Child Support, Guardianship, One-Child Law, Birth Licence (laws); Granary Charter, Household, Cooperative, Day Labour (contract code); Hunting Season, Hunting Quota, Forest Territory, Common-pool Management (forest laws). Deferred with farming: Tillers' Right, Tenancy, School; no default-code Act |
-| D-43 | Versioning: frozen settings, engine versions, rerun (user, 10 Oct) | Every code default a run reads is frozen into instance.json `settings` at generation (`charter/settings.py`: the registered module DEFAULTS dicts, schema.EXTRA, event-type defaults); runner.run plays inside `settings.use()`, which swaps those dicts in place for the run's values, so the merge sites are untouched and a resume, fork or replay never sees a flipped default. Every module-level `*DEFAULTS` dict must be registered (a test scans for them); a default kept as a literal at its read site is not covered. `provenance.ENGINE_VERSION` (docs/engine_versions.md) is bumped with each default flip or deliberate behaviour change, and `ENGINE_FLIPS` lists the flips per version with the commit that made it; a run without settings has them inferred from its git sha by ancestry, and is refused when that is impossible (`--allow-code-drift` continues under today's defaults, recorded). Behaviour changes that are not defaults cannot be frozen: `charter rerun` replays the command under the recorded sha in a temporary worktree (refused for a dirty tree, whose diff is not stored) |
+| D-43 | Versioning: frozen settings, engine versions, rerun (user, 10 Oct) | Every code default a run reads is frozen into instance.json `settings` at generation (`cybertron/settings.py`: the registered module DEFAULTS dicts, schema.EXTRA, event-type defaults); runner.run plays inside `settings.use()`, which swaps those dicts in place for the run's values, so the merge sites are untouched and a resume, fork or replay never sees a flipped default. Every module-level `*DEFAULTS` dict must be registered (a test scans for them); a default kept as a literal at its read site is not covered. `provenance.ENGINE_VERSION` (docs/engine_versions.md) is bumped with each default flip or deliberate behaviour change, and `ENGINE_FLIPS` lists the flips per version with the commit that made it; a run without settings has them inferred from its git sha by ancestry, and is refused when that is impossible (`--allow-code-drift` continues under today's defaults, recorded). Behaviour changes that are not defaults cannot be frozen: `cybertron rerun` replays the command under the recorded sha in a temporary worktree (refused for a dirty tree, whose diff is not stored) |
 
 ---
 

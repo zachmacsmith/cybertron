@@ -20,7 +20,7 @@ Four of these are worth doing soon. All four are small, and all ride on review 0
 
 Scripts have the best research value per unit of effort for 200-round runs.
 
-The capital catalogue, proficiencies and technology are valuable but turn Charter from a political and institutional LLM society
+The capital catalogue, proficiencies and technology are valuable but turn Cybertron from a political and institutional LLM society
 into an economic strategy game. They should come in as one or two sharp treatments (a vault, an observatory, a harvest machine),
 not as a catalogue.
 

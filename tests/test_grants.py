@@ -1,4 +1,4 @@
-"""Review 14 WP-E (charter/grants.py): powers from grant sources, not from an institution's kind; the default code resolved up the
+"""Review 14 WP-E (cybertron/grants.py): powers from grant sources, not from an institution's kind; the default code resolved up the
 institution tree; offices as records with holders, and the channel selectors that read them. Behind `institutions.grants` (with
 `institutions.unified`); off, nothing changes (the goldens prove the bytes).
 
@@ -12,20 +12,20 @@ import re
 
 import pytest
 
-from charter import actions as A
-from charter import agents as AG
-from charter import channels as CH
-from charter import code as DC
-from charter import contracts as CT
-from charter import generator, runner
-from charter import grants as G
-from charter import institutions as I
-from charter import lawlang as L
-from charter import powers as PW
-from charter import spec as S
-from charter.kernel import Kernel
+from cybertron import actions as A
+from cybertron import agents as AG
+from cybertron import channels as CH
+from cybertron import code as DC
+from cybertron import contracts as CT
+from cybertron import generator, runner
+from cybertron import grants as G
+from cybertron import institutions as I
+from cybertron import lawlang as L
+from cybertron import powers as PW
+from cybertron import spec as S
+from cybertron.kernel import Kernel
 
-import charter_golden_cases as GC
+import cybertron_golden_cases as GC
 
 ON = ["law.v2=true", "contracts.enabled=true", "contracts.scripted=false"]
 UNIFIED = "institutions.unified=true"
@@ -295,7 +295,7 @@ def test_tree_opt_fixer_false_drops_the_fixer_from_the_seed():
     ([{"id": "J0", "code": "most"}], "expected today, none"),
 ])
 def test_tree_schema(tree, msg):
-    from charter import schema as SC
+    from cybertron import schema as SC
     sp = S.apply_overrides(S.load("E2"), [UNIFIED, GRANTS, "regime=" + json.dumps({"base": "assembly", "tree": tree})])
     errs = SC.validate(sp)
     assert any(msg in e for e in errs), errs
@@ -306,7 +306,7 @@ def test_every_preset_compiles_to_a_one_node_tree():
     for p in sorted(pathlib.Path(S.__file__).parent.joinpath("specs").glob("*.yaml")):
         sp = S.load(p.stem)
         t = G.compile_tree(sp)
-        from charter import jurisdictions as J
+        from cybertron import jurisdictions as J
         if J.nature_start(sp):
             assert t == (), p.stem
             continue
@@ -321,7 +321,7 @@ def _files(d):
 
 
 def _run(preset, seed, sets, tmp, grants):
-    from charter import laweffects as LE     # with grants on, law.v2 worlds document reseat (laweffects): compare without it
+    from cybertron import laweffects as LE     # with grants on, law.v2 worlds document reseat (laweffects): compare without it
     sets = list(sets) + ["shared_archive.enabled=false", UNIFIED, *LE.OFF] + ([GRANTS] if grants else [])
     inst = generator.generate(S.apply_overrides(S.load(preset), sets), seed)
     inst["run_id"] = "grants"
@@ -348,7 +348,7 @@ def test_scripted_worlds_run_the_same_with_grants_on(preset, sets, tmp_path):
 
 
 def test_prompts_identical_off_and_founding_docs_on():
-    from charter import action_registry as AR
+    from cybertron import action_registry as AR
     sp = S.apply_overrides(S.load("E2"), ["contracts.enabled=true", UNIFIED])
     assert AR.doc_for("create_contract", sp) is None and AR.doc_for("found", sp) is None
     on = S.apply_overrides(S.load("E2"), ["contracts.enabled=true", UNIFIED, GRANTS])
@@ -460,7 +460,7 @@ def test_officer_selectors_are_unknown_with_the_flag_off():
 
 
 def test_the_flag_is_in_the_schema_and_needs_unified():
-    from charter import schema as SC
+    from cybertron import schema as SC
     sp = S.apply_overrides(S.load("E2"), [UNIFIED, GRANTS])
     assert SC.validate(sp) == [] and G.on_spec(sp)
     assert not G.on_spec(S.apply_overrides(S.load("E2"), [GRANTS])) and not G.on_spec(S.load("E2"))

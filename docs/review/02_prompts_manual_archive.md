@@ -2,7 +2,7 @@
 
 *7 Oct 2026. Read-only review of the working tree, including the uncommitted wiring of `action_registry` into `context.core_prompt`
 and `manual.sections` (`purposes.py` deleted). Evidence comes from reading the code and from rendering `society` seed 5 and `E6`
-seed 1 in memory. `tests/test_charter_prompts.py` passes (15 tests). This review builds on `charter/docs/architecture_review.md`
+seed 1 in memory. `tests/test_cybertron_prompts.py` passes (15 tests). This review builds on `cybertron/docs/architecture_review.md`
 (4 Oct, rec. 4 and §1.2-1.3) and does not repeat its status audit.*
 
 ## 1. Verdict
@@ -76,7 +76,7 @@ Each action now has:
 - membership in a module `ACTIONS` tuple and in `actions.ACTIONS`;
 - a category in `scorer` / `MD.CATEGORIES`.
 
-The four name sets agree today (94 each, checked), but only `ACTIONS ⊆ ACTION_DOC` is tested (test_charter_consistency.py:23).
+The four name sets agree today (94 each, checked), but only `ACTIONS ⊆ ACTION_DOC` is tested (test_cybertron_consistency.py:23).
 Nothing pins `REG == ACTIONS`. The registry's `args` repeats the JSON shapes already in `ACTION_DOC`, and one of them already
 differs: `dm` in REG omits `encrypted`. `context.LOOKUPS` / `ACTIONS` / `FILE_ACTIONS` restate `pre=True` and `needs=mod:context`.
 
@@ -304,7 +304,7 @@ stays, and should. The larger gain is that adding an action or a module touches 
 
 1. **Pin first.**
    - Add the snapshot test of `agents.system_prompt` for E2/E4/E6/E7 agents (if the old path is kept).
-   - Add `REG == actions.ACTIONS == ACTION_DOC` set equality to test_charter_consistency.
+   - Add `REG == actions.ACTIONS == ACTION_DOC` set equality to test_cybertron_consistency.
    - Add the perturbation test (§4.5) as `xfail`.
 2. **Delete dead paths.** Remove `grouped_actions`, `_module_sections`/`KNOWN_MODULES`, the `manual_sections` docstring and the
    unused `core_section`. Test impact: none.
@@ -318,20 +318,20 @@ stays, and should. The larger gain is that adding an action or a module touches 
    - Move `args` and `doc` from ACTION_DOC into `R(...)`, module by module (media and jurisdictions first; their `ACTION_DOC` dicts
      already sit in their own modules).
    - Keep `AG.ACTION_DOC` as a derived dict for the old path and for `goals`.
-   - test_charter_prompts must stay green unchanged.
+   - test_cybertron_prompts must stay green unchanged.
 7. **Derive `scorer` categories and module `ACTIONS` tuples from `REG`.** Check `activity_mix` on an old run for identical output.
 8. **Class/role/right registry.** Do it in two steps, so that a test edit and a code edit never land together:
    - Merge LEVERAGE_ROLE with `role_text`, and `_one_class_line` with `class_brief`.
-   - Update `test_every_prompt_states_its_leverage_per_class_and_role` and test_charter_classes to read from the registry.
+   - Update `test_every_prompt_states_its_leverage_per_class_and_role` and test_cybertron_classes to read from the registry.
 9. **Section registry.** Introduce `Section` and `section()`, and port `manual.sections` piece by piece, keeping titles identical.
-   test_charter_context and test_charter_prompts pin the titles ("Your archive", "Actions: all", "World rules").
+   test_cybertron_context and test_cybertron_prompts pin the titles ("Your archive", "Actions: all", "World rules").
 10. **Core prompt as sections with `fit()`.** Assert the token counts per agent are unchanged on `society` before tightening the
     budget.
 11. **Old pipeline as the `legacy` layout**, against the step-1 snapshot. Then delete the `absent` set and the `absent_actions`
     functions.
 12. **Archive and law-docs gating onto `needs_ok`.** `archive.present` must return identical sets for every spec in `specs/`, so
     add a parametrised test.
-13. **Generate the prompt preview.** Add `charter preview <spec> --seed N` and delete the committed `prompt_preview.md`. Point
+13. **Generate the prompt preview.** Add `cybertron preview <spec> --seed N` and delete the committed `prompt_preview.md`. Point
     `goals._common_shingles` at the rendered core and manual text for context worlds. This is a deliberate scoring change, so record
     it in the commit.
 

@@ -1,2 +1,0 @@
-# Control: the same world, all Haiku, no placed goals.
-extends: [charter/specs/pilot2/base.yaml]

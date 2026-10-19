@@ -5,11 +5,11 @@ Every engine claim cites file:line in this worktree (branch `subsistence`). "New
 
 ## 1. Summary
 
-- **Most of the legal machinery already exists.** Proposal, amendment and procedures (`charter/amendment.py`,
-  `dispatch/changes/legal.py`), courts v2 with panels, appeals, deadlines and remedies (`charter/courts.py`), clause-based civil
+- **Most of the legal machinery already exists.** Proposal, amendment and procedures (`cybertron/amendment.py`,
+  `dispatch/changes/legal.py`), courts v2 with panels, appeals, deadlines and remedies (`cybertron/courts.py`), clause-based civil
   law (Compensation Act, Graded Remedies, Contract Registry), strict-liability criminal law (Penal Code), a paid prosecutor
   (Prosecution Office), juries, a Court of Appeal, stare decisis, judicial review (Constitutional Court) and a law previewer
-  (`charter/lawpreview.py`, the `preview_law` pre-action). Lawyers have no engine role. Clerks of court have none either.
+  (`cybertron/lawpreview.py`, the `preview_law` pre-action). Lawyers have no engine role. Clerks of court have none either.
   Representation is impossible: agency covers only `transfer` and `deposit_escrow` (`contracts.py:141-145`).
 - **Millbrook had no court at all.** No agent held `judge` (`specs/base.yaml:118`, `judge: null`; Millbrook grants none). Its
   Penal Code sentences by after-hook with no case and no clause (`library.py:2330-2370`). So the Constable, "public prosecutor

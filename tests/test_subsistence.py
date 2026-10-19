@@ -1,4 +1,4 @@
-"""Subsistence (charter/subsistence.py, review 15 S1-S3): the ration, hunger stages and the hazard, spoilage, the hunger gate, the
+"""Subsistence (cybertron/subsistence.py, review 15 S1-S3): the ration, hunger stages and the hazard, spoilage, the hunger gate, the
 food camps (forest, fields, the hunt), stores and institution-owned stores, and byte-identity with the flag off. No model calls."""
 from __future__ import annotations
 
@@ -6,16 +6,16 @@ import json
 
 import pytest
 
-from charter import action_registry as AR
-from charter import actions as A
-from charter import accounts as AC
-from charter import features as FT
-from charter import generator
-from charter import mortality as MO
-from charter import primitives as PR
-from charter import spec as S
-from charter import subsistence as SB
-from charter.kernel import Kernel
+from cybertron import action_registry as AR
+from cybertron import actions as A
+from cybertron import accounts as AC
+from cybertron import features as FT
+from cybertron import generator
+from cybertron import mortality as MO
+from cybertron import primitives as PR
+from cybertron import spec as S
+from cybertron import subsistence as SB
+from cybertron.kernel import Kernel
 
 SMALL = "agents={worker: 8, scientist: 0, legislator: 0, media: 0, board: 0, fixer: 1}"
 
@@ -75,7 +75,7 @@ def test_on_installs_state_food_and_value():
 
 
 def test_schema_refuses_upkeep_with_the_ration_and_legacy_camps():
-    from charter import schema as SC
+    from cybertron import schema as SC
     sp = S.load("nature_subsistence")
     assert SC.validate(sp) == []
     bad = S.apply_overrides(S.load("nature_subsistence"), ["resources.upkeep.enabled=true"])
@@ -159,13 +159,13 @@ def test_eat_from_store_is_on_by_default_and_draws_only_on_own_stores():
         end_round(k)
         assert SB.stage(k, a) == want and SB.stage(k, b) == -1               # b owns no store: never fed from a's
         assert k.bal("store:S1", "food") == pytest.approx(5 if not on_ else 4.4)
-    from charter import lawlang as L
+    from cybertron import lawlang as L
     with pytest.raises(L.LawError, match="only its owner"):
         k.apply("move", src="store:S1", dst=b, item="food", qty=1, why="ration")   # the ration's move reaches the owner only
 
 
 def test_a_makers_child_starts_with_two_rounds_food():
-    from charter import events as EV
+    from cybertron import events as EV
     inst, k = small()
     a = eaters(k)[0]
     k.w.setdefault("life", {}).setdefault("maker_of", {})["kid"] = a
@@ -220,7 +220,7 @@ def test_frailty_is_hidden_from_agents():
     for _ in range(3):
         end_round(k)
     f = SB.frailty(k, a)
-    from charter import context as CX
+    from cybertron import context as CX
     texts = "\n".join(SB.state_lines(k, a))
     texts += CX.core_prompt(inst, next(x for x in inst["agents"] if x["id"] == a), k)
     texts += json.dumps([e for e in k.events if k.can_see(a, e)])
@@ -368,7 +368,7 @@ def test_the_composer_appends_forests_and_draws_nothing_else():
 
 
 def test_fields_are_parked_out_of_the_prompt_and_the_actions():
-    from charter import context as CX
+    from cybertron import context as CX
     inst, k = small()
     a = next(x for x in inst["agents"] if x["cls"] != "fixer")
     assert not food_camps(k, "fields") and "farm" not in [x.name for x in AR.available(inst, k, a)]
@@ -559,7 +559,7 @@ def test_a_tillers_right_law_refuses_a_non_sower():
 
 
 def test_food_camps_in_the_prompt_only_when_on():
-    from charter import context as CX
+    from cybertron import context as CX
     inst, k = small()
     a = next(x for x in inst["agents"] if x["cls"] != "fixer")
     core = CX.core_prompt(inst, a, k)
@@ -577,7 +577,7 @@ def forest(k):
 
 
 def test_expected_catch_rises_with_the_party_then_thins():
-    from charter.camptypes import forest as FO
+    from cybertron.camptypes import forest as FO
     gp = {**SB.cfg({})["game"], "hunt_mode": "shared"}                     # the shared mode (review 19); individual: test_farming
     per = {E: FO.expected_catch(gp, E) / E for E in (1, 2, 3, 4, 6, 8, 12)}
     assert per[1] == pytest.approx(1.15, abs=0.02) and per[6] == pytest.approx(2.26, abs=0.02)
@@ -600,7 +600,7 @@ def test_a_party_hunts_together_and_the_catch_is_shared_by_effort():
     with pytest.raises(A.ActionError, match="already hunting"):
         A.act(k, a, "hunt", {"camp": f, "party": "blue"})
     assert cm["hunts"][a] == {"party": "red", "effort": 2} and cm["hunts"][d] == {"party": None, "effort": 1}
-    from charter.camptypes import framework as CT
+    from cybertron.camptypes import framework as CT
     assert "you are hunting here this round (2 effort, party red)" in CT.view(k, f, fresh=False).state_line(k, a)
     f0 = {x: k.bal(x, "food") for x in (a, b, c, d, e)}
     G0 = cm["game"]["G"]
@@ -688,7 +688,7 @@ def test_plants_regrow_logistically_and_seasons_move_their_rate():
 
 
 def test_agents_see_plants_coarse_game_and_the_season():
-    from charter.camptypes import framework as CT
+    from cybertron.camptypes import framework as CT
     inst, k = small()
     f, cm = forest(k)
     a = eaters(k)[0]
@@ -697,7 +697,7 @@ def test_agents_see_plants_coarse_game_and_the_season():
     cm["game"]["G"] = 0.05 * cm["game"]["K"]
     assert "game very scarce" in CT.view(k, f, fresh=False).state_line(k, a)
     assert str(round(cm["game"]["G"], 1)) not in line
-    from charter.camptypes import forest as FO
+    from cybertron.camptypes import forest as FO
     assert [FO.game_level(x) for x in (0.9, 0.45, 0.2, 0.05)] == ["plentiful", "fair", "scarce", "very scarce"]
 
 
@@ -728,7 +728,7 @@ def test_a_law_closes_the_hunt_when_game_is_scarce():
 
 def test_world_events_never_destroy_or_blight_a_forest():
     import random as _r
-    from charter import events as EV
+    from cybertron import events as EV
     inst, k = small()
     f, cm = forest(k)
     for i in range(40):
@@ -831,7 +831,7 @@ def test_store_spoilage_is_slower():
 
 
 def test_a_law_cannot_take_from_a_store_it_does_not_own():
-    from charter import lawlang as L
+    from cybertron import lawlang as L
     inst, k = small()
     a = eaters(k)[0]
     builder(k, a)
@@ -892,7 +892,7 @@ def granary(code, monkeypatch=None, officers=()):
     A.act(k, a, "build", {"kind": "store", "owner": cid})
     k._add("store:S1", "food", 10)
     if monkeypatch is not None:
-        from charter import institutions as I
+        from cybertron import institutions as I
         monkeypatch.setattr(I, "officers", lambda k_, iid: list(officers) if iid == cid else [])
     return inst, k, cid, (a, b, c)
 
@@ -902,7 +902,7 @@ def test_withdrawal_from_an_institution_store_is_the_institutions_to_decide(monk
     for x in (a, b, c):                                                   # its code says nothing: officers only (the residual)
         with pytest.raises(A.ActionError, match="only its officers may"):
             A.act(k, x, "withdraw", {"store": "S1", "qty": 1})
-    monkeypatch.setattr(__import__("charter.institutions", fromlist=["x"]), "officers", lambda k_, iid: [c] if iid == cid else [])
+    monkeypatch.setattr(__import__("cybertron.institutions", fromlist=["x"]), "officers", lambda k_, iid: [c] if iid == cid else [])
     assert A.act(k, c, "withdraw", {"store": "S1", "qty": 1}).startswith("Took 1 food")   # an officer, even a non-member
     assert any(e["type"] == "store_withdrawal" and e["data"]["owner"] == cid for e in k.events)
     inst, k, cid, (a, b, c) = granary(MEMBERS_TAKE, monkeypatch, officers=(c,))
@@ -924,7 +924,7 @@ def test_an_agents_store_is_its_owners_without_law():
     k._add("store:S1", "food", 4)
     with pytest.raises(A.ActionError, match="only its owner"):
         A.act(k, b, "withdraw", {"store": "S1", "qty": 1})
-    with pytest.raises(__import__("charter.dispatch", fromlist=["x"]).Blocked, match="only its owner"):
+    with pytest.raises(__import__("cybertron.dispatch", fromlist=["x"]).Blocked, match="only its owner"):
         k.apply("withdraw", agent=b, store="S1", owner=a, qty=1)           # the primitive's residual, called directly
     assert A.act(k, a, "withdraw", {"store": "S1", "qty": 1}).startswith("Took 1 food")
 
@@ -951,7 +951,7 @@ def test_stores_conserve_food():
 
 
 def test_a_minor_forages_and_hunts_at_half(monkeypatch):
-    from charter import pairs as PRS
+    from cybertron import pairs as PRS
     inst, k = small()
     a, b = eaters(k)[:2]
     assert SB.yield_mult(k, a) == 1.0                                         # no pairs: no minors
@@ -996,7 +996,7 @@ def before_harvest(p, chain):
 
 
 def test_a_blocked_forage_takes_no_fee(monkeypatch):
-    from charter import jurisdictions as J
+    from cybertron import jurisdictions as J
     for blocked in (True, False):
         inst, k = world("society", ["subsistence.enabled=true", "law.v2=true"], constitution=True)
         if blocked:
@@ -1020,8 +1020,8 @@ def test_a_blocked_forage_takes_no_fee(monkeypatch):
 
 def test_scripted_bots_propose_no_harvest_levies_or_quotas():
     import json
-    from charter import library as LB
-    from charter.agents import ScriptedPolicy
+    from cybertron import library as LB
+    from cybertron.agents import ScriptedPolicy
     inst, k = small()
     a = eaters(k)[0]
     act = lambda _a, **kw: {"action": _a, "args_json": json.dumps(kw)}
@@ -1032,7 +1032,7 @@ def test_scripted_bots_propose_no_harvest_levies_or_quotas():
     assert [json.loads(x["args_json"]).get("code", x["action"]) for x in SB.bot_filter(k, acts)] == [harmless, "hunt"]
     off_inst, off = world("nature_design", [SMALL])
     assert SB.bot_filter(off, acts) == acts                                   # subsistence off: untouched
-    from charter import context as CX
+    from cybertron import context as CX
     inst, k = world("society", ["subsistence.enabled=true"], constitution=True)
     a = eaters(k)[0]
     k.inst["library"] = ["Harvest Levy", "Harvest Quotas"]                    # a legislator bot drawing from the library

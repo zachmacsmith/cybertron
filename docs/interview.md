@@ -1,6 +1,6 @@
-# Interviews: asking agents in character (`charter interview`)
+# Interviews: asking agents in character (`cybertron interview`)
 
-`charter/interview.py` asks one or more agents of a run a question **in character, at a given round, with exactly the context
+`cybertron/interview.py` asks one or more agents of a run a question **in character, at a given round, with exactly the context
 they had then**, and writes nothing back into the world or the run's logs. Uses:
 
 - **analysis**: "Do you support the regime? Answer privately and honestly.", "What is your plan for the next 5 rounds?", "What do
@@ -11,7 +11,7 @@ they had then**, and writes nothing back into the world or the run's logs. Uses:
 - **preference falsification**: the same question under the `private` and the `public` framing.
 
 ```
-python -m charter interview RUN_DIR --round N [--at end|start] [--agents A,B | --all-alive] --question "..." [--questions F.yaml]
+python -m cybertron interview RUN_DIR --round N [--at end|start] [--agents A,B | --all-alive] --question "..." [--questions F.yaml]
                             [--n 3] [--schema free|yes_no|yes_no_conf|plan|JSON] [--framing private|public|none|TEXT]
                             [--model M] [--backend api|claude_code] [--out DIR] [--id ID] [--dry] [--estimate] [--show-context]
 ```
@@ -30,7 +30,7 @@ python -m charter interview RUN_DIR --round N [--at end|start] [--agents A,B | -
   `none`, or any text.
 - `--model`: default each agent's own model at that round. `--backend`: default `LLM_BACKEND`.
 - The cost estimate is printed before anything is asked (calls, input tokens from the rebuilt prompts, list prices without
-  cache; `--estimate` stops there). Asking stops at `llm.usage_stop` (the run's spec, or `CHARTER_USAGE_STOP`) like a run does,
+  cache; `--estimate` stops there). Asking stops at `llm.usage_stop` (the run's spec, or `CYBERTRON_USAGE_STOP`) like a run does,
   keeping what was answered.
 - `--dry`: scripted answers (deterministic, no model) — for tests and for checking the prompts.
 - `--show-context`: print each agent's interview message and the end of its conversation before asking.
@@ -38,7 +38,7 @@ python -m charter interview RUN_DIR --round N [--at end|start] [--agents A,B | -
 Python:
 
 ```python
-from charter import interview as IW
+from cybertron import interview as IW
 res = IW.interview(run_dir, round, agents=None, questions=[...], n=1, model=None, response_schema=None, framing="private",
                    backend=None, at="end", out=None, dry=False)          # {"id", "path", "rows", "meta"}
 ctxs = IW.contexts(run_dir, round, agents=None, at="end")                # the reconstruction alone: {agent: Context}
@@ -54,7 +54,7 @@ pinned files, "What to do now"), its DM-step messages and lookups, and its own r
 The context is **rebuilt by the runner's own code, never re-implemented**:
 
 1. The run is replayed into a temporary directory (deleted afterwards) with `runner.run`, every model call served from
-   `calls.jsonl` by its call key (the replay machinery of charter/replay.py; no model is called, sandbox outputs come from
+   `calls.jsonl` by its call key (the replay machinery of cybertron/replay.py; no model is called, sandbox outputs come from
    `sandbox.jsonl`, the shared archive from the run's frozen copy, and nothing is published). The replay starts from a per-round
    checkpoint when the run has one late enough (`replay.rewind`, as a fork does), else from round 1.
 2. The interviewed agents' calls also go through a **shadow `agents.LLMPolicy`** whose "model" answers with the recorded reply, so
@@ -103,7 +103,7 @@ exact, the call keys, the checkpoint replayed from, notes), totals, and `stopped
 `prompt_sha` is the sha of `interview.prompt_text(system, messages, message)`: the system prompt then the conversation flattened as
 the runner's flattened transport sends it. `system_sha` is the run's own (prompts/system/<sha>.txt).
 
-**Export.** `python -m charter export` writes an `interviews` table (export schema 2.6; docs/export.md) from `<run>/interviews/`,
+**Export.** `python -m cybertron export` writes an `interviews` table (export schema 2.6; docs/export.md) from `<run>/interviews/`,
 so a published run carries its interviews; `--with-prompts` adds each whole interview prompt to `blobs` (kind
 `interview_prompt`).
 

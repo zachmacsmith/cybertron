@@ -37,7 +37,7 @@ minutes, ledgers and rolls, the public registers, the chronicle and the Scientis
 
 | Store | Read | Write | Amend / delete | Versioning | Search | Evidence |
 |---|---|---|---|---|---|---|
-| **Event log** `k.events` | `Kernel.can_see`: public, a list of agents, channel readers, `monitor` = nobody; hidden ids only for the author and holders of `see_hidden` | `Kernel.log` only (the kernel, laws, actions) | No delete. `truncate_events` drops only a dying law invocation's suffix (rollback) | Ids `e<n>` in order; nothing is ever rewritten in place | `search_board` (public posts ever made), `search_dms` (own DMs only), `recent`, `recall` (history mode, charter/memory.py) | kernel.py:382-401, 403-408, 1569-1590; context.py:440-466, 468-485 |
+| **Event log** `k.events` | `Kernel.can_see`: public, a list of agents, channel readers, `monitor` = nobody; hidden ids only for the author and holders of `see_hidden` | `Kernel.log` only (the kernel, laws, actions) | No delete. `truncate_events` drops only a dying law invocation's suffix (rollback) | Ids `e<n>` in order; nothing is ever rewritten in place | `search_board` (public posts ever made), `search_dms` (own DMs only), `recent`, `recall` (history mode, cybertron/memory.py) | kernel.py:382-401, 403-408, 1569-1590; context.py:440-466, 468-485 |
 | **Hidden entries** `w["hidden"]` | Hidden posts vanish for everyone except the author and `see_hidden` holders; laws still read them, marked `hidden: True` | A law's `hide_post` (logs a public `post_hidden` event); the `veil_of_thessaly` power (silent, monitor-only `power_use`) | `unhide_post`; the Sunlight law unhides every hidden post each round | The event itself is untouched | n/a | kernel.py:723-728; eventtypes.py:274-275; hidden.py:400-407, 387-389; library.py:633-640; evidence.py:161 |
 | **Forged history** `hidden_caps["forged"]` | Every agent-facing render applies the overlay: feed, `search_board`, `recent`, court citations (`_cited` renders from the citer's view) | The `palimpsest_rite` power: public posts and gazette entries only, not hidden ones | Rewritable again (`before` is kept) | The original stays in `k.events`; monitor `history_forged` holds original, before and forged text; ground truth lists `forged` | Searches return the forged text | hidden.py:473-483, 517-530, 596; agents.py:477-478; actions.py:1111-1115 |
 | **Gazette** | Public (with media2: the members of the jurisdiction, through `official_post`) | Laws (`gazette()`), the kernel | Not veilable (only forgeable, through the power) | Event log | `recent {"kind": "gazette"}` | kernel.py:536-539; media.py:404-410; eventtypes.py:144-145 |
@@ -298,7 +298,7 @@ audit hit, a public post or DM naming the record and the change, a court case ci
 ## 7. Spec sketch (State regime: the Ministry of Records), with the Cooperative diff
 
 ```yaml
-# Fragment for an established world (start: block, charter/start.py). Lines marked NEW need code from §8.
+# Fragment for an established world (start: block, cybertron/start.py). Lines marked NEW need code from §8.
 law: {v2: true}
 directories:
   enabled: true

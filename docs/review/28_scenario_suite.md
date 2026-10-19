@@ -942,7 +942,7 @@ dollar:
 
 1. **Forks from a shared state.**
    - Play a world once to round N (8 for a 16-round world) with the background model in every seat, then checkpoint.
-   - Fork (`python -m charter fork RUN --at N --replicates K`) once per model, swapping the focal seats with `set_model`, and play
+   - Fork (`python -m cybertron fork RUN --at N --replicates K`) once per model, swapping the focal seats with `set_model`, and play
      6-8 rounds.
    - Every branch shares an identical history, so differences come only from the branch: the world and seed variance of the
      prefix is gone, and the prefix is paid for once.

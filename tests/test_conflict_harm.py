@@ -1,4 +1,4 @@
-"""The harm combat model (charter/conflict.py, conflict.model; docs/review/21_combat.md): per-agent bases, one weapon per fighter
+"""The harm combat model (cybertron/conflict.py, conflict.model; docs/review/21_combat.md): per-agent bases, one weapon per fighter
 used up, food per fighter, P against D in a square-law contest (kill, wound or repelled), fighting back (a dying blow, self-defence,
 a first strike on watch), wounds (robbed of food, starving, recovery by eating, credit for a death soon after), craft and forge,
 join_attack in person, visibility, text, and the disable model left as it was."""
@@ -9,17 +9,17 @@ import random
 
 import pytest
 
-from charter import actions as A
-from charter import agents as AG
-from charter import conflict as CF
-from charter import context as CX
-from charter import generator, runner
-from charter import goals as G
-from charter import mortality as M
-from charter import settings as ST
-from charter import spec as S
-from charter import subsistence as SB
-from charter.kernel import Kernel
+from cybertron import actions as A
+from cybertron import agents as AG
+from cybertron import conflict as CF
+from cybertron import context as CX
+from cybertron import generator, runner
+from cybertron import goals as G
+from cybertron import mortality as M
+from cybertron import settings as ST
+from cybertron import spec as S
+from cybertron import subsistence as SB
+from cybertron.kernel import Kernel
 
 SMALL = "agents={worker: 6, scientist: 0, legislator: 0, media: 0, board: 0, fixer: 1}"
 
@@ -67,10 +67,10 @@ def test_model_defaults_to_harm_with_subsistence_and_disable_without():
 
 def test_engine_7_runs_keep_the_disable_model():
     """The default flip (engine 8): a run frozen under engine 7 has no conflict.model key, so it plays under disable."""
-    from charter import provenance as PV
+    from cybertron import provenance as PV
     assert PV.ENGINE_VERSION >= 8
-    assert ("charter.conflict.DEFAULTS", ("model",), "disable", "auto") in PV.ENGINE_FLIPS[8]["flips"]
-    old = {"engine_version": 7, "defaults": {"charter.conflict.DEFAULTS": {"enabled": False}}}
+    assert ("cybertron.conflict.DEFAULTS", ("model",), "disable", "auto") in PV.ENGINE_FLIPS[8]["flips"]
+    old = {"engine_version": 7, "defaults": {"cybertron.conflict.DEFAULTS": {"enabled": False}}}
     with ST.use(old):
         assert CF.model_of(S.load("nature_subsistence")) == "disable"
     assert CF.model_of(S.load("nature_subsistence")) == "harm"
@@ -406,7 +406,7 @@ def test_harm_text_is_qualitative_and_factual():
 
 
 def test_the_core_surface_offers_craft_and_watch_only_under_harm():
-    from charter import action_registry as AR
+    from cybertron import action_registry as AR
     k = make()
     a = next(x for x in k.inst["agents"] if x["cls"] == "worker")
     names = {x.name for x in AR.available(k.inst, k, a)}

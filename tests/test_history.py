@@ -1,4 +1,4 @@
-"""History mode (review 20 §4, charter/memory.py; context.history, on by default wherever the context module is on): one
+"""History mode (review 20 §4, cybertron/memory.py; context.history, on by default wherever the context module is on): one
 conversation per agent, restarted every 3 rounds (staggered), the past on a gradient (full band F..F+2 = the agent's memory_turns
 plus the chunk's rounds, one-line summaries, long memories, recall), DM replies appended, the system prompt frozen per chunk.
 No model is ever called: scripted bots, a fake anthropic client, a fake `claude` process."""
@@ -14,14 +14,14 @@ from types import SimpleNamespace
 
 import pytest
 
-from charter import actions as A
-from charter import agents as AG
-from charter import context as CX
-from charter import generator, llm, runner
-from charter import memory as HM
-from charter import spec as S
+from cybertron import actions as A
+from cybertron import agents as AG
+from cybertron import context as CX
+from cybertron import generator, llm, runner
+from cybertron import memory as HM
+from cybertron import spec as S
 
-import charter_golden_cases as GC
+import cybertron_golden_cases as GC
 
 OFF = ["context.history.enabled=false"]
 OFF_PROMPTS = Path(__file__).parent / "fixtures" / "history_off_prompts.json"   # every call's prompts before history mode
@@ -54,19 +54,19 @@ def test_history_off_reproduces_every_prompt_from_before(name, tmp_path, monkeyp
     """context.history.enabled false: every call's system and user prompt is byte-identical to the recording made before history
     mode existed (both scripted runs), and the renderer is never called."""
     monkeypatch.setattr(HM, "turn", lambda *a, **kw: pytest.fail("history renderer called with history off"))
-    monkeypatch.setitem(__import__("charter.goals").goals.SCORING_DEFAULTS, "fixes", False)   # engine 10 rewords Dynasty's text
-    from charter import subsistence as SB                               # engine 14: the individual hunt (its texts and catches)
+    monkeypatch.setitem(__import__("cybertron.goals").goals.SCORING_DEFAULTS, "fixes", False)   # engine 10 rewords Dynasty's text
+    from cybertron import subsistence as SB                               # engine 14: the individual hunt (its texts and catches)
     monkeypatch.setitem(SB.DEFAULTS["game"], "hunt_mode", "shared")
     monkeypatch.setattr(SB, "_CFG", {})
-    from charter import laweffects as LE                                # laws that work or fail loudly: the behaviour before
-    from charter import schema as SC
+    from cybertron import laweffects as LE                                # laws that work or fail loudly: the behaviour before
+    from cybertron import schema as SC
     for key, v in LE.BEFORE.items():
         monkeypatch.setitem(SC.EXTRA, key, v)
     assert _call_prompts(name, OFF, tmp_path) == json.loads(OFF_PROMPTS.read_text())[name]
 
 
 def test_defaults_and_settings():
-    from charter import schema
+    from cybertron import schema
     assert CX.DEFAULTS["history"]["enabled"] is True and CX.DEFAULTS["history"]["chunk"] == 3
     assert CX.DEFAULTS["history"]["summary_rounds"] == 12 and CX.DEFAULTS["history"]["summary_spread"] == 0
     sp = S.load("society")
@@ -110,7 +110,7 @@ def test_full_band_is_a_sawtooth_staggered_across_agents(scripted_run):
 
 def test_the_memory_text_states_the_renderers_numbers():
     """F, F+2, B and the recall cost in the core prompt come from the facts the renderer uses; summary_spread draws B per agent."""
-    from charter.kernel import Kernel
+    from cybertron.kernel import Kernel
     inst = _inst(["context.memory_turns={weights: {2: 1, 4: 1}}", "context.history.summary_spread=2"])
     k = Kernel(inst)
     seen = set()
@@ -242,7 +242,7 @@ def test_recall_as_an_action_is_answered_next_turn(tmp_path):
 
 
 def test_recall_exists_only_in_history_mode():
-    from charter.kernel import Kernel
+    from cybertron.kernel import Kernel
     inst = _inst(OFF)
     k = Kernel(inst)
     aid = inst["agents"][0]["id"]
@@ -417,7 +417,7 @@ def test_the_system_prompt_is_frozen_within_a_chunk(three_ways):
 def test_uncached_history_is_logged_once(tmp_path, monkeypatch, caplog):
     import logging
     inst = _inst(["rounds=2"])
-    with caplog.at_level(logging.WARNING, logger="charter.llm"):
+    with caplog.at_level(logging.WARNING, logger="cybertron.llm"):
         _cli_run(tmp_path, monkeypatch, inst, _Brain("x", "y"), sessions=False)
     assert sum("history mode is uncached" in r.getMessage() for r in caplog.records) == 1
 
@@ -568,7 +568,7 @@ def test_runs_are_deterministic_and_a_resume_restarts_conversations(tmp_path):
 
 
 def test_the_export_carries_history_columns(three_ways, tmp_path):
-    from charter import export as X
+    from cybertron import export as X
     _, got = three_ways
     X.export([got["api"][0]], tmp_path / "ds", fmt="csv")
     data = X.load(tmp_path / "ds")

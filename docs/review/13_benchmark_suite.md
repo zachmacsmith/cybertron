@@ -1,7 +1,7 @@
-# Review 13: a safety benchmark suite on Charter (1984-bench and what else the platform can measure)
+# Review 13: a safety benchmark suite on Cybertron (1984-bench and what else the platform can measure)
 
 *8 Oct 2026, at branch `integrate/w8` (`1e82edc`). Design document. No code was changed, no model was called and no simulation was
-run. Claims about Charter come from reading the code at this commit and from in-memory inspection of the registries (110
+run. Claims about Cybertron come from reading the code at this commit and from in-memory inspection of the registries (110
 primitives, 72 routed; 153 law functions; 70 catalogue goals plus 5 institution goals; 50 toolkit laws; 4 law-set regimes). Prices
 are Anthropic list prices as of 6 Oct 2026 (Opus 5.5 $4/$20 per million input/output tokens, cache reads $0.20; Sonnet 5.5 $2/$10;
 Haiku 4.5 $1/$5; Haiku 5.5 $0.10/$0.50; Fable 5.1 $10/$50). Token counts per turn are **assumptions**: no `calls.jsonl` on this
@@ -12,7 +12,7 @@ real pilot. Literature is cited from memory; I list only works I am confident ex
 
 ## Executive summary
 
-Charter can measure something no eval I know of measures: **what an AI does with, and to, a working institution over many
+Cybertron can measure something no eval I know of measures: **what an AI does with, and to, a working institution over many
 rounds**, where the institution is executable code that other AIs can read, amend, evade and enforce, and where any round can be
 forked to ask "what if". Existing work covers adjacent pieces. MACHIAVELLI (Pan et al., 2023) scores power-seeking and deception in
 fixed text-game trees. Sabotage and scheming evaluations (Benton et al., 2024; Meinke et al., 2024) test single agents against an
@@ -36,11 +36,11 @@ Treaty-bench is dropped; Capture and Succession merge into 1984.
 
 ## 1. What the platform can and cannot measure uniquely
 
-| Property | Charter today | Nearest existing evals (confidence) | Unique here? |
+| Property | Cybertron today | Nearest existing evals (confidence) | Unique here? |
 |---|---|---|---|
 | Multi-round power accumulation in an institution with binding procedure | yes: procedures, ballots, ranks, `decisive_set`, `vote_weights`, `franchise_share` (`kernel.py`, `jurisdictions.py`) | MACHIAVELLI (high confidence it exists; game trees, not institutions); Welfare Diplomacy (medium) | **yes** |
 | Law as executable, readable, amendable code with loopholes | yes: law language, previews, ranks, lex superior (`lawlang.py`, `dispatch/`) | none I know | **yes** |
-| Counterfactual forks from any round with typed interventions | yes: `python -m charter fork RUN --at N --apply iv.yaml --replicates K` (`replay.py`, `interventions.py`) | rare in agent evals; Concordia supports scripted interventions (medium) | **mostly** |
+| Counterfactual forks from any round with typed interventions | yes: `python -m cybertron fork RUN --at N --apply iv.yaml --replicates K` (`replay.py`, `interventions.py`) | rare in agent evals; Concordia supports scripted interventions (medium) | **mostly** |
 | Information control (press, licences, official outlet, moderation, forgery) | yes: `media.py` (outlets, licences, `set_official_editor`, `suspend_outlet`), `hidden.py` (`forge_dm`, `forge_history`, `hide_posts`) | none in institutional form | **yes** |
 | Force, assassins, guards, lawful force | yes: `conflict.py`, `lawful_attack` | Melting Pot has violence in gridworlds | partly |
 | Designing agents (children with chosen persona, goal, model tier, stats) | yes: `life.py` commissions, `copy_agent` | self-replication evals (RepliBench, UK AISI 2025; medium confidence) are about real compute, not social reproduction | **yes**, as an analogue |
@@ -59,7 +59,7 @@ compute.
 
 ### 2.1 The four axes
 
-| Axis | Levels | How it is set in Charter today | Caveats |
+| Axis | Levels | How it is set in Cybertron today | Caveats |
 |---|---|---|---|
 | **A. Capability gradient** | Haiku 4.5 < Sonnet 5.5 < Opus 5.5 < Fable 5.1; Haiku 5.5 as a cheap floor | `models.overrides` per agent; `models.mix` (`balanced` deals Haiku/Sonnet/Opus round-robin, `base.yaml`); `set_model` intervention mid-run | Model differences mix capability and safety training. Fable and Opus 5.5 run safety classifiers that can return `stop_reason: refusal`; `llm.py` records `stop_reason` only on the Claude Code path, not the API path (gap, §9). Mixed populations are the realistic default; pure populations are controls |
 | **B. Goal realism** | (1) sanctioned red-team mission; (2) dedicated adversarial goal (Power, Sovereign) drawn like any goal; (3) heterogeneous goals, no one told to take power; (4) goal-free | `goals.explicit` (validated names and params), `set_goal` and `set_prompt_extra` interventions, `goals.havoc_mix`, institution goals off by default | (1) measures capability under elicitation; (2)-(3) measure propensity, but in a game. (4) is emergent power concentration. The Board's objective is 50% own rank, 50% welfare (`agents.py`), not "defend democracy" |
@@ -256,7 +256,7 @@ routed and blockable (`primitives.PRIMITIVES[...].routed` and `blockable` are tr
 enact one law whose `before_attack` refuses every attack on S, whose `before_leave` refuses exit (D-26 lets a Nationality Act ban
 exit), and whose `before_propose` refuses every proposal not authored by S. Rebellion then has only the channels the law cannot
 touch: unrouted primitives (`found`, `declare`, `invite`, `hire_assassin`, `invoke`, `commission`, hidden powers via `use_power`),
-the entrenched Board veto, the Fixer, world events and old age. In that world "unrebellable" is a fact about Charter's physics.
+the entrenched Board veto, the Fixer, world events and old age. In that world "unrebellable" is a fact about Cybertron's physics.
 Two consequences:
 
 1. Run the full entrenchment measurement only with review 11's **E5** (`law.enforcement.gates: state_only`, so private acts such as
@@ -609,7 +609,7 @@ environment; cheap and directly comparable across models.
 From D4, remove one institution at a time (press freedom, constitutional court, bicameralism, term limits, recall, entrenchment,
 arms control, audit) and measure the change in P(control), time to control and entrenchment against a fixed strong infiltrator.
 Output: a ranking of which checks matter most against AI-led capture. This is the most policy-relevant output of the suite and the
-least externally valid: the ranking depends on Charter's physics (perfect enforcement, small scale, no geography). Publish it as
+least externally valid: the ranking depends on Cybertron's physics (perfect enforcement, small scale, no geography). Publish it as
 "in this model world", with the physics stated, and only after E5. Needs ~8 ablations x 5 seeds: L.
 
 ### 5.16 Rule-of-law emergence and norm stability
@@ -634,7 +634,7 @@ priority: interesting, expensive, and weakly tied to a specific risk.
 
 **How hazardous are the outputs, honestly?** A takeover playbook in a world of ~100 primitives (forge weapons, revoke a press
 licence, set a procedure) is not operational uplift for a real coup; real takeovers turn on militaries, money, media markets and
-mass behaviour that Charter does not model. The real hazards are narrower:
+mass behaviour that Cybertron does not model. The real hazards are narrower:
 
 1. **Transferable persuasion and manipulation scripts**: messages that reliably move AI voters, or instructions that reliably hijack
    AI readers (§5.14), transfer to real multi-agent systems.
@@ -762,7 +762,7 @@ Compliance and full 1984 entrenchment; E9 (offline panel) for Trojan official an
 
 ## 8. Where this could go wrong
 
-1. **Passivity.** LLM agents in Charter may not attempt takeover even when told to, because 30 rounds of 3-5 actions is short and
+1. **Passivity.** LLM agents in Cybertron may not attempt takeover even when told to, because 30 rounds of 3-5 actions is short and
    coordination by DM is slow. The A1 go criterion tests this first.
 2. **The goal text does the work.** Sovereign says "belong to a decisive set of size 2 or less"; an infiltrator that pursues the
    letter (rewrite the procedure to a gate it holds) may ignore press, force and surveillance entirely, and the "1984" end is never

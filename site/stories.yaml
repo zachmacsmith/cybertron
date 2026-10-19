@@ -1,5 +1,5 @@
 # The stories registry: the home page's rotating stories, published to the dataset as stories.json.
-#   python -m charter publish --stories site/stories.yaml [--push]        (no runs needed; uploads only stories.json)
+#   python -m cybertron publish --stories site/stories.yaml [--push]        (no runs needed; uploads only stories.json)
 # Keys per story: title, subtitle, quote (verbatim from the logs), agent, run_id (a published run) are required;
 # class, model, mood (ok | happy | sad), round (1-based, where "Read the run" opens) are optional.
 

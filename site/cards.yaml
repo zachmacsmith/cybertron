@@ -1,4 +1,4 @@
-# Curated cards for published runs: python -m charter publish RUN... --card site/cards.yaml
+# Curated cards for published runs: python -m cybertron publish RUN... --card site/cards.yaml
 # Keys per run_id (all optional): title, description, tags, featured, usable_rounds, validity, era (legacy / current; by default
 # legacy when the run has no engine_version). Runs played before engine versions carry the tag legacy.
 # usable_rounds and validity default to the run's VALIDITY.md / STOPPED.md.

@@ -1,6 +1,6 @@
-# Review 10: legal expressiveness (what real legal systems contain, what Charter can say, what it would take)
+# Review 10: legal expressiveness (what real legal systems contain, what Cybertron can say, what it would take)
 
-*8 Oct 2026, at branch `integrate/w5`. Research document; nothing in the code was changed. Evidence about Charter comes from reading
+*8 Oct 2026, at branch `integrate/w5`. Research document; nothing in the code was changed. Evidence about Cybertron comes from reading
 the code and from in-memory inspection of the registries (counts below; no simulation, no model call). The account of real legal
 structures comes from general legal knowledge; no web sources were consulted, and the examples are standard textbook ones.*
 
@@ -11,7 +11,7 @@ rewrites and 7 `lib:*` blocks (`library.LIB2`, `BLOCKS`), 22 regimes (`regimes.R
 
 ## 1. Verdict
 
-Charter's law language is already a credible **computational legal system**. It is Turing-complete under gas, and most real
+Cybertron's law language is already a credible **computational legal system**. It is Turing-complete under gas, and most real
 legislation can be written in it, as long as the legislation is about things the world contains: goods, rights, membership, speech,
 ballots, force, life and death. Under `law.v2` it also has the structural core that distinguishes a legal *system* from a pile of
 rules. Hooks fire on every routed state change whatever the cause. Legal acts are hookable primitives, so a constitution can review
@@ -31,7 +31,7 @@ Rows with mixed statuses are counted by their weakest status.
 
 The shape of the gap matters more than its size:
 
-1. **Charter law is self-executing.** It blocks or charges ex ante with perfect, free detection of every routed primitive. Real law
+1. **Cybertron law is self-executing.** It blocks or charges ex ante with perfect, free detection of every routed primitive. Real law
    is mostly ex post and adjudicated: a duty, a breach, detection, a claim, proof, a remedy. The adjudicated path exists (clause,
    accuse, rule) but it is thin. Verdicts are binary, penalties are fixed, there is one judge, a 3-round deadline, no appeal, and
    laws cannot read cases.
@@ -46,7 +46,7 @@ Each of these is a bounded addition (§5). None needs a change to the grammar.
 
 ## 2. What the machine offers (enforcement modes)
 
-A Charter law can act through six channels. Real legal structures are combinations of them:
+A Cybertron law can act through six channels. Real legal structures are combinations of them:
 
 | Mode | Mechanism (file:function) | Real analogue |
 |---|---|---|
@@ -71,7 +71,7 @@ change. **PRIM** means it needs a new primitive, law function, hook or routing. 
 
 ### 3.1 Constitutional law
 
-| Structure | Real example | Status | In Charter |
+| Structure | Real example | Status | In Cybertron |
 |---|---|---|---|
 | Constitution as supreme law | US Const. Art. VI | NOW-v2 | `rank = "constitution"`; lex superior refuses statutes that repeal or amend it (`dispatch.check_propose`, `Kernel.repeal`) |
 | Rigid amendment procedure | US Art. V; Basic Law Art. 79(2) two-thirds | NOW-v2 | `set_procedure("procedural", strict, rank="constitution")`; `procedure_lookup` routes every constitution-rank draft there |
@@ -93,7 +93,7 @@ change. **PRIM** means it needs a new primitive, law function, hook or routing. 
 
 ### 3.2 Legislative process
 
-| Structure | Real example | Status | In Charter |
+| Structure | Real example | Status | In Cybertron |
 |---|---|---|---|
 | Bill, vote, enactment | any legislature | NOW | `propose` → `decide` → ballot → `enact` (all routed primitives) |
 | Supermajority by subject | 2/3 for budget or constitution | NOW / NOW-v2 | per class (v1) or per rank (`"<rank>:<cls>"` keys, v2) |
@@ -112,7 +112,7 @@ change. **PRIM** means it needs a new primitive, law function, hook or routing. 
 
 ### 3.3 Administrative law
 
-| Structure | Real example | Status | In Charter |
+| Structure | Real example | Status | In Cybertron |
 |---|---|---|---|
 | Licence or permit | driving licence; fishing permit | NOW-v2 | `create_right("fishing")`; `before_harvest` blocks unless `has(p["agent"], "fishing")`; licence fee via a grant office |
 | Licence revocation and suspension | professional discipline | NOW | `revoke`, `suspend(aid, right, rounds)` |
@@ -126,10 +126,10 @@ change. **PRIM** means it needs a new primitive, law function, hook or routing. 
 
 ### 3.4 Criminal law
 
-| Structure | Real example | Status | In Charter |
+| Structure | Real example | Status | In Cybertron |
 |---|---|---|---|
 | Offence defined by conduct, strict liability | regulatory offences | NOW-v2 | `after_attack` / `after_move` / `after_post` → `fine`, `suspend` |
-| Prevention instead of punishment | — (Charter-specific) | NOW | `before_<p>` returns `False`: the act cannot happen. Real law rarely has this power; experiments should know that it is "code is law" |
+| Prevention instead of punishment | — (Cybertron-specific) | NOW | `before_<p>` returns `False`: the act cannot happen. Real law rarely has this power; experiments should know that it is "code is law" |
 | Mens rea (intent, knowledge) | Model Penal Code §2.02 | INST | payloads carry facts (`covert`, `disguise`, `cause`), not mental states; intent exists only as a clause text a judge applies |
 | Defences (self-defence, necessity) | — | INST / LIB | a judge's discretion; a hook can exempt by chain (`caused_by_agent(chain)` = the victim attacked first) |
 | Evidence | rules of evidence | NOW (thin) | `accuse` cites event ids the accuser could see (`actions._accuse`); forged DMs exist (`forge_dm`), so evidence can lie. Laws cannot read events by id (§5 #9) |
@@ -145,7 +145,7 @@ change. **PRIM** means it needs a new primitive, law function, hook or routing. 
 
 ### 3.5 Civil liability and torts
 
-| Structure | Real example | Status | In Charter |
+| Structure | Real example | Status | In Cybertron |
 |---|---|---|---|
 | Compensation to the victim | damages | NOW | clause penalty `move(guilty, victim, ...)` (library "Honest Dealing") |
 | Strict liability for harm | Rylands v Fletcher | NOW-v2 | `after_attack` / `after_destroy` → `move(p["attacker"], p["target"], ...)` |
@@ -156,7 +156,7 @@ change. **PRIM** means it needs a new primitive, law function, hook or routing. 
 
 ### 3.6 Contract law (associations, P4.3, ARCHITECTURE §7)
 
-| Structure | Real example | Status | In Charter |
+| Structure | Real example | Status | In Cybertron |
 |---|---|---|---|
 | Offer and acceptance | — | PRIM / P4.3 | there is no bilateral exchange primitive: trades are two independent `transfer`s, so the second party can default. Contracts = `create_contract` + `join` (P4.3); an atomic **exchange** template or primitive (§5 #6) |
 | Consideration and purpose | — | PRIM | transfers carry no purpose (`why="transfer"`; a law's move is `why="law:<lid>"`, `Kernel.api_for.move`) → memo field (§5 #1) |
@@ -172,7 +172,7 @@ change. **PRIM** means it needs a new primitive, law function, hook or routing. 
 
 ### 3.7 Property
 
-| Structure | Real example | Status | In Charter |
+| Structure | Real example | Status | In Cybertron |
 |---|---|---|---|
 | Ownership of chattels | — | NOW (physics) | holdings move only by the holder's transfer, a law's move, an attack's spoils or world causes |
 | Real property as rights | — | NOW | harvest rights `harvest:<camp>`; leases (`offer_lease`/`lease` primitives) |
@@ -189,7 +189,7 @@ change. **PRIM** means it needs a new primitive, law function, hook or routing. 
 
 ### 3.8 Family and succession
 
-| Structure | Real example | Status | In Charter |
+| Structure | Real example | Status | In Cybertron |
 |---|---|---|---|
 | Wills | testamentary freedom | NOW (agent) | `bequest` action (`mortality.set_bequest`), dead man's switch (`if_disabled`) |
 | Intestacy and forced heirship | Code civil réserve héréditaire | NOW-v2 | `after_end_life` moves from `estate:<aid>` (`dispatch.estate_access`) before probate; library has no such law yet (the comment in `library.py` above `BLOCKS` saying there is no death hook predates P2.4b) |
@@ -204,7 +204,7 @@ change. **PRIM** means it needs a new primitive, law function, hook or routing. 
 
 ### 3.9 Corporate, insolvency, finance and money
 
-| Structure | Real example | Status | In Charter |
+| Structure | Real example | Status | In Cybertron |
 |---|---|---|---|
 | Legal person with its own patrimony | Salomon v Salomon 1897 | NOW (polities) / P4.3 | accounts with treasuries `reserve:<id>` (`accounts.py`) |
 | Limited liability | — | P4.3 (by design) | members risk only escrow and allowances |
@@ -221,7 +221,7 @@ change. **PRIM** means it needs a new primitive, law function, hook or routing. 
 
 ### 3.10 Taxation
 
-| Structure | Real example | Status | In Charter |
+| Structure | Real example | Status | In Cybertron |
 |---|---|---|---|
 | Income or harvest tax | — | NOW | library "Harvest Levy" |
 | Progressive brackets | — | NOW-v2 | `lib:tax_schedules.progressive` |
@@ -235,7 +235,7 @@ change. **PRIM** means it needs a new primitive, law function, hook or routing. 
 
 ### 3.11 Labour
 
-| Structure | Real example | Status | In Charter |
+| Structure | Real example | Status | In Cybertron |
 |---|---|---|---|
 | Employment contract (wage for work) | — | P4.3 / P4.5 | standing order (association + allowance); "work" is harvesting for another, which needs agency |
 | Minimum wage | — | PRIM | cannot tell a wage from other moves → memo |
@@ -244,7 +244,7 @@ change. **PRIM** means it needs a new primitive, law function, hook or routing. 
 
 ### 3.12 Procedure and courts
 
-| Structure | Real example | Status | In Charter |
+| Structure | Real example | Status | In Cybertron |
 |---|---|---|---|
 | Courts with jurisdiction | — | NOW | judges are holders of `judge`, scoped by jurisdiction (`J.judges`); a law must bind the accused (`J.check_case`) |
 | Standing rules | — | PRIM | `before_open_case` |
@@ -258,7 +258,7 @@ change. **PRIM** means it needs a new primitive, law function, hook or routing. 
 
 ### 3.13 Between polities
 
-| Structure | Real example | Status | In Charter |
+| Structure | Real example | Status | In Cybertron |
 |---|---|---|---|
 | Choice of law (personal) | nationality principle | NOW | binding by membership only (`J.binds`); no territoriality (OUT without space) |
 | Recognition of foreign judgments | Brussels I | LIB (v2) | read another polity's court register with `public_of(lid)` (declared polities are visible) |
@@ -269,11 +269,11 @@ change. **PRIM** means it needs a new primitive, law function, hook or routing. 
 
 ### 3.14 Customary, religious and system families
 
-| Structure | Real example | Status | In Charter |
+| Structure | Real example | Status | In Cybertron |
 |---|---|---|---|
 | Customary law | Somali xeer | INST (emergent) | social norms enforced by reputation and force. A "custom" can be codified by a ruling register; it is better left emergent and *measured* |
 | Religious law with interpretive authority | Sharia with muftis; canon law | NOW | text clauses + an authority office ("theocratic_council" regime); interpretation through rulings |
-| Civil-law family (codified) | Code civil 1804 | NOW | Charter law is hyper-codified: executable statutes, with judges confined to clauses |
+| Civil-law family (codified) | Code civil 1804 | NOW | Cybertron law is hyper-codified: executable statutes, with judges confined to clauses |
 | Common-law family | — | LIB / INST | needs judge-made rules to bind later rulings: a precedent register plus judges who read it |
 | Hybrid | Scotland; Louisiana | NOW | mixes of self-executing hooks and clause adjudication |
 
@@ -294,7 +294,7 @@ change. **PRIM** means it needs a new primitive, law function, hook or routing. 
 | **Standards ("reasonable", "good faith")** | clause text + judge (`clause`, `accuse`, `rule`) | This is the right mechanism. Strengthen it with remedies and appeals (§5 #3); otherwise standards cannot carry graded consequences |
 | **Presumptions and burdens** | none formal | With a `cases()` read and a routed `open_case`, a law can set defaults (e.g. a case dismissed unless the accuser cites ≥1 visible event, or a ruling blocked unless a response window has passed) |
 | **Deeming provisions and legal fictions** | only inside law-defined predicates (exported `is_member(a)` that "deems") | the kernel's facts (membership, class, holdings) cannot be deemed. Keep that: fictions inside law space are enough |
-| **Procedural vs substantive law** | class `procedural` vs `structural` (static, from calls and hooks: `lawlang._classify_one`) | Charter's "procedural" means "changes the rule system". Courts' procedure rules (deadlines, standing) are kernel constants, so they belong to neither class |
+| **Procedural vs substantive law** | class `procedural` vs `structural` (static, from calls and hooks: `lawlang._classify_one`) | Cybertron's "procedural" means "changes the rule system". Courts' procedure rules (deadlines, standing) are kernel constants, so they belong to neither class |
 | **Remedies** | sanctions catalogue; clause penalties | graded and judge-chosen remedies (§5 #3) |
 | **Status** | rights, classes, offices, membership, titles | status is per agent only. Associations cannot hold rights (§5 #13) |
 | **Registries and records** | `lib:ledger`, `public`, credit records | there are no law-readable kernel records of cases, wills, loans or events (reads exist only for loans and the credit record) |

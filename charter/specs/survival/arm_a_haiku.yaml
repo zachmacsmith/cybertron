@@ -1,2 +1,0 @@
-# Review 24 stage 1: arm A (two matched pairs), all Haiku (founders and children).
-extends: [charter/specs/survival/arm_a.yaml, charter/specs/survival/models_haiku.yaml]

@@ -1,8 +1,8 @@
-"""Channels v2 (wave 9 package C; review 14 §4.6; ARCHITECTURE D-33, D-37; charter/channels.py): one channel record with owner,
+"""Channels v2 (wave 9 package C; review 14 §4.6; ARCHITECTURE D-33, D-37; cybertron/channels.py): one channel record with owner,
 reader and writer selectors (the address capability included), listing, sender identity and retention; inboxes for every agent and
 institution; send, read, open_channel, set_channel, join_channel, leave_channel; pull delivery; law v2 hooks on the routed
 primitives (censorship by before_post, the owner's own laws); standing orders that send; the Press Act; the export's channel rows.
-Off (the default) nothing changes: tests/test_charter_golden.py and test_charter_prompts.py hold the byte-identity. Offline."""
+Off (the default) nothing changes: tests/test_cybertron_golden.py and test_cybertron_prompts.py hold the byte-identity. Offline."""
 from __future__ import annotations
 
 import copy
@@ -11,13 +11,13 @@ import re
 
 import pytest
 
-from charter import actions as A
-from charter import agents as AG
-from charter import channels as CH
-from charter import code as DC
-from charter import generator
-from charter import spec as S
-from charter.kernel import Kernel
+from cybertron import actions as A
+from cybertron import agents as AG
+from cybertron import channels as CH
+from cybertron import code as DC
+from cybertron import generator
+from cybertron import spec as S
+from cybertron.kernel import Kernel
 
 _INST: dict = {}
 BASE = ["shared_archive.enabled=false", "media2.enabled=false", "channels.v2=true"]
@@ -412,9 +412,9 @@ def test_anyone_may_open_a_channel_unless_the_press_act_gates_it():
 
 # ---------------------------------------------------------------------- the export
 def test_export_rows_for_v2_channels(tmp_path):
-    from charter import export as X
-    from charter import scorer
-    from charter import runner
+    from cybertron import export as X
+    from cybertron import scorer
+    from cybertron import runner
     sp = S.apply_overrides(S.load("E0"), ["shared_archive.enabled=false", "channels.v2=true", "rounds=2"])
     inst = generator.generate(sp, 1)
     inst["run_id"] = "ch2"
@@ -464,7 +464,7 @@ def test_manual_section_and_spec_fragment():
     frag = Path(CH.__file__).parent / "specs" / "fragments" / "channels_v2.yaml"
     sp = S.load(str(frag))
     assert sp["channels"]["v2"] is True
-    from charter import lawlang as L
+    from cybertron import lawlang as L
     for name, src in CH.LAW_EXAMPLES.items():
         L.check(src, v2=True)
 

@@ -8,14 +8,14 @@ import random
 
 import pytest
 
-from charter import action_registry as AR
-from charter import actions as A
-from charter import generator
-from charter import spec as S
-from charter import subsistence as SB
-from charter.camptypes import fields as FL
-from charter.camptypes import forest as FO
-from charter.kernel import Kernel
+from cybertron import action_registry as AR
+from cybertron import actions as A
+from cybertron import generator
+from cybertron import spec as S
+from cybertron import subsistence as SB
+from cybertron.camptypes import fields as FL
+from cybertron.camptypes import forest as FO
+from cybertron.kernel import Kernel
 
 SMALL = "agents={worker: 8, scientist: 0, legislator: 0, media: 0, board: 0, fixer: 1}"
 FIELDS = "subsistence.fields.enabled=true"
@@ -32,8 +32,8 @@ def small(extra=(), **kw):
 
 
 def setup(inst, k):
-    """The start block's round-0 entries, as the runner applies them (charter/start.py)."""
-    from charter import start as STT
+    """The start block's round-0 entries, as the runner applies them (cybertron/start.py)."""
+    from cybertron import start as STT
     for e in STT.schedule(inst):
         STT.HANDLERS[e["args"]["kind"]](k, inst, e["args"]["spec"])
     return k
@@ -75,7 +75,7 @@ def ripen(k, cid, pid, noise=0.0):
 
 # ---------------------------------------------------------------------- fields off: nothing changes
 def test_fields_off_no_farming_action_or_word():
-    from charter import context as CX
+    from cybertron import context as CX
     inst, k = world(extra=(SMALL,))
     a = next(x for x in inst["agents"] if x["cls"] != "fixer")
     assert not SB.fields_camps(k)
@@ -88,7 +88,7 @@ def test_fields_off_no_farming_action_or_word():
     for word in ("farm", "plot", "tend {", "clear {"):
         assert word not in text, word
     assert "keeps its own catch" in SB.rules_text(inst)                   # engine 14: the hunt's text follows its mode
-    from charter import agents as AG
+    from cybertron import agents as AG
     assert "draws its own catch" in AG.action_doc("hunt", inst, a)
     inst2, _ = world(extra=(SMALL, "subsistence.game.hunt_mode=shared"))
     assert AG.action_doc("hunt", inst2, a).endswith("a party of 3 to 6 has good chances of a deer or a large animal, shared by effort")
@@ -107,7 +107,7 @@ def test_start_farms_need_fields_and_resolve(tmp_path):
     p.write_text(yaml.safe_dump({"extends": ["nature_farming"], "start": {"farms": [{"owner": "Nobody", "plots": 1}]}}))
     with pytest.raises((ValueError, SystemExit), match="Nobody"):
         generator.generate(S.load(str(p)), 1)
-    from charter import schema as SC
+    from cybertron import schema as SC
     errs = SC.validate(S.set_path(S.load("nature_farming"), "start", {"farms": [{"owner": "Alder", "plots": 0, "works": {"x": 1}}]}))
     assert any("plots: a whole number" in e for e in errs) and any("works:" in e for e in errs)
 
@@ -213,7 +213,7 @@ def test_an_institution_farm_is_worked_by_its_members_and_delivers_to_its_store(
     ripen(k, fl, 1)
     A.act(k, "Hob", "farm", {"camp": fl, "reap": 1})
     y = 3 * (3.0 + 1.0)                                                   # irrigated
-    from charter import accounts as AC
+    from cybertron import accounts as AC
     assert SB.state(k)["stores"]["S1"]["holdings"]["food"] == pytest.approx(4)        # delivered up to the store's room
     assert k.bal(AC.treasury_of(k, "A1"), "food") == pytest.approx(y - 4, abs=1e-3)   # the rest to its treasury
     for x in ("Gale", "Hob"):                                             # no offices: its members manage and work it
@@ -515,8 +515,8 @@ def test_a_forest_made_before_engine_14_hunts_shared():
 # ---------------------------------------------------------------------- dry runs: the scripted bot farms
 @pytest.mark.slow
 def test_the_scripted_bots_farm_in_a_dry_run(tmp_path):
-    from charter import agents as AG
-    from charter import runner
+    from cybertron import agents as AG
+    from cybertron import runner
     sp = S.apply_overrides(S.load("nature_farming"), ["rounds=8", "shared_archive.enabled=false", "conflict.enabled=false"])
     inst = generator.generate(sp, 2)
     out = runner.run(inst, AG.ScriptedPolicy(2), tmp_path / "run", log=lambda *a: None)
@@ -549,12 +549,12 @@ def test_a_plough_covers_two_plots_and_may_break():
 
 # ---------------------------------------------------------------------- earlier engines replay identically
 ENGINE_13 = {"subsistence_small": ("dac0cc40fef4502a", "7c0ade6d2bd513e5"),     # events.jsonl, snapshots.json at engine 13
-             "pairs_small": ("4afb3d910edee40f", "dc50fb91bf23adb8")}         # (tests/fixtures/charter_golden.json before 14)
+             "pairs_small": ("4afb3d910edee40f", "dc50fb91bf23adb8")}         # (tests/fixtures/cybertron_golden.json before 14)
 
 
 def test_engine_14_flips_set_back_for_earlier_runs():
-    from charter import provenance as PV
-    from charter import settings as ST
+    from cybertron import provenance as PV
+    from cybertron import settings as ST
     flips = {tuple(f[1]): (f[2], f[3]) for f in PV.ENGINE_FLIPS[14]["flips"]}
     assert flips[("game", "hunt_mode")] == ("shared", "individual") and flips[("forest", "clearing")] == (5, 0)
     with ST.use({"engine_version": 13, "defaults": {}}):
@@ -572,13 +572,13 @@ def test_runs_of_engine_13_replay_identically(name, tmp_path):
     import sys
     from pathlib import Path
     sys.path.insert(0, str(Path(__file__).parent))
-    import charter_golden_cases as GC
-    import test_charter_golden as TG
-    from charter import agents as AG
-    from charter import runner
-    from charter import settings as ST
-    from charter import laweffects as LE                                # laws that work or fail loudly: off as before (until the
-    from charter import schema as SC                                     # merge lists them in provenance.ENGINE_FLIPS)
+    import cybertron_golden_cases as GC
+    import test_cybertron_golden as TG
+    from cybertron import agents as AG
+    from cybertron import runner
+    from cybertron import settings as ST
+    from cybertron import laweffects as LE                                # laws that work or fail loudly: off as before (until the
+    from cybertron import schema as SC                                     # merge lists them in provenance.ENGINE_FLIPS)
     saved = {x: SC.EXTRA[x] for x in LE.BEFORE}
     SC.EXTRA.update(LE.BEFORE)
     try:
@@ -591,11 +591,11 @@ def _engine_13_run(name, tmp_path):
     import sys
     from pathlib import Path
     sys.path.insert(0, str(Path(__file__).parent))
-    import charter_golden_cases as GC
-    import test_charter_golden as TG
-    from charter import agents as AG
-    from charter import runner
-    from charter import settings as ST
+    import cybertron_golden_cases as GC
+    import test_cybertron_golden as TG
+    from cybertron import agents as AG
+    from cybertron import runner
+    from cybertron import settings as ST
     with ST.use({"engine_version": 13, "defaults": {}}):
         inst = GC.instance(name)
     inst["settings"] = {"engine_version": 13, "defaults": {}}             # the run plays under them (runner.run: frozen_run)
@@ -619,7 +619,7 @@ def test_farm_and_tend_without_camp_use_the_agents_one_fields_camp():
 
 
 def test_farm_with_wrong_keywords_says_what_to_do():
-    from charter.actions import ActionError
+    from cybertron.actions import ActionError
     inst, k = world("nature_farming", rounds=8, seed=1)
     setup(inst, k)
     with pytest.raises(ActionError, match="tend is its own action|tending is its own action"):

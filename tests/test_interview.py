@@ -1,4 +1,4 @@
-"""Interviews (charter/interview.py; docs/interview.md): an agent's context at a round is rebuilt by replaying the run with its
+"""Interviews (cybertron/interview.py; docs/interview.md): an agent's context at a round is rebuilt by replaying the run with its
 recorded replies, and equals what the model was sent in the run (history mode, per-round conversations, self-contained prompts;
 after a resume; without checkpoints); the run directory is never changed; repeated sampling, reply schemas, the scoring helper,
 usage stop, the CLI and the export table. No model is ever called: a fake anthropic client and scripted bots."""
@@ -15,13 +15,13 @@ from types import SimpleNamespace
 
 import pytest
 
-from charter import __main__ as M
-from charter import agents as AG
-from charter import export as X
-from charter import generator, llm, runner
-from charter import interview as IW
-from charter import provenance as PV
-from charter import spec as S
+from cybertron import __main__ as M
+from cybertron import agents as AG
+from cybertron import export as X
+from cybertron import generator, llm, runner
+from cybertron import interview as IW
+from cybertron import provenance as PV
+from cybertron import spec as S
 
 QUIET = lambda *a: None
 # A small society in history mode (as tests/test_history.py): 7 agents, 6 rounds, chunks of 3 staggered, F = 3.
@@ -293,7 +293,7 @@ def test_interview_share_reads_stored_answers(hist, tmp_path):
 
 def test_usage_stop_is_respected(hist, tmp_path, monkeypatch):
     out, _ = hist
-    monkeypatch.delenv("CHARTER_USAGE_STOP", raising=False)
+    monkeypatch.delenv("CYBERTRON_USAGE_STOP", raising=False)
     monkeypatch.setattr(llm, "_api", lambda *a, **k: pytest.fail("asked past the usage stop"))
     ctxs = IW.contexts(out, 1, [IW.alive_at(out, 1)[0]])
     monkeypatch.setattr(llm, "USAGE", {"windows": {"five_hour": 0.97}, "status": "allowed"})
