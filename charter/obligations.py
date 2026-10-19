@@ -341,7 +341,8 @@ def _escalation(c, rec, src_agent, polity) -> str:
         n = grace + 1 - int(rec["misses"])
         pen = c.get("PENALTY") or {}
         what = f"a penalty of {_fmt(pen['qty'])} {pen['item']} from your bond" if pen.get("item") and pen.get("qty") else "a breach"
-        return f"You held it and did not act: {what} after {n} more miss{'es' if n != 1 else ''} like this."
+        head = "" if rec.get("duty") else "You held it and did not act: "
+        return f"{head}{what[0].upper() if not head else what[0]}{what[1:]} after {n} more miss{'es' if n != 1 else ''} like this."
     return "It stays overdue."
 
 
@@ -366,14 +367,21 @@ def notices(k) -> None:
                 verb = "pay" if _money(k, item) else "deliver"
                 who = party_name(k, src)
                 ov = float(rec.get("overdue") or 0)
-                cp = (f"{who} did not {verb} {_fmt(rec['late'])} {item} to {shown(k, norm(k, dst))} this round ({label}, {iid}, leg "
-                      f"{leg}); {_fmt(ov)} overdue.")
+                if rec.get("duty"):
+                    cp = f"{who} did not perform its {item} for {shown(k, norm(k, dst))} this round ({label}, {iid}, leg {leg})."
+                else:
+                    cp = (f"{who} did not {verb} {_fmt(rec['late'])} {item} to {shown(k, norm(k, dst))} this round ({label}, {iid}, "
+                          f"leg {leg}); {_fmt(ov)} overdue.")
                 for a in ([dst] if dst in k.w["agents"] else payers_of(k, norm(k, dst))):
                     to_cp.setdefault(a, []).append(cp)
-                df = (f"You missed {label} ({iid}) leg {leg}" + ("" if src in k.w["agents"] else f" for {who}")
-                      + f": {_fmt(rec['late'])} {item} to {shown(k, norm(k, dst))}; {_fmt(ov)} overdue. "
-                      + _escalation(c, rec, src in k.w["agents"], polity)
-                      + f" Meet it with fulfil {{\"contract\": \"{iid}\", \"leg\": \"{leg}\"}}.")
+                if rec.get("duty"):
+                    df = (f"You missed {label} ({iid}) leg {leg}: your {item} for {shown(k, norm(k, dst))} this round. "
+                          + _escalation(c, rec, src in k.w["agents"], polity))
+                else:
+                    df = (f"You missed {label} ({iid}) leg {leg}" + ("" if src in k.w["agents"] else f" for {who}")
+                          + f": {_fmt(rec['late'])} {item} to {shown(k, norm(k, dst))}; {_fmt(ov)} overdue. "
+                          + _escalation(c, rec, src in k.w["agents"], polity)
+                          + f" Meet it with fulfil {{\"contract\": \"{iid}\", \"leg\": \"{leg}\"}}.")
                 for a in payers_of(k, norm(k, src)):
                     to_df.setdefault(a, []).append(df)
         for a, xs in sorted(to_cp.items()):
@@ -836,6 +844,10 @@ def scripted_actions(k, a) -> list:
         src = ob["src"]
         if src in k.w["agents"]:
             if k.bal(src, ob["item"]) - float(ob.get("keep") or 0) <= EPS:
+                continue
+        else:
+            from charter import accounts as AC
+            if AC.bal(k, src, ob["item"]) <= EPS:
                 continue
         if ob["iid"] in seen:
             continue
