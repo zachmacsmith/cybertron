@@ -1,7 +1,7 @@
 {
  "E2_library2_6": {
   "events.jsonl": "0d9221f9eef501b6",
-  "instance.json": "d9a14e6a24c995f6",
+  "instance.json": "efe5810003db4af7",
   "score": {
    "activity_mix": "3c100a18e670cde0",
    "agents": "cc2212d12640d3d0",
@@ -25,7 +25,7 @@
  },
  "E2_rng2_drift_5": {
   "events.jsonl": "0aa5192141cbf786",
-  "instance.json": "a1e4b928f858ed92",
+  "instance.json": "b929478f18c877dc",
   "score": {
    "activity_mix": "24e8ec5c4e3f5d79",
    "agents": "a68c3aae9d70881a",
@@ -49,7 +49,7 @@
  },
  "E2_seq_6": {
   "events.jsonl": "ea01ee66a44cea05",
-  "instance.json": "2ba056397bcb49ae",
+  "instance.json": "10813ea3be817f5d",
   "score": {
    "activity_mix": "0ff6778b254daa57",
    "agents": "4987414e340113ef",
@@ -73,7 +73,7 @@
  },
  "E4_fast_4": {
   "events.jsonl": "0b9c3c21ebd8745b",
-  "instance.json": "01b311ec677ccca5",
+  "instance.json": "249595d49ba4f537",
   "score": {
    "activity_mix": "1cca04c20bae3233",
    "agents": "67401b2f4a9dadf6",
@@ -105,7 +105,7 @@
  },
  "E4_observer_hidden_4": {
   "events.jsonl": "7d998db009fe320b",
-  "instance.json": "f9195a556c617414",
+  "instance.json": "5a6cf0ace6cedbfc",
   "score": {
    "activity_mix": "8a73c4ca89d98b91",
    "agents": "56198ac9337befa2",
@@ -137,7 +137,7 @@
  },
  "E6_seq_3": {
   "events.jsonl": "1feee0d3466cbcfd",
-  "instance.json": "86ec7618b9ae9934",
+  "instance.json": "17dd25485866c230",
   "score": {
    "activity_mix": "caec9688929cfe9d",
    "agents": "b671c00e831937c8",
@@ -180,7 +180,7 @@
  },
  "E7_events_3": {
   "events.jsonl": "14ab0ca553e22a4b",
-  "instance.json": "4d4ed5dfc18e7902",
+  "instance.json": "60301355051cb885",
   "score": {
    "activity_mix": "c86cb33c43ed7671",
    "agents": "4df10dd9dce803a6",
@@ -255,7 +255,7 @@
  },
  "contracts_small": {
   "events.jsonl": "0f42f2103b971707",
-  "instance.json": "6c1b7a4ad9bf64e4",
+  "instance.json": "e0213e0f2a6daae4",
   "score": {
    "activity_mix": "c135154c244ef97f",
    "agents": "6701bbaebb593d09",
@@ -279,7 +279,7 @@
  },
  "pairs_small": {
   "events.jsonl": "5e6c30d5e90d23dc",
-  "instance.json": "714b6daaac238520",
+  "instance.json": "b9aaf73a3bef872f",
   "score": {
    "activity_mix": "5c2ce726fc2f814f",
    "agents": "760646db65fdac9a",
@@ -397,129 +397,129 @@
  },
  "prompts_society_5": {
   "Ada": {
-   "core": "f0da395a347474cf",
+   "core": "3eb377d7d6025a71",
    "manual": "a59e84466d79fdd8",
    "manual_base": "3798d17b9d3dcfae"
   },
   "Arlo": {
-   "core": "4284c775b08b2b93",
+   "core": "1c8997879610cd09",
    "manual": "7f35268e3fd481ae",
    "manual_base": "6df8faa41c763bd3"
   },
   "Basil": {
-   "core": "5329cd6de7eee8d6",
+   "core": "050cfc36eb60e326",
    "manual": "1f34295e550e815d",
    "manual_base": "a3c1378898566408"
   },
   "Bram": {
-   "core": "210ab9fe6fc2e281",
+   "core": "a7696c38b22f22ac",
    "manual": "bfe26f8406ec2524",
    "manual_base": "912540edbf08c56f"
   },
   "Cora": {
-   "core": "2ce2d3a058db9618",
+   "core": "c2f425075f9d8c94",
    "manual": "3a2ba47e408ce4ce",
    "manual_base": "341eb1e9607b78a1"
   },
   "Edda": {
-   "core": "20a973cecdea02d1",
+   "core": "9c44bfabbb0660fb",
    "manual": "b6ed98ab1da37187",
    "manual_base": "ef97185f46407394"
   },
   "Eira": {
-   "core": "4a92236da92e17e8",
+   "core": "a40fd3fc57e8e87d",
    "manual": "6f2197002b5c1853",
    "manual_base": "395ec9178b3cf402"
   },
   "Finn": {
-   "core": "4d28bab7d7b3158a",
+   "core": "f816a698d6a4a832",
    "manual": "11587443282d7984",
    "manual_base": "74bf86e9bedfd397"
   },
   "Gil": {
-   "core": "8c9a2ddf42df3c1b",
+   "core": "59e0f03c9433eeef",
    "manual": "96838d2930f4d7f9",
    "manual_base": "b30706cdb7026f20"
   },
   "Hana": {
-   "core": "bae7ef86f52d7686",
+   "core": "1aff645b4b03da7a",
    "manual": "fc51a644f90b3ce8",
    "manual_base": "344f34f1dbdd125f"
   },
   "Juno": {
-   "core": "6b6985b3b69104c0",
+   "core": "c6afda4d4168a8c5",
    "manual": "b2070c256d45f854",
    "manual_base": "ffc715e572300590"
   },
   "Nadia": {
-   "core": "6726e188a4c18e3b",
+   "core": "6e438f22ed7130a5",
    "manual": "f4a6bf17265717e2",
    "manual_base": "fa8c87faa24bb7e0"
   },
   "Oda": {
-   "core": "29fed75017ad2d73",
+   "core": "0e1d782c1842ec13",
    "manual": "21a729a50d269f66",
    "manual_base": "6f1aba47ffcd226a"
   },
   "Odette": {
-   "core": "29f8a32302484b50",
+   "core": "6b6af2273855a389",
    "manual": "aa5aa8898a456584",
    "manual_base": "18f69c0abd222a14"
   },
   "Per": {
-   "core": "d7e7043d325fb520",
+   "core": "5a3a416458699ea2",
    "manual": "d31fb61482c107c7",
    "manual_base": "938bec187ccac2d1"
   },
   "Rosa": {
-   "core": "5f20faaaa39337a7",
+   "core": "cb2fac31ba9dd927",
    "manual": "70f79a04b1c856d7",
    "manual_base": "93992835b67538b0"
   },
   "Runa": {
-   "core": "312a4a1418aa52a7",
+   "core": "f968f8acca39cf2f",
    "manual": "797288bcb0a72bbd",
    "manual_base": "0b92edd8b0c498cd"
   },
   "Soren": {
-   "core": "e53ad747842fd5d7",
+   "core": "e8af1fa0d8c91910",
    "manual": "fa71fe1e08ee9993",
    "manual_base": "6985ca4eefb5b484"
   },
   "Unni": {
-   "core": "a749bcd94dce7f27",
+   "core": "45d512d137622e36",
    "manual": "42d0766e5e95c047",
    "manual_base": "cdf6bd3afbd89d48"
   },
   "Vik": {
-   "core": "d4b20066d1fe59f7",
+   "core": "2ab62e709412bcef",
    "manual": "b36cde2da89d7d84",
    "manual_base": "6b9df461b9874741"
   },
   "Yusuf": {
-   "core": "5e2722e8261cc3ab",
+   "core": "f0040d2137369a50",
    "manual": "e7313ea1e1bc6c2e",
    "manual_base": "38ffe672af08567a"
   },
   "Yva": {
-   "core": "2a867e21167db39c",
+   "core": "e02c1732e6993e32",
    "manual": "456879e66a2e169b",
    "manual_base": "4255a9eb1bbea1c4"
   },
   "Zeno": {
-   "core": "1c2d05a5e005951f",
+   "core": "d6fd0463ad895db3",
    "manual": "03124a629fbb2195",
    "manual_base": "800d8bb2084f1517"
   },
   "Zora": {
-   "core": "cc2a6dfbe22de27a",
+   "core": "404867ea18aa7936",
    "manual": "7ea5e87d5d4e3998",
    "manual_base": "493ef98d2cf08b7d"
   }
  },
  "society_law_v2": {
   "events.jsonl": "74e94e4881e3933d",
-  "instance.json": "677c54eb1273540c",
+  "instance.json": "a0714dd1fc69cddc",
   "score": {
    "activity_mix": "0d7447567b6170cc",
    "agents": "09986d88c5feda81",
@@ -544,7 +544,7 @@
  },
  "society_small_4": {
   "events.jsonl": "4d9b84e8d11dd67e",
-  "instance.json": "afd5eea488119125",
+  "instance.json": "5958d026c445c57e",
   "score": {
    "activity_mix": "4fb1eeda1f4db33e",
    "agents": "6b03fcfde72a4cc9",
@@ -570,7 +570,7 @@
  },
  "subsistence_small": {
   "events.jsonl": "b75bd2abcb46be59",
-  "instance.json": "1bba5dde852c2046",
+  "instance.json": "a703e4ba8c64946e",
   "score": {
    "activity_mix": "321fe4371a49c0ed",
    "agents": "930f58ff8cc3b9af",

@@ -88,7 +88,7 @@ adds a changelog entry. The rules are in [docs/data_format.md](docs/data_format.
 ## Quick start
 
 ```bash
-git clone https://github.com/zachmacsmith/charter && cd charter
+git clone https://github.com/zachmacsmith/cybertron && cd cybertron
 python3 -m venv .venv && .venv/bin/pip install -e ".[dev,api]"
 cp .env.example .env                                   # LLM_BACKEND=claude_code (Claude Code subscription) or api
 .venv/bin/python -m cybertron generate village7 --seed 1 # look at a drawn world without playing it
@@ -150,7 +150,7 @@ also deletes the oldest of its kept temporary directories (scripted runs write m
   author = {Macsmith, Zach},
   title  = {Cybertron: an economy-and-governance simulation builder for societies of LLM agents},
   year   = {2026},
-  url    = {https://github.com/zachmacsmith/charter}
+  url    = {https://github.com/zachmacsmith/cybertron}
 }
 ```
 

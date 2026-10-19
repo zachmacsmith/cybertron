@@ -419,7 +419,7 @@ configs:
 CARD_BODY = """# Cybertron runs
 
 Complete records of societies of LLM agents (Claude Haiku, Sonnet and Opus) played in
-[Cybertron](https://github.com/zachmacsmith/charter): agents harvest, trade, message each other and govern themselves through laws
+[Cybertron](https://github.com/zachmacsmith/cybertron): agents harvest, trade, message each other and govern themselves through laws
 written as executable code, each with private goals scored from game state.
 
 The agents are told they are playing a scored game, and when interviewed they say they know it is a multi-agent simulation in

@@ -136,10 +136,10 @@ ENGINE_FLIPS = {
                  "start.contracts, start.allowances, start.escrow; the Standing Contract core (cybertron/standing.py) with the "
                  "Supply, Board, Payroll, Quota, Grant, Charge and Retainer presets and terms lines; the Licence template; officers "
                  "see pending applicants"},
-    18: {"commits": [],
+    18: {"commits": ["c68b916c8dc58a201875b9954ac893246166ad62"],
          "flips": [("cybertron.context.DEFAULTS", ("world_name",), "Charter", "")],
          "note": "the package is renamed charter -> cybertron; the prompts no longer name the world (the overview's first line was "
-                 "\"Charter: N agents, R rounds.\"; the legacy prompt's \"You are an agent in Charter, a world of ...\")"},
+                 "\"Charter: N agents, R rounds.\"; the frozen legacy prompt (context off, D-4) keeps its text)"},
 }
 
 

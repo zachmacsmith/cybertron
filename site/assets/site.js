@@ -1,7 +1,7 @@
 // Shared page chrome and helpers for the Cybertron site.
 import { openDataset } from "../lib/cybertron-data.js";
 
-export const GITHUB = "https://github.com/zachmacsmith/charter";
+export const GITHUB = "https://github.com/zachmacsmith/cybertron";
 export const DATASET_REPO = "zachmacsmith/charter-runs";
 export const DATASET_URL = `https://huggingface.co/datasets/${DATASET_REPO}`;
 const THEMES = [["swiss", "Swiss"], ["broadsheet", "Broadsheet"], ["night", "Night"]];

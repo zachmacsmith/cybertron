@@ -155,8 +155,8 @@ lowers everyone's future yields. Each harvest right allows {sp['harvests_per_rig
         camp_text = CT.rules_text(inst)
     start_law = ("No constitution is in force at the start (a state of nature)." if J.nature_start(sp) else    # review 14 B
                  f"The starting constitution ({inst['constitution']}) is itself a procedural law and can be amended under its own procedure.")
-    name = CX.cfg(inst).get("world_name") or ""
-    return f"""You are an agent in {name + ', a' if name else 'a'} world of {len(inst['agents'])} agents over {inst['rounds']} rounds.
+    # D-4: the context-off (legacy) prompt is frozen byte for byte, so it keeps the project's old name; context prompts have none
+    return f"""You are an agent in Charter, a world of {len(inst['agents'])} agents over {inst['rounds']} rounds.
 {camp_text}
 {money}
 Laws: {law} {start_law}{(chr(10) + RG.describe(inst)) if RG.describe(inst) else ''}
