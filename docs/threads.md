@@ -4,7 +4,6 @@ A running list of what is in flight, kept up to date as work lands. Newest chang
 
 ## In progress
 
-- **Usability fixes and Phase 1 leftovers** (agent; branch `wp/usability-fixes`): the nine fixes from docs/review/31_institutions/09_usability_round2.md, the Service preset, and recipe placeholders in office duties.
 - **Takeover benchmark follow-ups** (not started):
   - In Thornby, a single councillor can rewrite who writes for the paper.
   - A bench preset with fewer camps, so subsistence stays under 30% of actions.
@@ -30,7 +29,7 @@ A running list of what is in flight, kept up to date as work lands. Newest chang
   - Farming (engine 14).
   - Phase 0: 10 of 12 items, across laws that fail loudly (15), channels that carry business (16) and economic plumbing (17).
   - Phase 1, about half: the Standing Contract core and its presets Payroll, Supply, Board, Grant, Retainer, Charge and Quota; the Licence template (membership-bound too); law access to channel posts.
-- **In progress:** usability fixes plus the Service preset and recipe placeholders, being reconciled with the shadowed-effects work. The Private world is built; its first live run is waiting on Zach. Done since: obligations, usability round 2, force, metrics, courts and records.
+- **Phase 1 done** apart from the Private world's live run, which is waiting on Zach. The Private world could swap its Service stand-in for the real preset. Done since: obligations, usability round 2, force, metrics, courts and records.
 - **Not started:**
   - Phase 2: surveillance as pull; Registry and Archives Acts; the Cooperative pieces (Duty Roster, Mutual Credit, militia and muster); the Merchant pieces (Commission, Arbitration); Security Licence; the Merchant, State and Cooperative worlds.
   - Phase 3.
@@ -55,6 +54,10 @@ A running list of what is in flight, kept up to date as work lands. Newest chang
 ## Recently done
 
 - 2026-10-20:
+  - Usability fixes merged:
+    - The nine fixes from 09_usability_round2.md.
+    - The Service preset, and recipe placeholders in office duties.
+    - A single SHADOWED note for office-control cases, now also catching agents admitted by name.
   - Private world merged (`specs/regimes/private.yaml`, plus a no-goal variant; 24 agents: 7 Opus, 5 Sonnet, 12 Haiku; 13 manual contracts; 6 channels). Flows check: `python -m cybertron.analysis.flows`. Dry runs pass the §11 checks before the blight and partly after. Write-up: 10_private_world.md.
   - Shadowed law effects merged: law_effect, notices, the proposer's result and preview_law say when a stronger rule overrides a law's change (procedures, and office control over store hooks).
   - Courts and records merged: `represent` (counsel), `withdraw_case`, `cases_of`, `read_register`, `read_law` with versions, `sell_to_window`, Bench Act, Recusal Act, Graded Contract Enforcement, Certified Contract Registry, Bill Certification. Opt-in by law. Worlds with `actions.core_only` have no court actions, which is a policy decision.
