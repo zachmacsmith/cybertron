@@ -1,7 +1,7 @@
 // cybertron-data.js: read published Cybertron runs in the browser, straight from the Hugging Face dataset (docs/data_format.md).
 //
-//   import { openDataset } from "./cybertron-data.js";
-//   const ds = await openDataset({ repo: "zachmacsmith/charter-runs" });
+//   import { openDataset, DATASET_REPO } from "./cybertron-data.js";
+//   const ds = await openDataset({ repo: DATASET_REPO });     // the published dataset (the default)
 //   const runs = await ds.catalog();                       // one row per published run (catalog.json)
 //   const stories = await ds.stories();                    // curated stories: title, subtitle, quote, agent, run_id (stories.json)
 //   const run = ds.run(runs[0]);                           // lazy: nothing is fetched until a table is asked for
@@ -16,8 +16,10 @@
 import { asyncBufferFromUrl, parquetReadObjects } from "https://cdn.jsdelivr.net/npm/hyparquet@1.31.3/+esm";
 
 const HF = "https://huggingface.co";
+// The Hugging Face dataset id: the only place the site writes it (Python: cybertron/publish.py DATASET; docs/publishing.md).
+export const DATASET_REPO = "zachmacsmith/charter-runs";
 
-export async function openDataset({ repo = "zachmacsmith/charter-runs", revision = "main", base = null } = {}) {
+export async function openDataset({ repo = DATASET_REPO, revision = "main", base = null } = {}) {
   // base: serve the dataset from another URL (a local copy while developing); then no revision lookup happens
   let root = base;
   if (!root) {
@@ -34,7 +36,7 @@ export async function openDataset({ repo = "zachmacsmith/charter-runs", revision
 }
 
 async function resolveRevision(repo, revision) {
-  const key = `charter-sha:${repo}:${revision}`;
+  const key = `cybertron-sha:${repo}:${revision}`;
   try { const hit = sessionStorage.getItem(key); if (hit) return hit; } catch (e) {}
   const r = await fetchOk(`${HF}/api/datasets/${repo}/revision/${encodeURIComponent(revision)}`);
   const sha = (await r.json()).sha;

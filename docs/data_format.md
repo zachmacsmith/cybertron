@@ -294,7 +294,8 @@ under changed code). With `--with-prompts`, `blobs` rows of kind `interview_prom
 
 ## Layout on Hugging Face (publish's concern, recorded for reference)
 
-`cybertron publish` (`cybertron/publish.py`) writes, in one commit to the dataset `zachmacsmith/charter-runs`:
+`cybertron publish` (`cybertron/publish.py`) writes, in one commit to the dataset `zachmacsmith/charter-runs` (`publish.DATASET`; see
+[publishing.md](publishing.md) for the one place it is set and for repacking a published raw archive):
 
 - `catalog.parquet`, `catalog.json`: one row per run (the curated card, key run facts, `era`, `engine_version`).
 - `runs/<spec>/<run_id>/<table>.parquet` plus `manifest.json` and `card.json`.

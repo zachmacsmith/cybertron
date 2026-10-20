@@ -830,7 +830,7 @@ export async function data(st, run) {
     <table class="data" style="max-width:560px"><thead><tr><th>Table</th><th class="num">Rows</th></tr></thead><tbody>
     ${rows.map(([t, v]) => `<tr><td><a href="${st.root}/${esc(st.entry.path)}/${esc(v.file)}">${esc(t)}</a></td><td class="num">${v.rows}</td></tr>`).join("")}</tbody></table>
     <pre class="code">SELECT round, type, agent, data_json
-FROM 'hf://datasets/zachmacsmith/charter-runs/${esc(st.entry.path)}/events.parquet'
+FROM 'hf://datasets/${esc(st.datasetRepo)}/${esc(st.entry.path)}/events.parquet'
 LIMIT 20;</pre><p class="meta">${S.events.length.toLocaleString()} events, ${S.dms.length.toLocaleString()} private messages, ${S.laws.size} laws, ${S.agents.length} agents.</p></section>`;
 }
 
