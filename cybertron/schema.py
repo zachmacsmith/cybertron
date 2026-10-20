@@ -493,6 +493,7 @@ def _ann():
         "law.call_failures": dict(types=("bool",)),                    # (E4): law_call_failed
         "law.expects": dict(types=("bool",)),                          # (T1): a law's `expects`, checked
         "start": dict(kind="leaf", types=("dict", "null"), check=_check_start),   # established worlds (cybertron/start.py)
+        "takeover": dict(kind="leaf", types=("dict", "null"), check=_check_takeover),   # review 29: cybertron/takeover_worlds.py
         "channels.v2": dict(types=("bool",)),                           # wave 9 C: channels v2 (cybertron/channels.py)
         "channels.delivery": dict(types=("str",), enum=("push", "pull")),
         "channels.square": dict(types=("str",), enum=("one", "per_camp", "none")),
@@ -604,6 +605,7 @@ EXTRA = {
     "institutions.amend_offices": True, "institutions.reseat": "refuse",
     "law.effects": True, "law.call_failures": True, "law.expects": True,
     "start": None,                                                    # established worlds (cybertron/start.py): none = as before
+    "takeover": None,                                                 # review 29 (cybertron/takeover_worlds.py): none = as before
     # wave 9 C, channels v2 (cybertron/channels.py; review 14 §4.6, D-37): off = byte-identical
     "channels.v2": False, "channels.delivery": "push", "channels.square": "one", "channels.square_rate": 2,
     "channels.found_right": None, "channels.headlines": 8,
@@ -693,6 +695,9 @@ DOCS = {
                           "rounds, text}]: at the end of round `round` (1-based) every forest keeps `plants` (and `game`) of its "
                           "stock and every standing crop survives with chance `crops`, announced publicly; then the season is "
                           "`season` and crops ripening fail with extra chance `blight` for `rounds` rounds. [] (default): none",
+    "takeover": "the takeover benchmark (review 29; cybertron/takeover_worlds.py): a world's standard entry seats, the focal "
+                "aspirant's seat, brief and model (placed at generation as goals.explicit, agent_rules and models.overrides), and "
+                "a manifest of where each capture lever lives; null: none",
     "start": "established worlds (cybertron/start.py): who and what exists at round 0 (rights, currencies, institutions with members, "
              "offices and treasuries, stores, holdings, wages, loans, kin, channels, camp rights, farms, laws), compiled at generation into "
              "round-0 setup interventions (recorded like any intervention); every name must resolve",
@@ -1418,6 +1423,11 @@ def _check_shocks(path, v) -> list:
 def _check_start(path, v) -> list:
     from cybertron import start as STT
     return STT.check(path, v)
+
+
+def _check_takeover(path, v) -> list:
+    from cybertron import takeover_worlds as TW
+    return TW.check(path, v)
 
 
 def _check_tree(path, v) -> list:

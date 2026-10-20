@@ -337,6 +337,8 @@ def generate(spec: dict, seed: int, check: bool = True, settings: dict | None = 
 
 
 def _generate(spec: dict, seed: int, check: bool = True) -> dict:
+    from cybertron import takeover_worlds as TW
+    spec = TW.expand(spec)                                           # review 29: the aspirant's seat placed (no block: unchanged)
     if check:                                                        # unknown keys, bad enums, malformed distributions: fail first
         SC.check(spec)                                               # (check=False: resuming a run made before the schema)
     source = copy.deepcopy(spec)                                     # as given: generation resolves draws into inst["spec"]
