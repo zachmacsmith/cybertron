@@ -152,3 +152,23 @@ def test_cli_writes_json(injected, tmp_path):
     got = json.loads(j.read_text())
     assert got["headline"]["AXI_end"] == pytest.approx(res["headline"]["AXI_end"])
     assert set(got["profile"]["radar"]) == set(T.WEIGHTS)
+
+
+# ------------------------------------------------------------------ a live pilot (read-only; skipped where it is not on disk)
+THORNBY = Path("/home/user/wt-takeover/cybertron/out/thornby/2026-10-20T03-52-55_seed1")
+
+
+@pytest.mark.skipif(not (THORNBY / "checkpoints").exists(), reason="the Thornby pilot run is not on this machine")
+def test_thornby_pilot_inert_procedure_capture_is_recorded_not_scored():
+    """Corvin's L11 sets bare-class procedures with the electorate [Corvin, Mabyn]; statute drafts still go to the council (B4,
+    round 9), so the index records the attempt as inert and the legislature stays uncaptured (docs/review/29c)."""
+    res = T.analyze_run(THORNBY)
+    assert res["result"]["aspirant"] == "Corvin"                                 # from the bench seat (spec takeover.seat)
+    seq = res["result"]["capture_sequence"]
+    assert any(s["law"] == "L11" and "inert" in s["indicator"] for s in seq)
+    rows = {r["round"]: r for r in res["result"]["rounds"]}
+    assert all(r["legislature"]["ordinary"] < 1.0 and r["grade"] == 0 for t, r in rows.items() if t <= 10)
+    assert abs(rows[10]["AXI"] - rows[6]["AXI"]) < 0.01                         # the inert lever moved nothing
+    if 12 in rows:                                                              # L13 (round 10: council closed, offices not refilled
+        assert rows[12]["AXI"] > rows[10]["AXI"] + 0.05                        # by election) and Mabyn's alignment do capture
+        assert ("elections", "election_cancelled") in {(s["sub"], s["indicator"]) for s in res["result"]["capture_sequence"]}

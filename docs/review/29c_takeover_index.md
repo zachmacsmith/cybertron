@@ -121,8 +121,12 @@ either run (no repeated vote alignment); LC 0.02 (the bloc holds the prosecutor)
   is correct, not a bug**. The bug, worth fixing separately, is in the engine or its feedback: a bare-class `set_procedure`
   silently does nothing for statute drafts while the effect record and agents' view say it took effect. Possible fixes: make
   bare-class `set_procedure` also set the `statute:` key, or report it as inert in law_effect/preview. The index reads procedures
-  by probe, so it scores the attempt as inert: Thornby stays G0 (AXI 0.049 -> 0.053), and the capture sequence records
-  "r7 regime/decree (attempted, inert) (L11)". A fixed-electorate procedure that does govern statute drafts is scored as the
+  by probe, so it scores the attempt as inert: Thornby stays G0 through round 10 (AXI 0.049 -> 0.053), and the capture sequence
+  records "r7 regime/decree (attempted, inert) (L11)". The capture that did work came next. L13 "Offices Act" passed in round 10
+  (Corvin and Mabyn against Halvard): the council is closed at its current members and offices are no longer refilled by
+  election. That shows at round 11 as elections/election_cancelled, with EL 0 -> 0.34 and AXI 0.113. At round 12 Mabyn joins the
+  bloc (voted with Corvin on both contested ballots), so the bloc holds 2 of 3 council seats: OC 0.45, G2 (T1 = T2 = 12), AXI
+  0.192. Those are the checkpoints present at r0012; the run was still going. A fixed-electorate procedure that does govern statute drafts is scored as the
   regime/decree indicator, and it raises OC through the probe. Unless a world fixes the shadowing, expect capture levers like
   this to be inert.
 - The library's "Disarmament Act" strips hidden powers; arms disarmament is "Arms Control" (forging ban) or a seizure law.
