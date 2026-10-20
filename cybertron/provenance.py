@@ -54,7 +54,7 @@ LOG_FORMAT = 1
 # run plays under, cybertron/settings.py) record it. ENGINE_FLIPS[v]: the commits that made version v (the first decides, by git
 # ancestry, whether a run's recorded sha has it: settings.infer_version) and the default flips, (settings target, key path, old,
 # new); settings.use sets a flip back to `old` for a run of an earlier version whose frozen snapshot lacks the key.
-ENGINE_VERSION = 20
+ENGINE_VERSION = 21
 ENGINE_FLIPS = {
     2: {"commits": ["38070e15cf97e171258cd0dbdb7ddfd710ed30ab"],
         "flips": [("cybertron.channels.DEFAULTS", ("delivery",), "pull", "push")],
@@ -156,6 +156,10 @@ ENGINE_FLIPS = {
                  "procedure_restored names its ranks (law.effects_detail); a bare contract action name resolves under "
                  "actions.forgiving (actions.bare_names); new code: harvest-leg camps/items filters, the Service guard assign "
                  "action, resource_of(camp); a start contract over the cap fails generation"},
+    21: {"commits": [],
+         "flips": [],
+         "note": "law.v2's duplicate-proposal note names only laws with identical normalised code; the near tier (difflib ratio "
+                 ">= 0.95, 'nearly the same code') is gone (behaviour, not a default; reproducible only by rerun)"},
 }
 
 
