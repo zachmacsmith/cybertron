@@ -150,3 +150,63 @@ def test_law_seals_files_and_sets_the_policy(tmp_path):
     with pytest.raises(ActionError, match="sealed"):
         act(k, "Bo", "dir_edit", path="r1.md", find="met", replace="did not meet")
     assert "sealed in round" in act(k, "Fay", "dir_history", dir="minutes", path="r1.md")
+
+
+# ---------------------------------------------------------------------- 2.10 the Registry Act and the Archives Act
+def invoke(k, aid, action, *args):
+    return act(k, aid, "invoke", action=action, args=list(args))
+
+
+def test_registry_act_files_certifies_corrects_and_registers_late_entries(tmp_path):
+    from cybertron import registers as RG
+    sp = dir_world()
+    sp["start"]["laws"] = [{"template": "Registry Act", "params": {"FEE": 1, "AUTO_AFTER": 2,
+                                                                   "OFFICES": ["J0.registrar", "J0.president"]}}]
+    k = T.setup(tmp_path, sp)
+    lid = T.law(k, "J0", "Registry Act")
+    pub = k.w["laws"][lid]["public"]
+    assert [r["office"] for r in pub["roll"]] == ["J0.registrar", "J0.president"]
+    t0 = k.bal("Fay", "penny")
+    assert "pending" in invoke(k, "Fay", "file_entry", "title", "Fay holds the east plot")
+    assert k.bal("Fay", "penny") == pytest.approx(t0 - 1)
+    with pytest.raises(ActionError):
+        invoke(k, "Fay", "certify_entry", 1, "ok")                      # only the Registrar certifies
+    invoke(k, "Bo", "certify_entry", 1, "seen")
+    invoke(k, "Bo", "correct_entry", 1, "the plot is the north-east plot")
+    assert pub["register"][0]["text"] == "Fay holds the east plot" and pub["errata"][0]["n"] == 1   # errata, never edits
+    invoke(k, "Di", "file_entry", "notice", "Di is a candidate")
+    with pytest.raises(ActionError, match="reason"):
+        invoke(k, "Bo", "refuse_entry", 2)
+    T.step(k, 2)                                                        # nobody decides entry 2: registered automatically
+    pub = k.w["laws"][lid]["public"]
+    assert pub["register"][1]["status"] == "registered" and "automatic" in pub["register"][1]["decided_by"]
+    assert invoke(k, "Ed", "extract_entry", 1).endswith("extract sent")
+    note = [e for e in k.events if e["type"] == "notify" and "Certified extract" in str(e["data"])]
+    assert note and "north-east" in str(note[-1]["data"])
+    assert "Fay holds" in RG.read_register(k, "Ed", {"law": lid, "book": "register"})
+
+
+def test_archives_act_seals_sets_history_readers_and_audits(tmp_path):
+    sp = dir_world(history="full")
+    sp["start"]["institutions"][0]["offices"]["auditor"] = {"title": "Auditor", "holders": ["Ed"], "duties": "Audit."}
+    sp["start"]["laws"] = [{"template": "Archives Act", "params": {"DIR": "minutes", "SEAL_AFTER": 2,
+                                                                   "HISTORY_READERS": "office:J0.president",
+                                                                   "AUDITOR": "J0.auditor"}}]
+    k = T.setup(tmp_path, sp)
+    lid = T.law(k, "J0", "Archives Act")
+    assert k.w["laws"][lid]["rank"] == "constitution" and k.w["dirs"]["minutes"]["history_readers"] == "office:J0.president"
+    act(k, "Bo", "dir_write", path="r1.md", text="the council met; Ada objected")
+    T.step(k)
+    act(k, "Bo", "dir_edit", path="r1.md", find="; Ada objected", replace="")   # the 1984 edit, before sealing
+    assert "not sealed yet" in invoke(k, "Ed", "audit_record", "r1.md")
+    T.step(k, 3)
+    pub = k.w["laws"][lid]["public"]
+    assert [r["path"] for r in pub["sealed"]] == ["r1.md"]
+    with pytest.raises(ActionError, match="sealed"):
+        act(k, "Bo", "dir_write", path="r1.md", text="again")
+    assert invoke(k, "Ed", "audit_record", "r1.md").endswith("intact since sealing")
+    pub = k.w["laws"][lid]["public"]
+    assert pub["audits"][-1]["changes"] == 1 and pub["audits"][-1]["versions"] == 2   # the audit sees the edit in the log
+    assert "Ada objected" in act(k, "Di", "dir_history", dir="minutes", path="r1.md")
+    with pytest.raises(ActionError):
+        invoke(k, "Fay", "audit_record", "r1.md")
