@@ -751,11 +751,20 @@ def _office_generic(k, aid, iid, offs) -> list:
     if "propose" in (k.w["agents"].get(aid, {}).get("rights") or ()):
         out.append('propose a law: propose {"code": "<law source>", "intent": "..."}')
     inbox = "@" + str(iid)
-    if inbox in (k.w.get("channels") or {}):
+    ch = (k.w.get("channels") or {}).get(inbox)
+    if ch is not None and _readable(k, aid, ch):
         out.append(f"read what is sent to {iid}: read {{\"channel\": \"{inbox}\"}}")
     if not out:
         out.append(f"speak for {iid} or pay from it: transfer {{\"to\", \"item\", \"qty\", \"as\": \"{iid}\"}}")
     return out
+
+
+def _readable(k, aid, ch) -> bool:
+    from cybertron import channels as CH
+    try:
+        return bool(CH.can_read(k, aid, ch))
+    except Exception:                                                   # noqa: BLE001 (channels off or an old record)
+        return False
 
 
 def _treasury_text(k, iid) -> str:
