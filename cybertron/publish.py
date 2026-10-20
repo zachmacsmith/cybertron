@@ -2,6 +2,7 @@
 
     python -m cybertron publish RUN [RUN...] --repo OWNER/NAME [--card CARDS.yaml] [--push] [--release vX.Y[.Z] [--notes "..."]]
     python -m cybertron publish --repo OWNER/NAME --reexport-all [--push]      # rebuild every published run's tables
+    python -m cybertron publish --audit PATH                                  # privacy scan of a directory / snapshot, no push
 
 Without --push nothing leaves the machine: the dataset is staged in --staging (default cybertron/out/_publish/<time>) and a summary
 of what would be uploaded is printed. Layout on the Hub (docs/data_format.md, "Layout on Hugging Face"):
@@ -16,7 +17,10 @@ of what would be uploaded is printed. Layout on the Hub (docs/data_format.md, "L
 Each run is replaced as a unit: publishing a run deletes whatever its folder and archive held before, so a republish never leaves
 stale files behind. Tables are written by cybertron.export and are never edited here; publish refuses to upload when an exported
 table holds an absolute path or the home directory (fix the exporter, not the output), when a checkpoint or pickle is staged,
-or when the published runs would mix export schema majors (use --reexport-all). Raw files are text logs written by the
+or when the published runs would mix export schema majors (use --reexport-all). The privacy gate (cybertron/privacy.py) scans
+every staged file, archive member and table for the Claude Code account's email and ids, a user denylist, tokens and keys,
+claude.ai session URLs and home/root paths, and refuses to upload on any hit; values are never printed, only redacted context.
+`publish --audit PATH` runs the same scan on a local directory or downloaded dataset snapshot without pushing. Raw files are text logs written by the
 simulator; local paths in them are rewritten to `<spec>/<run>`-relative ones before archiving.
 
 A card gives a run its curated facts, all optional: title, description, tags, featured, usable_rounds ("1-23"), validity. --card
@@ -58,11 +62,15 @@ import time
 from pathlib import Path
 
 from cybertron import export as X
+from cybertron import privacy as PV
 
 DEFAULT_REPO = "zachmacsmith/charter-runs"
 STAGING = Path(__file__).resolve().parent / "out" / "_publish"
 # raw files never published: pickles execute code when loaded; the rest are reports rebuilt from the data
-NEVER = re.compile(r"(^|/)(checkpoints?(/|$)|claude_sessions(/|$)|.*\.pkl$|.*\.pickle$|abandoned_calls\.jsonl$)")   # claude_sessions: the CLI's account file and transcripts (email, account ids, injected context)
+# claude_sessions / .claude*: the Claude Code CLI's account file and transcripts (email, account ids, injected context); credentials,
+# .env files and private keys: secrets. cybertron.privacy scans everything staged on top of this (module docstring).
+NEVER = re.compile(r"(^|/)(checkpoints?(/|$)|claude_sessions(/|$)|\.claude[^/]*(/|$)|\.credentials[^/]*\.json$|\.env(\.[^/]*)?$"
+                   r"|id_(rsa|dsa|ecdsa|ed25519)[^/]*$|[^/]*\.pem$|[^/]*\.pkl$|[^/]*\.pickle$|abandoned_calls\.jsonl$)")
 REPORTS = {"story.html", "messages.md", "overview.md", "observer.md", "spec_outline.md"}
 CARD_KEYS = ("title", "description", "tags", "featured", "usable_rounds", "validity", "era")
 STORY_KEYS = ("title", "subtitle", "quote", "agent", "run_id", "class", "model", "mood", "round")
@@ -659,6 +667,7 @@ def publish(runs, repo: str = DEFAULT_REPO, cards: dict | None = None, push: boo
     published = remote_catalog(repo)
     cards = cards or {}
     run_dirs = X.find_runs(runs) if runs else []
+    priv = PV.collect_private(run_dirs)                                 # before staging: the runs' own account files count
     tmp = None
     if reexport_all:                                                    # rebuild every published run from its raw archive
         tmp = stage.parent / f".raw-{stage.name}"
@@ -706,10 +715,12 @@ def publish(runs, repo: str = DEFAULT_REPO, cards: dict | None = None, push: boo
         write_stories(stories, stage)
     (stage / "README.md").write_text(dataset_card(repo, sorted(tables), catalog, entries))
     problems += check_staging(stage)
+    hits = PV.scan_tree(stage, priv)                                    # the privacy gate: every hit blocks the upload
+    problems = [PV.redact(p, priv) for p in problems] + [str(h) for h in hits]
     files = sorted(p for p in stage.rglob("*") if p.is_file())
     total = sum(p.stat().st_size for p in files)
     summary = {"repo": repo, "staging": str(stage), "runs": sorted(new_ids), "catalog_runs": len(catalog), "files": len(files),
-               "bytes": total, "problems": problems, "pushed": False, "release": release, "tag": None}
+               "bytes": total, "problems": problems, "privacy_hits": len(hits), "pushed": False, "release": release, "tag": None}
     if stories is not None:
         summary.update(stories=len(stories), stories_dropped=[f"{st.get('title')} ({st['run_id']})" for st in dropped])
     log(f"\n{len(new_ids)} run(s) staged in {stage}: {len(files)} files, {total / 1e6:.1f} MB; catalog would list {len(catalog)} run(s)")
@@ -750,6 +761,8 @@ def publish_stories(stories: list[dict], repo: str, stage: Path, published: list
         stories, dropped = drop_missing_stories(stories, {r["run_id"] for r in published}, log=log)
     problems = check_stories(stories, {r["run_id"] for r in published})
     write_stories(stories, stage)
+    priv = PV.collect_private()
+    problems = [PV.redact(p, priv) for p in problems] + [str(h) for h in PV.scan_tree(stage, priv)]
     summary = {"repo": repo, "staging": str(stage), "runs": [], "stories": len(stories), "files": 1, "problems": problems,
                "stories_dropped": [f"{st.get('title')} ({st['run_id']})" for st in dropped],
                "pushed": False}
@@ -772,6 +785,8 @@ def publish_stories(stories: list[dict], repo: str, stage: Path, published: list
 def add_command(sub) -> None:
     p = sub.add_parser("publish", help="publish runs to a Hugging Face dataset (cybertron/publish.py; docs/data_format.md)")
     p.add_argument("runs", nargs="*", help="run directories, or directories holding runs")
+    p.add_argument("--audit", metavar="PATH", help="only run the privacy scan on PATH (a directory, archive or downloaded dataset "
+                                                    "snapshot) and exit 1 on any hit; nothing is staged or uploaded")
     p.add_argument("--repo", default=DEFAULT_REPO, help=f"dataset repo (default {DEFAULT_REPO})")
     p.add_argument("--card", help="YAML/JSON card, or {run_id: card} (title, description, tags, featured, usable_rounds, validity)")
     p.add_argument("--stories", help="stories registry (site/stories.yaml) to publish as stories.json; runs are optional")
@@ -794,6 +809,10 @@ def add_command(sub) -> None:
 
 
 def cmd(a) -> None:
+    if a.audit:
+        if a.runs or a.push or a.stories or a.reexport_all:
+            raise SystemExit("--audit takes only a path: it scans, it does not stage or upload")
+        raise SystemExit(1 if PV.audit(a.audit, never=NEVER) else 0)
     if a.notes and not a.release:
         raise SystemExit("--notes goes with --release (the changelog entry)")
     cards = load_cards(a.card)
