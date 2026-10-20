@@ -119,6 +119,8 @@ def _p_capture(rng, world, me=None):
 
 
 def _p_resource(rng, world, me=None):
+    if not world["resources"]:                                          # a world with no drawn camps (only forests, fields): food
+        return {"resource": "food"}
     return {"resource": rng.choice(world["resources"])}
 
 

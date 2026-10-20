@@ -508,7 +508,7 @@ def _generate(spec: dict, seed: int, check: bool = True) -> dict:
 
     # goals
     world = {"resources": sorted({c["resource"] for c in camps}), "camps": [c["id"] for c in camps],
-             "hardest_camp": max(camps, key=lambda c: c["tier"])["id"], "library": lib,
+             "hardest_camp": max(camps, key=lambda c: c["tier"])["id"] if camps else None, "library": lib,
              "agents": [(a["id"], a["cls"], list(a["rights"])) for a in agents],
              "compute": {c["id"]: c.get("compute") for c in camps if c.get("compute")},
              "channels_dm": sp["channels"].get("dm", True), "has_media": counts["media"] > 0, "has_scientists": counts["scientist"] > 0}

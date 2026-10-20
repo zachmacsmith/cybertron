@@ -1,0 +1,38 @@
+# Usability round 2 (docs/review/31_institutions/09_usability_round2.md): employment under manual obligations.
+# The situation of usability/payroll (the Ridge Timber Company A1: an owner, five salaried workers on a Payroll with a 50% cut of
+# their timber, a council standing order buying the company's timber from round 3), with the round-2 changes:
+#   - manual obligations: wages move only when the owner pays them (fulfil, or a transfer "as" A1); the engine records, reminds the
+#     owner at the top of its next turn, tells each worker of a missed wage, and keeps the arrears. The harvest cut stays automatic
+#     (a levy at harvest, not labour), and so does the council's order (the council is not played here: leg mode auto).
+#   - role cards; forgiving arguments; petitions to @A1 listed to the owner and made public after 2 rounds unanswered.
+#   - the decision seat (Oren, the owner) is Opus; workers Haiku, one Sonnet.
+#   - goals tied to roles: the owner runs the company (Company on A1); workers earn wages (Wealth).
+#   - camps: only the timber camp the company works and the forest (no silver, copper, gold or stone).
+extends: [usability/payroll]
+camps: {typed: {set: [{type: tutorial, resource: timber}]}}
+models:
+  overrides:
+    Oren: claude-opus-5-5         # the owner (decision seat)
+    Ezra: claude-sonnet-5-5       # a worker
+goals:
+  explicit:
+    Oren: {primary: Company, params: {contract: A1, members: 4, payout_rounds: 5, rounds: 8}}
+contracts: {legs_default: manual, obligations: true, role_cards: true}
+institutions: {petition_public_after: 2}
+actions: {forgiving: true}
+chronicle:
+  namespace: usability2_payroll
+start:
+  contracts:
+    - template: Grant
+      in: J0
+      roster: {Oren: {}}
+      params:
+        LABEL: Council timber order
+        ROLE: contractor
+        TERMS: {recipient: "assoc:A1", goods: penny, qty: 14, every: 1, keep: 0}
+        LEGS: [{id: G, from: treasury, to: recipient, item: goods, qty: qty, every: every, keep: keep, first: 2, mode: auto}]
+    - template: Payroll
+      in: A1
+      roster: {Ash: {wage: 2}, Bea: {wage: 2}, Cole: {wage: 2}, Dina: {wage: 2}, Ezra: {wage: 2}}
+      params: {OFFICE: head, TERMS: {cut: 0.5}}

@@ -609,10 +609,20 @@ EXTRA = {
     "channels.found_right": None, "channels.headlines": 8,
     # review 31.04 §5 (channels that carry business): off / none = byte-identical
     "channels.square_delivery": None, "channels.business": False, "channels.notices": None, "channels.board_headlines": 1,
+    # manual obligations (cybertron/obligations.py): 0 / false = as before
+    "institutions.petition_public_after": 0,                           # rounds a petition to an institution's inbox may wait unanswered
+                                                                       # before a public notice names the office (0: never; listed to officers)
+    "actions.forgiving": False,                                        # forgiving arguments (withdraw item/food, transfer to S1 or @A1,
+                                                                       # a note on a transfer) and plain messages for missing arguments
 }
 
 # One-line docs where neither base.yaml nor a DEFAULTS dict has a comment.
 DOCS = {
+    "institutions.petition_public_after": "manual obligations (cybertron/obligations.py): rounds a petition to an institution's "
+                                          "inbox may wait unanswered before a public notice names the office; 0: never (with a "
+                                          "positive value officers also see the unanswered petitions in their state)",
+    "actions.forgiving": "read near-miss arguments the way they were meant (withdraw with item food, transfer to S1 or @A1, a note "
+                         "on a transfer, fulfil aliases) and say a missing argument in words with the action's syntax",
     "goals.aims": "review 24: agents see each goal's aim (with its time structure: at the end, the most ever, or by a deadline) "
                   "instead of its text, and no slot percentages",
     "goals.score_at_end": "with Life: a goal about own holdings or offices may be scored on the living lineage when that is "

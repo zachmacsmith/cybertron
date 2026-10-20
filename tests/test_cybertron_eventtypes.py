@@ -66,7 +66,8 @@ TWELVE = ("jur_joined", "jur_left", "jur_declared", "jur_join_accepted", "jur_jo
 ADDED = {"media.EVENT_TYPES": {"official_stream"}, "life.EVENT_TYPES": {"birth_rules", "conceive_offer", "conceived"},   # review 15 S4
          "jurisdictions.EVENT_TYPES": {"jur_joined", "jur_left", "jur_declared", "jur_join_accepted", "jur_join_refused",
                                        "jur_leave_pending", "jur_born_into"},
-         "conflict.EVENT_TYPES": {"wounded"}}                                   # the harm combat model
+         "conflict.EVENT_TYPES": {"wounded"},                                   # the harm combat model
+         "context.OFFICIAL": {"petition_unanswered"}}                           # manual obligations: a petition gone public
 # Agent-visible (public at some call site) types still unrendered: may only shrink.
 KNOWN_PUBLIC_UNRENDERED = {"round_start", "jur_funded"}
 
@@ -220,7 +221,7 @@ def test_feed_priorities_are_unchanged_for_every_registered_type():
         if t in OLD["context.POSTS"]:
             said = f"{d.get('headline', '')} {d.get('text', '')}"
             return 4 if re.search(rf"(?<!\w){re.escape(aid)}(?!\w)", said) else 6
-        return 5 if t in OLD["context.OFFICIAL"] else 1
+        return 5 if t in OLD["context.OFFICIAL"] | ADDED["context.OFFICIAL"] else 1
     for t in ET.REG:
         for d, agent in (({}, None), ({"to": "Ann", "text": "hi Ann"}, "Bob"), ({"text": "x"}, "Ann")):
             e = {"type": t, "agent": agent, "data": d}

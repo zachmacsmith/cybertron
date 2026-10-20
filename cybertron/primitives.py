@@ -959,7 +959,7 @@ ACTION_PRIMITIVES = {
     "join_channel": ("subscribe",), "leave_channel": ("subscribe",),
     # contracts (P4.3)
     "create_contract": ("create_contract",), "join_contract": ("join",), "leave_contract": ("leave",),
-    "deposit_escrow": ("deposit_escrow",), "set_allowance": ("set_allowance",), "propose_contract_change": ("propose",),
+    "deposit_escrow": ("deposit_escrow",), "set_allowance": ("set_allowance",), "fulfil": ("move",), "propose_contract_change": ("propose",),
     "authorize": ("authorize",), "revoke_authorization": ("deauthorize",), "act_for": ("act_for", "move", "deposit_escrow"),   # P4.5
     "standing_order": ("create_contract", "set_allowance"),
     # powers
