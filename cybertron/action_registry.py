@@ -1207,3 +1207,50 @@ def categories() -> dict:
 def aliases() -> dict:
     """actions._ALIASES: {action: {synonym: proper argument name}} for the actions that have any."""
     return {n: dict(a.aliases) for n, a in REG.items() if a.aliases}
+
+
+# ---------------------------------------------------------------------- review 31.05 #1-2 and 31.07 #7-9: courts and records
+# Opt-in by world content (no spec key): each exists only where the world's laws or contracts bring it (counsel.world_hidden;
+# actions._act treats it as unknown elsewhere) and is listed only for the agents it concerns (its `when`), so no existing world's
+# prompts, manuals or errors change. read_law's "version" argument is documented in read_register's line for the same reason.
+def _k_registers(inst, k, a, r):
+    from cybertron import registers as RG
+    return RG.any_readable(k)
+
+
+def _k_counsel(inst, k, a, r):
+    from cybertron import counsel as CN
+    return bool(CN.clients_of(k, a["id"])) and "represent" not in CN.world_hidden(k)
+
+
+def _k_withdrawable(inst, k, a, r):
+    from cybertron import courts as CO
+    return any(CO.withdrawable(k, a["id"], c) for c in k.w["cases"].values())
+
+
+R("read_register", "read a law's public register (who holds what, agreements, awards)", "INFORMATION", core=True, pre=True,
+  needs=("mod:context", "law:v2"), when=_k_registers, args='{"law": "L7", "book": "agreements"}',
+  handler="registers:act_read_register", module="context", category="productive", legacy=False,
+  aliases={"register": "book", "key": "book", "id": "law", "rows": "n"},
+  doc='read_register {"law": "L7", "book": "agreements", "n": 20}: the books a law keeps in its public register, where its code '
+      'opens them (READ): read_register {} lists the laws that do, {"law": "L7"} lists its books, with a book its last n rows '
+      '(only the rows naming you where the book is open to its parties); repealed laws stay readable. Also read_law {"law": "L7", '
+      '"version": 2} for an earlier version of a law\'s code ("against": 3 gives the diff to version 3)')
+R("represent", "act in court for a client who retains you", "courts", needs=("level:2", "law:v2"), when=_k_counsel,
+  handler="counsel:act_represent", module="core", category="political", emits=("counsel_acted",),
+  aliases={"for": "client", "case_id": "case", "why": "reason", "act": "action", "accused": "agent"},
+  doc='represent {"client": "Name", "action": "accuse", "agent": "Name", "law": "L5", "clause": "name", "evidence": ["e12"]}: as '
+      'the counsel a retainer names, act in court for your client: "accuse" (the client is the accuser), "respond" {"case": "C1", '
+      '"evidence": [...]}, "appeal" {"case": "C1", "reason": "..."} or "withdraw_case" {"case": "C1"}; you may cite what you or '
+      'your client could see; the case records you as counsel and your client is told')
+R("withdraw_case", "withdraw a case you filed", "courts", needs=("level:2", "law:v2"), when=_k_withdrawable,
+  handler="courts:act_withdraw_case", module="core", category="political", emits=("case_withdrawn",),
+  aliases={"case_id": "case", "why": "reason"},
+  doc='withdraw_case {"case": "C1", "reason": "..."}: as the accuser, drop an open case before it is decided (where a law lets '
+      'accusers withdraw); it is dismissed, no penalty runs, and the withdrawal is public')
+ACTIONS_ORDER += ("read_register", "represent", "withdraw_case")
+DOC_ORDER += ("read_register", "represent", "withdraw_case")
+REG["read_register"] = replace(REG["read_register"], fed=-2)            # a look-up: open to the starving too (as _fed_table)
+FED["read_register"] = -2
+if not sorted(ACTIONS_ORDER) == sorted(REG) == sorted(DOC_ORDER):
+    raise ValueError("ACTIONS_ORDER and DOC_ORDER must name every registered action exactly once")

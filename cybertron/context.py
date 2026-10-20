@@ -97,6 +97,7 @@ FILE_ACTIONS = ("write_scratchpad", "write_file", "rename_file", "share_file", "
 ACTIONS = ("manual", "manual_search", "search_board", "search_dms", "recent", "read_law", "read_file") + FILE_ACTIONS \
     + ("preview_law", "legal_position", "recall")                       # agent actions this module adds (preview_law: law.v2 only;
                                                                         # legal_position: law.v2 with law.digest)
+ACTIONS += ("read_register",)                                           # review 31.05 #1: only where a law declares READ
 BOARD_TYPES = ET.names("board")                                       # what search_board searches (posts and the gazette)
 FETCHED_HEADER = "## Lookups (fetched this turn)"
 
@@ -724,7 +725,14 @@ def lookup(k, aid, name, args: dict) -> str:
     if name == "recent":
         return recent(k, aid, args.get("kind", "all"), args.get("n", 5))
     if name == "read_law":
+        if args.get("version") not in (None, ""):                       # review 31.05 #2: an earlier version (or a diff of two)
+            from cybertron import registers as RG
+            return RG.read_law_version(k, aid, args.get("law", args.get("id")), args["version"], args.get("against"))
         return read_law(k, aid, args.get("law", args.get("id", first)))
+    if name == "read_register":                                         # review 31.05 #1: a law's readable register (READ)
+        from cybertron import registers as RG
+        if RG.any_readable(k):
+            return RG.read_register(k, aid, args)
     if name == "read_file":
         init_agent(k, aid)
         nm = args.get("name", first)
@@ -763,9 +771,11 @@ def lookup_names(k) -> tuple:
     from cybertron import digest as DG
     from cybertron import directories as DR
     from cybertron import channels as CH
+    from cybertron import registers as RG
     return tuple(n for n in LOOKUPS if (n != "preview_law" or LP.enabled(k)) and (n != "legal_position" or DG.enabled(k))
                  and (n != "recall" or _recall_on(k))) \
-        + (DR.LOOKUPS if DR.enabled(k) else ()) + (("read",) if CH.active(k) else ())
+        + (DR.LOOKUPS if DR.enabled(k) else ()) + (("read",) if CH.active(k) else ()) \
+        + (("read_register",) if RG.any_readable(k) else ())          # review 31.05 #1: only where a law declares READ
 
 
 def _recall_on(k) -> bool:

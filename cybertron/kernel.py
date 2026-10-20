@@ -788,6 +788,8 @@ class Kernel:
             api.update(AM.law_api(k, lid))                             # law.v2 (P3.4): propose_law, propose_amendment (from L3)
             api.update(CO.law_api(k, lid))                             # law.v2 (courts v2): cases, case, court_rules, set_court_rule
             api.update(EVD.law_api(k, lid))                            # law.v2 (review 10 #10): event(eid), history(...)
+            from cybertron import window as WIN                         # review 31.03 #5: sell_to_window from the law's treasury
+            api.update(WIN.law_api(k, lid))
             if PUB.enabled(k):
                 api.update(PUB.law_api(k, lid))                        # review 12 WP2: publish, unpublish, publication
             if IN.amend_setting(k):                                    # institutions.amend_offices: reseat(institution, office, agents)

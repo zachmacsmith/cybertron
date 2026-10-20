@@ -53,6 +53,10 @@ DEFAULTS = {"deadline": 3, "panel": 1, "judges": None, "appeal_judges": None, "a
             "rulings_per_round": 3}                                     # W7e: the per-judge cap (before W7e a fixed 3)
 BOUNDS = {"deadline": (1, 20), "panel": (1, 9), "appeal_window": (0, 10), "appeal_panel": (1, 9), "rulings_per_round": (1, 20)}
 RIGHT_KEYS = ("judges", "appeal_judges")
+# Review 31.07 #7, #9 (courts and records): rules no world has until a law sets one (kept out of DEFAULTS, so rules() and the frozen
+# settings of every world are as before). withdrawal: an accuser (or its counsel) may withdraw an open case before it is decided
+# (withdraw_case); counsel: a party's retained counsel may act for it (counsel.act_represent) in this polity's courts.
+OPT_RULES = {"withdrawal": False, "counsel": True}
 ACT = "Court Rules Act"                                                # code.enabled: its rows replace these DEFAULTS (cybertron/code)
 ACT_KEYS = ("deadline", "panel", "rulings_per_round")
 STATUSES = ("open", "decided", "dismissed")
@@ -85,8 +89,20 @@ def rules(k, polity) -> dict:
     return out
 
 
+def opt_rule(k, polity, key) -> bool:
+    """A review 31.07 opt-in court rule (OPT_RULES) in a polity: its value while the law that set it is in force, else its default."""
+    e = ((k.w.get("court_rules") or {}).get(polity) or {}).get(key)
+    if e is not None and (k.w["laws"].get(e.get("law")) or {}).get("status") == "active":
+        return bool(e["value"])
+    return bool(OPT_RULES[key])
+
+
 def check_rule(k, key, value):
     """A court rule's value, checked (LawError on a bad key or value)."""
+    if key in OPT_RULES:                                                # review 31.07: true or false
+        if not isinstance(value, bool):
+            raise L.LawError(f"court rule {key} is True or False")
+        return value
     if key not in DEFAULTS:
         raise L.LawError(f"no court rule {key!r}: one of {', '.join(DEFAULTS)}")
     if key in RIGHT_KEYS:
@@ -365,6 +381,9 @@ def view(k, c) -> dict:
            "final": c["status"] in ("decided", "dismissed") and c.get("appealable_until") is None, "penalty": c.get("penalty"),
            "appeal": c.get("appeal"), "first": {x: v for x, v in (c.get("first") or {}).items() if x != "votes"} or None,
            "source": c.get("source", "agent")}                        # W7e: agent | law | contest | contract
+    for x in ("counsel", "withdrawn"):                                  # review 31.07 #7, #9: only on cases that have them
+        if c.get(x):
+            out[x] = c[x]
     return json.loads(json.dumps(out))
 
 
@@ -393,10 +412,69 @@ def law_api(k, lid) -> dict:
     def court_rules():
         return rules(k, AC.account_of(k, lid))
 
+    def cases_of(agent):
+        """Review 31.07 #8: every case naming the agent as accuser, accused or counsel, in any court (public data: filings and
+        rulings are public events), oldest first."""
+        return [view(k, c) for c in sorted(k.w["cases"].values(), key=lambda c: _cid_n(c["id"])) if names(c, agent)]
+
     def set_court_rule(key, value):
         key = str(key)
         value = check_rule(k, key, value)
         k.apply("set_court_rule", jurisdiction=D.jur_of(k, lid), key=key, value=value, lid=lid)
         return True
 
-    return {"cases": cases, "case": case, "court_rules": court_rules, "set_court_rule": set_court_rule}
+    return {"cases": cases, "case": case, "court_rules": court_rules, "set_court_rule": set_court_rule, "cases_of": cases_of}
+
+
+# ---------------------------------------------------------------------- review 31.07 #7-9: counsel on a case, withdrawal, cases_of
+def names(c, agent) -> bool:
+    """Is the agent a party to the case (accuser or accused) or counsel on it?"""
+    return agent in (c.get("accuser"), c.get("accused")) or agent in (c.get("counsel") or {}).values()
+
+
+def note_counsel(k, case, client, counsel) -> None:
+    """Record counsel on a case: {client: counsel} (the latest counsel each party used)."""
+    c = k.w["cases"][case]
+    c.setdefault("counsel", {})[client] = counsel
+
+
+def withdrawable(k, aid, c) -> bool:
+    """May aid (as accuser) withdraw this case now: open, at first instance, filed by aid, in a polity whose court rule withdrawal is
+    on (a law set it)?"""
+    return (c is not None and c.get("status") == "open" and c.get("stage", 1) == 1 and c.get("accuser") == aid
+            and opt_rule(k, polity_of(k, c), "withdrawal"))
+
+
+def withdrawal_on(k) -> bool:
+    """Has any polity a law in force that lets accusers withdraw cases (the withdraw_case action exists only then)?"""
+    if not enabled(k):
+        return False
+    return any(opt_rule(k, pol, "withdrawal") for pol in sorted(k.w.get("court_rules") or {}))
+
+
+def withdraw(k, aid, case, reason="", counsel=None) -> str:
+    """The accuser withdraws an open case (status dismissed, with the withdrawal recorded; no penalty ever runs). The judges are told
+    and the withdrawal is public (a plea deal or a settlement is made by DM and kept, or not, by the parties)."""
+    from cybertron.actions import ActionError
+    c = k.w["cases"].get(str(case))
+    if c is None or c.get("accuser") != aid:
+        mine = sorted((x["id"] for x in k.w["cases"].values() if x.get("accuser") == aid and x["status"] == "open"), key=_cid_n)
+        raise ActionError(f"{case} is not a case {aid} filed" + (f" (open cases {aid} filed: {', '.join(mine)})" if mine else ""))
+    if c["status"] != "open" or c.get("stage", 1) != 1:
+        raise ActionError(f"{case} cannot be withdrawn: " + ("it is on appeal" if c["status"] == "open" else f"it is {c['status']}"))
+    if not opt_rule(k, polity_of(k, c), "withdrawal"):
+        raise ActionError("this court does not allow an accuser to withdraw a case (no law in force sets the court rule withdrawal)")
+    why = str(reason or "")[:300]
+    c["status"] = "dismissed"
+    c["withdrawn"] = {"by": aid, "round": k.r, "reason": why, **({"counsel": counsel} if counsel else {})}
+    for j in c.get("judges") or []:
+        k.notify(j, f"Case {c['id']} ({aid} v {c['accused']} under {c['clause']}) was withdrawn by its accuser.")
+    k.notify(c["accused"], f"Case {c['id']} against you was withdrawn by {aid}" + (f": {why}" if why else "."))
+    k.log("case_withdrawn", counsel or aid, {"case": c["id"], "accuser": aid, "accused": c["accused"], "clause": c["clause"],
+                                             "reason": why, **({"for": aid} if counsel else {})}, vis="public")
+    return f"Case {c['id']} withdrawn."
+
+
+def act_withdraw_case(k, aid, case, reason=""):
+    """The withdraw_case action (law.v2, where a polity's law sets the court rule withdrawal)."""
+    return withdraw(k, aid, case, reason)

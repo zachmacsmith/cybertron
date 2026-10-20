@@ -358,6 +358,13 @@ LAWFNS = _fns(
         F("court_rules", "read", scope="read", docs="requires", v2=True),
         F("set_court_rule", "governance", scope="none", why="sets a court rule of the calling law's own polity (deadline, panel, "
           "benches, appeals)", docs="requires", v2=True, primitive="set_court_rule"),
+        F("cases_of", "read", ((0, "agent"),), scope="none", why="public data (filings and rulings are public events): the cases "
+          "naming an agent in any court, binds nobody", docs="requires", v2=True),   # review 31.07 #8 (retainers per case)
+    ),
+    _module(
+        "window",                                                       # review 31.03 #5 (law.v2): a treasury sells to the window
+        F("sell_to_window", "money", scope="none", why="only the calling law's own treasury sells; the coins come back to it",
+          docs="requires", v2=True, primitive="mint"),
     ),
     _module(
         "contracts",                                                    # P4.3: associations (cybertron/contracts.py); only with contracts on
@@ -412,6 +419,7 @@ CONTRACT_COLUMN = {
                             "public_of", "root_kind", "caused_by_agent", "caused_by_law", "chain_laws", "law_id", "treasury",
                             "refuse", "open_fund",                      # W6a: a contract's law may refuse too; P4.4 funds
                             "reseat",                                   # its own offices only (institutions.law_api checks)
+                            "sell_to_window",                           # review 31.03 #5: its own treasury only
                             "send_message")},                           # wave 9 C: messages in its own name (channels.v2)
     **{n: "escrow" for n in ("move", "fine", "pull", "forfeit", "refund", "swap")},
     # P4.5: its own currencies (shares), rights and offices only: contracts.scope_api names them "<cid>.<name>", mints to anyone,

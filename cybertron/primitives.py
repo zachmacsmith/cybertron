@@ -947,6 +947,9 @@ ACTION_PRIMITIVES = {
     "set_charter": ("set_charter",),
     # courts
     "accuse": ("open_case",), "respond": ("answer_case",), "appeal": ("appeal",), "request_fix": ("request_fix",),
+    "represent": ("open_case", "answer_case", "appeal"),               # review 31.07 #7: counsel files, answers, appeals for a client
+    "withdraw_case": ("rule",),                                        # review 31.07 #9: a dismissal on withdrawal (not routed)
+    "read_register": LOOKUP,                                           # review 31.05 #1
     # force, more
     "guard": ("guard_bind", "guard_release", "move"), "join_attack": ("attack", "end_life"), "contract": ("hire_assassin", "move"),
     "buy_initiative": ("set_initiative", "destroy"),
