@@ -134,7 +134,7 @@ def test_every_template_checks_and_is_listed_only_where_its_needs_hold():
     assert "Relief Act" in AA.library_index(inst) and "Child Support" not in AA.library_index(inst)
     inst2 = generator.generate(plain, 3)
     assert not set(AA.library_index(inst2)) & names
-    tk = S.apply_overrides(plain, ["law.library.edition=2", "law.library.access=catalogue", "law.library.toolkit=all"])
+    tk = S.apply_overrides(plain, ["law.library.access=catalogue", "law.library.toolkit=all"])
     assert "Food and family templates" not in LB.catalogue_text(tk)
     assert "Food and family templates" in LB.catalogue_text(S.apply_overrides(tk, ["subsistence.enabled=true"]))
 

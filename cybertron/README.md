@@ -119,7 +119,7 @@ Runs the same scripted worlds on two code revisions and reports where they first
 | `kernel.py` | world state, invariants, the law API, ballots, procedures, Board veto window, Fixer, courts, dry-run transactions, probes, snapshots |
 | `actions.py` | every agent action |
 | `credit.py` | loans, interest, default, credit records, par currencies, reserve ratio, bank runs, credit metrics |
-| `library.py` | 58 drafted laws, 5 constitutions, effect predicates; edition 2: lib:* blocks, readable rewrites and the legal toolkit (29 parameterised law.v2 templates) |
+| `library.py` | 58 drafted laws, 5 constitutions, effect predicates; lib:* blocks and the legal toolkit (29 parameterised law.v2 templates) |
 | `lawset.py` | law sets: composability checks, dimensions derived from laws, legal fingerprints and distances; `python -m cybertron library list|show` |
 | `regimes.py` | 22 starting regimes: constitution + starting statutes + starting rights/offices + description |
 | `goals.py` | 29 goals with weights, samplers and state-based scores; Board/Fixer objectives |
@@ -307,7 +307,7 @@ Runs the same scripted worlds on two code revisions and reports where they first
   succession, taxes, hooks per family), recorded next to the declared `expect` (they agree for every built-in regime but
   federation). Template laws keep their provenance on the law record (`template`), and law.v2 runs record a `legal_fingerprint` in
   `run.json` (law shas, ranks, templates, hook coverage primitive x rank; `lawset.distance` compares two). `start_laws` also accepts
-  toolkit templates (law.v2), and `law.library.toolkit: all | [families]` lists them in the edition-2 catalogue.
+  toolkit templates (law.v2), and `law.library.toolkit: all | [families]` lists them in the catalogue (`law.library.access`).
 - **Courts and records** (review 31: `docs/review/31_institutions/08_integration.md` items 0.11, 1.7, 1.8, 2.2, 2.8; law.v2; all
   opt-in by world content, no spec key, so no earlier world changes). Law functions: `sell_to_window(currency, item, qty)`
   (`window.py`: a law's own treasury, e.g. a firm's output, sells to a convertible currency's window on deposit terms) and

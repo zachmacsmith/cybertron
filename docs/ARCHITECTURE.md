@@ -320,12 +320,15 @@ order is `sections.LAYOUTS[layer]`, modules' rows are anchored with `after=`; `r
 ```python
 LIB[name] = {"name", "category", "module",            # Feature gate (folds conflict.LAWS, GATED_CATEGORIES)
              "kind": "law" | "contract" | "block",    # block: a lib:* building block for use()
-             "rank": "statute", "edition": 1 | 2,    # v1 = today's switches; v2 = readable implementations from primitives
+             "rank": "statute", "edition": 1,        # edition 2 (LIB2 rewrites) removed: no spec or run used it
              "code", "sha"}                            # sha computed; blocks are in the code store and importable by hash
 ```
 
-Spec `library: {edition: 1|2, access: none|catalogue|instantiate}`: `catalogue` (agents can read library code and copy it),
-`instantiate` (one-call template instantiation with parameters: the experimental "templates" condition).
+Spec `law.library: {access: none|catalogue|instantiate, toolkit}` (needs law.v2): `catalogue` (agents can read the lib:* blocks
+and the listed toolkit templates and copy them), `instantiate` (one-call template instantiation with parameters: the experimental
+"templates" condition). `law.library.edition: 2` (the LIB2 rewrites of 13 library laws, with their documented GAPS) was removed
+by the old-code cleanup: it is a validation error naming the removing commit; such a world runs only at an earlier commit
+(`cybertron rerun`).
 
 As built (W6d, review 10 §5.4 and §6): the core legal toolkit, `TOOLKIT[name] = {name, category: "toolkit", kind: "law", edition:
 2, family, topic, rank, doc, fires, code, sha}` (law.v2 templates; names never collide with LIB; parameters = top-level constants,
@@ -335,7 +338,7 @@ drop, amend}` resolved by `regimes.resolve_laws` from the stream `f"{seed}|regim
 (composability), `lawset.dimensions(laws)` (the dimension vector derived from the laws; `expect` stays the declared label),
 `lawset.fingerprint(k)` (recorded in run.json as `legal_fingerprint`, law.v2 runs) and `lawset.distance(a, b)`. A law made from a
 template carries `template: {name, params, rank}` on its record. Spec `law.library.toolkit: none | all | [families]` lists toolkit
-templates in the edition-2 catalogue.
+templates in the catalogue (with `law.library.access` catalogue or instantiate).
 
 ### 3.12 Intervention ops (`interventions.py`, P5.1)
 

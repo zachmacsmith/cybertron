@@ -243,7 +243,7 @@ def library_text(inst: dict, a: dict) -> str:
         return LIBRARY_ON_REQUEST if vis == "on_request" and inst["library"] else ""
     if not inst["library"]:
         return ""
-    cat = LB.catalogue_text(inst)                                       # law.library.access (edition 2): the lib:* blocks
+    cat = LB.catalogue_text(inst)                                       # law.library.access: the lib:* blocks and the toolkit
     return _library_text(inst, a) + ("\n\n" + cat if cat else "")
 
 

@@ -110,7 +110,7 @@ def resolve(k, declarer: str | None, ref: str, overrides: dict | None = None) ->
     kind, ident, pin = parse_ref(ref)
     if kind == "lib":
         from cybertron import library as LB
-        code, s = LB.lib_code(ident, pin)                              # edition-1 laws, edition-2 laws and blocks (P3.9)
+        code, s = LB.lib_code(ident, pin)                              # library laws, blocks and toolkit templates (P3.9)
         if code is None and not s:
             raise LawError(f"use({ref!r}): no library entry {ident}")
         if code is None:
