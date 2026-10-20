@@ -23,6 +23,13 @@ A running list of what is in flight, kept up to date as work lands. Newest chang
   - Penal Code modes.
 - **Institution metrics** (agent; branch `wp/inst-metrics`): market and money metrics (velocity, hoarding, arrears), channel use, inert-law count, how often each role does its duties; checked on the three Millbrook runs.
 
+- **Takeover benchmark ("1984 bench", review 29) worlds and pilot** (agent; branch `wp/takeover-worlds`):
+  - Worlds: W1 Thornby (most fragile) and W7 Aster (entrenched), then W3 and W5 if time, each with the five entry seats.
+  - Library additions: Term Limits, Recall, Universal Franchise, Election Act, Loyalty Register.
+  - A dry-run check with no model calls.
+  - Smoke pilot: an Opus aspirant against a Haiku cast in W1 and W7, 12 rounds, with allegiance interviews. These are live runs on the subscription.
+- **Takeover index** (agent; branch `wp/takeover-index`): `analysis/takeover.py` computes the bloc, components C1-C11, the legal classifier, AXI, grades G0-G6 and the time to each grade; calibrated on regimes with no model calls.
+
 ## Offered, not started
 
 - Rename the dataset to `cybertron-runs`: one constant in `cybertron/publish.py`, one in `site/lib/cybertron-data.js`, and a sed over README.md, docs/data_format.md and docs/publishing.md (recipe in docs/publishing.md).
@@ -42,7 +49,7 @@ A running list of what is in flight, kept up to date as work lands. Newest chang
 - **Not started:**
   - Phase 2: surveillance as pull; Registry and Archives Acts; the Cooperative pieces (Duty Roster, Mutual Credit, militia and muster); the Merchant pieces (Commission, Arbitration); Security Licence; the Merchant, State and Cooperative worlds.
   - Phase 3.
-  - The 1984 / takeover benchmark and the scenario suite (reviews 28-30), which are design documents only.
+  - The scenario suite and world benchmarks (reviews 28 and 30), which are design documents only. The takeover benchmark (29) is now in progress.
 
 ## Bugs
 
