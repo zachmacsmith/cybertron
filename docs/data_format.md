@@ -298,8 +298,16 @@ under changed code). With `--with-prompts`, `blobs` rows of kind `interview_prom
 
 - `catalog.parquet`, `catalog.json`: one row per run (the curated card, key run facts, `era`, `engine_version`).
 - `runs/<spec>/<run_id>/<table>.parquet` plus `manifest.json` and `card.json`.
-- `raw/<spec>/<run_id>.tar.gz`: the raw run directory (no checkpoints or pickles; local paths scrubbed).
+- `raw/<spec>/<run_id>.tar.gz`: the raw run directory (no checkpoints or pickles, no `claude_sessions/`, `.claude*`,
+  credentials, `.env` or key files; local paths scrubbed).
 - `README.md` (the dataset card, one config per table) and `CHANGELOG.md` (one entry per release, newest first).
+
+**Privacy gate** (`cybertron/privacy.py`): before any upload, and in a dry run, every staged file, every archive member and the
+text of every table is scanned for the Claude Code account's email and ids (from `~/.claude.json`, `$CLAUDE_CONFIG_DIR` and any
+account file in the runs), `$CLAUDE_CODE_USER_EMAIL`, a denylist (`CYBERTRON_PRIVATE_STRINGS`, comma-separated, and/or
+`CYBERTRON_PRIVATE_FILE`, one per line), API tokens and keys, claude.ai session URLs and home/root paths. Any hit refuses the
+upload (no override); the report names file, member/column and kind with redacted context, never the value.
+`python -m cybertron publish --audit PATH` runs the same scan on a directory, archive or downloaded dataset snapshot.
 
 Readers pin URLs to a release tag or a commit (`resolve/v1.0/...`, `resolve/<sha>/...`) and may cache them indefinitely.
 
