@@ -148,7 +148,9 @@ def run_one(spec_name, sp, seed, dry, sandbox_mode, parent=None, quiet=False, fr
         if (out / "checkpoint.pkl").exists():
             from cybertron import settings as ST                        # the run's own code defaults, not today's (D-43)
             saved = json.loads((out / "instance.json").read_text()) if (out / "instance.json").exists() else {}
-            inst = generator.generate(sp, seed, settings=ST.resolve(out, saved, allow_code_drift))
+            settings = ST.resolve(out, saved, allow_code_drift)
+            ST.check_playable(settings, str(out))                       # engine < provenance.MIN_ENGINE: `cybertron rerun`
+            inst = generator.generate(sp, seed, settings=settings)
             inst["run_id"] = out.name
             if not _same_instance(out, inst):
                 raise SystemExit(f"[{out.name}] has a checkpoint but the world it would generate now differs from instance.json "
@@ -193,6 +195,7 @@ def cmd_resume(a):
     saved = json.loads((out / "instance.json").read_text())
     from cybertron import settings as ST                                # the run's frozen code defaults (inferred for older runs; D-43)
     settings = ST.resolve(out, saved, getattr(a, "allow_code_drift", False))
+    ST.check_playable(settings, str(out))                               # engine < provenance.MIN_ENGINE: `cybertron rerun`
     if "spec_source" in saved:                                        # regenerate from the spec as given and check the code still agrees
         inst = generator.generate(saved["spec_source"], saved["seed"], check=False,   # a run made before the schema still resumes
                                   settings=settings)

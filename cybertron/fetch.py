@@ -97,6 +97,7 @@ def continue_run(run, at: int, rounds: int | None = None, out=None, schedule=Non
     (None: to the end) with the live policy (dry: scripted bots). Under the current code when the replay reproduces the run, else
     under the recorded sha in a worktree. Returns {replay, branch, code, replay_result}."""
     from cybertron import replay as RP
+    from cybertron import settings as ST
     run = Path(run).resolve()
     at = int(at)
     if not (run / "instance.json").exists():
@@ -122,7 +123,7 @@ def continue_run(run, at: int, rounds: int | None = None, out=None, schedule=Non
         res = RP.replay(run, rdir, to=at, sandbox=None, log=lambda *a: None)
         if not res["identical"]:
             why = f"the replay differs from the run: {json.dumps(res.get('first_difference'))[:300]}"
-    except (RP.ReplayMiss, RP.ReplayDivergence) as e:
+    except (RP.ReplayMiss, RP.ReplayDivergence, ST.TooOld) as e:
         res, why = None, f"{type(e).__name__}: {e}"
     if why is None:
         log(f"[continue] the replay reproduces rounds 1-{at} (events and snapshots identical); forking at round {at + 1}")

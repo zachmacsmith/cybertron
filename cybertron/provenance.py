@@ -55,22 +55,27 @@ LOG_FORMAT = 1
 # ancestry, whether a run's recorded sha has it: settings.infer_version) and the default flips, (settings target, key path, old,
 # new); settings.use sets a flip back to `old` for a run of an earlier version whose frozen snapshot lacks the key.
 ENGINE_VERSION = 18
+# The oldest engine version the current code resumes, replays or forks in place (settings.frozen_run refuses older runs, pointing to
+# `cybertron rerun`): a replay of millbrook (engine 12) at engine 18 diverged at its first prompt, so the default flips of versions
+# before 13 (2, 4, 5, 6, 8, 9: channels.delivery, context.memory_text, dm_delta, history, conflict.model, admission_rounds) are no
+# longer set back and context.memory_text v1 is gone. Version 10's flip stays: it is read after the fact (scoring older runs).
+MIN_ENGINE = 13
 ENGINE_FLIPS = {
     2: {"commits": ["38070e15cf97e171258cd0dbdb7ddfd710ed30ab"],
-        "flips": [("cybertron.channels.DEFAULTS", ("delivery",), "pull", "push")],
+        "flips": [],                                                    # set back no more: MIN_ENGINE
         "note": "channels v2: push delivery by default"},
     3: {"commits": ["55d11fb785f1b859193d3b301fd8a7276f1fbbde", "97631829d31ce90bf9775a48a297e93babcf62a2"],
         "flips": [],
         "note": "dm_step.capacity natural (opt-in key, set by nature_subsistence and ashwood); the Communications Act caps at LIMIT "
                 "under natural (behaviour, not a default)"},
     4: {"commits": ["6a69002946d066769d9a6b25f68b8cf5e8b3e4f6"],
-        "flips": [("cybertron.context.DEFAULTS", ("memory_text",), "v1", "v2")],
+        "flips": [],                                                    # set back no more: MIN_ENGINE
         "note": "context.memory_text v2 by default"},
     5: {"commits": ["23c948aaefc9e12fa7cb1ee1e0bc0837d024a808", "b629aa09a0e9b132fed5e10ce52f4df65b3bda75"],
-        "flips": [("cybertron.context.DEFAULTS", ("dm_delta",), False, True)],
+        "flips": [],                                                    # set back no more: MIN_ENGINE
         "note": "context.dm_delta on by default; the next round shows last round's DM exchange whole (under dm_delta)"},
     6: {"commits": ["b04001c96682f890f5089b4c0f0e8251db7918c0", "b8e4b73ca847cbbfbbe40b0001baef7a987dd070"],
-        "flips": [("cybertron.context.DEFAULTS", ("history", "enabled"), False, True)],
+        "flips": [],                                                    # set back no more: MIN_ENGINE
         "note": "history mode on by default (review 20 §4: chunked conversations, the memory gradient, recall); recall added to "
                 "the lookups and actions (only in history mode)"},
     7: {"commits": ["05f21c4550da3c39ed4f2c0bff3602cb5ecd5894"],
@@ -78,11 +83,11 @@ ENGINE_FLIPS = {
         "note": "llm.cache_ttl 5m in base.yaml (a spec key, so each run's saved spec records it; absent = auto, the backend's choice, "
                 "which was 1h on the CLI subscription); a run flags rounds averaging longer than the lifetime"},
     8: {"commits": ["57114937a19e09b3325f01de6fd5019358f62276"],
-        "flips": [("cybertron.conflict.DEFAULTS", ("model",), "disable", "auto")],
+        "flips": [],                                                    # set back no more: MIN_ENGINE
         "note": "conflict.model auto: the harm combat model (kill, wound or repelled; one weapon per fighter, food per attack, "
                 "fighting back, watch and craft; docs/review/21_combat.md) in worlds with subsistence; disable elsewhere, as before"},
     9: {"commits": ["f196b62ac0322c32aae3600a8d0679060d812f00"],
-        "flips": [("cybertron.jurisdictions.DEFAULTS", ("admission_rounds",), 0, 1)],
+        "flips": [],                                                    # set back no more: MIN_ENGINE
         "note": "jurisdiction admission ballots stay open one round so members can vote (they closed in the round they opened, "
                 "with no votes, so every application failed)"},
     10: {"commits": ["de0c39cc94c3283a98d4025396e00afc4f372deb", "89e09999b3bc24e543ab2edc34b7da1e8f9f243a"],

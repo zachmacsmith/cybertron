@@ -206,6 +206,7 @@ def replay(run, out=None, to: int | None = None, sandbox=None, log=print, check_
     inst = json.loads((run / "instance.json").read_text())             # the saved world is authoritative
     from cybertron import settings as ST                                  # and its code defaults (frozen, else inferred; D-43): a replay
     inst["settings"] = ST.resolve(run, inst, allow_code_drift=True, record=False)   # under other defaults diverges, never hides it
+    ST.check_playable(inst["settings"], str(run))                       # engine < provenance.MIN_ENGINE: `cybertron rerun`
     meta = PV.read(run) or {}
     dry = bool(meta["dry"]) if meta.get("dry") is not None else "_dry" in run.name
     if out is None:

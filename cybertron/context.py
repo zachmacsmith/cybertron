@@ -66,7 +66,7 @@ DEFAULTS = {
     "max_pin_slots": 2,               # hard ceiling on pin slots
     "free_scratchpad_writes": 1,      # write_scratchpad actions per turn that use no action
     "memory_text": "v2",              # review 20 §6.1: v2 says accurately what the agent will remember and asks for a planning notebook;
-                                      # v1: the text before review 20 (byte-identical, to reproduce older runs)
+                                      # the only text (v1, before review 20, was removed with the replay of pre-13 runs)
     "dm_delta": True,                 # review 20 §4.5: a DM reply continues the agent's decide conversation (a short "since you acted"
                                       # message) instead of resending the whole turn prompt; false: the full DM prompt, as before
     "history": {                      # review 20 §4 (cybertron/memory.py): one conversation per agent, restarted every `chunk` rounds,
@@ -1215,18 +1215,9 @@ def _temperament(v):
 @_SC.section("memory", layers=("core",), sep="\n\n")
 def _memory(v):
     from cybertron import memory as HM
-    if v2(v.inst) and HM.on(v.inst):                                    # review 20 §6.2: history mode
+    if HM.on(v.inst):                                                   # review 20 §6.2: history mode
         return HM.core_text(v.inst, v.facts)
-    if v2(v.inst):
-        return memory_v2(v.inst, v.facts, v.a)
-    return f"""Memory: every turn you see only this prompt: your state, what changed since your last turn, your own last {v.facts['memory_turns']} turns, your
-scratchpad, media you read, pinned files and what you look up. Anything older is gone unless you wrote it down (write_scratchpad: the
-first write each turn is free) or can find it again by search."""
-
-
-def v2(x) -> bool:
-    """context.memory_text is v2 (review 20 §6.1): the accurate memory text and the notebook scratchpad text."""
-    return str(cfg(x).get("memory_text", "v1")) == "v2"
+    return memory_v2(v.inst, v.facts, v.a)
 
 
 def _free_write(x) -> str:
@@ -1632,18 +1623,14 @@ def closing_block(k, a, n_actions, final) -> str:
     sit = "## Your situation\n" + "\n".join(situation_lines(k, a, n_actions))
     scholar = bool((k.w.get("roles") or {}).get("scholar"))
     if no_goals(k.inst, a):                                             # the no-goal control: the situation and memory, no exhortation
-        nudge = "## Before you act\n" + (memory_reminder(mem, scholar) if v2(k) else
-                 f"Memory: you see only your last {mem} turns; anything you do not write down is forgotten within {mem} rounds.")
+        nudge = "## Before you act\n" + memory_reminder(mem, scholar)
         return sit + "\n\n" + nudge + ("\nThis is the final round." if final else "")
-    nudge = (f"## Before you act\nYour goal: {_short_goal(a, v2(k))}\n"
+    nudge = (f"## Before you act\nYour goal: {_short_goal(a, True)}\n"
              f"Use this turn for it. Any of your {n_actions} actions you do not use are wasted, and so are unused messages. Think "
              "strategically: what would move your score most from here? If you have no plan, make one and write it down. If you don't "
              "know what to do, explore: actions you have not tried (your edge first), your manual, the world and other agents "
              "(Scientists hold knowledge), better routes to your goal; coordinate, bargain and trade.\n"
-             + (memory_reminder(mem, scholar) if v2(k) else
-                f"Memory: you see only your last {mem} turns. Anything you do not write down (write_scratchpad, a file"
-                + (", or memory bought from the Scholar" if scholar else "") + f") is forgotten within {mem} rounds: plans, deals, promises, "
-                "who owes you what."))
+             + memory_reminder(mem, scholar))
     if final:
         nudge += "\nThis is the final round: whatever you leave undone now will not count."
     return sit + "\n\n" + nudge

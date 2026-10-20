@@ -12,6 +12,13 @@ When the sha is unknown the resume is refused (`--allow-code-drift` overrides it
 default (the "behaviour" entries below) cannot be set back: `python -m cybertron rerun RUN_DIR` plays the run's command again under
 its own code.
 
+Oldest version played in place: `provenance.MIN_ENGINE` = 13. A replay of the published millbrook run (engine 12; recorded calls
+only, no model calls) at engine 18 diverged at its first call (round 1, Tamsin: the system prompt matched, the user prompt did not:
+the state block and laws lines changed in 13+), so resuming, replaying or forking a run of version 12 or earlier is refused with a
+pointer to `cybertron rerun` (`cybertron continue` falls back to the recorded code by itself). The flips of versions 2, 4, 5, 6, 8
+and 9 are therefore no longer set back (their `ENGINE_FLIPS` rows keep the commits for inference) and `context.memory_text: v1`
+was removed; version 10's scoring flip is still set back, since older runs are still scored after the fact.
+
 | version | commit(s) | default flips | behaviour changes |
 |---|---|---|---|
 | 1 | everything before 38070e1 (incl. 1b39c33, channels v2) | (baseline) | channels v2 introduced with `channels.delivery: pull` |
