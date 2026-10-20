@@ -299,3 +299,20 @@ def test_bare_contract_action_names_under_forgiving(tmp_path):
         A.act(k, "Ada", "invoke", {"action": "set_wage", "args": ["Bo", 2]})
     inst, out = run(tmp_path / "b", S.deep_merge(sp, {"actions": {"bare_names": False}}), Script(plan))
     assert all("ERROR" in r for r in results(out, "Ada")[0][:2])        # engine 19: refused
+
+
+def test_brief_lines_setup_feed_and_polity_action_names(tmp_path):
+    """Review 31.10 (the Private world's prompt budget): contracts.brief_lines drops offices and succession from the contract lines
+    and lists only open contracts to join; context.setup_feed false starts round 1's feed after setup; a polity's standing contract
+    actions are named bare in the cards (no "J0.payroll_notice", which does not exist), and only offered to an agent holding the right."""
+    sp = S.deep_merge(manual(world(rounds=1)), {"contracts": {"brief_lines": True}, "context": {"setup_feed": False}})
+    sp["start"]["institutions"].append({"id": "A2", "name": "Shut", "founder": "Fay", "admission": "closed", "procedure": "founder",
+                                        "offices": {"boss": {"title": "Boss", "holders": ["Fay"]}}})
+    pol = Script()
+    run(tmp_path, sp, pol)
+    bo, ed = pol.prompts[(0, "Bo")], pol.prompts[(0, "Ed")]
+    assert "Your contract A1 'Provisions' (" in bo and "refilled by" not in bo.split("ROLE:")[0]
+    assert "'Shut'" not in bo                                                 # closed: not offered to join
+    assert '"change": "grant"' not in bo and "contract_joined" not in bo      # no setup record in the feed
+    assert all('"action": "J0.' not in p for p in pol.prompts.values())
+    assert "ROLE: worker in Payroll (J0)" in ed and "payroll_notice" not in ed

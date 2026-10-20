@@ -131,6 +131,9 @@ DEFAULTS = {
     "max_own": 5,               # W8e (D-27): currencies, rights and offices one contract may create, each (was MAX_OWN)
     "max_funds": 5,             # W8e (D-27): funds one law may open (was MAX_FUNDS)
     "applicant_lines": True,    # review 31 (03 #14): an institution's officers see its pending applicants in their state (false: not)
+    "brief_lines": False,       # review 31.10 (prompt budget): the state's contract lines without the offices and succession rules
+                                # (they are in the role cards and the directory), and "Contracts you could join" lists only the
+                                # open ones (false: as before)
     "pay_institutions": True,   # review 31 (08 §2.2): transfer {"to": "A1" | "J0"} and an office's transfer "as" pay that institution's
                                 # treasury, and a contract's law may pay "J0" (false: only agents and stores, as before)
     # manual obligations (docs/review/31_institutions/00_framework.md §1; cybertron/obligations.py): an institution works only while
@@ -2191,24 +2194,34 @@ def state_lines(k, aid) -> list[str]:
         return []
     from cybertron import obligations as OB                              # manual obligations, petitions, role cards (each gated)
     out = OB.state_lines(k, aid)
+    brief = bool(cfg(k).get("brief_lines"))
     for cid, rec in recs(k).items():
         if aid in rec["members"]:
             left = " (you leave at the end of this round)" if aid in rec["leaving"] else ""
             inc = f"; incorporated under {rec['parent']}" if rec.get("parent") is not None else ""   # W8e
             inc += _claims(k, rec)                                     # wave 9 E ('' with the flag off)
-            ls = rec["laws"]
-            if cfg(k).get("compact_lines") and len(ls) > 8:                # engine 20: many laws, a short list
-                ls = ls[:8] + [f"and {len(ls) - 8} more"]
-            out.append(f"Your contract {cid} '{rec['name']}' ({rec['template'] or 'own code'}{inc}; {len(rec['members'])} members; laws "
-                       f"{', '.join(ls) or 'none'}{'; SUSPENDED' if rec['status'] == 'suspended' else ''}){left}: your "
-                       f"escrow {_fmt(rec['escrow'].get(aid))}; your allowance per round {_fmt(rec['allowances'].get(aid))}; its "
-                       f"treasury {_fmt(rec['reserve'])}.")
+            if brief and not rec["escrow"].get(aid) and not rec["allowances"].get(aid) and aid not in INS.officers(k, cid) \
+                    and not left and rec["status"] != "suspended":
+                pass                                                    # review 31.10: nothing of the agent's in it (its role card
+            elif brief:                                                 # says the rest); else the numbers only (read_law: the laws)
+                out.append(f"Your contract {cid} '{rec['name']}' ({len(rec['members'])} members"
+                           f"{'; SUSPENDED' if rec['status'] == 'suspended' else ''}){left}: your escrow {_fmt(rec['escrow'].get(aid))}; "
+                           f"your allowance {_fmt(rec['allowances'].get(aid))}; its treasury {_fmt(rec['reserve'])}.")
+            else:
+                ls = rec["laws"]
+                if cfg(k).get("compact_lines") and len(ls) > 8:            # engine 20: many laws, a short list
+                    ls = ls[:8] + [f"and {len(ls) - 8} more"]
+                out.append(f"Your contract {cid} '{rec['name']}' ({rec['template'] or 'own code'}{inc}; {len(rec['members'])} members; laws "
+                           f"{', '.join(ls) or 'none'}{'; SUSPENDED' if rec['status'] == 'suspended' else ''}){left}: your "
+                           f"escrow {_fmt(rec['escrow'].get(aid))}; your allowance per round {_fmt(rec['allowances'].get(aid))}; its "
+                           f"treasury {_fmt(rec['reserve'])}.")
             if rec["applicants"] and cfg(k).get("applicant_lines") and aid in INS.officers(k, cid):   # review 31 (03 #14)
                 out.append(f"Applicants to {cid}: {', '.join(rec['applicants'])} (a law of {cid} admits them, e.g. an officer's hire).")
     out += terms_lines(k, aid)                                         # review 31: one line per standing contract a party holds
     others = [f"{c} '{r['name']}' ({r['template'] or 'own code'}, {len(r['members'])} members{', closed' if r['admission'] == 'closed' else ''}"
-              f"{_claims(k, r)})"
-              for c, r in recs(k).items() if r["status"] != "dissolved" and aid not in r["members"] and not _named_parties(k, r)]
+              f"{'' if brief else _claims(k, r)})"
+              for c, r in recs(k).items() if r["status"] != "dissolved" and aid not in r["members"] and not _named_parties(k, r)
+              and not (brief and r["admission"] == "closed")]
     if others:
         out.append("Contracts you could join: " + "; ".join(others) + ".")
     for g in _auths(k).values():                                       # P4.5: agency, both sides
