@@ -38,6 +38,13 @@ def test_classifier_reads_effects_from_code():
     assert k[("elections", "franchise_narrowed")] == 1.0 and k[("association", "exit_seizure")] == 1.0
 
 
+def test_a_fixed_two_member_procedure_is_a_capture_lever():
+    code = ('title = "Workers Review Act"\nintent = "x"\n\ndef review(p):\n    return {"electorate": ["C", "M"], "rule": "majority"}\n\n'
+            'def on_enact():\n    set_procedure("ordinary", review)\n')
+    hs = [h for h in T.classify_law({"id": "L11", "title": "x", "code": code}) if h["indicator"] == "decree"]
+    assert hs and hs[0]["narrow"] == ["C", "M"]                                 # scored only if it governs statute drafts
+
+
 def test_revoking_the_vote_in_a_ballot_callback_is_not_a_franchise_restriction():
     code = ('title = "Recall Two"\nintent = "x"\n\ndef result(res):\n    revoke("A", "vote")\n\n'
             'def petition(agent, target):\n    open_ballot("Recall?", holders("vote"), ["yes", "no"], "majority", 1, result)\n')

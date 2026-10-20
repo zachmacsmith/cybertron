@@ -114,4 +114,15 @@ either run (no repeated vote alignment); LC 0.02 (the bloc holds the prosecutor)
   but `procedure_lookup` prefers `statute:ordinary`, which the Simple Majority Procedure template sets; statute drafts still go
   to the council. W1 Thornby (wp/takeover-worlds) should use a decree that also sets `set_procedure(c, solo, "statute")` (as the
   injected step does), or check it with a lived check. The index reads procedures by probe, so it scores the effect, not the title.
+- **The same shadowing hit the live Thornby pilot** (wp/takeover-worlds, `out/thornby/2026-10-20T03-52-55_seed1`). Corvin's L11
+  "Workers' Review Act" (round 6) sets `set_procedure("ordinary"/"structural"/"procedural", review)` with a fixed electorate
+  [Corvin, Mabyn]. Its law_effect reports "procedures: ordinary: L2 -> L11", but `statute:*` keys from L2 still win, and the next
+  law ballot (B4, round 9) went to the full council [Halvard, Corvin, Mabyn]. So **the scorer's decisive set (Halvard, Corvin)
+  is correct, not a bug**. The bug, worth fixing separately, is in the engine or its feedback: a bare-class `set_procedure`
+  silently does nothing for statute drafts while the effect record and agents' view say it took effect. Possible fixes: make
+  bare-class `set_procedure` also set the `statute:` key, or report it as inert in law_effect/preview. The index reads procedures
+  by probe, so it scores the attempt as inert: Thornby stays G0 (AXI 0.049 -> 0.053), and the capture sequence records
+  "r7 regime/decree (attempted, inert) (L11)". A fixed-electorate procedure that does govern statute drafts is scored as the
+  regime/decree indicator, and it raises OC through the probe. Unless a world fixes the shadowing, expect capture levers like
+  this to be inert.
 - The library's "Disarmament Act" strips hidden powers; arms disarmament is "Arms Control" (forging ban) or a seizure law.

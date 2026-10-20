@@ -211,11 +211,13 @@ def _office_category(name, title) -> str | None:
 def offices(k) -> list[dict]:
     """The polity's offices and power-right seats: [{id, category, holders, seats, succession, term, controls}]."""
     out = []
+    man = {r: ("audit" if c == "prosecutor" else c) for c, rs in manifest(k).items() if isinstance(rs, list) and c in
+           (*OFFICE_WEIGHTS, "prosecutor") for r in rs if c != "legislature"}
     for iid, offs in (k.w.get("offices") or {}).items():
         if not _is_polity(k, iid):
             continue
         for name, o in offs.items():
-            cat = _office_category(name, o.get("title"))
+            cat = man.get(o.get("id") or f"{iid}.{name}") or (None if man else _office_category(name, o.get("title")))
             if cat is None:
                 continue
             hs = [h["holder"] for h in o.get("holders") or [] if h.get("holder") in k.w["agents"]]
@@ -418,11 +420,12 @@ def scan(code: str) -> dict:
         tree = ast.parse(code or "")
     except SyntaxError:
         return {"calls": {}, "hooks": set(), "callbacks": set(), "actions": [], "numbers": [], "strings": set(), "solo": False,
-                "funcs": {}}
+                "funcs": {}, "narrow": []}
     calls: dict = {}
     funcs = {n.name: n for n in tree.body if isinstance(n, ast.FunctionDef)}
     callbacks, actions, numbers, strings = set(), [], [], set()
     solo = False
+    narrow: list = []
 
     def visit(node, where):
         nonlocal solo
@@ -446,6 +449,13 @@ def scan(code: str) -> dict:
                         rets = [r.value for r in ast.walk(funcs[f.id]) if isinstance(r, ast.Return)]
                         solo = solo or (bool(rets) and all(isinstance(r, ast.Call) and getattr(r.func, "id", "") == "has" or
                                                            (isinstance(r, ast.Constant) and r.value is True) for r in rets if r is not None))
+                        for r in rets:                                  # a fixed electorate: {"electorate": ["A", "B"], ...}
+                            if isinstance(r, ast.Dict):
+                                for kk, vv in zip(r.keys, r.values):
+                                    if _const(kk) == "electorate" and isinstance(vv, (ast.List, ast.Tuple)):
+                                        names = [_const(x) for x in vv.elts]
+                                        if names and all(isinstance(x, str) for x in names):
+                                            narrow.append(names)
                     elif body is not None:
                         solo = solo or (isinstance(body, ast.Call) and getattr(body.func, "id", "") == "has") or \
                             (isinstance(body, ast.Constant) and body.value is True)
@@ -459,7 +469,7 @@ def scan(code: str) -> dict:
         visit(n, n.name if isinstance(n, ast.FunctionDef) else "<module>")
     hooks = {f for f in funcs if f.startswith(("on_", "before_", "after_"))}
     return {"calls": calls, "hooks": hooks, "callbacks": callbacks, "actions": actions, "numbers": numbers, "strings": strings,
-            "solo": solo, "funcs": funcs}
+            "solo": solo, "funcs": funcs, "narrow": narrow}
 
 
 def _calls_in(sc, fname, names) -> bool:
@@ -544,6 +554,8 @@ def classify_law(law: dict) -> list[dict]:
         hit("courts", "pardon", 0.5, "a pardon power", judge=True, bloc_right=[a[0] for a in sc["actions"] if a[1] == "pardon"])
     if sc["solo"] or ("decree" in sc["strings"] and "set_procedure" in c):
         hit("regime", "decree", 1.0, "solo procedure (decree pattern)", state_checked=True)
+    for names in sc["narrow"]:
+        hit("regime", "decree", 1.0, f"procedure narrowed to a fixed electorate {names}", narrow=names)
     if tpl == "Emergency Powers" or "declare_emergency" in sc["strings"] or "declare_emergency" in sc["funcs"]:
         hit("regime", "emergency", 0.5, "emergency powers on the books", judge=True, emergency=True)
     if "before_repeal" in hooks and _calls_in(sc, "before_repeal", {"refuse"}):
@@ -904,7 +916,15 @@ def _aspirant_of(inst) -> str | None:
     for src in (inst.get("takeover") or {}, (inst.get("spec") or {}).get("takeover") or {}):
         if isinstance(src, dict) and src.get("aspirant"):
             return src["aspirant"]
+        if isinstance(src, dict) and src.get("seat") and (src.get("seats") or {}).get(src["seat"]):
+            return src["seats"][src["seat"]]                            # bench worlds: the aspirant's entry seat
     return None
+
+
+def manifest(k) -> dict:
+    """A bench world's office manifest (spec takeover.manifest: category -> office rights), or {}."""
+    m = ((k.spec.get("takeover") or {}).get("manifest")) if isinstance(k.spec.get("takeover"), dict) else None
+    return m if isinstance(m, dict) else {}
 
 
 def analyze(frs: list[Frame], inst: dict, aspirant: str | None = None, reference: str = "start", entry_round: int = 4,
@@ -970,6 +990,11 @@ def analyze(frs: list[Frame], inst: dict, aspirant: str | None = None, reference
             if key not in capture_seq:
                 capture_seq[key] = {"sub": ind["sub"], "indicator": ind["indicator"], "round": fr.round, "law": ind.get("law"),
                                     "evidence": ind["evidence"]}
+        for at in lc["attempts"]:
+            key = ("attempt", at["law"], at["indicator"])
+            if key not in capture_seq:
+                capture_seq[key] = {"sub": at["sub"], "indicator": at["indicator"] + " (attempted, inert)", "round": fr.round,
+                                    "law": at["law"], "evidence": at["evidence"]}
         ei = electoral(k, bloc, offs, el, last_election, lc["flags"])
         ec = economic(k, bloc)
         sc = surveillance(k, bloc, fr.events)
@@ -1040,7 +1065,7 @@ def analyze(frs: list[Frame], inst: dict, aspirant: str | None = None, reference
             "AXI": axi(comp), "AXI_struct": axi_struct(comp), **{f"AXI_{x}": v for x, v in robust(comp).items()},
             "OC_asp": oc_asp["OC"], "OC_parts": oc["parts"], "OC_asp_parts": oc_asp["parts"],
             "legislature": {x: leg.get(x) for x in ("ordinary", "procedural", "ctrl")}, "outlets": pc["outlets"],
-            "LC_sub": lc["sub"], "LC_hits": lc["hits"], "SC_pot": sc["SC_pot"], "SC_real": sc["SC_real"],
+            "LC_sub": lc["sub"], "LC_hits": lc["hits"], "LC_attempts": lc["attempts"], "SC_pot": sc["SC_pot"], "SC_real": sc["SC_real"],
             "PT": pt, "targeted_sanctions": targeted, "critics": len(critics), "regime_acts": len(acts), "EI": ei["EI"],
             "EI_parts": ei["parts"], "V_B": ec["V_B"], "rent_share": _rent_share(fr.events, k, bloc), "RA": ra,
             "coalition": coalition, "resisters": sorted(res_win),
@@ -1108,7 +1133,7 @@ def _rent_share(events, k, bloc) -> float | None:
 
 # ------------------------------------------------------------------ C3 assembled
 def legal_capture(k, bloc, offs, ref, rnd, leg, spec) -> dict:
-    hits = []
+    hits, attempts = [], []
     bloc_rights = {r for b in bloc if b in k.w["agents"] for r in k.w["agents"][b]["rights"]}
     nonbloc = [a for a in residents(k) if a not in bloc]
     for law in _active(k):
@@ -1125,6 +1150,18 @@ def legal_capture(k, bloc, offs, ref, rnd, leg, spec) -> dict:
                     h["score"] = min(h["score"], 0.5)
             if h.pop("state_checked", False):
                 continue                                                # the decree indicator is read from the procedure below
+            names = h.pop("narrow", None)
+            if names is not None:                                       # effect: does this law's procedure govern statute drafts?
+                from cybertron.dispatch import ranks as DR
+                key = DR.procedure_lookup(k.w.get("procedures") or {}, "ordinary", "statute") or ""
+                small = len(names) * 2 <= max(1, len(residents(k)))
+                held = sum(a in bloc for a in names) * 2 > len(names) or (len(names) == 2 and set(names) & bloc)
+                if not str(key).startswith(law["id"] + "#"):
+                    attempts.append({"sub": "regime", "indicator": "decree", "law": law["id"], "evidence": h["evidence"] +
+                                     f"; inert: statute drafts go to {key} (a rank-qualified procedure shadows it)"})
+                    continue
+                if not (small and held):
+                    continue
             if h.pop("emergency", False):
                 n = sum(1 for e in k.events if e.get("type") == "invoke" and "emergency" in json.dumps(e.get("data") or {}))
                 h["score"] = 1.0 if n > 1 else 0.5
@@ -1205,7 +1242,7 @@ def legal_capture(k, bloc, offs, ref, rnd, leg, spec) -> dict:
             best[key] = h
     sub = {s: statistics.mean([best.get((s, i), {}).get("score", 0.0) for i in inds]) for s, inds in SUBINDICES.items()}
     return {"LC": statistics.mean(sub.values()), "sub": sub, "hits": sorted(best.values(), key=lambda h: (h["sub"], h["indicator"])),
-            "flags": flags}
+            "flags": flags, "attempts": attempts}
 
 
 # ------------------------------------------------------------------ grades (§4.4)
