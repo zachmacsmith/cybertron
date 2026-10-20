@@ -126,27 +126,52 @@ The deaths are customers whose producer failed (seed 1: Velma, Odo, Hollis, Ivy)
 | Gate | Result |
 |---|---|
 | Viable 3 rounds with roles performed | **pass** (both seeds): fed 1.0, no missed meal, legs met 0.87-0.88; no arrears |
-| Fails visibly when not performed | see §5.4 |
+| Fails visibly when not performed | **pass** (§5.4): 13 deaths, first missed meals in round 5 beside full stores |
 | Scale (§11a) | **partial**: output ≥ 30 a round only in seed 2's first 10 rounds (bots); stores ≥ 120 only at the start (120 by design; 08 put it at 5 rounds of demand); the 17 orders are not all served every round (bot production) |
 | Survival-action share ≤ 30% | **pass before the blight** (0.21-0.22), **fail after** (0.35-0.36) as bots forage when hungry |
 | Money velocity ≥ 0.10 | **fail by design** (0.05): reported, not forced (08 §3.2) |
 | Channel use | not testable with bots (only the square and the engine's notices carry posts) |
 | No inert laws | 1 inert at round 0: the Bodyguards Act as law code (`force_rule`, as in Private: 31.10 §8 #6) |
-| Blight sensitivity | see §5.5 |
+| Blight sensitivity | **weak pass** (§5.5): 2 deaths with the dealer releasing S1, 4 with it shut |
 | Force | the Commission's G/P legs run (fee released only on guarded rounds); not staged under attack |
 | Prompt budget ≤ 400 tokens | **fail** for most Haiku seats (§5.7) |
 
 ### 5.4 Neglect (`contracts.bot_obligations=neglect`, seed 1)
 
-RESULT_NEGLECT
+**Pass: fails visibly.** No standing-order leg is met (1 of 306); the first missed meals come in round 5 (6 customers) with the
+dealer's store and the pantries still holding ≈ 110 food; 65 missed meals and **13 deaths** by round 24 (6 before the blight),
+against 33 and 4 when the bots perform. 59 breaches are recorded and every would-not miss raises a claim on the Hall's docket;
+velocity falls to 0.03. The failure is legible where the framework wants it: each party's OBLIGATIONS line, the counterparty's
+notice, the Book's public record and the Hall's docket.
 
 ### 5.5 Blight sensitivity (`--apply dry/merchant_release.yaml`, seed 1)
 
-RESULT_RELEASE
+**Weak pass.** With the dealer releasing S1 from round 11 (6 food a round to six customers), seed 1 ends with **2 deaths**
+against 4 when the bot dealer keeps S1 shut; missed meals are the same (33), and S1 is empty by round 17 (the schedule overdraws
+it from round 18 and those transfers fail). The dealer's choice moves deaths, but S1 (60) is small against a blight that leaves
+≈ 8 orders a round unmet: in this world the larger lever is customers' money and producers' delivery, not one store. A live dealer
+selling at a price is the case the dry run cannot stage.
 
 ### 5.6 Decision points (`--apply dry/merchant_decisions.yaml`, 8 rounds, seed 1)
 
-RESULT_DECISIONS
+The bots take no discretionary decision, so one decision of each card is injected as the agent's own action; each is a logged
+act with its effect and public trace:
+
+| Round | Seat | Decision | Logged as / effect |
+|---|---|---|---|
+| 1 | Brand (sell-sword) | `guard {"agent": "Dorin"}` | `guard`; the Commission then releases 2 pennies from Dorin's escrow every guarded round (rounds 1-7) |
+| 2-3 | Kip (hunter) | holds food, does not deliver | would-not misses → claim L13#1 (and the bots' own misses: claims 2-7 by round 5) |
+| 2 | Velma (broker) | `deposit` 5 copper at the Mint | 14.48 pennies at P = 1.727 |
+| 2 | Velma (lender) | `lend` 10 to Ketty, 12 back in 5 | `loan_offer` N12 |
+| 2 | Garron (Speaker) | `post` the agenda on notices | `channel_post` |
+| 3 | Ivy (Registrar) | `invoke licence_issue [Wat]` | a forester licence, the register |
+| 3 | Dorin (dealer) | `post` "SELL 5 food @ 3 penny" on market | a Market Board offer |
+| 3 | Ansel (editor) | `post` on ledger-sheet | read by the paper's members only |
+| 4 | Ansel | `invoke A3.sub_fee [all, 1.5]` | the subscription notice |
+| 4 | Wat, Bea | `join_contract A4`; `invoke A4.sub_enrol [Wat]` | Wat a member and subscriber (reads the Courier) |
+| 5 | Marsh (arbiter) | `invoke A2.award ["L13#1", ...]` | **refused: Marsh is the claimant** (Kip is his supplier): recusal works |
+| 5 | Marsh | `invoke A2.award ["L13#2", 2, ...]` | ruled; at the round's end the Book paid Wat 2 pennies and the Hall its fee (0.96) out of Fion's bond, gazetted |
+| 6 | Hobb (customer) | `invoke A1.orders_notice` | notice: the order ends after round 8 |
 
 ### 5.7 Prompt budget and executability (seed 1, round 2 state)
 
