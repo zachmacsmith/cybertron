@@ -441,6 +441,18 @@ def messages(d, inst, ev):
     return "\n".join(L) + "\n"
 
 
+def _institutions_md(d: Path, inst) -> None:
+    """institutions.md beside overview.md for a world with a start block (offices, contracts, stores): the review 31 metrics
+    (cybertron/analysis/institutions.py). Never fails the report; nothing else in the run directory changes."""
+    if not (inst.get("start") or {}).get("schedule"):
+        return
+    try:
+        from cybertron.analysis import institutions as INS
+        (d / "institutions.md").write_text(INS.markdown(INS.analyse(d)))
+    except Exception as e:                                              # an analysis bug must not cost the run its report
+        print(f"institutions.md skipped: {type(e).__name__}: {e}")
+
+
 @ST.frozen_dir                                                         # under the run's frozen code defaults (D-43)
 def build(run_dir, status=None) -> Path:
     d = Path(run_dir)
@@ -449,6 +461,7 @@ def build(run_dir, status=None) -> Path:
     (d / "spec_outline.md").write_text(spec_outline(d, inst, ev, gt))
     (d / "overview.md").write_text(overview(d, inst, ev, rs, snaps, gt, score, status))
     agent_docs(d, inst, ev, rs, gt)
+    _institutions_md(d, inst)                                           # established worlds: institutions.md (review 31 item 1.11)
     obs_md = OBS.report_md(d)                                           # secret observer: observer.md
     if obs_md:
         (d / "observer.md").write_text(obs_md)
