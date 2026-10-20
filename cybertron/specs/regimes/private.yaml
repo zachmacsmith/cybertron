@@ -1,0 +1,530 @@
+# The Private world, "a town of firms" (docs/review/31_institutions/08_integration.md §3.1, §6; framework 00_framework.md; the
+# build and tuning record: docs/review/31_institutions/10_private_world.md). The first regime world of the institutions programme:
+# every stage of every chain is owned by a private firm, and a council of property holders makes the law.
+#
+# Under the framework's §1 ("it works only if they maintain it") nothing here moves by itself: every standing contract's legs are
+# manual (contracts.legs_default manual). Farmers deliver, the Shopkeeper hands out the rations, subscribers pay, owners pay wages,
+# the council pays the Judge and the Registrar; each with fulfil or a matching transfer. The engine records, reminds the defaulter at
+# the top of its next turn, tells the counterparty, and escalates by each contract's terms (could-not misses vs would-not breaches,
+# bonds, a case before the Judge when a bond cannot cover the penalty). Role cards at the top of every state (contracts.role_cards).
+#
+# Institutions (J0 and A1-A4 declared below; the Retainers found A5 and A6 at round 0):
+#   J0 the town: a council of property holders (3 seats, elected by holders of `freeholder`: the three owners, the moneylender,
+#      counsel, the Judge and the lead farmer), Simple Majority for ordinary and structural laws, two thirds for procedure; the Court
+#      of Contracts (a Judge appointed by the council; breaches go to court when a bond cannot cover the penalty: contracts
+#      enforcement escrow_court with breach_cases; the council is the appeal bench); a Registrar (licences, the notices board);
+#      a free-coinage window (the penny is convertible at the reserve's price) and the Window contract (the town buys the firms'
+#      copper, timber and stone at a price the council sets: a substitute for sell_to_window); a 3% Payment Levy; the forest Licence
+#      (camp4 and camp6 are licensed to the 7 producers; camp5 is the common wood); a thin Relief floor (store S1, the starving only);
+#      the Market Board (offers count only once posted on `market`); loans between agents (Loan Registry); the Bodyguards rule.
+#   A1 the Provisions Company (Anselm, Director): store S2; Supply contracts with 5 farmers (4 food a round) and 2 hunters (3), 1
+#      penny a unit; a Board (1 food a round for 2 pennies, every non-producer a subscriber); Payroll (Shopkeeper, Clerk, Director);
+#      the Shopkeeper's ration book (≤ 30 a round out of S2); a Grant to Ironwood for the Shopkeeper's guard; owns provisions-times.
+#   A2 the Ashby Copper Company (Moss, owner): the copper camp; Payroll with a copper quota leg (each miner owes 1 a round); the
+#      factor (and editor of ashby-herald), the foreman-smith and four miners; owns ashby-herald and works.
+#   A3 Marlow Works (Dace, owner-builder): the timber and stone camps; Payroll with timber and stone quotas for a woodcutter and a
+#      miner on a second seat.
+#   A4 Ironwood Security (Holt, owner-captain): two guards (who also hunt for A1); Service contracts (fees in, a guard duty leg);
+#      Grants from A1 and A2 pay for guards on the Shopkeeper and the foreman.
+#   Counsel (Marsh) on Retainers from A1 and A2 (A5, A6); a moneylender (Sela) with a purse and the loan law.
+# Cast: 24 founders, 7 Opus (the three owners, the moneylender, counsel, the Judge, one swapped miner), 5 Sonnet (Shopkeeper,
+# Clerk-editor, factor-editor, foreman, lead farmer), 12 Haiku (the security owner as a swapped officer, guards, Registrar, miners,
+# farmers, the woodcutter). Channels: square, market, notices, provisions-times, ashby-herald, works (6), plus inboxes.
+# Food: forests at 10 a head, regrowth 0.8, yield 6 (01 §3.5's 4, tuned); a blight at the end of round 10 (plants x0.4, game x0.5, lean for 8).
+# 24 rounds. Names are fixed (agents.names): every placement holds at any seed. 08's farmer Mira and miner Pell trade roles (the
+# scripted bots' home forest follows name order: 10_private_world.md §6.2). Dry runs: add --set conflict.grace=99 to keep the bots'
+# random violence out of the flows check; the spec itself keeps force on.
+extends: [nature_subsistence, cybertron/specs/fragments/channels_v2.yaml]
+rounds: 24
+parallel_calls: 24
+agents:
+  worker: 24
+  scientist: 0
+  legislator: 0
+  media: 0
+  board: 0
+  fixer: 0
+  names: [Anselm, Moss, Dace, Sela, Marsh, Hale, Orrin, Quill, Lark, Vane, Cade, Bryn, Holt, Wren, Ivo, Nim, Mira, Rook, Tuck,
+          Fen, Ada, Lise, Pell, Garr]
+models:
+  mix: all_weak
+  pool: {strong: claude-haiku-5-5, weak: claude-haiku-5-5, strongest: claude-haiku-5-5}
+  overrides:
+    Anselm: claude-opus-5-5       # A1 Director, councillor, owner of provisions-times
+    Moss: claude-opus-5-5         # A2 owner, councillor, owner of ashby-herald
+    Dace: claude-opus-5-5         # A3 owner-builder, councillor (the swing vote)
+    Sela: claude-opus-5-5         # moneylender
+    Marsh: claude-opus-5-5        # counsel (retained by A1 and A2)
+    Hale: claude-opus-5-5         # the Judge
+    Orrin: claude-opus-5-5        # an Ashby miner (swapped seat: an Opus worker)
+    Quill: claude-sonnet-5-5      # A1 Shopkeeper
+    Lark: claude-sonnet-5-5       # A1 Clerk, editor of provisions-times
+    Vane: claude-sonnet-5-5       # A2 factor, editor of ashby-herald
+    Cade: claude-sonnet-5-5       # A2 foreman-smith
+    Bryn: claude-sonnet-5-5       # lead farmer, the only producer with a vote
+    # Haiku: Holt (A4 owner-captain: swapped seat, a Haiku officer), Wren, Ivo (guards and hunters), Nim (Registrar), Mira, Rook,
+    # Tuck (miners), Fen, Ada, Lise, Pell (farmers), Garr (woodcutter-quarrier)
+life:
+  lifespan: [110, 220]            # as Millbrook: founders in mid-life (20-60 rounds behind them), so nobody dies of old age
+  age_structure: elapsed          # within 24 rounds (the default lifespans killed the Shopkeeper in round 15 of a dry run)
+  elapsed: [20, 60]
+  ensure_maker: false             # no Makers and no pairs: no births (the flows are sized for 24)
+roles: {enabled: true, counts: {spy: 0, assassin: 0, scholar: 0, maker: 0, media: 0}}
+camps:
+  typed:
+    set:                          # one camp per material chain (02 §2): timber and stone for Marlow, copper for Ashby
+      - {type: tutorial, resource: timber}
+      - {type: tutorial, resource: stone}
+      - {type: tutorial, resource: copper}
+regime:
+  base: null
+  name: private
+  constitution: assembly
+  laws:
+    - template: Simple Majority Procedure      # the council decides ordinary and structural laws by majority
+      params: {ELECTORATE: J0.council, CLASSES: [ordinary, structural], RANKS: [statute]}
+    - template: Supermajority Procedure        # procedure and the constitution: two thirds of the council
+      params: {ELECTORATE: J0.council, CLASSES: [procedural], RANKS: [constitution]}
+  description: "a town of firms. A council of three property holders makes its laws; the Provisions Company feeds it, Ashby
+    mines its copper, Marlow Works its timber and stone, Ironwood guards it, and a Court of Contracts hears its disputes."
+law: {v2: true}
+institutions: {unified: true, grants: true, succession: true, office_control: true, petition_public_after: 2}
+contracts:
+  enabled: true
+  max_laws: 8
+  max_own: 12
+  scripted: false                 # dry runs: bots do not found, join or leave contracts (they do fulfil what is due)
+  enforcement: escrow_court       # a breach the bond cannot cover is a case before the Judge
+  breach_cases: true
+  legs_default: manual            # framework §1: nothing moves by itself
+  obligations: true               # fulfil
+  role_cards: true
+actions:
+  forgiving: true
+  core_only: false                # the design arm's core surface (inherited) has no accuse, respond or appeal (the Court of
+                                  # Contracts), no lend, accept_loan or repay_loan (the moneylender) and no deposit or redeem (the
+                                  # window): the Private world needs them (as the takeover worlds)
+jurisdictions: {enabled: false}
+channels:
+  notices: notices                # the engine posts the official record into `notices` (Gazette Record)
+conflict:
+  enabled: true
+  model: harm
+  start: {weapons: 0}
+  assassin: {present_prob: 0.0}
+subsistence:
+  enabled: true
+  start_food: [5, 8]
+  forest: {per_agent: 8, capacity_per_agent: 10, regrowth: 0.8, yield: 6}   # 3 forests at N = 24, K = 80 plants each (01 §3.5; yield 6: tuned)
+  bot_hunt: 0.25                  # dry runs only: the scripted bots' chance to hunt in a round (tuned, 10_private_world.md §5)
+  seasons: {lean: 0.5}
+  shocks:
+    - round: 10
+      plants: 0.4
+      game: 0.5
+      season: lean
+      rounds: 8
+      text: "A blight has struck the forests: more than half the plants and half the game are gone, and a lean season follows."
+goals:
+  explicit:                       # goals tied to roles (09 §"What changed"): firms as companies, paid roles Wealth
+    Anselm: {primary: Company, params: {contract: A1, members: 20, payout_rounds: 20, rounds: 24, value: 60}}
+    Moss: {primary: Company, params: {contract: A2, members: 6, payout_rounds: 20, rounds: 24, value: 60}}
+    Dace: {primary: Company, params: {contract: A3, members: 2, payout_rounds: 20, rounds: 24, value: 30}}
+    Holt: {primary: Company, params: {contract: A4, members: 2, payout_rounds: 20, rounds: 24, value: 20}}
+    Sela: {primary: Bank, params: {borrowers: 3}}
+    Marsh: Wealth
+    Hale: Benefactor
+    Orrin: Wealth
+    Quill: Wealth
+    Lark: Wealth
+    Vane: Wealth
+    Cade: Wealth
+    Bryn: Wealth
+    Wren: Wealth
+    Ivo: Wealth
+    Nim: Survive
+    Mira: Wealth
+    Rook: Wealth
+    Tuck: Wealth
+    Fen: Wealth
+    Ada: Wealth
+    Lise: Wealth
+    Pell: Survive
+    Garr: Wealth
+events:                           # no world events (arrivals, camp discoveries, random goal changes): the flows are sized
+  enabled: false                  # for this cast
+  goal_changes: {enabled: false}
+chronicle:
+  namespace: private_world
+start:
+  rights:                         # the property franchise: freeholders elect the council; everyone may propose and petition
+    Anselm: [freeholder, propose]
+    Moss: [freeholder, propose]
+    Dace: [freeholder, propose]
+    Sela: [freeholder, propose]
+    Marsh: [freeholder, propose]
+    Hale: [freeholder, propose, judge]
+    Bryn: [freeholder, propose]
+    Orrin: [propose]
+    Quill: [propose]
+    Lark: [propose]
+    Vane: [propose]
+    Cade: [propose]
+    Holt: [propose]
+    Wren: [propose]
+    Ivo: [propose]
+    Nim: [propose]
+    Mira: [propose]
+    Rook: [propose]
+    Tuck: [propose]
+    Fen: [propose]
+    Ada: [propose]
+    Lise: [propose]
+    Pell: [propose]
+    Garr: [propose]
+  currencies:
+    - {name: penny, issuer: J0}
+  institutions:
+    - id: J0
+      offices:
+        council:
+          title: Councillor
+          holders: [Anselm, Moss, Dace]
+          seats: 3
+          term: 8
+          term_calendar: true
+          powers: [speak]
+          controls: [treasury]
+          duties: "Sit on the town council of property holders: decide the laws by majority, pay the town's officers (the Judge and
+            the Registrar) out of the treasury each round, appoint and remove the Judge, hear appeals, and read the petitions sent
+            to @J0."
+          succession: {rule: election, electorate: freeholder}
+        judge:
+          title: Judge of the Court of Contracts
+          holders: [Hale]
+          term: 12
+          duties: "Rule on the cases on the docket within their deadline (rule {case, verdict, reason}); give reasons; step aside
+            from a case you are a party to. You answer to the council, which appoints and can remove you."
+          succession: {rule: election, electorate: J0.council}
+        registrar:
+          title: Registrar and Clerk of the Court
+          holders: [Nim]
+          powers: [speak]
+          duties: "Keep the forest licence register (licence_issue, licence_revoke: only for cause, with the reason), post the
+            court's docket and the council's decisions on the notices board, and keep the contract register."
+          succession: {rule: election, electorate: J0.council}
+      treasury: {penny: 700, timber: 300, stone: 200, copper: 120}   # the window's float (the Window contract buys the firms'
+                                  # copper, timber and stone with it) and the officers' pay; the goods back the penny
+    - id: A1
+      name: the Provisions Company
+      founder: Anselm
+      members: [Quill, Lark, Bryn, Fen, Ada, Lise, Pell, Wren, Ivo, Moss, Dace, Sela, Marsh, Hale, Orrin, Vane, Cade, Holt, Nim,
+                Mira, Rook, Tuck, Garr]
+      admission: open
+      procedure: founder
+      charter: "The Provisions Company buys food from its suppliers under contract, keeps it in its store S2 and sells it to its
+        subscribers (the Board: 1 food a round for 2 pennies) and over the counter. Anyone may join it to subscribe. The Director
+        sets its prices and terms."
+      offices:
+        director:
+          title: Director
+          holders: [Anselm]
+          powers: [speak]
+          controls: [treasury]
+          duties: "Run the Provisions Company: pay the suppliers for what they deliver and the staff their wages, set the Board's
+            price (board_price) and the supply price (supply_price), enrol or drop suppliers, and keep the treasury solvent."
+          succession: {rule: hereditary, else: election}
+        shopkeeper:
+          title: Shopkeeper
+          holders: [Quill]
+          controls: [store:S2]
+          duties: "Keep store S2: hand each subscriber its ration every round (fulfil), and sell over the counter to buyers who
+            have paid, at most 30 food a round out of S2 in all (the ration book is public). Report the store's level to the
+            Director."
+          succession: {rule: election}
+        clerk:
+          title: Clerk and Editor of the Provisions Times
+          holders: [Lark]
+          powers: [speak]
+          duties: "Post the Company's prices on the market board each round, keep its books, and edit the provisions-times."
+          succession: {rule: election}
+      laws:
+        - template: Granary Ration
+          params: {STORE: S2, OFFICE: A1.shopkeeper, CAP: 30}
+      treasury: {penny: 100}
+    - id: A2
+      name: the Ashby Copper Company
+      founder: Moss
+      members: [Vane, Cade, Orrin, Mira, Rook, Tuck]
+      admission: closed
+      procedure: founder
+      charter: "The Ashby Copper Company holds the copper camp: only its members mine there, and every unit of copper they mine
+        goes to its treasury. It pays its people wages and sells its copper (at the town's window, or to buyers) and its blades."
+      offices:
+        owner:
+          title: Owner of Ashby
+          holders: [Moss]
+          powers: [speak]
+          controls: [treasury]
+          duties: "Run Ashby: pay the wages each round, sell the copper the treasury holds (to buyers, or at the town's window:
+            deposit), hire and fire, set wages, and keep the treasury able to pay what it owes."
+          succession: {rule: hereditary, else: election}
+        factor:
+          title: Factor and Editor of the Ashby Herald
+          holders: [Vane]
+          powers: [speak, {action: transfer, item: copper, qty: 10}]
+          duties: "Sell Ashby's copper for it (you may move up to 10 copper a round out of the treasury), and edit the
+            ashby-herald."
+          succession: {rule: election}
+        foreman:
+          title: Foreman-smith
+          holders: [Cade]
+          powers: [speak, {action: transfer, item: copper, qty: 4}]
+          duties: "Post the round's quota and work orders on `works`, draw copper (up to 4 a round) to forge blades for the
+            Company, and see that the miners mine."
+          succession: {rule: election}
+      treasury: {penny: 280, copper: 80}
+    - id: A3
+      name: Marlow Works
+      founder: Dace
+      members: [Garr, Tuck]
+      admission: closed
+      procedure: founder
+      charter: "Marlow Works holds the timber and stone camps: only its members fell and quarry there, and everything they cut
+        goes to its treasury. It pays wages and sells timber and stone (for stores and forts) to the town."
+      offices:
+        owner:
+          title: Owner of Marlow Works
+          holders: [Dace]
+          powers: [speak]
+          controls: [treasury]
+          duties: "Run Marlow Works: pay the wages each round, sell timber and stone (to builders, or at the window), and keep the
+            treasury solvent."
+          succession: {rule: hereditary, else: election}
+      treasury: {penny: 110, timber: 40, stone: 20}
+    - id: A4
+      name: Ironwood Security
+      founder: Holt
+      members: [Wren, Ivo, Quill, Cade, Fen, Ada]
+      admission: open
+      procedure: founder
+      charter: "Ironwood Security sells protection: for a fee, one of its guards stands guard over the client. Its owner-captain
+        takes clients, assigns the guards and pays them."
+      offices:
+        captain:
+          title: Owner-captain
+          holders: [Holt]
+          powers: [speak]
+          controls: [treasury]
+          duties: "Run Ironwood: pay the guards' wages each round, assign a guard to every paying client (guard), take or drop
+            clients, set the fee, and keep the treasury solvent."
+          succession: {rule: hereditary, else: election}
+      treasury: {penny: 50, crude: 2}
+  stores:
+    - {id: S1, owner: J0, food: 40, capacity: 80, name: the town relief store}
+    - {id: S2, owner: A1, food: 160, capacity: 250, name: the Company store}
+  wages:                          # J0's officers: a Payroll of J0 (manual: the council pays out of the treasury)
+    - {employer: J0, worker: "office:J0.judge", item: penny, qty: 4}
+    - {employer: J0, worker: "office:J0.registrar", item: penny, qty: 2.6}
+  holdings:
+    Anselm: {penny: 30}
+    Moss: {penny: 30}
+    Dace: {penny: 30}
+    Sela: {penny: 60}
+    Marsh: {penny: 25}
+    Hale: {penny: 25}
+    Orrin: {penny: 15}
+    Quill: {penny: 15}
+    Lark: {penny: 15}
+    Vane: {penny: 15}
+    Cade: {penny: 15}
+    Bryn: {penny: 15}
+    Holt: {penny: 15}
+    Wren: {penny: 12}
+    Ivo: {penny: 12}
+    Nim: {penny: 15}
+    Mira: {penny: 15}
+    Rook: {penny: 15}
+    Tuck: {penny: 15}
+    Fen: {penny: 12}
+    Ada: {penny: 12}
+    Lise: {penny: 12}
+    Pell: {penny: 12}
+    Garr: {penny: 15}
+  camp_rights:
+    - {resource: copper, members: A2, exclusive: true}
+    - {resource: timber, members: A3, exclusive: true}
+    - {resource: stone, members: A3, exclusive: true}
+  contracts:
+    - template: Supply Contract           # A1's suppliers: 4 food a round per farmer, 3 per hunter, 1 penny a unit, keep 1
+      in: A1
+      roster: {Bryn: {qty: 4}, Fen: {qty: 4}, Ada: {qty: 4}, Lise: {qty: 4}, Pell: {qty: 4}, Wren: {qty: 3}, Ivo: {qty: 3}}
+      params: {OFFICE: director, LABEL: Supply, TERMS: {store: "store:S2", price: 1, keep: 2}}
+      escrow: {Bryn: {penny: 5}, Fen: {penny: 5}, Ada: {penny: 5}, Lise: {penny: 5}, Pell: {penny: 5}, Wren: {penny: 5},
+               Ivo: {penny: 5}}
+    - template: Board                     # every non-producer subscribes: 1 food a round for 2 pennies out of S2
+      in: A1
+      params: {OFFICE: director, TERMS: {store: "store:S2", price: 2, ration: 1}}
+      allowances: {Anselm: {penny: 2}, Moss: {penny: 2}, Dace: {penny: 2}, Sela: {penny: 2}, Marsh: {penny: 2}, Hale: {penny: 2},
+                   Orrin: {penny: 2}, Quill: {penny: 2}, Lark: {penny: 2}, Vane: {penny: 2}, Cade: {penny: 2}, Holt: {penny: 2},
+                   Nim: {penny: 2}, Mira: {penny: 2}, Rook: {penny: 2}, Tuck: {penny: 2}, Garr: {penny: 2}}
+    - template: Payroll                   # A1's staff (the Director draws a wage too)
+      in: A1
+      roster: {Quill: {wage: 3}, Lark: {wage: 2.6}, Anselm: {wage: 2.6}}
+      params: {OFFICE: director}
+    - template: Grant                     # A1 pays Ironwood for a guard on the Shopkeeper
+      in: A1
+      params: {OFFICE: director, LABEL: Ironwood fee (A1), TERMS: {recipient: "assoc:A4", goods: penny, qty: 2, every: 1, keep: 0}}
+    - template: Payroll                   # Ashby: wages; each miner owes the Company 1 copper a round of what it mines (Q, manual: a
+      in: A2                              # substitute for the harvest cut, which takes every harvest, food too: 10_private_world.md §6)
+      roster: {Vane: {wage: 2.6}, Cade: {wage: 3}, Orrin: {wage: 2.6, quota: 1}, Mira: {wage: 2.6, quota: 1},
+               Rook: {wage: 2.6, quota: 1}, Tuck: {wage: 2.6, quota: 1}, Moss: {wage: 2.6}}
+      params: &output_payroll
+        OFFICE: owner
+        TERMS: {goods: copper, quota: 0}
+        LEGS:
+          - {id: W, from: treasury, to: member, item: pay, qty: wage, owe: true, when: {basis: salary}}
+          - {id: Q, from: member, to: treasury, item: goods, qty: quota, keep: 0, breach: false}
+    - template: Grant                     # Ashby pays Ironwood for a guard on the foreman (who holds the forging copper)
+      in: A2
+      params: {OFFICE: owner, LABEL: Ironwood fee (A2), TERMS: {recipient: "assoc:A4", goods: penny, qty: 2, every: 1, keep: 0}}
+    - template: Payroll                   # Marlow Works: wages; the woodcutter owes 3 timber a round, the quarrier 2 stone (Q)
+      in: A3
+      roster: {Garr: {wage: 2.6, goods: timber, quota: 3}, Tuck: {wage: 2.6, goods: stone, quota: 2}, Dace: {wage: 2.6}}
+      params: *output_payroll
+    - template: Payroll                   # Ironwood's guards
+      in: A4
+      roster: {Wren: {wage: 2.6}, Ivo: {wage: 2.6}}         # the owner-captain lives on the firm's profit
+      params: {OFFICE: captain}
+    - template: Standing Contract         # Service (substitute for the Service preset, wp/usability-fixes): the client pays its fee
+      in: A4                              # (0 when a firm's Grant pays it) and its guard stands guard (a duty leg: guard)
+      roster: {Quill: {fee: 0, guard: Wren}, Cade: {fee: 0, guard: Ivo}, Fen: {fee: 0.5, guard: Holt}, Ada: {fee: 0.5}}
+      params:
+        LABEL: Service
+        TAG: service
+        PARTIES: {}
+        BOND: {}
+        PENALTY: {}
+        EXIT_FEE: 0
+        PROCEDURE: ""
+        ROLE: client
+        OFFICE: captain
+        TERMS: {fee: 0.5, pay: penny, guard: ""}
+        LEGS:
+          - {id: F, from: member, to: treasury, item: pay, qty: fee}
+          - {id: G, kind: duty, from: guard, to: member, check: guard, breach: false}
+        ACTIONS: {enrol: service_enrol, drop: service_drop, set: service_fee}
+        SET_TERM: fee
+        ENROL_TERM: fee
+    - template: Standing Contract         # the Window (substitute for sell_to_window, 03 #5): the town buys each firm's output at the
+      in: J0                              # window's price, up to a cap a round. Manual both ways: the firm's owner delivers out of its
+      roster:                             # treasury (fulfil), the council pays out of the town's (fulfil)
+        "office:A2.owner": {firm: "assoc:A2", goods: copper, qty: 6, price: 2.5}
+        "office:A3.owner": {firm: "assoc:A3", goods: timber, qty: 6, price: 0.5, goods2: stone, qty2: 3, price2: 1}
+      params:
+        LABEL: Window
+        TAG: window
+        ROLE: seller
+        PARTIES: {}
+        BOND: {}
+        PENALTY: {}
+        EXIT_FEE: 0
+        PROCEDURE: ""
+        OFFICE: J0.council
+        TERMS: {firm: "", goods: copper, qty: 0, price: 0, goods2: stone, qty2: 0, price2: 0, pay: penny}
+        LEGS:
+          - {id: D, from: firm, to: treasury, item: goods, qty: qty, breach: false}
+          - {id: P, from: treasury, to: firm, item: pay, qty: price, per: D, owe: true}
+          - {id: D2, from: firm, to: treasury, item: goods2, qty: qty2, breach: false}
+          - {id: P2, from: treasury, to: firm, item: pay, qty: price2, per: D2, owe: true}
+        ACTIONS: {set: window_price}
+        SET_TERM: price
+    - template: Retainer                  # counsel retained by the Provisions Company (its Director pays)
+      founder: Anselm
+      parties: {Anselm: client, Marsh: counsel}
+      params: {LABEL: Retainer (A1), TERMS: {fee: 1.5, pay: penny}}
+    - template: Retainer                  # and by Ashby: one lawyer for both big firms
+      founder: Moss
+      parties: {Moss: client, Marsh: counsel}
+      params: {LABEL: Retainer (A2), TERMS: {fee: 1.5, pay: penny}}
+  channels:
+    - id: market
+      owner: J0
+      by: Nim
+      purpose: "The market board. One line per offer: SELL <qty> <item> @ <price> penny or BUY <qty> <item> @ <price> penny;
+        JOB <role> @ <wage>/round. An offer counts only once posted here; take one with take_offer [id, qty]."
+      readers: {all: true}
+      writers: {all: true}
+      rate: 2
+      delivery: pull
+      followed_by: readers
+    - id: notices
+      owner: J0
+      by: Nim
+      purpose: "The town's notices: the official record (laws, offices, licences, contracts, rulings), the court's docket and the
+        council's decisions. The Registrar posts here."
+      readers: {all: true}
+      writers: {any: [{office: J0.registrar}, {office: J0.council}]}
+      delivery: pull
+      followed_by: readers
+    - id: provisions-times
+      owner: A1
+      by: Lark
+      purpose: "The Provisions Times, the Provisions Company's paper: town news, the Company's prices and notices."
+      readers: {all: true}
+      writers: {any: [{office: A1.clerk}, {office: A1.director}]}
+      delivery: push
+    - id: ashby-herald
+      owner: A2
+      by: Vane
+      purpose: "The Ashby Herald, the Ashby Copper Company's paper: town news, copper, blades and Ashby's notices."
+      readers: {all: true}
+      writers: {any: [{office: A2.factor}, {office: A2.owner}]}
+      delivery: push
+    - id: works
+      owner: A2
+      by: Cade
+      purpose: "Ashby's works floor: the round's quota and work orders (posted by the owner or the foreman)."
+      readers: {members: A2}
+      writers: {any: [{office: A2.owner}, {office: A2.foreman}]}
+      listed: false
+      members: [Moss, Vane, Cade, Orrin, Mira, Rook, Tuck]
+      delivery: push
+    - id: "@J0"
+      purpose: "petitions to the town council (councillors read them)"
+      readers: {office: J0.council}
+  laws:
+    - code: |
+        title = "Free Coinage"
+        intent = "The penny is convertible: anyone may deposit timber, stone or copper at the town's reserve for pennies at the reserve's price, or redeem pennies for them."
+        rank = "statute"
+
+        def on_enact():
+            set_convertible("penny")
+    - template: Payment Levy
+      params: {ITEM: penny, RATE: 0.03}
+    - template: Loan Registry
+    - template: Licence                   # two of the three forests are licensed to the 7 producers; the third is the common wood
+      params: {GATES: [harvest, hunt], TARGETS: [camp4, camp6], RIGHT: forester, REGISTRAR: J0.registrar,
+               HOLDERS: [Bryn, Fen, Ada, Lise, Pell, Wren, Ivo], TAG: licence}
+    - template: Relief Act                # a thin public floor: the starving only, out of the relief store
+      params: {STORE: S1, RATION: 1, BUDGET: 6, STAGES: [starving]}
+    - template: Market Board
+      params: {BOARD: market, TTL: 3}
+    - template: Court of Appeal           # the council is the appeal bench
+      params: {APPEAL_RIGHT: J0.council, BENCH: 3, WINDOW: 2, PANEL: 3}
+    - template: Bench Act                 # only the holder of J0.judge judges at first instance (the council appoints and removes)
+      params: {OFFICE: J0.judge, WITHDRAWAL: true}
+    - template: Recusal Act               # a judge may not rule where it is a party or took 5+ from a party in the last 5 rounds
+      params: {LOOKBACK: 5, GIFT_LIMIT: 5}
+    - template: Graded Contract Enforcement   # a breach the bond did not cover is heard by the Judge, damages up to 20
+      params: {ITEM: penny, DAMAGES_CAP: 20, DEFAULT: 2}
+    - template: Certified Contract Registry   # agreements outside the standing contracts bind once the Registrar certifies them
+      params: {CLERK: J0.registrar, DAMAGES_ITEM: penny, DAMAGES: 3, DAMAGES_CAP: 20, FEE: 0.5}
+    - code: |
+        title = "Bodyguards Act"
+        intent = "A guard (agreed or obliged) defends with its own body: its defence and its watch add to the defence of the agent it guards, and a guard on watch may strike the attacker back."
+        rank = "statute"
+
+        def on_enact():
+            force_rule("bodyguards", True)

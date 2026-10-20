@@ -1,0 +1,8 @@
+# The Private world with no private goals (goals.none): the same town of firms, institutions, offices, contracts, channels, cast
+# and models as regimes/private.yaml; no agent is given a goal, so what each does comes from its role cards, its contracts and its
+# own tendencies inside the institutions (the comparison arm for the goals tied to roles; docs/review/31_institutions/
+# 10_private_world.md §2).
+extends: [cybertron/specs/regimes/private.yaml]
+goals: {none: true}
+chronicle:
+  namespace: private_world_nogoal
