@@ -283,6 +283,17 @@ def test_every_role_card_instruction_names_an_action_its_holder_has(state_k):
                     assert plain in names, (iid, name, h, plain)
 
 
+def test_every_invoke_in_every_state_names_a_defined_action(state_k):
+    """The generated role cards and terms lines name invoked actions as the kernel defines them (a polity's are bare: the cards
+    used to say "J0.set_wage", which no invoke resolves)."""
+    import re
+    from cybertron import agents as AG
+    k = state_k
+    for a in k.players():
+        for x in re.findall(r'"action": "([\w.]+)"', AG.state_view(k, a)):
+            assert x in k.w["actions"], (a, x)
+
+
 def test_state_gates_refuse_ordinary_actions(state_k):
     """The press licence, the posted-draw rule and the square's moderation refuse an agent's own action (inject_action in a dry
     run cannot be refused: 11_state_world.md §8)."""

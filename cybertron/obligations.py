@@ -736,6 +736,14 @@ def _standing_laws(k, iid) -> list:
     return out
 
 
+def _act_name(k, iid, name) -> str:
+    """The name an action a contract defines is invoked by: an association's own actions are "<iid>.<name>" (contracts.scope_api),
+    a polity's (J0's Quota, Board, Payroll) are bare (11_state_world.md §8: the role cards named them "J0.<name>", which no
+    invoke resolves)."""
+    from cybertron import jurisdictions as J
+    return f"{iid}.{name}" if J.association(k, iid) is not None else str(name)
+
+
 def _office_decisions(k, aid, iid, law) -> list:
     from cybertron import institutions as IN
     c = consts(law)
@@ -753,7 +761,7 @@ def _office_decisions(k, aid, iid, law) -> list:
         if name:
             args = ACTION_ARGS[verb].format(term=term.get(verb, "value"))
             what = ACTION_WHAT[verb].format(term=term.get(verb, "value"))
-            out.append(f"{what} ({label}): invoke {{\"action\": \"{iid}.{name}\", \"args\": {args}}}")
+            out.append(f"{what} ({label}): invoke {{\"action\": \"{_act_name(k, iid, name)}\", \"args\": {args}}}")
     return out
 
 
@@ -1157,7 +1165,7 @@ def role_lines(k, aid) -> list:
         if d:
             dec.append(f"meet it: fulfil {{\"contract\": \"{iid}\"}}")
         if c.get("NOTICE", 0) or c.get("PARTIES"):
-            dec.append(f"give notice: invoke {{\"action\": \"{iid}.{c.get('TAG', 'sc')}_notice\"}}")
+            dec.append(f"give notice: invoke {{\"action\": \"{_act_name(k, iid, str(c.get('TAG', 'sc')) + '_notice')}\"}}")
         dec.append(f"raise terms with the office: send {{\"to\": \"{iid}\", \"text\": \"...\"}}")
         if J.association(k, iid) is not None:
             dec.append(f"leave: leave_contract {{\"contract\": \"{iid}\"}}")
