@@ -1420,11 +1420,10 @@ def autocracy_full() -> dict:
     """absolute_autocracy plus the controls the doc's 'autocracy' anchor presumes (§2.4 calibration worlds): Moderation, the press
     right withdrawn from Media, and surveil for the Ruler. A sensitivity anchor, not one of the §2.7 presets."""
     from cybertron import regimes as RG
-    reg = dict(RG.REGIMES["absolute_autocracy"])
-    reg["statutes"] = list(reg["statutes"]) + ["Moderation"]
-    reg["rights"] = [{"who": "legislator", "revoke": ["vote"]}, {"who": "media", "revoke": ["press"]},
-                     {"office": "Ruler", "from": ["legislator", "citizens"], "n": 1, "grant": ["decree", "propose", "surveil"]}]
-    return reg
+    base = RG.REGIMES["absolute_autocracy"]
+    return dict(base, statutes=list(base["statutes"]) + ["Moderation"],    # a regime definition (data), not a kernel write
+                rights=[{"who": "legislator", "revoke": ["vote"]}, {"who": "media", "revoke": ["press"]},
+                        {"office": "Ruler", "from": ["legislator", "citizens"], "n": 1, "grant": ["decree", "propose", "surveil"]}])
 
 
 ANCHORS = ("direct_democracy", "representative_democracy")                     # reported beside the §2.7 presets
