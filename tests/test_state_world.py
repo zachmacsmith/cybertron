@@ -210,3 +210,92 @@ def test_archives_act_seals_sets_history_readers_and_audits(tmp_path):
     assert "Ada objected" in act(k, "Di", "dir_history", dir="minutes", path="r1.md")
     with pytest.raises(ActionError):
         invoke(k, "Fay", "audit_record", "r1.md")
+
+
+# ---------------------------------------------------------------------- engine finding: sell_to_window at P = 0
+def test_sell_to_window_fails_cleanly_when_the_coin_is_worth_nothing():
+    import test_courts_records as CR
+    from cybertron import accounts as AC
+    k = CR.make()
+    CR.enact_code(k, 'title = "Coin"\nintent = "crown, convertible"\ndef on_enact():\n    create_currency("crown")\n'
+                     '    set_convertible("crown")\n    mint("crown", 10, "Ada")\n')
+    firm = CR.found(k, "Ada", 'title = "Co"\nintent = "t"\n')
+    k._add("Ada", "copper", 3)
+    act(k, "Ada", "transfer", to=firm, item="copper", qty=3)
+    for i, v in list(AC.holdings(k, "reserve").items()):          # an empty reserve: the crown is worth nothing (P = 0)
+        if i != "crown" and v:
+            k.w["reserve"][i] = 0
+    assert k.price("crown") == 0
+    lid = AC.assocs(k)[firm]["laws"][0] if hasattr(AC, "assocs") else k.w["contracts"]["assoc"][firm]["laws"][0]
+    assert k.api_for(lid)["sell_to_window"]("crown", "copper", 3) == 0      # was a ZeroDivisionError
+    assert AC.holdings(k, AC.treasury_of(k, firm))["copper"] == 3
+
+
+# ---------------------------------------------------------------------- 2.15 the State world spec (regimes/state.yaml)
+STATE = "cybertron/specs/regimes/state.yaml"
+
+
+@pytest.fixture(scope="module")
+def state_k(tmp_path_factory):
+    sp = S.load(STATE)
+    return T.setup(tmp_path_factory.mktemp("state"), sp)
+
+
+def test_state_spec_validates_and_its_nogoal_arm_differs_only_in_goals():
+    from cybertron import schema as SC
+    a, b = S.load(STATE), S.load("cybertron/specs/regimes/state_nogoal.yaml")
+    assert SC.validate(a) == [] and SC.validate(b) == []
+    assert b["goals"].get("none") is True
+    assert {x: v for x, v in a.items() if x not in ("goals", "chronicle")} == {x: v for x, v in b.items() if x not in ("goals", "chronicle")}
+
+
+def test_state_world_starts_with_no_inert_law_and_every_institution(state_k):
+    k = state_k
+    effects = [e["data"] for e in k.events if e["type"] == "law_effect"]
+    assert effects and not [d["title"] for d in effects if d.get("inert")]
+    assert not [e for e in k.events if e["type"] in ("contract_law_error", "law_call_failed")]
+    acts = set(k.w["actions"])
+    assert {"issue", "set_wage", "set_quota", "board_price", "request_arms", "issue_arms", "issue_warrant", "serve_warrant",
+            "countersign", "certify_bill", "refuse_bill", "certify_entry", "refuse_entry", "file_entry", "audit_record",
+            "forest_issue", "press_revoke", "petition_recall", "A1.sell_copper", "A1.set_sale", "A1.set_wage"} <= acts
+    assert k.w["dirs"]["minutes"]["history_readers"] == "office:J0.president"
+
+
+def test_every_role_card_instruction_names_an_action_its_holder_has(state_k):
+    """The duties of every office (the role cards) name actions with their syntax: each invoked action exists and is guarded by
+    the office's right, and each plain action is one the holder can use."""
+    import re
+    from cybertron import action_registry as AR
+    k = state_k
+    for iid, offices in k.w["offices"].items() if isinstance(k.w["offices"], dict) else []:
+        for name, o in (offices or {}).items():
+            duties = str(o.get("duties") or "")
+            holders = [h["holder"] if isinstance(h, dict) else h for h in (o.get("holders") or [])]
+            for x in re.findall(r'\\"action\\": \\"([\w.]+)\\"|"action": "([\w.]+)"', duties):
+                a = next(y for y in x if y)
+                assert a in k.w["actions"], (iid, name, a)
+                right = k.w["actions"][a]["right"] if isinstance(k.w["actions"][a], dict) else None
+                if right and holders:
+                    assert all(k.has(h, right) for h in holders), (iid, name, a, right)
+            for plain in re.findall(r"\(([a-z_]+) \{", duties):
+                for h in holders:
+                    names = {x.name for x in AR.available(k.inst, k, k.w["agents"][h])}
+                    assert plain in names, (iid, name, h, plain)
+
+
+def test_state_gates_refuse_ordinary_actions(state_k):
+    """The press licence, the posted-draw rule and the square's moderation refuse an agent's own action (inject_action in a dry
+    run cannot be refused: 11_state_world.md §8)."""
+    import copy
+    k = state_k
+    k.w = copy.deepcopy(k.w)
+    invoke(k, "Ivy", "press_revoke", "Vera", "for the test")
+    with pytest.raises(ActionError, match="Press licence"):
+        act(k, "Vera", "post", channel="tribune", text="still here")
+    with pytest.raises(ActionError, match="DRAW"):
+        act(k, "Rhea", "withdraw", store="S1", qty=2)
+    act(k, "Rhea", "post", channel="ministry", text="DRAW 2")
+    assert "Took 2" in act(k, "Rhea", "withdraw", store="S1", qty=2)
+    with pytest.raises(ActionError, match="moderated"):
+        act(k, "Bea", "post", channel="square", text="The council is corrupt.")
+    assert "Wiretap on Bea" in act(k, "Dorran", "wiretap", agent="Bea")

@@ -1,0 +1,9 @@
+# Dry-run schedule for regimes/state.yaml (docs/review/31_institutions/11_state_world.md §5.4, the blight-sensitivity check): at the
+# blight (round 11) the Food Commissioner rations by price: the Ration Shop's price goes from 1 to 4 pennies (one decision, with the
+# card's syntax). Subscribers who cannot pay get only what they pay for; Relief (12 a round, the hungry and the starving) is the floor.
+# Compare deaths and missed meals with the same seed without the schedule.
+#   python -m cybertron run cybertron/specs/regimes/state.yaml --seed 1 --dry --fresh --sandbox off --set conflict.grace=99 \
+#       --apply cybertron/specs/regimes/dry/state_price.yaml
+interventions:
+  - {id: price_r11, at: {round: 10, phase: round_start}, op: inject_action,
+     args: {agent: Corin, action: invoke, args: {action: board_price, args: [all, 4]}}, note: the Commissioner rations by price}

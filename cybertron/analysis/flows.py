@@ -79,13 +79,14 @@ def _books(run: Path) -> dict:
         laws = {}
         for lid, law in (w.get("laws") or {}).items():
             st = law.get("state") or {}
-            if law.get("status") != "active" or "book" not in st and "dues" not in st:
+            if law.get("status") != "active" or "book" not in st and "dues" not in st and "moved" not in st:
                 continue
             code = law.get("code") or ""
             m = re.search(r"^LABEL = (['\"])(.*?)\1", code, re.M)
             duty = set(re.findall(r"'id': '(\w+)', 'kind': 'duty'", code))
             laws[lid] = {"title": law.get("title"), "label": (m.group(2) if m and m.group(2) else law.get("title")),
-                         "inst": law.get("jurisdiction") or _inst_of(w, lid), "book": st.get("book") or {}, "duty": duty}
+                         "inst": law.get("jurisdiction") or _inst_of(w, lid), "book": st.get("book") or {}, "duty": duty,
+                         "moved": st.get("moved") if "book" not in st else None}   # automatic legs (11_state_world.md): no book
         out[int(row["round"])] = laws
     return out
 
@@ -240,6 +241,10 @@ def analyse(run: Path, licensed=None) -> dict:
             met, missed = _delta(move_prev, move_cur)
             dm, dmiss = _delta({k: {g: v for g, v in legs.items() if g in duty} for k, legs in pb.items()},
                                {k: {g: v for g, v in legs.items() if g in duty} for k, legs in law["book"].items()})
+            if law.get("moved") is not None:                            # automatic legs: this round's moves, a leg with nothing moved
+                legs = [x for per in law["moved"].values() for x in per.values() if isinstance(x, (list, tuple)) and len(x) >= 2]
+                met = sum(1 for x in legs if float(x[1] or 0) > 1e-9)  # is short (could not: the obligor held too little)
+                missed = len(legs) - met
             if met or missed or dm or dmiss:
                 roles[f"{law['inst']} {law['label']} ({lid})"] = {"met": met, "missed": missed, **({"duty_met": dm, "duty_missed": dmiss}
                                                                                                     if duty else {})}

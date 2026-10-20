@@ -63,6 +63,9 @@ def sell(k, lid, currency, item, qty) -> float:
         if backing > 1e-9:
             k.apply("mint", currency=cur, qty=backing, to=rk, via="treasury")
             k.log("treasury_coins", None, {"currency": cur, "coins": backing}, vis="public")
+    if k.price(cur) <= 1e-12:                                          # nothing backs the coin (a reserve without goods): no price
+        return _fail(k, lid, f"sell_to_window: {cur} is worth nothing (its reserve holds no goods), so the window cannot price "
+                     f"{item}", args)                                   # (was a ZeroDivisionError that killed the calling law)
     coins = q * k.unit_value(item) / k.price(cur)
     if not k.move(src, rk, item, q, why=f"law:{lid}", by=None):
         return _fail(k, lid, f"sell_to_window: the move of {q:g} {item} to the reserve was refused", args)
