@@ -54,7 +54,7 @@ LOG_FORMAT = 1
 # run plays under, cybertron/settings.py) record it. ENGINE_FLIPS[v]: the commits that made version v (the first decides, by git
 # ancestry, whether a run's recorded sha has it: settings.infer_version) and the default flips, (settings target, key path, old,
 # new); settings.use sets a flip back to `old` for a run of an earlier version whose frozen snapshot lacks the key.
-ENGINE_VERSION = 18
+ENGINE_VERSION = 19
 ENGINE_FLIPS = {
     2: {"commits": ["38070e15cf97e171258cd0dbdb7ddfd710ed30ab"],
         "flips": [("cybertron.channels.DEFAULTS", ("delivery",), "pull", "push")],
@@ -140,6 +140,11 @@ ENGINE_FLIPS = {
          "flips": [("cybertron.context.DEFAULTS", ("world_name",), "Charter", "")],
          "note": "the package is renamed charter -> cybertron; the prompts no longer name the world (the overview's first line was "
                  "\"Charter: N agents, R rounds.\"; the frozen legacy prompt (context off, D-4) keeps its text)"},
+    19: {"commits": [],
+         "flips": [("cybertron.contracts.DEFAULTS", ("miss_judged",), "round_end", "turn")],
+         "note": "a missed manual contract leg is judged on what the payer held at the end of its turns this round (could-not "
+                 "unless it held what was late, above its keep, when it could act; simultaneous turns discount what others gave it "
+                 "after the decisions); the miss record carries held, held_turn and held_end (docs/review/31_institutions/10 §8 #3)"},
 }
 
 

@@ -36,7 +36,8 @@ What the engine does by itself is the accountability layer, here:
 
 The scripted bots perform their obligations (contracts.bot_obligations perform), or neglect them (neglect: a collapse test).
 
-All of it is off by default (engine 18 unchanged: no default flips): a spec turns it on with contracts {legs_default: manual,
+Engine 19 (contracts.miss_judged turn): a miss is judged on what the payer held at the end of its turns this round, not at the
+round's end (holdings at turns, below). The rest is off by default: a spec turns it on with contracts {legs_default: manual,
 obligations: true, role_cards: true}, actions.forgiving and institutions.petition_public_after (cybertron/specs/usability/v2/*).
 """
 from __future__ import annotations
@@ -312,22 +313,91 @@ def open_for(k, aid) -> list:
     return out
 
 
+# ---------------------------------------------------------------------- holdings at the payer's turns (engine 19)
+# A manual leg is met by acting, so a miss is judged on what the payer held when it could act: at the end of each of its turns
+# this round (contracts.miss_judged turn). Holdings change after a turn by harvests and production resolved at the round's end
+# (camps.end_of_round runs before the laws' on_round_end), by other agents' transfers on later turns, and by laws' hooks; none of
+# that could have been delivered. Under simultaneous turns every agent decided from the view before the first action ran, so what
+# others gave it between then and the end of its turn is taken off too (its own actions in the turn, a harvest, count). k.w
+# "turn_held" = {"round": r, "simultaneous": bool, "start": {aid: holdings}, "begin": {aid: holdings}, "agents": {aid: {"turns":
+# [position], "held": {item: max}, "at": {item: position}}}}; written only with the setting on and contracts present.
+def at_turn(k) -> bool:
+    return "contracts" in k.w and cfg(k).get("miss_judged") == "turn"
+
+
+def turns_begin(k, simultaneous: bool) -> None:
+    """The round's turns start (runner, before any decision): a fresh record; the decision view for simultaneous turns."""
+    if not at_turn(k):
+        return
+    start = {aid: dict(a["holdings"]) for aid, a in sorted(k.w["agents"].items())} if simultaneous else {}
+    k.w["turn_held"] = {"round": k.r, "simultaneous": bool(simultaneous), "start": start, "begin": {}, "agents": {}}
+
+
+def _record(k):
+    th = k.w.get("turn_held")
+    return th if at_turn(k) and th and th.get("round") == k.r else None
+
+
+def turn_begin(k, aid) -> None:
+    th = _record(k)
+    a = k.w["agents"].get(aid)
+    if th is not None and a is not None:
+        th["begin"][aid] = dict(a["holdings"])
+
+
+def turn_end(k, aid, pos) -> None:
+    """After aid's turn: the most it held of each item at the end of a turn this round (less, under simultaneous turns, what
+    others gave it since the decisions), and the turn (round position) it held that at."""
+    th = _record(k)
+    a = k.w["agents"].get(aid)
+    if th is None or a is None:
+        return
+    end = a["holdings"]
+    rec = th["agents"].setdefault(aid, {"turns": [], "held": {}, "at": {}})
+    rec["turns"].append(pos)
+    b, s = th["begin"].pop(aid, {}), th["start"].get(aid)
+    for item in sorted(set(end) | set(rec["held"])):
+        q = float(end.get(item, 0.0))
+        if s is not None:                                              # simultaneous: others' gifts before its turn ran
+            q -= max(0.0, float(b.get(item, 0.0)) - float(s.get(item, 0.0)))
+        q = round(max(0.0, q), 6)
+        if item not in rec["held"] or q > rec["held"][item] + EPS:
+            rec["held"][item], rec["at"][item] = q, pos
+
+
+def held_at_turn(k, aid, item):
+    """(most held at the end of a turn this round, its position or None) for an agent, or None when not judged at turns (setting
+    off, or no turns were played this round: a law driven without the runner)."""
+    th = _record(k)
+    if th is None:
+        return None
+    rec = th["agents"].get(aid) or {}
+    return float((rec.get("held") or {}).get(item, 0.0)), (rec.get("at") or {}).get(item, (rec.get("turns") or [None])[-1])
+
+
 # ---------------------------------------------------------------------- round end
 def settle(k) -> None:
-    """Before the laws' on_round_end: each manual law's state["paid"] = what this round's payments credited, per binding and leg."""
+    """Before the laws' on_round_end: each manual law's state["paid"] = what this round's payments credited, per binding and leg;
+    with contracts.miss_judged turn, also state["turn_held"] = what each agent payer held at its turns ({key: {leg: {held, turn}}})."""
     if "contracts" not in k.w:
         return
     obs = obligations(k)
     if not obs:
         return
     led = ledger(k, obs)
-    paid = {}
+    paid, held = {}, {}
+    judged = _record(k) is not None
     for ob in obs:
         q = led[ob["id"]][1]
         if q > EPS:
             paid.setdefault(ob["lid"], {}).setdefault(ob["key"], {})[ob["leg"]] = round(q, 6)
+        h = held_at_turn(k, ob["src"], ob["item"]) if judged and ob["kind"] != "duty" and ob["src"] in k.w["agents"] else None
+        if h is not None:
+            held.setdefault(ob["lid"], {}).setdefault(ob["key"], {})[ob["leg"]] = {"held": round(h[0], 6), "turn": h[1]}
     for law in laws(k):
         law["state"]["paid"] = paid.get(law["id"], {})
+        if judged:
+            law["state"]["turn_held"] = held.get(law["id"], {})
 
 
 def _escalation(c, rec, src_agent, polity) -> str:
@@ -342,15 +412,16 @@ def _escalation(c, rec, src_agent, polity) -> str:
         return f"That is a breach: penalty {what}{tail}."
     if not src_agent:
         return "It stays owed (arrears) until paid."
+    turn = "held_turn" in rec                                           # engine 19: judged on what it held at its turns
     if rec.get("why") == "could":
-        return "You lacked it (a could-not miss): no penalty, but it stays overdue."
+        return ("You lacked it at your turn" if turn else "You lacked it") + " (a could-not miss): no penalty, but it stays overdue."
     if polity:
         return "It stays overdue" + (" and you are fined" if c.get("FINE") else "") + "."
     if rec.get("misses"):
         n = grace + 1 - int(rec["misses"])
         pen = c.get("PENALTY") or {}
         what = f"a penalty of {_fmt(pen['qty'])} {pen['item']} from your bond" if pen.get("item") and pen.get("qty") else "a breach"
-        head = "" if rec.get("duty") else "You held it and did not act: "
+        head = "" if rec.get("duty") else ("You held it at your turn and did not act: " if turn else "You held it and did not act: ")
         return f"{head}{what[0].upper() if not head else what[0]}{what[1:]} after {n} more miss{'es' if n != 1 else ''} like this."
     return "It stays overdue."
 

@@ -125,7 +125,7 @@ def test_escalation_by_the_contracts_terms_penalty_after_grace(tmp_path):
     inst, out = run(tmp_path, sp, Script())
     evs = events(out)
     note = {e["round"]: e["data"]["text"] for e in evs if e["type"] == "notify" and e["data"]["to"] == "Bo" and "Supply" in e["data"]["text"]}
-    assert "You held it and did not act: a penalty of 2 penny from your bond after 1 more miss" in note[0]
+    assert "You held it at your turn and did not act: a penalty of 2 penny from your bond after 1 more miss" in note[0]
     assert "That is a breach: penalty 2 penny from your bond" in note[1]
     assert [e for e in evs if e["type"] == "contract_breach" and e["round"] == 1]
 
@@ -205,3 +205,77 @@ def test_a_manual_duty_leg_is_recorded_and_its_miss_told(tmp_path):
     k = kernel_at(out, 2)
     law = next(l for l in k.w["laws"].values() if l["status"] == "active" and "G" in json.dumps((l.get("state") or {}).get("book", {})))
     assert [v["G"] for v in law["state"]["book"].values()] == [[1, 1]]                # kept once, missed once
+
+
+# ---------------------------------------------------------------------- engine 19: misses judged at the payer's turn
+def _supply(rounds, holdings, **contracts):
+    sp = manual(base(rounds=rounds, contracts=[{"template": "Supply Contract", "in": "A1", "roster": {"Bo": {"qty": 2}},
+                                                "params": {"OFFICE": "head", "TERMS": {"store": "store:S2", "price": 1, "keep": 1}},
+                                                "escrow": {"Bo": {"penny": 5}}}],
+                     holdings=holdings), **contracts)
+    return S.deep_merge(sp, {"subsistence": {"start_food": [0, 0]}, "turns": "sequential"})
+
+
+class GiveAfterBo:
+    """Every agent whose turn comes after Bo's in round 0 gives Bo 5 food (simultaneous: everyone but Bo gives, decided before
+    any action ran)."""
+
+    def __init__(self, simultaneous=False):
+        self.simultaneous, self.after_bo = simultaneous, False
+
+    def act(self, k, a, system, user, n_actions, final):
+        acts = []
+        if a["id"] == "Bo":                                               # sequential: Bo decides, then its turn runs
+            self.after_bo = True
+        elif k.r == 0 and DM_PHASE not in user and (self.simultaneous or self.after_bo) \
+                and k.w["agents"][a["id"]]["holdings"].get("food", 0) >= 5:
+            acts = [{"action": "transfer", "args_json": json.dumps({"to": "Bo", "item": "food", "qty": 5})}]
+        return ({"reasoning": "", "actions": acts, "notes": "", "goal_guesses_json": "{}"}, "", {})
+
+
+FED = {"Bo": {"penny": 20}, "Di": {"penny": 20, "food": 20}, "Fay": {"penny": 10, "food": 20}, "Cy": {"food": 20},
+       "Ed": {"food": 20}, "Ada": {"food": 20}}
+
+
+def test_food_received_after_the_turn_is_a_could_not_miss(tmp_path):
+    """Bo holds nothing at its turn; agents later in the round give it food. Under engine 18 (miss_judged round_end) the end-of-round
+    holdings made that a would-not miss; now it is could-not, and the record says what Bo held at its turn and at the end."""
+    inst, out = run(tmp_path / "turn", _supply(1, FED), GiveAfterBo())
+    k = kernel_at(out, 1)
+    rec = law_of(k, "A1", "Supply Contract")["state"]["last"]["Bo"]["D"]
+    order = next(e["data"]["order"] for e in events(out) if e["type"] == "round_start")
+    assert order[-1] != "Bo"                                                  # someone gave after Bo's turn
+    assert rec["why"] == "could" and rec["held"] == 0 and rec["held_end"] >= 5 and rec["held_turn"] == order.index("Bo") + 1
+    assert not [e for e in events(out) if e["type"] == "contract_breach"]
+    notes = [e["data"]["text"] for e in events(out) if e["type"] == "notify" and e["data"]["to"] == "Bo" and "Supply" in e["data"]["text"]]
+    assert any("You lacked it at your turn (a could-not miss)" in t for t in notes)
+    # the old judgement, kept for runs of engine <= 18 (their frozen settings lack the key: settings.use sets it back)
+    inst, out = run(tmp_path / "end", _supply(1, FED, miss_judged="round_end"), GiveAfterBo())
+    rec = law_of(kernel_at(out, 1), "A1", "Supply Contract")["state"]["last"]["Bo"]["D"]
+    assert rec["why"] == "would" and "held" not in rec
+
+
+def test_simultaneous_turns_do_not_count_what_others_gave_after_the_decisions(tmp_path):
+    sp = S.deep_merge(_supply(1, FED), {"turns": "simultaneous"})
+    inst, out = run(tmp_path, sp, GiveAfterBo(simultaneous=True))
+    rec = law_of(kernel_at(out, 1), "A1", "Supply Contract")["state"]["last"]["Bo"]["D"]
+    assert rec["why"] == "could" and rec["held"] == 0 and rec["held_end"] >= 10
+
+
+def test_held_at_the_end_of_its_turn_and_did_not_deliver_is_would_not(tmp_path):
+    inst, out = run(tmp_path, _supply(1, {**FED, "Bo": {"penny": 20, "food": 30}}), Script())
+    rec = law_of(kernel_at(out, 1), "A1", "Supply Contract")["state"]["last"]["Bo"]["D"]
+    assert rec["why"] == "would" and rec["held"] == 30 and rec["misses"] == 1
+    notes = [e["data"]["text"] for e in events(out) if e["type"] == "notify" and e["data"]["to"] == "Bo" and "Supply" in e["data"]["text"]]
+    assert any("You held it at your turn and did not act" in t for t in notes)
+
+
+def test_miss_judged_flip_is_engine_19():
+    from cybertron import contracts as KC
+    from cybertron import provenance as PV
+    assert KC.DEFAULTS["miss_judged"] == "turn"
+    assert ("cybertron.contracts.DEFAULTS", ("miss_judged",), "round_end", "turn") in PV.ENGINE_FLIPS[19]["flips"]
+    from cybertron import settings as ST
+    with ST.use({"engine_version": 18, "defaults": {}}):                # an engine-18 run replays with end-of-round judgement
+        assert KC.DEFAULTS["miss_judged"] == "round_end"
+    assert KC.DEFAULTS["miss_judged"] == "turn"

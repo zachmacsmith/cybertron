@@ -136,6 +136,10 @@ DEFAULTS = {
     "obligations": False,       # the fulfil action exists (pay what a manual leg asks in one action); false: it is unknown
     "role_cards": False,        # each agent's state carries its role cards (offices and contract positions: numbers, decisions)
     "bot_obligations": "perform",   # dry runs: the scripted bots fulfil their manual obligations when able | neglect (a collapse test)
+    "miss_judged": "turn",      # engine 19: a missed manual leg is a would-not miss (grace, then breach) only if the payer held what
+                                # was late, above its keep, at the end of one of its turns this round (simultaneous turns: less what
+                                # others gave it after the round's decisions); otherwise could-not | round_end (engine <= 18: judged
+                                # on its holdings at the end of the round, after harvests and transfers it could not have used)
 }
 PROCEDURES = ("members", "two_thirds", "founder")
 ENFORCEMENT = ("escrow", "escrow_court", "word")

@@ -143,7 +143,8 @@ def test_infer_version_from_git_history():
     assert ST.infer_version("0" * 40) is None
 
 
-CON17 = {"pay_institutions": False, "applicant_lines": False}                # engine 17: economic plumbing
+CON17 = {"pay_institutions": False, "applicant_lines": False,               # engine 17: economic plumbing
+         "miss_judged": "round_end"}                                            # engine 19: misses judged at the turn
 EXTRA15 = {"law.effects": False, "law.call_failures": False, "law.expects": False,    # engine 15: laws that fail loudly
            "institutions.amend_offices": False}
 SUB14 = {"game": {"hunt_mode": "shared"}, "forest": {"clearing": 5},                     # engine 14: farming, the individual hunt
@@ -176,8 +177,8 @@ def test_old_run_resumes_under_the_defaults_of_its_git_sha(tmp_path, monkeypatch
         for key in EXTRA15:                                               # and engine 15's
             m.setitem(__import__("cybertron.schema").schema.EXTRA, key, False)
         m.setitem(__import__("cybertron.channels").channels.DEFAULTS, "business", False)   # and engine 16's
-        for key in CON17:                                                 # and engine 17's
-            m.setitem(__import__("cybertron.contracts").contracts.DEFAULTS, key, False)
+        for key, v in CON17.items():                                      # and engine 17's and 19's
+            m.setitem(__import__("cybertron.contracts").contracts.DEFAULTS, key, v)
         m.setitem(CX.DEFAULTS, "world_name", "Charter")                    # and engine 18's
         old_ref = runner.run(_inst(), AG.ScriptedPolicy(1), tmp_path / "old_ref", **QUIET)
         old = runner.run(_inst(), AG.ScriptedPolicy(1), tmp_path / "old", until=1, **QUIET)

@@ -22,7 +22,9 @@ delivery, a stockout charges nothing); a payment the recipient of that leg owes 
 principal's shortfall is recorded as owed (arrears, paid first in later rounds) instead of a miss. `harvest`: qty is the share of
 the member's harvests deducted into the treasury (a law's on_harvest deduction). `duty`: performed when `check` holds this round
 ("guard": the performer guards the payee; "act:<event type>": the performer has such an event this round).
-Misses: a payer whose holdings (less its keep) fall short could not pay: a miss, never a breach. A payer who held enough but whose
+Misses: a payer whose holdings (less its keep) fall short could not pay: a miss, never a breach. A manual leg's payer is judged on
+what it held at the end of its turns this round (contracts.miss_judged turn, engine 19; the miss record carries held, held_turn and
+held_end), an auto leg's on its holdings when the leg runs, at the round's end. A payer who held enough but whose
 allowance was short would not: after GRACE such misses in a row, a breach: PENALTY from its bond (escrow) to the injured party
 (FORUM escrow), a claim for the arbiter (arbiter:<agent>, who awards from the bond), or, under court, the bond pays what it covers
 and the rest is a breach record naming the victim (actionable in a polity's courts under escrow_court).
@@ -458,20 +460,30 @@ def run_manual(p, b, key, r, done, alive):
         return
     book[1] = book[1] + 1
     why = "would"
-    if src in alive:
+    th = state.get("turn_held", {}).get(key, {}).get(lid)
+    if src in alive and th != None:
+        rec["held"] = th["held"]
+        rec["held_turn"] = th["turn"]
+        rec["held_end"] = round_to(balance(src, item), 6)
+        if th["held"] - num(b.get(p["keep"], p["keep"])) < late - 0.000001:
+            why = "could"
+    elif src in alive:
         if balance(src, item) - num(b.get(p["keep"], p["keep"])) < late - 0.000001:
             why = "could"
     elif balance(src, item) < late - 0.000001:
         why = "could"
     rec["why"] = why
+    at = ""
+    if src in alive and th != None:
+        at = " at its turn"
     if not (src in alive):
         note(key, lid + " unpaid " + fmt(late) + " " + item + " (" + why + ")")
     elif why == "could":
         cnt = state.setdefault("could", {}).setdefault(key, {})
         cnt[lid] = cnt.get(lid, 0) + 1
-        note(key, lid + " missed: " + src + " could not (short of " + item + ")")
+        note(key, lid + " missed: " + src + " could not (short of " + item + at + ")")
     elif is_polity():
-        note(key, lid + " missed: " + src + " held it and did not deliver")
+        note(key, lid + " missed: " + src + " held it" + at + " and did not deliver")
         if FINE > 0:
             got = fine(src, item if FINE_ITEM == "" else FINE_ITEM, FINE * late)
             note(key, "fined " + fmt(got))
@@ -479,7 +491,7 @@ def run_manual(p, b, key, r, done, alive):
         miss = state.setdefault("missed", {}).setdefault(key, {})
         miss[lid] = miss.get(lid, 0) + 1
         rec["misses"] = miss[lid]
-        note(key, lid + " missed: " + src + " would not " + str(miss[lid]) + " of grace " + str(GRACE))
+        note(key, lid + " missed: " + src + " would not" + (" (held " + fmt(th["held"]) + at + ")" if at != "" else "") + " " + str(miss[lid]) + " of grace " + str(GRACE))
         if miss[lid] > GRACE:
             miss[lid] = 0
             rec["breached"] = True
@@ -584,6 +596,8 @@ def on_round_end(r):
             run_leg(p, pair[1], pair[0], r, done, alive)
     if any_manual():
         state["paid"] = {}
+        if "turn_held" in state:
+            state["turn_held"] = {}
     for key, end in sorted(state.get("notice", {}).items()):
         if end <= r:
             if key == "*":
