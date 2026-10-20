@@ -152,7 +152,13 @@ def hub(monkeypatch):
     monkeypatch.setattr(P, "_api", lambda: api)
     monkeypatch.setattr(P, "remote_catalog", lambda repo, revision=None: [])
     monkeypatch.setattr(P, "remote_changelog", lambda repo: P.changelog_entries(OLD_LOG))
+    monkeypatch.setattr(P, "code_info", lambda: dict(CODE))
+    api.git = []
+    monkeypatch.setattr(P, "_git_run", lambda *args: (api.git.append(args), (0, ""))[1])   # no tag or push in tests
     return api
+
+
+CODE = {"sha": "0123456789abcdef0123456789abcdef01234567", "branch": "wp", "dirty": False, "export_schema": "2.7", "engine_version": 10}
 
 
 def test_release_prepends_changelog_and_tags_upload_commit(run, tmp_path, hub):
@@ -351,3 +357,69 @@ def test_what_each_call_saw_unknown_dm_step_falls_back_to_the_whole_prompt(tmp_p
             {"round": 0, "agent": "Bo", "phase": "dm_reply_1"}]                                       # no prompt recorded: skipped
     out = _saw(tmp_path, rows, [_dm("e1", 0, "Bo", "Ann"), _dm("e2", 0, "Bo", "Ann")])
     assert out[(0, "Ann", "dm_reply_1")] == {"saw": ["e2"]} and out[(0, "Bo", "dm_reply_1")] == {}
+
+
+# ------------------------------------------------------------------ releases name their code (changelog entry + dataset-vX.Y tag)
+def test_release_records_the_code_and_tags_it(run, tmp_path, hub):
+    s = P.publish([run], repo="me/data", staging=tmp_path / "st", push=True, release="v1.1", notes="adds pub1", **QUIET)
+    log = hub.uploaded["CHANGELOG.md"]
+    assert f"- Code: [`{CODE['sha'][:12]}`](https://github.com/zachmacsmith/cybertron/commit/{CODE['sha']})" in log
+    assert "code tag `dataset-v1.1`" in log and "export schema 2.7; engine version 10" in log and "dirty" not in log
+    tag, push = hub.git
+    assert tag[:3] == ("tag", "-a", "dataset-v1.1") and tag[-1] == CODE["sha"]
+    assert "adds pub1" in tag[4] and "https://hf.co/c/abc123" in tag[4]                       # notes + the Hub commit
+    assert push == ("push", "origin", "dataset-v1.1") and s["code_tag"]["pushed"]
+
+
+def test_release_refused_from_a_dirty_tree_unless_allowed(run, tmp_path, hub, monkeypatch):
+    monkeypatch.setattr(P, "code_info", lambda: {**CODE, "dirty": True})
+    with pytest.raises(SystemExit, match="uncommitted"):
+        P.publish([run], repo="me/data", staging=tmp_path / "st", push=True, release="v1.1", **QUIET)
+    assert hub.calls == [] and not (tmp_path / "st").exists()
+    P.publish([run], repo="me/data", staging=tmp_path / "st2", push=True, release="v1.1", allow_dirty=True, **QUIET)
+    assert ", dirty: true;" in hub.uploaded["CHANGELOG.md"]
+
+
+def test_a_failed_code_tag_push_warns_and_never_fails_the_release(run, tmp_path, hub, monkeypatch):
+    monkeypatch.setattr(P, "_git_run", lambda *args: (1, "denied") if args[0] == "push" else (0, ""))
+    logs = []
+    s = P.publish([run], repo="me/data", staging=tmp_path / "st", push=True, release="v1.1", log=logs.append)
+    assert s["tag"] == "v1.1" and s["code_tag"]["created"] and not s["code_tag"]["pushed"]
+    assert any("WARNING" in m and "push origin dataset-v1.1" in m for m in logs)
+
+
+# ------------------------------------------------------------------ the raw archive: no account data, no links
+def test_raw_archive_leaves_out_cli_sessions_abandoned_calls_and_symlinks(run, tmp_path):
+    import shutil
+    d = tmp_path / "E0" / "pub1"
+    shutil.copytree(run, d)
+    (d / "abandoned_calls.jsonl").write_text('{"call": "r1:Ann:0", "abandoned": true}\n')
+    cs = d / "claude_sessions" / "projects" / "slug"
+    cs.mkdir(parents=True)
+    (d / "claude_sessions" / ".claude.json").write_text('{"oauthAccount": {"emailAddress": "someone@example.com"}}')
+    (cs / "s1.jsonl").write_text('{"text": "hi"}\n')
+    (d / "link.json").symlink_to(d / "instance.json")
+    out = tmp_path / "st" / "raw" / "E0" / "pub1.tar.gz"
+    P.raw_archive(d, out, "E0")
+    with tarfile.open(out) as tf:
+        names = set(tf.getnames())
+    assert "E0/pub1/instance.json" in names and "E0/pub1/calls.jsonl" in names
+    assert not {n for n in names if "claude_sessions" in n or "abandoned_calls" in n or n.endswith("link.json")}
+    assert P.check_staging(tmp_path / "st") == []
+
+
+def test_staging_guard_flags_cli_sessions_and_links(tmp_path):
+    import io
+    out = tmp_path / "raw" / "E0" / "r.tar.gz"
+    out.parent.mkdir(parents=True)
+    with tarfile.open(out, "w:gz") as tf:
+        data = b"{}"
+        info = tarfile.TarInfo("E0/r/claude_sessions/transcripts/a.jsonl")
+        info.size = len(data)
+        tf.addfile(info, io.BytesIO(data))
+        info = tarfile.TarInfo("E0/r/link.json")
+        info.type, info.linkname = tarfile.SYMTYPE, "/etc/passwd"
+        tf.addfile(info)
+    probs = P.check_staging(tmp_path)
+    assert any("never published" in p and "claude_sessions" in p for p in probs)
+    assert any("not a regular file" in p and "link.json" in p for p in probs)

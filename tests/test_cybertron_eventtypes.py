@@ -183,8 +183,9 @@ def test_every_agent_visible_type_has_a_renderer_or_a_reason():
 
 
 def test_agents_rows_name_a_branch_in_render_event():
+    # render_event records what a prompt shows (agents.Shown) and delegates to _render_event, which holds the branches
     src = ast.get_source_segment((ROOT / "agents.py").read_text(), next(
-        n for n in ast.parse((ROOT / "agents.py").read_text()).body if isinstance(n, ast.FunctionDef) and n.name == "render_event"))
+        n for n in ast.parse((ROOT / "agents.py").read_text()).body if isinstance(n, ast.FunctionDef) and n.name == "_render_event"))
     strings = {n.value for n in ast.walk(ast.parse(src)) if isinstance(n, ast.Constant) and isinstance(n.value, str)}
     missing = [n for n, t in ET.REG.items() if t.renderer == "agents" and n not in strings]
     assert not missing, missing

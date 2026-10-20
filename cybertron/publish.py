@@ -14,9 +14,14 @@ of what would be uploaded is printed. Layout on the Hub (docs/data_format.md, "L
     catalog.parquet, catalog.json             one row per published run: the site's index (curated card + key run facts)
     stories.json                              the stories registry the site's home page rotates through (--stories)
     runs/<spec>/<run_id>/<table>.parquet      cybertron.export tables for that run, plus manifest.json and card.json
-    raw/<spec>/<run_id>.tar.gz                the raw run directory (the record; re-exported from when the schema changes)
+    raw/<spec>/<run_id>.tar.gz                the raw run directory (the record; re-exported from when the schema changes; enough
+                                              to replay the run and continue it: see "Continuing a published run" below)
     README.md                                 dataset card with one config per table (the Hub's viewer and SQL console span all runs)
     CHANGELOG.md                              one entry per release, newest first (also the card's "Changelog" section)
+
+viewer.json (the old story viewer's data, derived by parsing prompts) is written only with --with-viewer-json; the site's run page
+still reads it until it reads the tables (calls_seen: what each model call was shown; docs/site_data_contract.md). Files published before
+are never deleted by a publish that does not write them, except within a republished run's folder.
 
 Each run is replaced as a unit: publishing a run deletes whatever its folder and archive held before, so a republish never leaves
 stale files behind. Tables are written by cybertron.export and are never edited here; publish refuses to upload when an exported
@@ -26,6 +31,13 @@ every staged file, archive member and table for the Claude Code account's email 
 claude.ai session URLs and home/root paths, and refuses to upload on any hit; values are never printed, only redacted context.
 `publish --audit PATH` runs the same scan on a local directory or downloaded dataset snapshot without pushing. Raw files are text logs written by the
 simulator; local paths in them are rewritten to `<spec>/<run>`-relative ones before archiving.
+
+Continuing a published run (docs/data_format.md): checkpoints are never published, because unpickling a downloaded file runs
+whatever code it names. The record is enough: `python -m cybertron fetch RUN_ID [--revision vX.Y]` unpacks the raw archive into a
+run directory; `python -m cybertron replay DIR` re-executes it from instance.json and the recorded replies and checks it reproduces
+byte for byte; `python -m cybertron continue DIR --at N [--rounds K]` replays to round N (rebuilding the checkpoints locally),
+forks there and plays on with the live policy (the model calls from N are new). When the current code does not reproduce the run,
+continue uses the run's recorded git sha in a worktree (cybertron rerun's mechanism), or refuses and says why.
 
 A card gives a run its curated facts, all optional: title, description, tags, featured, usable_rounds ("1-23"), validity. --card
 takes a YAML or JSON file: either one card, or {run_id: card, ...}. Without one, the title is "<spec> seed <seed>" and usable
@@ -48,6 +60,11 @@ Versions and releases (docs/data_format.md, "Versions and releases"; every perso
   before engine versions, under earlier simulation designs), else "current"; a card's `era` overrides it. Sites filter
   `era = 'legacy'` out by default. The catalog's `engine_version` is the export's `runs.engine_version`.
 - Papers cite a DOI snapshot of a tagged release (e.g. Zenodo), not main.
+- Each release names the code that made it. The changelog entry records the publishing checkout's git commit, the export schema
+  (`SCHEMA_VERSION.SCHEMA_MINOR`) and the engine version of that code; publish refuses to release from a tree with uncommitted
+  changes unless --allow-dirty (then the entry says `dirty: true`). After the Hub tag, publish creates the matching annotated tag
+  `dataset-vX.Y[.Z]` in the code repo on that commit (message: the release notes and the Hub commit URL) and pushes it to origin;
+  a failure to create or push it is a warning with the command to run, never a failed release.
 
 --stories takes the stories registry (site/stories.yaml: a list of {title, subtitle, quote, agent, run_id, class, model, mood,
 round}) and writes it as stories.json, replacing the published one. With no runs, only stories.json is staged and uploaded.
@@ -84,6 +101,7 @@ STAGING = Path(__file__).resolve().parent / "out" / "_publish"
 NEVER = re.compile(r"(^|/)(checkpoints?(/|$)|claude_sessions(/|$)|\.claude[^/]*(/|$)|\.credentials[^/]*\.json$|\.env(\.[^/]*)?$"
                    r"|id_(rsa|dsa|ecdsa|ed25519)[^/]*$|[^/]*\.pem$|[^/]*\.pkl$|[^/]*\.pickle$|abandoned_calls\.jsonl$)")
 REPORTS = {"story.html", "messages.md", "overview.md", "observer.md", "spec_outline.md"}
+SCRATCH = re.compile(r"/tmp/claude-\d+/[^\s\"']*?/scratchpad/")     # an agent session's scratch directory in a recorded argv
 CARD_KEYS = ("title", "description", "tags", "featured", "usable_rounds", "validity", "era")
 STORY_KEYS = ("title", "subtitle", "quote", "agent", "run_id", "class", "model", "mood", "round")
 STORY_REQUIRED = ("title", "subtitle", "quote", "agent", "run_id")
@@ -251,6 +269,8 @@ def check_tables(table_dir: Path) -> list[str]:
 
 
 def check_staging(stage: Path) -> list[str]:
+    """Problems in the staged files: anything never published, an archive member that is not a regular file or directory, a local
+    path left in a raw archive (cybertron.privacy scans everything staged on top of this)."""
     problems = []
     for p in stage.rglob("*"):
         rel = p.relative_to(stage).as_posix()
@@ -261,6 +281,8 @@ def check_staging(stage: Path) -> list[str]:
             for m in tf.getmembers():
                 if NEVER.search(m.name):
                     problems.append(f"never published: {tar.name}:{m.name}")
+                elif not (m.isfile() or m.isdir()):
+                    problems.append(f"not a regular file: {tar.name}:{m.name}")
                 elif m.isfile():
                     try:
                         text = tf.extractfile(m).read().decode()
@@ -273,22 +295,41 @@ def check_staging(stage: Path) -> list[str]:
 
 
 # ------------------------------------------------------------------ raw archive
+def _slug(p: str) -> str:
+    """A path as the CLI names a project folder after it (every non-alphanumeric character a dash)."""
+    return re.sub(r"[^A-Za-z0-9]", "-", p.rstrip("/"))
+
+
 def _scrub(text: str, prefixes: list[str], home: str) -> str:
     for p in prefixes:
         text = text.replace(p.rstrip("/") + "/", "")
+    for p in prefixes + [home]:                                         # the CLI's project-folder names (dashed paths)
+        if len(p.strip("/")) > 1:
+            text = text.replace(_slug(p) + "-", "")
+    text = SCRATCH.sub("<scratch>/", text)
     return text.replace(home, "~")
 
 
+def archive_members(run: Path) -> list[tuple[str, Path]]:
+    """(name in the archive relative to the run, file) for every file a raw archive holds: all but what NEVER excludes
+    (checkpoints, pickles, claude_sessions/, secrets, abandoned_calls.jsonl), symlinks and the rebuilt reports."""
+    out = []
+    for p in sorted(run.rglob("*")):
+        rel = p.relative_to(run).as_posix()
+        if p.is_dir() or p.is_symlink() or NEVER.search(rel) or rel in REPORTS:
+            continue
+        out.append((rel, p))
+    return out
+
+
 def raw_archive(run: Path, out: Path, spec: str) -> dict:
-    """The run directory as a .tar.gz under <spec>/<run>/ (no checkpoints, pickles or rebuilt reports; local paths scrubbed)."""
+    """The run directory as a .tar.gz under <spec>/<run>/ (archive_members: nothing NEVER excludes, no rebuilt reports; local
+    paths scrubbed)."""
     prefixes, home = _local_prefixes(run), _home()
     out.parent.mkdir(parents=True, exist_ok=True)
     files, size = 0, 0
     with tarfile.open(out, "w:gz") as tf:
-        for p in sorted(run.rglob("*")):
-            rel = p.relative_to(run).as_posix()
-            if p.is_dir() or NEVER.search(rel) or rel in REPORTS:
-                continue
+        for rel, p in archive_members(run):
             data = p.read_bytes()
             if p.suffix in (".json", ".jsonl", ".md", ".txt", ".yaml", ".yml", ".log", ".csv"):
                 try:
@@ -303,7 +344,8 @@ def raw_archive(run: Path, out: Path, spec: str) -> dict:
 
 
 def viewer_data(run: Path) -> dict:
-    """TEMPORARY (--with-viewer-json): the story viewer's data, plus each model call's planned actions (and, for the decide call,
+    """TEMPORARY (--with-viewer-json; the calls_seen table will replace it, docs/site_data_contract.md): the story viewer's data,
+    plus each model call's planned actions (and, for the decide call,
     the actions that finally ran), so the site can order a round's phases: decide -> DM waves (dm_reply_1, 2) -> final actions."""
     from cybertron import viewer as V
     data = V.load(run)
@@ -502,9 +544,79 @@ def changelog_entries(text: str) -> str:
     return text[m.start():].strip() if m else ""
 
 
+CODE_REPO = "https://github.com/zachmacsmith/cybertron"
+
+
+def code_info() -> dict:
+    """The publishing code: its git commit (sha, branch, dirty), its export schema and its engine version."""
+    from cybertron import provenance as PV
+    g = PV.git_info()
+    return {"sha": g.get("sha"), "branch": g.get("branch"), "dirty": g.get("dirty"),
+            "export_schema": f"{X.SCHEMA_VERSION}.{X.SCHEMA_MINOR}", "engine_version": PV.ENGINE_VERSION}
+
+
+def release_code(allow_dirty: bool = False) -> dict:
+    """code_info() for a release; refused from a dirty tree (or outside a git checkout) unless allow_dirty, which records it."""
+    c = code_info()
+    if (c["dirty"] or not c["sha"]) and not allow_dirty:
+        raise SystemExit("not releasing from " + ("a tree with uncommitted changes" if c["sha"] else "outside a git checkout")
+                         + ": commit first (the release records the code's commit), or pass --allow-dirty to record dirty: true")
+    if c["dirty"] is None or not c["sha"]:
+        c["dirty"] = True
+    return c
+
+
+def code_tag_name(version: str) -> str:
+    return f"dataset-{version}"
+
+
+def code_line(code: dict | None, version: str) -> str | None:
+    if not code:
+        return None
+    sha = code.get("sha")
+    ref = f"[`{sha[:12]}`]({CODE_REPO}/commit/{sha}) (code tag `{code_tag_name(version)}`)" if sha else "unknown commit"
+    return (f"- Code: {ref}" + (", dirty: true" if code.get("dirty") else "")
+            + f"; export schema {code.get('export_schema')}; engine version {code.get('engine_version')}")
+
+
+def _git_run(*args) -> tuple[int, str]:
+    """git in this checkout: (exit status, output)."""
+    import subprocess
+    from cybertron import provenance as PV
+    try:
+        p = subprocess.run(["git", "-C", str(PV.REPO), *args], capture_output=True, text=True, timeout=120)
+    except (OSError, subprocess.SubprocessError) as e:
+        return 1, str(e)
+    return p.returncode, (p.stdout + p.stderr).strip()
+
+
+def tag_code(version: str, code: dict, notes: str | None, hub_url: str, log=print) -> dict:
+    """The code repo's matching tag: dataset-vX.Y (annotated: the notes and the Hub commit) on the publishing commit, pushed to
+    origin. Never fails the release: a failure is warned about with the command to run."""
+    name, sha = code_tag_name(version), code.get("sha")
+    out = {"tag": name, "sha": sha, "created": False, "pushed": False}
+    if not sha:
+        log(f"WARNING: no code commit to tag {name} on (not a git checkout)")
+        return out
+    msg = f"{version}: {notes.strip() if notes else 'dataset release'}\n\nHugging Face commit: {hub_url}"
+    rc, text = _git_run("tag", "-a", name, "-m", msg, sha)
+    if rc != 0:
+        log(f"WARNING: could not create the code tag {name}: {text[:300]}\n  run: git tag -a {name} -m \"{version}\" {sha} "
+            f"&& git push origin {name}")
+        return out
+    out["created"] = True
+    rc, text = _git_run("push", "origin", name)
+    if rc != 0:
+        log(f"WARNING: could not push the code tag {name}: {text[:300]}\n  run: git push origin {name}")
+        return out
+    out["pushed"] = True
+    log(f"code tag {name} at {sha[:12]} pushed to origin")
+    return out
+
+
 def changelog_entry(version: str, date: str, added: list[str], replaced: list[str], catalog: list[dict],
-                    notes: str | None) -> str:
-    """One CHANGELOG.md entry (a '## ' section)."""
+                    notes: str | None, code: dict | None = None) -> str:
+    """One CHANGELOG.md entry (a '## ' section). code: release_code(), the publishing commit, export schema and engine version."""
     schemas = sorted({f"{r.get('schema_version')}.{r.get('schema_minor') or 0}" for r in catalog if r.get("schema_version") is not None})
     engines = sorted({r["engine_version"] for r in catalog if r.get("engine_version") is not None})
     n_legacy = sum(1 for r in catalog if r.get("era") == "legacy")
@@ -515,6 +627,8 @@ def changelog_entry(version: str, date: str, added: list[str], replaced: list[st
     out.append(f"- Engine versions: {', '.join(map(str, engines)) or 'none'}"
                + (f" (plus {n_legacy} legacy run(s) without one)" if n_legacy else ""))
     out.append(f"- Catalog: {len(catalog)} run(s)")
+    if code_line(code, version):
+        out.append(code_line(code, version))
     if notes:
         out.append(f"- Notes: {notes.strip()}")
     return "\n".join(out)
@@ -623,13 +737,32 @@ def remote_tags(repo: str) -> list[str]:
         return []
 
 
-def fetch_raw(repo: str, row: dict, dest: Path) -> Path:
+def extract_archive(archive, dest: Path) -> list[Path]:
+    """Unpack a raw archive into dest safely: regular files and directories only, relative names without "..", nothing that is
+    never published (a pickle in an archive is skipped, never unpacked). Returns the run directories (<spec>/<run>) it held."""
+    dest = Path(dest)
+    runs = []
+    with tarfile.open(archive) as tf:
+        safe = []
+        for m in tf.getmembers():
+            parts = Path(m.name).parts
+            if m.name.startswith(("/", "\\")) or ".." in parts or not (m.isfile() or m.isdir()) or NEVER.search(m.name):
+                continue
+            safe.append(m)
+            if len(parts) >= 2 and dest / parts[0] / parts[1] not in runs:
+                runs.append(dest / parts[0] / parts[1])
+        try:
+            tf.extractall(dest, members=safe, filter="data")
+        except TypeError:                                               # Python without extraction filters
+            tf.extractall(dest, members=safe)
+    return [r for r in runs if r.is_dir()]
+
+
+def fetch_raw(repo: str, row: dict, dest: Path, revision: str | None = None) -> Path:
     """Download and unpack a published run's raw archive; returns the run directory."""
     from huggingface_hub import hf_hub_download
-    p = hf_hub_download(repo, row["raw"], repo_type="dataset")
-    with tarfile.open(p) as tf:
-        safe = [m for m in tf.getmembers() if not (m.name.startswith("/") or ".." in Path(m.name).parts) and not NEVER.search(m.name)]
-        tf.extractall(dest, members=safe)
+    p = hf_hub_download(repo, row["raw"], repo_type="dataset", revision=revision)
+    extract_archive(p, dest)
     return dest / row["spec"] / Path(row["raw"]).name.removesuffix(".tar.gz")
 
 
@@ -751,17 +884,19 @@ def stage_runs(runs: list[Path], stage: Path, cards: dict, log=print, with_promp
 def publish(runs, repo: str | None = None, cards: dict | None = None, push: bool = False, staging=None,
             reexport_all: bool = False, with_prompts: bool = False, spec_override: str | None = None,
             prune_legacy: bool = False, message: str | None = None, release: str | None = None, notes: str | None = None,
-            with_viewer_json: bool = False, stories=None, skip_missing_stories: bool = False, log=print) -> dict:
+            with_viewer_json: bool = False, stories=None, skip_missing_stories: bool = False, allow_dirty: bool = False,
+            log=print) -> dict:
     """Stage (and with push=True, upload) runs as one dataset commit. Returns a summary dict.
 
     release="vX.Y[.Z]" also prepends a changelog entry (CHANGELOG.md and the card) in that commit and tags it (module docstring).
     stories (a list from load_stories) are written as stories.json, checked against the catalog; skip_missing_stories drops (with a
     warning) the ones whose run is not in it instead of refusing."""
     repo = repo or default_repo()
-    last_release = None
+    last_release = code = None
     if release:
         parse_release(release)
         last_release = check_release(release, remote_tags(repo))     # before any staging or upload
+        code = release_code(allow_dirty)                                # the code that makes this release (its changelog entry)
     stage = Path(staging) if staging else STAGING / time.strftime("%Y%m%d-%H%M%S")
     if stage.exists() and any(stage.iterdir()):
         raise SystemExit(f"{stage} is not empty: pass a new --staging directory")
@@ -800,7 +935,7 @@ def publish(runs, repo: str | None = None, cards: dict | None = None, push: bool
         ref = {r["run_id"]: f"{r['spec']}/{r['run_id']}" for r in rows}
         entry = changelog_entry(release, time.strftime("%Y-%m-%d", time.gmtime()),
                                 sorted(ref[i] for i in new_ids - old_ids), sorted(ref[i] for i in new_ids & old_ids),
-                                catalog, notes)
+                                catalog, notes, code)
         entries = entry + ("\n\n" + entries if entries else "")
         need, got = suggested_bump(published, catalog, new_ids), bump_of(release, last_release)
         order = ("patch", "minor", "major")
@@ -849,6 +984,7 @@ def publish(runs, repo: str | None = None, cards: dict | None = None, push: bool
                        tag_message=f"{release}: {notes}" if notes else release)
         summary["tag"] = release
         log(f"tagged {release} at {summary['commit']}: load with revision=\"{release}\"")
+        summary["code_tag"] = tag_code(release, code, notes, summary.get("url") or summary["commit"], log=log)
     else:
         log("reminder: no release tag. Releases are tagged: rerun with --release vX.Y[.Z] --notes \"...\" "
             "(docs/data_format.md, 'Versions and releases')")
@@ -900,7 +1036,8 @@ def add_command(sub) -> None:
     p.add_argument("--reexport-all", action="store_true", help="also rebuild every published run's tables from its raw archive")
     p.add_argument("--with-prompts", action="store_true", help="include the prompts table (blobs) when the exporter supports it")
     p.add_argument("--with-viewer-json", action="store_true",
-                   help="TEMPORARY: also write the story viewer's data (viewer.json) per run, until the site reads the tables")
+                   help="TEMPORARY: also write the story viewer's data (viewer.json) per run, which the site's run page reads "
+                        "until it reads the tables (calls_seen: docs/site_data_contract.md); off by default")
     p.add_argument("--prune-legacy", action="store_true", help="delete pre-catalog files (runs.csv) from the dataset")
     p.add_argument("--message", help="commit message")
     p.add_argument("--push", action="store_true", help="upload (without it: stage and summarise only)")
@@ -909,6 +1046,7 @@ def add_command(sub) -> None:
     p.add_argument("--notes", help="changelog notes for --release")
     p.add_argument("--repack-raw", metavar="PATH", help="rebuild one published raw archive (raw/<spec>/<run_id>.tar.gz) without "
                                                         "the members NEVER excludes; uploads only with --push (docs/publishing.md)")
+    p.add_argument("--allow-dirty", action="store_true", help="release from a tree with uncommitted changes (recorded as dirty: true)")
     p.set_defaults(fn=cmd)
 
 
@@ -931,6 +1069,6 @@ def cmd(a) -> None:
     s = publish(a.runs, repo=a.repo, cards=cards, push=a.push, staging=a.staging, reexport_all=a.reexport_all,
                 with_prompts=a.with_prompts, spec_override=a.spec, prune_legacy=a.prune_legacy, message=a.message,
                 release=a.release, notes=a.notes, with_viewer_json=a.with_viewer_json, stories=load_stories(a.stories),
-                skip_missing_stories=a.skip_missing_stories)
+                skip_missing_stories=a.skip_missing_stories, allow_dirty=a.allow_dirty)
     if s["problems"] and not a.push:
         raise SystemExit(1)

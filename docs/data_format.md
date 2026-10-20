@@ -300,7 +300,12 @@ under changed code). With `--with-prompts`, `blobs` rows of kind `interview_prom
 - `catalog.parquet`, `catalog.json`: one row per run (the curated card, key run facts, `era`, `engine_version`).
 - `runs/<spec>/<run_id>/<table>.parquet` plus `manifest.json` and `card.json`.
 - `raw/<spec>/<run_id>.tar.gz`: the raw run directory (no checkpoints or pickles, no `claude_sessions/`, `.claude*`,
-  credentials, `.env` or key files; local paths scrubbed).
+  credentials, `.env` or key files, no `abandoned_calls.jsonl`; local paths scrubbed): everything a replay, a continuation
+  and the exporter read (below, "Continuing a published run").
+- `runs/<spec>/<run_id>/viewer.json`: TEMPORARY, written only with `--with-viewer-json`; the site's run page still reads it
+  (site/README.md) until it reads the tables (`calls_seen` carries what viewer.json's `saw` / `lookup_results` do); never
+  deleted from the Hub by a publish that does not write it. The site's contract:
+  [docs/site_data_contract.md](site_data_contract.md).
 - `README.md` (the dataset card, one config per table) and `CHANGELOG.md` (one entry per release, newest first).
 
 **Privacy gate** (`cybertron/privacy.py`): before any upload, and in a dry run, every staged file, every archive member and the
@@ -346,8 +351,16 @@ Every person or agent publishing follows these rules (also in `cybertron/publish
   - Export schema: 2.3
   - Engine versions: 10 (plus 4 legacy run(s) without one)
   - Catalog: 12 run(s)
+  - Code: [`0123456789ab`](https://github.com/zachmacsmith/cybertron/commit/<sha>) (code tag `dataset-v1.1`); export schema 2.7; engine version 10
   - Notes: adds the survival runs
   ```
+- **Each release names the code that made it.** The entry's `Code` line is the publishing checkout's git commit, the export
+  schema of that code (`SCHEMA_VERSION.SCHEMA_MINOR`) and its engine version (`provenance.ENGINE_VERSION`). Publish refuses to
+  release from a tree with uncommitted changes (or outside a git checkout) unless `--allow-dirty`, and then the line says
+  `dirty: true`: release from a clean, committed tree so the sha means something. After the Hub tag is created, publish creates
+  the matching annotated tag `dataset-vX.Y[.Z]` in the code repo on that commit (message: the release notes and the Hub commit
+  URL) and pushes it (`git push origin dataset-vX.Y`). Creating or pushing that tag never fails the release: publish warns and
+  prints the command to run. So `git checkout dataset-v1.1` gives the code that exported `v1.1`.
 - **Old layouts live in tags, not archive folders.** `v0-legacy-layout` is the dataset as it was before the legacy runs were
   republished in the export-schema-2 layout. Main only ever holds the current layout.
 - **Loading a pinned version:**
@@ -362,3 +375,50 @@ Every person or agent publishing follows these rules (also in `cybertron/publish
   ```
 - **Legacy runs** are kept and marked `era: legacy` in the catalog; websites filter them out by default.
 - **Papers** cite a DOI snapshot of a tagged release (e.g. a Zenodo deposit of `v1.0`), never main or an untagged commit.
+
+## Continuing a published run
+
+A published run can be replayed and continued by anyone with the code, from the Hub alone:
+
+```
+python -m cybertron fetch ashwood3_seed1_801acc08 --revision v0.11          # -> cybertron/out/_fetched/ashwood3/ashwood3_seed1_801acc08
+python -m cybertron replay cybertron/out/_fetched/ashwood3/ashwood3_seed1_801acc08          # IDENTICAL: events, snapshots byte for byte
+python -m cybertron continue cybertron/out/_fetched/ashwood3/ashwood3_seed1_801acc08 --at 20 --rounds 2 [--dry]
+```
+
+- **fetch** (`cybertron/fetch.py`) reads the catalog at `--revision` (a release tag; default main), downloads the run's raw archive
+  and unpacks it safely (regular files only, no absolute or `..` paths, nothing that is never published) into a run directory.
+- **replay** re-executes the run from `instance.json`, every recorded model reply (`calls.jsonl`), the recorded sandbox outputs
+  (`sandbox.jsonl`, `blobs/`), the frozen shared archive (`archive/`, `archive_overlay.jsonl`) and directories (`directories/`),
+  and the intervention schedule (`interventions.yaml`): each model call's prompt must hash to the recorded one, and events and
+  snapshots must come out byte-identical. A run that stopped or paused is replayed to the rounds it played. History mode's
+  conversations restart where the run's resumes and forks restarted them (run.json `history_restarts`), so a resumed run replays.
+- **continue RUN --at N [--rounds K]** replays to round N into `<out>/replay` (rebuilding the per-round checkpoints locally, from
+  data, and checking the state at N is the run's), forks that replay at N into `<out>/branch` (`fork --at N`, strict replay mode:
+  the recorded replies before N) and plays K rounds (default: to the end) with the live policy, models or `--dry` scripted bots.
+  The branch's run.json has the usual fork `parent` and `continued_from` {run_id, round, code}. When the current code does not
+  reproduce the run, continue runs the same two steps with the CLI of a git worktree at the run's recorded sha (the segment that
+  played round N; `cybertron rerun`'s mechanism), and refuses with the reason when that sha is missing or the run started dirty.
+  `fork RUN --at N` on a fetched run (no checkpoints) says to use continue.
+
+**Why checkpoints are not published.** Checkpoints (`checkpoint.pkl`, `checkpoints/rNNNN.pkl`) are Python pickles, and
+unpickling a downloaded file executes whatever code it names. The record above is enough to rebuild them, by the engine itself,
+so only data is ever downloaded.
+
+**What is and is not byte-reproducible.**
+
+- Reproduced exactly: rounds 1..N of a replay or continuation (events.jsonl, snapshots.json, turns.jsonl, memory.jsonl,
+  interventions.jsonl, ground_truth.json and the goal scores), given the code the run was played with or code that replays it
+  identically (the replay checks every prompt hash, so drift is caught, never hidden).
+- New: everything after round N of a continuation. Its model calls are live calls (another sample of the model, under the
+  current prompts), or scripted bots with `--dry`; its prompts may differ from what the original run's code would have written.
+- A run whose segments ran under different code (a resume after a code change) replays segment by segment, each under its own
+  sha (replay to the resume round under the first sha, then resume that replay with the recorded replies under the second);
+  `continue` does not automate this, it uses the sha of the segment that played round N.
+- Legacy runs without `calls.jsonl` (made before model calls were recorded) and without a recorded git sha cannot be replayed;
+  their tables and raw logs remain the record.
+
+**What a raw archive holds.** The whole run directory except what is never published (above: checkpoints and pickles,
+`claude_sessions/` and `.claude*`, credentials, `.env` and key files, `abandoned_calls.jsonl`) and the reports rebuilt from the
+data (`story.html`, `messages.md`, `overview.md`, `observer.md`, `spec_outline.md`). None of the excluded files is read by a
+replay or a continuation; a run re-exported from its archive therefore has no abandoned rows in `calls`.
