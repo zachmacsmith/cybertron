@@ -353,3 +353,21 @@ def test_zero_attention_three_rounds(tmp_path):
     assert len(pub(k, "Duty Roster")["log"]) == 6 and len(pub(k, "Militia Roll")["log"]) == 6
     assert len([x for x in pub(k, "Mutual Credit")["log"] if x["why"].startswith("Commons Dues")]) == 18
     assert sum(pub(k, "Mutual Credit")["balances"].values()) == pytest.approx(0, abs=1e-6)
+    from cybertron.analysis import flows as FL                         # the flows check reads the commons from the checkpoints
+    rows = FL.commons_rows(rd)
+    assert [x["round"] for x in rows] == [1, 2, 3] and all(x["credit_booked"] > 0 for x in rows)
+    assert rows[0]["pooled"] == 6 and rows[-1]["militia"]["missed"] == 2
+    assert FL.analyse(rd)["summary"]["commons"]["motions_moved"] == 0
+
+
+def test_opening_balances_and_a_stock_only_the_steward_sees(tmp_path):
+    sp = world(coop={"PUBLIC_STOCK": False, "STEWARD": "J0.steward"})
+    mc = next(x for x in sp["start"]["laws"] if x["template"] == "Mutual Credit")
+    mc["params"] = {"OPENING": {"Fay": -8}}
+    k = setup(tmp_path, sp)
+    assert credit(k)["Fay"] == -8 and credit(k)["fund"] == 8
+    T.step(k)
+    assert "stock" not in pub(k, "Cooperative Store")["last"]
+    ada = [x for x in lines(k, "Ada") if x.startswith("CO-OP STORE")][0]
+    bo = [x for x in lines(k, "Bo") if x.startswith("CO-OP STORE")][0]
+    assert "stock 4" in ada and "stock known to the steward" in bo

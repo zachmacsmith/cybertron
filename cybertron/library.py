@@ -6551,7 +6551,7 @@ pass; the rest are resolutions on the record. One chair may withdraw a motion (t
 
 established_template("Cooperative Store", "contract", "cooperative", '''
 title = "Cooperative Store"
-intent = "A food cooperative whose pool is the store STORE (not the treasury: food spoils more slowly in a store). At the end of every round each member's pledge is pooled into STORE, never taking the member below KEEP, and credited to the member's shares: in an association its food allowance (set_allowance on food), in a polity (the commons' own law) its standing pledge (pledge_food [qty]; PLEDGES at the start; 0 stops it). Then every member holding less than a meal is given up to a meal out of STORE, charged to its shares (no cap, while STORE lasts). Every PERIOD rounds PAYOUT of the stock above RESERVE is paid out of STORE to the members with positive shares, in proportion to them. The general meeting changes RESERVE, PAYOUT and PERIOD by motion (MOTION: RESERVE <food>, MOTION: PAYOUT <share 0-1>, MOTION: PERIOD <rounds>, under the law titled MEETING of the same institution). With CREDIT_PER_FOOD above 0 each unit pooled also earns the member that much credit from the Common Fund on the Mutual Credit ledger of the same institution (the producers' pay). A member who leaves gives up its shares. Shares, pooling, meals, payouts and the stock are public."
+intent = "A food cooperative whose pool is the store STORE (not the treasury: food spoils more slowly in a store). At the end of every round each member's pledge is pooled into STORE, never taking the member below KEEP, and credited to the member's shares: in an association its food allowance (set_allowance on food), in a polity (the commons' own law) its standing pledge (pledge_food [qty]; PLEDGES at the start; 0 stops it). Then every member holding less than a meal is given up to a meal out of STORE, charged to its shares (no cap, while STORE lasts). Every PERIOD rounds PAYOUT of the stock above RESERVE is paid out of STORE to the members with positive shares, in proportion to them. The general meeting changes RESERVE, PAYOUT and PERIOD by motion (MOTION: RESERVE <food>, MOTION: PAYOUT <share 0-1>, MOTION: PERIOD <rounds>, under the law titled MEETING of the same institution). With CREDIT_PER_FOOD above 0 each unit pooled also earns the member that much credit from the Common Fund on the Mutual Credit ledger of the same institution (the producers' pay). A member who leaves gives up its shares. Shares, pooling, meals and payouts are public; the stock too while PUBLIC_STOCK (otherwise only holders of STEWARD see it)."
 STORE = "S1"
 KEEP = 1
 PERIOD = 3
@@ -6561,6 +6561,8 @@ MEETING = "Assembly Motions"
 CREDIT_PER_FOOD = 0
 MEMBERS = "vote"
 PLEDGES = {}
+PUBLIC_STOCK = True
+STEWARD = ""
 DIALS = ["RESERVE", "PAYOUT", "PERIOD"]
 
 def is_polity():
@@ -6697,7 +6699,9 @@ def on_round_end(r):
                 if q > 0.000001 and move(where(), m, "food", q):
                     paid[m] = round_to(q, 3)
         public["payout"] = {"round": r + 1, "paid": paid}
-    public["last"] = {"round": r + 1, "pooled": put, "meals": meals, "paid": paid, "stock": round_to(stock(), 1)}
+    public["last"] = {"round": r + 1, "pooled": put, "meals": meals, "paid": paid}
+    if PUBLIC_STOCK:
+        public["last"]["stock"] = round_to(stock(), 1)
     public["shares"] = {m: round_to(s, 2) for m, s in sh.items()}
     write(r + 1)
 
@@ -6710,7 +6714,10 @@ def write(r):
             how = "pledge_food: invoke {\\"action\\": \\"pledge_food\\", \\"args\\": [<n>]}"
         else:
             how = "set_allowance {\\"contract\\": \\"" + jurisdiction() + "\\", \\"item\\": \\"food\\", \\"qty\\": <n>}"
-        out[m] = ("CO-OP STORE " + STORE + ": stock " + str(round_to(stock(), 1)) + ", reserve " + str(dial("RESERVE")) + "; your shares " + str(round_to(shares().get(m, 0), 1)) + "; you pool " + str(pledged(m)) + " food a round (" + how + "); a member short of a meal gets one; payout of " + str(dial("PAYOUT")) + " of the stock above the reserve in round " + str(nxt + 1) + ".")
+        level = "stock " + str(round_to(stock(), 1)) + ", "
+        if not PUBLIC_STOCK and not (STEWARD != "" and has(m, STEWARD)):
+            level = "stock known to the steward, "
+        out[m] = ("CO-OP STORE " + STORE + ": " + level + "reserve " + str(dial("RESERVE")) + "; your shares " + str(round_to(shares().get(m, 0), 1)) + "; you pool " + str(pledged(m)) + " food a round (" + how + "); a member short of a meal gets one; payout of " + str(dial("PAYOUT")) + " of the stock above the reserve in round " + str(nxt + 1) + ".")
     state["terms_lines"] = out
 
 def on_enact():
@@ -6728,7 +6735,7 @@ meeting's motions and the credit ledger can reach it; laws of different institut
 
 established_template("Mutual Credit", "law", "credit", '''
 title = "Mutual Credit"
-intent = "A credit ledger without coins. Every holder of MEMBERS has a balance, 0 at the start; pay_credit [to, qty] moves credit from the payer to another member (or to fund, the Common Fund), and a payer may not go below minus LIMIT. Balances always sum to zero. The Common Fund (account fund) belongs to the commons: holders of FUND_OFFICE pay out of it (fund_pay [to, qty, reason]), with no floor. Laws titled in SOURCES post charges and payments to the ledger (dues, duty pay, the producers' pay); those are booked even past the limit, and a member below minus LIMIT is listed as over the limit until it is back above. The general meeting changes LIMIT (MOTION: LIMIT <n>) and may write a member's debt off against the fund (MOTION: WRITEOFF <member>), under the law titled MEETING. The ledger, each round's turnover and who is over the limit are public."
+intent = "A credit ledger without coins. Every holder of MEMBERS has a balance, 0 at the start; pay_credit [to, qty] moves credit from the payer to another member (or to fund, the Common Fund), and a payer may not go below minus LIMIT. Balances always sum to zero. The Common Fund (account fund) belongs to the commons: holders of FUND_OFFICE pay out of it (fund_pay [to, qty, reason]), with no floor. Laws titled in SOURCES post charges and payments to the ledger (dues, duty pay, the producers' pay); those are booked even past the limit, and a member below minus LIMIT is listed as over the limit until it is back above. OPENING sets members' balances at the start (against the fund). The general meeting changes LIMIT (MOTION: LIMIT <n>) and may write a member's debt off against the fund (MOTION: WRITEOFF <member>), under the law titled MEETING. The ledger, each round's turnover and who is over the limit are public."
 rank = "statute"
 LIMIT = 10
 MEMBERS = "vote"
@@ -6736,6 +6743,7 @@ FUND_OFFICE = "J0.treasurer"
 SOURCES = ["Cooperative Store", "Duty Roster", "Commons Dues", "Militia Roll"]
 MEETING = "Assembly Motions"
 FUND = "fund"
+OPENING = {}
 
 def num(x):
     s = str(x).strip()
@@ -6866,6 +6874,9 @@ def on_enact():
     if FUND_OFFICE != "":
         define_action(FUND_OFFICE, "fund_pay", fund_pay)
     bal()
+    for a, v in OPENING.items():
+        if known(a) and a != FUND and v != 0:
+            book(FUND, a, v, "opening balance", "booked")
     settle()
 ''', doc="""Mutual credit (review 31 03 §6.4, #13; 08 §3.4, §7 decision 10): balances in law state summing to zero, a floor of minus
 LIMIT on voluntary payments, the Common Fund as the commons' own account, charges and pay posted by other laws (credit_orders,

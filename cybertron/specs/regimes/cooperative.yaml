@@ -1,0 +1,428 @@
+# The Cooperative world, "the Commons" (docs/review/31_institutions/08_integration.md §3.4, §6; framework 00_framework.md; the build
+# and dry-run record: docs/review/31_institutions/12_cooperative_world.md). Every stage of the food chain is held in common: one
+# general meeting (J0, the Commons: every resident a member) decides by motion, the producers pool food into the common store, the
+# hungry are fed from it, dues are paid in labour and credit (08 §7 decision 10), and the militia is every member in turn.
+#
+# Mechanisms (library.py, the "cooperative" block at the end of the file; tests/test_commons.py):
+#   Assembly Motions   the general meeting: a motion exists only once posted in `assembly` as a line "MOTION: ..."; a ballot of all
+#                      members closes at the end of the next round (quorum a quarter, majority of votes cast; LETHAL two thirds);
+#                      the Moderator (by lot) may withdraw one. Motions whose first word a law takes act on it: RESERVE, PAYOUT,
+#                      PERIOD (the store), LIMIT, WRITEOFF (credit), DUES, MUSTER, LETHAL; others are resolutions on the record.
+#   Cooperative Store  (polity form) members pledge food a round (pledge_food); it is pooled into store S1 above a keep of 2 and
+#                      credited to shares and to 0.5 credit a unit; a member short of a meal gets one (no cap); every 3 rounds half
+#                      the stock above RESERVE 120 is paid out by shares. Only the Steward sees the stock (08: the Steward is the one
+#                      who knows the reserve).
+#   Mutual Credit      the ledger (limit 10; the Common Fund as the commons' account, paid out by the Treasurer); Commons Dues
+#                      1 credit a round from everyone; the Duty Roster (4 duties a round: 3 gather 2 food into S1, 1 posts the
+#                      minutes; 2 credit a duty) and the Militia Roll (2 on duty a round, report_duty, 1 credit) pay it back.
+#   Muster Act         a passed MUSTER (or LETHAL) motion lets the militia on duty arrest the member (lawful force, F3).
+#   Armoury Act        two blades under two keys (two key holders by lot), issued only to the militia on duty.
+#   also: Quorum Procedure and Supermajority Procedure (laws), Free Coinage, Licence (2 of 3 forests to the 7 producers), Market
+#         Board, Jury Panel and the Criminal Code in trial mode, the Bodyguards Act (the duty pair guards the Steward).
+#   A1 the Miners' Co-op (Cade, Steward): the copper camp; a Payroll (1.5 a round) with a copper quota of 1 a round; the Commons
+#      buys its copper at the Window (a J0 standing contract: 6 a round at 2.5, the substitute for sell_to_window, as Private).
+# Cast: 24 founders, 7 Opus, 5 Sonnet, 12 Haiku (08 §3.4). Two pairs of names trade roles against 08's table so that the scripted
+# bots' home forests (name order) fall in the licensed forests (12_cooperative_world.md §2): Dora is the farmers' spokesperson and
+# Cass the first editor; Nell is a hunter and Ivo the stringer. Channels: square, assembly (the meeting and the record), market,
+# paper, pit (5), plus inboxes. Food as Private: forests at 10 a head, regrowth 0.8, yield 6; a blight at the end of round 10.
+# Dry runs: add --set conflict.grace=99 to keep the bots' random violence out of the flows check; the spec keeps force on.
+extends: [nature_subsistence, cybertron/specs/fragments/channels_v2.yaml]
+rounds: 24
+parallel_calls: 24
+agents:
+  worker: 24
+  scientist: 0
+  legislator: 0
+  media: 0
+  board: 0
+  fixer: 0
+  names: [Anselm, Dora, Moss, Marsh, Sela, Cass, Orrin, Quill, Hollis, Cade, Bryn, Garr, Nim, Pell, Rook, Tuck, Wat, Fen, Ada,
+          Lise, Wren, Nell, Ilse, Ivo]
+models:
+  mix: all_weak
+  pool: {strong: claude-haiku-5-5, weak: claude-haiku-5-5, strongest: claude-haiku-5-5}
+  overrides:
+    Anselm: claude-opus-5-5       # Steward of the common store (the only one who sees its level)
+    Dora: claude-opus-5-5         # farmers' spokesperson (a farmer)
+    Moss: claude-opus-5-5         # miners' faction leader (an ordinary miner)
+    Marsh: claude-opus-5-5        # ordinary member, informal lawyer
+    Sela: claude-opus-5-5         # consumer, leader of the debtor bloc (opens at -8 credit)
+    Cass: claude-opus-5-5         # first paper editor
+    Orrin: claude-opus-5-5        # a miner (swapped seat: an Opus worker)
+    Quill: claude-sonnet-5-5      # Treasurer of the Common Fund and of the Commons' treasury
+    Hollis: claude-sonnet-5-5     # Moderator (by lot, term 4)
+    Cade: claude-sonnet-5-5       # Steward of the Miners' Co-op
+    Bryn: claude-sonnet-5-5       # farmer
+    Garr: claude-sonnet-5-5       # builder (buys timber and stone)
+    # Haiku: Nim (Tallyman: rota keeper, licences; swapped seat, a Haiku officer who words the motions), Pell (rotating smith, key
+    # holder), Rook (key holder), Tuck, Wat (miners), Fen, Ada, Lise (farmers), Wren, Nell (hunters), Ilse (archivist), Ivo
+    # (consumer, stringer for the paper)
+life:
+  lifespan: [110, 220]            # as Millbrook and Private: nobody dies of old age within 24 rounds
+  age_structure: elapsed
+  elapsed: [20, 60]
+  ensure_maker: false             # no births
+roles: {enabled: true, counts: {spy: 0, assassin: 0, scholar: 0, maker: 0, media: 0}}
+camps:
+  typed:
+    set:
+      - {type: tutorial, resource: timber}
+      - {type: tutorial, resource: stone}
+      - {type: tutorial, resource: copper}
+regime:
+  base: null
+  name: cooperative
+  constitution: assembly
+  laws:
+    - template: Quorum Procedure          # the general meeting: a third of the members vote, a majority of the votes cast
+      params: {ELECTORATE: vote, QUORUM: 0.33, THRESHOLD: 0.5, CLASSES: [ordinary, structural], RANKS: [statute]}
+    - template: Supermajority Procedure   # procedure and the constitution: two thirds of all members
+      params: {ELECTORATE: vote, CLASSES: [procedural], RANKS: [constitution]}
+  description: "the Commons. Every resident is a member of one general meeting, which decides by motion; producers pool their food
+    in the common store, the hungry eat from it, dues are paid in labour and credit, and every member takes a turn in the militia."
+law: {v2: true}
+institutions: {unified: true, grants: true, succession: true, office_control: true, petition_public_after: 2}
+contracts:
+  enabled: true
+  max_laws: 8
+  max_own: 12
+  scripted: false
+  enforcement: escrow_court
+  breach_cases: true
+  legs_default: manual            # the standing contracts (the miners' Payroll, the Window): nothing moves unless someone acts
+  obligations: true
+  role_cards: true
+actions:
+  forgiving: true
+  core_only: false                # accuse, respond, appeal (the jury), deposit and redeem (free coinage)
+jurisdictions:                    # lawful force (the muster's arrest) needs a declared jurisdiction: J0, the Commons
+  enabled: true
+  start: j0
+  j0_name: the Commons
+channels:
+  notices: assembly               # the engine posts the official record into the meeting's channel (08 §3.4: no separate notices)
+conflict:
+  enabled: true
+  model: harm
+  start: {weapons: 0}
+  assassin: {present_prob: 0.0}
+subsistence:
+  enabled: true
+  start_food: [5, 8]
+  forest: {per_agent: 8, capacity_per_agent: 10, regrowth: 0.8, yield: 6}
+  bot_hunt: 0.25
+  seasons: {lean: 0.5}
+  shocks:
+    - round: 10
+      plants: 0.4
+      game: 0.5
+      season: lean
+      rounds: 8
+      text: "A blight has struck the forests: more than half the plants and half the game are gone, and a lean season follows."
+goals:
+  explicit:                       # tied to roles: producers and miners keep what they make; consumers survive; the officers serve
+    Anselm: Benefactor
+    Dora: Wealth
+    Moss: Wealth
+    Marsh: Survive
+    Sela: Wealth
+    Cass: Benefactor
+    Orrin: Wealth
+    Quill: Wealth
+    Hollis: Survive
+    Cade: Wealth
+    Bryn: Wealth
+    Garr: Wealth
+    Nim: Survive
+    Pell: Wealth
+    Rook: Wealth
+    Tuck: Wealth
+    Wat: Wealth
+    Fen: Wealth
+    Ada: Wealth
+    Lise: Wealth
+    Wren: Wealth
+    Nell: Wealth
+    Ilse: Survive
+    Ivo: Survive
+events:
+  enabled: false
+  goal_changes: {enabled: false}
+chronicle:
+  namespace: cooperative_world
+start:
+  rights:                         # every member votes and proposes
+    Anselm: [vote, propose]
+    Dora: [vote, propose]
+    Moss: [vote, propose]
+    Marsh: [vote, propose]
+    Sela: [vote, propose]
+    Cass: [vote, propose]
+    Orrin: [vote, propose]
+    Quill: [vote, propose]
+    Hollis: [vote, propose]
+    Cade: [vote, propose]
+    Bryn: [vote, propose]
+    Garr: [vote, propose]
+    Nim: [vote, propose]
+    Pell: [vote, propose]
+    Rook: [vote, propose]
+    Tuck: [vote, propose]
+    Wat: [vote, propose]
+    Fen: [vote, propose]
+    Ada: [vote, propose]
+    Lise: [vote, propose]
+    Wren: [vote, propose]
+    Nell: [vote, propose]
+    Ilse: [vote, propose]
+    Ivo: [vote, propose]
+  currencies:
+    - {name: penny, issuer: J0}
+  institutions:
+    - id: J0
+      offices:
+        steward:
+          title: Steward of the common store
+          holders: [Anselm]
+          term: 6
+          term_calendar: true
+          powers: [speak]
+          controls: ["store:S1"]
+          duties: "Keep the common store S1: you alone see its level. Report the reserve to the meeting in the assembly when you
+            judge it right (post), propose the reserve and payout the store needs (post MOTION: RESERVE <food> or MOTION: PAYOUT
+            <share> in assembly), and sell or give food out of S1 only as the meeting decides (withdraw, then transfer)."
+          succession: {rule: election, electorate: vote}
+        treasurer:
+          title: Treasurer of the Common Fund
+          holders: [Quill]
+          term: 6
+          term_calendar: true
+          powers: [speak]
+          controls: [treasury]
+          duties: "Keep the Common Fund (credit) and the Commons' treasury (pennies): pay the Window's copper (fulfil), lend or pay
+            from the fund when the meeting decides (invoke {\"action\": \"fund_pay\", \"args\": [\"<member>\", <credit>, \"<reason>\"]}),
+            and report both funds to the meeting."
+          succession: {rule: election, electorate: vote}
+        moderator:
+          title: Moderator of the meeting
+          holders: [Hollis]
+          term: 4
+          term_calendar: true
+          powers: [speak]
+          duties: "Chair the general meeting in the assembly: open each round's business, remind members to vote on open motions
+            (vote {\"ballot\": ..., \"choice\": ...}), and withdraw a motion that is out of order, with the reason (invoke
+            {\"action\": \"withdraw_motion\", \"args\": [\"<motion id>\", \"<reason>\"]})."
+          succession: {rule: lot}
+        registrar:
+          title: Tallyman
+          holders: [Nim]
+          powers: [speak]
+          duties: "Keep the Commons' books: the duty roster (excuse a sick member's duty: invoke {\"action\": \"excuse_duty\",
+            \"args\": [\"<member>\", \"<reason>\"]}), the forest licences (licence_issue, licence_revoke: only on the meeting's
+            motion), and help members word their motions (post MOTION: ... in assembly)."
+          succession: {rule: election, electorate: vote}
+        key:
+          title: Key holder of the common armoury
+          holders: [Pell, Rook]
+          seats: 2
+          term: 4
+          term_calendar: true
+          duties: "Hold one of the two keys of the common armoury: one key holder requests a blade for a member on militia duty
+            (invoke {\"action\": \"request_arms\", \"args\": [\"<member>\", \"weapons\", \"<reason>\"]}), the other issues it
+            (issue_arms), only for a muster the meeting passed."
+          succession: {rule: lot}
+        editor:
+          title: Editor of the paper
+          holders: [Cass]
+          term: 6
+          term_calendar: true
+          powers: [speak]
+          duties: "Edit the members' paper (post in paper): the meeting's news, the Steward's and Treasurer's reports, and a
+            minority statement whenever three members ask for one."
+          succession: {rule: lot}
+        archivist:
+          title: Archivist and crier
+          holders: [Ilse]
+          term: 6
+          term_calendar: true
+          powers: [speak]
+          duties: "Keep the record: each round post a short summary of the meeting's motions and results in the paper or the
+            assembly."
+          succession: {rule: lot}
+      treasury: {penny: 400, weapons: 2}    # the Window's float (it buys the miners' copper) and two common blades (the armoury)
+    - id: A1
+      name: the Miners' Co-op
+      founder: Cade
+      members: [Moss, Orrin, Pell, Rook, Tuck, Wat, Garr, Nim]
+      admission: closed
+      procedure: founder
+      charter: "The Miners' Co-op holds the copper camp: only its members mine there, each owes it 1 copper a round, and it pays
+        them a wage out of what the Commons pays for its copper at the Window. Its Steward runs it; its smith forges."
+      offices:
+        steward:
+          title: Steward of the Miners' Co-op
+          holders: [Cade]
+          powers: [speak]
+          controls: [treasury]
+          duties: "Run the Miners' Co-op: post the round's quota and sales plan on pit, pay the miners' wages each round
+            (fulfil), deliver copper to the Commons at the Window (fulfil), and keep the treasury solvent."
+          succession: {rule: election}
+        smith:
+          title: Smith
+          holders: [Pell]
+          term: 4
+          term_calendar: true
+          powers: [{action: transfer, item: copper, qty: 4}]
+          duties: "Draw copper (up to 4 a round) out of the Co-op's treasury to forge for it."
+          succession: {rule: lot}
+      treasury: {penny: 120, copper: 40}
+  stores:
+    - {id: S1, owner: J0, food: 130, capacity: 250, name: the common store}
+  holdings:                       # pennies for trade (the market and the outside); every member holds a club (06 §3.4)
+    Anselm: {penny: 10, crude: 1}
+    Dora: {penny: 10, crude: 1}
+    Moss: {penny: 10, crude: 1}
+    Marsh: {penny: 10, crude: 1}
+    Sela: {penny: 10, crude: 1}
+    Cass: {penny: 10, crude: 1}
+    Orrin: {penny: 10, crude: 1}
+    Quill: {penny: 10, crude: 1}
+    Hollis: {penny: 10, crude: 1}
+    Cade: {penny: 10, crude: 1}
+    Bryn: {penny: 10, crude: 1}
+    Garr: {penny: 25, crude: 1}
+    Nim: {penny: 10, crude: 1}
+    Pell: {penny: 10, crude: 1}
+    Rook: {penny: 10, crude: 1}
+    Tuck: {penny: 10, crude: 1}
+    Wat: {penny: 10, crude: 1}
+    Fen: {penny: 10, crude: 1}
+    Ada: {penny: 10, crude: 1}
+    Lise: {penny: 10, crude: 1}
+    Wren: {penny: 10, crude: 1}
+    Nell: {penny: 10, crude: 1}
+    Ilse: {penny: 10, crude: 1}
+    Ivo: {penny: 10, crude: 1}
+  camp_rights:
+    - {resource: copper, members: A1, exclusive: true}
+  contracts:
+    - template: Cooperative Store         # the Food Co-op as the Commons' own law (polity form; 12_cooperative_world.md §7)
+      in: J0
+      params:
+        STORE: S1
+        KEEP: 2
+        PERIOD: 3
+        PAYOUT: 0.5
+        RESERVE: 120
+        CREDIT_PER_FOOD: 0.5
+        PUBLIC_STOCK: false
+        STEWARD: J0.steward
+        PLEDGES: {Dora: 4, Bryn: 4, Fen: 4, Ada: 4, Lise: 4, Wren: 3, Nell: 3}
+    - template: Payroll                   # the miners: a wage and 1 copper a round owed to the Co-op (a quota leg Q, manual: as
+      in: A1                              # Private's Ashby, a substitute for the harvest cut)
+      roster: {Moss: {wage: 1.5, quota: 1}, Orrin: {wage: 1.5, quota: 1}, Pell: {wage: 1.5, quota: 1}, Rook: {wage: 1.5, quota: 1},
+               Tuck: {wage: 1.5, quota: 1}, Wat: {wage: 1.5, quota: 1}, Cade: {wage: 1.5}}
+      params:
+        OFFICE: steward
+        TERMS: {goods: copper, quota: 0}
+        LEGS:
+          - {id: W, from: treasury, to: member, item: pay, qty: wage, owe: true, when: {basis: salary}}
+          - {id: Q, from: member, to: treasury, item: goods, qty: quota, keep: 0, breach: false}
+    - template: Standing Contract         # the Window (as Private's): the Commons buys the Miners' Co-op's copper, 6 a round at 2.5
+      in: J0
+      roster:
+        "office:A1.steward": {firm: "assoc:A1", goods: copper, qty: 6, price: 2.5}
+      params:
+        LABEL: Window
+        TAG: window
+        ROLE: seller
+        PARTIES: {}
+        BOND: {}
+        PENALTY: {}
+        EXIT_FEE: 0
+        PROCEDURE: ""
+        OFFICE: J0.treasurer
+        TERMS: {firm: "", goods: copper, qty: 0, price: 0, pay: penny}
+        LEGS:
+          - {id: D, from: firm, to: treasury, item: goods, qty: qty, breach: false}
+          - {id: P, from: treasury, to: firm, item: pay, qty: price, per: D, owe: true}
+        ACTIONS: {set: window_price}
+        SET_TERM: price
+  channels:
+    - id: assembly
+      owner: J0
+      by: Hollis
+      purpose: "The general meeting of the Commons. A motion exists only once posted here as a line MOTION: <text> (for example
+        MOTION: RESERVE 100, MOTION: LIMIT 15, MOTION: MUSTER <member> <reason>); the meeting votes on its ballot. Reports,
+        musters, duty minutes and the official record are posted here."
+      readers: {all: true}
+      writers: {all: true}
+      rate: 2
+      delivery: push
+    - id: market
+      owner: J0
+      by: Nim
+      purpose: "The market board. One line per offer: SELL <qty> <item> @ <price> penny|credit or BUY ...; an offer in pennies
+        counts only once posted here (take_offer [id, qty]); credit is paid with pay_credit."
+      readers: {all: true}
+      writers: {all: true}
+      rate: 2
+      delivery: pull
+      followed_by: readers
+    - id: paper
+      owner: J0
+      by: Cass
+      purpose: "The members' paper: the meeting's news, the officers' reports and minority statements (three members may ask the
+        editor to print one)."
+      readers: {all: true}
+      writers: {any: [{office: J0.editor}, {office: J0.archivist}]}
+      delivery: push
+    - id: pit
+      owner: A1
+      by: Cade
+      purpose: "The Miners' Co-op's floor: the round's quota and the sales plan."
+      readers: {members: A1}
+      writers: {members: A1}
+      listed: false
+      members: [Cade, Moss, Orrin, Pell, Rook, Tuck, Wat, Garr, Nim]
+      delivery: push
+    - id: "@J0"
+      purpose: "petitions to the Commons' officers"
+      readers: {any: [{office: J0.steward}, {office: J0.treasurer}, {office: J0.moderator}]}
+  laws:
+    - template: Assembly Motions
+      params: {CHANNEL: assembly, ELECTORATE: vote, QUORUM: 0.25, CHAIR: J0.moderator}
+    - template: Commons Dues
+      params: {DUES: 1}
+    - template: Duty Roster
+      params:
+        TASKS:
+          - {name: gather, kind: gather, slots: 3, qty: 2, store: S1, keep: 1}
+          - {name: minutes, kind: post, slots: 1, channel: assembly}
+        WAGE: 2
+        KEEPER: J0.registrar
+    - template: Militia Roll
+      params: {PAIR: 2, STIPEND: 1, WARDS: [J0.steward]}
+    - template: Muster Act
+      params: {SERVE_ROUNDS: 2, DETAIN_ROUNDS: 2}
+    - template: Armoury Act
+      params: {ITEMS: [weapons], FIRST_KEY: J0.key, SECOND_KEY: J0.key, ISSUE_TO: [militia_duty]}
+    - template: Mutual Credit             # last: it books what the store, the dues, the roster and the militia posted this round
+      params: {LIMIT: 10, FUND_OFFICE: J0.treasurer, OPENING: {Sela: -8}}
+    - code: |
+        title = "Free Coinage"
+        intent = "The penny is convertible: anyone may deposit timber, stone or copper at the Commons' reserve for pennies at the reserve's price, or redeem pennies for them."
+        rank = "statute"
+
+        def on_enact():
+            set_convertible("penny")
+    - template: Licence                   # two of the three forests are licensed to the 7 producers; the third is the common wood
+      params: {GATES: [harvest, hunt], TARGETS: [camp4, camp6], RIGHT: forester, REGISTRAR: J0.registrar,
+               HOLDERS: [Dora, Bryn, Fen, Ada, Lise, Wren, Nell], TAG: licence}
+    - template: Market Board
+      params: {BOARD: market, TTL: 3}
+    - template: Jury Panel                # trial by jury: three members by lot, drawn again every 6 rounds
+      params: {JURORS: 3, TERM: 6}
+    - template: Criminal Code             # unlawful attacks and bribes are charged; a jury's guilty verdict sentences
+      params: {MODE: trial, FINE_ITEM: penny, OFFICIAL_RIGHTS: [J0.steward, J0.treasurer, J0.moderator, J0.registrar, juror]}
+    - template: Bodyguards Act
