@@ -37,9 +37,10 @@ conflict:
   model: harm
   start: {weapons: 0}
   assassin: {present_prob: 0.0}
-subsistence:
-  enabled: true
-  start_food: [14, 18]
+subsistence:                      # light (review 26 R1): food in hand lasts the run (spoiling at 3% a round, not 15%), so foraging
+  enabled: true                   # is a choice, not a chore (pilot P1 at the defaults: 37% of actions were subsistence)
+  start_food: [18, 22]
+  spoil: 0.03
   forest: {capacity_per_agent: 7.0, start_stock: 1.0}
   game: {capacity_per_agent: 10.0, start_stock: 1.0}
 actions:

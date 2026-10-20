@@ -1178,6 +1178,12 @@ _INSTITUTION_ROWS = [
               'text); (b) the share of the other agents with their own profile of at least {min_bytes} bytes (people/<Name>.md); (c) the '
               'files of at least {min_bytes} bytes under evidence/ / {evidence}, capped at 1. Files under _records/ and other read-only prefixes do not count.',
          params=IG.defaults_sampler("Chronicler"), score=IG.h_chronicler, needs=frozenset({'states'}), version=3),   # v2 clerks count; v3 a profile counts only for its own name
+    Goal('Aim', 'Institution', 0, gate="institution", requires=(), share="direct",
+         text='{text}',
+         rule='Over the last scored rounds (the final window), the share of rounds in which you belong to a decisive set of at most '
+              '{decisive} agent(s) for procedural laws (a set that can pass them by itself). The text of the aim is shown to you as '
+              'written; nothing else of it is scored.',
+         params=IG.defaults_sampler("Aim"), score=IG.h_aim, needs=frozenset({'states'}), version=1),   # review 29: the bench's briefs
 ]
 
 
