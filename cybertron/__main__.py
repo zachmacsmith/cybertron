@@ -392,6 +392,7 @@ def main(argv=None):
     __import__("cybertron.publish", fromlist=["add_command"]).add_command(sub)    # publish RUN.. --repo OWNER/NAME [--push]
     __import__("cybertron.rerun", fromlist=["add_command"]).add_command(sub)      # rerun RUN [--out DIR] [--dry-run]: its own code
     __import__("cybertron.interview", fromlist=["add_command"]).add_command(sub)  # interview RUN --round N --question ..: in character
+    __import__("cybertron.fetch", fromlist=["add_commands"]).add_commands(sub)  # fetch RUN_ID; continue RUN --at N [--rounds K]
     from cybertron import preview
     p = sub.add_parser("preview", help="render what agents see, with token counts (cybertron/preview.py)")
     preview.add_arguments(p); p.set_defaults(fn=lambda a: sys.exit(preview.cmd(a)))
