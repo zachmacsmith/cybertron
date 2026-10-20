@@ -742,7 +742,9 @@ def act_draft(k, aid, template=None, parties=None, roster=None, terms=None, para
     bilateral = kind == "preset" and bool(({**SD.PRESETS[tname]["params"], **p}).get("PARTIES"))
     return (f"Draft saved as {ref} ({len(code):,} characters of code: file it by reference, never paste it). "
             f"{_summary(tname, kind, p, code)}. " + (f"Shared (read) with {', '.join(shared)}. " if shared else "")
-            + f"Check it with preview_law {{\"draft\": \"{ref}\"}}. " + _filing(kind, bilateral, ref, tname))
+            + (f"Check it with preview_law {{\"draft\": \"{ref}\"}}. " if kind != "preset" else
+               "It passed the law check here (a preset is long: previewing it is slow; its legs are summarised above). ")
+            + _filing(kind, bilateral, ref, tname))
 
 
 # ====================================================================== filing by reference

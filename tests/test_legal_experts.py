@@ -234,7 +234,7 @@ def test_a_retainer_drafted_for_a_new_client_is_founded_by_reference_and_makes_c
               **{"for": "Orrin"})
     ref = re.search(r"legal/drafts/\S+\.py", out).group()
     assert "Shared (read) with Orrin" in out and "create_contract" in out and "8," not in out.split("Draft saved")[0]
-    assert "preview_law" in out and "fee=1" in out
+    assert "passed the law check" in out and "fee=1" in out
     assert LG.with_draft(k, "Orrin", {"draft": ref, "scenario": "none"})["code"].startswith("title = 'Retainer'")
     with pytest.raises(ActionError, match="cannot read"):
         act(k, "Hale", "create_contract", name="x", draft=ref)          # not shared with Hale
