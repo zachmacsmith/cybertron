@@ -16,7 +16,7 @@ models:
     Ezra: claude-sonnet-5-5       # a worker
 goals:
   explicit:
-    Oren: {primary: Company, params: {contract: A1, members: 4, payout_rounds: 5, rounds: 8}}
+    Oren: {primary: Company, params: {contract: A1, members: 4, payout_rounds: 5, rounds: 8, payouts: legs}}   # 31.09 #9: only leg payouts count
 contracts: {legs_default: manual, obligations: true, role_cards: true}
 institutions: {petition_public_after: 2}
 actions: {forgiving: true}

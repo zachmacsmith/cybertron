@@ -21,7 +21,9 @@ J0), a store declared here, an office declared here. `python -m cybertron spec c
           procedure: members                          members | two_thirds | founder: how its code changes
           charter: "text"                             what it is for: its first law, a public statement of purpose
           laws: [{template, params} | {code}]         further code (library templates, e.g. Day Labour; or law code)
-          offices: {name: {title, holders, duties, controls, powers, seats, term, succession}}   (an Offices Act in its code)
+          offices: {name: {title, holders, duties, controls, powers, seats, term, succession}}   (an Offices Act in its code;
+                                                      "{best:camp1}" in duties is that camp's recipe: the dial setting that
+                                                      yields best, resolved at generation, e.g. [0, 9, 9, 0]; review 31 02 §5)
           treasury: {item: qty}
         - id: J0                                      the polity: offices (an Offices Act of J0), treasury, laws
       stores: [{id: S1, owner: J0 | A1 | Name, food: 60, capacity: 150, name: granary}]   in id order S1, S2, ...
@@ -340,6 +342,42 @@ def _selector_agents(sel) -> list:
     return out
 
 
+# ---------------------------------------------------------------------- recipes in office duties (review 31 02 §5, 08 item 1.10)
+_BEST = re.compile(r"\{best:([A-Za-z0-9_]+)\}")
+_DRIFTING = ("conditions", "history", "drift")                          # modifiers under which a camp has no fixed recipe
+
+
+def recipe(inst: dict, camp_id: str, where: str = "start") -> list:
+    """The dial setting that yields best at a dial camp of the world (its type's best_input, mapped to the dials an agent sets):
+    what an employer can tell a worker so a tutorial camp is labour, not a search. ValueError when the camp has none."""
+    from cybertron import camptypes as CT
+    from cybertron.camptypes import modifiers as M
+    cid = f"camp{camp_id}" if str(camp_id).isdigit() else str(camp_id)
+    c = next((x for x in inst.get("camps") or () if x.get("id") == cid), None)
+    if c is None:
+        raise ValueError(f"{where}: {{best:{camp_id}}}: no camp {cid} in this world")
+    if not c.get("type") or not c.get("dials"):
+        raise ValueError(f"{where}: {{best:{camp_id}}}: {cid} is not a dial camp, so it has no recipe")
+    bad = [m for m in _DRIFTING if M.on(c, m)]
+    if bad:
+        raise ValueError(f"{where}: {{best:{camp_id}}}: {cid}'s rule moves ({', '.join(bad)} modifiers), so no fixed recipe "
+                         f"exists (switch them off for it: camps.typed.modifiers)")
+    best = CT.get(c["type"])(c, None).best_input(None)
+    if best is None:
+        raise ValueError(f"{where}: {{best:{camp_id}}}: a {c['type']} camp has no single best setting")
+    return [int(v) for v in M.to_actual(None, c, best)]
+
+
+def _recipes(b: dict, inst: dict) -> None:
+    """Every "{best:<camp>}" in an office's duties replaced by that camp's recipe (JSON, e.g. [0, 9, 9, 0])."""
+    import json as _json
+    for e in b.get("institutions") or ():
+        for name, d in (e.get("offices") or {}).items():
+            if isinstance(d, dict) and isinstance(d.get("duties"), str) and "{best:" in d["duties"]:
+                where = f"start.institutions.{e.get('id')}.offices.{name}.duties"
+                d["duties"] = _BEST.sub(lambda m: _json.dumps(recipe(inst, m.group(1), where)), d["duties"])
+
+
 # ---------------------------------------------------------------------- compile (generation)
 def _entry(kind, i, spec, note=None) -> dict:
     return {"id": f"start:{kind}:{i}", "at": {"round": 0, "phase": "setup"}, "op": OP, "args": {"kind": kind, "spec": spec},
@@ -462,6 +500,7 @@ def compile(sp: dict, inst: dict) -> dict:
     from cybertron import features as FT
     from cybertron import succession as SU
     b = copy.deepcopy(_block(sp))
+    _recipes(b, inst)                                                   # "{best:camp1}" in office duties: the camp's recipe
     from cybertron import contracts as KC
     legs_mode = str(KC.cfg_of(sp).get("legs_default") or "auto")     # manual obligations: the standing contracts' leg mode
     names = {a["id"] for a in inst["agents"]}

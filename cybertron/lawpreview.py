@@ -522,6 +522,9 @@ def preview_law(k, agent, code, scenario=None, *, jurisdiction=None, amends=None
                                                                           k.w["laws"][lid]["code"])
             rep["enact"]["failed_calls"] = [f"{f['law']}: {f['fn']}({', '.join(f['args'])}): {f['reason']}"
                                             for f in (failed + failed2)[:10] if f["law"] not in hidden]
+            note = LE.control_note(k, lid, k.w["laws"][lid]["code"])     # review 31.09 #6: a grant the office-control gate overrides
+            if note:
+                rep["enact"]["control_note"] = note
         rep["static"] = _static(k, lid, system, amends)
         acc = _gas_since(k, mark0)                                      # the proposal and the enactment
         rep["warnings"] += [f"proposal: {w}" for w in _events(k, start0, agent, hidden)[1]]
@@ -609,6 +612,8 @@ def render(rep: dict, budget: int = TOKENS) -> str:
                      + ("; INERT: as written it changes nothing and no hook of it acts later" if en.get("inert") else "") + ".")
         if en.get("failed_calls"):
             lines.append("Failed law calls: " + "; ".join(en["failed_calls"]))
+        if en.get("control_note"):
+            lines.append(en["control_note"])
     for s in rep["scenarios"]:
         head = f"Scenario {s['name']}" + (f" {s['action']} {_j(s['args'])}" if s.get("action") else "")
         lines.append(f"{head}: {'ok' if s['ok'] else 'refused'}: {str(s['result'])[:200]}")

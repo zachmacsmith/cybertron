@@ -145,3 +145,119 @@ def test_v2_specs_stores_cost_what_the_world_has(tmp_path):
     k.w["agents"]["Alder"]["holdings"]["timber"] = 16.0
     assert "store" in A.act(k, "Alder", "build", {"kind": "store"}).lower()
     assert k.bal("Alder", "timber") == 0
+
+
+# ---------------------------------------------------------------------- 6. a law whose grant the office-control gate overrides
+WIDEN = '''title = "Open Granary"
+intent = "Councillors may draw from the granary too."
+def before_withdraw(p, chain):
+    if p["store"] != "S1":
+        return None
+    if has(p["agent"], "J0.keeper") or p["agent"] == "Bo":
+        return None
+    return {"block": True, "reason": "only the keeper and Bo"}
+'''
+
+
+def test_a_law_the_office_control_gate_overrides_is_flagged(tmp_path):
+    from cybertron import actions as A
+    from cybertron import lawpreview as LP
+    inst, out = run(tmp_path, base(rounds=1))
+    k = kernel_at(out, 1)
+    rep = LP.preview_law(k, "Bo", WIDEN)
+    text = LP.render(rep)
+    assert "Office control: only the holders of the offices controlling J0's stores take food out of them (store S1: Keeper (Cy))" \
+        in text and "lets nobody else draw" in text
+    allow = WIDEN.replace('    if has(p["agent"], "J0.keeper") or p["agent"] == "Bo":\n        return None',
+                          '    if has(p["agent"], "J0.keeper") or p["agent"] == "Bo":\n        return True')
+    assert "Office control" not in LP.render(LP.preview_law(k, "Bo", allow))      # an explicit allow passes the gate: no flag
+    n0 = len(k.events)
+    A.act(k, "Bo", "propose", {"code": WIDEN})
+    prop = [e for e in k.events[n0:] if e["type"] == "proposal"]
+    assert prop and "Office control" in prop[0]["data"]["control_note"]
+    k.enact(prop[0]["data"]["law"])
+    eff = [e for e in k.events[n0:] if e["type"] == "law_effect"]
+    assert eff and "Office control" in eff[-1]["data"]["control_note"]
+    from cybertron import laweffects as LE
+    assert "Office control" in LE.render(k, eff[-1], "[r1]")
+    import pytest
+    with pytest.raises(A.ActionError, match="Keeper"):                       # and indeed: the gate refuses Bo
+        A.act(k, "Bo", "withdraw", {"store": "S1", "qty": 1})
+
+
+# ---------------------------------------------------------------------- 8. a petition actually sent (the v3 laws world)
+def test_the_v3_laws_world_sends_a_petition_listed_then_public(tmp_path):
+    from pathlib import Path
+    from cybertron import generator as GN
+    from cybertron import interventions as IV
+    from cybertron import runner
+    sched = IV.load_schedule(Path("cybertron/specs/usability/v3/schedules/laws_petition.yaml"))
+    sp = S.deep_merge(S.load("usability/v3/laws"), {"rounds": 4, "parallel_calls": 1})
+    pol = Script()
+    out = Path(runner.run(GN.generate(sp, 1), pol, tmp_path / "run", log=lambda *a: None, schedule=sched))
+    evs = events(out)
+    sent = [e for e in evs if e["type"] == "channel_post" and e["data"].get("channel") == "@J0"]
+    assert len(sent) == 1 and sent[0]["agent"] == "Gil" and sent[0]["round"] == 2
+    assert "PETITIONS to J0 waiting for an answer (1): Gil" in pol.prompts[(2, "Ada")]
+    assert "1 petition(s) unanswered" in card(pol.prompts[(3, "Bram")], "ROLE: Councillor")
+    pub = [e for e in evs if e["type"] == "petition_unanswered"]
+    assert len(pub) == 1 and pub[0]["round"] == 3 and "Councillor (Ada, Bram, Cora)" in pub[0]["data"]["text"]
+
+
+# ---------------------------------------------------------------------- 9. Company: which payouts count
+def test_company_goal_counts_leg_payouts_not_token_dividends(tmp_path):
+    from cybertron import institution_goals as IG
+    from cybertron.history import History
+    plan = {(0, "Ada"): [("transfer", {"to": "Bo", "item": "penny", "qty": 1, "as": "A1"})],     # a 1-penny "dividend"
+            (1, "Ada"): [("transfer", {"to": "Di", "item": "penny", "qty": 1, "as": "A1"})],
+            (2, "Ada"): [("fulfil", {"contract": "A1", "leg": "W"})]}                          # wages: a contract leg
+    inst, out = run(tmp_path, manual(base(rounds=3)), Script(plan))
+    h = History.load(out)
+    p = {"contract": "A1", "payout_rounds": 3}
+    assert IG._payout_rounds(h, "A1", "Ada", IG.params_of("Company", p)) == {0, 1, 2}                 # default: as before
+    assert IG._payout_rounds(h, "A1", "Ada", IG.params_of("Company", {**p, "payouts": "legs"})) == {2}
+    assert IG._payout_rounds(h, "A1", "Ada", IG.params_of("Company", {**p, "payout_min": 2})) == {2}  # 3 + 2 penny of wages
+    any_ = IG.h_company(h, "Ada", p)
+    assert IG.h_company(h, "Ada", {**p, "payouts": "legs"}) < any_
+
+
+def test_company_goal_defaults_keep_the_old_text():
+    from cybertron import goal_registry as G
+    from cybertron import institution_goals as IG
+    assert IG.OPTIONAL["Company"] == {"payouts": "any", "payout_min": 0} and "payouts" not in IG.DEFAULTS["Company"]
+    p = G._institution_fill("Company", {})
+    assert p["payout_kind"] == "(dividends, wages, purchases)" and p["payout_min_text"] == "" and p["payout_rule"] == ""
+    from cybertron import schema as SC
+    for name in ("contracts", "farming", "laws", "market", "payroll"):
+        assert SC.validate(S.load(f"usability/v2/{name}")) == []
+    assert SC.validate(S.load("usability/v3/laws")) == []
+    assert any("payouts must be one of" in e for e in SC.validate(S.deep_merge(S.load("usability/v2/payroll"), {
+        "goals": {"explicit": {"Oren": {"primary": "Company", "params": {"payouts": "some"}}}}})))
+    for name in ("contracts", "payroll"):
+        assert S.load(f"usability/v2/{name}")["goals"]["explicit"][{"contracts": "Mara", "payroll": "Oren"}[name]]["params"][
+            "payouts"] == "legs"
+
+
+# ---------------------------------------------------------------------- 08 item 1.10: the recipe placeholder in office duties
+def test_recipe_placeholder_in_office_duties():
+    import copy
+    import pytest
+    from cybertron import camptypes as CT
+    from cybertron import generator as GN
+    sp = S.load("usability/v2/payroll")
+    sp = copy.deepcopy(sp)
+    a1 = next(e for e in sp["start"]["institutions"] if e["id"] == "A1")
+    a1["offices"]["foreman"] = {"title": "Foreman", "holders": ["Ash"],
+                                "duties": 'Fell timber at camp1 with harvest {"camp": "camp1", "x": {best:camp1}}.'}
+    inst = GN.generate(sp, 1)
+    camp = next(c for c in inst["camps"] if c["id"] == "camp1")
+    best = CT.get(camp["type"])(camp, None).best_input(None)
+    code = json.dumps(inst["start"]["schedule"])
+    assert json.dumps(best) in json.dumps(json.loads(code)) and "{best:" not in code
+    from cybertron import start as STT
+    assert STT.recipe(inst, "camp1") == best and STT.recipe(inst, "1") == best
+    with pytest.raises(ValueError, match="not a dial camp"):
+        STT.recipe(inst, "camp2")                                                     # the forest
+    a1["offices"]["foreman"]["duties"] = "Work {best:camp9}."
+    with pytest.raises(ValueError, match="no camp camp9"):
+        GN.generate(sp, 1)

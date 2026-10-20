@@ -150,6 +150,10 @@ def do_propose(k, jurisdiction, draft, actor=None, preview=None) -> dict:
             tgt = k.w["laws"].get(law.get("amends")) or {}
             if LE.inert("amend" if law.get("amends") else "enact", rest, tgt.get("code"), law["code"]):
                 extra["inert"] = True
+        if LE.effects_on(k) and not law.get("repeal_target"):
+            note = LE.control_note(k, lid, law["code"])                 # review 31.09 #6: a grant the office-control gate overrides
+            if note:
+                extra["control_note"] = note
     sims = similar_laws(k, lid)                                        # law.v2 only: a duplicate is noted, not refused
     if sims:
         extra["similar_to"] = sims

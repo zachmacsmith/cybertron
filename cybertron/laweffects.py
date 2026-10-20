@@ -205,6 +205,53 @@ def inert(act: str, diff: list, old_code=None, new_code=None) -> bool:
     return _sig(old_code) == _sig(new_code)
 
 
+# ---------------------------------------------------------------------- the office-control gate (review 31.09 #6)
+def _cannot_allow(node) -> bool:
+    """A before-hook's return value that can never be an explicit allow (None, False, a number, a dict without "block" or with a
+    constant true "block"); anything computed might be one."""
+    if node is None:
+        return True
+    if isinstance(node, ast.Constant):
+        return node.value is not True
+    if isinstance(node, ast.Dict):
+        for key, v in zip(node.keys, node.values):
+            if isinstance(key, ast.Constant) and key.value == "block":
+                return isinstance(v, ast.Constant) and bool(v.value)
+        return True
+    return False
+
+
+def control_note(k, lid, code=None) -> str:
+    """A law of an institution whose stores an office controls (institutions.office_control), with a before_withdraw that can only
+    block: under the office-control rule nobody but the controlling offices' holders draws from such a store unless a law of its
+    owner explicitly allows the draw, so whatever the hook means to permit is refused (the Millbrook-style silent no-op of review
+    31.09: a council's amendment letting councillors draw did nothing). "" when it does not apply. Setup acts are not flagged."""
+    from cybertron import institutions as IN
+    from cybertron import jurisdictions as J
+    from cybertron import accounts as AC
+    if not IN.control_on(k) or "subsistence" not in k.w or _vis(k) == "monitor":
+        return ""
+    rec = k.w["laws"].get(lid) or {}
+    tree = _tree(code if code is not None else rec.get("code"))
+    fn = next((n for n in (tree.body if tree else ()) if isinstance(n, ast.FunctionDef) and n.name == "before_withdraw"), None)
+    if fn is None or not all(_cannot_allow(r.value) for r in ast.walk(fn) if isinstance(r, ast.Return)):
+        return ""
+    iid = J.law_jur(k, lid)
+    held = []
+    for sid, st in sorted(AC.stores(k).items()):
+        offs = IN.controlling(k, iid, "store:" + sid) if st.get("owner") == iid else []
+        if offs:
+            who = "; ".join(f"{(IN.office(k, iid, o) or {}).get('title') or o} ({', '.join(IN.holders(k, iid, o)) or 'vacant'})"
+                            for o in offs)
+            held.append(f"store {sid}: {who}")
+    if not held:
+        return ""
+    return (f"Office control: only the holders of the offices controlling {iid}'s stores take food out of them ({'; '.join(held)}) "
+            f"unless a law of {iid} explicitly allows the draw (before_withdraw returning True or {{\"block\": False}}). This law's "
+            "before_withdraw never allows, so it can limit draws but lets nobody else draw: to widen them, return True for whom "
+            "it admits, or grant the controlling office's right.")
+
+
 # ---------------------------------------------------------------------- failed law calls (E4)
 def note_reason(k, reason) -> None:
     """Why the current law call failed (Kernel.move, the api's refusals, scope refusals, reseat): read by the watcher."""
@@ -398,6 +445,9 @@ def effect(k, act: str, lid: str, old_code=None, **meta):
     data = {"law": lid, "title": rec.get("title"), "act": act, **meta, "changes": diff[:EFFECT_LINES], "n_changes": len(diff),
             "inert": inert(act, diff, old_code if act != "enact" else None, code if act != "repeal" else None),
             "failed_calls": failed[:FAILED_SHOWN]}
+    note = control_note(k, lid, code) if act != "repeal" else ""
+    if note:                                                            # review 31.09 #6: a grant the office-control gate overrides
+        data["control_note"] = note
     k.log("law_effect", None, data, vis=_vis(k))
     if act != "repeal" and expects_on(k):
         bad = unmet(k, code)
@@ -419,8 +469,10 @@ def render(k, e, tag) -> str | None:
             return head + " but changed nothing (inert: no holdings, rights, offices, stores, treasuries or rules changed, and no " \
                           "hook of it acts later)" + tail
         ch = d.get("changes") or []
+        if d.get("control_note"):
+            tail += ". " + d["control_note"]
         if not ch:
-            return (head + "; no immediate change (it acts through its hooks)" + tail) if fails else None
+            return (head + "; no immediate change (it acts through its hooks)" + tail) if fails or d.get("control_note") else None
         more = d.get("n_changes", len(ch)) - min(len(ch), 12)
         return head + "; it changed: " + "; ".join(ch[:12]) + (f" (+{more} more)" if more > 0 else "") + tail
     if t == "law_call_failed":

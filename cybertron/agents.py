@@ -600,6 +600,8 @@ def _render_event(k, e, viewer=None) -> str | None:
         if "at_enactment" in d:                                         # law.effects: what the enactment itself changes
             pv += "\n  At enactment: " + ("; ".join(d["at_enactment"]) or "no change") + (
                 " (INERT: as written it changes nothing in the world and installs no hook that acts later)" if d.get("inert") else "")
+        if d.get("control_note"):                                       # review 31.09 #6
+            pv += "\n  " + d["control_note"]
         if "amends" in d or "by_law" in d:                              # law.v2 (P3.4): amendments and proposals by law
             by = who or f"law {d['by_law']}"
             what = f"{d['law']}, an amendment of {d['amends']} ({d['class']}, rank {d.get('rank')}; reason: {d.get('reason') or '-'})" \
