@@ -190,6 +190,9 @@ def _need(inst, a, rights, n) -> bool:
     if kind == "combat":                                                # "combat:harm": conflict's combat model (conflict.model_of)
         from cybertron import conflict as CF
         return CF.model_of(inst["spec"]) == v
+    if kind == "lawyer":                                                # review 31.14: "lawyer:expert" owns a legal archive
+        from cybertron import lawguide as LGD
+        return LGD.static_expert(inst, a)
     if kind == "camp":                                                  # review 15/19: "camp:<type>": the world has such a camp
         return any(c.get("type") == v for c in inst.get("camps") or [])
     raise ValueError(f"unknown requirement {n!r}")
@@ -1156,6 +1159,8 @@ DOC_ORDER = (
     "craft", "watch",                                                   # the harm combat model (docs/review/21_combat.md)
     "tend", "improve", "practice", "clear",
     "fulfil")                                                           # manual obligations (cybertron/obligations.py)
+
+
 if not sorted(ACTIONS_ORDER) == sorted(REG) == sorted(DOC_ORDER):
     raise ValueError("ACTIONS_ORDER and DOC_ORDER must name every registered action exactly once")
 
@@ -1252,5 +1257,26 @@ ACTIONS_ORDER += ("read_register", "represent", "withdraw_case")
 DOC_ORDER += ("read_register", "represent", "withdraw_case")
 REG["read_register"] = replace(REG["read_register"], fed=-2)            # a look-up: open to the starving too (as _fed_table)
 FED["read_register"] = -2
+
+
+# ---------------------------------------------------------------------- review 31.14: legal experts (cybertron/lawguide.py)
+# Opt-in by spec: only where a directories store is seeded with the legal archive (its owner is the expert); actions._act treats
+# draft as unknown elsewhere, so no existing world's prompts, manuals or errors change.
+def _k_lawyer(inst, k, a, r):
+    from cybertron import lawguide as LGD
+    return LGD.when_expert(inst, k, a, r)
+
+
+R("draft", "draft a law or contract from a template into your legal archive, for a client", "your role",
+  needs=("flag:law.v2", "lawyer:expert"), when=_k_lawyer,
+  handler="lawguide:act_draft", module="directories", category="political",
+  aliases={"preset": "template", "name_of": "name", "client": "for", "clients": "for", "file": "path"},
+  doc='draft {"template": "Retainer", "parties": {"Ann": "client", "You": "counsel"}, "terms": {"fee": 1}, "for": "Ann"}: write '
+      'a complete draft of a standing-contract preset (parties, roster, terms) or any law or contract template (params) into '
+      'drafts/ of your legal archive and give the client ("for") read access; the answer summarises it and gives the exact '
+      'call that files it by reference ({"draft": "<dir>/<path>"} in place of "code" in propose, amend, create_contract, '
+      'propose_contract_change and preview_law). Your archive (guide/00-index.md) explains the whole legal system')
+ACTIONS_ORDER += ("draft",)
+DOC_ORDER += ("draft",)
 if not sorted(ACTIONS_ORDER) == sorted(REG) == sorted(DOC_ORDER):
     raise ValueError("ACTIONS_ORDER and DOC_ORDER must name every registered action exactly once")

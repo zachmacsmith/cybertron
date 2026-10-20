@@ -748,7 +748,8 @@ def lookup(k, aid, name, args: dict) -> str:
         return A.act(k, aid, "run_python", {"code": args.get("code", first)})
     if name == "preview_law":                                           # P3.5: law.v2 worlds only (lawpreview.lookup refuses otherwise)
         from cybertron import lawpreview as LP
-        return LP.lookup(k, aid, args)
+        from cybertron import lawguide as LGD                           # review 31.14: {"draft": "<dir>/<path>"} for "code"
+        return LP.lookup(k, aid, LGD.with_draft(k, aid, args))
     if name == "legal_position":                                        # law.v2 with law.digest (cybertron/digest.py)
         from cybertron import digest as DG
         return DG.act_legal_position(k, aid)
