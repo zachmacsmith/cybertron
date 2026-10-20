@@ -7,6 +7,8 @@ from __future__ import annotations
 
 import json
 
+import pytest
+
 from cybertron import spec as S
 
 from test_standing_contracts import NAMES, events, kernel_at, law_of, run, world
@@ -279,3 +281,21 @@ def test_miss_judged_flip_is_engine_19():
     with ST.use({"engine_version": 18, "defaults": {}}):                # an engine-18 run replays with end-of-round judgement
         assert KC.DEFAULTS["miss_judged"] == "round_end"
     assert KC.DEFAULTS["miss_judged"] == "turn"
+
+
+def test_bare_contract_action_names_under_forgiving(tmp_path):
+    """Review 31.10 §8 #7 (engine 20, actions.bare_names): under actions.forgiving a contract action named without its institution
+    resolves when one institution's action fits (invoke or as a top-level action); an ambiguous name lists the qualified ones."""
+    from cybertron import actions as A
+    plan = {(0, "Ada"): [("invoke", {"action": "set_wage", "args": ["Bo", 4]}), ("set_wage", {"args": ["Di", 3]})]}
+    sp = S.deep_merge(manual(base(rounds=1)), {"actions": {"forgiving": True}})
+    inst, out = run(tmp_path / "a", sp, Script(plan))
+    res = results(out, "Ada")[0]
+    assert all("ERROR" not in r for r in res[:2]) and "A1.set_wage" in res[0]
+    k = kernel_at(out, 1)
+    assert law_of(k, "A1", "Payroll")["state"]["roster"]["Di"]["wage"] == 3
+    k.w["actions"]["A9.set_wage"] = dict(k.w["actions"]["A1.set_wage"])
+    with pytest.raises(A.ActionError, match=r"choices: A1.set_wage, A9.set_wage"):
+        A.act(k, "Ada", "invoke", {"action": "set_wage", "args": ["Bo", 2]})
+    inst, out = run(tmp_path / "b", S.deep_merge(sp, {"actions": {"bare_names": False}}), Script(plan))
+    assert all("ERROR" in r for r in results(out, "Ada")[0][:2])        # engine 19: refused

@@ -101,6 +101,8 @@ for _n, _s in [("agents", "agents(cls=None)"), ("holders", "holders(right)"), ("
                ("rights_of", "rights_of(agent)")]:
     E.append((_n, "reads", "Read", _s, "", "prompt", "prompt"))
 E += [
+    ("resource_of", "reads", "Read", "resource_of(camp)", "what a camp yields (its resource, e.g. \"food\"); None for a camp not "
+     "disclosed. Engine 20.", "rare", "rare"),
     ("rng", "chance", "Read", "rng()", "a float in [0, 1) from the law stream, seeded per world. Every law shares one stream, so a law that "
      "draws in on_round_start shifts every later draw that round (a Chair or Council draw included); dry runs restore the stream, "
      "so a preview never shows what the real draw will be.", "rare", "rare"),

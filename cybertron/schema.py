@@ -492,6 +492,8 @@ def _ann():
         "law.effects": dict(types=("bool",)),                          # laws that work or fail loudly (E2, E3): law_effect, inert
         "law.call_failures": dict(types=("bool",)),                    # (E4): law_call_failed
         "law.expects": dict(types=("bool",)),                          # (T1): a law's `expects`, checked
+        "law.effects_detail": dict(types=("bool",)),                   # engine 20: force rules in law_effect; ranks on procedure_restored
+        "actions.bare_names": dict(types=("bool",)),                   # engine 20: forgiving resolves a bare contract action name
         "start": dict(kind="leaf", types=("dict", "null"), check=_check_start),   # established worlds (cybertron/start.py)
         "channels.v2": dict(types=("bool",)),                           # wave 9 C: channels v2 (cybertron/channels.py)
         "channels.delivery": dict(types=("str",), enum=("push", "pull")),
@@ -603,6 +605,8 @@ EXTRA = {
     # default; false (and reseat unread) is the behaviour before them
     "institutions.amend_offices": True, "institutions.reseat": "refuse",
     "law.effects": True, "law.call_failures": True, "law.expects": True,
+    "law.effects_detail": True,                                        # engine 20 (false before): force_rule changes count in law_effect
+                                                                       # (not inert) and procedure_restored names the ranks
     "start": None,                                                    # established worlds (cybertron/start.py): none = as before
     # wave 9 C, channels v2 (cybertron/channels.py; review 14 §4.6, D-37): off = byte-identical
     "channels.v2": False, "channels.delivery": "push", "channels.square": "one", "channels.square_rate": 2,
@@ -614,6 +618,8 @@ EXTRA = {
                                                                        # before a public notice names the office (0: never; listed to officers)
     "actions.forgiving": False,                                        # forgiving arguments (withdraw item/food, transfer to S1 or @A1,
                                                                        # a note on a transfer) and plain messages for missing arguments
+    "actions.bare_names": True,                                        # engine 20 (false before): under actions.forgiving a contract
+                                                                       # action's bare name (board_price) resolves when unambiguous
 }
 
 # One-line docs where neither base.yaml nor a DEFAULTS dict has a comment.

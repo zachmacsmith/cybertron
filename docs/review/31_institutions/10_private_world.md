@@ -307,6 +307,9 @@ producers cannot all sit on licensed forests with 08's names, so the farmer and 
 
 ## 8. Engine findings
 
+Status (wp/engine-bugs): #1 fails generation; #2 `cut_camps` / `cut_items` (harvest leg `camps` / `items`); #3 engine 19
+(`contracts.miss_judged: turn`); #6 and #7 engine 20 (`law.effects_detail`, `actions.bare_names`); #4 and #5 open.
+
 1. **A start contract over `contracts.max_laws` is skipped silently.** `start:contract_law:3` (A1's Grant) recorded no result and
    no error; nothing in `spec check` or the run log said so. It should fail generation or log an intervention error.
 2. **The Payroll harvest leg (`kind: harvest`) has no camp or item filter** (`standing.on_harvest`): a cut of 1.0 takes a miner's

@@ -391,3 +391,19 @@ def test_force_rule_checks(tmp_path):
         api["force_rule"]("bodyguards", 1)
     assert api["force_rule"]("bodyguards", True) and CF.bodyguards(k)
     assert any(e["type"] == "force_rule" and e["data"]["key"] == "bodyguards" for e in k.events)
+
+
+@pytest.mark.parametrize("detail", [True, False])
+def test_force_rule_counts_in_law_effect(tmp_path, detail):
+    """Review 31.10 §8 #6: a law whose only effect is a force_rule call is not inert; its law_effect names the rule (engine 20,
+    law.effects_detail; false keeps the engine-19 reading, inert)."""
+    sp = world()
+    if not detail:
+        sp = S.deep_merge(sp, {"law": {"effects_detail": False}})
+    k = setup(tmp_path, sp)
+    code = 'title = "Guards Rule"\nintent = "guards defend with their own body"\ndef on_enact():\n    force_rule("bodyguards", True)\n'
+    lb = k.new_law(code, "constitution")
+    k.enact(lb)
+    eff = [e["data"] for e in k.events if e["type"] == "law_effect" and e["data"]["law"] == lb]
+    assert eff and eff[-1]["inert"] is (not detail)
+    assert any("force rule bodyguards" in c for c in eff[-1]["changes"]) is detail

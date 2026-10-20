@@ -131,6 +131,7 @@ LAWFNS = _fns(
         F("reserve", "read"),
         F("price", "read"),
         F("stock", "read"),
+        F("resource_of", "read"),                                       # engine 20: what a camp yields
         F("round", "read"),
         F("laws", "read"),
         F("proposer", "read"),

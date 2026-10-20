@@ -643,15 +643,33 @@ def due_lines(k, aid) -> list:
         return []
     led = ledger(k, obs)
     mine, owed = {}, []
+    compact = bool(cfg(k).get("compact_lines"))                        # engine 20: laws with the same label and leg summed
+    owed_sum = {}
     for ob in obs:
         due, paid = led[ob["id"]]
         ob["due_now"], ob["paid"] = due, paid
         if aid in payers_of(k, ob["src"]):
-            mine.setdefault((ob["iid"], ob["label"], ob["leg"], ob["lid"]), []).append(ob)
+            mine.setdefault((ob["iid"], ob["label"], ob["leg"], None if compact else ob["lid"]), []).append(ob)
         elif ob["dst"] == aid and ob["kind"] != "duty" and due - paid > EPS:
-            owed.append(f"{_fmt(due - paid)} {ob['item']} from {party_name(k, ob['src'])} ({ob['iid']} {ob['leg']})")
+            if compact:
+                g = (party_name(k, ob["src"]), ob["iid"], ob["leg"], ob["item"])
+                owed_sum[g] = owed_sum.get(g, 0.0) + due - paid
+            else:
+                owed.append(f"{_fmt(due - paid)} {ob['item']} from {party_name(k, ob['src'])} ({ob['iid']} {ob['leg']})")
+    for (src, iid, leg, item), q in owed_sum.items():
+        owed.append(f"{_fmt(q)} {item} from {src} ({iid} {leg})")
     parts = []
     for (iid, label, leg, lid), xs in mine.items():
+        if compact and len({x["lid"] for x in xs}) > 1:                # one row per destination, summed over the laws
+            by = {}
+            for x in xs:
+                y = by.setdefault((x["dst"], x["src"], x["item"]), dict(x, due_now=0.0, paid=0.0, overdue=0.0))
+                y["due_now"] += x["due_now"]
+                y["paid"] += x["paid"]
+                y["overdue"] = float(y.get("overdue") or 0) + float(x.get("overdue") or 0)
+            n = len({x["lid"] for x in xs})
+            label = f"{label} ({n} laws)"
+            xs = list(by.values())
         if xs[0]["kind"] == "duty":
             if any(x.get("on") for x in xs):
                 parts.append(f"{iid} {label} {leg}: {xs[0]['check']} duty to {shown(k, xs[0]['dst'])} this round (done by acting)")
@@ -793,8 +811,8 @@ def petition_lines(k, aid) -> list:
 # ---------------------------------------------------------------------- role cards
 CARD_BUDGET = 1800                                                      # characters for the whole ROLE block (the essentials first)
 ACTION_ARGS = {"enrol": '["<agent>", <{term}>]', "drop": '["<agent>", <severance>]', "set": '["<agent> or all", <{term}>]',
-               "post": '["<job text>", <wage>]'}
-ACTION_WHAT = {"enrol": "take on", "drop": "remove", "set": "set {term}", "post": "post a job"}
+               "post": '["<job text>", <wage>]', "assign": '["<agent> or all", "<{term}>"]'}
+ACTION_WHAT = {"enrol": "take on", "drop": "remove", "set": "set {term}", "post": "post a job", "assign": "assign the {term}"}
 
 
 def _standing_laws(k, iid) -> list:
@@ -817,9 +835,10 @@ def _office_decisions(k, aid, iid, law) -> list:
     if aid not in IN.holders(k, iid, short):
         return []
     out = []
-    term = {"enrol": c.get("ENROL_TERM") or "value", "set": c.get("SET_TERM") or "value"}
+    term = {"enrol": c.get("ENROL_TERM") or "value", "set": c.get("SET_TERM") or "value",
+            "assign": (list(c.get("AGENT_TERMS") or ()) or ["agent"])[0]}
     label = str(c.get("LABEL") or law.get("title") or law["id"])
-    for verb in ("set", "enrol", "drop", "post"):
+    for verb in ("set", "enrol", "drop", "post", "assign"):
         name = (c.get("ACTIONS") or {}).get(verb)
         if name:
             args = ACTION_ARGS[verb].format(term=term.get(verb, "value"))

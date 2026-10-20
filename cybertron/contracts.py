@@ -119,7 +119,11 @@ SU_EVENTS = ("office_vacant", "office_filled", "office_abolished", "assets_locke
 DEFAULTS = {
     "enabled": False,       # associations: anyone may found a contract with its own treasury, escrow, allowances and code (needs law.v2)
     "max_founded": 3,       # contracts one agent may found
-    "max_laws": 3,          # laws (code modules) one contract may have in force or suspended
+    "max_laws": 50,         # laws (code modules) one contract may have in force or suspended (engine 20: was 3; an established
+                            # firm's code is a charter, offices, wages and several standing contracts)
+    "max_laws_rule": 50,    # the most a polity's company rule max_laws may allow its companies (engine 20: was 10)
+    "compact_lines": True,  # engine 20: many laws in one institution render compactly (a member's contract line names at most 8
+                            # law ids; obligations and what is owed are summed over laws with the same label and leg); false: listed
     "templates": True,      # agents may found contracts from the templates (club, company, crowdfund, cartel)
     "scripted": True,       # dry runs: the scripted bots found, join and use contracts (own RNG stream)
     "enforcement": "escrow",    # P4.4 dial: escrow | escrow_court (a polity's courts hear breaches) | word (no escrow at all)
@@ -2192,8 +2196,11 @@ def state_lines(k, aid) -> list[str]:
             left = " (you leave at the end of this round)" if aid in rec["leaving"] else ""
             inc = f"; incorporated under {rec['parent']}" if rec.get("parent") is not None else ""   # W8e
             inc += _claims(k, rec)                                     # wave 9 E ('' with the flag off)
+            ls = rec["laws"]
+            if cfg(k).get("compact_lines") and len(ls) > 8:                # engine 20: many laws, a short list
+                ls = ls[:8] + [f"and {len(ls) - 8} more"]
             out.append(f"Your contract {cid} '{rec['name']}' ({rec['template'] or 'own code'}{inc}; {len(rec['members'])} members; laws "
-                       f"{', '.join(rec['laws']) or 'none'}{'; SUSPENDED' if rec['status'] == 'suspended' else ''}){left}: your "
+                       f"{', '.join(ls) or 'none'}{'; SUSPENDED' if rec['status'] == 'suspended' else ''}){left}: your "
                        f"escrow {_fmt(rec['escrow'].get(aid))}; your allowance per round {_fmt(rec['allowances'].get(aid))}; its "
                        f"treasury {_fmt(rec['reserve'])}.")
             if rec["applicants"] and cfg(k).get("applicant_lines") and aid in INS.officers(k, cid):   # review 31 (03 #14)

@@ -274,15 +274,24 @@ def _do_repeal(k, law, by_law, via) -> dict:
     rec["status"] = "repealed"
     if DC.is_act(rec):                                                  # the default code: its rows go, the residual applies
         DC.on_repeal(k, law)
+    from cybertron import laweffects as LE
+    detail = bool(LE.setting(k.spec, "law.effects_detail"))           # engine 20: the restored procedure names its ranks
+    unshadowed = {}                                                     # (class, law) -> ranks an unranked procedure decides again
     for cl, key in list(k.w["procedures"].items()):
         if key.split("#")[0] == law:
             del k.w["procedures"][cl]
             # fall back to the procedure this law replaced, if the law that set it is still in force (e.g. the constitution)
             prev = next((h for h in reversed(k.w.get("procedure_history", [])) if h["cls"] == cl and h["law"] != law
                          and k.w["laws"].get(h["law"], {}).get("status") == "active" and h["key"] in k.fnreg), None)
+            rank, _, base = cl.rpartition(":")
             if prev:
                 k.w["procedures"][cl] = prev["key"]
-                k.log("procedure_restored", None, {"cls": cl, "law": prev["law"], "after_repeal_of": law}, vis="public")
+                k.log("procedure_restored", None, {"cls": cl, "law": prev["law"], "after_repeal_of": law,
+                                                   **({"ranks": [rank]} if detail and rank else {})}, vis="public")
+            elif detail and rank and base in k.w["procedures"]:          # a ranked procedure gone: the unranked one decides again
+                unshadowed.setdefault((base, k.w["procedures"][base].split("#")[0]), []).append(rank)
+    for (cl, by), ranks in unshadowed.items():
+        k.log("procedure_restored", None, {"cls": cl, "law": by, "after_repeal_of": law, "ranks": ranks}, vis="public")
     for nm, act in list(k.w["actions"].items()):
         if act["law"] == law:
             del k.w["actions"][nm]

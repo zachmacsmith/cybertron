@@ -20,7 +20,8 @@ check}. Endpoints, items and quantities may name a TERMS entry (per member overr
 "treasury", "store:<id>", "assoc:<id>", "reserve" or an agent. `per`: qty is per unit the named leg moved this round (pay after
 delivery, a stockout charges nothing); a payment the recipient of that leg owes caps the delivery to what it can pay. `owe`: a
 principal's shortfall is recorded as owed (arrears, paid first in later rounds) instead of a miss. `harvest`: qty is the share of
-the member's harvests deducted into the treasury (a law's on_harvest deduction). `duty`: performed when `check` holds this round
+the member's harvests deducted into the treasury (a law's on_harvest deduction); optional `camps` and `items` (lists, or a TERMS
+name) limit it to harvests at those camps or of those resources (unset: every harvest, food included). `duty`: performed when `check` holds this round
 ("guard": the performer guards the payee; "act:<event type>": the performer has such an event this round).
 Misses: a payer whose holdings (less its keep) fall short could not pay: a miss, never a breach. A manual leg's payer is judged on
 what it held at the end of its turns this round (contracts.miss_judged turn, engine 19; the miss record carries held, held_turn and
@@ -537,6 +538,17 @@ def end_all(why):
             expel(m)
     state["terms_lines"] = {}
 
+def takes(l, b, camp):
+    cs = val(l.get("camps", []), b)
+    if is_text(cs):
+        cs = [cs]
+    if len(cs) > 0 and camp not in cs:
+        return False
+    its = val(l.get("items", []), b)
+    if is_text(its):
+        its = [its]
+    return len(its) == 0 or resource_of(camp) in its
+
 def on_harvest(agent, camp, x, y):
     if state.get("ended"):
         return 0
@@ -545,7 +557,7 @@ def on_harvest(agent, camp, x, y):
     for pair in bindings(agents()):
         b = pair[1]
         for l in LEGS:
-            if l.get("kind", "move") == "harvest" and acct(l.get("from", ""), b, alive) == agent and when_ok(l, b):
+            if l.get("kind", "move") == "harvest" and acct(l.get("from", ""), b, alive) == agent and when_ok(l, b) and takes(l, b, camp):
                 cut = y * num(val(l.get("qty", 0), b))
                 if cut > 0:
                     took = state.setdefault("took", {}).setdefault(pair[0], {})
@@ -647,7 +659,14 @@ def leg_text(p, b, a, alive, byid):
     if q <= 0:
         return ""
     if p["kind"] == "harvest":
-        return fmt(q * 100) + "% of each harvest you make goes to " + shown(dst)
+        its = val(p["l"].get("items", []), b)
+        cs = val(p["l"].get("camps", []), b)
+        of = ""
+        if len(its) > 0:
+            of = " of " + (its if is_text(its) else " or ".join(its))
+        if len(cs) > 0:
+            of = of + " at " + (cs if is_text(cs) else " or ".join(cs))
+        return fmt(q * 100) + "% of each harvest" + of + " you make goes to " + shown(dst)
     if p["kind"] == "duty":
         if src == a:
             return "you owe " + str(p["check"]) + " duty to " + shown(dst)
@@ -872,6 +891,26 @@ def set_term(agent, member, value):
     write_lines(round())
     return SET_TERM + " set to " + str(value)
 
+def assign(agent, member, value, term=""):
+    t = term
+    if t == "" and len(AGENT_TERMS) > 0:
+        t = AGENT_TERMS[0]
+    if t not in AGENT_TERMS:
+        refuse("no term naming an agent can be set here" + ("" if len(AGENT_TERMS) == 0 else " but " + ", ".join(AGENT_TERMS)))
+    if value != "treasury" and value not in agents():
+        refuse(str(value) + " is not a living agent (or treasury: the institution itself)")
+    if member == "" or member == "all":
+        old = defaults().get(t)
+        state.setdefault("defaults", {})[t] = value
+    else:
+        if member not in state.get("roster", {}):
+            refuse(str(member) + " is not on the roster")
+        old = state["roster"][member].get(t, defaults().get(t))
+        state["roster"][member][t] = value
+    gazette(LABEL + " (" + law_id() + "): " + agent + " set " + t + (" for everyone" if member in ["", "all"] else " for " + member) + " from " + str(old) + " to " + str(value))
+    write_lines(round())
+    return t + " set to " + str(value)
+
 def post_job(agent, text, wage=None):
     jobs = public.setdefault("jobs", [])
     jobs.append({"round": round() + 1, "by": agent, "text": str(text)[:200], "wage": wage})
@@ -932,8 +971,8 @@ def on_enact():
         if f != "polity":
             r = short_right(OFFICE)
             create_right(r)
-        names = {"enrol": enrol, "drop": drop, "set": set_term, "post": post_job}
-        for verb in ["enrol", "drop", "set", "post"]:
+        names = {"enrol": enrol, "drop": drop, "set": set_term, "post": post_job, "assign": assign}
+        for verb in ["enrol", "drop", "set", "post", "assign"]:
             if ACTIONS.get(verb, "") != "":
                 define_action(r, ACTIONS[verb], names[verb])
         if f == "polity":
@@ -963,9 +1002,11 @@ BASE = {
     "VISIBILITY": "public",     # public (terms and book in its public record) | parties
     "PROCEDURE": "",        # "" (the institution's own) | parties (bilateral: every party must vote yes)
     "OFFICE": "",           # the office whose holders run ACTIONS (e.g. "head", or "J0.paymaster" in a polity)
-    "ACTIONS": {},          # {enrol, drop, set, post: action name}
+    "ACTIONS": {},          # {enrol, drop, set, post, assign: action name}
     "ENROL_TERM": "",       # the term an enrol action's value sets (Payroll: wage)
     "SET_TERM": "",         # the term the set action changes (Payroll: wage; Board: price)
+    "AGENT_TERMS": [],      # terms whose value names an agent, set in play by ACTIONS assign (a living agent, or "treasury"):
+                            # Service: guard (engine 20)
     "EXPEL": False,         # roster: dropping someone also expels them from the institution (Payroll: fire)
     "ON_BREACH": "",        # "" | drop (off the roster) | expel
     "FINE": 0,              # polity: fine per unit short when the member held it at the start of the round (Quota)
@@ -1036,14 +1077,16 @@ PRESETS = {
                   "out of the treasury (salary), or its wage per unit of output when its basis is piece; the cut of a worker's "
                   "harvests goes to the treasury. A wage the treasury cannot pay is owed and paid first when it can (the arrears "
                   "register). The officer hires (an applicant, at a wage), fires (severance from the treasury; the worker leaves), "
-                  "sets wages and posts jobs. Roster keys office:<right> pay every holder of that office.",
+                  "sets wages and posts jobs. Roster keys office:<right> pay every holder of that office. cut_camps / cut_items "
+                  "(lists; empty: every harvest) limit the cut to harvests at those camps or of those resources.",
         "doc": "Salaried or piece-rate employment with hire, fire, set_wage and post_job and an arrears register (review 31 03 §4.2); "
                "replaces Wage Roll, and pays offices of J0 (the polity form) so a salaried state needs no association.",
         "params": {"TAG": "payroll", "ROLE": "worker",
-                   "TERMS": {"wage": 2, "basis": "salary", "cut": 0, "pay": "penny"},
+                   "TERMS": {"wage": 2, "basis": "salary", "cut": 0, "pay": "penny", "cut_camps": [], "cut_items": []},
                    "LEGS": [{"id": "W", "from": "treasury", "to": "member", "item": "pay", "qty": "wage", "owe": True,
                              "when": {"basis": "salary"}},
-                            {"id": "O", "kind": "harvest", "from": "member", "to": "treasury", "qty": "cut"},
+                            {"id": "O", "kind": "harvest", "from": "member", "to": "treasury", "qty": "cut", "camps": "cut_camps",
+                             "items": "cut_items"},
                             {"id": "R", "from": "treasury", "to": "member", "item": "pay", "qty": "wage", "per": "O", "owe": True,
                              "when": {"basis": "piece"}}],
                    "NOTICE": 1, "ACTIONS": {"enrol": "hire", "drop": "fire", "set": "set_wage", "post": "post_job"},
@@ -1076,7 +1119,8 @@ PRESETS = {
                   "treasury out of its allowance, and for a paid round the firm owes it a guard: the guard named in the client's "
                   "terms must guard the client that round (the guard action). A paid round with the guard elsewhere is a breach "
                   "of the firm's duty (on the record, naming the client). A client stops paying to cancel (allowance 0) or gives "
-                  "notice (service_notice); the officer enrols clients (service_enrol, at a fee), drops them and sets the fee.",
+                  "notice (service_notice); the officer enrols clients (service_enrol, at a fee), drops them, sets the fee and assigns "
+                  "a client's guard (service_guard [client, agent]).",
         "doc": "Protection for a fee (review 31 06 Service Contract, F9; 08 §2.1): client to firm every round, a guard duty owed "
                "back for each paid round, a breach on a gap. Name each client's guard in its roster terms ({guard: <agent>}); "
                "until one is named the firm itself owes the duty, and its officers are told of each unguarded paid round.",
@@ -1086,8 +1130,9 @@ PRESETS = {
                             {"id": "G", "kind": "duty", "from": "guard", "to": "member", "qty": 1, "check": "guard",
                              "after": "P"}],
                    "NOTICE": 1, "GRACE": 0, "PENALTY": {"item": "penny", "qty": 0},
-                   "ACTIONS": {"enrol": "service_enrol", "drop": "service_drop", "set": "service_fee"},
-                   "ENROL_TERM": "fee", "SET_TERM": "fee"}},
+                   "ACTIONS": {"enrol": "service_enrol", "drop": "service_drop", "set": "service_fee",
+                               "assign": "service_guard"},
+                   "ENROL_TERM": "fee", "SET_TERM": "fee", "AGENT_TERMS": ["guard"]}},
     "Charge": {
         "topic": "dues", "fires": "on_round_end",
         "intent": "A charge (dues, rent, a subscription to a paper): each round every member on the roster pays dues out of its "

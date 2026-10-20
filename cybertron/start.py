@@ -560,6 +560,7 @@ def compile(sp: dict, inst: dict) -> dict:
         if emp not in {e["id"] for e in insts}:
             raise ValueError(f"start.wages: employer {emp} is not an association declared in start, J0 or an agent")
         by_emp.setdefault(emp, []).append(w)
+    n_laws = {}                                                         # laws each association starts with (contracts.max_laws)
     for e in insts:
         iid = e["id"]
         founder = agent(f"start.institutions.{iid}.founder", e["founder"])
@@ -593,6 +594,10 @@ def compile(sp: dict, inst: dict) -> dict:
             tpls.append({"name": "Wage Roll", "params": None, "rank": None})
         if not codes:
             raise ValueError(f"start.institutions.{iid}: an association needs code (a charter, laws, offices or wages)")
+        n_laws[iid] = len(codes)
+        if len(codes) > int(KC.cfg_of(sp).get("max_laws") or 0):
+            raise ValueError(f"start.institutions.{iid}: its start code is {len(codes)} laws (charter, laws, offices, wages), over "
+                             f"contracts.max_laws {KC.cfg_of(sp).get('max_laws')}; raise contracts.max_laws")
         sched.append(_entry("institution", iid, {"id": iid, "name": str(e.get("name") or iid), "founder": founder,
                                                   "members": members, "admission": e.get("admission") or "closed",
                                                   "procedure": e.get("procedure"), "codes": codes, "templates": tpls,
@@ -648,6 +653,14 @@ def compile(sp: dict, inst: dict) -> dict:
             if e.get("parties"):
                 raise ValueError(f"{p}: parties name a bilateral contract (give a founder, not `in`)")
             code, t = _contract_code(p, e, legs_mode)
+            if iid != "J0":                                             # over the cap it would not come into force: fail here
+                n_laws[iid] = n_laws.get(iid, 0) + 1
+                cap = int(KC.cfg_of(sp).get("max_laws") or 0)
+                if n_laws[iid] > cap:
+                    total = n_laws[iid] + sum(1 for x in (b.get("contracts") or ())[i + 1:] if str(x.get("in")) == iid)
+                    raise ValueError(f"{p} ({e.get('template') or 'contract'} in {iid}): {iid} would have {n_laws[iid]} laws, "
+                                     f"over contracts.max_laws {cap}; set contracts.max_laws to at least {total} for {iid}'s "
+                                     "start code")
             sched.append(_entry("contract_law", i, {"in": iid, "code": code, "template": t}))
             cid = iid
         else:
