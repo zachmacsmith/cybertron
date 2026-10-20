@@ -140,7 +140,7 @@ ENGINE_FLIPS = {
          "flips": [("cybertron.context.DEFAULTS", ("world_name",), "Charter", "")],
          "note": "the package is renamed charter -> cybertron; the prompts no longer name the world (the overview's first line was "
                  "\"Charter: N agents, R rounds.\"; the frozen legacy prompt (context off, D-4) keeps its text)"},
-    19: {"commits": [],
+    19: {"commits": ["646cbc0972dfa9a72a2826cd51657eaa3b44f912"],
          "flips": [("cybertron.contracts.DEFAULTS", ("miss_judged",), "round_end", "turn")],
          "note": "a missed manual contract leg is judged on what the payer held at the end of its turns this round (could-not "
                  "unless it held what was late, above its keep, when it could act; simultaneous turns discount what others gave it "
