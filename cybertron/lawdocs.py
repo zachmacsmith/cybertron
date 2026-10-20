@@ -261,6 +261,9 @@ def _gated_off(spec: dict) -> set:
 # life: entries that exist only in worlds with a module on (spec <module>.enabled); elsewhere they are left out of the mapping, so the
 # prompt and the codex are unchanged. mortality: Life or Conflict.
 REQUIRES = {"set_succession_public": lambda spec: bool((spec.get("life") or {}).get("enabled") or (spec.get("conflict") or {}).get("enabled"))}
+# engine 20: resource_of (the harvest leg's items filter in standing contracts) is documented where contracts and subsistence are both
+# on (established economies); elsewhere it works undocumented, so other worlds' prompts and codex are unchanged
+REQUIRES["resource_of"] = lambda spec: bool((spec.get("contracts") or {}).get("enabled") and (spec.get("subsistence") or {}).get("enabled"))
 
 # media2 (media.py): documented only in worlds with media2 on (REQUIRES); compel_subscription is article-only, in a rare article
 E += [

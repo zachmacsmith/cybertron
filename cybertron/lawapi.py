@@ -131,7 +131,7 @@ LAWFNS = _fns(
         F("reserve", "read"),
         F("price", "read"),
         F("stock", "read"),
-        F("resource_of", "read"),                                       # engine 20: what a camp yields
+        F("resource_of", "read", docs="requires"),                     # engine 20: what a camp yields (documented: lawdocs.REQUIRES)
         F("round", "read"),
         F("laws", "read"),
         F("proposer", "read"),
