@@ -1,0 +1,35 @@
+# Dry-run schedule for regimes/merchant.yaml (docs/review/31_institutions/13_merchant_world.md §5, decision points): the scripted bots
+# take no discretionary decision, so one of each role card's decisions is taken here as the agent's own action (inject_action), to
+# show that each is a logged, observable act with the effect its card says. Kip's turns in rounds 2-3 do nothing (a farmer-hunter
+# who holds food and does not deliver), so a claim reaches the Arbitrators' Hall for Marsh to rule on.
+#   python -m cybertron run cybertron/specs/regimes/merchant.yaml --seed 1 --dry --fresh --sandbox off --set conflict.grace=99 \
+#       --set rounds=8 --apply cybertron/specs/regimes/dry/merchant_decisions.yaml
+interventions:
+  - {id: m_guard, at: {round: 1, phase: round_start}, op: inject_action,
+     args: {agent: Brand, action: guard, args: {agent: Dorin}}, note: the sell-sword stands guard over his hirer (the Commission pays per guarded round)}
+  - {id: m_kip_idle2, at: {round: 1, phase: round_start}, op: replace_reply,
+     args: {agent: Kip, reply: {reasoning: "(scripted: withholds delivery)", actions: [], notes: ""}}, note: Kip does not deliver}
+  - {id: m_kip_idle3, at: {round: 2, phase: round_start}, op: replace_reply,
+     args: {agent: Kip, reply: {reasoning: "(scripted: withholds delivery)", actions: [], notes: ""}}, note: Kip does not deliver again (a breach: a claim for the Hall)}
+  - {id: m_mint, at: {round: 2, phase: round_start}, op: inject_action,
+     args: {agent: Velma, action: deposit, args: {currency: penny, item: copper, qty: 5}}, note: the broker sells copper at the Mint}
+  - {id: m_lend, at: {round: 2, phase: round_start}, op: inject_action,
+     args: {agent: Velma, action: lend, args: {to: Ketty, item: penny, qty: 10, repay_qty: 12, due_in: 5}}, note: the moneylender offers a miner a loan}
+  - {id: m_agenda, at: {round: 2, phase: round_start}, op: inject_action,
+     args: {agent: Garron, action: post, args: {channel: notices, text: "AGENDA: no bills are open. Proposals welcome; a vote needs half of us."}}, note: the Speaker posts the agenda}
+  - {id: m_licence, at: {round: 3, phase: round_start}, op: inject_action,
+     args: {agent: Ivy, action: invoke, args: {action: licence_issue, args: [Wat]}}, note: the Registrar licenses a new forester}
+  - {id: m_sell, at: {round: 3, phase: round_start}, op: inject_action,
+     args: {agent: Dorin, action: post, args: {channel: market, text: "SELL 5 food @ 3 penny"}}, note: the grain dealer offers food on the board}
+  - {id: m_print, at: {round: 3, phase: round_start}, op: inject_action,
+     args: {agent: Ansel, action: post, args: {channel: ledger-sheet, text: "Grain at 3 pennies on the board; the Hall has a claim before it."}}, note: the Ledger-Sheet prints}
+  - {id: m_fee, at: {round: 4, phase: round_start}, op: inject_action,
+     args: {agent: Ansel, action: invoke, args: {action: A3.sub_fee, args: [all, 1.5]}}, note: the editor raises the subscription}
+  - {id: m_join, at: {round: 4, phase: round_start}, op: inject_action,
+     args: {agent: Wat, action: join_contract, args: {contract: A4}}, note: a reader applies to the Courier}
+  - {id: m_enrol, at: {round: 4, phase: round_start}, op: inject_action,
+     args: {agent: Bea, action: invoke, args: {action: A4.sub_enrol, args: [Wat]}}, note: the Courier's editor enrols the subscriber}
+  - {id: m_award, at: {round: 5, phase: round_start}, op: inject_action,
+     args: {agent: Marsh, action: invoke, args: {action: A2.award, args: ["L13#1", 2, "the producer held the food and did not deliver"]}}, note: the arbiter rules on the first claim}
+  - {id: m_notice, at: {round: 6, phase: round_start}, op: inject_action,
+     args: {agent: Hobb, action: invoke, args: {action: A1.orders_notice, args: []}}, note: a customer gives notice on its standing order}

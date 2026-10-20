@@ -353,3 +353,45 @@ def test_security_licence_lets_a_licensed_firms_guards_detain_aggressors_only(tm
     assert law["public"]["detentions"][0]["outcome"] == "subdued"
     TF.invoke(k, "Di", "revoke_licence", "A1", "abuse")
     assert not k.has("Bo", "licensed_guard")
+
+
+# ---------------------------------------------------------------------- the core: a term that names an agent (the Order Book)
+def test_roster_term_naming_an_agent_is_set_by_enrol_and_checked(tmp_path):
+    from cybertron import accounts as AC
+    book = {"id": "A1", "name": "the Order Book", "founder": "Cy", "members": ["Bo", "Di", "Fay"], "admission": "open",
+            "offices": {"notary": {"title": "Notary", "holders": ["Cy"], "duties": "Enrol orders."}}}
+    orders = {"template": "Standing Contract", "in": "A1", "roster": {"Fay": {"seller": "Bo"}},
+              "params": {"PARTIES": {}, "BOND": {}, "EXIT_FEE": 0, "PROCEDURE": "", "OFFICE": "notary", "ROLE": "customer",
+                         "TERMS": {"seller": "", "qty": 1, "price": 2, "pay": "penny"},
+                         "LEGS": [{"id": "F", "from": "seller", "to": "member", "item": "food", "qty": "qty"},
+                                  {"id": "P", "from": "member", "to": "seller", "item": "pay", "qty": "price", "per": "F"}],
+                         "ACTIONS": {"enrol": "orders_enrol"}, "ENROL_TERM": "seller"},
+              "allowances": {"Bo": {"food": 2}, "Di": {"penny": 2}, "Fay": {"penny": 2}}}
+    k = setup(tmp_path, world(inst=book, contracts=[orders]))
+    with pytest.raises(ActionError, match="an agent's name"):
+        inv(k, "Cy", "A1.orders_enrol", "Di", 3)
+    inv(k, "Cy", "A1.orders_enrol", "Di", "Bo")
+    lid = AC.assocs(k)["A1"]["laws"][-1]
+    assert k.w["laws"][lid]["state"]["roster"]["Di"] == {"seller": "Bo"}
+    T.step(k)                                                               # auto legs: Bo delivers to both, both pay
+    moved = k.w["laws"][lid]["state"]["moved"]
+    assert moved["Di"]["F"][1:] == [1, "Bo", "Di"] and moved["Di"]["P"][1:] == [2, "Di", "Bo"]
+    assert moved["Fay"]["F"][1:] == [1, "Bo", "Fay"]
+
+
+# ---------------------------------------------------------------------- the Merchant spec
+def test_merchant_spec_checks_and_establishes_without_errors(tmp_path):
+    from cybertron import accounts as AC
+    from cybertron import schema as SC
+    for f in ("cybertron/specs/regimes/merchant.yaml", "cybertron/specs/regimes/merchant_nogoal.yaml"):
+        assert not SC.validate(S.load(f)), f
+    sp = S.load("cybertron/specs/regimes/merchant.yaml")
+    k = setup(tmp_path, sp)                                                 # round 0: every establish step ran without error
+    recs = AC.assocs(k)
+    assert [recs[c]["name"] for c in ("A1", "A2", "A3", "A4")] == ["the Order Book", "the Arbitrators' Hall", "the Ledger-Sheet",
+                                                                     "the Courier"]
+    titles = {l["title"] for l in k.w["laws"].values() if l["status"] == "active"}
+    assert {"Arbitrators' Hall", "Paper Subscription", "Commission", "Wound Bounty", "Criminal Code", "Quorum Procedure",
+            "Licence", "Loan Registry"} <= titles
+    book = next(l for l in k.w["laws"].values() if l["title"] == "Standing Contract" and l.get("jurisdiction") == "A1")
+    assert len(book["state"]["roster"]) == 17                               # every non-producer has a standing order

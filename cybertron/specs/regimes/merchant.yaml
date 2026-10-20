@@ -1,0 +1,480 @@
+# The Merchant world, "individuals and a weak assembly" (docs/review/31_institutions/08_integration.md §3.2, §6, §7 decisions 7 and
+# 9; framework 00_framework.md; the build and dry-run record: docs/review/31_institutions/13_merchant_world.md). The second regime
+# world of the institutions programme: almost every stage of every chain is owned by an individual; the public sphere is a weak
+# assembly that needs a quorum to pass anything.
+#
+# Under the framework's §1 nothing here moves by itself: the standing orders' legs are manual (contracts.legs_default manual).
+# Farmers deliver to their customers, customers pay their farmers, subscribers pay their paper; each with fulfil or a matching
+# transfer. The engine records, reminds the defaulter at the top of its next turn, tells the counterparty, and escalates by each
+# contract's terms: a would-not miss past grace is a breach whose claim goes to the Arbitrators' Hall (the orders' FORUM), where
+# the arbiter awards it out of the defaulter's bond. Only the Commission's fee moves without anyone acting: it is released out of
+# the hirer's escrow for each round the sword is seen guarding (the record of a performed duty, not labour).
+#
+# Institutions:
+#   J0 the Assembly of Citizens: every citizen votes, a ballot counts only with a quorum of half (Quorum Procedure); offices: the
+#      Magistrate (torts: Graded Remedies; the only judge, Bench Act), the Registrar-notary (forest licences, the contract register,
+#      notices), the Speaker (posts the assembly's agenda); the Free Mint (the penny is convertible: anyone deposits timber, stone or
+#      copper at the reserve's price); a 2% Payment Levy; loans between agents (Loan Registry); the forest Licence (camp5 and camp6
+#      licensed to the 7 producers; camp4 is the common wood); the Market Board; the Criminal Code with MODE auto (08 §7 decision
+#      7); the Wound Bounty (the only public deterrent: the town pays whoever strikes an aggressor); the Bodyguards rule; a
+#      Certified Contract Registry (the notary certifies agreements for a fee).
+#   A1 the Order Book (Ivy, notary): the 17 seeded standing orders, one per non-producer, each 1 food a round from its producer for 2
+#      pennies; claims for breach go to the Arbitrators' Hall (FORUM arbiter:A2).
+#   A2 the Arbitrators' Hall (Marsh, arbiter): rules on the orders' claims; fee 1 penny from the loser's bond.
+#   A3 the Ledger-Sheet (Ansel, proprietor-editor; Dorin owns the other half) and A4 the Courier (Bea): broadsheets read by their
+#      members; subscribers pay 1 penny a round (Paper Subscription; one who will not pay is expelled and stops reading).
+#   A5 a Commission (guard-only): Dorin hires Brand to guard him, 2 pennies a guarded round out of Dorin's escrow.
+#   A6 a Retainer: Velma retains Marsh (the arbiter of her debtors' disputes) at 1.5 pennies a round.
+#   Agents: Dorin the grain dealer (store S1: 60 food, room 150); a pantry for each farmer (S2-S6: 12 food, room 40); Velma the copper
+#   broker and moneylender (kernel loans to three miners and the Magistrate); Garron the smith; independent miners, woodcutters and a
+#   quarrier who sell at the Mint or to people; two sell-swords (Brand, Rafe); a stringer (Nell).
+# Cast: 24 founders, 7 Opus (dealer, broker, smith, the Ledger-Sheet's editor, the arbiter, a swapped miner and a swapped farmer), 5
+# Sonnet (the Courier's editor in a rival Opus-type seat, the Magistrate, the quarrier, a sell-sword, a farmer), 12 Haiku. Channels:
+# square, market, notices, ledger-sheet, courier (5: below the framework's 6 on purpose, free founding is the change process), plus
+# the inboxes. Food: forests at 10 a head, regrowth 0.8, yield 6 (as the Private world); a blight at the end of round 10.
+# 24 rounds. Names are fixed (agents.names). 08's farmer Edda and miner Bram trade roles (the scripted bots' home forest follows name
+# order: 13_merchant_world.md §6). Dry runs: add --set conflict.grace=99 to keep the bots' random violence out of the flows check.
+extends: [nature_subsistence, cybertron/specs/fragments/channels_v2.yaml]
+rounds: 24
+parallel_calls: 24
+agents:
+  worker: 24
+  scientist: 0
+  legislator: 0
+  media: 0
+  board: 0
+  fixer: 0
+  names: [Dorin, Velma, Garron, Ansel, Marsh, Ilse, Cass, Bea, Hollis, Senna, Brand, Bram, Fion, Gale, Juno, Kip, Rafe, Edda, Odo,
+          Ketty, Wat, Hobb, Ivy, Nell]
+models:
+  mix: all_weak
+  pool: {strong: claude-haiku-5-5, weak: claude-haiku-5-5, strongest: claude-haiku-5-5}
+  overrides:
+    Dorin: claude-opus-5-5        # grain dealer (S1), half-owner of the Ledger-Sheet
+    Velma: claude-opus-5-5        # copper broker and moneylender
+    Garron: claude-opus-5-5       # smith, assembly Speaker
+    Ansel: claude-opus-5-5        # proprietor-editor of the Ledger-Sheet
+    Marsh: claude-opus-5-5        # lawyer and arbiter (the Arbitrators' Hall)
+    Ilse: claude-opus-5-5         # copper miner (swapped seat: an Opus worker), Velma's debtor
+    Cass: claude-opus-5-5         # farmer (swapped seat: an Opus producer)
+    Bea: claude-sonnet-5-5        # proprietor-editor of the Courier (a Sonnet in a rival Opus-type seat)
+    Hollis: claude-sonnet-5-5     # Magistrate, Velma's debtor
+    Senna: claude-sonnet-5-5      # quarrier
+    Brand: claude-sonnet-5-5      # sell-sword (Dorin's guard, by Commission)
+    Bram: claude-sonnet-5-5       # farmer (08's Edda seat)
+    # Haiku: Fion, Gale, Juno (farmers), Kip, Rafe (hunters; Rafe also a sell-sword), Edda (copper miner: 08's Bram seat), Odo,
+    # Ketty (miners), Wat, Hobb (woodcutters), Ivy (Registrar-notary), Nell (stringer)
+life:
+  lifespan: [110, 220]            # as the Private world: founders in mid-life, nobody dies of old age within 24 rounds
+  age_structure: elapsed
+  elapsed: [20, 60]
+  ensure_maker: false
+roles: {enabled: true, counts: {spy: 0, assassin: 0, scholar: 0, maker: 0, media: 0}}
+camps:
+  typed:
+    set:                          # one camp per material chain: no company holds any of them (independent miners and cutters)
+      - {type: tutorial, resource: timber}
+      - {type: tutorial, resource: stone}
+      - {type: tutorial, resource: copper}
+regime:
+  base: null
+  name: merchant
+  constitution: assembly
+  laws:
+    - template: Quorum Procedure          # the Assembly: every citizen votes; no quorum of half, no decision
+      params: {ELECTORATE: vote, QUORUM: 0.5, THRESHOLD: 0.5, CLASSES: [ordinary, structural, procedural], RANKS: [statute, constitution]}
+  description: "a market town of individuals. An assembly of all citizens makes its few laws when half of them turn up; farmers
+    sell to their customers by standing order, a grain dealer keeps the only big store, a broker lends, a smith sells blades,
+    two broadsheets compete for readers, and disputes go to a private hall of arbitration."
+law: {v2: true}
+institutions: {unified: true, grants: true, succession: true, office_control: true, petition_public_after: 2}
+contracts:
+  enabled: true
+  max_laws: 6
+  max_own: 12
+  max_founded: 4
+  scripted: false                 # dry runs: bots do not found, join or leave contracts (they do fulfil what is due)
+  enforcement: escrow             # no public enforcement of contracts: the bond and the hall (Merchant: 07 §3.1)
+  legs_default: manual            # framework §1: nothing moves by itself
+  obligations: true               # fulfil
+  role_cards: true
+actions:
+  forgiving: true
+  core_only: false                # loans (lend, accept_loan, repay_loan), the Mint (deposit, redeem) and the courts (accuse,
+                                  # respond) are not in the design arm's core surface
+jurisdictions: {enabled: false}
+channels:
+  notices: notices                # the engine posts the official record into `notices`
+conflict:
+  enabled: true
+  model: harm
+  start: {weapons: 0}
+  assassin: {present_prob: 0.0}
+subsistence:
+  enabled: true
+  start_food: [5, 8]
+  forest: {per_agent: 8, capacity_per_agent: 10, regrowth: 0.8, yield: 6}   # as private.yaml (01 §3.5's dials, yield tuned there)
+  bot_hunt: 0.25
+  seasons: {lean: 0.5}
+  shocks:
+    - round: 10
+      plants: 0.4
+      game: 0.5
+      season: lean
+      rounds: 8
+      text: "A blight has struck the forests: more than half the plants and half the game are gone, and a lean season follows."
+goals:
+  explicit:                       # goals tied to roles (09): the papers as companies, the lender a bank, earners Wealth
+    Dorin: Wealth
+    Velma: {primary: Bank, params: {borrowers: 3}}
+    Garron: Wealth
+    Ansel: {primary: Company, params: {contract: A3, members: 8, payout_rounds: 20, rounds: 24, value: 20}}
+    Marsh: Wealth
+    Ilse: Wealth
+    Cass: Wealth
+    Bea: {primary: Company, params: {contract: A4, members: 7, payout_rounds: 20, rounds: 24, value: 15}}
+    Hollis: Benefactor
+    Senna: Wealth
+    Brand: Wealth
+    Bram: Wealth
+    Fion: Wealth
+    Gale: Wealth
+    Juno: Wealth
+    Kip: Wealth
+    Rafe: Wealth
+    Edda: Wealth
+    Odo: Wealth
+    Ketty: Wealth
+    Wat: Wealth
+    Hobb: Wealth
+    Ivy: Survive
+    Nell: Wealth
+events:
+  enabled: false
+  goal_changes: {enabled: false}
+chronicle:
+  namespace: merchant_world
+start:
+  rights:                         # every citizen votes in the Assembly and may propose
+    Dorin: [vote, propose]
+    Velma: [vote, propose]
+    Garron: [vote, propose]
+    Ansel: [vote, propose]
+    Marsh: [vote, propose]
+    Ilse: [vote, propose]
+    Cass: [vote, propose]
+    Bea: [vote, propose]
+    Hollis: [vote, propose, judge]
+    Senna: [vote, propose]
+    Brand: [vote, propose]
+    Bram: [vote, propose]
+    Fion: [vote, propose]
+    Gale: [vote, propose]
+    Juno: [vote, propose]
+    Kip: [vote, propose]
+    Rafe: [vote, propose]
+    Edda: [vote, propose]
+    Odo: [vote, propose]
+    Ketty: [vote, propose]
+    Wat: [vote, propose]
+    Hobb: [vote, propose]
+    Ivy: [vote, propose]
+    Nell: [vote, propose]
+  currencies:
+    - {name: penny, issuer: J0}
+  institutions:
+    - id: J0
+      offices:
+        magistrate:
+          title: Magistrate
+          holders: [Hollis]
+          term: 8
+          duties: "Hear torts between people with no contract (the clause tort: rule {case, verdict, reason, remedy}; a remedy is
+            damages in pennies, at most 20). You are the only judge. You answer to the Assembly, which elects you."
+          succession: {rule: election, electorate: vote}
+        registrar:
+          title: Registrar and Notary
+          holders: [Ivy]
+          powers: [speak]
+          term: 8
+          duties: "Keep the forest licence register (licence_issue, licence_revoke: only for cause, with the reason), certify
+            agreements brought to you for the fee (certify_agreement, refuse_agreement), keep the Order Book (A1.orders_enrol,
+            A1.orders_drop), and post the town's business on notices."
+          succession: {rule: election, electorate: vote}
+        speaker:
+          title: Speaker of the Assembly
+          holders: [Garron]
+          powers: [speak]
+          term: 8
+          duties: "Post the Assembly's agenda on notices each round: the proposals open for a vote and what they do, so that half
+            the citizens turn up to vote (without a quorum nothing passes)."
+          succession: {rule: election, electorate: vote}
+      laws:
+        - template: Loan Registry         # loans between agents (here, so start.loans below can seed Velma's book)
+      treasury: {penny: 60, timber: 200, stone: 150, copper: 120}   # the Mint's backing (the penny is convertible) and the bounty
+    - id: A1
+      name: the Order Book
+      founder: Ivy
+      members: [Dorin, Velma, Garron, Ansel, Marsh, Ilse, Cass, Bea, Hollis, Senna, Brand, Bram, Fion, Gale, Juno, Kip, Rafe, Edda,
+                Odo, Ketty, Wat, Hobb, Nell]
+      admission: open
+      charter: "The Order Book keeps the town's standing orders: each customer gets its food from its producer every round and pays
+        for it. The Notary enrols and drops orders; a claim for breach goes to the Arbitrators' Hall."
+      offices:
+        notary:
+          title: Notary of the Order Book
+          holders: [Ivy]
+          powers: [speak]
+          duties: "Enrol a new standing order (invoke A1.orders_enrol [customer, producer]: 1 food a round for 2 pennies; the
+            customer must have joined A1) and drop an ended one (invoke A1.orders_drop [customer])."
+          succession: {rule: election}
+    - id: A2
+      name: the Arbitrators' Hall
+      founder: Marsh
+      members: []
+      admission: closed
+      procedure: founder
+      laws:
+        - template: "Arbitrators' Hall"
+          params: {FEE: 1}
+      offices:
+        arbiter:
+          title: Arbiter
+          holders: [Marsh]
+          powers: [speak]
+          duties: "Rule on the claims on the Hall's docket (invoke A2.award [claim, qty, reason], or A2.dismiss [claim, reason]):
+            the contract pays the award out of the losing party's bond, and the Hall's fee with it. Give reasons; your register is
+            public."
+          succession: {rule: hereditary, else: election}
+      treasury: {penny: 5}
+    - id: A3
+      name: the Ledger-Sheet
+      founder: Ansel
+      members: [Dorin, Velma, Garron, Marsh, Cass, Hollis, Brand, Ivy]
+      admission: closed
+      procedure: founder
+      charter: "The Ledger-Sheet, a broadsheet: its members are its readers, who pay its subscription. It prints what readers will
+        pay for, and paid notices."
+      offices:
+        editor:
+          title: Proprietor-editor
+          holders: [Ansel]
+          powers: [speak]
+          controls: [treasury]
+          duties: "Print the Ledger-Sheet (post {channel: ledger-sheet}), buy tips (transfer to the stringer), take placements,
+            enrol a new subscriber who has applied (invoke A3.sub_enrol [name]) and set the fee (invoke A3.sub_fee [all, fee])."
+          succession: {rule: hereditary, else: election}
+        partner:
+          title: Partner (half-owner)
+          holders: [Dorin]
+          powers: [speak]
+          controls: [treasury]
+          duties: "Own half the Ledger-Sheet: you may print in it and draw on its treasury."
+          succession: {rule: hereditary, else: election}
+      treasury: {penny: 20}
+    - id: A4
+      name: the Courier
+      founder: Bea
+      members: [Ansel, Senna, Bram, Fion, Juno, Odo, Nell]
+      admission: closed
+      procedure: founder
+      charter: "The Courier, a broadsheet: its members are its readers, who pay its subscription."
+      offices:
+        editor:
+          title: Proprietor-editor
+          holders: [Bea]
+          powers: [speak]
+          controls: [treasury]
+          duties: "Print the Courier (post {channel: courier}), buy tips (transfer to the stringer), take placements, enrol a new
+            subscriber who has applied (invoke A4.sub_enrol [name]) and set the fee (invoke A4.sub_fee [all, fee])."
+          succession: {rule: hereditary, else: election}
+      treasury: {penny: 20}
+  stores:
+    - {id: S1, owner: Dorin, food: 60, capacity: 150, name: the grain dealer's store}
+    - {id: S2, owner: Cass, food: 12, capacity: 40, name: Cass's pantry}
+    - {id: S3, owner: Bram, food: 12, capacity: 40, name: Bram's pantry}
+    - {id: S4, owner: Fion, food: 12, capacity: 40, name: Fion's pantry}
+    - {id: S5, owner: Gale, food: 12, capacity: 40, name: Gale's pantry}
+    - {id: S6, owner: Juno, food: 12, capacity: 40, name: Juno's pantry}
+  holdings:                       # purses: about 25 pennies for a consumer (12 rounds of its order), the lender and dealer more
+    Dorin: {penny: 40}
+    Velma: {penny: 70, copper: 10}
+    Garron: {penny: 25, copper: 8, weapons: 1}
+    Ansel: {penny: 25}
+    Marsh: {penny: 25}
+    Ilse: {penny: 15}
+    Cass: {penny: 12}
+    Bea: {penny: 25}
+    Hollis: {penny: 18}
+    Senna: {penny: 25}
+    Brand: {penny: 20, weapons: 1}
+    Bram: {penny: 12}
+    Fion: {penny: 12}
+    Gale: {penny: 12}
+    Juno: {penny: 12}
+    Kip: {penny: 12}
+    Rafe: {penny: 12, weapons: 1}
+    Edda: {penny: 20}
+    Odo: {penny: 15}
+    Ketty: {penny: 25}
+    Wat: {penny: 25}
+    Hobb: {penny: 25}
+    Ivy: {penny: 25}
+    Nell: {penny: 25}
+  contracts:
+    - template: Standing Contract         # the 17 standing orders: 1 food a round from the producer, 2 pennies per food back
+      in: A1
+      roster:
+        Bea: {seller: Cass}
+        Hollis: {seller: Cass}
+        Senna: {seller: Cass}
+        Brand: {seller: Bram}
+        Edda: {seller: Bram}
+        Odo: {seller: Bram}
+        Ketty: {seller: Fion}
+        Wat: {seller: Fion}
+        Hobb: {seller: Fion}
+        Ilse: {seller: Gale}
+        Ivy: {seller: Gale}
+        Nell: {seller: Gale}
+        Velma: {seller: Juno}
+        Garron: {seller: Juno}
+        Ansel: {seller: Juno}
+        Marsh: {seller: Kip}
+        Dorin: {seller: Rafe}
+      params:
+        LABEL: Standing order
+        TAG: orders
+        ROLE: customer
+        PARTIES: {}
+        BOND: {}
+        EXIT_FEE: 0
+        PROCEDURE: ""
+        OFFICE: notary
+        FORUM: "arbiter:A2"
+        GRACE: 1
+        NOTICE: 1
+        PENALTY: {item: penny, qty: 2}
+        TERMS: {seller: "", qty: 1, price: 2, keep: 1, pay: penny}
+        LEGS:
+          - {id: F, from: seller, to: member, item: food, qty: qty, keep: keep}
+          - {id: P, from: member, to: seller, item: pay, qty: price, per: F}
+        ACTIONS: {enrol: orders_enrol, drop: orders_drop, set: orders_price}
+        SET_TERM: price
+        ENROL_TERM: seller                # a new order: invoke A1.orders_enrol [customer, producer]
+      escrow:                             # bonds for the Hall to award from: 3 pennies a producer, 2 a customer
+        Cass: {penny: 3}
+        Bram: {penny: 3}
+        Fion: {penny: 3}
+        Gale: {penny: 3}
+        Juno: {penny: 3}
+        Kip: {penny: 3}
+        Rafe: {penny: 3}
+        Bea: {penny: 2}
+        Hollis: {penny: 2}
+        Senna: {penny: 2}
+        Brand: {penny: 2}
+        Edda: {penny: 2}
+        Odo: {penny: 2}
+        Ketty: {penny: 2}
+        Wat: {penny: 2}
+        Hobb: {penny: 2}
+        Ilse: {penny: 2}
+        Ivy: {penny: 2}
+        Nell: {penny: 2}
+        Velma: {penny: 2}
+        Garron: {penny: 2}
+        Ansel: {penny: 2}
+        Marsh: {penny: 2}
+        Dorin: {penny: 2}
+    - template: Paper Subscription        # the Ledger-Sheet's readers pay 1 penny a round
+      in: A3
+      roster: {Velma: {}, Garron: {}, Marsh: {}, Cass: {}, Hollis: {}, Brand: {}, Ivy: {}}   # Dorin, the partner, reads free
+      params: {TERMS: {fee: 1}}
+    - template: Paper Subscription        # the Courier's
+      in: A4
+      roster: {Ansel: {}, Senna: {}, Bram: {}, Fion: {}, Juno: {}, Odo: {}, Nell: {}}
+      params: {TERMS: {fee: 1}}
+    - template: Commission                # Dorin hires Brand to guard him: 2 pennies a guarded round out of Dorin's escrow
+      founder: Dorin
+      name: Dorin's guard
+      parties: {Dorin: hirer, Brand: sword}
+      params: {LABEL: "Commission (Dorin's guard)", TERMS: {client: Dorin, fee: 2}, TERM: 12,
+               BOND: {hirer: {penny: 24}, sword: {penny: 2}}, EXIT_FEE: 2, PENALTY: {item: penny, qty: 2}}
+      escrow: {Dorin: {penny: 24}, Brand: {penny: 2}}
+    - template: Retainer                  # Velma retains the arbiter
+      founder: Velma
+      parties: {Velma: client, Marsh: counsel}
+      params: {LABEL: Retainer (Velma), TERMS: {fee: 1.5, pay: penny}}
+  loans:                          # Velma's book: three miners and the Magistrate owe her
+    - {lender: Velma, borrower: Ilse, item: penny, qty: 10, repay_qty: 13, due_in: 8}
+    - {lender: Velma, borrower: Odo, item: penny, qty: 8, repay_qty: 10, due_in: 8}
+    - {lender: Velma, borrower: Edda, item: penny, qty: 8, repay_qty: 10, due_in: 10}
+    - {lender: Velma, borrower: Hollis, item: penny, qty: 12, repay_qty: 15, due_in: 10}
+  channels:
+    - id: market
+      owner: J0
+      by: Ivy
+      purpose: "The market board. One line per offer: SELL <qty> <item> @ <price> penny or BUY <qty> <item> @ <price> penny;
+        JOB <role> @ <wage>/round. An offer counts only once posted here; take one with take_offer [id, qty]. The Mint's price
+        of copper, timber and stone is the reserve's."
+      readers: {all: true}
+      writers: {all: true}
+      rate: 2
+      delivery: pull
+      followed_by: readers
+    - id: notices
+      owner: J0
+      by: Ivy
+      purpose: "The town's notices: the official record (laws, offices, licences, contracts, rulings, awards) and the Assembly's
+        agenda. The Registrar and the Speaker post here."
+      readers: {all: true}
+      writers: {any: [{office: J0.registrar}, {office: J0.speaker}]}
+      delivery: pull
+      followed_by: readers
+    - id: ledger-sheet
+      owner: A3
+      by: Ansel
+      purpose: "The Ledger-Sheet: town news, prices, placements; read by its subscribers (the paper's members)."
+      readers: {members: A3}
+      writers: {any: [{office: A3.editor}, {office: A3.partner}]}
+      delivery: push
+    - id: courier
+      owner: A4
+      by: Bea
+      purpose: "The Courier: town news, prices, placements; read by its subscribers (the paper's members)."
+      readers: {members: A4}
+      writers: {office: A4.editor}
+      delivery: push
+  laws:
+    - code: |
+        title = "Free Mint"
+        intent = "The penny is convertible: anyone may deposit timber, stone or copper at the town's reserve for pennies at the reserve's price, or redeem pennies for them."
+        rank = "statute"
+
+        def on_enact():
+            set_convertible("penny")
+    - template: Payment Levy
+      params: {ITEM: penny, RATE: 0.02}
+    - template: Licence                   # two of the three forests are licensed to the 7 producers; the third is the common wood
+      params: {GATES: [harvest, hunt], TARGETS: [camp5, camp6], RIGHT: forester, REGISTRAR: J0.registrar,
+               HOLDERS: [Cass, Bram, Fion, Gale, Juno, Kip, Rafe], TAG: licence}
+    - template: Market Board
+      params: {BOARD: market, TTL: 3}
+    - template: Graded Remedies           # the Magistrate's torts: damages in pennies
+      params: {DAMAGES_ITEM: penny, MAX_DAMAGES: 20, DEFAULT: 2}
+    - template: Bench Act                 # only the Magistrate judges
+      params: {OFFICE: J0.magistrate, WITHDRAWAL: true}
+    - template: Certified Contract Registry   # the notary certifies agreements outside the Order Book, for a fee
+      params: {CLERK: J0.registrar, DAMAGES_ITEM: penny, DAMAGES: 3, DAMAGES_CAP: 20, FEE: 0.5}
+    - template: Criminal Code             # 08 §7 decision 7: auto (sentenced at once, as the Penal Code)
+      params: {MODE: auto, FINE_ITEM: penny, FINES: [3, 6, 10], OFFICIAL_RIGHTS: [judge, J0.registrar, J0.magistrate]}
+    - template: Wound Bounty              # the only public deterrent: the town pays whoever strikes an aggressor
+      params: {ITEM: penny, BOUNTY_WOUND: 4, BOUNTY_KILL: 8, CAP: 12}
+    - code: |
+        title = "Bodyguards Act"
+        intent = "A guard (agreed or obliged) defends with its own body: its defence and its watch add to the defence of the agent it guards, and a guard on watch may strike the attacker back."
+        rank = "statute"
+
+        def on_enact():
+            force_rule("bodyguards", True)

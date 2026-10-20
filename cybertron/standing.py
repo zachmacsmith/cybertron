@@ -880,8 +880,7 @@ def enrol(agent, member, value=None):
         refuse("no such agent: " + str(member))
     t = {}
     if value != None and ENROL_TERM != "":
-        if not is_number(value) or value < 0:
-            refuse("the " + ENROL_TERM + " is a number from 0")
+        check_term(ENROL_TERM, value)
         t[ENROL_TERM] = value
     state.setdefault("roster", {})[member] = t
     gazette(LABEL + " (" + law_id() + "): " + agent + " enrolled " + member + ("" if value == None else " at " + ENROL_TERM + " " + str(value)))
@@ -903,11 +902,17 @@ def drop(agent, member, severance=0):
     gazette(LABEL + " (" + law_id() + "): " + agent + " removed " + member + ("" if paid == 0 else " (severance " + str(paid) + ")"))
     return member + " is off the roster"
 
+def check_term(term, value):
+    if is_text(defaults().get(term)):
+        if not is_text(value) or value not in agents():
+            refuse("the " + term + " is an agent's name")
+    elif not is_number(value) or value < 0:
+        refuse("the " + term + " is a number from 0")
+
 def set_term(agent, member, value):
     if SET_TERM == "":
         refuse("no term can be set here")
-    if not is_number(value) or value < 0:
-        refuse("the " + SET_TERM + " is a number from 0")
+    check_term(SET_TERM, value)
     if member == "" or member == "all":
         old = defaults().get(SET_TERM)
         state.setdefault("defaults", {})[SET_TERM] = value
