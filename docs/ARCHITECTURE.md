@@ -605,8 +605,8 @@ world is byte-identical, checked by the goldens and `difftest` against the base)
   dissolved), `published` (members | public), `members`, `parent`; a kind's own fields stay on the record as its template's state.
   Laws and offices are indexes (`institutions.laws`, `offices`), not copies. `k.w["jurisdictions"]` and `k.w["contracts"]["assoc"]`
   are not stored: `jurisdictions.jurs(k)` and `accounts.assocs(k)` are read-only views. Snapshots keep their shape (no new snapshot
-  key), so History, the scorer, goals, context and export read what they did; `institutions.legacy_stores(k)` rebuilds the old
-  stores. Checkpoints hold the new key (no migration of old checkpoints into the flag: a run keeps the flag it started with).
+  key), so History, the scorer, goals, context and export read what they did; `institutions.legacy_view(rec)` projects a record back to the old
+  stores' record shape. Checkpoints hold the new key (no migration of old checkpoints into the flag: a run keeps the flag it started with).
 - Hidden is publication, not a status: a secret founding is `forming` with its existence published to its members; declaring
   publishes it and activates it. Secrecy checks read `jurisdictions.secret`, lifecycle checks `jurisdictions.st` (today's names).
 - One path: the `found` action also founds an association when given code or a template (`create_contract` stays as its alias, and

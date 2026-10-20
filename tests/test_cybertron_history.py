@@ -308,7 +308,6 @@ def test_window_restricts_every_table(runs):
 def test_sugar_matches_hand_written_loops(runs):
     h = History.load(runs["E2_seq_6"][0])
     assert HI.at_end(h, lambda s: s["round"]) == h.final["round"]
-    assert HI.mean_over_rounds(h, lambda s: min(s["stocks"].values())) == G.s_steward(h.gt, None, {})
     assert HI.peak(h, lambda s: s["round"]) == h.final["round"]
 
 

@@ -178,7 +178,8 @@ def test_primitive_row_is_well_formed(p):
 @pytest.mark.parametrize("p", list(PR.PRIMITIVES.values()), ids=lambda p: p.name)
 def test_payload_sample_round_trips_through_json(p):
     assert set(p.params) <= set(PR.PARAM_SAMPLES), sorted(set(p.params) - set(PR.PARAM_SAMPLES))
-    assert PR.json_roundtrip(p)
+    s = p.sample()
+    assert json.loads(json.dumps(s)) == s
 
 
 def test_today_s_change_sites_exist_in_the_source():

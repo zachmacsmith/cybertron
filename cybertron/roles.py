@@ -326,13 +326,6 @@ def pass_on(k, role, from_aid) -> None:
     k.log("role_passed", None, {"role": role, "from": from_aid, "to": new}, vis="monitor")
 
 
-def pass_all(k, aid) -> None:
-    """Every role `aid` holds passes on or lapses (convenience for whoever removes an agent)."""
-    for r in ROLES:
-        if aid in (k.w.get("roles") or {}).get(r, []):
-            pass_on(k, r, aid)
-
-
 # ====================================================================== the Spy's reading (member mode)
 def _ocfg(k) -> dict:
     from cybertron import observer as OBS

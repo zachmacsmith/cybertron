@@ -835,10 +835,5 @@ def at_end(h, f):
     return f(h.final)
 
 
-def mean_over_rounds(h, f):
-    """sum(f(state)) / number of states, in round order (the arithmetic of today's averaging scorers)."""
-    return sum(f(s) for s in h.states) / len(h.states)
-
-
 def peak(h, f, default=0.0):
     return max((f(s) for s in h.states), default=default)

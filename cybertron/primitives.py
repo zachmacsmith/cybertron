@@ -58,7 +58,6 @@ look-ups. ACTION_PRIMITIVES marks the actions that change nothing but logs and p
 """
 from __future__ import annotations
 
-import json
 from dataclasses import dataclass, field, replace
 from typing import Callable
 
@@ -1160,8 +1159,3 @@ LAW_HOOKS = tuple(n for n, h in HOOKS.items() if h.live)              # lawlang.
 
 def alias(name: str) -> HookAlias:
     return next(a for a in ALIASES if a.name == name)
-
-
-def json_roundtrip(p: Primitive) -> bool:
-    s = p.sample()
-    return json.loads(json.dumps(s)) == s

@@ -248,12 +248,6 @@ def add_file(k, aid, name, text, origin) -> None:
     files[_free_name(files, str(name)[:60] or "file")] = {"text": text, "tokens": tokens(text), "pinned": False, "origin": str(origin)}
 
 
-def set_scratchpad(k, aid, text) -> None:
-    """Replace an agent's scratchpad (cut to its size), e.g. a child's letter."""
-    init_agent(k, aid)
-    k.w["scratchpad"][aid] = clip(text, scratchpad_size(k, aid))[0]
-
-
 def note_gone(k, aid, cause, by, public, named) -> None:
     """Record a death or departure as the world saw it, for the roster line (only when context.roster is on): the killer only when
     the death was public and the attacker named."""

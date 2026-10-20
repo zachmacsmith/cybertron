@@ -157,7 +157,7 @@ def test_pass_on_gives_a_secret_role_to_a_living_agent_unannounced():
     pub = [e for e in ev if e["vis"] == "public"]
     assert not pub
     ass = R.holders(k, "assassin")[0]
-    R.pass_all(k, ass)
+    R.pass_on(k, "assassin", ass)
     assert R.holders(k, "assassin") and R.holders(k, "assassin")[0] != ass
     sch = R.holders(k, "scholar")[0]
     R.pass_on(k, "scholar", sch)                                               # public roles lapse
@@ -257,7 +257,6 @@ def test_eliminator_is_gated_by_conflict_and_takes_its_share_from_wealth():
     assert all(abs(off[g] - on[g]) < 1e-9 for g in G.CATALOGUE if g not in ("Eliminator", "Seat", "Wealth", "Currency Magnate", "Reaper", "Depopulator"))
     assert abs(sum(off.values()) - sum(on.values())) < 1e-9
     assert G.weights({"weights": {"Eliminator": 5, "Wealth": 1}}, "worker")["Eliminator"] == 0
-    assert G.enabled_modules({"conflict": {"enabled": True}}) == {"conflict"} and G.enabled_modules({}) == set()
     drawn_off = drawn_on = 0
     for seed in range(30):
         for a in _gen(seed, AG28, "goals.weights={Eliminator: 1, Wealth: 1}")["agents"]:

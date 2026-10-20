@@ -143,12 +143,6 @@ def run_id_of(run: Path) -> str:
     return (PV.read(run) or {}).get("run_id") or run.name
 
 
-def parse_rounds(text: str | None):
-    """'1-23' / '1–23' -> [1, 23]; None when absent."""
-    m = re.search(r"(\d+)\s*[-–]\s*(\d+)", text or "")
-    return [int(m.group(1)), int(m.group(2))] if m else None
-
-
 def default_card(run: Path) -> dict:
     """Card facts a run states itself: usable rounds and the first paragraph of VALIDITY.md or STOPPED.md."""
     card = {}

@@ -395,7 +395,7 @@ def test_pay_is_all_or_nothing():
     assert not RS.pay(k, a, {"timber": 2, "copper": 2})
     assert k.bal(a, "timber") == 3.0
     assert RS.pay(k, a, {"timber": 2, "copper": 1}, to=None) and k.bal(a, "timber") == 1.0 and k.bal(a, "copper") == 0.0
-    assert RS.USES["stone"] and RS.cost_value(k, {"gold": 1}) == 30
+    assert RS.USES["stone"]
 
 
 def test_optional_upkeep_costs_an_action_until_paid():

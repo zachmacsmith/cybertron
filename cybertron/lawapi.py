@@ -566,18 +566,6 @@ def dispatch_sites() -> dict:
     return out
 
 
-def doc_pointer(name: str) -> dict:
-    """Where a function or hook is documented: its mechanism, its lawdocs tiers (core and minimal preset) and whether the original
-    agents.API_DOC (preset full) names it."""
-    import re
-    from cybertron import agents as AG
-    from cybertron import lawdocs as LD
-    row = LAWFNS.get(name) or HOOKTABLE[name]
-    e = LD.ENTRIES.get(name) or {}
-    return {"mechanism": row.docs, "where": DOCS[row.docs], "core": e.get("core"), "minimal": e.get("minimal"),
-            "api_doc": bool(re.search(rf"\b{name}\(", AG.API_DOC)), "always_article": name in LD.ALWAYS_ARTICLE | LD.ARTICLE_ONLY}
-
-
 def rows() -> list[dict]:
     """The whole table, one dict per function and per hook (dispatch sites with their current file:line)."""
     sites = dispatch_sites()

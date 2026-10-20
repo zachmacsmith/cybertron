@@ -188,11 +188,6 @@ def has_power(k, account, power: str):
     return got
 
 
-def power_set(k, account) -> dict:
-    """The account's whole power set: power -> has_power."""
-    return {n: has_power(k, account, n) for n in POWERS}
-
-
 def law_level(k, account) -> str:
     """The law level preset an account's laws are checked at."""
     return has_power(k, account, "law_levels") or "L0"

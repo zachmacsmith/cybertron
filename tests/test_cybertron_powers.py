@@ -16,6 +16,11 @@ from cybertron import spec as S
 from cybertron.kernel import Kernel
 
 
+def power_set(k, account) -> dict:
+    """The account's whole power set: power -> has_power."""
+    return {n: P.has_power(k, account, n) for n in P.POWERS}
+
+
 def _world(preset="jurisdictions_pilot", extra=()):
     sp = S.apply_overrides(S.load(preset), ["rounds=4", "shared_archive.enabled=false", "hidden.enabled=false", "turns=sequential",
                                             *extra])
@@ -58,17 +63,17 @@ def test_level_presets_are_the_law_levels():
 def test_j0_holds_every_power_it_uses_today_with_jurisdictions_off():
     inst, k = _world("E4")
     assert "jurisdictions" not in k.w
-    ps = P.power_set(k, "J0")
+    ps = power_set(k, "J0")
     assert ps.pop("law_levels") == inst["law_level"]
     assert all(v is True for v in ps.values()), ps
 
 
 def test_j0_and_a_declared_jurisdiction():
     inst, k = _world()
-    j0 = P.power_set(k, "J0")
+    j0 = power_set(k, "J0")
     assert j0.pop("law_levels") == inst["law_level"] and all(v is True for v in j0.values()), j0
     jid = _declare(k, _citizens(k)[0])
-    j1 = P.power_set(k, jid)
+    j1 = power_set(k, jid)
     lacks = {n for n, v in j1.items() if not v}
     assert lacks == set(P.J0_ONLY) | {"board_veto"}                   # board_scope founding: the Board reviews J0 only
     assert set(P.J0_ONLY) == {"legacy_reserve", "propose_right"}
