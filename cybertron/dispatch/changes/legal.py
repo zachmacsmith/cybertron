@@ -135,6 +135,7 @@ def do_propose(k, jurisdiction, draft, actor=None, preview=None) -> dict:
         law["rank"] = draft["rank"]
     shown = k.spec["conditions"]["effect_preview"]
     extra = {}
+    k.__dict__.pop("_shadow_note", None)                               # set below for this draft only (LE.shadow_note reads it)
     if law.get("amends"):                                              # P3.4: an amendment draft (agent amend, propose_amendment)
         extra.update({"amends": law["amends"], "rank": law.get("rank"), "reason": law.get("amend_reason") or ""})
     if str(law["author"]).startswith("law:"):                          # P3.4: proposed by a law; it has no dry run
@@ -148,8 +149,14 @@ def do_propose(k, jurisdiction, draft, actor=None, preview=None) -> dict:
             rest = [x for x in dry[1] if not str(x).startswith(mine)]       # the enactment's own diff in the dry run
             extra["at_enactment"] = rest[:20]
             tgt = k.w["laws"].get(law.get("amends")) or {}
-            if LE.inert("amend" if law.get("amends") else "enact", rest, tgt.get("code"), law["code"]):
+            sh = list(dry[2]) if len(dry) > 2 else []                    # changes a rule of higher precedence overrides
+            dead = LE.ineffective(rest, sh)
+            if LE.inert("amend" if law.get("amends") else "enact", [x for x in rest if x not in dead], tgt.get("code"), law["code"]):
                 extra["inert"] = True
+            if sh:
+                extra["shadowed"] = sh
+                extra["shadow_notes"] = LE.shadow_texts(k, sh)
+                k.__dict__["_shadow_note"] = (lid, extra["shadow_notes"])   # the proposer's result (actions, jurisdictions)
     sims = similar_laws(k, lid)                                        # law.v2 only: a duplicate is noted, not refused
     if sims:
         extra["similar_to"] = sims

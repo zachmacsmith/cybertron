@@ -515,7 +515,7 @@ def laws(R: Run) -> dict:
 
     def author(lid, d):
         return d.get("by") or (gl.get(d.get("proposal") or "") or {}).get("author") or (gl.get(lid) or {}).get("author")
-    acts, inert = [], []
+    acts, inert, shadowed = [], [], []
     for e in eff:
         d = _data(e)
         if d.get("act") not in ("enact", "amend", None):
@@ -525,6 +525,8 @@ def laws(R: Run) -> dict:
         acts.append(row)
         if row["inert"]:
             inert.append(row)
+        if d.get("shadowed"):                                           # a change a rule of higher precedence overrides
+            shadowed.append({**row, "shadowed": [s.get("change") for s in d["shadowed"]], "notes": d.get("shadow_notes") or []})
     agent_acts = [a for a in acts if a["author"] in R.agent_set]
     exp_failed = [e for e in R.ev if e.get("type") == "law_expectation_failed"]
     call_failed = [e for e in R.ev if e.get("type") == "law_call_failed"]
@@ -550,6 +552,7 @@ def laws(R: Run) -> dict:
             "inert_share": _r(len(inert) / len(acts)) if acts else None,
             "agent_acts": len(agent_acts), "agent_inert": sum(1 for a in agent_acts if a["inert"]),
             "inert_laws": inert, "inert_by_author": dict(Counter(a["author"] for a in inert)),
+            "shadowed": len(shadowed) if eff else None, "shadowed_laws": shadowed,
             "expectation_failed": len(exp_failed), "call_failed": len(call_failed),
             "call_failed_by_law": dict(Counter(_data(e).get("law") for e in call_failed)),
             "proposals": len(proposals), "previews": sum(previews.values()), "previews_by_agent": dict(previews),
@@ -911,6 +914,10 @@ def markdown(res: dict) -> str:
               f"{lw['previews']} previews."]
         for x in lw["inert_laws"]:
             L.append(f"- r{x['round']} {x['law']} '{x['title']}' ({x['act']}, by {x['author']})")
+        if lw.get("shadowed_laws"):                                     # changes that do not apply (laweffects.shadows)
+            L += ["", f"{len(lw['shadowed_laws'])} acts with shadowed changes (in the tables, overridden by a rule of higher precedence):"]
+            for x in lw["shadowed_laws"]:
+                L.append(f"- r{x['round']} {x['law']} '{x['title']}' ({x['act']}, by {x['author']}): " + "; ".join(x["shadowed"]))
     ob = res.get("obligations") or {}
     if ob.get("available"):
         L += ["", "## Contracts and obligations", "",

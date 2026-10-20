@@ -220,13 +220,21 @@ def procedure_lookup(table: dict, cls: str, rank: str | None):
     constitutional draft unless one is set for its own class: a constitution changes only by its rank's procedures once it sets one);
     then table[cls]; then, for rank >= constitution, table["procedural"]. With rank statute and no "<rank>:" keys (always, without
     law.v2) this is table.get(cls), as before."""
+    src = procedure_source(table, cls, rank)
+    return table[src] if src else None
+
+
+def procedure_candidates(cls: str, rank: str | None) -> list:
+    """The table keys procedure_lookup consults for a draft of class `cls` and rank `rank`, in order of precedence."""
     rank = rank if rank in RANKS else "statute"
     high = RANKS[rank] >= RANKS["constitution"]
     own = CLASSES[CLASSES.index(cls):] if high and cls in CLASSES else (cls,)
-    for key in [f"{rank}:{c}" for c in own] + [cls] + (["procedural"] if high else []):
-        if table.get(key):
-            return table[key]
-    return None
+    return [f"{rank}:{c}" for c in own] + [cls] + (["procedural"] if high else [])
+
+
+def procedure_source(table: dict, cls: str, rank: str | None):
+    """The table key (not its value) whose procedure decides a draft of class `cls` and rank `rank` (procedure_lookup), or None."""
+    return next((key for key in procedure_candidates(cls, rank) if table.get(key)), None)
 
 
 def check_procedure_rank(k, lid, rank) -> None:

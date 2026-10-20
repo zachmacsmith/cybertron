@@ -513,13 +513,20 @@ def preview_law(k, agent, code, scenario=None, *, jurisdiction=None, amends=None
             rep["enact"] = _enact(k, lid, hidden)
         if loud:                                                        # what the enactment itself changes (and inert)
             own = tuple(f"law {x}: " for x in (lid, as_amend) if x)
-            dl = [x for x in k.diff(view0, k.view()) if not x.startswith(own) and not _names_hidden(x, hidden)
+            view1 = k.view()
+            dl = [x for x in k.diff(view0, view1) if not x.startswith(own) and not _names_hidden(x, hidden)
                   and not (proc.get("ballot") and x.startswith("ballot "))]
             tgt = (k.w["laws"].get(as_amend) or {}) if as_amend else {}
             old_code = tgt.get("patches", [{}])[-1].get("old") if tgt.get("patches") else None
             rep["enact"]["diff"] = dl
-            rep["enact"]["inert"] = bool(rep["enact"]["ok"]) and LE.inert("amend" if as_amend else "enact", dl, old_code,
+            sh = LE.shadows(k, view0, view1, lid, code=k.w["laws"][lid]["code"]) if rep["enact"]["ok"] else []
+            dead = LE.ineffective(dl, sh)                               # changes a rule of higher precedence overrides
+            rep["enact"]["inert"] = bool(rep["enact"]["ok"]) and LE.inert("amend" if as_amend else "enact",
+                                                                          [x for x in dl if x not in dead], old_code,
                                                                           k.w["laws"][lid]["code"])
+            if sh:
+                rep["enact"]["shadowed"] = sh
+                rep["enact"]["shadow_notes"] = LE.shadow_texts(k, sh)
             rep["enact"]["failed_calls"] = [f"{f['law']}: {f['fn']}({', '.join(f['args'])}): {f['reason']}"
                                             for f in (failed + failed2)[:10] if f["law"] not in hidden]
         rep["static"] = _static(k, lid, system, amends)
@@ -607,6 +614,7 @@ def render(rep: dict, budget: int = TOKENS) -> str:
     if "diff" in en:                                                    # law.effects: what the enactment itself changes
         lines.append("At enactment: " + ("; ".join(en["diff"][:20]) if en["diff"] else "no change")
                      + ("; INERT: as written it changes nothing and no hook of it acts later" if en.get("inert") else "") + ".")
+        lines += [x.rstrip(".") + "." for x in en.get("shadow_notes") or ()]
         if en.get("failed_calls"):
             lines.append("Failed law calls: " + "; ".join(en["failed_calls"]))
     for s in rep["scenarios"]:
