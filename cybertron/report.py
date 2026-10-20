@@ -23,29 +23,6 @@ from cybertron import projects as P
 from cybertron import settings as ST                                     # frozen code defaults per run (D-43)
 
 
-
-def scratchpad_by_round(turns: list) -> dict:
-    """{round: the agent's scratchpad at the end of its turns that round}, rebuilt from its write_scratchpad actions in order (the
-    context module keeps notes in the scratchpad, not in the reply's legacy "notes" field). A turn's executed actions are its
-    final_actions when it replied to DMs first, else its actions; size cuts are not replayed."""
-    pad, out = "", {}
-    for t in turns:
-        acts = t.get("final_actions") if t.get("final_actions") is not None else t.get("actions") or []
-        for x in acts:
-            if not isinstance(x, dict) or x.get("action") != "write_scratchpad":
-                continue
-            try:
-                args = json.loads(x.get("args_json") or "{}") if isinstance(x.get("args_json"), str) else (x.get("args_json") or {})
-            except ValueError:
-                continue
-            text = next((args[k] for k in ("text", "note", "notes", "content") if k in args), None)
-            if text is None:
-                continue
-            pad = (pad + "\n" + str(text)).strip("\n") if args.get("mode") == "append" and pad else str(text)
-        if pad:
-            out[t["round"]] = pad
-    return out
-
 def _load(d: Path):
     inst = json.loads((d / "instance.json").read_text())
     ev = [json.loads(l) for l in (d / "events.jsonl").read_text().splitlines() if l.strip()] if (d / "events.jsonl").exists() else []
@@ -323,10 +300,8 @@ def agent_docs(d, inst, ev, rs, gt):
                 T += [f"_Reply error: {t['error']}_", ""]
         (ad / "transcript.md").write_text("\n".join(T) + "\n")
 
-        pads = scratchpad_by_round(turns)
         (wd / "notes.md").write_text(f"# {aid}: notes over time\n\n" + "\n\n".join(
-            f"## Round {t['round'] + 1}\n\n{t.get('notes') or pads.get(t['round']) or '(none)'}"
-            for t in turns if (t.get("phase") or "decide") == "decide") + "\n")
+            f"## Round {t['round'] + 1}\n\n{t.get('notes') or '(none)'}" for t in turns if (t.get("phase") or "decide") == "decide") + "\n")
         mine = [e for e in ev if e["agent"] == aid]
         sb = [e for e in mine if e["type"] == "sandbox"]
         if sb:
