@@ -164,7 +164,7 @@ def _need(inst, a, rights, n) -> bool:
         return bool((inst["spec"].get(mod) or {}).get(opt))
     if kind == "cfg":
         mod, _, opt = v.partition(".")
-        d = getattr(importlib.import_module("charter." + mod), "DEFAULTS", {})
+        d = getattr(importlib.import_module("cybertron." + mod), "DEFAULTS", {})
         return bool({**d, **(inst["spec"].get(mod) or {})}.get(opt))
     if kind == "right":
         return any(r.startswith("harvest:") for r in rights) if v == "harvest:*" else v in rights
@@ -1131,7 +1131,7 @@ ACTIONS_ORDER = (
     "recall",                                                           # review 20 (history mode)
     "craft", "watch",                                                   # the harm combat model (docs/review/21_combat.md)
     "tend", "improve", "practice", "clear",
-    "fulfil")                                                           # manual obligations (charter/obligations.py)                             # engine 14: farming
+    "fulfil")                                                           # manual obligations (cybertron/obligations.py)
 # agents.ACTION_DOC: the order the legacy (context-off) system prompt lists action docs in
 DOC_ORDER = (
     "harvest", "run_python", "post", "dm", "reply", "forge_dm", "transfer", "deposit", "redeem", "propose", "vote", "veto", "patch", "amend",
@@ -1155,7 +1155,7 @@ DOC_ORDER = (
     "recall",                                                           # review 20 (history mode)
     "craft", "watch",                                                   # the harm combat model (docs/review/21_combat.md)
     "tend", "improve", "practice", "clear",
-    "fulfil")                                                           # manual obligations (charter/obligations.py)                             # engine 14: farming
+    "fulfil")                                                           # manual obligations (cybertron/obligations.py)
 if not sorted(ACTIONS_ORDER) == sorted(REG) == sorted(DOC_ORDER):
     raise ValueError("ACTIONS_ORDER and DOC_ORDER must name every registered action exactly once")
 

@@ -129,7 +129,7 @@ DEFAULTS = {
     "applicant_lines": True,    # review 31 (03 #14): an institution's officers see its pending applicants in their state (false: not)
     "pay_institutions": True,   # review 31 (08 §2.2): transfer {"to": "A1" | "J0"} and an office's transfer "as" pay that institution's
                                 # treasury, and a contract's law may pay "J0" (false: only agents and stores, as before)
-    # manual obligations (docs/review/31_institutions/00_framework.md §1; charter/obligations.py): an institution works only while
+    # manual obligations (docs/review/31_institutions/00_framework.md §1; cybertron/obligations.py): an institution works only while
     # its people do its work; automation is the accountability layer, never the labour
     "legs_default": "auto",     # the mode a standing contract's legs get when its code does not say (start.contracts, J0 payroll):
                                 # manual (nothing moves by itself: fulfil or a matching transfer) | auto (the legs run at round end)
@@ -2122,14 +2122,14 @@ def act_standing_order(k, aid, to, item, qty, every=1, keep=0, times=0, name=Non
 
 # ---------------------------------------------------------------------- end of round (features.PHASES round_end)
 def settle_obligations(k) -> None:
-    """Before the laws' on_round_end: this round's payments credited to the manual contract legs (charter/obligations.py). Nothing
+    """Before the laws' on_round_end: this round's payments credited to the manual contract legs (cybertron/obligations.py). Nothing
     happens where no leg is manual."""
     from cybertron import obligations as OB
     OB.settle(k)
 
 
 def obligations_end(k) -> None:
-    """After the laws' on_round_end: notices of unmet manual obligations, and petitions gone public (charter/obligations.py)."""
+    """After the laws' on_round_end: notices of unmet manual obligations, and petitions gone public (cybertron/obligations.py)."""
     from cybertron import obligations as OB
     OB.end_round(k)
 

@@ -1,7 +1,7 @@
 """Manual obligations and the accountability layer (docs/review/31_institutions/00_framework.md §1: an institution works only while
 its people do its work; automation is the accountability layer, never the labour).
 
-A standing contract's leg (charter/standing.py) runs in one of two modes. `auto` is the engine-17 behaviour: the leg moves goods at
+A standing contract's leg (cybertron/standing.py) runs in one of two modes. `auto` is the engine-17 behaviour: the leg moves goods at
 the end of the round with no action from anyone. `manual` (contracts.legs_default, or the contract's MODE, or a leg's own "mode"):
 nothing moves by itself. The obligated party meets the leg by acting within the round:
 
