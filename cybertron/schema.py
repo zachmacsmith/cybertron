@@ -696,6 +696,10 @@ DOCS = {
                    "event with what it changed (inert when nothing did and no hook acts later), previews compare offices, stores, "
                    "treasuries, clauses and open ballots, a proposal's preview is flagged inert, and preview_law shows the enactment's "
                    "own diff and previews amendments as amendments (amends). false: none of this (the behaviour before)",
+    "law.effects_detail": "engine 20: law_effect also lists the force rules a law sets, and procedure_restored names the ranks it "
+                          "restores (cybertron/laweffects.py)",
+    "actions.bare_names": "engine 20, with actions.forgiving: a contract or office action named without its institution (board_price for "
+                          "A1.board_price) resolves when exactly one of the agent's institutions offers it; otherwise the error lists the choices",
     "law.call_failures": "a law's move, fine, grant, revoke, suspend, burn or reseat that fails logs law_call_failed with the reason, "
                          "to the law's author and its institution's officers (once per law, function and round), and previews list "
                          "the failed calls. false: such calls fail silently (the behaviour before)",
