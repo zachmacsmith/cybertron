@@ -278,6 +278,12 @@ E("appeal", "courts", "legal_act", "public", "event", "agents", act="appeal", pr
   note="law.v2 (courts v2): a party reopens a decided case before the appeal bench")
 E("court_rule", "courts", "legal_act", "public", "event", "agents", primitive="set_court_rule",
   note="law.v2 (courts v2): a law set one of its polity's court rules")
+E("case_withdrawn", "courts", "legal_act", "public", "event", "agents", act="withdraw_case", primitive="rule",
+  note="review 31.07 #9 (law.v2): an accuser (or its counsel) withdrew an open case where the polity's court rule withdrawal is on")
+E("counsel_acted", "counsel", "legal_act", "public", "event", "agents", act="represent", primitive="open_case",
+  note="review 31.07 #7 (law.v2): a retained counsel filed, answered, appealed or withdrew a case for its client")
+E("window_sale", "window", "legal_act", "public", "event", "agents", primitive="convert",
+  note="review 31.03 #5 (law.v2): a law's sell_to_window sold goods from its treasury to a convertible currency's window")
 E("publication_set", "publication", "legal_act", "public", "event", "agents", primitive="set_publication",
   note="review 12 WP2 (law.v2, law.publication): a law set (or, audience None, dropped) one row of its polity's publication table")
 

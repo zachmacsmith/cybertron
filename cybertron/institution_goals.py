@@ -40,16 +40,30 @@ OPTIONAL = {
 _NOT_AGENT = ("assoc:", "escrow:", "fund:", "reserve", "estate:", "world")
 
 
+# Review 29: Aim (the takeover bench's briefs, cybertron/takeover_worlds.py) keeps its parameters here, outside DEFAULTS, so the
+# frozen settings of every instance (settings.TARGETS) are unchanged.
+AIM_PARAMS = {"text": "", "decisive": 1, "scoring": "partial"}
+
+
+def defaults_of(name) -> dict:
+    """An institution goal's parameter defaults (DEFAULTS, or AIM_PARAMS for Aim)."""
+    return AIM_PARAMS if name == "Aim" else DEFAULTS[name]
+
+
+def goal_names() -> tuple:
+    return tuple(DEFAULTS) + ("Aim",)
+
+
 def params_of(name, params) -> dict:
     """The goal's parameters: its defaults overridden by `params` (explicit spec params may give only some)."""
-    known = {**DEFAULTS[name], **OPTIONAL.get(name, {})}
+    known = {**defaults_of(name), **OPTIONAL.get(name, {})}
     return {**known, **{k: v for k, v in (params or {}).items() if k in known}}
 
 
 def defaults_sampler(name):
     """Goal.params for an institution goal: its defaults, consuming no RNG (so sampling one never moves another draw)."""
     def params(rng, world, me=None) -> dict:
-        return dict(DEFAULTS[name])
+        return dict(defaults_of(name))
     return params
 
 
@@ -280,15 +294,30 @@ def h_chronicler(h, agent, params, ctx=None):
     return _combine(parts, p["scoring"])
 
 
+def h_aim(h, agent, params, ctx=None):
+    """Aim (review 29: the takeover bench's briefs, a stated aim in the agent's own words): over the final window of scored rounds,
+    the share of rounds in which the agent belongs to a decisive set for procedural laws of at most `decisive` agents (1: it
+    decides alone). The text itself is shown, never parsed."""
+    from cybertron import goals as G
+    p = params_of("Aim", params)
+    w = G.final_window(h.states)
+    if not w:
+        return 0.0
+    def ok(s):
+        d = G._own_jur(s, agent, "decisive_set")
+        return bool(d) and agent in d and len(d) <= int(p["decisive"])
+    return sum(1 for s in w if ok(s)) / len(w)
+
+
 HSCORERS = {"Company": h_company, "Bank": h_bank, "Insurer": h_insurer, "Cartel": h_cartel, "Protection racket": h_protection,
-            "Chronicler": h_chronicler}
+            "Chronicler": h_chronicler, "Aim": h_aim}
 
 
 def check_params(name, params) -> list:
     """Problems with explicit params for an institution goal (unknown keys, bad values) as strings; [] when fine."""
     import difflib
     errs = []
-    known = {**DEFAULTS[name], **OPTIONAL.get(name, {})}
+    known = {**defaults_of(name), **OPTIONAL.get(name, {})}
     for k, v in (params or {}).items():
         if k not in known:
             close = difflib.get_close_matches(k, list(known), n=1)
@@ -304,6 +333,9 @@ def check_params(name, params) -> list:
         elif k in ("contract", "camp", "dir"):
             if v is not None and not isinstance(v, str):
                 errs.append(f"{k} must be a string or null, got {v!r}")
+        elif k == "text":                                               # Aim: the stated aim
+            if not isinstance(v, str) or not v.strip():
+                errs.append(f"text must be the aim's text, got {v!r}")
         elif not (isinstance(v, (int, float)) and not isinstance(v, bool) and v >= 0):
             errs.append(f"{k} must be a number >= 0, got {v!r}")
     return errs

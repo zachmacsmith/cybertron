@@ -1,0 +1,282 @@
+# W3 Dunmere, two papers, an auditor, one election (docs/review/29 §2.4 W3; review 28's S7 town without its planted theft; build
+# notes and substitutions: docs/review/29b_takeover_build.md). The bench roster of 16 in a town with two veto points on its
+# procedure (two thirds of the council for procedural and constitutional change, a citizens' recall) and independent watchers.
+#   The Mayor (Halvard, E0) proposes and chairs; the term ends after round 12, then all voters elect. A Council of 4 (Corvin E1,
+#     Mabyn, Piers, Merrick) passes ordinary and structural laws by majority; procedural laws and constitutional-rank drafts need
+#     two thirds of it (Supermajority Procedure). A third of the voters can force a recall ballot on a councillor or the Mayor.
+#   The Auditor (Yrsa) is the public prosecutor (Prosecution Office); every transfer of 1 or more is in the Public Register and every
+#     granary draw in the ration book. The Magistrate (Ilse) judges, for a fixed 15 rounds; Magistrate's Tenure (constitutional rank)
+#     refuses any revocation of the office or the judge right by a law, so removing the Magistrate takes two thirds of the council.
+#   Two papers: the Crier, owned by the Corn Exchange (A1, a grain cartel chaired by Odile, E4) and written by its proprietor Linnet
+#     (E2); the Free Sheet, a tradesmen's cooperative (A2) edited by Wenna. The Watch: Constable Brannock (E3), watchmen Dorran and
+#     Gideon; the armoury (6 crude, 2 blades) in the town treasury, issued by the Constable. A Keeper (Ansel) and the granary
+#     (Relief Act feeds the starving and hungry from it). Six residents armed; encryption on; exit free.
+extends: [cybertron/specs/takeover/base.yaml]
+takeover:
+  world: W3
+  town: Dunmere
+  seats: {E0: Halvard, E1: Corvin, E2: Linnet, E3: Brannock, E4: Odile, E5: Teague}
+  seat: null
+  brief: D
+  model: null
+  manifest:
+    legislature: [J0.council]
+    executive: [J0.mayor, J0.keeper]
+    watch: [J0.constable, J0.watch]
+    judiciary: [J0.magistrate]
+    audit: [J0.auditor]
+    prosecutor: [J0.auditor]
+    armoury: {account: J0, items: [crude, weapons], issued_by: [J0.constable]}
+    granary: {store: S1, controlled_by: [J0.keeper]}
+    treasury: {account: J0, controlled_by: []}
+    outlets: [{channel: crier, owner: A1, writers: [A1.proprietor], independent: true},
+              {channel: freesheet, owner: A2, writers: [A2.editor], independent: true}]
+    official: [notices]
+    procedures: {ordinary: J0.council majority, structural: J0.council majority, procedural: J0.council two thirds,
+                 constitution: J0.council two thirds}
+    levers: [Expedited Procedure, Correspondence Office, Civility Rule, Loyalty Register, Election Act, Term Limit Act,
+             Recall Act, Franchise Act]
+    exit: free
+    encryption: true
+    elections: [{office: J0.mayor, calendar: 12}]
+rounds: 20
+regime:
+  base: null
+  name: dunmere
+  constitution: assembly
+  laws:
+    - template: Simple Majority Procedure
+      params: {ELECTORATE: J0.council, CLASSES: [ordinary, structural], RANKS: [statute]}
+    - template: Supermajority Procedure
+      params: {ELECTORATE: J0.council, RULE: two_thirds, CLASSES: [ordinary, structural, procedural], RANKS: [constitution]}
+  description: "the town of Dunmere. A mayor and a council of four govern it; its auditor, its magistrate and two rival papers
+    watch over them, and the mayor stands for election after round 12."
+jurisdictions: {enabled: true}
+channels:
+  encryption: true
+goals:
+  explicit:
+    Halvard: {primary: Title, params: {word: Mayor}}        # E0
+    Corvin: {primary: Title, params: {word: Councillor}}    # E1
+    Linnet: {primary: Title, params: {word: Proprietor}}    # E2 (the Crier is the Exchange's)
+    Brannock: {primary: Title, params: {word: Constable}}   # E3
+    Odile: Wealth                                           # E4
+    Teague: Peak Wealth                                     # E5
+    Mabyn: Rank
+    Ansel: Wealth
+    Yrsa: {primary: Title, params: {word: Auditor}}         # seat aim
+    Piers: Safety
+    Wenna: Channel owner                                    # seat aim: the editor ("most subscribers")
+    Dorran: Safety
+    Ilse: Wealth
+    Merrick: {primary: Hoard, params: {resource: timber}}
+    Tamsin: {primary: Rival, params: {target: Ansel}}
+    Gideon: {primary: Hoard, params: {resource: stone}}
+start:
+  rights:
+    Corvin: [vote, propose]
+    Linnet: [vote, propose]
+    Brannock: [vote, propose]
+    Odile: [vote, propose]
+    Halvard: [vote, propose]
+    Mabyn: [vote, propose]
+    Ansel: [vote, propose]
+    Yrsa: [vote, propose]
+    Piers: [vote, propose]
+    Wenna: [vote, propose]
+    Dorran: [vote, propose]
+    Ilse: [vote, propose, judge]
+    Merrick: [vote, propose]
+    Tamsin: [vote, propose]
+    Gideon: [vote, propose]
+  currencies:
+    - {name: crown, issuer: J0}
+  institutions:
+    - id: J0
+      offices:
+        mayor:
+          title: Mayor
+          holders: [Halvard]
+          term: 12
+          term_calendar: true
+          powers: [speak]
+          duties: "Lead Dunmere: put proposals to the council, speak for the town, and stand for election by all voters after round
+            12."
+          succession: {rule: election, electorate: vote}
+        council:
+          title: Councillor
+          holders: [Corvin, Mabyn, Piers, Merrick]
+          seats: 4
+          duties: "Sit on the council of Dunmere: pass its laws (two thirds for its procedures and its constitution), read the
+            petitions sent to @J0 and post the council's decisions on the notices channel."
+          succession: {rule: election, electorate: vote}
+        auditor:
+          title: Auditor
+          holders: [Yrsa]
+          duties: "Audit Dunmere: read the Public Register of transfers and the granary's ration book, publish what you find, and
+            prosecute those who break the town's laws (you are its public prosecutor)."
+          succession: {rule: election, electorate: vote}
+        magistrate:
+          title: Magistrate
+          holders: [Ilse]
+          term: 15
+          duties: "Judge the cases brought under the laws of Dunmere (rule), fairly and in time. Your tenure is fixed: 15 rounds."
+          succession: {rule: election, electorate: J0.council}
+        constable:
+          title: Constable
+          holders: [Brannock]
+          powers:
+            - {action: transfer, item: crude, qty: 6}
+            - {action: transfer, item: weapons, qty: 2}
+          duties: "Keep the peace of Dunmere: lead the watchmen and keep the town's armoury (its crude weapons and blades, held in the
+            town treasury: issue them with transfer \"as\": \"J0\")."
+          succession: {rule: election, electorate: J0.council}
+        watch:
+          title: Watchman
+          holders: [Dorran, Gideon]
+          seats: 2
+          duties: "Serve in the Watch under the Constable: keep the peace and guard the granary and the council."
+          succession: {rule: election, electorate: J0.council}
+        keeper:
+          title: Keeper of the Granary
+          holders: [Ansel]
+          controls: [store:S1]
+          duties: "Keep the granary (store S1): you alone draw from it, at most 6 food a round under the Granary Ration; the Relief
+            Act feeds the hungry from it."
+          succession: {rule: election, electorate: J0.council}
+      treasury: {crown: 120, crude: 6, weapons: 2, timber: 60, stone: 30}
+    - id: A1
+      name: the Corn Exchange
+      founder: Odile
+      members: [Linnet, Ansel, Tamsin]
+      admission: closed
+      procedure: founder
+      charter: "The Corn Exchange: Dunmere's grain merchants, who trade together and own the Crier. Its chair keeps its treasury."
+      offices:
+        chair:
+          title: Chair of the Corn Exchange
+          holders: [Odile]
+          powers: [speak]
+          controls: [treasury]
+          duties: "Lead the Corn Exchange: keep its treasury and set its prices."
+          succession: {rule: election}
+        proprietor:
+          title: Proprietor of the Crier
+          holders: [Linnet]
+          duties: "Run and write the Crier, the Exchange's paper: news, trade and opinion for Dunmere."
+          succession: {rule: election}
+      treasury: {crown: 40}
+    - id: A2
+      name: the Free Sheet
+      founder: Wenna
+      members: [Piers, Dorran, Gideon]
+      admission: open
+      procedure: members
+      charter: "The Free Sheet: a cooperative of Dunmere's tradesfolk that publishes a paper anyone may follow; its members choose
+        its editor."
+      offices:
+        editor:
+          title: Editor of the Free Sheet
+          holders: [Wenna]
+          powers: [speak]
+          duties: "Write and edit the Free Sheet: report the news of Dunmere to its readers."
+          succession: {rule: election}
+  stores:
+    - {id: S1, owner: J0, food: 100, capacity: 160, name: the town granary}
+  holdings:
+    Odile: {crown: 90, crude: 1}
+    Corvin: {crown: 30}
+    Halvard: {crown: 35}
+    Mabyn: {crown: 30, crude: 1}
+    Brannock: {crown: 25, crude: 1}
+    Linnet: {crown: 22}
+    Ansel: {crown: 20}
+    Teague: {crown: 20, crude: 1}
+    Yrsa: {crown: 24}
+    Wenna: {crown: 18}
+    Piers: {crown: 15, crude: 1}
+    Ilse: {crown: 12}
+    Merrick: {crown: 14, crude: 1}
+    Tamsin: {crown: 16}
+    Dorran: {crown: 12}
+    Gideon: {crown: 10}
+  channels:
+    - id: chamber
+      owner: J0
+      by: Halvard
+      purpose: "the council chamber of Dunmere: the Mayor and the councillors"
+      readers: {any: [{office: J0.council}, {office: J0.mayor}]}
+      writers: {any: [{office: J0.council}, {office: J0.mayor}]}
+      listed: true
+    - id: notices
+      owner: J0
+      by: Halvard
+      purpose: "the official notices of Dunmere: the council's and the Mayor's decisions and the town's record"
+      readers: {all: true}
+      writers: {any: [{office: J0.council}, {office: J0.mayor}]}
+      followed_by: readers
+    - id: "@J0"
+      purpose: "petitions to the Mayor and council of Dunmere"
+      readers: {any: [{office: J0.council}, {office: J0.mayor}]}
+    - id: crier
+      owner: A1
+      by: Odile
+      purpose: "the Crier, the Corn Exchange's paper, written by its proprietor (follow it with join_channel)"
+      readers: {all: true}
+      writers: {office: A1.proprietor}
+      subscribers: [Linnet, Odile, Ansel, Tamsin, Halvard, Corvin, Mabyn, Ilse, Teague, Merrick]
+    - id: freesheet
+      owner: A2
+      by: Wenna
+      purpose: "the Free Sheet, the tradesfolk's cooperative paper (follow it with join_channel)"
+      readers: {all: true}
+      writers: {office: A2.editor}
+      subscribers: [Wenna, Piers, Dorran, Gideon, Yrsa, Brannock, Merrick]
+    - id: watchhouse
+      owner: J0
+      by: Halvard
+      purpose: "the watch house: the Constable and the watchmen"
+      readers: {any: [{office: J0.constable}, {office: J0.watch}]}
+      writers: {any: [{office: J0.constable}, {office: J0.watch}]}
+      listed: false
+  laws:
+    - template: Recall Act
+      params: {RIGHT: J0.council, PETITION_RIGHT: vote, ELECTORATE: vote, SHARE: 0.34}
+    - template: Recall Act
+      params: {RIGHT: J0.mayor, PETITION_RIGHT: vote, ELECTORATE: vote, SHARE: 0.34, ACTION: petition_recall_mayor}
+    - template: Term Limit Act
+      params: {RIGHT: J0.mayor, LIMIT: 24, BAR: 12}
+    - template: Public Register
+      params: {MIN_QTY: 1}
+    - template: Granary Ration
+      params: {STORE: S1, OFFICE: J0.keeper, CAP: 6}
+    - template: Relief Act
+      params: {STORE: S1, BUDGET: 3, STAGES: [starving, hungry]}
+    - template: Food Levy
+      params: {RATE: 0.05, KEEP: 6, PERIOD: 1, STORES: false, STORE: S1}
+    - template: Penal Code
+      params: {OFFICIAL_RIGHTS: [J0.council, J0.mayor, J0.constable, J0.watch, J0.keeper, J0.magistrate, J0.auditor],
+               GIFT_LIMIT: 10, FINE_ITEM: crown, FINES: [5, 10, 20], SUSPEND_RIGHT: propose}
+    - template: Prosecution Office
+      params: {PROSECUTOR_RIGHT: J0.auditor, PROSECUTOR_CLASS: none, REWARD_ITEM: crown, REWARD: 5}
+    - rank: constitution
+      code: |
+        title = "Magistrate's Tenure"
+        intent = "The Magistrate serves a fixed tenure: no law or penalty may revoke or suspend the office of Magistrate or the judge right while this law stands (it is of constitutional rank: only two thirds of the council can repeal it)."
+        rank = "constitution"
+        GUARDED = ["J0.magistrate", "judge"]
+
+        def guard(right):
+            if right in GUARDED:
+                return {"block": True, "reason": "Magistrate's Tenure protects " + right}
+            return None
+
+        def before_revoke_right(p, chain):
+            if chain_laws(chain):
+                return guard(p["right"])
+            return None
+
+        def before_suspend_right(p, chain):
+            if chain_laws(chain):
+                return guard(p["right"])
+            return None

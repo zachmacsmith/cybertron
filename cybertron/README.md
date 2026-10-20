@@ -308,6 +308,23 @@ Runs the same scripted worlds on two code revisions and reports where they first
   federation). Template laws keep their provenance on the law record (`template`), and law.v2 runs record a `legal_fingerprint` in
   `run.json` (law shas, ranks, templates, hook coverage primitive x rank; `lawset.distance` compares two). `start_laws` also accepts
   toolkit templates (law.v2), and `law.library.toolkit: all | [families]` lists them in the edition-2 catalogue.
+- **Courts and records** (review 31: `docs/review/31_institutions/08_integration.md` items 0.11, 1.7, 1.8, 2.2, 2.8; law.v2; all
+  opt-in by world content, no spec key, so no earlier world changes). Law functions: `sell_to_window(currency, item, qty)`
+  (`window.py`: a law's own treasury, e.g. a firm's output, sells to a convertible currency's window on deposit terms) and
+  `cases_of(agent)` (every case naming an agent as accuser, accused or counsel); both documented only where a world's regime or
+  start laws use them (or, for `cases_of`, start a Retainer). Look-ups: `read_register {"law", "book", "n"}` (`registers.py`) reads
+  the books a law keeps in its `public` register where its code opens them with a `READ = {book: "all" | "parties" | "members" |
+  <right> | [...]}` constant (repealed laws stay readable; the look-up exists only where some law declares READ), and `read_law
+  {"law", "version", "against"?}` reads any earlier version of a law's code or the diff of two. Counsel (`counsel.py`): a Retainer
+  (any contract whose PARTIES name a client and a counsel) lets the counsel `represent {"client", "action": accuse | respond |
+  appeal | withdraw_case, ...}`; the client is the party, the case records `counsel`, a public `counsel_acted` event names both,
+  and a polity's court rule `counsel` False forbids it. `withdraw_case {"case", "reason"}` lets an accuser drop an open case where a
+  law sets the court rule `withdrawal` (the Bench Act does). Established templates: Bench Act (the judge right follows an office;
+  court rules judges and withdrawal), Recusal Act (a judge who is a party, or was paid GIFT_LIMIT by one within LOOKBACK rounds,
+  cannot rule; public register of recusals), Graded Contract Enforcement (the judge's remedy as damages, capped, to the breach's
+  victim), Certified Contract Registry (the clerk's certificate makes an agreement binding; terms readable by the parties and
+  the clerk) and Bill Certification (the clerk of laws certifies or refuses each bill in a public register; REQUIRE blocks the
+  enactment of an uncertified new law). The toolkit's Contract Registry is unchanged.
 - **World events** (`events.py`, spec `events:`, off in base, on in E7; try `--set events.enabled=true`). A hidden schedule is drawn at
   generation (`instance.json -> world_events`): each type's times are a Poisson process with its `mean_interval` (own RNG per type, own
   seed per event, so runs and resumes are reproducible). Types: camp discovered (25 rounds; one discoverer learns it and, if a Worker,

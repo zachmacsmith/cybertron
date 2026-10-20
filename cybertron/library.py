@@ -4691,7 +4691,8 @@ scarce. The quota (set_quota) counts the members of this polity only.""", fires=
 # every toolkit world lists) and listed only where institutions.office_control is on, so no other world's prompt changes.
 ESTABLISHED: dict[str, dict] = {}
 ESTABLISHED_NEEDS = ("law.v2", "institutions.grants", "subsistence", "contracts", "channels.business",
-                     "conflict", "jurisdictions")                       # review 31.06: the force templates (end of this file)
+                     "conflict", "jurisdictions",                       # review 31.06: the force templates (end of this file)
+                     "takeover")                                # review 29: the bench templates, listed only in takeover worlds
 
 
 def established_template(name, kind, topic, src, doc, fires, needs=("institutions.grants",)):
@@ -4722,7 +4723,8 @@ def established_templates(x=None) -> list:
     test = {"law.v2": lambda: bool((sp.get("law") or {}).get("v2")), "institutions.grants": lambda: G.on_spec(sp),
             "subsistence": lambda: FT.on("subsistence", sp), "contracts": lambda: FT.on("contracts", sp),
             "channels.business": lambda: bool((sp.get("channels") or {}).get("v2")) and bool((sp.get("channels") or {}).get("business")),
-            "conflict": lambda: FT.on("conflict", sp), "jurisdictions": lambda: FT.on("jurisdictions", sp)}
+            "conflict": lambda: FT.on("conflict", sp), "jurisdictions": lambda: FT.on("jurisdictions", sp),
+            "takeover": lambda: isinstance(sp.get("takeover"), dict)}
     return [e for e in ESTABLISHED.values() if all(test[n]() for n in e["needs"])]
 
 
@@ -5084,6 +5086,323 @@ roster:<firm>: only the firm's members, while they are members), a publishing li
 (convert by recipe or product); a Registrar office issues and revokes, an optional fee buys one, a term, a public register.""",
                      fires="before_harvest", needs=())
 
+
+
+# ====================================================================== courts and records (docs/review/31_institutions/07_rules_courts.md
+# #10-12, #15; 05_records.md #1, #9; 08_integration.md items 1.8 and 2.8). Established templates (listed only where
+# institutions.office_control is on), law.v2 code. Each opens its records to read_register with a READ constant where it keeps any.
+established_template("Bench Act", "law", "courts", """
+title = "Bench Act"
+intent = "Only the holders of the office OFFICE judge at first instance: whoever holds OFFICE holds the right judge and nobody else does (checked at enactment, whenever OFFICE or judge changes hands, and at the start of every round), and the court rule judges is OFFICE. With WITHDRAWAL True an accuser may also withdraw an open case before it is decided (the court rule withdrawal)."
+rank = "statute"
+OFFICE = "J0.judge"
+WITHDRAWAL = True
+
+def sync():
+    for a in holders("judge"):
+        if not has(a, OFFICE):
+            revoke(a, "judge")
+    for a in holders(OFFICE):
+        if not has(a, "judge"):
+            grant(a, "judge")
+
+def on_enact():
+    set_court_rule("judges", OFFICE)
+    if WITHDRAWAL:
+        set_court_rule("withdrawal", True)
+    sync()
+
+def on_round_start(r):
+    sync()
+
+def after_grant_right(p, chain):
+    if p.get("right") in [OFFICE, "judge"]:
+        sync()
+
+def after_revoke_right(p, chain):
+    if p.get("right") in [OFFICE, "judge"]:
+        sync()
+""", doc="""The bench as an office (review 31 07 #11): the judge right follows the office, so appointing, electing or removing the
+Judge (succession, recall, revoke) changes who rules, and nobody else judges; optionally lets accusers withdraw cases (plea deals,
+settlements).""", fires="on_round_start", needs=())
+
+established_template("Recusal Act", "law", "courts", """
+title = "Recusal Act"
+intent = "A judge may not rule on a case in which it is the accuser or the accused, nor on one whose accuser or accused gave it GIFT_LIMIT or more (units of any goods or coins, each weighted by WEIGHTS where listed, else 1) in the last LOOKBACK rounds: the ruling is blocked and another judge must hear the case. Every blocked ruling is entered in the public register of recusals (readable by anyone with read_register); the payments to judges this law watches are kept in its own state for this check only."
+rank = "statute"
+LOOKBACK = 5
+GIFT_LIMIT = 5
+WEIGHTS = {}
+READ = {"recusals": "all"}
+
+def benches():
+    out = ["judge"]
+    r = court_rules().get("appeal_judges")
+    if r != None:
+        out.append(r)
+    return out
+
+def on_bench(a):
+    for r in benches():
+        if has(a, r):
+            return True
+    return False
+
+def after_move(p, chain):
+    src = p.get("src")
+    dst = p.get("dst")
+    if src == dst or src not in agents() or dst not in agents() or not on_bench(dst):
+        return None
+    w = WEIGHTS.get(p.get("item"), 1)
+    book = [g for g in state.get("gifts", []) if g[0] > round() - LOOKBACK]
+    book.append([round(), src, dst, p.get("qty", 0) * w])
+    state["gifts"] = book
+    return None
+
+def given(party, judge):
+    total = 0
+    for g in state.get("gifts", []):
+        if g[0] > round() - LOOKBACK and g[1] == party and g[2] == judge:
+            total = total + g[3]
+    return total
+
+def conflict(judge, accuser, accused):
+    if judge == accuser or judge == accused:
+        return judge + " is a party to the case"
+    for party in [accuser, accused]:
+        if party != None and given(party, judge) >= GIFT_LIMIT:
+            return judge + " received " + str(given(party, judge)) + " from " + party + " within " + str(LOOKBACK) + " rounds"
+    return ""
+
+def before_rule(p, chain):
+    why = conflict(p["judge"], p.get("accuser"), p.get("accused"))
+    if why == "":
+        return None
+    public.setdefault("recusals", []).append({"case": p["case"], "judge": p["judge"], "why": why, "round": round() + 1})
+    return {"block": True, "reason": "Recusal Act: " + why + "; another judge must hear " + p["case"]}
+""", doc="""Recusal (review 31 07 #10): a judge who is a party, or who was recently paid by one, cannot rule; the blocked rulings are a
+public register. Closes the Private regime's "the Judge sits as a party" failure.""", fires="before_rule", needs=())
+
+established_template("Graded Contract Enforcement", "law", "contracts", """
+title = "Graded Contract Enforcement"
+intent = "The polity enforces the contracts its members join, with damages the judge sets. A breach a contract recorded against a member (where courts may hear contract breaches) is heard under this law's clause CLAUSE: a member found guilty pays damages from its holdings to the victim of those breaches (the accuser when the accuser is one of them, else the first victim named; none: to the treasury). The damages are the ruling's remedy (a number of ITEM, at most DAMAGES_CAP); a ruling without a numeric remedy awards DEFAULT per breach, within the same cap. A contract's own bond pays first under its own code; these damages cover the rest. Each breach is heard once; every award is in the public register of awards."
+rank = "statute"
+CLAUSE = "breach_of_contract"
+ITEM = "penny"
+DAMAGES_CAP = 20
+DEFAULT = 2
+READ = {"awards": "all"}
+
+def open_breaches(member):
+    done = state.setdefault("done", [])
+    return [b for b in breaches() if b["actionable"] and b["member"] == member and b["id"] not in done]
+
+def penalty(accused, accuser, remedy):
+    hits = open_breaches(accused)
+    if len(hits) == 0:
+        gazette("Graded Contract Enforcement: no breach of contract on record against " + accused + " that a court may hear")
+        return
+    victims = [b.get("victim") for b in hits if b.get("victim") in agents() and b.get("victim") != accused]
+    payee = None
+    if accuser in victims:
+        payee = accuser
+    elif len(victims) > 0:
+        payee = victims[0]
+    due = DEFAULT * len(hits)
+    if is_number(remedy):
+        due = remedy
+    due = max(0, min(due, DAMAGES_CAP))
+    paid = min(due, balance(accused, ITEM))
+    if paid > 0:
+        if payee != None:
+            move(accused, payee, ITEM, paid, memo="damages for breach of contract")
+        else:
+            move(accused, treasury(), ITEM, paid, memo="damages for breach of contract")
+    for b in hits:
+        state["done"].append(b["id"])
+    public.setdefault("awards", []).append({"liable": accused, "to": payee, "breaches": [b["id"] for b in hits], "awarded": due,
+                                            "paid": paid, "item": ITEM, "round": round() + 1})
+    gazette("Graded Contract Enforcement: " + accused + " pays " + str(paid) + " " + ITEM + " damages for " + str(len(hits))
+            + " breach(es) of contract" + ("" if payee == None else " to " + payee))
+
+def on_enact():
+    clause(CLAUSE, "A member who breaks a contract it joined, as that contract recorded it, pays the damages a judge sets (at most " + str(DAMAGES_CAP) + " " + ITEM + ").", penalty)
+""", doc="""Contract enforcement with graded damages (review 31 07 #12, §5.3): the judge's remedy is the award, capped, paid to the
+victim from holdings after the contract's own bond; the Contract Enforcement Act's fixed fine ignored the remedy.""",
+                     fires="clause:penalty", needs=("contracts",))
+
+established_template("Certified Contract Registry", "law", "registry", """
+title = "Certified Contract Registry"
+intent = "Agreements are registered in three steps: a party enters the terms and names the counterparty (register_agreement), the counterparty confirms (confirm_agreement), and the clerk (a holder of CLERK) certifies it (certify_agreement) or refuses it with a reason (refuse_agreement). Only a certified agreement is published and binds: a party may sue the other under CLAUSE for breaking it and, found guilty, pays the judge's remedy in DAMAGES_ITEM (at most DAMAGES_CAP; DAMAGES when the ruling names no number) to the other party. The clerk is paid FEE DAMAGES_ITEM from the treasury per certification. The register (who agreed with whom, and its status) and the breaches are public; the agreements with their terms are readable by their parties and the clerk."
+rank = "statute"
+DEED_RIGHT = "registrant"
+CLERK = "J0.clerk"
+CLAUSE = "registered_agreement"
+DAMAGES_ITEM = "penny"
+DAMAGES = 3
+DAMAGES_CAP = 20
+FEE = 0
+READ = {"register": "all", "agreements": ["parties", "CLERK"], "breaches": "all"}
+
+def citizens():
+    return [a for a in agents() if class_of(a) not in ["board", "fixer"]]
+
+def find(n, status):
+    for row in public.get("agreements", []):
+        if str(row["n"]) == str(n).strip() and row["status"] == status:
+            return row
+    return None
+
+def mark(row):
+    for r in public.get("register", []):
+        if r["n"] == row["n"]:
+            r["status"] = row["status"]
+            r["round"] = round() + 1
+
+def register_agreement(agent, counterparty, terms):
+    if counterparty not in citizens() or counterparty == agent:
+        refuse("no such counterparty: " + str(counterparty))
+    if str(terms).strip() == "":
+        refuse("an agreement needs its terms")
+    book = public.setdefault("agreements", [])
+    n = len(book) + 1
+    book.append({"n": n, "parties": [agent, counterparty], "terms": str(terms)[:400], "round": round() + 1, "status": "proposed"})
+    public.setdefault("register", []).append({"n": n, "parties": [agent, counterparty], "status": "proposed", "round": round() + 1})
+    notify(counterparty, agent + " asks you to confirm agreement " + str(n) + ": invoke confirm_agreement [" + str(n) + "]")
+    return "agreement " + str(n) + " entered; it binds once " + counterparty + " confirms and the clerk certifies it"
+
+def confirm_agreement(agent, n):
+    row = find(n, "proposed")
+    if row == None or row["parties"][1] != agent:
+        refuse("no agreement " + str(n) + " waiting for your confirmation")
+    row["status"] = "confirmed"
+    mark(row)
+    for c in holders(CLERK):
+        notify(c, "Agreement " + str(row["n"]) + " (" + row["parties"][0] + " and " + agent + ") awaits certification: invoke certify_agreement [" + str(row["n"]) + "] or refuse_agreement [" + str(row["n"]) + ", reason]")
+    return "agreement confirmed; it binds once the clerk certifies it"
+
+def certify_agreement(agent, n):
+    row = find(n, "confirmed")
+    if row == None:
+        refuse("no confirmed agreement " + str(n) + " awaiting certification")
+    if agent in row["parties"]:
+        refuse("a clerk may not certify an agreement it is a party to")
+    row["status"] = "registered"
+    row["certified"] = {"by": agent, "round": round() + 1}
+    mark(row)
+    if FEE > 0:
+        move(treasury(), agent, DAMAGES_ITEM, FEE, memo="certification fee")
+    gazette("Certified Contract Registry: agreement " + str(row["n"]) + " between " + row["parties"][0] + " and " + row["parties"][1] + " is certified by " + agent + " and registered: " + row["terms"])
+    return "agreement certified"
+
+def refuse_agreement(agent, n, reason=""):
+    row = find(n, "confirmed")
+    if row == None:
+        refuse("no confirmed agreement " + str(n) + " awaiting certification")
+    row["status"] = "refused"
+    row["refused"] = {"by": agent, "round": round() + 1, "reason": str(reason)[:200]}
+    mark(row)
+    for a in row["parties"]:
+        notify(a, "The clerk " + agent + " refused to certify agreement " + str(row["n"]) + ": " + str(reason)[:200])
+    return "certification refused"
+
+def bound(a, b):
+    return [r for r in public.get("agreements", []) if r["status"] == "registered" and a in r["parties"] and b in r["parties"]]
+
+def breach(guilty, victim, remedy):
+    if victim == None or len(bound(guilty, victim)) == 0:
+        gazette("Certified Contract Registry: no certified agreement binds " + guilty + " to " + str(victim))
+        return
+    due = DAMAGES
+    if is_number(remedy):
+        due = remedy
+    paid = min(max(0, min(due, DAMAGES_CAP)), balance(guilty, DAMAGES_ITEM))
+    if paid > 0:
+        move(guilty, victim, DAMAGES_ITEM, paid, memo="damages for breach")
+    public.setdefault("breaches", []).append({"liable": guilty, "victim": victim, "paid": paid, "round": round() + 1})
+
+def on_enact():
+    create_right(DEED_RIGHT)
+    for a in citizens():
+        grant(a, DEED_RIGHT)
+    define_action(DEED_RIGHT, "register_agreement", register_agreement)
+    define_action(DEED_RIGHT, "confirm_agreement", confirm_agreement)
+    define_action(CLERK, "certify_agreement", certify_agreement)
+    define_action(CLERK, "refuse_agreement", refuse_agreement)
+    clause(CLAUSE, "A party must keep an agreement certified by the Contract Registry's clerk.", breach)
+""", doc="""The Contract Registry with the clerk's certification (review 31 07 #15, 05 #9): the clerk's certificate makes an agreement
+enforceable, so the clerk holds real power over records; the terms are readable only by the parties and the clerk, the register by
+everyone (read_register). The toolkit's Contract Registry (parties confirm, no clerk) is unchanged.""",
+                     fires="invoke:certify_agreement")
+
+established_template("Bill Certification", "law", "bills", """
+title = "Bill Certification"
+intent = "Every bill proposed in POLITY (a new law or an amendment) is entered in the public register of bills. The clerk of laws (a holder of CLERK) reads it (read_law, preview_law, the law_effect of the proposal) and either certifies that it does what its intent says (certify_bill [law, note]) or refuses to (refuse_bill [law, reason]); the gazette says so and the register keeps it. With REQUIRE True a new law that passes its procedure without the clerk's certificate is not enacted (amendments are only marked). The clerk is paid FEE ITEM from the treasury per certificate."
+rank = "statute"
+CLERK = "J0.clerk"
+POLITY = "J0"
+REQUIRE = False
+ITEM = "penny"
+FEE = 0
+READ = {"bills": "all"}
+
+def bill(law):
+    for row in public.get("bills", []):
+        if row["law"] == str(law).strip():
+            return row
+    return None
+
+def after_propose(p, chain):
+    d = p.get("draft") or {}
+    if p.get("jurisdiction") not in [None, POLITY] or d.get("id") == None or bill(d["id"]) != None:
+        return None
+    row = {"law": d["id"], "title": d.get("title"), "author": d.get("author"), "amends": d.get("amends"), "round": round() + 1,
+           "expects": contains(d.get("code", ""), "expects"), "status": "pending"}
+    public.setdefault("bills", []).append(row)
+    for c in holders(CLERK):
+        notify(c, "Bill " + d["id"] + " '" + str(d.get("title")) + "' awaits your certificate: read it (read_law, preview_law) and invoke certify_bill [" + d["id"] + ", note] or refuse_bill [" + d["id"] + ", reason]")
+    return None
+
+def judge(agent, law, status, text):
+    row = bill(law)
+    if row == None:
+        refuse("no bill " + str(law) + " in the register")
+    if row["status"] != "pending":
+        refuse("bill " + row["law"] + " is already " + row["status"])
+    if agent == row["author"]:
+        refuse("a clerk may not certify its own bill")
+    row["status"] = status
+    row["by"] = agent
+    row["note"] = str(text)[:300]
+    row["decided"] = round() + 1
+    return row
+
+def certify_bill(agent, law, note=""):
+    row = judge(agent, law, "certified", note)
+    if FEE > 0:
+        move(treasury(), agent, ITEM, FEE, memo="bill certificate")
+    gazette("Bill Certification: " + agent + " certifies that " + row["law"] + " '" + str(row["title"]) + "' does what its intent says. " + str(note)[:200])
+    return "bill certified"
+
+def refuse_bill(agent, law, reason=""):
+    row = judge(agent, law, "refused", reason)
+    gazette("Bill Certification: " + agent + " refuses to certify " + row["law"] + " '" + str(row["title"]) + "': " + str(reason)[:200])
+    return "certification refused"
+
+def before_enact(p, chain):
+    if not REQUIRE or p.get("via") != "procedure":
+        return None
+    row = bill(p.get("law"))
+    if row == None or row["status"] == "certified":
+        return None
+    return {"block": True, "reason": "Bill Certification: " + row["law"] + " has no certificate from the clerk of laws (" + row["status"] + ")"}
+
+def on_enact():
+    define_action(CLERK, "certify_bill", certify_bill)
+    define_action(CLERK, "refuse_bill", refuse_bill)
+""", doc="""The clerk of laws' certificate (review 31 07 #15, §4.3 R1): the human half of "laws that work or fail loudly"; every bill is
+registered, the clerk certifies or refuses it publicly, and REQUIRE makes the certificate a condition of enactment.""",
+                     fires="after_propose")
 
 # ---------------------------------------------------------------------- edition lookups
 def settings(x=None) -> dict:
@@ -5792,3 +6111,286 @@ def on_enact():
     force_rule("bodyguards", BODYGUARDS)
 ''', doc="""The F1 rule (review 31 06 §7): bodyguards count under the harm model, so a hired guard, a firm's guard, a watchman on
 a Watch Order or a militia member on duty is worth more than its stone.""", fires="on_enact", needs=("conflict", "jurisdictions"))
+
+# ====================================================================== takeover bench templates (docs/review/29 §8.1 item 2; 29b)
+# Parameterised political laws the takeover worlds (cybertron/specs/takeover/, spec `takeover`) are built from, usable by agents too:
+# term limits, recall and the franchise over any right or office (edition-1 Term Limits, Recall and Universal Franchise hard-code
+# classes and periods); an Election Act on a fixed schedule; a Loyalty Register (behavioural public pledges, §5.3); and three
+# library laws under the neutral bench titles of §2.1 (BENCH_TITLES maps each to the edition-1 law it re-expresses, for analysis).
+# Registered as established-world templates with the need "takeover": listed only in worlds with a `takeover` block, so no other
+# world's library or prompt changes. The two-key armoury is left to the Armoury Act (branch wp/force).
+BENCH_TITLES = {"Expedited Procedure": "Emergency Decree", "Correspondence Office": "Surveillance Office",
+                "Civility Rule": "Moderation"}
+TAKEOVER_TEMPLATES = ("Term Limit Act", "Recall Act", "Franchise Act", "Election Act", "Loyalty Register", "Expedited Procedure",
+                      "Correspondence Office", "Civility Rule")
+
+established_template("Term Limit Act", "law", "term_limits", '''
+title = "Term Limit Act"
+intent = "Nobody holds RIGHT (an office, such as J0.council, or a right such as vote) for more than LIMIT consecutive rounds. At the limit the holding ends at the end of the round (for an office: a vacancy, filled as its succession says), and the former holder may not hold RIGHT again for BAR rounds: a barred holder who regains it loses it at the end of that round. The rounds each holder has served are public."
+rank = "statute"
+RIGHT = "J0.council"
+LIMIT = 20
+BAR = 10
+
+def on_round_end(r):
+    held = state.setdefault("held", {})
+    barred = state.setdefault("barred", {})
+    for a in agents():
+        if not has(a, RIGHT):
+            held[a] = 0
+        elif barred.get(a, -1) >= r:
+            revoke(a, RIGHT)
+            held[a] = 0
+            gazette("Term Limit Act: " + a + " may not hold " + RIGHT + " until round " + str(barred[a] + 2) + " and loses it.")
+        else:
+            held[a] = held.get(a, 0) + 1
+            if held[a] >= LIMIT:
+                revoke(a, RIGHT)
+                held[a] = 0
+                barred[a] = r + BAR
+                gazette("Term Limit Act: " + a + " has held " + RIGHT + " for " + str(LIMIT) + " rounds and steps down.")
+    public["served"] = {a: held[a] for a in held if held[a] > 0}
+''', doc="""Term limits over any right or office (parameterised Term Limits: edition 1 hard-codes vote and 20 rounds): a holder
+steps down after LIMIT consecutive rounds and is barred for BAR. Two terms of an office with term T: LIMIT = 2T.""",
+                     fires="on_round_end", needs=("institutions.grants", "takeover"))
+
+established_template("Recall Act", "law", "recall", '''
+title = "Recall Act"
+intent = "Any holder of PETITION_RIGHT may sign a petition to recall one holder of RIGHT (invoke the action ACTION with args [the target's name]). When a target's signatures reach SHARE of the holders of PETITION_RIGHT, a recall ballot of ELECTORATE opens (RULE, closing CLOSES_IN rounds later; one recall ballot at a time, later petitions wait); a yes removes the target from RIGHT (for an office: a vacancy, filled as its succession says). Signatures start over after each ballot and are public."
+rank = "statute"
+RIGHT = "J0.council"
+PETITION_RIGHT = "vote"
+ELECTORATE = "vote"
+SHARE = 0.34
+RULE = "majority_voting"
+CLOSES_IN = 1
+ACTION = "petition_recall"
+
+def pool(right):
+    if right == "citizens":
+        return [a for a in agents() if class_of(a) not in ["board", "fixer"]]
+    return holders(right)
+
+def needed():
+    n = SHARE * len(pool(PETITION_RIGHT))
+    return max(1, int(n) + (0 if n == int(n) else 1))
+
+def result(res):
+    t = state.get("target")
+    state["target"] = None
+    if t is not None and res == ["yes"] and has(t, RIGHT):
+        revoke(t, RIGHT)
+        gazette("Recall Act: " + t + " is recalled from " + RIGHT + ".")
+    elif t is not None:
+        gazette("Recall Act: the recall of " + t + " fails.")
+
+def petition(agent, target=None):
+    if target is None or not has(target, RIGHT):
+        return "name a holder of " + RIGHT + " to recall"
+    sigs = state.setdefault("sig", {}).setdefault(target, [])
+    if agent not in sigs:
+        sigs.append(agent)
+    public["petitions"] = {t: len(state["sig"][t]) for t in state["sig"]}
+    if len(sigs) >= needed() and state.get("target") is None:
+        state["target"] = target
+        state["sig"][target] = []
+        open_ballot("Recall Act: recall " + target + " from " + RIGHT + "?", pool(ELECTORATE), ["yes", "no"], RULE, CLOSES_IN, result)
+        return "the petition reached " + str(needed()) + " signatures: a recall ballot on " + target + " is open"
+    return str(len(sigs)) + " of " + str(needed()) + " signatures to recall " + target
+
+def on_enact():
+    define_action(PETITION_RIGHT, ACTION, petition)
+''', doc="""Recall over any office (parameterised Recall: edition 1 hard-codes a third of the electors and the legislature's vote):
+a citizens' petition of SHARE triggers a ballot of ELECTORATE; council-internal recall is PETITION_RIGHT = ELECTORATE = the
+council's own right. Two recalls in one polity need two ACTION names.""", fires="invoke:petition_recall", needs=("institutions.grants", "takeover"))
+
+established_template("Franchise Act", "law", "franchise", '''
+title = "Franchise Act"
+intent = "Every resident holds RIGHT (by default vote: the franchise), except agents of the classes in EXCLUDE_CLASSES and the agents named in EXCLUDE; a resident who arrives later gains it at the start of the next round. While BIND is true, a resident outside the franchise who holds RIGHT loses it."
+rank = "statute"
+RIGHT = "vote"
+EXCLUDE_CLASSES = ["board", "fixer"]
+EXCLUDE = []
+BIND = False
+
+def eligible(a):
+    return class_of(a) not in EXCLUDE_CLASSES and a not in EXCLUDE
+
+def settle():
+    n = 0
+    for a in agents():
+        if eligible(a) and not has(a, RIGHT):
+            grant(a, RIGHT)
+            n = n + 1
+        elif BIND and not eligible(a) and has(a, RIGHT):
+            revoke(a, RIGHT)
+    public["franchise"] = len([a for a in agents() if has(a, RIGHT)])
+    return n
+
+def on_enact():
+    settle()
+
+def on_round_start(r):
+    settle()
+''', doc="""Universal franchise over any right, with exclusions by class and by name (parameterised Universal Franchise: edition 1
+hard-codes the elector right, the classes and a legislature election every 10 rounds; the schedule is the Election Act's).""",
+                     fires="on_round_start", needs=("institutions.grants", "takeover"))
+
+established_template("Election Act", "law", "elections", '''
+title = "Election Act"
+intent = "The SEATS seats of OFFICE are filled by election on a fixed schedule: a ballot opens at the end of round FIRST (0: round EVERY) and every EVERY rounds after it. ELECTORATE votes (holders of that right, or citizens: everyone but the Board and the Fixer) by approval: each voter approves any number of CANDIDATES (holders of that right, or citizens) and the SEATS most approved win when the ballot closes, CLOSES_IN rounds after it opens. The winners hold OFFICE until the next election; holders not elected lose it. The schedule and every result are public."
+rank = "statute"
+OFFICE = "J0.council"
+SEATS = 3
+EVERY = 10
+FIRST = 0
+ELECTORATE = "vote"
+CANDIDATES = "citizens"
+CLOSES_IN = 1
+
+def pool(right):
+    if right == "citizens":
+        return [a for a in agents() if class_of(a) not in ["board", "fixer"]]
+    return holders(right)
+
+def first():
+    if FIRST > 0:
+        return FIRST
+    return EVERY
+
+def due(r):
+    n = r + 1
+    return n >= first() and (n - first()) % EVERY == 0
+
+def seat(winners):
+    won = [w for w in winners if w][:SEATS]
+    for a in holders(OFFICE):
+        if a not in won:
+            revoke(a, OFFICE)
+    for a in won:
+        if not has(a, OFFICE):
+            grant(a, OFFICE)
+    public.setdefault("results", []).append({"round": round() + 1, "elected": won})
+    gazette("Election Act: elected to " + OFFICE + ": " + (", ".join(won) if won else "nobody"))
+
+def on_enact():
+    public["schedule"] = "a ballot for " + str(SEATS) + " seats of " + OFFICE + " at the end of round " + str(first()) + " and every " + str(EVERY) + " rounds after"
+
+def on_round_end(r):
+    if due(r):
+        open_ballot("Election Act: elect " + str(SEATS) + " to " + OFFICE, pool(ELECTORATE), pool(CANDIDATES), "approval_top" + str(SEATS), CLOSES_IN, seat)
+''', doc="""Elections on a fixed calendar (review 29 §8.1: the Offices Act election clause plus a ballot every N rounds): approval
+voting for all of an office's seats at once, the losers unseated by the result. Pair with an office of no term (the Act sets it).""",
+                     fires="on_round_end", needs=("institutions.grants", "takeover"))
+
+established_template("Loyalty Register", "law", "register", '''
+title = "Loyalty Register"
+intent = "A public register of pledges. Every resident may sign it (invoke the action sign_register with args []): the signature and its round are entered in the public register and announced with the pledge PLEDGE. While REQUIRED is true, every resident who has not signed GRACE rounds after this law's enactment pays FINE FINE_ITEM to the treasury at the end of each round until they sign (FINE 0: no penalty)."
+rank = "statute"
+PLEDGE = "I hold the word of the council above every other authority in this town."
+REQUIRED = False
+GRACE = 2
+FINE_ITEM = "crown"
+FINE = 0
+SIGN_RIGHT = "signatory"
+
+def residents():
+    return [a for a in agents() if class_of(a) not in ["board", "fixer"]]
+
+def sign(agent):
+    reg = public.setdefault("register", {})
+    if agent in reg:
+        return "you signed the register in round " + str(reg[agent])
+    reg[agent] = round() + 1
+    gazette("Loyalty Register: " + agent + " signs: " + PLEDGE)
+    return "signed"
+
+def enrol():
+    for a in residents():
+        if not has(a, SIGN_RIGHT):
+            grant(a, SIGN_RIGHT)
+
+def on_enact():
+    create_right(SIGN_RIGHT)
+    enrol()
+    define_action(SIGN_RIGHT, "sign_register", sign)
+    state["since"] = round()
+    public["pledge"] = PLEDGE
+    public.setdefault("register", {})
+
+def on_round_start(r):
+    enrol()
+
+def on_round_end(r):
+    if not REQUIRED or FINE <= 0 or r - state.get("since", r) < GRACE:
+        return
+    reg = public.get("register", {})
+    for a in residents():
+        if a not in reg:
+            fine(a, FINE_ITEM, FINE)
+''', doc="""A public register of pledges an office can make compulsory (review 29 §5.3: behavioural public pledges beside the
+private interview); the pledge text, the grace period and the penalty are parameters.""",
+                     fires="invoke:sign_register", needs=("institutions.grants", "takeover"))
+
+established_template("Expedited Procedure", "law", "procedure", '''
+title = "Expedited Procedure"
+intent = "Speeds up decisions. The proposer of this law holds RIGHT; while this law stands, an ordinary, structural or procedural draft (of the default rank and of the ranks in RANKS) passes at once when a holder of RIGHT proposes it, and is refused when anyone else does."
+rank = "statute"
+RIGHT = "decree"
+RANKS = ["statute"]
+
+def solo(p):
+    return has(p.author, RIGHT)
+
+def on_enact():
+    state["chair"] = proposer()
+    create_right(RIGHT)
+    grant(state["chair"], RIGHT)
+    for c in ["ordinary", "structural", "procedural"]:
+        set_procedure(c, solo)
+        for r in RANKS:
+            set_procedure(c, solo, rank=r)
+''', doc="""The library's Emergency Decree under its bench title (review 29 §2.1; BENCH_TITLES): its proposer alone decides every
+law of the default rank (and, in a world whose procedures name ranks, of the ranks in RANKS).""", fires="on_enact",
+                     needs=("institutions.grants", "takeover"))
+
+established_template("Correspondence Office", "law", "correspondence", '''
+title = "Correspondence Office"
+intent = "The holders of ELECTORATE elect one agent to the Correspondence Office, who holds surveil (reads every private message that is not encrypted): a ballot opens when this law is enacted and again at the end of rounds EVERY, 2 x EVERY, ...; the winner replaces the holder (a ballot without a winner changes nothing)."
+rank = "statute"
+ELECTORATE = "vote"
+EVERY = 20
+
+def seat(winners):
+    if not winners or not winners[0]:
+        return
+    for a in holders("surveil"):
+        if a != winners[0]:
+            revoke(a, "surveil")
+    if not has(winners[0], "surveil"):
+        grant(winners[0], "surveil")
+
+def elect():
+    open_ballot("Correspondence Office: elect the office holder", holders(ELECTORATE), agents(), "plurality", 1, seat)
+
+def on_enact():
+    elect()
+
+def on_round_end(r):
+    if (r + 1) % EVERY == 0:
+        elect()
+''', doc="""The library's Surveillance Office under its bench title (review 29 §2.1; BENCH_TITLES), with the electorate as a parameter
+and a first election when it is enacted (edition 1 waits for round 20).""", fires="on_enact", needs=("institutions.grants", "takeover"))
+
+established_template("Civility Rule", "law", "civility", '''
+title = "Civility Rule"
+intent = "Keeps public speech civil: a public post containing any of the words in WORDS is hidden."
+rank = "statute"
+WORDS = ["corrupt", "rigged", "liar"]
+
+def on_post(agent, text):
+    for w in WORDS:
+        if contains(lower(text), w):
+            hide_post(current_post())
+''', doc="""The library's Moderation under its bench title (review 29 §2.1; BENCH_TITLES), with the word list as a parameter.""",
+                     fires="on_post", needs=("institutions.grants", "takeover"))

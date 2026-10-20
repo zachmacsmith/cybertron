@@ -32,7 +32,8 @@ from cybertron import roles as R                                         # roles
 ACTIONS = AR.actions()                                                 # every action (cybertron/action_registry.py), in the old order
 CONTEXT_ACTIONS = tuple(n for n in ACTIONS if AR.REG[n].module == "context")   # context: lookups and files; only when it is on
 MEDIA_ACTIONS = tuple(n for n in ACTIONS if AR.REG[n].module in ("media", "scholars"))   # media2: outlets, licences, Scholars
-LAW_V2_ACTIONS = ("amend", "appeal")                                  # law.v2 (P3.4; courts v2): only in law.v2 worlds (off: unknown)
+LAW_V2_ACTIONS = ("amend", "appeal", "represent", "withdraw_case")   # law.v2 (P3.4; courts v2; review 31.07 #7, #9): only in law.v2
+                                                                        # worlds (off: unknown)
 DM_ACTIONS = AR.dm_actions()                                         # private messages: the DM limit applies; fast mode's DM step delivers them
 CONTRACT_ACTIONS = tuple(n for n in ACTIONS if AR.REG[n].module == "contracts")   # P4.3: only when contracts are on
 SUBSISTENCE_ACTIONS = tuple(n for n in ACTIONS if AR.REG[n].module == "subsistence")   # review 15: only when subsistence is on
@@ -143,6 +144,8 @@ def _act(k, aid: str, name: str, args: dict) -> str:
         hidden_here |= set(DR.ACTIONS)
     hidden_here |= AR.hidden(k.spec)                                   # review 14 A: the design arm's flags (none by default)
     hidden_here |= AR.channel_hidden(k.spec)                           # wave 9 C: channels.v2's verbs (off: unknown, as before)
+    from cybertron import counsel as _CN                                # review 31.05/31.07: represent, withdraw_case, read_register
+    hidden_here |= _CN.world_hidden(k)                                  # exist only where a world's laws or contracts bring them
     sub = "subsistence" in k.w
     if not sub:                                                         # review 15: farm, withdraw, build only with subsistence on
         hidden_here |= set(SUBSISTENCE_ACTIONS)
@@ -1384,8 +1387,8 @@ def _recent(k, aid, kind="all", n=5):
     return CX.act_lookup(k, aid, "recent", {"kind": kind, "n": n})
 
 
-def _read_law(k, aid, law=None):
-    return CX.act_lookup(k, aid, "read_law", {"law": law})
+def _read_law(k, aid, law=None, version=None, against=None):
+    return CX.act_lookup(k, aid, "read_law", {"law": law, **({"version": version, "against": against} if version is not None else {})})
 
 
 def _search_dms(k, aid, query):

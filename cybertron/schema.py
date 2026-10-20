@@ -1527,7 +1527,7 @@ def _check_explicit_goal(path, v) -> list:
             errs.append(f"{path}.{p}: expected a mapping, got {v[p]!r}")
     from cybertron import institution_goals as IG
     for slot, p in (("primary", "params"), ("secondary", "secondary_params")):
-        if v.get(slot) in IG.DEFAULTS and isinstance(v.get(p), dict):
+        if v.get(slot) in IG.goal_names() and isinstance(v.get(p), dict):
             errs += [f"{path}.{p}: {e}" for e in IG.check_params(v[slot], v[p])]
     return errs
 
@@ -1771,6 +1771,10 @@ def validate(spec) -> list[str]:
     if not isinstance(spec, dict):
         return [f"spec: expected a mapping, got {type(spec).__name__}"]
     errs: list[str] = []
+    if "takeover" in spec:                                             # review 29 (cybertron/takeover_worlds.py), checked here and not
+        from cybertron import takeover_worlds as TW                    # registered in EXTRA, so no instance's frozen settings change
+        errs += TW.check("takeover", spec["takeover"])
+        spec = {k: v for k, v in spec.items() if k != "takeover"}
     _section(keys()[""], "", spec, errs)
     law = spec.get("law") if isinstance(spec.get("law"), dict) else {}
     lib = law.get("library") if isinstance(law.get("library"), dict) else {}

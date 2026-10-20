@@ -394,6 +394,7 @@ def legacy_actions(inst: dict, a: dict) -> list:
         absent |= {"amend"}                                              # law.v2 (P3.4): amend exists only in law.v2 worlds
     if not (sp.get("law") or {}).get("v2") or lvl < 2:
         absent |= {"appeal"}                                             # law.v2 (courts v2): appeal exists only in law.v2 worlds
+    absent |= {"represent", "withdraw_case"}                             # review 31.07 #7, #9: never in the legacy prompt (frozen)
     from cybertron import life as LF
     absent |= LF.absent_actions(inst, a)                               # life: only where Life (or mortality) is on
     if not FT.on("contracts", inst):                                    # contracts (P4.3): their actions only when on
@@ -640,6 +641,7 @@ def _render_event(k, e, viewer=None) -> str | None:
         return f"{tag} {t} {who or ''}: " + json.dumps(head)[:300] + ("\n" + cited if cited else "")
     if t in ("rights", "sanction", "censure", "rename", "accuse", "respond", "ruling", "case_dismissed", "invoke", "channel_created",
              "deposit", "redeem", "proposal_check_failed", "panel_vote", "case_final", "appeal", "court_rule",   # courts v2 (law.v2)
+             "case_withdrawn", "counsel_acted", "window_sale",           # review 31.07 #7, #9; 31.03 #5
              "publication_set"):                                    # review 12 WP2 (law.publication)
         return f"{tag} {t} {who or ''}: " + json.dumps({x: (y if not isinstance(y, list) or t != 'accuse' else [z['id'] for z in y]) for x, y in d.items()})[:600]
     if t in ("proposal_blocked", "primitive_blocked", "law_charged", "law_flagged", "account_out_of_gas"):   # law.v2 (P3.1)

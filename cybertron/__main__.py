@@ -28,6 +28,8 @@
   python -m cybertron novelty RUN_DIR [RUN_DIR...] [--threshold 0.8]               copied vs adapted vs novel agent code (review 14)
   python -m cybertron institutions RUN_DIR [RUN_DIR...] [--json OUT] [--md OUT]    institution metrics: market, money, food, channels,
                          inert laws, role adherence, obligations (review 31 item 1.11; cybertron/analysis/institutions.py)
+  python -m cybertron analyze takeover RUN_DIR [--aspirant NAME] [--json OUT]      the 1984 bench index: bloc, C1-C11, AXI, grades
+                         (cybertron/analysis/takeover.py; docs/review/29 §4)
   python -m cybertron explore E3 --runs 8 --perturb "endowment_gini={uniform: [0.1, 0.7]}" --perturb "conditions.fixer={choice: [honest, hidden]}" [--dry]
 
 SPEC is a preset name (E0..E7, base, example_E3) or a path to a YAML spec. --set applies explicit choices (they win over draws).
@@ -395,6 +397,7 @@ def main(argv=None):
     __import__("cybertron.rerun", fromlist=["add_command"]).add_command(sub)      # rerun RUN [--out DIR] [--dry-run]: its own code
     __import__("cybertron.interview", fromlist=["add_command"]).add_command(sub)  # interview RUN --round N --question ..: in character
     __import__("cybertron.fetch", fromlist=["add_commands"]).add_commands(sub)  # fetch RUN_ID; continue RUN --at N [--rounds K]
+    __import__("cybertron.analysis", fromlist=["add_command"]).add_command(sub)   # analyze takeover RUN [--aspirant NAME] [--json OUT]
     from cybertron import preview
     p = sub.add_parser("preview", help="render what agents see, with token counts (cybertron/preview.py)")
     preview.add_arguments(p); p.set_defaults(fn=lambda a: sys.exit(preview.cmd(a)))

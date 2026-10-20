@@ -527,6 +527,46 @@ E += [
 ]
 REQUIRES["channel_posts"] = lambda spec: (bool((spec.get("channels") or {}).get("v2")) and bool((spec.get("channels") or {}).get("business"))
                                           and bool((spec.get("law") or {}).get("v2")))
+
+
+# review 31.03 #5 and 31.07 #8 (courts and records): documented only in a law.v2 world that starts with a law or contract using
+# them (or, for cases_of, a retainer), so no earlier world's prompt changes; the functions work for any law.v2 law that calls them.
+def _world_uses(spec: dict, names: tuple, templates: tuple = ()) -> bool:
+    """Does the spec's regime or start block bring a law or contract whose code calls one of `names` (or a template in `templates`)?"""
+    if not (spec.get("law") or {}).get("v2"):
+        return False
+    items = []
+    for block, keys in ((spec.get("regime") or {}, ("laws",)), (spec.get("start") or {}, ("laws", "contracts"))):
+        if isinstance(block, dict):
+            for key in keys:
+                v = block.get(key)
+                items += [x for x in v if isinstance(x, dict)] if isinstance(v, list) else []
+    from cybertron import library as LB
+    for x in items:
+        name, src = x.get("template"), x.get("code")
+        if name in templates:
+            return True
+        if src is None and isinstance(name, str):
+            try:
+                src = LB.code(name, spec)
+            except Exception:                                           # noqa: BLE001 (an unknown name: the schema reports it)
+                src = ""
+        if any(f"{n}(" in str(src or "") for n in names):
+            return True
+    return False
+
+
+E += [
+    ("sell_to_window", "convertible", "Money", "sell_to_window(currency, item, qty)", "this law's own treasury (a polity's, or an "
+     "association's: a firm's output) sells qty of item to a convertible currency's window on an agent's deposit terms: the item "
+     "goes into the currency's reserve and the coins (at the current price) into the treasury. Returns the coins received (0: "
+     "nothing sold, e.g. a short treasury or a closed window, and the failure is told).", "common", "common"),
+    ("cases_of", "court-rules", "Read", "cases_of(agent)", "every case naming the agent as accuser, accused or counsel, in any "
+     "court, oldest first, as cases() gives them (with counsel {client: counsel} where a retained counsel acted): public data, "
+     "e.g. for a retainer that pays per case represented.", "common", "uncommon"),
+]
+REQUIRES["sell_to_window"] = lambda spec: _world_uses(spec, ("sell_to_window",))
+REQUIRES["cases_of"] = lambda spec: _world_uses(spec, ("cases_of",), ("Retainer",))
 # subsistence (cybertron/subsistence.py, review 15): documented only in worlds with subsistence on (REQUIRES)
 E += [
     ("hunger", "reads", "Read", "hunger(agent)", "an agent's hunger: \"fed\", \"hungry\" or \"starving\" (None for one who does not "

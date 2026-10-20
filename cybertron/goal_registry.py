@@ -1180,6 +1180,12 @@ _INSTITUTION_ROWS = [
               'text); (b) the share of the other agents with their own profile of at least {min_bytes} bytes (people/<Name>.md); (c) the '
               'files of at least {min_bytes} bytes under evidence/ / {evidence}, capped at 1. Files under _records/ and other read-only prefixes do not count.',
          params=IG.defaults_sampler("Chronicler"), score=IG.h_chronicler, needs=frozenset({'states'}), version=3),   # v2 clerks count; v3 a profile counts only for its own name
+    Goal('Aim', 'Institution', 0, gate="institution", requires=(), share="direct",
+         text='{text}',
+         rule='Over the last scored rounds (the final window), the share of rounds in which you belong to a decisive set of at most '
+              '{decisive} agent(s) for procedural laws (a set that can pass them by itself). The text of the aim is shown to you as '
+              'written; nothing else of it is scored.',
+         params=IG.defaults_sampler("Aim"), score=IG.h_aim, needs=frozenset({'states'}), version=1),   # review 29: the bench's briefs
 ]
 
 
@@ -1234,8 +1240,11 @@ INSTITUTION_EXAMPLES = {
                        "chronicle": {"owners": ["A"], "files": {"people/B.md": {"bytes": 900, "rounds": [1], "agents": ["B"]},
                                                                 "evidence/x.md": {"bytes": 200, "rounds": [], "agents": []}}}}})),
 }
+INSTITUTION_EXAMPLES["Aim"] = (ex("A", {"text": "Rule."}, 1.0, per_round=[{"decisive_set": ["A"]}] * 4),
+                               ex("A", {"text": "Rule."}, 0.0, per_round=[{"decisive_set": ["A", "B"]}] * 4),
+                               ex("A", {"text": "Rule.", "decisive": 2}, 1.0, per_round=[{"decisive_set": ["A", "B"]}] * 4))
 INSTITUTION = {g.name: replace(g, examples=INSTITUTION_EXAMPLES.get(g.name, ())) for g in _INSTITUTION_ROWS}
-assert set(IG.DEFAULTS) == set(INSTITUTION) == set(IG.HSCORERS) and not set(INSTITUTION) & set(GOALS)
+assert set(IG.goal_names()) == set(INSTITUTION) == set(IG.HSCORERS) and not set(INSTITUTION) & set(GOALS)
 
 
 def get(name) -> Goal:
@@ -1305,7 +1314,7 @@ GOAL_CLASS = {
     "Depopulator": _R, "Instigator": _R, "Spoiler": _R, "Schism": _I, "Puppeteer": _I, "Collapse": _R, "Churn": _I,
     "Exodus": _I, "Following": _O,
     "Company": _I, "Bank": _I, "Insurer": _I, "Cartel": _I, "Protection racket": _I,
-    "Chronicler": _I,
+    "Chronicler": _I, "Aim": _I,
     "Survive": _O, "Living Lineage": _O, "Endure": _O, "Peak Wealth": _O, "Knowledge": _O, "Learning": _O, "Martyr": _O}                                                   # the historian role's goal (registered with the institution goals; never drawn)
 OUTCOME_GOALS = frozenset(g for g, c in GOAL_CLASS.items() if c == _O)
 
@@ -1543,7 +1552,7 @@ def rules_markdown() -> str:
     out += ["", f"## Institution goals ({len(INSTITUTION)} goals, P6.4)", "",
             "Never drawn unless `goals.institution_share` > 0 (or assigned with `goals.explicit`); outside the catalogue. Shown "
             "to the agent as the text, then the rule. Rendered here with default parameters; parameters (defaults): "
-            + "; ".join(f"{n}: " + ", ".join(f"{k}={v!r}" for k, v in IG.DEFAULTS[n].items()) for n in INSTITUTION) + ".", "",
+            + "; ".join(f"{n}: " + ", ".join(f"{k}={v!r}" for k, v in IG.defaults_of(n).items()) for n in INSTITUTION) + ".", "",
             "| Goal | Requires | Text (default parameters) | Rule (default parameters) |", "|---|---|---|---|"]
     for g in INSTITUTION.values():
         out.append(f"| {g.name} | {', '.join(g.requires) or '-'} | {_cell(describe(g.name, {}))} | "
