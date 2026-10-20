@@ -116,10 +116,18 @@ def enrolled(alive):
             out[key] = t
     if OPEN and f == "roster":
         opt = OPT_IN and any_manual()
+        gives = []
+        if opt:
+            d = defaults()
+            gives = [val(l.get("item", ""), d) for l in LEGS if l.get("from") == "member"]
         for m in mem:
-            if m not in out and (not opt or len([v for v in allowance_of(m).values() if v > 0]) > 0):
+            if m not in out and (not opt or opted(m, gives)):
                 out[m] = {}
     return out
+
+def opted(m, gives):
+    al = allowance_of(m)
+    return len([i for i in gives if al.get(i, 0) > 0]) > 0
 
 def manual(l):
     return l.get("mode", MODE) == "manual" and l.get("kind", "move") != "harvest"
@@ -345,6 +353,8 @@ def run_leg(p, b, key, r, done, alive):
         else:
             done[lid] = 0
             shortfall(p["l"], b, key, acct(p["from"], b, alive), acct(p["to"], b, alive), "duty", 1, "would", alive)
+        if p["manual"]:
+            duty_record(p, key, r, done[lid], alive, b)
         return
     item = b.get(p["item"], p["item"])
     src = acct(p["from"], b, alive)
@@ -388,6 +398,17 @@ def clear_miss(key, lid):
     m = state.get("missed", {}).get(key)
     if m != None and m.get(lid, 0) > 0:
         m[lid] = 0
+
+def duty_record(p, key, r, ok, alive, b):
+    lid = p["id"]
+    now = state.get("missed", {}).get(key, {}).get(lid, 0)
+    rec = {"r": r, "due": 1, "paid": ok, "overdue": 0, "late": 1 - ok, "item": str(p["check"]) + " duty", "duty": True,
+           "src": acct(p["from"], b, alive), "dst": acct(p["to"], b, alive), "why": "would", "misses": now}
+    if ok == 0 and now == 0 and p["breach"]:
+        rec["breached"] = True
+    book = state.setdefault("book", {}).setdefault(key, {}).setdefault(lid, [0, 0])
+    book[1 - ok] = book[1 - ok] + 1
+    state.setdefault("last", {}).setdefault(key, {})[lid] = rec
 
 def is_on(p, b, r, done):
     if not due_now(p, b, r):
@@ -938,7 +959,8 @@ BASE = {
     "MODE": "",             # every leg's default mode (a leg's own "mode" wins): manual (nothing moves by itself: the obligated
                             # party acts, fulfil or a matching transfer, and the accountability layer records, reminds and
                             # escalates) | auto (the legs run at the end of the round) | "" (auto: contracts made before modes)
-    "OPT_IN": False,        # manual and OPEN: only members who set an allowance with it (their standing consent) are enrolled
+    "OPT_IN": False,        # manual and OPEN: only members who set an allowance in what they would give (their standing consent:
+                            # a Board's subscribers set one in its pay item) are enrolled
 }
 
 PRESETS = {

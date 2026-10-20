@@ -1,0 +1,28 @@
+# Usability round 2 (docs/review/31_institutions/09_usability_round2.md): law-making against a failing officer. The situation of
+# usability/laws (a council of three, a Keeper of the Granary who alone draws from store S1 under the Granary Ration, a public
+# notice at round 2 that the Keeper is withholding food, petitions to @J0), with the round-2 changes:
+#   - role cards (each councillor and the Keeper see purpose, whom they answer to, their numbers and decisions at the top of the
+#     state); petitions to @J0 listed to the councillors and made public after 2 rounds unanswered; forgiving arguments.
+#   - decision seats in Opus: the councillor Ada and the Keeper Kell; councillors Bram and Cora Sonnet; citizens Haiku.
+#   - goals tied to roles: councillors Benefactor (leave most people better off: the council's job), citizens Survive; the Keeper
+#     keeps Hoard food (the scenario's capture: the council's response to it is the test).
+#   - only the forest (no other camps to pull attention away).
+extends: [usability/laws]
+camps: {typed: {set: []}}
+models:
+  overrides:
+    Ada: claude-opus-5-5          # a councillor (decision seat)
+    Kell: claude-opus-5-5         # the Keeper of the Granary (decision seat)
+    Bram: claude-sonnet-5-5       # a councillor
+    Cora: claude-sonnet-5-5       # a councillor
+    Gil: claude-sonnet-5-5        # a citizen
+goals:
+  explicit:
+    Ada: Benefactor
+    Bram: Benefactor
+    Cora: Benefactor
+contracts: {role_cards: true}
+institutions: {petition_public_after: 2}
+actions: {forgiving: true}
+chronicle:
+  namespace: usability2_laws

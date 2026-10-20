@@ -1,0 +1,18 @@
+# Usability round 2 (docs/review/31_institutions/09_usability_round2.md): farming. The situation of usability/farming (six
+# smallholders with two empty plots each), with the round-2 changes that apply where there is no institution: goals tied to the
+# role (feed yourself from your farm: Survive; two farmers aim to grow rich in food: Wealth) instead of drawn private goals;
+# forgiving arguments; only the forest and the fields (no other camps to pull attention away). There are no contracts, offices or
+# decision seats here, so manual obligations and role cards do not apply; the models stay as round 1 (two Sonnet, four Haiku).
+extends: [usability/farming]
+camps: {typed: {set: []}}
+goals:
+  explicit:
+    Alder: Wealth
+    Bryn: Survive
+    Cass: Survive
+    Dell: Wealth
+    Edda: Survive
+    Fion: Survive
+actions: {forgiving: true}
+chronicle:
+  namespace: usability2_farming

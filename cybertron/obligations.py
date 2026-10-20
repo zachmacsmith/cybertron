@@ -1,7 +1,7 @@
 """Manual obligations and the accountability layer (docs/review/31_institutions/00_framework.md §1: an institution works only while
 its people do its work; automation is the accountability layer, never the labour).
 
-A standing contract's leg (cybertron/standing.py) runs in one of two modes. `auto` is the engine-17 behaviour: the leg moves goods at
+A standing contract's leg (cybertron/standing.py) runs in one of two modes. `auto` is the engine-18 behaviour: the leg moves goods at
 the end of the round with no action from anyone. `manual` (contracts.legs_default, or the contract's MODE, or a leg's own "mode"):
 nothing moves by itself. The obligated party meets the leg by acting within the round:
 
@@ -20,15 +20,21 @@ What the engine does by itself is the accountability layer, here:
                                          could-not vs would-not misses, and escalates by the contract's terms (GRACE, bond, PENALTY,
                                          FORUM, ON_BREACH);
   notices (round end, after the laws)    an unmet obligation notifies the counterparty ("Bryn did not deliver 2 food to ...; 2
-                                         overdue") and the defaulter (what it missed, why, and how far it is from the penalty);
+                                         overdue") and the defaulter (what it missed, why, and how far it is from the penalty); a
+                                         missed duty leg (done by acting) is recorded and told the same way;
   state lines (every turn)               OBLIGATIONS: what is due this round, to whom, the exact fulfil, what is overdue and what was
                                          missed last round; and what others owe the agent;
-  role cards (contracts.role_cards)      ROLE: one line per office and contract position, with its numbers and the decisions it owns;
+  role cards (contracts.role_cards)      ROLE: one card per office and contract position (framework §2): purpose, whom it answers to
+                                         and who answers to it, what it gets and from which leg, this round's numbers, and the 2-4
+                                         decisions it owns with exact syntax (a vital line: at the top of the state);
   petitions                              messages to an institution's inbox (@A1) by non-officers, unanswered (no officer has sent
                                          the petitioner a message since), are listed to the officers; after
                                          institutions.petition_public_after rounds a public notice names the office.
 
 The scripted bots perform their obligations (contracts.bot_obligations perform), or neglect them (neglect: a collapse test).
+
+All of it is off by default (engine 18 unchanged: no default flips): a spec turns it on with contracts {legs_default: manual,
+obligations: true, role_cards: true}, actions.forgiving and institutions.petition_public_after (cybertron/specs/usability/v2/*).
 """
 from __future__ import annotations
 
@@ -341,13 +347,14 @@ def _escalation(c, rec, src_agent, polity) -> str:
         n = grace + 1 - int(rec["misses"])
         pen = c.get("PENALTY") or {}
         what = f"a penalty of {_fmt(pen['qty'])} {pen['item']} from your bond" if pen.get("item") and pen.get("qty") else "a breach"
-        return f"You held it and did not act: {what} after {n} more miss{'es' if n != 1 else ''} like this."
+        head = "" if rec.get("duty") else "You held it and did not act: "
+        return f"{head}{what[0].upper() if not head else what[0]}{what[1:]} after {n} more miss{'es' if n != 1 else ''} like this."
     return "It stays overdue."
 
 
 def notices(k) -> None:
     """After the laws' on_round_end: an unmet manual obligation notifies the counterparty and the defaulter (one message each per
-    contract a round)."""
+    contract a round; the defaulter's lists each leg once, with what was missed, the consequence and the exact fulfil)."""
     if "contracts" not in k.w:
         return
     from cybertron import jurisdictions as J
@@ -366,22 +373,35 @@ def notices(k) -> None:
                 verb = "pay" if _money(k, item) else "deliver"
                 who = party_name(k, src)
                 ov = float(rec.get("overdue") or 0)
-                cp = (f"{who} did not {verb} {_fmt(rec['late'])} {item} to {shown(k, norm(k, dst))} this round ({label}, {iid}, leg "
-                      f"{leg}); {_fmt(ov)} overdue.")
+                if rec.get("duty"):
+                    cp = f"{who} did not perform its {item} for {shown(k, norm(k, dst))} this round ({label}, {iid}, leg {leg})."
+                else:
+                    cp = (f"{who} did not {verb} {_fmt(rec['late'])} {item} to {shown(k, norm(k, dst))} this round ({label}, {iid}, "
+                          f"leg {leg}); {_fmt(ov)} overdue.")
                 for a in ([dst] if dst in k.w["agents"] else payers_of(k, norm(k, dst))):
                     to_cp.setdefault(a, []).append(cp)
-                df = (f"You missed {label} ({iid}) leg {leg}" + ("" if src in k.w["agents"] else f" for {who}")
-                      + f": {_fmt(rec['late'])} {item} to {shown(k, norm(k, dst))}; {_fmt(ov)} overdue. "
-                      + _escalation(c, rec, src in k.w["agents"], polity)
-                      + f" Meet it with fulfil {{\"contract\": \"{iid}\", \"leg\": \"{leg}\"}}.")
+                then = _escalation(c, rec, src in k.w["agents"], polity)
+                what = f"your {item} for {shown(k, norm(k, dst))}" if rec.get("duty") else \
+                    f"{_fmt(rec['late'])} {item} to {shown(k, norm(k, dst))}"
+                head = f"You missed {label} ({iid}) leg {leg}" + ("" if src in k.w["agents"] else f" for {who}")
                 for a in payers_of(k, norm(k, src)):
-                    to_df.setdefault(a, []).append(df)
+                    g = to_df.setdefault(a, {}).setdefault((head, then, leg, bool(rec.get("duty"))), [[], 0.0])
+                    g[0].append(what)
+                    g[1] += ov
         for a, xs in sorted(to_cp.items()):
             if a in k.w["agents"]:
                 k.notify(a, " ".join(xs[:4]) + (f" (and {len(xs) - 4} more)" if len(xs) > 4 else ""), by=f"law:{law['id']}")
-        for a, xs in sorted(to_df.items()):
-            if a in k.w["agents"]:
-                k.notify(a, " ".join(xs[:3]) + (f" (and {len(xs) - 3} more)" if len(xs) > 3 else ""), by=f"law:{law['id']}")
+        for a, gs in sorted(to_df.items()):
+            if a not in k.w["agents"]:
+                continue
+            out = []
+            for (head, then, leg, duty), (whats, ov) in gs.items():
+                t = head + ": " + ", ".join(whats[:5]) + (f" and {len(whats) - 5} more" if len(whats) > 5 else "")
+                t += ("." if duty else f"; {_fmt(ov)} overdue.") + " " + then
+                if not duty:
+                    t += f" Meet it with fulfil {{\"contract\": \"{iid}\", \"leg\": \"{leg}\"}}."
+                out.append(t)
+            k.notify(a, " ".join(out[:3]) + (f" (and {len(out) - 3} more)" if len(out) > 3 else ""), by=f"law:{law['id']}")
 
 
 def end_round(k) -> None:
@@ -557,16 +577,20 @@ def due_lines(k, aid) -> list:
                 acc = f" ({_fmt(fresh)} for {xs[0]['per']} this round may wait to the end of next round)"
         parts.append(f"{iid} {label} {leg}: {_fmt(tot)} {item} {'to ' + to if len(rem) == 1 else '(' + to + ')'}{frm}"
                      + (f", of which {_fmt(ov)} overdue" if ov > EPS else "") + acc + f" -> {_call(xs[0])}")
-    missed = []
+    from cybertron import jurisdictions as J
+    groups = {}                                                         # (label, leg, consequence) -> ["1 food to Bo", ...]
     for law in laws(k):
-        for key, legs in (law["state"].get("last") or {}).items():
-            for leg, rec in legs.items():
+        c = consts(law)
+        polity = J.association(k, J.law_jur(k, law["id"])) is None
+        for key, legs in sorted((law["state"].get("last") or {}).items()):
+            for leg, rec in sorted(legs.items()):
                 if rec.get("r") == k.r - 1 and float(rec.get("late") or 0) > EPS and aid in payers_of(k, norm(k, rec.get("src"))):
-                    c = consts(law)
-                    from cybertron import jurisdictions as J
-                    missed.append(f"{str(c.get('LABEL') or law.get('title'))} {leg} {_fmt(rec['late'])} {rec['item']} to {shown(k, norm(k, rec['dst']))} ("
-                                  + _escalation(c, rec, rec.get("src") in k.w["agents"],
-                                                J.association(k, J.law_jur(k, law["id"])) is None).rstrip(".").lower() + ")")
+                    then = _escalation(c, rec, rec.get("src") in k.w["agents"], polity).rstrip(".")
+                    g = (str(c.get("LABEL") or law.get("title")), leg, then[0].lower() + then[1:])
+                    what = f"{rec['item']}" if rec.get("duty") else f"{_fmt(rec['late'])} {rec['item']}"
+                    groups.setdefault(g, []).append(f"{what} to {shown(k, norm(k, rec['dst']))}")
+    missed = [f"{label} {leg}: " + ", ".join(xs[:5]) + (" ..." if len(xs) > 5 else "") + f" ({then})"
+              for (label, leg, then), xs in groups.items()]
     out = []
     if parts or missed:
         line = ("OBLIGATIONS: nothing moves unless you act. Due this round: " + ("; ".join(parts) if parts else "nothing") + "."
@@ -667,7 +691,7 @@ def petition_lines(k, aid) -> list:
 
 
 # ---------------------------------------------------------------------- role cards
-CARD_BUDGET = 1400                                                      # characters for the whole ROLE block (the essentials first)
+CARD_BUDGET = 1800                                                      # characters for the whole ROLE block (the essentials first)
 ACTION_ARGS = {"enrol": '["<agent>", <{term}>]', "drop": '["<agent>", <severance>]', "set": '["<agent> or all", <{term}>]',
                "post": '["<job text>", <wage>]'}
 ACTION_WHAT = {"enrol": "take on", "drop": "remove", "set": "set {term}", "post": "post a job"}
@@ -694,11 +718,43 @@ def _office_decisions(k, aid, iid, law) -> list:
         return []
     out = []
     term = {"enrol": c.get("ENROL_TERM") or "value", "set": c.get("SET_TERM") or "value"}
+    label = str(c.get("LABEL") or law.get("title") or law["id"])
     for verb in ("set", "enrol", "drop", "post"):
         name = (c.get("ACTIONS") or {}).get(verb)
         if name:
             args = ACTION_ARGS[verb].format(term=term.get(verb, "value"))
-            out.append(f"{ACTION_WHAT[verb].format(term=term.get(verb, 'value'))}: invoke {{\"action\": \"{iid}.{name}\", \"args\": {args}}}")
+            what = ACTION_WHAT[verb].format(term=term.get(verb, "value"))
+            out.append(f"{what} ({label}): invoke {{\"action\": \"{iid}.{name}\", \"args\": {args}}}")
+    return out
+
+
+def _office_generic(k, aid, iid, offs) -> list:
+    """An office's decisions from what it holds: open ballots it votes in, the stores and treasury it controls, proposing laws (the
+    propose right), its institution's inbox."""
+    out = []
+    bal = [b for b in (k.w.get("ballots") or {}).values() if b.get("status") == "open" and aid in (b.get("electorate") or ())
+           and aid not in (b.get("votes") or {})]
+    if bal:
+        out.append(f"vote on {', '.join(b['id'] for b in bal[:3])}: vote {{\"ballot\": \"{bal[0]['id']}\", \"choice\": \"yes\"}}")
+    ctl = []
+    for o in offs:
+        for c in o.get("controls") or ():
+            if c not in ctl:
+                ctl.append(c)
+    for c in ctl:
+        if str(c).startswith("store:"):
+            out.append(f"draw food from store {c[6:]}: withdraw {{\"store\": \"{c[6:]}\", \"qty\": <n>}}, then give it: transfer "
+                       f"{{\"to\": \"<agent>\", \"item\": \"food\", \"qty\": <n>}}")
+        elif c == "treasury":
+            out.append(f"pay out of {iid}'s treasury: transfer {{\"to\": \"<agent>\", \"item\": \"<item>\", \"qty\": <n>, "
+                       f"\"as\": \"{iid}\"}}")
+    if "propose" in (k.w["agents"].get(aid, {}).get("rights") or ()):
+        out.append('propose a law: propose {"code": "<law source>", "intent": "..."}')
+    inbox = "@" + str(iid)
+    if inbox in (k.w.get("channels") or {}):
+        out.append(f"read what is sent to {iid}: read {{\"channel\": \"{inbox}\"}}")
+    if not out:
+        out.append(f"speak for {iid} or pay from it: transfer {{\"to\", \"item\", \"qty\", \"as\": \"{iid}\"}}")
     return out
 
 
@@ -718,13 +774,96 @@ def _stores_text(k, iid) -> str:
     return ", ".join(xs)
 
 
+def _purpose(text) -> str:
+    """The first sentence of an office's duties, as a purpose line."""
+    t = " ".join(str(text or "").split())
+    if not t:
+        return ""
+    head = t.split(". ", 1)[0]
+    if len(head) > 160:
+        head = head[:160].rsplit(" ", 1)[0].rstrip(" ,;:") + "..."
+    return head.rstrip(".") + "."
+
+
+def _who(k, ref) -> str:
+    """An electorate or office reference in words: "J0.council" -> "Councillor of J0 (Ada, Bram, Cora)"; "vote" -> "holders of vote"."""
+    from cybertron import institutions as IN
+    ref = str(ref or "")
+    if "." in ref:
+        iid, name = ref.split(".", 1)
+        o = IN.office(k, iid, name)
+        if o is not None:
+            hs = IN.holders(k, iid, name)
+            return f"{o.get('title') or name} of {iid} ({', '.join(hs) or 'vacant'})"
+    return f"holders of {ref}"
+
+
+def _answers_to(k, aid, iid, o) -> str:
+    from cybertron import accounts as AC
+    from cybertron import jurisdictions as J
+    cl = o.get("succession") or {}
+    if cl.get("electorate"):
+        return f"answers to {_who(k, cl['electorate'])}, who fill the office by {cl.get('rule') or 'election'}"
+    rec = AC.assocs(k).get(iid) if "contracts" in k.w else None
+    if rec:
+        if rec.get("founder") and rec["founder"] != aid:
+            return f"answers to its founder {rec['founder']}"
+        return f"answers to its members ({len(rec.get('members') or ())})"
+    return "answers to the polity's law" if J.association(k, iid) is None else ""
+
+
+def _parties_of(k, iid, short) -> list:
+    """(role, [agents]) of the standing contracts of iid whose OFFICE is this office: who answers to its holder."""
+    out = []
+    for law in _standing_laws(k, iid):
+        c = consts(law)
+        if str(c.get("OFFICE") or "").split(".")[-1] != short:
+            continue
+        who = sorted(a for a in ((law.get("state") or {}).get("terms_lines") or {}) if a in k.w["agents"])
+        if who:
+            out.append((f"{str(c.get('ROLE') or 'party')}s ({str(c.get('LABEL') or law.get('title') or law['id'])})", who))
+    return out
+
+
+def _sums(k, obs, led) -> str:
+    """What a set of obligations still asks this round, per item: "2 food, 3 penny"."""
+    tot = {}
+    for ob in obs:
+        q = max(0.0, led[ob["id"]][0] - led[ob["id"]][1])
+        if q > EPS:
+            tot[ob["item"]] = tot.get(ob["item"], 0.0) + q
+    return ", ".join(f"{_fmt(q)} {i}" for i, q in sorted(tot.items()))
+
+
+def _pay_text(k, obs, every=None) -> str:
+    """What the agent gets from these legs: "1.5 penny per food of leg D (A1 P)", "2 penny a round (A1 W)"."""
+    xs = []
+    every = obs if every is None else every
+    for ob in obs:
+        if ob["kind"] == "duty":
+            continue
+        if ob.get("per") and float(ob.get("unit") or 0) > EPS:
+            base = next((x for x in every if x["lid"] == ob["lid"] and x["key"] == ob["key"] and x["leg"] == ob["per"]), None)
+            what = base["item"] if base and base["kind"] != "duty" else "unit"
+            t = f"{_fmt(ob['unit'])} {ob['item']} per {what} of leg {ob['per']} ({ob['iid']} {ob['leg']})"
+        elif float(ob.get("qty") or 0) > EPS:
+            t = f"{_fmt(ob['qty'])} {ob['item']} a round ({ob['iid']} {ob['leg']})"
+        else:
+            continue
+        if t not in xs:
+            xs.append(t)
+    return "; ".join(xs[:3])
+
+
 def role_lines(k, aid) -> list:
-    """ROLE: one line per office the agent holds and per standing contract it is a party to: the institution, its numbers and the
-    2-4 decisions it owns, with exact syntax. Budgeted: past CARD_BUDGET characters the decisions are cut to two per role."""
+    """ROLE: one card per office the agent holds and per standing contract it is a party to (framework §2): the purpose, whom it
+    answers to and who answers to it, its pay and the contract it comes from, this round's numbers, and the 2-4 decisions it owns
+    with exact syntax. Budgeted: past CARD_BUDGET characters the decisions are cut to two per card."""
     if not cards_on(k):
         return []
     from cybertron import contracts as KC
     from cybertron import institutions as IN
+    from cybertron import jurisdictions as J
     obs = obligations(k)
     led = ledger(k, obs) if obs else {}
     cards = []
@@ -734,37 +873,50 @@ def role_lines(k, aid) -> list:
     for iid, offs in sorted(held.items()):
         rec = IN.get(k, iid) or {}
         name = f"{rec['name']} ({iid})" if rec.get("name") else iid
+        about = []
+        purpose = " ".join(p for p in (_purpose(o.get("duties")) for o in offs) if p)
+        if purpose:
+            about.append("Purpose: " + purpose.rstrip("."))
+        up = _answers_to(k, aid, iid, offs[0])
+        if up:
+            about.append(up[0].upper() + up[1:])
+        down = []
+        for o in offs:
+            short = str(o.get("id") or "").split(".")[-1]
+            down += [f"{r} {', '.join(w[:5])}" + (" ..." if len(w) > 5 else "") for r, w in _parties_of(k, iid, short)]
+        if down:
+            about.append("Answer to you: " + "; ".join(down))
+        pay = _pay_text(k, [ob for ob in obs if ob["dst"] == aid], obs)
+        if pay:
+            about.append("You get: " + pay)
         nums = [f"treasury {_treasury_text(k, iid)}"]
         st = _stores_text(k, iid)
         if st:
             nums.append(st)
         owes = [ob for ob in obs if _inst(k, ob["src"])[0] == iid and ob["kind"] != "duty"]
-        due = sum(max(0.0, led[ob["id"]][0] - led[ob["id"]][1]) for ob in owes)
-        arrears = sum(float(ob.get("overdue") or 0) for ob in owes)
-        if due > EPS:
-            nums.append(f"it owes {_fmt(due)} this round" + (f" ({_fmt(arrears)} in arrears)" if arrears > EPS else ""))
-        ows = [ob for ob in obs if _inst(k, ob["dst"])[0] == iid and ob["kind"] != "duty"]
-        owed_in = sum(max(0.0, led[ob["id"]][0] - led[ob["id"]][1]) for ob in ows)
-        if owed_in > EPS:
-            nums.append(f"owed to it {_fmt(owed_in)} this round")
+        due = _sums(k, owes, led)
+        arrears = sum(float(ob.get("overdue") or 0) for ob in owes if led[ob["id"]][0] - led[ob["id"]][1] > EPS)
+        if due:
+            nums.append(f"it owes {due} this round" + (f" ({_fmt(arrears)} in arrears)" if arrears > EPS else ""))
+        owed_in = _sums(k, [ob for ob in obs if _inst(k, ob["dst"])[0] == iid and ob["kind"] != "duty"], led)
+        if owed_in:
+            nums.append(f"owed to it {owed_in} this round")
         ac = (KC.recs(k).get(iid) or {}) if "contracts" in k.w else {}
         if ac.get("applicants"):
             nums.append(f"applicants {', '.join(ac['applicants'])}")
         ps = petitions(k, iid) if petition_after(k) else []
         if ps:
             nums.append(f"{len(ps)} petition(s) unanswered")
-        jobs = []
         dec = []
-        if due > EPS:
+        if due:
             dec.append(f"pay what {iid} owes: fulfil {{\"contract\": \"{iid}\"}}")
         if ps:
             dec.append(f"answer {ps[0]['by']}'s petition: send {{\"to\": \"{ps[0]['by']}\", \"text\": \"...\"}}")
         for law in _standing_laws(k, iid):
             dec += _office_decisions(k, aid, iid, law)
-        if not dec:
-            dec.append(f"speak for {iid} or pay from it: transfer {{\"to\", \"item\", \"qty\", \"as\": \"{iid}\"}}")
+        dec += _office_generic(k, aid, iid, offs)
         titles = "/".join(o["title"] for o in offs)
-        cards.append([f"ROLE: {titles} of {name}: " + "; ".join(nums) + ".", dec + jobs])
+        cards.append([f"ROLE: {titles} of {name}. " + "".join(x + ". " for x in about) + "Now: " + "; ".join(nums) + ".", dec])
     for lid in k.w.get("law_order") or ():
         law = k.w["laws"].get(lid)
         if not law or law.get("status") != "active":
@@ -773,36 +925,48 @@ def role_lines(k, aid) -> list:
         if aid not in (st.get("terms_lines") or {}):
             continue
         c = consts(law)
-        from cybertron import jurisdictions as J
         iid = J.law_jur(k, lid)
         label = str(c.get("LABEL") or law.get("title") or lid)
         role = (c.get("PARTIES") or {}).get(aid) or c.get("ROLE") or "party"
         mine = [ob for ob in obs if ob["lid"] == lid and aid in payers_of(k, ob["src"]) and ob["kind"] != "duty"]
         toward = [ob for ob in obs if ob["lid"] == lid and ob["dst"] == aid]
+        about = []
+        office = str(c.get("OFFICE") or "")
+        if office:
+            short = office.split(".")[-1]
+            o = IN.office(k, iid, short) or {}
+            about.append(f"You answer to the {o.get('title') or short} of {iid} ({', '.join(IN.holders(k, iid, short)) or 'vacant'})")
+        pay = _pay_text(k, toward, obs)
+        if pay:
+            about.append("You get: " + pay)
         nums = []
-        d = sum(max(0.0, led[ob["id"]][0] - led[ob["id"]][1]) for ob in mine)
-        if d > EPS:
-            nums.append(f"you owe {_fmt(d)} {mine[0]['item']} this round")
-        o = sum(max(0.0, led[ob["id"]][0] - led[ob["id"]][1]) for ob in toward)
-        if o > EPS:
-            nums.append(f"owed to you {_fmt(o)} {toward[0]['item']}" + (" (" + _fmt(sum(float(x.get("overdue") or 0) for x in toward))
-                                                                         + " overdue)" if any(x.get("overdue") for x in toward) else ""))
+        d = _sums(k, mine, led)
+        if d:
+            nums.append(f"you owe {d} this round")
+        o_ = _sums(k, toward, led)
+        if o_:
+            ov = sum(float(x.get("overdue") or 0) for x in toward)
+            nums.append(f"owed to you {o_}" + (f" ({_fmt(ov)} overdue)" if ov > EPS else ""))
         book = (st.get("book") or {}).get(aid) or {}
         if book:
             kept = sum(v[0] for v in book.values())
             miss = sum(v[1] for v in book.values())
             nums.append(f"your record kept {kept}, missed {miss}")
         dec = []
-        if d > EPS:
+        if d:
             dec.append(f"meet it: fulfil {{\"contract\": \"{iid}\"}}")
         if c.get("NOTICE", 0) or c.get("PARTIES"):
             dec.append(f"give notice: invoke {{\"action\": \"{iid}.{c.get('TAG', 'sc')}_notice\"}}")
         dec.append(f"raise terms with the office: send {{\"to\": \"{iid}\", \"text\": \"...\"}}")
         if J.association(k, iid) is not None:
             dec.append(f"leave: leave_contract {{\"contract\": \"{iid}\"}}")
-        cards.append([f"ROLE: {role} in {label} ({iid}): " + ("; ".join(nums) if nums else "nothing open") + ".", dec])
+        if not nums and not mine and not toward and len(dec) <= 1:          # nothing to do or to watch (an automatic leg's party)
+            continue
+        cards.append([f"ROLE: {role} in {label} ({iid}). " + "".join(x + ". " for x in about) + "Now: "
+                      + ("; ".join(nums) if nums else "nothing open") + ".", dec])
     if not cards:
         return []
+
     def render(n):
         return [head + " Decisions: " + "; ".join(dec[:n]) + "." for head, dec in cards]
     out = render(4)
@@ -836,6 +1000,10 @@ def scripted_actions(k, a) -> list:
         src = ob["src"]
         if src in k.w["agents"]:
             if k.bal(src, ob["item"]) - float(ob.get("keep") or 0) <= EPS:
+                continue
+        else:
+            from cybertron import accounts as AC
+            if AC.bal(k, src, ob["item"]) <= EPS:
                 continue
         if ob["iid"] in seen:
             continue

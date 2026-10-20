@@ -834,7 +834,7 @@ R("set_allowance", "let a contract take from you each round", "contracts", needs
   doc='set_allowance {"contract": "A1", "item": "grain", "qty": 2}: a contract you belong to may take up to qty of item from you '
       'each round (dues, premiums, instalments); qty 0 withdraws it')
 R("fulfil", "meet what a contract asks of you this round", "contracts", needs=("mod:contracts", "cfg:contracts.obligations"),
-  handler="obligations:act_fulfil", module="contracts", category="economic", emits=("transfer", "store_deposit", "office_payment"),
+  handler="obligations:act_fulfil", module="contracts", category="economic",   # logs transfer / store_deposit / office_payment
   aliases={"law": "contract", "institution": "contract", "id": "contract", "leg_id": "leg", "for": "member"},
   doc='fulfil {"contract": "A1", "leg": "D"}: pay or deliver what a contract leg asks of you this round, plus anything overdue '
       '(your state lists each one under OBLIGATIONS with this call): from your holdings, or, as an officer who pays for an '

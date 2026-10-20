@@ -1,0 +1,19 @@
+# Usability round 2 (docs/review/31_institutions/09_usability_round2.md): the market board. The situation of usability/market
+# (three food sellers, three buyers with pennies, two timber holders, a pull market channel under the Market Board law), with the
+# round-2 changes that apply: forgiving arguments; only the forest (no other camps to pull attention away); one seller (Bryn) in
+# an Opus seat, the market's most active decision-maker; goals already tied to roles (sellers Wealth, buyers Survive), and the two
+# timber holders now Wealth (sell timber for food or pennies). No standing contracts here, so manual obligations do not apply.
+extends: [usability/market]
+camps: {typed: {set: []}}
+models:
+  overrides:
+    Bryn: claude-opus-5-5         # a seller
+    Gale: claude-sonnet-5-5       # a buyer with pennies
+goals:
+  explicit:
+    Hob: Wealth
+    Ione: Wealth
+contracts: {role_cards: true}
+actions: {forgiving: true}
+chronicle:
+  namespace: usability2_market

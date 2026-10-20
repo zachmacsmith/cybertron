@@ -1,0 +1,26 @@
+# Usability round 2 (docs/review/31_institutions/09_usability_round2.md): contracts and subscriptions under manual obligations.
+# The situation of usability/contracts (the Corner Shop A1: a Board subscription out of store S1 and a Supply Contract with three
+# farmers), with the round-2 changes:
+#   - manual obligations: nothing moves by itself (contracts.legs_default manual). The shopkeeper hands out each subscriber's ration
+#     and pays each farmer per unit delivered; farmers deliver; subscribers pay per ration received; each with fulfil or a matching
+#     transfer. The engine records, reminds (top of the next turn), tells the counterparty, and escalates by the contract's terms.
+#   - role cards in every state (contracts.role_cards); forgiving arguments (actions.forgiving); petitions to @A1 listed to the
+#     shopkeeper and made public after 2 rounds unanswered.
+#   - the decision seat (Mara, the shopkeeper) is Opus; contracted roles are Haiku, one consumer Sonnet.
+#   - goals tied to roles: the shopkeeper runs the shop as a company (Company on A1), farmers earn from supply (Wealth),
+#     consumers eat (Survive).
+#   - only the forests stay (camps.tiers []): no ore, gold or compute camps to pull attention away.
+extends: [usability/contracts]
+camps: {typed: {set: []}}
+models:
+  overrides:
+    Mara: claude-opus-5-5         # the shopkeeper (decision seat)
+    Gale: claude-sonnet-5-5       # a consumer, not yet subscribed
+goals:
+  explicit:
+    Mara: {primary: Company, params: {contract: A1, members: 4, payout_rounds: 5, rounds: 8}}
+contracts: {legs_default: manual, obligations: true, role_cards: true}
+institutions: {petition_public_after: 2}
+actions: {forgiving: true}
+chronicle:
+  namespace: usability2_contracts
