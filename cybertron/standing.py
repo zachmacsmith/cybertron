@@ -1,8 +1,8 @@
 """The Standing Contract core and its presets (docs/review/31_institutions/03_money_labour.md §2, 08_integration.md §2.1).
 
 One law-language module (CORE) runs every standing contract: per-round legs between parties, executed at the end of the round with
-no action from anyone. The presets (Supply Contract, Board, Payroll, Quota, Grant, Charge, Retainer and the bare Standing
-Contract) are parameter sets with a title over the same code, registered as established-world templates (library.ESTABLISHED,
+no action from anyone. The presets (Supply Contract, Board, Payroll, Quota, Grant, Charge, Retainer, Service and the bare
+Standing Contract) are parameter sets with a title over the same code, registered as established-world templates (library.ESTABLISHED,
 kind "contract": an association's code; Payroll, Board, Quota and Grant also run as a polity's law, e.g. in J0).
 
 Forms (decided by the code itself, never declared):
@@ -1056,6 +1056,24 @@ PRESETS = {
                    "LEGS": [{"id": "G", "from": "treasury", "to": "recipient", "item": "goods", "qty": "qty", "every": "every",
                              "keep": "keep"}],
                    "NOTICE": 0}},
+    "Service": {
+        "topic": "security", "fires": "on_round_end",
+        "intent": "A service contract (a security firm's code): each round every client on the roster pays its fee into the firm's "
+                  "treasury out of its allowance, and for a paid round the firm owes it a guard: the guard named in the client's "
+                  "terms must guard the client that round (the guard action). A paid round with the guard elsewhere is a breach "
+                  "of the firm's duty (on the record, naming the client). A client stops paying to cancel (allowance 0) or gives "
+                  "notice (service_notice); the officer enrols clients (service_enrol, at a fee), drops them and sets the fee.",
+        "doc": "Protection for a fee (review 31 06 Service Contract, F9; 08 §2.1): client to firm every round, a guard duty owed "
+               "back for each paid round, a breach on a gap. Name each client's guard in its roster terms ({guard: <agent>}); "
+               "until one is named the firm itself owes the duty, and its officers are told of each unguarded paid round.",
+        "params": {"TAG": "service", "ROLE": "client",
+                   "TERMS": {"fee": 1, "pay": "penny", "guard": "treasury"},   # no guard named: the firm itself owes it
+                   "LEGS": [{"id": "P", "from": "member", "to": "treasury", "item": "pay", "qty": "fee", "breach": False},
+                            {"id": "G", "kind": "duty", "from": "guard", "to": "member", "qty": 1, "check": "guard",
+                             "after": "P"}],
+                   "NOTICE": 1, "GRACE": 0, "PENALTY": {"item": "penny", "qty": 0},
+                   "ACTIONS": {"enrol": "service_enrol", "drop": "service_drop", "set": "service_fee"},
+                   "ENROL_TERM": "fee", "SET_TERM": "fee"}},
     "Charge": {
         "topic": "dues", "fires": "on_round_end",
         "intent": "A charge (dues, rent, a subscription to a paper): each round every member on the roster pays dues out of its "

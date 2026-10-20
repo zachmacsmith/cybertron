@@ -26,7 +26,10 @@ What the engine does by itself is the accountability layer, here:
                                          missed last round; and what others owe the agent;
   role cards (contracts.role_cards)      ROLE: one card per office and contract position (framework §2): purpose, whom it answers to
                                          and who answers to it, what it gets and from which leg, this round's numbers, and the 2-4
-                                         decisions it owns with exact syntax (a vital line: at the top of the state);
+                                         decisions it owns with exact syntax (a vital line: at the top of the state); an
+                                         officer's card also lists members on no roster and applicants (with the enrol action),
+                                         and the recall route of an elected office; OFFER: an open contract (a shop's Board) for
+                                         agents not on it, with the steps to take it up (review 31.09 fixes 1-3, 7);
   petitions                              messages to an institution's inbox (@A1) by non-officers, unanswered (no officer has sent
                                          the petitioner a message since), are listed to the officers; after
                                          institutions.petition_public_after rounds a public notice names the office.

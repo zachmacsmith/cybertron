@@ -556,3 +556,42 @@ def test_licence_gates_posting_by_right_roster_registrar_and_fee(tmp_path):
         act(k, "Fay", "post", channel="market", text="again")
     lid = law(k, "J0", "Licence")
     assert [r["event"].split(" ")[0] for r in k.w["laws"][lid]["public"]["register"]] == ["issued", "bought", "revoked"]
+
+
+def test_service_preset_fee_in_guard_duty_out_breach_on_a_gap(tmp_path):
+    """The Service preset (review 31 06 F9, 08 §2.1 item 1.3): the client pays the firm its fee each round; for a paid round its named
+    guard owes a guard on it (guards()); a paid round with the guard elsewhere is a breach naming the client."""
+    from cybertron import standing as SD
+    assert "Service" in SD.PRESETS and SD.PRESETS["Service"]["params"]["ACTIONS"]["enrol"] == "service_enrol"
+    sp = world(rounds=2, contracts=[{"template": "Service", "in": "A1", "roster": {"Bo": {"guard": "Di", "fee": 2}},
+                                     "params": {"OFFICE": "head"}, "allowances": {"Bo": {"penny": 2}}}])
+    k = setup(tmp_path, sp)
+    svc = law(k, "A1", "Service")
+    from cybertron import accounts as AC
+    t0 = k.bal(AC.treasury_of(k, "A1"), "penny")
+    act(k, "Di", "guard", agent="Bo")
+    step(k)
+    assert k.bal(AC.treasury_of(k, "A1"), "penny") == t0 + 2                  # the fee, by allowance
+    assert not [e for e in k.events if e["type"] == "contract_breach"]        # guarded: the duty done
+    line = k.w["laws"][svc]["state"]["terms_lines"]["Bo"]
+    assert "Di owes you guard duty" in line and "P: you give 2 penny" in line
+    act(k, "Di", "guard", stop=True)
+    n0 = len(k.events)
+    step(k)
+    br = since(k, n0, "contract_breach")
+    assert br and br[0]["agent"] == "Di" and br[0]["data"]["clause"] == "Service G" and "to Bo" in br[0]["data"]["remedy"]
+
+
+def test_service_without_a_guard_named_records_the_gap_without_errors(tmp_path):
+    for mode in ("auto", "manual"):
+        sp = world(rounds=1, contracts=[{"template": "Service", "in": "A1", "roster": {"Bo": {"fee": 1}},
+                                         "params": {"OFFICE": "head"}, "allowances": {"Bo": {"penny": 1}}}])
+        sp = S.deep_merge(sp, {"contracts": {"legs_default": mode, "obligations": mode == "manual"}})
+        k = setup(tmp_path / mode, sp)
+        if mode == "manual":
+            act(k, "Bo", "fulfil", contract="A1", leg="P")
+        step(k)
+        assert not [e for e in k.events if e["type"] in ("contract_law_error", "law_error")], mode
+        assert not [e for e in k.events if e["type"] == "contract_breach"]       # nobody to blame: the gap is noted, no breach
+        if mode == "manual":                                                    # the firm owes it: its head is told
+            assert any("leg G" in e["data"]["text"] for e in k.events if e["type"] == "notify" and e["data"]["to"] == "Ada")
