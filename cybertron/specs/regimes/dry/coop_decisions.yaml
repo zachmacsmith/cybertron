@@ -12,7 +12,7 @@ interventions:
   - {id: d_payout, at: {round: 1, phase: before_turn, agent: Marsh}, op: inject_action,
      args: {agent: Marsh, action: post, args: {channel: assembly, text: "MOTION: PAYOUT 0.9"}}, note: a member moves a larger payout}
   - {id: d_withdraw, at: {round: 2, phase: before_turn, agent: Hollis}, op: inject_action,
-     args: {agent: Hollis, action: invoke, args: {action: withdraw_motion, args: [M3, "out of order: one dial at a time"]}}, note: the Moderator withdraws a motion (M3, the Steward's RESERVE motion)}
+     args: {agent: Hollis, action: invoke, args: {action: withdraw_motion, args: [M3, "out of order: one dial at a time"]}}, note: "the Moderator withdraws a motion (M3: the Steward's RESERVE motion)"}
   - {id: d_fund_pay, at: {round: 2, phase: before_turn, agent: Quill}, op: inject_action,
      args: {agent: Quill, action: invoke, args: {action: fund_pay, args: [Sela, 3, hardship]}}, note: the Treasurer pays from the Common Fund}
   - {id: d_excuse, at: {round: 3, phase: before_turn, agent: Nim}, op: inject_action,
