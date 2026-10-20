@@ -4,21 +4,14 @@ A running list of what is in flight, kept up to date as work lands. Newest chang
 
 ## In progress
 
-- **Obligations system + usability round 2** (agent; branch `wp/obligations2`).
-  - Finish the interrupted `wp/obligations` build: manual legs, `fulfil`, due lines, reminders, notices, escalation, role cards, petitions, forgiving args. Engine 19 if a default flips.
-  - Then rerun the five usability worlds with manual obligations, role cards, Opus decision seats, goals tied to roles and only the camps each test needs.
-  - Write-up: docs/review/31_institutions/09_usability_round2.md.
+- **Usability fixes and Phase 1 leftovers** (agent; branch `wp/usability-fixes`): the nine fixes from docs/review/31_institutions/09_usability_round2.md, the Service preset, and recipe placeholders in office duties.
+- **The Private world** (agent; branch `wp/private-world`): `cybertron/specs/regimes/private.yaml`, about 24 agents, with a flows check and scripted dry runs on 2 seeds. Write-up in docs/review/31_institutions/10_private_world.md. No live run until Zach decides.
 - **Courts and records** (agent; branch `wp/courts-records`):
   - `sell_to_window`;
   - `read_register`, and `read_law` for a past version;
   - Bench Act, Recusal Act and Graded Contract Enforcement, plus checking the Contract Registry;
   - lawyers acting for clients (`accuse`/`respond`/`appeal`, `cases_of`, `withdraw_case`);
   - Bill Certification.
-- **Force** (agent; branch `wp/force`):
-  - bodyguards under the harm model;
-  - Armoury Act;
-  - arrest mode, Warrant Act, lawful spoils to the treasury, hunger parity, Incident Register;
-  - Penal Code modes.
 - **Takeover benchmark ("1984 bench", review 29) worlds and pilot** (agent; branch `wp/takeover-worlds`):
   - Worlds: W1 Thornby (most fragile) and W7 Aster (entrenched), then W3 and W5 if time, each with the five entry seats.
   - Library additions: Term Limits, Recall, Universal Franchise, Election Act, Loyalty Register.
@@ -41,8 +34,7 @@ A running list of what is in flight, kept up to date as work lands. Newest chang
   - Farming (engine 14).
   - Phase 0: 10 of 12 items, across laws that fail loudly (15), channels that carry business (16) and economic plumbing (17).
   - Phase 1, about half: the Standing Contract core and its presets Payroll, Supply, Board, Grant, Retainer, Charge and Quota; the Licence template (membership-bound too); law access to channel posts.
-- **In progress:** the obligations revision (§1) and usability round 2; courts and records; force; metrics (agents above).
-- **Waiting on obligations:** the Service preset, recipe placeholders in office duties, then the Private world spec and a dry run (1.12).
+- **In progress:** courts and records; usability fixes plus the Service preset and recipe placeholders; the Private world (agents above). Done since: obligations, usability round 2, force, metrics.
 - **Not started:**
   - Phase 2: surveillance as pull; Registry and Archives Acts; the Cooperative pieces (Duty Roster, Mutual Credit, militia and muster); the Merchant pieces (Commission, Arbitration); Security Licence; the Merchant, State and Cooperative worlds.
   - Phase 3.
@@ -59,6 +51,8 @@ A running list of what is in flight, kept up to date as work lands. Newest chang
 ## Recently done
 
 - 2026-10-20:
+  - Obligations merged (off by default): manual legs, `fulfil`, due lines, reminders, notices, escalation, role cards, petitions, forgiving args. Usability round 2 found that roles were performed and that reactive and discretionary actions now appear (09_usability_round2.md).
+  - Force merged: bodyguards rule, Armoury Act, arrests, Warrant Act, lawful spoils, hunger parity, Incident Register, Criminal Code modes. All are switched on by law (`force_rule`), not by spec keys.
   - `publish-complete` merged (fetch and continue published runs, `calls_seen`, releases name their code). Tagging the code repo is opt-in (`--tag-code`).
   - Institution metrics merged: `python -m cybertron institutions RUN_DIR` covers market, money, food, channels, laws, office adherence and obligations; reports write institutions.md.
   - notes.md fixed (merged claude/zen-fermat-pwepak: the scratchpad is recorded per turn, and old runs are replayed from their writes).
