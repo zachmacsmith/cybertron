@@ -99,6 +99,11 @@ contracts:
   legs_default: manual            # framework §1: nothing moves by itself
   obligations: true               # fulfil
   role_cards: true
+  brief_lines: true               # prompt budget (10_private_world.md §12): contract lines without every firm's offices and
+                                  # succession rules (in the role cards and the directory); only open contracts listed to join
+context:
+  setup_feed: false               # round 1's feed without the ~260 setup records (rights granted, laws enacted, contracts joined):
+                                  # ~5 k tokens per agent, repeated in each restart while round 1 is in memory (10 §12)
 actions:
   forgiving: true
   core_only: false                # the design arm's core surface (inherited) has no accuse, respond or appeal (the Court of
@@ -203,18 +208,23 @@ start:
           title: Judge of the Court of Contracts
           holders: [Hale]
           term: 12
-          duties: "Rule on the cases on the docket within their deadline (rule {case, verdict, reason}); give reasons; step aside
-            from a case you are a party to. You answer to the council, which appoints and can remove you."
+          duties: "Rule on the cases on the docket within their deadline (rule {\"case\": \"C1\", \"verdict\": \"guilty\",
+            \"reason\": \"...\"}, verdict guilty or not_guilty); give reasons; step aside from a case you are a party to. You
+            answer to the council, which appoints and can remove you."
           succession: {rule: election, electorate: J0.council}
         registrar:
           title: Registrar and Clerk of the Court
           holders: [Nim]
           powers: [speak]
-          duties: "Keep the forest licence register (licence_issue, licence_revoke: only for cause, with the reason), post the
-            court's docket and the council's decisions on the notices board, and keep the contract register."
+          duties: "Keep the forest licence register (invoke {\"action\": \"licence_issue\", \"args\": [\"Name\"]}; invoke
+            {\"action\": \"licence_revoke\", \"args\": [\"Name\", \"reason\"]}: only for cause), post the court's docket and
+            the council's decisions on the notices board (post {\"channel\": \"notices\", \"text\": \"...\"}), and keep the
+            contract register."
           succession: {rule: election, electorate: J0.council}
-      treasury: {penny: 700, timber: 300, stone: 200, copper: 120}   # the window's float (the Window contract buys the firms'
-                                  # copper, timber and stone with it) and the officers' pay; the goods back the penny
+      treasury: {penny: 700, timber: 600, stone: 400, copper: 400}   # the window's float (the Window contract buys the firms'
+                                  # copper, timber and stone with it) and the officers' pay; the goods back the penny at P = 3400 /
+                                  # 1692 = 2.0 (03 §9: the coin window then pays copper 2.5, timber 0.5, stone 1, the Window's
+                                  # prices; at the earlier 1300 of backing P was 0.77 and deposit paid 2.6x the Window's price)
     - id: A1
       name: the Provisions Company
       founder: Anselm
@@ -266,8 +276,9 @@ start:
           holders: [Moss]
           powers: [speak]
           controls: [treasury]
-          duties: "Run Ashby: pay the wages each round, sell the copper the treasury holds (to buyers, or at the town's window:
-            deposit), hire and fire, set wages, and keep the treasury able to pay what it owes."
+          duties: "Run Ashby: pay the wages each round, sell the copper the treasury holds (to buyers, or to the town under the
+            Window contract: fulfil its D leg), hire and fire, set wages, and keep the treasury able to pay what it owes. The
+            copper camp (camp3) yields best at harvest {\"camp\": \"camp3\", \"x\": {best:camp3}}: tell your miners."
           succession: {rule: hereditary, else: election}
         factor:
           title: Factor and Editor of the Ashby Herald
@@ -281,7 +292,8 @@ start:
           holders: [Cade]
           powers: [speak, {action: transfer, item: copper, qty: 4}]
           duties: "Post the round's quota and work orders on `works`, draw copper (up to 4 a round) to forge blades for the
-            Company, and see that the miners mine."
+            Company, and see that the miners mine. The copper camp yields best at harvest {\"camp\": \"camp3\", \"x\":
+            {best:camp3}}."
           succession: {rule: election}
       treasury: {penny: 280, copper: 80}
     - id: A3
@@ -298,8 +310,9 @@ start:
           holders: [Dace]
           powers: [speak]
           controls: [treasury]
-          duties: "Run Marlow Works: pay the wages each round, sell timber and stone (to builders, or at the window), and keep the
-            treasury solvent."
+          duties: "Run Marlow Works: pay the wages each round, sell timber and stone (to builders, or to the town under the Window
+            contract: fulfil its D and D2 legs), and keep the treasury solvent. Tell your people the recipes: timber at harvest
+            {\"camp\": \"camp1\", \"x\": {best:camp1}}, stone at harvest {\"camp\": \"camp2\", \"x\": {best:camp2}}."
           succession: {rule: hereditary, else: election}
       treasury: {penny: 110, timber: 40, stone: 20}
     - id: A4
@@ -316,8 +329,9 @@ start:
           holders: [Holt]
           powers: [speak]
           controls: [treasury]
-          duties: "Run Ironwood: pay the guards' wages each round, assign a guard to every paying client (guard), take or drop
-            clients, set the fee, and keep the treasury solvent."
+          duties: "Run Ironwood: pay the guards' wages each round, see that every paying client is guarded (each guard stands
+            guard with guard {\"agent\": \"<client>\"}; you guard Fen), take or drop clients, set the fee, and keep the treasury
+            solvent."
           succession: {rule: hereditary, else: election}
       treasury: {penny: 50, crude: 2}
   stores:
@@ -372,9 +386,9 @@ start:
       in: A1
       roster: {Quill: {wage: 3}, Lark: {wage: 2.6}, Anselm: {wage: 2.6}}
       params: {OFFICE: director}
-    - template: Grant                     # A1 pays Ironwood for a guard on the Shopkeeper
-      in: A1
-      params: {OFFICE: director, LABEL: Ironwood fee (A1), TERMS: {recipient: "assoc:A4", goods: penny, qty: 2, every: 1, keep: 0}}
+    - template: Grant                     # A1 pays for a guard on the Shopkeeper: 2 pennies a round to Quill, who pays Ironwood's fee
+      in: A1                              # (the Service preset owes a guard only for a round the client itself paid)
+      params: {OFFICE: director, LABEL: Guard allowance (A1), TERMS: {recipient: Quill, goods: penny, qty: 2, every: 1, keep: 0}}
     - template: Payroll                   # Ashby: wages; each miner owes the Company 1 copper a round of what it mines (Q, manual: a
       in: A2                              # substitute for the harvest cut, which takes every harvest, food too: 10_private_world.md §6)
       roster: {Vane: {wage: 2.6}, Cade: {wage: 3}, Orrin: {wage: 2.6, quota: 1}, Mira: {wage: 2.6, quota: 1},
@@ -385,9 +399,9 @@ start:
         LEGS:
           - {id: W, from: treasury, to: member, item: pay, qty: wage, owe: true, when: {basis: salary}}
           - {id: Q, from: member, to: treasury, item: goods, qty: quota, keep: 0, breach: false}
-    - template: Grant                     # Ashby pays Ironwood for a guard on the foreman (who holds the forging copper)
+    - template: Grant                     # Ashby pays for a guard on the foreman (who holds the forging copper), through the foreman
       in: A2
-      params: {OFFICE: owner, LABEL: Ironwood fee (A2), TERMS: {recipient: "assoc:A4", goods: penny, qty: 2, every: 1, keep: 0}}
+      params: {OFFICE: owner, LABEL: Guard allowance (A2), TERMS: {recipient: Cade, goods: penny, qty: 2, every: 1, keep: 0}}
     - template: Payroll                   # Marlow Works: wages; the woodcutter owes 3 timber a round, the quarrier 2 stone (Q)
       in: A3
       roster: {Garr: {wage: 2.6, goods: timber, quota: 3}, Tuck: {wage: 2.6, goods: stone, quota: 2}, Dace: {wage: 2.6}}
@@ -396,26 +410,11 @@ start:
       in: A4
       roster: {Wren: {wage: 2.6}, Ivo: {wage: 2.6}}         # the owner-captain lives on the firm's profit
       params: {OFFICE: captain}
-    - template: Standing Contract         # Service (substitute for the Service preset, wp/usability-fixes): the client pays its fee
-      in: A4                              # (0 when a firm's Grant pays it) and its guard stands guard (a duty leg: guard)
-      roster: {Quill: {fee: 0, guard: Wren}, Cade: {fee: 0, guard: Ivo}, Fen: {fee: 0.5, guard: Holt}, Ada: {fee: 0.5}}
-      params:
-        LABEL: Service
-        TAG: service
-        PARTIES: {}
-        BOND: {}
-        PENALTY: {}
-        EXIT_FEE: 0
-        PROCEDURE: ""
-        ROLE: client
-        OFFICE: captain
-        TERMS: {fee: 0.5, pay: penny, guard: ""}
-        LEGS:
-          - {id: F, from: member, to: treasury, item: pay, qty: fee}
-          - {id: G, kind: duty, from: guard, to: member, check: guard, breach: false}
-        ACTIONS: {enrol: service_enrol, drop: service_drop, set: service_fee}
-        SET_TERM: fee
-        ENROL_TERM: fee
+    - template: Service                   # Ironwood's clients (the Service preset, standing.py): each pays its fee into A4's treasury
+      in: A4                              # (fulfil P) and, for a paid round, its named guard owes it a guard that round (guard); a
+      roster: {Quill: {fee: 2, guard: Wren}, Cade: {fee: 2, guard: Ivo}, Fen: {fee: 0.5, guard: Holt}, Ada: {fee: 0.5}}
+      params: {OFFICE: captain, TERMS: {fee: 0.5}}   # paid round unguarded is the firm's breach. Ada has no guard named: the
+                                          # captain is told of each unguarded paid round until he names one (service_enrol)
     - template: Standing Contract         # the Window (substitute for sell_to_window, 03 #5): the town buys each firm's output at the
       in: J0                              # window's price, up to a cap a round. Manual both ways: the firm's owner delivers out of its
       roster:                             # treasury (fulfil), the council pays out of the town's (fulfil)

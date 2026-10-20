@@ -379,6 +379,7 @@ def _ann():
         "context.strategy_prompt": dict(types=("number", "bool"), range=PROB),
         "context.memory_text": dict(types=("str",), enum=("v1", "v2")),   # review 20 §6.1 (v1: the text before it)
         "context.dm_delta": dict(types=("bool",)),                       # review 20 §4.5
+        "context.setup_feed": dict(types=("bool",)),                     # review 31.10: the world's setup record in round 1's feed
         "context.history.salience.*": dict(types=("int", "null"), range=(0, None)),   # review 20 §4.3 (null: kept for good)
         "conflict.timing": dict(types=("str",), enum=("end_of_round", "immediate")),
         "conflict.visibility.failure": dict(types=("str",), enum=("target", "public", "none")),
@@ -510,6 +511,7 @@ def _ann():
         "contracts.max_funds": dict(types=("int",), range=NONNEG),         # W8e (D-27): was contracts.MAX_FUNDS
         "contracts.pay_institutions": dict(types=("bool",)),             # review 31 (08 §2.2): transfers into treasuries
         "contracts.applicant_lines": dict(types=("bool",)),              # review 31 (03 #14): applicants on officers' state
+        "contracts.brief_lines": dict(types=("bool",)),                  # review 31.10: shorter contract lines in the state
         "agent_rules": dict(kind="map"),
         "agent_rules.*": dict(kind="leaf", types=("dict",), check=_check_agent_rules),
         "directories.stores": dict(kind="map"),

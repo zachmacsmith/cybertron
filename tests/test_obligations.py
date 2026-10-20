@@ -205,3 +205,20 @@ def test_a_manual_duty_leg_is_recorded_and_its_miss_told(tmp_path):
     k = kernel_at(out, 2)
     law = next(l for l in k.w["laws"].values() if l["status"] == "active" and "G" in json.dumps((l.get("state") or {}).get("book", {})))
     assert [v["G"] for v in law["state"]["book"].values()] == [[1, 1]]                # kept once, missed once
+
+
+def test_brief_lines_setup_feed_and_polity_action_names(tmp_path):
+    """Review 31.10 (the Private world's prompt budget): contracts.brief_lines drops offices and succession from the contract lines
+    and lists only open contracts to join; context.setup_feed false starts round 1's feed after setup; a polity's standing contract
+    actions are named bare in the cards (no "J0.payroll_notice", which does not exist), and only offered to an agent holding the right."""
+    sp = S.deep_merge(manual(world(rounds=1)), {"contracts": {"brief_lines": True}, "context": {"setup_feed": False}})
+    sp["start"]["institutions"].append({"id": "A2", "name": "Shut", "founder": "Fay", "admission": "closed", "procedure": "founder",
+                                        "offices": {"boss": {"title": "Boss", "holders": ["Fay"]}}})
+    pol = Script()
+    run(tmp_path, sp, pol)
+    bo, ed = pol.prompts[(0, "Bo")], pol.prompts[(0, "Ed")]
+    assert "Your contract A1 'Provisions' (" in bo and "refilled by" not in bo.split("ROLE:")[0]
+    assert "'Shut'" not in bo                                                 # closed: not offered to join
+    assert '"change": "grant"' not in bo and "contract_joined" not in bo      # no setup record in the feed
+    assert all('"action": "J0.' not in p for p in pol.prompts.values())
+    assert "ROLE: worker in Payroll (J0)" in ed and "payroll_notice" not in ed

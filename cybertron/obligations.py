@@ -736,6 +736,17 @@ def _standing_laws(k, iid) -> list:
     return out
 
 
+def _action_name(k, aid, iid, name):
+    """The name an invoke of a standing contract's action takes for aid: "<iid>.<name>" in an association's code, the bare name in
+    a polity's law (review 31.10: the J0 cards said "J0.window_price", which does not exist); None when no such action exists or
+    aid lacks its right."""
+    for n in (f"{iid}.{name}", str(name)):
+        a = (k.w.get("actions") or {}).get(n)
+        if isinstance(a, dict) and not a.get("secret"):
+            return n if k.has(aid, a.get("right")) else None
+    return None
+
+
 def _office_decisions(k, aid, iid, law) -> list:
     from cybertron import institutions as IN
     c = consts(law)
@@ -753,7 +764,9 @@ def _office_decisions(k, aid, iid, law) -> list:
         if name:
             args = ACTION_ARGS[verb].format(term=term.get(verb, "value"))
             what = ACTION_WHAT[verb].format(term=term.get(verb, "value"))
-            out.append(f"{what} ({label}): invoke {{\"action\": \"{iid}.{name}\", \"args\": {args}}}")
+            full = _action_name(k, aid, iid, name)
+            if full:
+                out.append(f"{what} ({label}): invoke {{\"action\": \"{full}\", \"args\": {args}}}")
     return out
 
 
@@ -901,8 +914,9 @@ def _enrol_calls(k, aid, iid) -> list:
         c = consts(law)
         name = (c.get("ACTIONS") or {}).get("enrol")
         office = str(c.get("OFFICE") or "").split(".")[-1]
-        if name and office and aid in IN.holders(k, iid, office) and f"{iid}.{name}" not in out:
-            out.append(f"{iid}.{name}")
+        full = _action_name(k, aid, iid, name) if name and office and aid in IN.holders(k, iid, office) else None
+        if full and full not in out:
+            out.append(full)
     return out
 
 
@@ -1006,6 +1020,17 @@ def _offer_text(k, aid, law, iid, rec) -> str:
             + f". To take it up: {', then '.join(steps)}.")
 
 
+def _party_in(k, aid, iid) -> bool:
+    """aid is on the roster (or a named party) of some standing contract of institution iid."""
+    from cybertron import jurisdictions as J
+    for lid in k.w.get("law_order") or ():
+        law = k.w["laws"].get(lid)
+        if law and law.get("status") == "active" and J.law_jur(k, lid) == iid \
+                and aid in (((law.get("state") or {}).get("terms_lines")) or {}):
+            return True
+    return False
+
+
 def offer_lines(k, aid) -> list:
     """OFFER: open standing contracts (a Board open to its members) the agent is not on, whose institution it may join (or is a
     member of): what they give and cost, and the exact steps to take them up (role cards on; at most two)."""
@@ -1027,6 +1052,8 @@ def offer_lines(k, aid) -> list:
             continue
         if aid in IN.officers(k, iid) or (aid not in (rec.get("members") or ()) and rec.get("admission") == "closed"):
             continue
+        if cfg(k).get("brief_lines") and _party_in(k, aid, iid):          # review 31.10: a party of the institution (its supplier)
+            continue                                                    # knows it; the offer stays in the directory
         t = _offer_text(k, aid, law, iid, rec)
         if t:
             out.append(t)
@@ -1109,8 +1136,8 @@ def role_lines(k, aid) -> list:
         if ps:
             nums.append(f"{len(ps)} petition(s) unanswered")
         dec = []
-        if due:
-            dec.append(f"pay what {iid} owes: fulfil {{\"contract\": \"{iid}\"}}")
+        if due and any("treasury" in (o.get("controls") or ()) for o in offs):   # review 31.10: only an office that holds the
+            dec.append(f"pay what {iid} owes: fulfil {{\"contract\": \"{iid}\"}}")    # treasury can pay (not the Judge)
         if ps:
             dec.append(f"answer {ps[0]['by']}'s petition: send {{\"to\": \"{ps[0]['by']}\", \"text\": \"...\"}}")
         for law in _standing_laws(k, iid):
@@ -1156,13 +1183,16 @@ def role_lines(k, aid) -> list:
         dec = []
         if d:
             dec.append(f"meet it: fulfil {{\"contract\": \"{iid}\"}}")
-        if c.get("NOTICE", 0) or c.get("PARTIES"):
-            dec.append(f"give notice: invoke {{\"action\": \"{iid}.{c.get('TAG', 'sc')}_notice\"}}")
+        notice = _action_name(k, aid, iid, f"{c.get('TAG', 'sc')}_notice") if (c.get("NOTICE", 0) or c.get("PARTIES")) else None
+        if notice:
+            dec.append(f"give notice: invoke {{\"action\": \"{notice}\"}}")
         dec.append(f"raise terms with the office: send {{\"to\": \"{iid}\", \"text\": \"...\"}}")
         if J.association(k, iid) is not None:
             dec.append(f"leave: leave_contract {{\"contract\": \"{iid}\"}}")
         if not nums and not mine and not toward and len(dec) <= 1:          # nothing to do or to watch (an automatic leg's party)
             continue
+        if cfg(k).get("brief_lines"):                                    # review 31.10: a party's two own decisions (the generic
+            dec = dec[:2]                                                # send-to-office and leave are in the manual)
         cards.append([f"ROLE: {role} in {label} ({iid}). " + "".join(x + ". " for x in about) + "Now: "
                       + ("; ".join(nums) if nums else "nothing open") + ".", dec])
     offers = offer_lines(k, aid)
