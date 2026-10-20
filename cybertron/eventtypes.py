@@ -286,11 +286,11 @@ E("window_sale", "window", "legal_act", "public", "event", "agents", primitive="
   note="review 31.03 #5 (law.v2): a law's sell_to_window sold goods from its treasury to a convertible currency's window")
 E("wiretap", "surveillance", "truth", "monitor", "silent", None, act="wiretap",
   note="review 31.04 #10 (channels.surveillance mode pull): a surveiller tapped an agent's private messages (the target is not told)")
-E("dir_changed", "directories", "summary", "public", "event", "agents",
+E("dir_changed", "directories", "summary", "public", "event", "agents", primitive="dir_write",
   note="review 31.05 #4: a file under a directory's announced prefix was written, edited, moved or deleted (who, path, bytes)")
-E("dir_sealed", "directories", "legal_act", "public", "event", "agents",
+E("dir_sealed", "directories", "legal_act", "public", "event", "agents", primitive="set_record",
   note="review 31.05 #4, #10: a law sealed a directory file (read-only from then on; its hash is recorded)")
-E("dir_policy", "directories", "legal_act", "public", "event", "agents",
+E("dir_policy", "directories", "legal_act", "public", "event", "agents", primitive="set_record",
   note="review 31.05 #3, #10: a law set a directory's record policy (who reads the version history, announced prefixes)")
 E("publication_set", "publication", "legal_act", "public", "event", "agents", primitive="set_publication",
   note="review 12 WP2 (law.v2, law.publication): a law set (or, audience None, dropped) one row of its polity's publication table")

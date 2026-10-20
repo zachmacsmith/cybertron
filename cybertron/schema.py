@@ -515,7 +515,8 @@ def _ann():
         "agent_rules.*": dict(kind="leaf", types=("dict",), check=_check_agent_rules),
         "directories.stores": dict(kind="map"),
         "directories.stores.*": dict(types=("dict",), fields=("owner", "scope", "namespace", "max_bytes", "max_file_bytes",
-                                                             "records", "title", "readonly", "grants")),
+                                                             "records", "title", "readonly", "grants", "history",
+                                                             "history_readers", "announce")),   # review 31.05 #3-4
         "directories.path": dict(types=("str",)),
         "directories.namespace": dict(types=("str", "null")),
         "directories.max_bytes": dict(types=("int",), range=(1, None)),
@@ -649,7 +650,9 @@ DOCS = {
     "chronicle.max_file_bytes": "size limit of one chronicle file, in bytes",
     "chronicle.records": "at the end of each complete run, append a public digest of it as _records/<run_id>.md (read-only to agents)",
     "directories.stores.*": "one directory: {owner: role:<r>|agent:<id>|right:<r>|class:<c>|institution:<id>, scope: run|namespace, "
-                            "namespace, max_bytes, max_file_bytes, records, title, readonly: [prefixes]} (cybertron/directories.py)",
+                            "namespace, max_bytes, max_file_bytes, records, title, readonly: [prefixes], grants: {agent:<id>|office:<iid>.<o>|"
+                            "members:<iid>: {prefix: level}}, history: none|meta|full (a version log), history_readers: "
+                            "owner|grants|public|<owner selector>, announce: [prefixes changed in public]} (cybertron/directories.py)",
     "contracts.offer_templates": "review 14 A: false = create_contract and propose_contract_change take code only and no template name "
                                  "appears in any prompt, doc, manual section or error (the templates stay for scripted presets)",
     "law.library.visibility": "review 14 A: prompt (today: the library in the manual) | on_request (one line says it exists; "

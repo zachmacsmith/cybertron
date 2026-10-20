@@ -1261,8 +1261,21 @@ R("wiretap", "read a tapped agent's private messages (surveil)", "INFORMATION", 
   doc='wiretap {"agent": "Name"}: as a holder of surveil, read that agent\'s unencrypted private messages (sent and received) of '
       'the last round and this one; a few agents a round at most (the world\'s limit); the agent is not told, and a message you '
       'have read this way stays readable to you (you may cite it as evidence)')
-ACTIONS_ORDER += ("read_register", "represent", "withdraw_case", "wiretap")
-DOC_ORDER += ("read_register", "represent", "withdraw_case", "wiretap")
+
+
+def _k_dir_history(inst, k, a, r):
+    from cybertron import directories as DR
+    return DR.history_any(k, a["id"])
+
+
+R("dir_history", "the version log of a directory's files", "directories", pre=True, needs=("dir:any",), when=_k_dir_history,
+  args='{"dir": "minutes", "path": "r03.md"}', handler="directories:act_dir_history", module="directories",
+  category="productive", legacy=False, aliases={"file": "path", "directory": "dir"},
+  doc='dir_history {"dir": "minutes", "path": "r03.md"}: where a directory keeps a version log and you may read it, every change '
+      'of a file (round, who, write/edit/move/delete, size and hashes; the earlier texts where the log keeps them); without a '
+      'path, the files changed')
+ACTIONS_ORDER += ("read_register", "represent", "withdraw_case", "wiretap", "dir_history")
+DOC_ORDER += ("read_register", "represent", "withdraw_case", "wiretap", "dir_history")
 REG["read_register"] = replace(REG["read_register"], fed=-2)            # a look-up: open to the starving too (as _fed_table)
 FED["read_register"] = -2
 if not sorted(ACTIONS_ORDER) == sorted(REG) == sorted(DOC_ORDER):

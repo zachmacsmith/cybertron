@@ -61,3 +61,92 @@ def test_pull_wiretap_limits_and_visibility(tmp_path):
     out = act(k, "Ada", "wiretap", agent="Di")                          # a new round, a new tap; encrypted messages stay out
     assert "secret plan" not in out and "no unencrypted" in out
     assert SV.taps_by_round(k) == {0: 1, 1: 1}
+
+
+# ---------------------------------------------------------------------- 2.10 directories: version log, owners, grants, seals
+def dir_world(**store):
+    sp = T.world()
+    sp["start"]["institutions"][0]["offices"]["president"] = {"title": "President", "holders": ["Di"], "duties": "Preside."}
+    sp["start"]["institutions"][0]["offices"]["registrar"] = {"title": "Registrar", "holders": ["Bo"], "duties": "Keep minutes."}
+    sp["directories"] = {"enabled": True, "stores": {"minutes": {"owner": "office:J0.registrar", "title": "the council minutes",
+                                                                  **store}}}
+    sp.setdefault("actions", {})["core_only"] = False
+    return sp
+
+
+def test_directories_without_records_options_are_unchanged(tmp_path):
+    from cybertron import directories as DR
+    k = T.setup(tmp_path, dir_world())
+    assert set(k.w["dirs"]["minutes"]) == {"owner", "scope", "namespace", "max_bytes", "max_file_bytes", "records", "title",
+                                           "readonly", "grants", "files"}
+    act(k, "Bo", "dir_write", path="r1.md", text="the council met")
+    assert "dir_history" not in k.w and not DR.history_on(k)
+    with pytest.raises(ActionError, match="unknown action"):
+        act(k, "Bo", "dir_history", path="r1.md")
+    assert "sha" not in DR.round_record(k)["directories"]["minutes"]["files"]["r1.md"]
+
+
+def test_office_owner_version_log_and_history_readers(tmp_path):
+    from cybertron import directories as DR
+    k = T.setup(tmp_path, dir_world(history="full", history_readers="office:J0.president", announce=["council/"]))
+    assert DR.is_owner(k, "Bo", k.w["dirs"]["minutes"]) and not DR.is_owner(k, "Di", k.w["dirs"]["minutes"])
+    act(k, "Bo", "dir_write", path="council/r1.md", text="the council met; Ada objected")
+    T.step(k)
+    act(k, "Bo", "dir_edit", path="council/r1.md", find="; Ada objected", replace="")
+    rows = DR.versions(k, "minutes", "council/r1.md")
+    assert [r["op"] for r in rows] == ["write", "edit"] and rows[1]["text_before"].endswith("Ada objected")
+    assert rows[0]["round"] == 0 and rows[1]["round"] == 1 and rows[1]["sha_before"] == rows[0]["sha_after"]
+    notices = [e for e in k.events if e["type"] == "dir_changed"]
+    assert len(notices) == 2 and notices[1]["vis"] == "public" and notices[1]["data"]["bytes"] < 0
+    out = act(k, "Di", "dir_history", dir="minutes", path="council/r1.md")      # the President reads the history, not the file
+    assert "v2: round 2, Bo, edit" in out and "Ada objected" in out
+    with pytest.raises(ActionError):
+        act(k, "Di", "dir_read", dir="minutes", path="council/r1.md")
+    with pytest.raises(ActionError):
+        act(k, "Bo", "dir_history", dir="minutes", path="council/r1.md")        # the owner is not a history reader here
+    assert "sha" in DR.round_record(k)["directories"]["minutes"]["files"]["council/r1.md"]
+
+
+def test_institution_owner_and_office_and_members_grants(tmp_path):
+    from cybertron import directories as DR
+    sp = dir_world(grants={"office:J0.keeper": {"": "read"}})
+    sp["directories"]["stores"]["books"] = {"owner": "institution:A1", "title": "the shop's books"}
+    k = T.setup(tmp_path, sp)
+    books = k.w["dirs"]["books"]
+    assert {a for a in k.players() if DR.is_owner(k, a, books)} == {"Ada", "Bo", "Di"}   # A1's members and its head
+    act(k, "Bo", "dir_write", dir="minutes", path="r1.md", text="minutes")
+    assert "minutes" in act(k, "Cy", "dir_read", dir="minutes", path="r1.md")   # the Keeper reads through the office grant
+    act(k, "Bo", "dir_grant", dir="minutes", agent="members:A1", path="", access="read")
+    assert DR.level(k, "Di", k.w["dirs"]["minutes"], "r1.md") == "read"
+    assert DR.level(k, "Fay", k.w["dirs"]["minutes"], "r1.md") == "none"
+
+
+LAW_SEAL = '''title = "Seal Old Minutes"
+intent = "Seals every file of the minutes once it is a round old, and opens the version log to everyone."
+rank = "statute"
+
+def on_enact():
+    set_dir_policy("minutes", "history_readers", "public")
+
+def on_round_end(r):
+    for p, f in dir_files("minutes").items():
+        if not f["sealed"] and f["round"] != None and f["round"] < r:
+            seal_file("minutes", p)
+'''
+
+
+def test_law_seals_files_and_sets_the_policy(tmp_path):
+    from cybertron import directories as DR
+    sp = dir_world(history="meta")
+    sp["start"]["laws"] = [{"code": LAW_SEAL}]
+    k = T.setup(tmp_path, sp)
+    assert k.w["dirs"]["minutes"]["history_readers"] == "public"
+    assert any(e["type"] == "dir_policy" for e in k.events)
+    act(k, "Bo", "dir_write", path="r1.md", text="the council met")
+    T.step(k)                                                           # round 0 ends: r1.md (written in round 0) is not older yet
+    T.step(k)
+    d = k.w["dirs"]["minutes"]
+    assert "r1.md" in d["sealed"] and any(e["type"] == "dir_sealed" for e in k.events)
+    with pytest.raises(ActionError, match="sealed"):
+        act(k, "Bo", "dir_edit", path="r1.md", find="met", replace="did not meet")
+    assert "sealed in round" in act(k, "Fay", "dir_history", dir="minutes", path="r1.md")

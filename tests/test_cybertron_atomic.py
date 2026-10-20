@@ -146,6 +146,8 @@ CALLS = {
     "unpublish": "publish('vote', 'members')\n    unpublish('vote')",
     "reseat": "reseat('J0', 'keeper', ['{a}'])",
     "sell_to_window": "sell_to_window('penny', 'timber', 1)",            # no window here: a law_call_failed record (window.py)                         # no such office here: a law_call_failed record (laweffects)
+    "seal_file": "seal_file('minutes', 'r1.md')",                      # no directory here: a law_call_failed record (directories.py)
+    "set_dir_policy": "set_dir_policy('minutes', 'announce', ['r'])",   # likewise
 }
 CALL_MODULE = '''
 def tinker(agent, *args):

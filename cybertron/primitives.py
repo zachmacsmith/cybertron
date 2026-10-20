@@ -771,6 +771,12 @@ _ROWS = [
       why={"compel": _LNA, "gate": "law.v2: before_dir_grant gates it",
            "event": "the grantee is told by a private notice; the runner's turn record keeps the action"},
       notes="access: read, write or none (revokes); path: a file, a folder prefix, or \"\" (all of it)"),
+    P("set_record", "directories", "rule", ("dir", "path", "key", "value"), "directories:change_set_record", before=False,
+      after=False, causes=("law",), event="dir_sealed", compel_vis="public",
+      sites=("directories:change_set_record", "directories:law_api.seal_file", "directories:law_api.set_dir_policy"),
+      why={"gate": "records metadata: not hookable (a law seals a file or sets who reads a store's version log; both public)"},
+      notes="review 31.05 #3-4, #10: key sealed (path: the file; read-only from then on, its hash recorded) or history_readers / "
+            "announce (path None); logs dir_sealed or dir_policy"),
     # P4.5: agency (cybertron/contracts.py). Laws never act for an agent: no law function causes these; the grantor consents
     # (authorize), the grantee acts (act_for), every use is logged to both.
     P("authorize", "contracts", "relation", ("grantor", "grantee", "auth", "scope"), "dispatch.changes.agency:do_authorize", routed=True, subject="grantor",
@@ -951,6 +957,7 @@ ACTION_PRIMITIVES = {
     "withdraw_case": ("rule",),                                        # review 31.07 #9: a dismissal on withdrawal (not routed)
     "read_register": LOOKUP,                                           # review 31.05 #1
     "wiretap": LOOKUP,                                                 # review 31.04 #10 (channels.surveillance pull)
+    "dir_history": LOOKUP,                                             # review 31.05 #3 (a store's version log)
     # force, more
     "guard": ("guard_bind", "guard_release", "move"), "join_attack": ("attack", "end_life"), "contract": ("hire_assassin", "move"),
     "buy_initiative": ("set_initiative", "destroy"),

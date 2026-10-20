@@ -791,6 +791,8 @@ class Kernel:
             api.update(EVD.law_api(k, lid))                            # law.v2 (review 10 #10): event(eid), history(...)
             from cybertron import window as WIN                         # review 31.03 #5: sell_to_window from the law's treasury
             api.update(WIN.law_api(k, lid))
+            from cybertron import directories as DRS                    # review 31.05 #3-4, #10: records laws over directories
+            api.update(DRS.law_api(k, lid))
             if PUB.enabled(k):
                 api.update(PUB.law_api(k, lid))                        # review 12 WP2: publish, unpublish, publication
             if IN.amend_setting(k):                                    # institutions.amend_offices: reseat(institution, office, agents)
