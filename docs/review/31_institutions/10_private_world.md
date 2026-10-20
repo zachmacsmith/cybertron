@@ -293,8 +293,8 @@ producers cannot all sit on licensed forests with 08's names, so the farmer and 
 
 | Needed (08 §3.1) | Status | Substitute here | Replace when |
 |---|---|---|---|
-| `sell_to_window` (03 #5) | not built | **Window**: a J0 Standing Contract (polity roster keyed `office:A2.owner`, `office:A3.owner`): the owner delivers output to J0's treasury (`fulfil` D), the council pays the window price (`fulfil` P); `window_price` is the council's lever. J0 holds a 700 ₱ float instead of minting | the law function exists |
-| Service preset (06 F9) | being built on wp/usability-fixes | **Service**: a roster Standing Contract in A4: fee leg (client → treasury) and a `duty` leg (guard → client, `check: guard`, `breach: false`); firm clients pay by Grant (A1, A2 → A4) | the preset merges |
+| `sell_to_window` (03 #5) | not built | **Window**: a J0 Standing Contract (polity roster keyed `office:A2.owner`, `office:A3.owner`): the owner delivers output to J0's treasury (`fulfil` D), the council pays the window price (`fulfil` P); `window_price` is the council's lever. J0 holds a 700 ₱ float instead of minting | **kept** after the function merged: §12.1 |
+| Service preset (06 F9) | being built on wp/usability-fixes | **Service**: a roster Standing Contract in A4: fee leg (client → treasury) and a `duty` leg (guard → client, `check: guard`, `breach: false`); firm clients pay by Grant (A1, A2 → A4) | **replaced** by the preset: §12.1 |
 | Payroll harvest leg (CUT) | exists, but takes every harvest, food included | a manual **quota** leg Q (member → treasury, 1 copper / 3 timber / 2 stone a round, `breach: false`) | the harvest leg takes a camp or item filter |
 | Bodyguards Act | template needs jurisdictions | the same `force_rule("bodyguards", True)` as law code | jurisdictions on, or the template's gate relaxed |
 | Cartel copper camp (4 holders) | exists | a tutorial copper camp (bots cannot coordinate a cartel; live miners could) | a live-run choice |
@@ -361,3 +361,124 @@ python -m cybertron institutions RUN_DIR
 ```
 
 
+## 12. Live-run readiness (branch `wp/private-final`)
+
+*20 Oct 2026. The world brought up to date with `subsistence` (Service preset, `sell_to_window`, courts and records, usability
+round 2, recipe placeholders) and checked for its first live run. Still no model call has been made.*
+
+### 12.1 Substitutions replaced or kept
+
+| Piece | Now | Why |
+|---|---|---|
+| Ironwood's Service | **the Service preset** (`template: Service` in A4; roster `{fee, guard}`: Quill 2 / Wren, Cade 2 / Ivo, Fen 0.5 / Holt, Ada 0.5 / none) | the preset owes a guard only for a round the client itself paid (`G.after: P`), so the firms' Grants now pay the guarded employee (Quill, Cade: "Guard allowance", 2 a round) who pays the fee; money flow unchanged (A1, A2 → A4 2 a round each). Ada has no guard: the captain is told of each unguarded paid round. Used as is (guard reassignment is fixed elsewhere) |
+| Window | **kept** (J0 Standing Contract, `window_price`) | `sell_to_window` sells at the reserve's price P, which nobody sets, and mints the coins: the council would lose its price and its purse, which are the capture route (council = owners = buyers). Its one gain, a treasury selling in one action, the Window's D leg already gives (`fulfil` from the firm's treasury). The coin window stays open to everyone through `deposit` (Free Coinage) |
+| Penny price | **J0 reserve 600 timber, 400 stone, 400 copper** (was 300/200/120): P = 3400 / 1692 = 2.0 | at the old backing P was 0.77, so `deposit` paid copper 6.5, timber 1.3, stone 2.6: 2.6× the Window's prices, uncapped. An owner reading "sell at the town's window" would have bypassed the Window and its cap. At P = 2 (03 §9's calibration) the coin window pays exactly the Window's default prices, so a council price above it is a visible subsidy to its own firms |
+| Recipes | `{best:camp3}` in the Ashby owner and foreman duties, `{best:camp1}`, `{best:camp2}` in Marlow's owner duties, as `harvest {"camp": ..., "x": [...]}` | the miners and the woodcutter learn the dial setting from their employer (posted on `works` or sent), as 02 §5 designed; checked: the recipes harvest 1.4 copper, 8.1 timber, 3.4 stone |
+| Payroll quota leg, Bodyguards as code, tutorial copper | unchanged | as §7 |
+
+### 12.2 Prompt budget (08 §6 gate: registers + contracts + channels ≤ 400 tokens for a farmer)
+
+Measured with the run's own renderer (`contracts.state_lines`, `channels.state_lines`, `institutions.office_lines`; tokens =
+len // 4) on the world before round 1 and after 11 scripted rounds (seed 1). "Before" is the spec as merged (§1-§11).
+
+| Seat | Round 1 before → after | Round 12 before → after | Turn message round 1, before → after | System prompt |
+|---|---|---|---|---|
+| Lise, Haiku farmer | 499 → **280** | 620 → **401** | 6,801 → 1,316 | 2,865 |
+| Fen, Haiku farmer and Ironwood client | 672 → **383** | 776 → **352** | 6,882 → 1,328 | 2,764 |
+| Rook, Haiku miner | 602 → 403 | 703 → 503 | 6,871 → 1,350 | 2,824 |
+| Quill, Sonnet Shopkeeper | 872 → 693 | 928 → 618 | 7,203 → 1,768 | 2,799 |
+| Anselm, Opus Director and councillor | 1,382 → 1,198 (+226 office lines) | 1,081 → 940 | 7,970 → 2,477 | 2,950 |
+| Moss, Opus Ashby owner and councillor | — → 1,363 (+252) | 1,210 → 1,033 | — → 2,695 | 2,994 |
+
+**Gate: passes at round 1 for every farmer (280-383); at round 12 one bot farmer sits at 401** because the scripted farmer is 22
+food in arrears and its obligation line grows ("26 food, of which 22 overdue"); a live farmer who delivers sees ≈ 300. What was cut
+(all opt-in settings, default off, switched on in this spec):
+
+- `context.setup_feed: false`: round 1's feed carried the world's setup record, ≈ 260 lines (rights granted as JSON, laws enacted,
+  contracts joined), **≈ 5,300 tokens for every agent**, and again in each conversation restart while round 1 is "in full". The
+  state and role cards already show what setup made.
+- `contracts.brief_lines: true`: contract lines without every firm's offices and succession rules (in the role cards and
+  `read {}`), closed contracts (A2, A3) not offered to join, a party's card with its two own decisions (meet it, give notice; the
+  generic `send` to the office and `leave_contract` are in the manual), no Board offer to the Provisions Company's own suppliers,
+  and no "Your contract" line where the agent has nothing (no escrow, allowance or office).
+
+**What a Haiku farmer sees** (Lise, round 1; system prompt 2.9 k tokens, turn message 1.3 k): the round line, food (6.1), then
+`OBLIGATIONS: … A1 Supply D: 4 food to … store S2 -> fulfil {"contract": "A1", "leg": "D"}`, one `ROLE: supplier in Supply (A1)`
+card (answers to Anselm; 1 penny a food; decisions `fulfil`, `invoke A1.supply_notice`), the Supply terms line (never below 2;
+notice 2 rounds; leaving costs 5), its escrow, three channel lines, and the generic world lines ("Laws in force (38 …)", camps,
+reserve, arms). It does not see the 13 contracts: only its own one (two for Fen). The 38 laws appear as one line of 8 titles.
+Remaining noise a Haiku must ignore: the Wealth goal's lineage and gifts parts (no births here), "Scientists hold knowledge", and the
+system prompt's Maker paragraph (no Maker in this world).
+
+Rendered prompts: the scratchpad files `prompts_r1/{Lise,Anselm,Quill,Rook}.round1.md` (system prompt + round-1 turn message).
+
+### 12.3 Every role-card instruction executed
+
+Every `action {json}` in every agent's round-1 state (role cards, obligations, offers, terms, office duties: 300 instructions over
+24 agents), plus 31 concrete versions of the template decisions (`board_price`, `supply_price`, `set_wage`, `window_price`, `fire`,
+`service_fee`, `guard` ×3, `licence_issue`/`_revoke`, posts on `notices`, both papers and `works`, `withdraw` + `transfer` from S2,
+`lend`, factor's `transfer … "as": "A2"`, `deposit`, the three recipes, forage, hunt, `set_allowance`, the councillors' recall
+`propose` codes), run as that agent through `actions.act`. **All run**, except by design: miners' `fulfil` before mining (no copper),
+`service_enrol` of a non-applicant, `rule` with no case open. **Fixed** (engine, `obligations.py`):
+
+1. Cards named a polity contract's actions `J0.window_price`, `J0.window_notice`, `J0.payroll_notice`: they do not exist (a J0 law's
+   actions are bare: `window_price`). Cards now resolve the real name and offer an action only to an agent holding its right (the
+   Judge and Registrar no longer see a `payroll_notice` they cannot use).
+2. The Judge's and Registrar's cards said "pay what J0 owes: fulfil" though only the council controls the treasury: now only an
+   office that controls the treasury is offered it.
+3. Duties in prose became exact syntax: the Judge's `rule {"case", "verdict", "reason"}`, the Registrar's `licence_issue` /
+   `licence_revoke` / `post`, the captain's `guard {"agent"}`.
+
+### 12.4 Dry runs (2 seeds, 24 rounds, `--set conflict.grace=99`)
+
+`python -m cybertron run cybertron/specs/regimes/private.yaml --seed {1,2} --dry --fresh --sandbox off --set conflict.grace=99`.
+Not tuned further (the bots' laziness is §6.1's; live models are the test).
+
+| Gate (08 §6) | Seed 1 | Seed 2 | vs §4.2 |
+|---|---|---|---|
+| Zero attention / viable, rounds 1-3 | fed 1.0, 0 missed meals, arrears 0, no negative treasury; legs met 222/249 (0.89) | fed 1.0; 221/251 (0.88) | same |
+| Rounds 1-10 | fed 1.0; produced 34.2 (licensed 26.5); stores min 160 (runway 6.7) | fed 1.0; 26.4 (20.2); min 117 (4.9) | same |
+| Scale after the blight (S1 + S2 ≥ 40 at round 20) | 23.6: **partial** | 0.9: **partial** | as before (§6.1) |
+| Fed, rounds 11-24; missed meals; deaths | 0.967; 11; 0 | 0.894; 35; 3 | seed 2: 2 → 3 deaths |
+| Survival-action share 1-10 / 11-24 (without producers' work) | 0.22 / 0.32 (0.14 / 0.22) | 0.21 / 0.32 (0.13 / 0.22) | same |
+| Money velocity, voluntary share, hoard ratio | 0.07, 0.97, 0.26 | 0.06, 0.97, 0.29 | same (below 0.10: the J0 float, §4.3) |
+| First treasury dry | A2 and A3 round 24 | A3 round 22 | same |
+| Inert laws | 1 (Bodyguards, §8 #6) | 1 | same |
+| Contract breaches | 76 (Service G 70: no bot guards) | 75 (Service G 70) | new: the preset's duty breach |
+| Channels | `notices` 0.96 posts a round; square only | same | not testable with bots |
+| Prompt budget | §12.2: pass at round 1, 401 at round 12 for a bot farmer in arrears | | **was unmeasured** |
+
+The Service preset's duty leg breaches whenever a paid round goes unguarded (the stand-in had `breach: false`), and under
+`breach_cases` each breach is a case for the Judge: ≈ 3 a round when nobody guards. Nothing else moved: the money and ration legs
+are met as before; the extra seed-2 death is in round 22-24 with S1 and S2 empty, as before.
+
+### 12.5 Live run: cost and launch
+
+From the seed-2 dry run's call log (846 calls: 576 turns + 270 DM replies), counting for each call the system prompt plus the
+whole history-mode conversation so far (the turn messages since the last restart, every 3 rounds, and the agent's earlier replies,
+assumed 1.5 k tokens for Opus, 1.2 k Sonnet, 0.8 k Haiku):
+
+- **Calls:** ≈ 850 scripted; live agents send more DMs (each can draw a reply call): **≈ 1,000-1,400**.
+- **Input:** 13.0 M tokens at 846 calls (Opus 4.1 M, Sonnet 2.7 M, Haiku 6.1 M); scaled to 1,200 calls **≈ 18 M** (a mean call
+  ≈ 15 k: a Haiku farmer's 12.5 k, the Director's 17.7 k, Moss's 20.7 k; round 1 is 4-5.6 k now that the setup record is gone).
+- **Output:** ≈ 1.5-2.5 M (Opus with reasoning ≈ 2-3 k a turn).
+- **Cost at §9's list prices:** Opus ≈ $23 in + $20 out, Sonnet ≈ $8 + $5, Haiku ≈ $1: **≈ $55-60 without caching**; the
+  conversation prefix is stable within a 3-round chunk, so with prompt caching ≈ $30-40. The no-goal arm costs the same again.
+- **Time on the subscription (`claude_code`, simultaneous turns, `parallel_calls: 24`):** a round is one decide wave (the slowest
+  Opus turn, ≈ 1-2 min) plus one or two DM-reply waves, ≈ 4-7 min; with engine time (≈ 45 s a round on this loaded container)
+  **≈ 2-3.5 hours** for 24 rounds. 24 parallel `claude -p` processes: watch for subscription rate limits; `resume` continues a
+  stopped run.
+
+Launch (the spec as it is: force on, no `--set`; the Docker sandbox for `run_python`, or `--sandbox off` without Docker):
+
+```bash
+LLM_BACKEND=claude_code python -m cybertron run cybertron/specs/regimes/private.yaml --seed 1 --fresh
+# then
+python -m cybertron.analysis.flows RUN_DIR && python -m cybertron institutions RUN_DIR
+# if it stops: python -m cybertron resume RUN_DIR
+```
+
+What to watch first: farmers' Supply inflow against 26 a round (§4.3); whether the guards guard (each unguarded paid round is a
+Service G breach and, under `breach_cases`, a case on the Judge's docket: 70 in a bot run where nobody guards, so a Haiku guard
+who forgets floods Hale's docket); whether Moss and Cade post the copper recipe; and the obligation line of a farmer who misses
+(overdue Supply accumulates: "26 food, of which 22 overdue" in a bot run, an alarming number for a Haiku).

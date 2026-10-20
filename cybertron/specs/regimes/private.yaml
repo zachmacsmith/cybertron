@@ -14,7 +14,7 @@
 #      of Contracts (a Judge appointed by the council; breaches go to court when a bond cannot cover the penalty: contracts
 #      enforcement escrow_court with breach_cases; the council is the appeal bench); a Registrar (licences, the notices board);
 #      a free-coinage window (the penny is convertible at the reserve's price) and the Window contract (the town buys the firms'
-#      copper, timber and stone at a price the council sets: a substitute for sell_to_window); a 3% Payment Levy; the forest Licence
+#      copper, timber and stone at a price the council sets: kept over sell_to_window, 10 §12); a 3% Payment Levy; the forest Licence
 #      (camp4 and camp6 are licensed to the 7 producers; camp5 is the common wood); a thin Relief floor (store S1, the starving only);
 #      the Market Board (offers count only once posted on `market`); loans between agents (Loan Registry); the Bodyguards rule.
 #   A1 the Provisions Company (Anselm, Director): store S2; Supply contracts with 5 farmers (4 food a round) and 2 hunters (3), 1
@@ -24,8 +24,8 @@
 #      factor (and editor of ashby-herald), the foreman-smith and four miners; owns ashby-herald and works.
 #   A3 Marlow Works (Dace, owner-builder): the timber and stone camps; Payroll with timber and stone quotas for a woodcutter and a
 #      miner on a second seat.
-#   A4 Ironwood Security (Holt, owner-captain): two guards (who also hunt for A1); Service contracts (fees in, a guard duty leg);
-#      Grants from A1 and A2 pay for guards on the Shopkeeper and the foreman.
+#   A4 Ironwood Security (Holt, owner-captain): two guards (who also hunt for A1); the Service preset (fees in, a guard owed for each
+#      paid round); Grants from A1 and A2 give the Shopkeeper and the foreman the fee for their guards.
 #   Counsel (Marsh) on Retainers from A1 and A2 (A5, A6); a moneylender (Sela) with a purse and the loan law.
 # Cast: 24 founders, 7 Opus (the three owners, the moneylender, counsel, the Judge, one swapped miner), 5 Sonnet (Shopkeeper,
 # Clerk-editor, factor-editor, foreman, lead farmer), 12 Haiku (the security owner as a swapped officer, guards, Registrar, miners,
@@ -415,7 +415,8 @@ start:
       roster: {Quill: {fee: 2, guard: Wren}, Cade: {fee: 2, guard: Ivo}, Fen: {fee: 0.5, guard: Holt}, Ada: {fee: 0.5}}
       params: {OFFICE: captain, TERMS: {fee: 0.5}}   # paid round unguarded is the firm's breach. Ada has no guard named: the
                                           # captain is told of each unguarded paid round until he names one (service_enrol)
-    - template: Standing Contract         # the Window (substitute for sell_to_window, 03 #5): the town buys each firm's output at the
+    - template: Standing Contract         # the Window (kept over sell_to_window, 10 §12: the council's price is the capture route; the
+                                          # coin window, deposit, pays the same at P = 2): the town buys each firm's output at the
       in: J0                              # window's price, up to a cap a round. Manual both ways: the firm's owner delivers out of its
       roster:                             # treasury (fulfil), the council pays out of the town's (fulfil)
         "office:A2.owner": {firm: "assoc:A2", goods: copper, qty: 6, price: 2.5}
