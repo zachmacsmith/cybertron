@@ -2,6 +2,10 @@
 
     python -m cybertron publish RUN [RUN...] --repo OWNER/NAME [--card CARDS.yaml] [--push] [--release vX.Y[.Z] [--notes "..."]]
     python -m cybertron publish --repo OWNER/NAME --reexport-all [--push]      # rebuild every published run's tables
+    python -m cybertron publish --repack-raw raw/<spec>/<run_id>.tar.gz [--push]   # drop NEVER members from a published archive
+
+The dataset id is DATASET below (the one place it is written in Python; the site's is DATASET_REPO in site/lib/cybertron-data.js).
+The environment variable CYBERTRON_DATASET overrides it, and --repo overrides both.
 
 Without --push nothing leaves the machine: the dataset is staged in --staging (default cybertron/out/_publish/<time>) and a summary
 of what would be uploaded is printed. Layout on the Hub (docs/data_format.md, "Layout on Hugging Face"):
@@ -59,7 +63,15 @@ from pathlib import Path
 
 from cybertron import export as X
 
-DEFAULT_REPO = "zachmacsmith/charter-runs"
+DATASET = "zachmacsmith/charter-runs"     # the Hugging Face dataset id: the only place it is written in Python (docs/publishing.md)
+
+
+def default_repo() -> str:
+    """The dataset to publish to: $CYBERTRON_DATASET when set, else DATASET."""
+    return os.environ.get("CYBERTRON_DATASET") or DATASET
+
+
+DEFAULT_REPO = default_repo()
 STAGING = Path(__file__).resolve().parent / "out" / "_publish"
 # raw files never published: pickles execute code when loaded; the rest are reports rebuilt from the data
 NEVER = re.compile(r"(^|/)(checkpoints?(/|$)|claude_sessions(/|$)|.*\.pkl$|.*\.pickle$|abandoned_calls\.jsonl$)")   # claude_sessions: the CLI's account file and transcripts (email, account ids, injected context)
@@ -613,6 +625,95 @@ def fetch_raw(repo: str, row: dict, dest: Path) -> Path:
     return dest / row["spec"] / Path(row["raw"]).name.removesuffix(".tar.gz")
 
 
+# ------------------------------------------------------------------ repack a published raw archive
+ARCHIVE_FIELDS = {"bytes_archive": "bytes_archive", "bytes_raw": "bytes_raw", "raw_files": "files",
+                  "raw_sha256": "sha256", "archive_sha256": "sha256"}   # catalog field -> repack result key, updated when a row has it
+
+
+def _sha256(path: Path) -> str:
+    import hashlib
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for block in iter(lambda: f.read(1 << 20), b""):
+            h.update(block)
+    return h.hexdigest()
+
+
+def repack_archive(src: Path, dst: Path) -> dict:
+    """Copy a raw .tar.gz to dst without the members NEVER excludes (and any absolute or '..' member). Nothing is extracted;
+    kept members keep their names, sizes, mtimes and modes. Returns {files, bytes_raw, bytes_archive, sha256, dropped}."""
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    files, size, dropped = 0, 0, []
+    with tarfile.open(src) as tin, tarfile.open(dst, "w:gz") as tout:
+        for m in tin:
+            if m.name.startswith("/") or ".." in Path(m.name).parts or NEVER.search(m.name):
+                dropped.append(m.name)
+            elif m.isfile():
+                tout.addfile(m, tin.extractfile(m))
+                files, size = files + 1, size + m.size
+            elif m.isdir():
+                tout.addfile(m)
+            else:                                                       # links, devices: never written by raw_archive
+                dropped.append(m.name)
+    return {"files": files, "bytes_raw": size, "bytes_archive": dst.stat().st_size, "sha256": _sha256(dst), "dropped": dropped}
+
+
+def repack_remote_archive(repo_id: str, path: str, dry_run: bool = True, workdir=None, log=print, download=None,
+                          catalog=None, api=None) -> dict:
+    """Rebuild one published raw archive in place on the Hub: download `path` (raw/<spec>/<run_id>.tar.gz), drop the members
+    NEVER excludes (repack_archive), and, unless dry_run, upload the new archive in one commit, with catalog.json/.parquet when
+    a catalog row for it records archive facts (ARCHIVE_FIELDS; the current catalog records none, only the `raw` path).
+    Nothing is uploaded when no member is dropped. Earlier commits still hold the old archive: see docs/publishing.md.
+    download(repo_id, path) -> local file, catalog(repo_id) -> rows and api (upload_folder) are for tests."""
+    if not RAW_PATH.match(path or ""):
+        raise SystemExit(f"not a raw archive path: {path!r} (expected raw/<spec>/<run_id>.tar.gz)")
+    if download is None:
+        def download(repo, p):
+            from huggingface_hub import hf_hub_download
+            return hf_hub_download(repo, p, repo_type="dataset")
+    stage = Path(workdir) if workdir else STAGING / f"repack-{time.strftime('%Y%m%d-%H%M%S')}"
+    if stage.exists() and any(stage.iterdir()):
+        raise SystemExit(f"{stage} is not empty: pass a new --staging directory")
+    src = Path(download(repo_id, path))
+    before = {"bytes_archive": src.stat().st_size, "sha256": _sha256(src)}
+    res = repack_archive(src, stage / path)
+    rows = (catalog or remote_catalog)(repo_id)
+    changed = []
+    for r in rows:
+        if r.get("raw") != path:
+            continue
+        for field, key in ARCHIVE_FIELDS.items():
+            if field in r and r[field] != res[key]:
+                r[field] = res[key]
+                changed.append(f"{r['run_id']}.{field}")
+    if changed:
+        write_catalog(rows, stage)
+    summary = {"repo": repo_id, "path": path, "dropped": res["dropped"], "before": before,
+               "after": {k: res[k] for k in ("files", "bytes_raw", "bytes_archive", "sha256")},
+               "catalog_updated": changed, "local": str(stage), "pushed": False}
+    log(f"{path}: {len(res['dropped'])} member(s) dropped, {before['bytes_archive']} -> {res['bytes_archive']} bytes"
+        + (f"; catalog fields updated: {', '.join(changed)}" if changed else "; no catalog field records this archive"))
+    for name in res["dropped"]:
+        log(f"  drop {name}")
+    if not res["dropped"]:
+        log("nothing to drop: not uploading")
+        return summary
+    if dry_run:
+        log(f"dry run: nothing uploaded (the repacked archive is in {stage})")
+        return summary
+    problems = [p for p in check_staging(stage) if not p.startswith("local path left")]   # the archive was already public
+    if problems:
+        raise SystemExit("not uploading: " + "; ".join(problems))
+    commit = (api or _api()).upload_folder(folder_path=str(stage), repo_id=repo_id, repo_type="dataset", delete_patterns=[],
+                                           commit_message=f"repack {path}: drop {len(res['dropped'])} excluded member(s)")
+    summary.update(pushed=True, commit=str(getattr(commit, "oid", commit)))
+    log(f"pushed: {getattr(commit, 'commit_url', '') or summary['commit']}")
+    return summary
+
+
+RAW_PATH = re.compile(r"^raw/[^/.][^/]*/[^/]+\.tar\.gz$")
+
+
 # ------------------------------------------------------------------ publish
 def stage_runs(runs: list[Path], stage: Path, cards: dict, log=print, with_prompts: bool = False,
                spec_override: str | None = None, with_viewer_json: bool = False) -> tuple[list[dict], list[str], set[str]]:
@@ -639,7 +740,7 @@ def stage_runs(runs: list[Path], stage: Path, cards: dict, log=print, with_promp
     return rows, problems, tables
 
 
-def publish(runs, repo: str = DEFAULT_REPO, cards: dict | None = None, push: bool = False, staging=None,
+def publish(runs, repo: str | None = None, cards: dict | None = None, push: bool = False, staging=None,
             reexport_all: bool = False, with_prompts: bool = False, spec_override: str | None = None,
             prune_legacy: bool = False, message: str | None = None, release: str | None = None, notes: str | None = None,
             with_viewer_json: bool = False, stories=None, skip_missing_stories: bool = False, log=print) -> dict:
@@ -648,6 +749,7 @@ def publish(runs, repo: str = DEFAULT_REPO, cards: dict | None = None, push: boo
     release="vX.Y[.Z]" also prepends a changelog entry (CHANGELOG.md and the card) in that commit and tags it (module docstring).
     stories (a list from load_stories) are written as stories.json, checked against the catalog; skip_missing_stories drops (with a
     warning) the ones whose run is not in it instead of refusing."""
+    repo = repo or default_repo()
     last_release = None
     if release:
         parse_release(release)
@@ -772,7 +874,7 @@ def publish_stories(stories: list[dict], repo: str, stage: Path, published: list
 def add_command(sub) -> None:
     p = sub.add_parser("publish", help="publish runs to a Hugging Face dataset (cybertron/publish.py; docs/data_format.md)")
     p.add_argument("runs", nargs="*", help="run directories, or directories holding runs")
-    p.add_argument("--repo", default=DEFAULT_REPO, help=f"dataset repo (default {DEFAULT_REPO})")
+    p.add_argument("--repo", default=default_repo(), help=f"dataset repo (default {default_repo()}: $CYBERTRON_DATASET, else {DATASET})")
     p.add_argument("--card", help="YAML/JSON card, or {run_id: card} (title, description, tags, featured, usable_rounds, validity)")
     p.add_argument("--stories", help="stories registry (site/stories.yaml) to publish as stories.json; runs are optional")
     p.add_argument("--skip-missing-stories", action="store_true",
@@ -790,10 +892,16 @@ def add_command(sub) -> None:
     p.add_argument("--release", help="tag the upload commit vX.Y[.Z] and add a changelog entry (major: schema major or layout; "
                                      "minor: runs or columns added; patch: card/catalog fixes)")
     p.add_argument("--notes", help="changelog notes for --release")
+    p.add_argument("--repack-raw", metavar="PATH", help="rebuild one published raw archive (raw/<spec>/<run_id>.tar.gz) without "
+                                                        "the members NEVER excludes; uploads only with --push (docs/publishing.md)")
     p.set_defaults(fn=cmd)
 
 
 def cmd(a) -> None:
+    if getattr(a, "repack_raw", None):
+        s = repack_remote_archive(a.repo, a.repack_raw, dry_run=not a.push, workdir=a.staging)
+        print(json.dumps({k: v for k, v in s.items() if k != "local"}, indent=1))
+        return
     if a.notes and not a.release:
         raise SystemExit("--notes goes with --release (the changelog entry)")
     cards = load_cards(a.card)

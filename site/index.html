@@ -58,21 +58,23 @@
     <div class="head"><h2>Open data</h2></div>
     <div class="grid4 grid-data">
       <div><p style="margin-top:0">Every run is published as typed tables (events, messages, channels, turns, laws, scores) plus
-        the raw logs, in the <a href="https://huggingface.co/datasets/zachmacsmith/charter-runs">charter-runs dataset</a> under
+        the raw logs, in the <a data-dataset-link href="#">dataset on Hugging Face</a> under
         CC BY 4.0. The simulator is <a href="https://github.com/zachmacsmith/cybertron">open source</a> (MIT); new runs are added
         with one command.</p></div>
       <div class="code">-- every DM in every run, straight from the Hub (DuckDB)
 SELECT run_id, channel_id, sender, text
-FROM 'hf://datasets/zachmacsmith/charter-runs/runs/*/*/messages.parquet'
+FROM 'hf://datasets/<span data-dataset-repo></span>/runs/*/*/messages.parquet'
 WHERE channel_kind = 'dm'
 LIMIT 20;</div>
     </div>
   </section>
 </main>
 <script type="module">
-  import { chrome, dataset, esc, mascot, runFacts } from "./assets/site.js";
+  import { chrome, dataset, DATASET_REPO, DATASET_URL, esc, mascot, runFacts } from "./assets/site.js";
   import { storyCarousel } from "./assets/stories.js";
   chrome("home");
+  document.querySelectorAll("[data-dataset-link]").forEach((a) => { a.href = DATASET_URL; a.textContent = `${DATASET_REPO.split("/").pop()} dataset`; });
+  document.querySelectorAll("[data-dataset-repo]").forEach((s) => { s.textContent = DATASET_REPO; });
 
   const QUOTES = [
     ["Bjorn", "happy", "I hold every crown in circulation.", "Bjorn · Opus legislator · private thought", true],

@@ -12,7 +12,7 @@
 <main class="wrap run-page" id="main"><p class="loading">Loading the run…</p></main>
 <div id="hovercard" role="tooltip"></div>
 <script type="module">
-  import { chrome, dataset, DATASET_URL } from "./assets/site.js";
+  import { chrome, dataset, DATASET_REPO, DATASET_URL } from "./assets/site.js";
   import { prepare } from "./assets/run/model.js";
   import { buildSprite } from "./assets/run/mascots.js";
   import * as V from "./assets/run/views.js";
@@ -31,7 +31,7 @@
   const S = prepare(D);
   const dark = document.documentElement.dataset.theme === "night";
   buildSprite(S, dark);
-  const st = { S, entry, root: ds.root, datasetUrl: DATASET_URL, dark, round: S.lastRound, section: "front", target: null, filter: "",
+  const st = { S, entry, root: ds.root, datasetRepo: DATASET_REPO, datasetUrl: DATASET_URL, dark, round: S.lastRound, section: "front", target: null, filter: "",
     order: (() => { try { return localStorage.getItem("cybertron-diary-order") || "asc"; } catch (e) { return "asc"; } })(),
     hide: new Set((() => { try { return JSON.parse(localStorage.getItem("cybertron-diary-hide") || "[]"); } catch (e) { return []; } })()),
     fold: (() => { try { return localStorage.getItem("cybertron-diary-fold2") === "on"; } catch (e) { return false; } })() };
