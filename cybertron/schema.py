@@ -98,6 +98,7 @@ FEATURE_DEFAULTS = {
     "contracts": ("contracts", _mod("cybertron.contracts"), "cybertron.contracts"),     # P4.3: associations (needs law.v2)
     "directories": ("directories", _mod("cybertron.directories"), "cybertron.directories"),   # owned trees of text files
     "chronicle": ("directories", _mod("cybertron.directories", "CHRONICLE_DEFAULTS"), "cybertron.directories"),   # the Historian's
+    "documents": ("directories", _mod("cybertron.documents"), "cybertron.documents"),   # review 32: literacy, personal stores, copies
     "subsistence": ("subsistence", _mod("cybertron.subsistence"), "cybertron.subsistence"),   # review 15: food, hunger, food camps, stores
 }
 ALIASES = {"media": "media2", "outside": "outside_power", "camptypes": "camps.typed", "leases": "camps.leases"}
@@ -526,6 +527,11 @@ def _ann():
         "chronicle.max_file_bytes": dict(types=("int",), range=(1, None)),
         "chronicle.grants": dict(types=("dict",)),
         "chronicle.readonly": dict(types=("list",)),
+        "documents.enabled": dict(types=("bool",)),
+        "documents.literate": dict(kind="leaf", types=("str", "dict"), check=_check_literate),
+        "documents.max_bytes": dict(types=("int",), range=(1, None)),
+        "documents.max_file_bytes": dict(types=("int",), range=(1, None)),
+        "documents.notice_chars": dict(types=("int",), range=NONNEG),
         "resources.placement": dict(types=("str",), enum=_placements),
         "prompts.core": dict(types=("dict",)),
         "prompts.manual": dict(types=("dict",)),
@@ -644,6 +650,11 @@ DOCS = {
     "chronicle.namespace": "the chronicle's persistent namespace (null: directories.namespace, shared_archive.namespace, else default)",
     "chronicle.max_bytes": "size limit of the whole chronicle, in bytes",
     "chronicle.grants": "initial access for others (clerks): {agent:<id>: {path prefix: read|write|none}}; the owner may change it",
+    "documents.enabled": "documents (review 32): every player has a personal document store; literate agents write, anyone passes copies on",
+    "documents.literate": "who can write documents: all, none, or {agents, classes, roles, rights (\"J0.*\" matches a prefix), profiles, officers: true}; read live",
+    "documents.max_bytes": "size limit of a personal document store, in bytes (received copies count)",
+    "documents.max_file_bytes": "size limit of one document, in bytes",
+    "documents.notice_chars": "characters of a copy's text quoted in the recipient's notice",
     "chronicle.readonly": "extra read-only path prefixes (e.g. archive/ holding an earlier chronicle); not counted by Chronicler",
     "chronicle.max_file_bytes": "size limit of one chronicle file, in bytes",
     "chronicle.records": "at the end of each complete run, append a public digest of it as _records/<run_id>.md (read-only to agents)",
@@ -1428,6 +1439,15 @@ def _check_shocks(path, v) -> list:
 def _check_start(path, v) -> list:
     from cybertron import start as STT
     return STT.check(path, v)
+
+
+def _check_literate(path, v) -> list:
+    from cybertron import documents as DOC
+    try:
+        DOC.check_literate(v)
+    except ValueError as e:
+        return [f"{path}: {e}"]
+    return []
 
 
 def _check_tree(path, v) -> list:

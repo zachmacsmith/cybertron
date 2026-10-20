@@ -47,6 +47,7 @@ import re
 import time
 from pathlib import Path
 
+from cybertron import documents as DOC                                  # documents: personal stores, literacy, copies (off: nothing)
 from cybertron import features as FT
 
 DEFAULTS = {
@@ -182,6 +183,8 @@ def enabled(x) -> bool:
         return False
     if not isinstance(x, dict) and hasattr(x, "w"):
         return bool(x.w.get("dirs") is not None)
+    if DOC.on(x):                                                       # documents: every player's personal store
+        return True
     try:
         return bool(stores(x))
     except ValueError:
@@ -224,9 +227,9 @@ def install(k) -> None:
     """Kernel construction: an empty working copy of every provisioned directory (nothing when off; Frozen.load fills the
     namespace stores from the run's frozen base)."""
     st = stores(k.spec)
-    if not st:
-        return
-    k.w["dirs"] = {n: {**s, "files": {}, "grants": copy.deepcopy(s.get("grants") or {})} for n, s in st.items()}
+    if st:
+        k.w["dirs"] = {n: {**s, "files": {}, "grants": copy.deepcopy(s.get("grants") or {})} for n, s in st.items()}
+    DOC.install(k)                                                      # documents: personal stores (off: nothing)
 
 
 def create(k, name, conf) -> None:
@@ -249,6 +252,8 @@ def is_owner(k, aid, d) -> bool:
     a = k.w["agents"].get(aid)
     if not a or a.get("departed") is not None:
         return False
+    if kind == DOC.OWNER_KIND:                                          # documents: a personal store, owned while literate
+        return DOC.owner_access(k, aid, d)
     return bool(OWNER_KINDS[kind](k, aid, v))
 
 
@@ -264,6 +269,8 @@ def level(k, aid, d, path: str | None = None) -> str:
     a = k.w["agents"].get(aid)
     if not a or a.get("departed") is not None:
         return "none"
+    if d.get("personal") == aid:                                        # documents: a non-literate agent's own papers (read)
+        return DOC.own_papers(k, aid, d)
     best, blen = "none", -1
     for subj in subjects_of(k, aid):
         for prefix, lv in (d["grants"].get(subj) or {}).items():
@@ -277,12 +284,16 @@ def level(k, aid, d, path: str | None = None) -> str:
 
 def reachable(k, aid) -> list:
     """The directories an agent can reach (owner, or any grant above none), in name order."""
+    if DOC.on(k):
+        DOC.ensure(k, aid)                                              # documents: an agent born later gets its store here
     return [n for n, d in sorted(_dirs(k).items()) if level(k, aid, d) != "none"]
 
 
 def static_access(inst, a) -> bool:
     """action_registry "dir:any": directories are provisioned here; with no kernel (the system prompt written at the start), only
     owners see the actions (by role holders in the instance, id, class or rights); with a kernel `when` (has_any) decides."""
+    if DOC.on(inst) and DOC.literate_static(inst, a):                   # documents: a literate agent owns its personal store
+        return True
     try:
         st = stores(inst)
     except ValueError:
@@ -505,16 +516,24 @@ def dir_delete(k, aid, path=None, dir=None) -> str:
     return f"Deleted {name}/{p}."
 
 
-def change_dir_write(k, agent, dir, path, op, text=None, to=None) -> dict:
+def change_dir_write(k, agent, dir, path, op, text=None, to=None, meta=None) -> dict:
     """The dir_write primitive: one file of a directory written (write, append, edit), moved or deleted (the action has checked
-    access, paths and sizes). Hooks see who changed which path of which directory, never the text."""
-    files = k.w["dirs"][dir]["files"]
+    access, paths and sizes). Hooks see who changed which path of which directory, never the text. meta (documents: a copy's
+    provenance, cybertron/documents.py) is kept beside the file; it follows a move and goes with a delete."""
+    d = k.w["dirs"][dir]
+    files = d["files"]
     if op == "move":
         files[to] = files.pop(path)
     elif op == "delete":
         files.pop(path, None)
     else:
         files[path] = str(text)
+    if meta is not None:
+        d.setdefault("meta", {})[path] = dict(meta)
+    elif d.get("meta") and path in d["meta"] and op in ("move", "delete"):
+        m = d["meta"].pop(path)
+        if op == "move":
+            d["meta"][to] = m
     return {"dir": dir, "path": to if op == "move" else path}
 
 
@@ -552,7 +571,7 @@ def change_dir_grant(k, agent, dir, grantee, path, access) -> dict:
 
 # ====================================================================== prompt
 def tree(d, paths, n) -> str:
-    out = [f"- {p} ({len(d['files'][p].encode())} bytes)" for p in paths[:n]]
+    out = [f"- {p} ({len(d['files'][p].encode())} bytes{DOC.tag(d, p) if d.get('meta') else ''})" for p in paths[:n]]
     if len(paths) > n:
         out.append(f"- ... {len(paths) - n} more (dir_list)")
     return "\n".join(out) or "(empty)"
@@ -577,19 +596,21 @@ def turn_section(k, aid) -> str:
         paths = _readable(k, aid, d)
         recs = [p for p in paths if p.startswith(RECORDS)]
         rest = [p for p in paths if not p.startswith(RECORDS)]
-        head = (f"{name} ({d['title']}; {'yours' if own else 'shared with you: ' + level(k, aid, d)}; {len(d['files'])} file(s), "
-                f"{_size(d)} of {d['max_bytes']} bytes"
-                + (", persists into later worlds" if d["scope"] == "namespace" else "") + "):")
+        head = DOC.heading(k, aid, name, d) or (
+            f"{name} ({d['title']}; {'yours' if own else 'shared with you: ' + level(k, aid, d)}; {len(d['files'])} file(s), "
+            f"{_size(d)} of {d['max_bytes']} bytes" + (", persists into later worlds" if d["scope"] == "namespace" else "") + "):")
         body = tree(d, rest, n)
         if not own:
             lv = level(k, aid, d)
             body += ("\nUse dir_list, dir_read and dir_search (look-ups)" + (", and dir_write, dir_edit, dir_move, dir_delete where "
-                     "you may write" if lv == "write" else "") + f", with \"dir\": \"{name}\".")
+                     "you may write" if lv == "write" else "") + (", doc_send to pass a copy on" if DOC.on(k) else "")
+                     + f", with \"dir\": \"{name}\".")
         if recs:
             body += f"\nRecords of {len(recs)} earlier world(s) (read-only): " + ", ".join(recs[-8:]) \
                 + (" ..." if len(recs) > 8 else "")
         parts.append(head + "\n" + body)
-    return "\n\n".join(parts)
+    line = DOC.role_line(k, aid) if DOC.on(k) else ""
+    return "\n\n".join(parts) + (f"\n\n{line}" if line else "")
 
 
 def role_text(inst) -> str:

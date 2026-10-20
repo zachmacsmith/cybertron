@@ -76,7 +76,7 @@ OPTIONS = {
     "loan_terms": frozenset({"lid"}), "loan_assign": frozenset({"lid"}), "create_clause": frozenset({"name", "text", "key"}),
     "start_project": frozenset({"record", "lid"}),
     # directories: text = the file's new text; to = a move's new path
-    "dir_write": frozenset({"text", "to"}), "dir_grant": frozenset(),
+    "dir_write": frozenset({"text", "to", "meta"}), "dir_grant": frozenset(),   # meta: a copy's provenance (documents)
     # wave 9 C (channels.v2): found's settings (a v2 channel's owner, selectors, listing, identity, retention, rate); subscribe's
     # via "channel" (join_channel, leave_channel)
     "set_channel": frozenset(),
