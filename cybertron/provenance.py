@@ -156,7 +156,7 @@ ENGINE_FLIPS = {
                  "procedure_restored names its ranks (law.effects_detail); a bare contract action name resolves under "
                  "actions.forgiving (actions.bare_names); new code: harvest-leg camps/items filters, the Service guard assign "
                  "action, resource_of(camp); a start contract over the cap fails generation"},
-    21: {"commits": [],
+    21: {"commits": ["4523cf089723a5b8c041f86a15f276981bd57970"],
          "flips": [],
          "note": "law.v2's duplicate-proposal note names only laws with identical normalised code; the near tier (difflib ratio "
                  ">= 0.95, 'nearly the same code') is gone (behaviour, not a default; reproducible only by rerun)"},
