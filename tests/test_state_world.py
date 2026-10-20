@@ -299,3 +299,31 @@ def test_state_gates_refuse_ordinary_actions(state_k):
     with pytest.raises(ActionError, match="moderated"):
         act(k, "Bea", "post", channel="square", text="The council is corrupt.")
     assert "Wiretap on Bea" in act(k, "Dorran", "wiretap", agent="Bea")
+
+
+def test_state_zero_attention_three_rounds(tmp_path):
+    """08 §6 zero-attention gate, adapted to the State: every agent idle for 3 rounds; nobody misses a meal, the Quota, the Ration
+    Shop, the civil list, the Board's payroll and the remittance run (automatic legs), the window sale runs, no treasury goes
+    negative and each treasury's runway at round 3 is at least 12 rounds."""
+    sp = S.load(STATE)
+    sp["rounds"] = 3
+    _, rd = T.run(tmp_path, sp)
+    evs = T.events(rd)
+    subs = [e["data"] for e in evs if e["type"] == "subsistence_round"]
+    assert subs and all(float(d.get("missed") or 0) == 0 for d in subs)
+    assert not [e for e in evs if e["type"] == "death"]
+    k = T.kernel_at(rd, 3)
+    from cybertron import accounts as AC
+    ids = {T.law(k, iid, t): t for iid, t in (("J0", "Quota"), ("J0", "Board"), ("J0", "Payroll"), ("A1", "Payroll"),
+                                                ("A1", "Grant"))}
+    ks = [T.kernel_at(rd, n) for n in (1, 2, 3)]
+    for lid, t in ids.items():                                          # each ran (the Quota: until idle producers ran short)
+        assert any(float(x[1] or 0) > 0 for kk in ks for per in (kk.w["laws"][lid]["state"].get("moved") or {}).values()
+                   for x in per.values()), t
+    assert len([e for e in evs if e["type"] == "window_sale"]) == 3
+    k0 = T.kernel_at(rd, 0)
+    for acct in ("J0", "A1", "A2"):
+        t0, t3 = k0.bal(AC.treasury_of(k0, acct), "penny"), k.bal(AC.treasury_of(k, acct), "penny")
+        assert t3 >= 0, acct
+        loss = (t0 - t3) / 3
+        assert loss <= 0 or t3 / loss >= 12, (acct, t0, t3)

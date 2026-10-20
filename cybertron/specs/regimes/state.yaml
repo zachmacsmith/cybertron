@@ -508,8 +508,8 @@ start:
     - template: Licence                   # the press licence: posting in the tribune
       params: {GATES: [post], TARGETS: [tribune], RIGHT: press_licence, REGISTRAR: J0.registrar, HOLDERS: [Vera], TAG: press,
                LABEL: Press licence}
-    - template: Relief Act                # the floor: the starving and the hungry, out of the granary
-      params: {STORE: S1, RATION: 1, BUDGET: 12, STAGES: [starving, hungry]}
+    - template: Relief Act                # the floor: anyone short of a meal (the starving first), out of the granary, 12 a round
+      params: {STORE: S1, RATION: 1, BUDGET: 12, STAGES: [starving, hungry, fed]}
     - template: Granary Ration
       params: {STORE: S1, OFFICE: J0.keeper, CAP: 6}
     - template: Bench Act                 # only the Magistrate judges at first instance
