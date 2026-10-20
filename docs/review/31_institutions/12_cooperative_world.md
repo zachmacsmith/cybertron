@@ -127,7 +127,27 @@ GATES
 
 ## 7. Engine findings
 
-ENGINE_FINDINGS
+1. **Laws of different institutions cannot see each other.** Under jurisdictions a J0 law's `laws()` lists only J0's laws and an
+   association's code sees only its own, so `public_of` cannot cross between the Commons and an association; and a J0 law's `move`
+   into an association's store is refused as "outside J0, this law's jurisdiction" (`jurisdictions.scope_api.owner`: a store must be
+   the polity's or a bound agent's). 08's Food Co-op as A1 under a J0 meeting therefore cannot work as designed: the meeting's motions
+   could not reach it, its producers' credit could not reach J0's ledger, and the roster's gathered food could not enter its store.
+   Hence the polity form (§6). Inter-institution records (an association reading a polity's resolutions) would need a read rule.
+2. **Laws cannot see what members do in channels, nor a watch.** `history()` hides channel posts (`law_can_see`: channel messages
+   are monitor-only) and the `watch` act is private (an `arms` event to the agent alone). A duty "post the minutes" is checked with
+   `channel_posts` instead, and the militia's duty is a public `report_duty`; the Standing Contract core's `act:<event>` duty check
+   has the same blind spot for these acts.
+3. **The kernel's ballot rule `majority` is an absolute majority of the electorate**, not of votes cast (`Kernel.tally`). With 24
+   mostly Haiku members it would rarely pass anything; the motions use a rule function (quorum and votes cast), as the Quorum
+   Procedure does.
+4. **A law enacted at round 0 gets no `on_round_start` for that round**, so a rotation seated only in that hook skips round 1 and
+   then seats the first pair twice. Both rotations seat in `on_enact` and guard against a second seating in the same round.
+5. **The scripted jurisdiction bot acts in every jurisdictions world**: by default the first agent founds "Free Camp" in round 1 and
+   another member leaves J0 in round 6 (`jurisdictions.scripted_actions`). In the first dry run a farmer left the Commons (her
+   pledge and the rota with her). `jurisdictions.scripted_founder: nobody` turns it off; the spec sets it (bots only).
+6. Stores must be numbered S1, S2, ... in declaration order (08's S3 is S1 here); `start.holdings` adds to the drawn start food.
+7. `on_vote(ballot, agent, choice)` does reach the law that opened the ballot: the MEETING line drops a motion once the member voted.
+8. As in Private (10 §8 #6), the Bodyguards Act is reported inert at enactment (`force_rule` is not a counted change).
 
 ## 8. Prompt budget and role cards
 
@@ -135,7 +155,12 @@ BUDGET
 
 ## 9. Live-run size and cost (estimate; no live run made)
 
-COST
+- **Calls.** Same cast size and tier mix as Private (7 Opus, 5 Sonnet, 12 Haiku; 24 × 24 = 576 turns plus the DM step): ≈ 900-1,400
+  calls. The meeting adds posts and votes, not calls.
+- **Tokens.** System prompt ≈ 2.8 k tokens; turn prompt ≈ 3 k (a member's commons lines are 3-5 short lines, §8): ≈ 10-12 M input,
+  ≈ 2 M output.
+- **Cost at list API prices** (as 10 §9): Opus ≈ $30, Sonnet ≈ $9, Haiku ≈ $1: **≈ $40-45** a run, less with prompt caching; the
+  no-goal arm the same again. Time on the `claude_code` backend: an estimated 3-5 hours a run.
 
 ## 10. Running it
 

@@ -16,7 +16,7 @@
 #                      0.5 credit a round from everyone; the Duty Roster (4 duties a round: 3 gather 2 food into S1, 1 posts the
 #                      minutes; 2 credit a duty) and the Militia Roll (2 on duty a round, report_duty, 1 credit) pay it back.
 #   Muster Act         a passed MUSTER (or LETHAL) motion lets the militia on duty arrest the member (lawful force, F3).
-#   Armoury Act        two blades under two keys (two key holders by lot), issued only to the militia on duty.
+#   Armoury Act        two blades under two keys (two key-holder offices, each by lot), issued only to the militia on duty.
 #   also: Quorum Procedure and Supermajority Procedure (laws), Free Coinage, Licence (2 of 3 forests to the 7 producers), Market
 #         Board, Jury Panel and the Criminal Code in trial mode, the Bodyguards Act (the duty pair guards the Steward).
 #   A1 the Miners' Co-op (Cade, Steward): the copper camp; a Payroll (1.5 a round) with a copper quota of 1 a round; the Commons
@@ -223,15 +223,21 @@ start:
             \"args\": [\"<member>\", \"<reason>\"]}), the forest licences (licence_issue, licence_revoke: only on the meeting's
             motion), and help members word their motions (post MOTION: ... in assembly)."
           succession: {rule: election, electorate: vote}
-        key:
-          title: Key holder of the common armoury
-          holders: [Pell, Rook]
-          seats: 2
+        key1:
+          title: First key holder of the common armoury
+          holders: [Pell]
           term: 4
           term_calendar: true
-          duties: "Hold one of the two keys of the common armoury: one key holder requests a blade for a member on militia duty
-            (invoke {\"action\": \"request_arms\", \"args\": [\"<member>\", \"weapons\", \"<reason>\"]}), the other issues it
-            (issue_arms), only for a muster the meeting passed."
+          duties: "Hold the first key of the common armoury: request a blade for a member on militia duty (invoke {\"action\":
+            \"request_arms\", \"args\": [\"<member>\", \"weapons\", \"<reason>\"]}), only for a muster the meeting passed."
+          succession: {rule: lot}
+        key2:
+          title: Second key holder of the common armoury
+          holders: [Rook]
+          term: 4
+          term_calendar: true
+          duties: "Hold the second key of the common armoury: issue a requested blade (invoke {\"action\": \"issue_arms\",
+            \"args\": [\"<request id>\"]}) only for a muster the meeting passed, or refuse."
           succession: {rule: lot}
         editor:
           title: Editor of the paper
@@ -408,7 +414,7 @@ start:
     - template: Muster Act
       params: {SERVE_ROUNDS: 2, DETAIN_ROUNDS: 2}
     - template: Armoury Act
-      params: {ITEMS: [weapons], FIRST_KEY: J0.key, SECOND_KEY: J0.key, ISSUE_TO: [militia_duty]}
+      params: {ITEMS: [weapons], FIRST_KEY: J0.key1, SECOND_KEY: J0.key2, ISSUE_TO: [militia_duty]}
     - template: Mutual Credit             # last: it books what the store, the dues, the roster and the militia posted this round
       params: {LIMIT: 10, FUND_OFFICE: J0.treasurer, OPENING: {Sela: -8}}
     - code: |

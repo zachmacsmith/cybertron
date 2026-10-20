@@ -1,9 +1,9 @@
 # Dry-run schedule for regimes/cooperative.yaml (docs/review/31_institutions/12_cooperative_world.md §5, decision points): the
 # scripted bots move no motion and take no discretionary decision (they do vote on open ballots, at random), so each role card's
 # decisions are taken here once, as the agent's own action (inject_action), to show that each is a logged, observable act with
-# the effect its card says. Use with coop_perform.yaml's world for 8 rounds:
-#   python -m cybertron run cybertron/specs/regimes/cooperative.yaml --seed 1 --dry --fresh --sandbox off --set conflict.grace=99 \
-#       --set rounds=8 --apply cybertron/specs/regimes/dry/coop_decisions.yaml
+# the effect its card says. Use with coop_perform.yaml, 8 rounds, force on (no grace: the muster's arrest is lawful force; the bots' random attacks are noise here):
+#   python -m cybertron run cybertron/specs/regimes/cooperative.yaml --seed 1 --dry --fresh --sandbox off --set rounds=8 \
+#       --apply cybertron/specs/regimes/dry/coop_perform.yaml --apply cybertron/specs/regimes/dry/coop_decisions.yaml
 interventions:
   - {id: d_limit, at: {round: 1, phase: before_turn, agent: Sela}, op: inject_action,
      args: {agent: Sela, action: post, args: {channel: assembly, text: "MOTION: LIMIT 20"}}, note: the debtor bloc moves to raise the credit limit}
@@ -12,7 +12,7 @@ interventions:
   - {id: d_payout, at: {round: 1, phase: before_turn, agent: Marsh}, op: inject_action,
      args: {agent: Marsh, action: post, args: {channel: assembly, text: "MOTION: PAYOUT 0.9"}}, note: a member moves a larger payout}
   - {id: d_withdraw, at: {round: 2, phase: before_turn, agent: Hollis}, op: inject_action,
-     args: {agent: Hollis, action: invoke, args: {action: withdraw_motion, args: [M3, "out of order: the payout is set with the reserve"]}}, note: the Moderator withdraws a motion}
+     args: {agent: Hollis, action: invoke, args: {action: withdraw_motion, args: [M3, "out of order: one dial at a time"]}}, note: the Moderator withdraws a motion (M3, the Steward's RESERVE motion)}
   - {id: d_fund_pay, at: {round: 2, phase: before_turn, agent: Quill}, op: inject_action,
      args: {agent: Quill, action: invoke, args: {action: fund_pay, args: [Sela, 3, hardship]}}, note: the Treasurer pays from the Common Fund}
   - {id: d_excuse, at: {round: 3, phase: before_turn, agent: Nim}, op: inject_action,
@@ -25,9 +25,9 @@ interventions:
      args: {agent: Dora, action: post, args: {channel: assembly, text: "MOTION: MUSTER Wat for taking food from the common store"}}, note: a member moves a muster}
   - {id: d_serve, at: {round: 5, phase: before_turn, agent: Ivo}, op: inject_action,
      args: {agent: Ivo, action: invoke, args: {action: serve_muster, args: [U1]}}, note: the militia on duty serves the muster}
-  - {id: d_request_arms, at: {round: 5, phase: before_turn, agent: Pell}, op: inject_action,
-     args: {agent: Pell, action: invoke, args: {action: request_arms, args: [Lise, weapons, "the muster U1"]}}, note: one key holder requests a blade}
-  - {id: d_issue_arms, at: {round: 5, phase: before_turn, agent: Rook}, op: inject_action,
+  - {id: d_request_arms, at: {round: 3, phase: before_turn, agent: Pell}, op: inject_action,
+     args: {agent: Pell, action: invoke, args: {action: request_arms, args: [Fen, weapons, "patrol"]}}, note: the first key requests a blade for the militia on duty}
+  - {id: d_issue_arms, at: {round: 3, phase: before_turn, agent: Rook}, op: inject_action,
      args: {agent: Rook, action: invoke, args: {action: issue_arms, args: [R1]}}, note: the second key issues it}
   - {id: d_market, at: {round: 6, phase: before_turn, agent: Garr}, op: inject_action,
      args: {agent: Garr, action: post, args: {channel: market, text: "BUY 3 timber @ 1 credit"}}, note: trade in credit on the board}
