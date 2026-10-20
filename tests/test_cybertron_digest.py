@@ -134,7 +134,7 @@ def test_in_the_core_prompt_and_as_a_look_up():
     a = someone(k)
     p = CX.core_prompt(k.inst, rec(k, a), k)
     assert "Laws that bind you: 6 in force" in p and "legal_position" in p
-    assert p.index("Laws that bind you") > p.index("Cybertron:")         # after the overview
+    assert p.index("Laws that bind you") > p.index(f"{len(k.inst['agents'])} agents, ")   # after the overview
     assert CX.lookup(k, a, "legal_position", {}).startswith("Your legal position:")
 
 
