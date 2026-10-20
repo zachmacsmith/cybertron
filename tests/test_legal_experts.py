@@ -210,7 +210,7 @@ def test_the_lawyer_reads_the_archive_as_an_action_a_lookup_and_in_the_dm_step(k
     assert "Common pitfalls" in out
     assert "bond" in CX.lookup(k, LAWYER, "dir_search", {"dir": "legal", "query": "bond"}).lower()
     turn = DR.turn_section(k, LAWYER)
-    assert "legal (the legal archive; yours" in turn and "guide/00-index.md" in turn
+    assert "legal (the legal archive kept by counsel" in turn and "; yours;" in turn and "guide/00-index.md" in turn
 
 
 def test_non_lawyers_read_only_the_public_guide(k):
@@ -218,7 +218,7 @@ def test_non_lawyers_read_only_the_public_guide(k):
     assert "Getting legal help" in CX.lookup(k, CLIENT, "dir_read", {"dir": "legal", "path": "public/legal-help.md"})
     with pytest.raises(ActionError, match="no read access"):
         act(k, CLIENT, "dir_read", dir="legal", path="guide/01-system.md")
-    assert "guide/" not in DR.dir_list(k, CLIENT, dir="legal")
+    assert "\n- guide/" not in DR.dir_list(k, CLIENT, dir="legal") and "\n- public/" in DR.dir_list(k, CLIENT, dir="legal")
     with pytest.raises(ActionError):
         act(k, CLIENT, "draft", template="Retainer")
     with pytest.raises(ActionError, match="read-only"):
