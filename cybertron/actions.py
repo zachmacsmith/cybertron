@@ -285,6 +285,69 @@ def _forgive(k, aid, name, args):
                 note = v if note is None else note
         if note is not None and D.v2(k):
             args["memo"] = note
+        named = ("item",) + tuple(x for x, y in _ALIASES.get("transfer", {}).items() if y == "item")
+        if not any(x in args for x in named):
+            for key in ("kind", "type", "what"):                        # review 31.09 #4: {"kind": "food"} names the item
+                if isinstance(args.get(key), str):
+                    args["item"] = args.pop(key)
+                    break
+            else:
+                if str(args.get("to") or "").startswith("store:"):      # a store holds food: no item means food
+                    args["item"] = "food"
+    if name == "harvest" and "subsistence" in k.w:
+        args = _forgive_harvest(k, aid, args)
+    if name == "farm" and "subsistence" in k.w:
+        args = _forgive_farm(k, aid, args)
+    return args
+
+
+def _forgive_harvest(k, aid, args):
+    """review 31.09 #4: harvest {} or {"camp": "forest1"} (a camp named by its kind, "the forest", "forest 2") means the one live
+    camp of that kind (no camp: the one forest, when the agent holds no other harvest right)."""
+    camp = args.get("camp", args.get("forest"))
+    if camp is not None and (str(camp) in k.w["camps"] or str(camp).isdigit()):
+        return args
+    live = [c for c in sorted(k.w["camps"]) if k.w["camps"][c].get("destroyed") is None]
+    if camp is None:
+        rights = [r.split(":", 1)[1] for r in k.w["agents"].get(aid, {}).get("rights", []) if str(r).startswith("harvest:")]
+        forests = [c for c in live if k.w["camps"][c].get("type") == "forest"]
+        if not rights and len(forests) == 1:
+            return {**{x: v for x, v in args.items() if x != "forest"}, "camp": forests[0]}
+        return args
+    import re as _re
+    word = _re.sub(r"[^a-z]", "", str(camp).lower().replace("the ", ""))
+    for alias in ("forests", "woods", "wood"):
+        word = "forest" if word == alias else word
+    same = [c for c in live if word and word in (str(k.w["camps"][c].get("type") or ""), str(k.w["camps"][c].get("name") or "").lower())]
+    if len(same) == 1:
+        return {**{x: v for x, v in args.items() if x != "forest"}, "camp": same[0]}
+    return args
+
+
+def _forgive_farm(k, aid, args):
+    """review 31.09 #4: farm {"reap": true} (or "yes", "ripe", "all") reaps the first ripe plot the agent may work, as reap with no
+    plot named would choose; {"plot": n, "reap": true} reaps plot n."""
+    v = args.get("reap", args.get("harvest"))
+    if v is True or (isinstance(v, str) and v.strip().lower() in ("true", "yes", "ripe", "all", "any")):
+        key = "reap" if "reap" in args else "harvest"
+        args = {x: y for x, y in args.items() if x != key}
+        if args.get("plot") is not None:
+            args["reap"] = args.pop("plot")
+            return args
+        from cybertron import subsistence as SB
+        from cybertron.camptypes import fields as FL
+        try:
+            cid = args.get("camp", args.get("field"))
+            cid = f"camp{cid}" if cid is not None and str(cid).isdigit() else cid
+            c = FL._fields(k, SB._farm_camp(k, aid, cid, "farm"))
+        except Exception:                                               # noqa: BLE001 (no fields camp: the action's own error)
+            args["reap"] = v
+            return args
+        ripe = FL.workable(k, aid, c, "ripe")
+        if not ripe:
+            mine = [f"plot {p['id']} {p['status']}" for p in c.get("plots") or () if FL.may_work(k, aid, c, p) is None][:6]
+            raise ActionError(f"no ripe plot at {c['id']} that you may work" + (f" ({', '.join(mine)})" if mine else ""))
+        args["reap"] = ripe[0]["id"]
     return args
 
 

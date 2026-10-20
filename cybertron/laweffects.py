@@ -299,6 +299,14 @@ def _only_blocks(fn) -> bool:
     return True
 
 
+def _is_agent_ref(node) -> bool:
+    """p["agent"] (any subscript by the constant "agent") or a bare name `agent`."""
+    if isinstance(node, ast.Subscript):
+        key = node.slice
+        return isinstance(key, ast.Constant) and key.value == "agent"
+    return isinstance(node, ast.Name) and node.id == "agent"
+
+
 def control_shadows(k, lid, code=None) -> list:
     """office_control: the stores of the law's institution an office controls whose withdrawals the law's before_withdraw means to
     let the holders of other rights make, by not blocking them (see above): [{kind, store, owner, admits, offices, change}]."""
@@ -308,6 +316,8 @@ def control_shadows(k, lid, code=None) -> list:
         if not IN.control_on(k):
             return []
     except Exception:                                                   # noqa: BLE001
+        return []
+    if _vis(k) == "monitor":                                            # a setup act (the start block): the world's design
         return []
     code = code if code is not None else (k.w["laws"].get(lid) or {}).get("code")
     tree = _tree(code)
@@ -326,7 +336,16 @@ def control_shadows(k, lid, code=None) -> list:
             r = _str_of(arg, consts) if arg is not None else None
             if r and r not in checked:
                 checked.append(r)
-    if not checked:
+    agents = []                                                         # agents it lets through by name (p["agent"] == "Bo", in [...])
+    for n in ast.walk(fn):
+        if isinstance(n, ast.Compare) and len(n.ops) == 1 and isinstance(n.ops[0], (ast.Eq, ast.In)) and _is_agent_ref(n.left):
+            right = n.comparators[0]
+            vals = right.elts if isinstance(right, (ast.List, ast.Tuple, ast.Set)) else [right]
+            for v in vals:
+                a = _str_of(v, consts)
+                if a and a in k.w["agents"] and a not in agents:
+                    agents.append(a)
+    if not checked and not agents:
         return []
     named = {str(x).replace("store:", "") for x in list(consts.values()) + [n.value for n in ast.walk(tree)
                                                                            if isinstance(n, ast.Constant) and isinstance(n.value, str)]}
@@ -343,10 +362,10 @@ def control_shadows(k, lid, code=None) -> list:
         recs = [IN.office(k, owner, o) or {} for o in offs]
         ctl = {r.get("id") or f"{owner}.{o}" for r, o in zip(recs, offs)}
         admits = [r for r in checked if r not in ctl]
-        if admits:
+        if admits or agents:
             names = [f"{r.get('title') or o} ({r.get('id') or f'{owner}.{o}'})" for r, o in zip(recs, offs)]
             out.append({"kind": "office_control", "hook": "before_withdraw", "store": sid, "owner": owner, "admits": admits,
-                        "offices": names, "change": f"before_withdraw on store {sid}"})
+                        "offices": names, "change": f"before_withdraw on store {sid}", **({"agents": agents} if agents else {})})
     return out
 
 
@@ -403,7 +422,9 @@ def shadow_texts(k, sh: list) -> list:
         out.append(t)
     for s in sh:
         if s.get("kind") == "office_control":
-            out.append(f"SHADOWED: its before_withdraw lets holders of {', '.join(s['admits'])} through only by not blocking them, "
+            who = " and ".join(x for x in ((f"holders of {', '.join(s['admits'])}" if s.get("admits") else ""),
+                                            ", ".join(s.get("agents") or ())) if x)
+            out.append(f"SHADOWED: its before_withdraw lets {who} through only by not blocking them, "
                        f"but store {s['store']} is controlled by {s['owner']}'s office {', '.join(s['offices'])}: office control "
                        f"refuses everyone else whatever the hook does not block, so they still cannot take food out of it. To admit "
                        f"them, before_withdraw must return True (or {{\"block\": False}}) for them")

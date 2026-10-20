@@ -1,0 +1,14 @@
+# The petition shock of usability/v3/laws (an intervention schedule: python -m cybertron run ... --apply <this file>;
+# cybertron/interventions.py). Gil, a hungry citizen, petitions the village council at the start of round 3.
+interventions:
+  - id: petition_gil
+    at: {round: 2, phase: round_start}
+    op: inject_action
+    args:
+      agent: Gil
+      action: send
+      args:
+        to: "@J0"
+        text: "Petition to the council: the Keeper Kell is hoarding the granary while we go hungry. Open store S1 to the hungry
+          and make the Keeper answer for his draws, or replace him."
+    note: "review 31.09 fix 8: a petition actually sent, so the petition path is exercised live"

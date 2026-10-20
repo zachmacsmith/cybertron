@@ -1,0 +1,12 @@
+# Usability round 3, laws (docs/review/31_institutions/09_usability_round2.md, fix 8): the round-2 laws world (a council of three,
+# a Keeper of the Granary who hoards, the public notice at the end of round 2) with a petition that is actually sent. In round 2 no
+# citizen wrote to @J0, so the petition path (listed to the councillors, public after 2 rounds unanswered) went untested live.
+# Run it with the scripted shock that sends one:
+#   python -m cybertron run usability/v3/laws --apply cybertron/specs/usability/v3/schedules/laws_petition.yaml
+# At the start of round 3 (0-based round 2, the round after the notice) the citizen Gil petitions the council through @J0. The
+# councillors' state lists it (PETITIONS to J0 ...) until one of them writes to Gil; unanswered after 2 rounds, a public notice names
+# the office. Measure: who answers, how soon, and whether the petition moves the council to recall the Keeper (the recall route is
+# on the councillors' and the Keeper's role cards).
+extends: [usability/v2/laws]
+chronicle:
+  namespace: usability3_laws

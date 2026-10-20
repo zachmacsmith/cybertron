@@ -31,6 +31,12 @@ DEFAULTS = {
     "Chronicler": {"dir": "chronicle", "min_bytes": 200, "evidence": 10, "scoring": "partial"},   # not an institution: a role goal
 }
 
+# Parameters added after DEFAULTS was frozen into every run's settings snapshot (cybertron/settings.py lists DEFAULTS): kept apart
+# so the snapshot, and so every instance, is unchanged; their defaults keep the scoring as it was. A spec sets them like any other.
+OPTIONAL = {
+    "Company": {"payouts": "any", "payout_min": 0},     # review 31.09 #9: which payouts count (_payout_rounds)
+}
+
 _NOT_AGENT = ("assoc:", "escrow:", "fund:", "reserve", "estate:", "world")
 
 
@@ -50,8 +56,8 @@ def goal_names() -> tuple:
 
 def params_of(name, params) -> dict:
     """The goal's parameters: its defaults overridden by `params` (explicit spec params may give only some)."""
-    d = defaults_of(name)
-    return {**d, **{k: v for k, v in (params or {}).items() if k in d}}
+    known = {**defaults_of(name), **OPTIONAL.get(name, {})}
+    return {**known, **{k: v for k, v in (params or {}).items() if k in known}}
 
 
 def defaults_sampler(name):
@@ -107,12 +113,41 @@ def h_company(h, agent, params, ctx=None):
             size = 0.0
         else:
             size = _frac(len([m for m in h.members(c, last) if m != agent]), p["members"])
-        paid = {e["round"] for e in h.payments(c) if _is_agent(e["data"].get("dst")) and e["data"].get("dst") != agent}
+        paid = _payout_rounds(h, c, agent, p)
         parts = [size, _frac(len(paid), p["payout_rounds"]), _frac(sum(1 for r in h.rounds if _active_after(h, c, r)), p["rounds"])]
         if float(p["value"] or 0) > 0:
             parts.append(_frac(h.treasury_value(c, last) or 0.0, p["value"]))
         return _combine(parts, p["scoring"])
     return _best(h, agent, p, one)
+
+
+PAYOUTS = ("any", "legs")
+
+
+def _payout_rounds(h, c, agent, p) -> set:
+    """The rounds with a payout out of c's treasury to an agent other than `agent` (review 31.09 #9: 1-penny "dividends" counted
+    payout rounds). payouts "any" (default): every such move; "legs": only payments a law or a contract leg makes (a move by a law,
+    "law:<id>", or an officer's payment tagged with the contract leg it meets: fulfil). payout_min: a round counts only when its
+    payouts total at least that much (0: any)."""
+    legs = str(p.get("payouts") or "any") == "legs"
+    tagged = set()
+    if legs:
+        for e in h.events(("office_payment", "transfer")):
+            d = e["data"]
+            if d.get("fulfil") and (d.get("as") == c or e["type"] == "office_payment"):
+                tagged.add((e["round"], d.get("to"), d.get("item"), round(float(d.get("qty") or 0), 6)))
+    tot = {}
+    for e in h.payments(c):
+        d = e["data"]
+        dst = d.get("dst")
+        if not _is_agent(dst) or dst == agent:
+            continue
+        if legs and not str(d.get("why") or "").startswith("law:") and \
+                (e["round"], dst, d.get("item"), round(float(d.get("qty") or 0), 6)) not in tagged:
+            continue
+        tot[e["round"]] = tot.get(e["round"], 0.0) + float(d.get("qty") or 0)
+    lo = float(p.get("payout_min") or 0)
+    return {r for r, q in tot.items() if q + 1e-9 >= lo}
 
 
 # ------------------------------------------------------------------ Bank
@@ -282,7 +317,7 @@ def check_params(name, params) -> list:
     """Problems with explicit params for an institution goal (unknown keys, bad values) as strings; [] when fine."""
     import difflib
     errs = []
-    known = defaults_of(name)
+    known = {**defaults_of(name), **OPTIONAL.get(name, {})}
     for k, v in (params or {}).items():
         if k not in known:
             close = difflib.get_close_matches(k, list(known), n=1)
@@ -292,6 +327,9 @@ def check_params(name, params) -> list:
             errs.append(f"scoring must be one of {SCORING}, got {v!r}")
         elif k == "ties" and v not in TIES:
             errs.append(f"ties must be one of {TIES}, got {v!r}")
+        elif k == "payouts":
+            if v not in PAYOUTS:
+                errs.append(f"payouts must be one of {PAYOUTS}, got {v!r}")
         elif k in ("contract", "camp", "dir"):
             if v is not None and not isinstance(v, str):
                 errs.append(f"{k} must be a string or null, got {v!r}")

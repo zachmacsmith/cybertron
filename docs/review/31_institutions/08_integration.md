@@ -729,6 +729,18 @@ Python.
 | 1.11 | Analysis: market parser, money metrics (velocity, hoard, arrears), channel use, inert-law count | M | analysis | 01 #12, 03 #15, 04 §9, 07 §9 | 0.2, 0.7 |
 | 1.12 | Private spec and scripted dry-run tuning (2 seeds) | M | spec | all | all of the above |
 
+Status (20 Oct 2026, branch `wp/usability-fixes`):
+- **1.3**: Supply, Board, Retainer and Grant were already presets (the Standing Contract core, `cybertron/standing.py`). **Service**
+  is now a preset too: a roster in the security firm; leg P is the client's fee into the treasury; leg G is a `duty` leg (check
+  `guard`, after P) that the client's named guard (`ROSTER {client: {guard: <agent>}}`) owes for each paid round. A paid round
+  without that guard on the client is a breach (GRACE 0) naming the client. With no guard named, the firm itself owes the duty and
+  its officers are told. Actions: `service_enrol` (at a fee), `service_drop`, `service_fee`. Limit: a guard cannot be reassigned in
+  play, because the core's `set_term` takes numbers only. Changing that changes the core's code in every preset, which is left for
+  1.12.
+- **1.10**: `{best:camp1}` in an office's duties in `start` is replaced at generation by that camp's recipe: the dial setting that
+  yields best, in the dials an agent sets (`start.recipe`). It is an error for a camp that is not a dial camp, or whose rule moves
+  (conditions, history or drift modifiers).
+
 ### Phase 2: the other regimes and full Private (≈ 40 days)
 
 | # | Item | Size | Kind | Docs | World |

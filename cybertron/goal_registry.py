@@ -1127,11 +1127,11 @@ _SUBJ = "{subject}"
 _INSTITUTION_ROWS = [
     Goal('Company', 'Institution', 1, gate="institution", requires=('contracts',), share="direct",
          text=f'build a company: {_SUBJ} that keeps at least {{members}} members besides you, pays out of its treasury to agents '
-              'other than you (dividends, wages, purchases) in at least {payout_rounds} different rounds, and stays active for at '
+              'other than you {payout_kind}{payout_min_text} in at least {payout_rounds} different rounds, and stays active for at '
               'least {rounds} rounds{value_text}',
          rule=f'Over the scored rounds, for {_SUBJ} (the best one counts if there are several), {{combine}}: (a) its members other '
               'than you after the last scored round / {members}, capped at 1 (0 unless it is active then); (b) the rounds with a '
-              'payment out of its treasury to an agent other than you / {payout_rounds}, capped at 1; (c) the rounds after which it '
+              'payment out of its treasury to an agent other than you{payout_rule} / {payout_rounds}, capped at 1; (c) the rounds after which it '
               'was active / {rounds}, capped at 1{value_rule}. 0 without such an association.',
          params=IG.defaults_sampler("Company"), score=IG.h_company, needs=frozenset({'events', 'states'})),
     Goal('Bank', 'Institution', 1, gate="institution", share="direct",
@@ -1269,6 +1269,13 @@ def _institution_fill(goal: str, p: dict) -> dict:
     p["value_text"] = f", with a treasury worth at least {p['value']:g}" if float(p.get("value") or 0) > 0 else ""
     p["value_rule"] = (f"; (d) its treasury value after the last scored round / {p['value']:g}, capped at 1"
                        if float(p.get("value") or 0) > 0 else "")
+    legs = str(p.get("payouts") or "any") == "legs"                   # Company (review 31.09 #9): which payouts count
+    lo = float(p.get("payout_min") or 0)
+    p["payout_kind"] = ("(payments its contracts' legs or its laws make: wages, supply and service payments; plain transfers do "
+                        "not count)" if legs else "(dividends, wages, purchases)")
+    p["payout_min_text"] = f", at least {lo:g} in a round," if lo > 0 else ""
+    p["payout_rule"] = ((" made by a law or meeting a contract leg (fulfil)" if legs else "")
+                        + (f", the round's total at least {lo:g}" if lo > 0 else ""))
     p["bank_by"] = f"from the treasury of {c}" if c else "yourself, or from the treasury of an association you founded"
     p["lenders"] = f"the treasury of {c}" if c else "you or the treasury of an association you founded"
     p["camp_text"] = f" at {p['camp']}" if p.get("camp") else " at some camp"
