@@ -367,6 +367,74 @@ def test_a_duplicate_proposal_is_noted_not_blocked():
     assert "Note:" not in A.act(k, leg, "propose", {"code": law("B", "def on_round_end(r):\n    gazette('a different law')\n    move('reserve', 'x', 'grain', 1)\n")})
 
 
+def _similar_before(k, lid, near=0.95):
+    """similar_laws as it was: difflib's ratio() on every candidate (the reference for the fast path)."""
+    import difflib
+    from cybertron import jurisdictions as J
+    from cybertron.dispatch.changes import legal as LG
+    mine, jur, out = LG._norm_code(k.w["laws"][lid]["code"]), J.law_jur(k, lid), []
+    for oid, o in k.w["laws"].items():
+        if oid == lid or o.get("status") not in LG._PENDING or J.law_jur(k, oid) != jur or o.get("amends"):
+            continue
+        theirs = LG._norm_code(o.get("code"))
+        if theirs == mine:
+            out.append({"law": oid, "title": o.get("title"), "status": o.get("status"), "match": "identical"})
+        elif theirs and difflib.SequenceMatcher(None, mine, theirs, autojunk=False).ratio() >= near:
+            out.append({"law": oid, "title": o.get("title"), "status": o.get("status"), "match": "near"})
+    return out
+
+
+def test_similar_laws_is_unchanged_by_the_fast_path(monkeypatch):
+    """similar_laws skips ratio() where the length, real_quick_ratio or quick_ratio bound rules `near` out, and finds difflib's
+    longest matches with a suffix automaton on large ranges (_FAST): the same identical, near and far results as before."""
+    from cybertron.dispatch.changes import legal as LG
+    k = world()
+    lines = "".join(f"    gazette('line {i} of the quota law')\n" for i in range(60))
+    base = "def on_round_end(r):\n" + lines
+    for title, body in [("Q", base), ("Q copy", "# a copy\n" + base),                                  # identical
+                        ("Q near", base.replace("line 7 of", "line seven of")),                        # near (one line)
+                        ("Q half", "def on_round_end(r):\n" + lines[:len(lines) // 2]),               # length rules it out
+                        ("Far", "def on_round_end(r):\n    move('reserve', 'x', 'grain', 1)\n")]:     # far
+        k.new_law(law(title, body), "a")
+    lids = [lid for lid, o in k.w["laws"].items() if o["status"] == "draft"]
+    for fast in (LG._FAST, 0):                                         # 0: every range takes the suffix automaton
+        monkeypatch.setattr(LG, "_FAST", fast)
+        for lid in lids:
+            for near in (0.5, 0.95, 0.999):
+                assert LG.similar_laws(k, lid, near) == _similar_before(k, lid, near), (lid, near, fast)
+    got = {s["title"]: s["match"] for s in LG.similar_laws(k, lids[0])}
+    assert got == {"Q copy": "identical", "Q near": "near"}
+
+
+def test_the_fast_matcher_has_difflibs_matching_blocks(monkeypatch):
+    import difflib
+    import random
+    from cybertron.dispatch.changes import legal as LG
+    monkeypatch.setattr(LG, "_FAST", 0)
+    rng = random.Random(7)
+    for t in range(3000):
+        alpha = ("ab", "abc", "abcdefgh \n")[t % 3]
+        a = "".join(rng.choice(alpha) for _ in range(rng.randrange(40)))
+        b = "".join(rng.choice(alpha) for _ in range(rng.randrange(40)))
+        if t % 2:
+            b = a[:rng.randrange(len(a) + 1)] + b[:5] + a[rng.randrange(len(a) + 1):]
+        assert LG._Matcher(None, a, b, autojunk=False).get_matching_blocks() == \
+            difflib.SequenceMatcher(None, a, b, autojunk=False).get_matching_blocks(), (a, b)
+
+
+def test_two_standing_contract_presets_compare_quickly():
+    """Two ~35,000-character presets (the same CORE, different parameters): difflib's ratio() took ~15 s a pair (0.9918 for these
+    two, so near), which made preview_law of a preset ~600 s in the Private world."""
+    import time
+    from cybertron import standing as ST
+    from cybertron.dispatch.changes import legal as LG
+    a, b = (LG._norm_code(ST.code(n)) for n in ("Payroll", "Retainer"))
+    t = time.perf_counter()
+    assert LG._near(a, b, 0.95) and not LG._near(a, b, 0.995)
+    assert round(LG._Matcher(None, a, b, autojunk=False).ratio(), 10) == 0.9918137883
+    assert time.perf_counter() - t < 3
+
+
 def test_before_enact_strikes_down_an_enactment(k):
     enact(k, law("Strike", "def before_enact(p, chain):\n    if p['via'] == 'test':\n        return {'block': True, 'reason': 'no'}\n"))
     lid = k.new_law(law("T", "def on_round_end(r):\n    gazette('x')\n"), "a")
