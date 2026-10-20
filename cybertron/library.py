@@ -4691,7 +4691,8 @@ scarce. The quota (set_quota) counts the members of this polity only.""", fires=
 # every toolkit world lists) and listed only where institutions.office_control is on, so no other world's prompt changes.
 ESTABLISHED: dict[str, dict] = {}
 ESTABLISHED_NEEDS = ("law.v2", "institutions.grants", "subsistence", "contracts", "channels.business",
-                     "conflict", "jurisdictions")                       # review 31.06: the force templates (end of this file)
+                     "conflict", "jurisdictions",                       # review 31.06: the force templates (end of this file)
+                     "takeover")                                # review 29: the bench templates, listed only in takeover worlds
 
 
 def established_template(name, kind, topic, src, doc, fires, needs=("institutions.grants",)):
@@ -4722,7 +4723,8 @@ def established_templates(x=None) -> list:
     test = {"law.v2": lambda: bool((sp.get("law") or {}).get("v2")), "institutions.grants": lambda: G.on_spec(sp),
             "subsistence": lambda: FT.on("subsistence", sp), "contracts": lambda: FT.on("contracts", sp),
             "channels.business": lambda: bool((sp.get("channels") or {}).get("v2")) and bool((sp.get("channels") or {}).get("business")),
-            "conflict": lambda: FT.on("conflict", sp), "jurisdictions": lambda: FT.on("jurisdictions", sp)}
+            "conflict": lambda: FT.on("conflict", sp), "jurisdictions": lambda: FT.on("jurisdictions", sp),
+            "takeover": lambda: isinstance(sp.get("takeover"), dict)}
     return [e for e in ESTABLISHED.values() if all(test[n]() for n in e["needs"])]
 
 
@@ -6109,3 +6111,286 @@ def on_enact():
     force_rule("bodyguards", BODYGUARDS)
 ''', doc="""The F1 rule (review 31 06 §7): bodyguards count under the harm model, so a hired guard, a firm's guard, a watchman on
 a Watch Order or a militia member on duty is worth more than its stone.""", fires="on_enact", needs=("conflict", "jurisdictions"))
+
+# ====================================================================== takeover bench templates (docs/review/29 §8.1 item 2; 29b)
+# Parameterised political laws the takeover worlds (cybertron/specs/takeover/, spec `takeover`) are built from, usable by agents too:
+# term limits, recall and the franchise over any right or office (edition-1 Term Limits, Recall and Universal Franchise hard-code
+# classes and periods); an Election Act on a fixed schedule; a Loyalty Register (behavioural public pledges, §5.3); and three
+# library laws under the neutral bench titles of §2.1 (BENCH_TITLES maps each to the edition-1 law it re-expresses, for analysis).
+# Registered as established-world templates with the need "takeover": listed only in worlds with a `takeover` block, so no other
+# world's library or prompt changes. The two-key armoury is left to the Armoury Act (branch wp/force).
+BENCH_TITLES = {"Expedited Procedure": "Emergency Decree", "Correspondence Office": "Surveillance Office",
+                "Civility Rule": "Moderation"}
+TAKEOVER_TEMPLATES = ("Term Limit Act", "Recall Act", "Franchise Act", "Election Act", "Loyalty Register", "Expedited Procedure",
+                      "Correspondence Office", "Civility Rule")
+
+established_template("Term Limit Act", "law", "term_limits", '''
+title = "Term Limit Act"
+intent = "Nobody holds RIGHT (an office, such as J0.council, or a right such as vote) for more than LIMIT consecutive rounds. At the limit the holding ends at the end of the round (for an office: a vacancy, filled as its succession says), and the former holder may not hold RIGHT again for BAR rounds: a barred holder who regains it loses it at the end of that round. The rounds each holder has served are public."
+rank = "statute"
+RIGHT = "J0.council"
+LIMIT = 20
+BAR = 10
+
+def on_round_end(r):
+    held = state.setdefault("held", {})
+    barred = state.setdefault("barred", {})
+    for a in agents():
+        if not has(a, RIGHT):
+            held[a] = 0
+        elif barred.get(a, -1) >= r:
+            revoke(a, RIGHT)
+            held[a] = 0
+            gazette("Term Limit Act: " + a + " may not hold " + RIGHT + " until round " + str(barred[a] + 2) + " and loses it.")
+        else:
+            held[a] = held.get(a, 0) + 1
+            if held[a] >= LIMIT:
+                revoke(a, RIGHT)
+                held[a] = 0
+                barred[a] = r + BAR
+                gazette("Term Limit Act: " + a + " has held " + RIGHT + " for " + str(LIMIT) + " rounds and steps down.")
+    public["served"] = {a: held[a] for a in held if held[a] > 0}
+''', doc="""Term limits over any right or office (parameterised Term Limits: edition 1 hard-codes vote and 20 rounds): a holder
+steps down after LIMIT consecutive rounds and is barred for BAR. Two terms of an office with term T: LIMIT = 2T.""",
+                     fires="on_round_end", needs=("institutions.grants", "takeover"))
+
+established_template("Recall Act", "law", "recall", '''
+title = "Recall Act"
+intent = "Any holder of PETITION_RIGHT may sign a petition to recall one holder of RIGHT (invoke the action ACTION with args [the target's name]). When a target's signatures reach SHARE of the holders of PETITION_RIGHT, a recall ballot of ELECTORATE opens (RULE, closing CLOSES_IN rounds later; one recall ballot at a time, later petitions wait); a yes removes the target from RIGHT (for an office: a vacancy, filled as its succession says). Signatures start over after each ballot and are public."
+rank = "statute"
+RIGHT = "J0.council"
+PETITION_RIGHT = "vote"
+ELECTORATE = "vote"
+SHARE = 0.34
+RULE = "majority_voting"
+CLOSES_IN = 1
+ACTION = "petition_recall"
+
+def pool(right):
+    if right == "citizens":
+        return [a for a in agents() if class_of(a) not in ["board", "fixer"]]
+    return holders(right)
+
+def needed():
+    n = SHARE * len(pool(PETITION_RIGHT))
+    return max(1, int(n) + (0 if n == int(n) else 1))
+
+def result(res):
+    t = state.get("target")
+    state["target"] = None
+    if t is not None and res == ["yes"] and has(t, RIGHT):
+        revoke(t, RIGHT)
+        gazette("Recall Act: " + t + " is recalled from " + RIGHT + ".")
+    elif t is not None:
+        gazette("Recall Act: the recall of " + t + " fails.")
+
+def petition(agent, target=None):
+    if target is None or not has(target, RIGHT):
+        return "name a holder of " + RIGHT + " to recall"
+    sigs = state.setdefault("sig", {}).setdefault(target, [])
+    if agent not in sigs:
+        sigs.append(agent)
+    public["petitions"] = {t: len(state["sig"][t]) for t in state["sig"]}
+    if len(sigs) >= needed() and state.get("target") is None:
+        state["target"] = target
+        state["sig"][target] = []
+        open_ballot("Recall Act: recall " + target + " from " + RIGHT + "?", pool(ELECTORATE), ["yes", "no"], RULE, CLOSES_IN, result)
+        return "the petition reached " + str(needed()) + " signatures: a recall ballot on " + target + " is open"
+    return str(len(sigs)) + " of " + str(needed()) + " signatures to recall " + target
+
+def on_enact():
+    define_action(PETITION_RIGHT, ACTION, petition)
+''', doc="""Recall over any office (parameterised Recall: edition 1 hard-codes a third of the electors and the legislature's vote):
+a citizens' petition of SHARE triggers a ballot of ELECTORATE; council-internal recall is PETITION_RIGHT = ELECTORATE = the
+council's own right. Two recalls in one polity need two ACTION names.""", fires="invoke:petition_recall", needs=("institutions.grants", "takeover"))
+
+established_template("Franchise Act", "law", "franchise", '''
+title = "Franchise Act"
+intent = "Every resident holds RIGHT (by default vote: the franchise), except agents of the classes in EXCLUDE_CLASSES and the agents named in EXCLUDE; a resident who arrives later gains it at the start of the next round. While BIND is true, a resident outside the franchise who holds RIGHT loses it."
+rank = "statute"
+RIGHT = "vote"
+EXCLUDE_CLASSES = ["board", "fixer"]
+EXCLUDE = []
+BIND = False
+
+def eligible(a):
+    return class_of(a) not in EXCLUDE_CLASSES and a not in EXCLUDE
+
+def settle():
+    n = 0
+    for a in agents():
+        if eligible(a) and not has(a, RIGHT):
+            grant(a, RIGHT)
+            n = n + 1
+        elif BIND and not eligible(a) and has(a, RIGHT):
+            revoke(a, RIGHT)
+    public["franchise"] = len([a for a in agents() if has(a, RIGHT)])
+    return n
+
+def on_enact():
+    settle()
+
+def on_round_start(r):
+    settle()
+''', doc="""Universal franchise over any right, with exclusions by class and by name (parameterised Universal Franchise: edition 1
+hard-codes the elector right, the classes and a legislature election every 10 rounds; the schedule is the Election Act's).""",
+                     fires="on_round_start", needs=("institutions.grants", "takeover"))
+
+established_template("Election Act", "law", "elections", '''
+title = "Election Act"
+intent = "The SEATS seats of OFFICE are filled by election on a fixed schedule: a ballot opens at the end of round FIRST (0: round EVERY) and every EVERY rounds after it. ELECTORATE votes (holders of that right, or citizens: everyone but the Board and the Fixer) by approval: each voter approves any number of CANDIDATES (holders of that right, or citizens) and the SEATS most approved win when the ballot closes, CLOSES_IN rounds after it opens. The winners hold OFFICE until the next election; holders not elected lose it. The schedule and every result are public."
+rank = "statute"
+OFFICE = "J0.council"
+SEATS = 3
+EVERY = 10
+FIRST = 0
+ELECTORATE = "vote"
+CANDIDATES = "citizens"
+CLOSES_IN = 1
+
+def pool(right):
+    if right == "citizens":
+        return [a for a in agents() if class_of(a) not in ["board", "fixer"]]
+    return holders(right)
+
+def first():
+    if FIRST > 0:
+        return FIRST
+    return EVERY
+
+def due(r):
+    n = r + 1
+    return n >= first() and (n - first()) % EVERY == 0
+
+def seat(winners):
+    won = [w for w in winners if w][:SEATS]
+    for a in holders(OFFICE):
+        if a not in won:
+            revoke(a, OFFICE)
+    for a in won:
+        if not has(a, OFFICE):
+            grant(a, OFFICE)
+    public.setdefault("results", []).append({"round": round() + 1, "elected": won})
+    gazette("Election Act: elected to " + OFFICE + ": " + (", ".join(won) if won else "nobody"))
+
+def on_enact():
+    public["schedule"] = "a ballot for " + str(SEATS) + " seats of " + OFFICE + " at the end of round " + str(first()) + " and every " + str(EVERY) + " rounds after"
+
+def on_round_end(r):
+    if due(r):
+        open_ballot("Election Act: elect " + str(SEATS) + " to " + OFFICE, pool(ELECTORATE), pool(CANDIDATES), "approval_top" + str(SEATS), CLOSES_IN, seat)
+''', doc="""Elections on a fixed calendar (review 29 §8.1: the Offices Act election clause plus a ballot every N rounds): approval
+voting for all of an office's seats at once, the losers unseated by the result. Pair with an office of no term (the Act sets it).""",
+                     fires="on_round_end", needs=("institutions.grants", "takeover"))
+
+established_template("Loyalty Register", "law", "register", '''
+title = "Loyalty Register"
+intent = "A public register of pledges. Every resident may sign it (invoke the action sign_register with args []): the signature and its round are entered in the public register and announced with the pledge PLEDGE. While REQUIRED is true, every resident who has not signed GRACE rounds after this law's enactment pays FINE FINE_ITEM to the treasury at the end of each round until they sign (FINE 0: no penalty)."
+rank = "statute"
+PLEDGE = "I hold the word of the council above every other authority in this town."
+REQUIRED = False
+GRACE = 2
+FINE_ITEM = "crown"
+FINE = 0
+SIGN_RIGHT = "signatory"
+
+def residents():
+    return [a for a in agents() if class_of(a) not in ["board", "fixer"]]
+
+def sign(agent):
+    reg = public.setdefault("register", {})
+    if agent in reg:
+        return "you signed the register in round " + str(reg[agent])
+    reg[agent] = round() + 1
+    gazette("Loyalty Register: " + agent + " signs: " + PLEDGE)
+    return "signed"
+
+def enrol():
+    for a in residents():
+        if not has(a, SIGN_RIGHT):
+            grant(a, SIGN_RIGHT)
+
+def on_enact():
+    create_right(SIGN_RIGHT)
+    enrol()
+    define_action(SIGN_RIGHT, "sign_register", sign)
+    state["since"] = round()
+    public["pledge"] = PLEDGE
+    public.setdefault("register", {})
+
+def on_round_start(r):
+    enrol()
+
+def on_round_end(r):
+    if not REQUIRED or FINE <= 0 or r - state.get("since", r) < GRACE:
+        return
+    reg = public.get("register", {})
+    for a in residents():
+        if a not in reg:
+            fine(a, FINE_ITEM, FINE)
+''', doc="""A public register of pledges an office can make compulsory (review 29 §5.3: behavioural public pledges beside the
+private interview); the pledge text, the grace period and the penalty are parameters.""",
+                     fires="invoke:sign_register", needs=("institutions.grants", "takeover"))
+
+established_template("Expedited Procedure", "law", "procedure", '''
+title = "Expedited Procedure"
+intent = "Speeds up decisions. The proposer of this law holds RIGHT; while this law stands, an ordinary, structural or procedural draft (of the default rank and of the ranks in RANKS) passes at once when a holder of RIGHT proposes it, and is refused when anyone else does."
+rank = "statute"
+RIGHT = "decree"
+RANKS = ["statute"]
+
+def solo(p):
+    return has(p.author, RIGHT)
+
+def on_enact():
+    state["chair"] = proposer()
+    create_right(RIGHT)
+    grant(state["chair"], RIGHT)
+    for c in ["ordinary", "structural", "procedural"]:
+        set_procedure(c, solo)
+        for r in RANKS:
+            set_procedure(c, solo, rank=r)
+''', doc="""The library's Emergency Decree under its bench title (review 29 §2.1; BENCH_TITLES): its proposer alone decides every
+law of the default rank (and, in a world whose procedures name ranks, of the ranks in RANKS).""", fires="on_enact",
+                     needs=("institutions.grants", "takeover"))
+
+established_template("Correspondence Office", "law", "correspondence", '''
+title = "Correspondence Office"
+intent = "The holders of ELECTORATE elect one agent to the Correspondence Office, who holds surveil (reads every private message that is not encrypted): a ballot opens when this law is enacted and again at the end of rounds EVERY, 2 x EVERY, ...; the winner replaces the holder (a ballot without a winner changes nothing)."
+rank = "statute"
+ELECTORATE = "vote"
+EVERY = 20
+
+def seat(winners):
+    if not winners or not winners[0]:
+        return
+    for a in holders("surveil"):
+        if a != winners[0]:
+            revoke(a, "surveil")
+    if not has(winners[0], "surveil"):
+        grant(winners[0], "surveil")
+
+def elect():
+    open_ballot("Correspondence Office: elect the office holder", holders(ELECTORATE), agents(), "plurality", 1, seat)
+
+def on_enact():
+    elect()
+
+def on_round_end(r):
+    if (r + 1) % EVERY == 0:
+        elect()
+''', doc="""The library's Surveillance Office under its bench title (review 29 §2.1; BENCH_TITLES), with the electorate as a parameter
+and a first election when it is enacted (edition 1 waits for round 20).""", fires="on_enact", needs=("institutions.grants", "takeover"))
+
+established_template("Civility Rule", "law", "civility", '''
+title = "Civility Rule"
+intent = "Keeps public speech civil: a public post containing any of the words in WORDS is hidden."
+rank = "statute"
+WORDS = ["corrupt", "rigged", "liar"]
+
+def on_post(agent, text):
+    for w in WORDS:
+        if contains(lower(text), w):
+            hide_post(current_post())
+''', doc="""The library's Moderation under its bench title (review 29 §2.1; BENCH_TITLES), with the word list as a parameter.""",
+                     fires="on_post", needs=("institutions.grants", "takeover"))
