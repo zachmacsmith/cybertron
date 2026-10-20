@@ -1014,3 +1014,12 @@ contracts: P2.1 → P4.1 → P4.2 → P4.3 (needs P3.1). Critical path to forks 
 - `composition.apply` semantics, the turn layers, the `lawdocs` tier model, `camptypes/`'s package structure.
 - Golden tests and resume-equivalence tests; add harness, replay and fork tests beside them.
 - No rewrite, no plugin framework, no event bus, no `features/` package, no decorator-driven order for anything order-sensitive.
+
+### media2 is frozen; channels v2 is canonical
+
+The press and newspaper model is channels v2 (`channels.v2`, `cybertron/channels.py`: institution channels with writers, readers,
+delivery push | pull | edition, fees by the owner's code). `media2` (`cybertron/media.py`: private and official outlets, editions,
+licences, placements, polls) is frozen: bug fixes only, no new features, and no new spec may turn it on. Loading a spec with
+`media2.enabled` on prints a `spec.FrozenModuleWarning` (a warning, never an error): the 14 specs that used it when it was frozen
+(society, opus20, scientists, explore15, grand35, haiku100, media2_pilot and pilot2/*) and the published runs made from them keep
+running, replaying and forking. `tests/test_media2_frozen.py` lists those specs and fails on a new one (the list may only shrink).
