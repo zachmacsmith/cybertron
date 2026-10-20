@@ -6710,14 +6710,14 @@ def write(r):
     per = max(1, int(dial("PERIOD")))
     nxt = r + per - 1 - (r % per)
     for m in roll():
-        if is_polity():
-            how = "pledge_food: invoke {\\"action\\": \\"pledge_food\\", \\"args\\": [<n>]}"
-        else:
-            how = "set_allowance {\\"contract\\": \\"" + jurisdiction() + "\\", \\"item\\": \\"food\\", \\"qty\\": <n>}"
         level = "stock " + str(round_to(stock(), 1)) + ", "
         if not PUBLIC_STOCK and not (STEWARD != "" and has(m, STEWARD)):
-            level = "stock known to the steward, "
-        out[m] = ("CO-OP STORE " + STORE + ": " + level + "reserve " + str(dial("RESERVE")) + "; your shares " + str(round_to(shares().get(m, 0), 1)) + "; you pool " + str(pledged(m)) + " food a round (" + how + "); a member short of a meal gets one; payout of " + str(dial("PAYOUT")) + " of the stock above the reserve in round " + str(nxt + 1) + ".")
+            level = ""
+        if is_polity():
+            how = "invoke {\\"action\\": \\"pledge_food\\", \\"args\\": [<n>]}"
+        else:
+            how = "set_allowance {\\"contract\\": \\"" + jurisdiction() + "\\", \\"item\\": \\"food\\", \\"qty\\": <n>}"
+        out[m] = "CO-OP STORE " + STORE + ": " + level + "reserve " + str(dial("RESERVE")) + "; your shares " + str(round_to(shares().get(m, 0), 1)) + "; you pool " + str(pledged(m)) + " food a round (" + how + "); short of a meal, you get one; payout round " + str(nxt + 1) + "."
     state["terms_lines"] = out
 
 def on_enact():
@@ -6852,7 +6852,7 @@ def lines():
     b = bal()
     for a in holders(MEMBERS):
         v = b.get(a, 0)
-        out[a] = "CREDIT: your balance " + str(round_to(v, 2)) + " (limit minus " + str(limit()) + ")" + (" OVER THE LIMIT" if v < -limit() - 0.000001 else "") + "; pay a member: invoke {\\"action\\": \\"pay_credit\\", \\"args\\": [\\"<member>\\", <qty>]}."
+        out[a] = "CREDIT: balance " + str(round_to(v, 2)) + " (floor -" + str(limit()) + ")" + (" OVER THE LIMIT" if v < -limit() - 0.000001 else "") + "; pay: invoke {\\"action\\": \\"pay_credit\\", \\"args\\": [\\"<member>\\", <qty>]}."
     state["terms_lines"] = out
 
 def settle():
@@ -7033,7 +7033,7 @@ def lines(r, p):
             continue
         t = task(x[1])
         if x[0] == r + 1:
-            out[a] = "DUTY this round (" + x[1] + "): " + text(t) + "; it pays " + str(WAGE) + " credit, a miss is recorded."
+            out[a] = "DUTY this round (" + x[1] + "): " + text(t) + "; " + str(WAGE) + " credit; a miss is recorded."
         else:
             out[a] = "DUTY: your next turn is " + x[1] + " in round " + str(x[0]) + " (" + str(WAGE) + " credit)."
     state["terms_lines"] = out
@@ -7171,7 +7171,7 @@ def seat(r):
     public["round"] = r + 1
     out = {}
     for a in on:
-        out[a] = "MILITIA DUTY this round: report (invoke {\\"action\\": \\"report_duty\\"}) and keep watch (watch {}), or serve a passed muster; it pays " + str(STIPEND) + " credit, a miss is recorded."
+        out[a] = "MILITIA DUTY this round: invoke {\\"action\\": \\"report_duty\\"} and watch {} (or serve a passed muster): " + str(STIPEND) + " credit; a miss is recorded."
     for a in public["next"]:
         if a not in out:
             out[a] = "MILITIA: you are on duty next round (round " + str(r + 2) + ")."

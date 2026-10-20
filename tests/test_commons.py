@@ -238,7 +238,7 @@ def test_mutual_credit_pay_within_the_limit_dues_and_duty_pay_booked(tmp_path):
     assert b["Ada"] == pytest.approx(-4 - 1 + 2, abs=0.01)              # on the gather duty (held 2 food): wage 2
     t = pub(k, "Mutual Credit")["turnover"]
     assert t["1"]["voluntary"] == 6 and t["1"]["booked"] > 6
-    assert any(x.startswith("CREDIT: your balance") for x in lines(k, "Bo"))
+    assert any(x.startswith("CREDIT: balance") for x in lines(k, "Bo"))
 
 
 def test_over_the_limit_the_meeting_raises_it_or_writes_off(tmp_path):
@@ -370,4 +370,4 @@ def test_opening_balances_and_a_stock_only_the_steward_sees(tmp_path):
     assert "stock" not in pub(k, "Cooperative Store")["last"]
     ada = [x for x in lines(k, "Ada") if x.startswith("CO-OP STORE")][0]
     bo = [x for x in lines(k, "Bo") if x.startswith("CO-OP STORE")][0]
-    assert "stock 4" in ada and "stock known to the steward" in bo
+    assert "stock 4" in ada and "stock" not in bo
