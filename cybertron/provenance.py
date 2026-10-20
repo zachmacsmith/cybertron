@@ -145,7 +145,7 @@ ENGINE_FLIPS = {
          "note": "a missed manual contract leg is judged on what the payer held at the end of its turns this round (could-not "
                  "unless it held what was late, above its keep, when it could act; simultaneous turns discount what others gave it "
                  "after the decisions); the miss record carries held, held_turn and held_end (docs/review/31_institutions/10 §8 #3)"},
-    20: {"commits": [],
+    20: {"commits": ["85502faec67caba70d98f5cf6c769640b1be4fbf"],
          "flips": [("cybertron.contracts.DEFAULTS", ("max_laws",), 3, 50),
                    ("cybertron.contracts.DEFAULTS", ("max_laws_rule",), 10, 50),
                    ("cybertron.contracts.DEFAULTS", ("compact_lines",), False, True),
