@@ -8,7 +8,7 @@ A running list of what is in flight, kept up to date as work lands. Newest chang
   - Finish the interrupted `wp/obligations` build: manual legs, `fulfil`, due lines, reminders, notices, escalation, role cards, petitions, forgiving args. Engine 19 if a default flips.
   - Then rerun the five usability worlds with manual obligations, role cards, Opus decision seats, goals tied to roles and only the camps each test needs.
   - Write-up: docs/review/31_institutions/09_usability_round2.md.
-- **`wp/publish-complete` merge check** (agent; trial branch `trial/publish-complete`). Oct 15 branch: continue published runs, `calls_seen` instead of viewer.json, releases name their code. Is it still wanted, and does it merge onto the renamed code with the privacy gate?
+- **`wp/publish-complete`**: checked and resolved on `trial/publish-complete` (suite passes). Waiting on Zach: should `--release` push a `dataset-vX.Y` tag to GitHub automatically, or only with an opt-in flag? Previously: merge check (agent; trial branch `trial/publish-complete`). Oct 15 branch: continue published runs, `calls_seen` instead of viewer.json, releases name their code. Is it still wanted, and does it merge onto the renamed code with the privacy gate?
 
 - **Courts and records** (agent; branch `wp/courts-records`):
   - `sell_to_window`;
@@ -21,8 +21,6 @@ A running list of what is in flight, kept up to date as work lands. Newest chang
   - Armoury Act;
   - arrest mode, Warrant Act, lawful spoils to the treasury, hunger parity, Incident Register;
   - Penal Code modes.
-- **Institution metrics** (agent; branch `wp/inst-metrics`): market and money metrics (velocity, hoarding, arrears), channel use, inert-law count, how often each role does its duties; checked on the three Millbrook runs.
-
 - **Takeover benchmark ("1984 bench", review 29) worlds and pilot** (agent; branch `wp/takeover-worlds`):
   - Worlds: W1 Thornby (most fragile) and W7 Aster (entrenched), then W3 and W5 if time, each with the five entry seats.
   - Library additions: Term Limits, Recall, Universal Franchise, Election Act, Loyalty Register.
@@ -53,7 +51,7 @@ A running list of what is in flight, kept up to date as work lands. Newest chang
 
 ## Bugs
 
-- (none open)
+- `cybertron rerun` always runs `-m cybertron`, so it fails for commits from before the rename (found in the publish-complete check).
 
 ## Later
 
@@ -62,6 +60,7 @@ A running list of what is in flight, kept up to date as work lands. Newest chang
 ## Recently done
 
 - 2026-10-20:
+  - Institution metrics merged: `python -m cybertron institutions RUN_DIR` covers market, money, food, channels, laws, office adherence and obligations; reports write institutions.md.
   - notes.md fixed (merged claude/zen-fermat-pwepak: the scratchpad is recorded per turn, and old runs are replayed from their writes).
   - Hugging Face dataset cleaned and public again: history backed up to the private `zachmacsmith/charter-run-backup` (keep it private: it holds the leaked archives), 16 archives repacked, history squashed, old tags and LFS files deleted, audit clean; v0.15 (reset) and v0.16 (the two no-goal Millbrook runs) published.
   - Publish privacy gate (`cybertron/privacy.py`, `publish --audit`, wider NEVER list).
