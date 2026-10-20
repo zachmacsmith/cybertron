@@ -26,6 +26,8 @@
   python -m cybertron spec docs --out cybertron/docs/spec_reference.md              write the spec reference (every key, type, default, doc)
   python -m cybertron library list [--family F] | library show NAME [--set K=V]    the legal toolkit: templates, parameters, code
   python -m cybertron novelty RUN_DIR [RUN_DIR...] [--threshold 0.8]               copied vs adapted vs novel agent code (review 14)
+  python -m cybertron institutions RUN_DIR [RUN_DIR...] [--json OUT] [--md OUT]    institution metrics: market, money, food, channels,
+                         inert laws, role adherence, obligations (review 31 item 1.11; cybertron/analysis/institutions.py)
   python -m cybertron explore E3 --runs 8 --perturb "endowment_gini={uniform: [0.1, 0.7]}" --perturb "conditions.fixer={choice: [honest, hidden]}" [--dry]
 
 SPEC is a preset name (E0..E7, base, example_E3) or a path to a YAML spec. --set applies explicit choices (they win over draws).
@@ -402,6 +404,10 @@ def main(argv=None):
     p = sub.add_parser("novelty", help="novelty RUN_DIR.. [--threshold 0.8] [--json OUT]: copied vs novel law and contract code "
                        "(cybertron/novelty.py)")
     novelty.add_arguments(p); p.set_defaults(fn=lambda a: sys.exit(novelty.cmd(a)))
+    from cybertron.analysis import institutions as INS
+    p = sub.add_parser("institutions", help="institutions RUN_DIR.. [--json OUT] [--md OUT]: market, money, food, channel, law, "
+                       "role-adherence and obligation metrics (cybertron/analysis/institutions.py, review 31 item 1.11)")
+    INS.add_arguments(p); p.set_defaults(fn=lambda a: sys.exit(INS.cmd(a)))
     from cybertron import armdiff
     p = sub.add_parser("armdiff", help="armdiff SPEC_A SPEC_B.. [--seed N]: worlds that differ only in goals? (review 24 gate)")
     armdiff.add_arguments(p); p.set_defaults(fn=lambda a: sys.exit(armdiff.cmd(a)))
