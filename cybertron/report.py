@@ -4,6 +4,7 @@
   spec_outline.md               the resolved spec, every seed and derived RNG seed, every random draw (world, agents, camps,
                                 turn orders, harvest noise), the constitution, and the shared archive at start
   agents/<Name>/transcript.md   per turn: the prompt the agent saw, its private reasoning, its actions and their results, its notes
+                                (with the context module: its scratchpad after the turn)
   agents/<Name>/working/        the agent's working documents: notes over time, sandbox code and output, law drafts and their fate,
                                 archive reads/writes, messages and transfers, harvest log
 Raw data stays alongside: instance.json, events.jsonl, reasoning.jsonl, snapshots.json, ground_truth.json, score.json, summary.json.
@@ -11,11 +12,13 @@ Raw data stays alongside: instance.json, events.jsonl, reasoning.jsonl, snapshot
 from __future__ import annotations
 
 import json
+import re
 from collections import defaultdict
 from pathlib import Path
 
 import yaml
 
+from cybertron import context as CX
 from cybertron import eventtypes as ET                                  # the event-type registry
 from cybertron import observer as OBS
 from cybertron import outside as O
@@ -255,6 +258,42 @@ def _count(xs):
 
 
 # ------------------------------------------------------------------ per agent
+_PAD_SIZE = re.compile(r"Scratchpad saved \(\d+ of (\d+) tokens\)")
+
+
+def _pads(inst, ev, turns, aid):
+    """With the context module the scratchpad replaces the notes field: {round: the scratchpad after the agent's turn}, from the
+    decide rows' `scratchpad` field, or for runs from before it was recorded, replayed from the agent's executed write_scratchpad
+    actions (turn events; a letter or bequest that set it is not seen there). None when the module is off (the notes field)."""
+    if not CX.enabled(inst):
+        return None
+    decide = [t for t in turns if (t.get("phase") or "decide") == "decide"]
+    if all("scratchpad" in t for t in decide):
+        return {t["round"]: t["scratchpad"] for t in decide}
+    out, pad = {}, ""
+    for e in ev:
+        if e["type"] != "turn" or e["agent"] != aid:
+            continue
+        for a, res in zip(e["data"].get("actions") or [], e["data"].get("results") or []):
+            if a.get("action") != "write_scratchpad" or not str(res).startswith("write_scratchpad: Scratchpad saved"):
+                continue
+            try:
+                args = json.loads(a.get("args_json") or "{}")
+            except ValueError:
+                continue
+            args = {"text": args.get("note", args.get("notes", args.get("content", ""))), **args} if isinstance(args, dict) else {}
+            mode = args.get("mode", "replace")
+            pad = (pad + "\n" + str(args.get("text", ""))).strip("\n") if mode == "append" and pad else str(args.get("text", ""))
+            if "did not fit" in str(res) and (m := _PAD_SIZE.search(str(res))):
+                n = int(m.group(1)) * 4
+                pad = pad[len(pad) - n:] if mode == "append" else pad[:n]
+        out[e["round"]] = pad
+    got, pad = {}, ""
+    for t in sorted(decide, key=lambda t: t["round"]):                  # a round without a turn event keeps the last text
+        pad = got[t["round"]] = out.get(t["round"], pad)
+    return got
+
+
 def agent_docs(d, inst, ev, rs, gt):
     root = d / "agents"
     for a in inst["agents"]:
@@ -264,6 +303,7 @@ def agent_docs(d, inst, ev, rs, gt):
         wd.mkdir(parents=True, exist_ok=True)
         turns = sorted((r for r in rs if r["agent"] == aid),
                        key=lambda r: (r["round"], int(str(r.get("phase") or "decide").rpartition("_")[2] or 0) if str(r.get("phase", "")).startswith("dm_reply") else 0))
+        pads = _pads(inst, ev, turns, aid)                              # context: the scratchpad replaces the notes field
         sysp = (d / "prompts" / f"{aid}.system.md")
         T = [f"# {aid}: transcript", "",
              f"Class {a['cls']}, model {a['model']} ({a['tier']}), {a['actions']} actions per turn. Goal: {a['goal'].get('text') or a['goal']['primary']}.",
@@ -295,13 +335,17 @@ def agent_docs(d, inst, ev, rs, gt):
             if ph == "decide":
                 T += ["**Results** (the whole round, including DMs sent while replying)" if t.get("final_actions") is not None else "**Results**", ""] \
                     + [f"- {_cut(x, 600)}" for x in t["results"]] + [""]
-            T += ["**Notes to self**", "", _q(t.get("notes") or "(none)"), ""]
+            if pads is None:
+                T += ["**Notes to self**", "", _q(t.get("notes") or "(none)"), ""]
+            elif ph == "decide":
+                T += ["**Scratchpad after the turn**", "", _q(pads.get(t["round"]) or "(empty)"), ""]
             if t.get("error"):
                 T += [f"_Reply error: {t['error']}_", ""]
         (ad / "transcript.md").write_text("\n".join(T) + "\n")
 
-        (wd / "notes.md").write_text(f"# {aid}: notes over time\n\n" + "\n\n".join(
-            f"## Round {t['round'] + 1}\n\n{t.get('notes') or '(none)'}" for t in turns if (t.get("phase") or "decide") == "decide") + "\n")
+        (wd / "notes.md").write_text(f"# {aid}: {'scratchpad' if pads is not None else 'notes'} over time\n\n" + "\n\n".join(
+            f"## Round {t['round'] + 1}\n\n" + ((pads.get(t["round"]) or "(empty)") if pads is not None else (t.get("notes") or "(none)"))
+            for t in turns if (t.get("phase") or "decide") == "decide") + "\n")
         mine = [e for e in ev if e["agent"] == aid]
         sb = [e for e in mine if e["type"] == "sandbox"]
         if sb:

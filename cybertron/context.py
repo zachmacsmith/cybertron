@@ -18,7 +18,7 @@ and pointers ("(14 older posts not shown: search_board)").
 A turn: the agent may list up to `free_lookups` lookups in its reply's "lookups" field (leaving "actions" empty); the runner then
 fetches them and asks again with the text in the Lookups layer, and that second reply is the turn. Lookups used as actions cost an
 action each; their text arrives in the next turn's Lookups layer. Every call's layer sizes and what was trimmed are written to
-reasoning.jsonl (`context`), and lookups as rows with phase `lookup`.
+reasoning.jsonl (`context`, with the scratchpad as it then stands in `scratchpad`), and lookups as rows with phase `lookup`.
 
 The core prompt and the manual are layers of cybertron.sections ("core": the rows at the end of this module; "manual": manual.py's
 rows plus the sections modules register with `@sections.section(..., after=...)`). The manual is generated per agent; only its
@@ -1656,10 +1656,11 @@ def memory_turns(k, aid) -> int:
 
 
 def record_fields(k, aid) -> dict:
-    """Extra fields for this agent's reasoning.jsonl rows ({} when the module is off)."""
+    """Extra fields for this agent's reasoning.jsonl rows ({} when the module is off): the layer record and the scratchpad as it
+    stands when the row is written (on the decide row: after the turn's actions ran; report.py's notes.md reads it)."""
     if not enabled(k):
         return {}
-    return {"context": copy.deepcopy(_st(k)["layers"].get(aid))}
+    return {"context": copy.deepcopy(_st(k)["layers"].get(aid)), "scratchpad": (k.w.get("scratchpad") or {}).get(aid, "")}
 
 
 def lookup_records(k, aid) -> list:
