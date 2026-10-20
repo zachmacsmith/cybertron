@@ -361,7 +361,8 @@ def test_what_each_call_saw_unknown_dm_step_falls_back_to_the_whole_prompt(tmp_p
 
 # ------------------------------------------------------------------ releases name their code (changelog entry + dataset-vX.Y tag)
 def test_release_records_the_code_and_tags_it(run, tmp_path, hub):
-    s = P.publish([run], repo="me/data", staging=tmp_path / "st", push=True, release="v1.1", notes="adds pub1", **QUIET)
+    s = P.publish([run], repo="me/data", staging=tmp_path / "st", push=True, release="v1.1", notes="adds pub1", tag_code_repo=True,
+                  **QUIET)
     log = hub.uploaded["CHANGELOG.md"]
     assert f"- Code: [`{CODE['sha'][:12]}`](https://github.com/zachmacsmith/cybertron/commit/{CODE['sha']})" in log
     assert "code tag `dataset-v1.1`" in log and "export schema 2.7; engine version 10" in log and "dirty" not in log
@@ -369,6 +370,16 @@ def test_release_records_the_code_and_tags_it(run, tmp_path, hub):
     assert tag[:3] == ("tag", "-a", "dataset-v1.1") and tag[-1] == CODE["sha"]
     assert "adds pub1" in tag[4] and "https://hf.co/c/abc123" in tag[4]                       # notes + the Hub commit
     assert push == ("push", "origin", "dataset-v1.1") and s["code_tag"]["pushed"]
+
+
+def test_code_repo_tag_is_opt_in(run, tmp_path, hub, monkeypatch):
+    calls = []
+    monkeypatch.setattr(P, "_git_run", lambda *args: calls.append(args) or (0, ""))
+    logs = []
+    s = P.publish([run], repo="me/data", staging=tmp_path / "st", push=True, release="v1.1", log=logs.append)
+    assert s["tag"] == "v1.1" and "code_tag" not in s and calls == []                         # no git tag, no git push
+    assert "code tag" not in hub.uploaded["CHANGELOG.md"] and CODE["sha"][:12] in hub.uploaded["CHANGELOG.md"]
+    assert any("--tag-code" in m for m in logs)
 
 
 def test_release_refused_from_a_dirty_tree_unless_allowed(run, tmp_path, hub, monkeypatch):
@@ -383,7 +394,7 @@ def test_release_refused_from_a_dirty_tree_unless_allowed(run, tmp_path, hub, mo
 def test_a_failed_code_tag_push_warns_and_never_fails_the_release(run, tmp_path, hub, monkeypatch):
     monkeypatch.setattr(P, "_git_run", lambda *args: (1, "denied") if args[0] == "push" else (0, ""))
     logs = []
-    s = P.publish([run], repo="me/data", staging=tmp_path / "st", push=True, release="v1.1", log=logs.append)
+    s = P.publish([run], repo="me/data", staging=tmp_path / "st", push=True, release="v1.1", tag_code_repo=True, log=logs.append)
     assert s["tag"] == "v1.1" and s["code_tag"]["created"] and not s["code_tag"]["pushed"]
     assert any("WARNING" in m and "push origin dataset-v1.1" in m for m in logs)
 

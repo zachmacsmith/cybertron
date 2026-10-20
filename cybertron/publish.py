@@ -62,9 +62,10 @@ Versions and releases (docs/data_format.md, "Versions and releases"; every perso
 - Papers cite a DOI snapshot of a tagged release (e.g. Zenodo), not main.
 - Each release names the code that made it. The changelog entry records the publishing checkout's git commit, the export schema
   (`SCHEMA_VERSION.SCHEMA_MINOR`) and the engine version of that code; publish refuses to release from a tree with uncommitted
-  changes unless --allow-dirty (then the entry says `dirty: true`). After the Hub tag, publish creates the matching annotated tag
-  `dataset-vX.Y[.Z]` in the code repo on that commit (message: the release notes and the Hub commit URL) and pushes it to origin;
-  a failure to create or push it is a warning with the command to run, never a failed release.
+  changes unless --allow-dirty (then the entry says `dirty: true`). With --tag-code (off by default), after the Hub tag publish
+  also creates the matching annotated tag `dataset-vX.Y[.Z]` in the code repo on that commit (message: the release notes and the
+  Hub commit URL) and pushes it to origin; a failure to create or push it is a warning with the command to run, never a failed
+  release.
 
 --stories takes the stories registry (site/stories.yaml: a list of {title, subtitle, quote, agent, run_id, class, model, mood,
 round}) and writes it as stories.json, replacing the published one. With no runs, only stories.json is staged and uploaded.
@@ -570,11 +571,12 @@ def code_tag_name(version: str) -> str:
     return f"dataset-{version}"
 
 
-def code_line(code: dict | None, version: str) -> str | None:
+def code_line(code: dict | None, version: str, tagged: bool = False) -> str | None:
     if not code:
         return None
     sha = code.get("sha")
-    ref = f"[`{sha[:12]}`]({CODE_REPO}/commit/{sha}) (code tag `{code_tag_name(version)}`)" if sha else "unknown commit"
+    ref = (f"[`{sha[:12]}`]({CODE_REPO}/commit/{sha})" + (f" (code tag `{code_tag_name(version)}`)" if tagged else "")) if sha \
+        else "unknown commit"
     return (f"- Code: {ref}" + (", dirty: true" if code.get("dirty") else "")
             + f"; export schema {code.get('export_schema')}; engine version {code.get('engine_version')}")
 
@@ -615,7 +617,7 @@ def tag_code(version: str, code: dict, notes: str | None, hub_url: str, log=prin
 
 
 def changelog_entry(version: str, date: str, added: list[str], replaced: list[str], catalog: list[dict],
-                    notes: str | None, code: dict | None = None) -> str:
+                    notes: str | None, code: dict | None = None, tagged: bool = False) -> str:
     """One CHANGELOG.md entry (a '## ' section). code: release_code(), the publishing commit, export schema and engine version."""
     schemas = sorted({f"{r.get('schema_version')}.{r.get('schema_minor') or 0}" for r in catalog if r.get("schema_version") is not None})
     engines = sorted({r["engine_version"] for r in catalog if r.get("engine_version") is not None})
@@ -627,8 +629,8 @@ def changelog_entry(version: str, date: str, added: list[str], replaced: list[st
     out.append(f"- Engine versions: {', '.join(map(str, engines)) or 'none'}"
                + (f" (plus {n_legacy} legacy run(s) without one)" if n_legacy else ""))
     out.append(f"- Catalog: {len(catalog)} run(s)")
-    if code_line(code, version):
-        out.append(code_line(code, version))
+    if code_line(code, version, tagged):
+        out.append(code_line(code, version, tagged))
     if notes:
         out.append(f"- Notes: {notes.strip()}")
     return "\n".join(out)
@@ -885,7 +887,7 @@ def publish(runs, repo: str | None = None, cards: dict | None = None, push: bool
             reexport_all: bool = False, with_prompts: bool = False, spec_override: str | None = None,
             prune_legacy: bool = False, message: str | None = None, release: str | None = None, notes: str | None = None,
             with_viewer_json: bool = False, stories=None, skip_missing_stories: bool = False, allow_dirty: bool = False,
-            log=print) -> dict:
+            tag_code_repo: bool = False, log=print) -> dict:
     """Stage (and with push=True, upload) runs as one dataset commit. Returns a summary dict.
 
     release="vX.Y[.Z]" also prepends a changelog entry (CHANGELOG.md and the card) in that commit and tags it (module docstring).
@@ -935,7 +937,7 @@ def publish(runs, repo: str | None = None, cards: dict | None = None, push: bool
         ref = {r["run_id"]: f"{r['spec']}/{r['run_id']}" for r in rows}
         entry = changelog_entry(release, time.strftime("%Y-%m-%d", time.gmtime()),
                                 sorted(ref[i] for i in new_ids - old_ids), sorted(ref[i] for i in new_ids & old_ids),
-                                catalog, notes, code)
+                                catalog, notes, code, tagged=tag_code_repo)
         entries = entry + ("\n\n" + entries if entries else "")
         need, got = suggested_bump(published, catalog, new_ids), bump_of(release, last_release)
         order = ("patch", "minor", "major")
@@ -984,7 +986,10 @@ def publish(runs, repo: str | None = None, cards: dict | None = None, push: bool
                        tag_message=f"{release}: {notes}" if notes else release)
         summary["tag"] = release
         log(f"tagged {release} at {summary['commit']}: load with revision=\"{release}\"")
-        summary["code_tag"] = tag_code(release, code, notes, summary.get("url") or summary["commit"], log=log)
+        if tag_code_repo:                                               # opt-in: pushes a tag to the code repo's origin
+            summary["code_tag"] = tag_code(release, code, notes, summary.get("url") or summary["commit"], log=log)
+        else:
+            log(f"code repo not tagged (pass --tag-code to create and push {code_tag_name(release)} on the publishing commit)")
     else:
         log("reminder: no release tag. Releases are tagged: rerun with --release vX.Y[.Z] --notes \"...\" "
             "(docs/data_format.md, 'Versions and releases')")
@@ -1047,6 +1052,8 @@ def add_command(sub) -> None:
     p.add_argument("--repack-raw", metavar="PATH", help="rebuild one published raw archive (raw/<spec>/<run_id>.tar.gz) without "
                                                         "the members NEVER excludes; uploads only with --push (docs/publishing.md)")
     p.add_argument("--allow-dirty", action="store_true", help="release from a tree with uncommitted changes (recorded as dirty: true)")
+    p.add_argument("--tag-code", action="store_true", help="with --release: also create the dataset-vX.Y tag in the code repo on the "
+                                                          "publishing commit and push it to origin (off by default)")
     p.set_defaults(fn=cmd)
 
 
@@ -1069,6 +1076,7 @@ def cmd(a) -> None:
     s = publish(a.runs, repo=a.repo, cards=cards, push=a.push, staging=a.staging, reexport_all=a.reexport_all,
                 with_prompts=a.with_prompts, spec_override=a.spec, prune_legacy=a.prune_legacy, message=a.message,
                 release=a.release, notes=a.notes, with_viewer_json=a.with_viewer_json, stories=load_stories(a.stories),
-                skip_missing_stories=a.skip_missing_stories, allow_dirty=a.allow_dirty)
+                skip_missing_stories=a.skip_missing_stories, allow_dirty=a.allow_dirty,
+                tag_code_repo=a.tag_code)
     if s["problems"] and not a.push:
         raise SystemExit(1)
