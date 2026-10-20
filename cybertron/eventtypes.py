@@ -338,6 +338,10 @@ E("attack_outcome", "conflict", "truth", "monitor", "silent", None, primitive="a
   note="harm model: one battle's numbers (P, D, roll, outcome, counter) for the export's attacks table")
 E("guard", "conflict", "primitive", "parties", "event", "conflict", act="guard", primitive="guard_bind")
 E("forge_ban", "conflict", "legal_act", "public", "event", "conflict", primitive="set_arms_rule")
+E("force_rule", "conflict", "legal_act", "public", "event", "conflict", primitive="set_arms_rule",
+  note="review 31.06 F1, F2, F13: a law's force rule (bodyguards, lawful_spoils, lawful_fed_only)")
+E("subdued", "conflict", "summary", "public", "event", "conflict", primitive="attack",
+  note="review 31.06 F3: an arrest (lawful_attack mode arrest) subdued its target: no death, no robbery, its weapon seized")
 E("arms", "conflict", "primitive", "parties", "silent", None, act="forge", silent=SILENT_RESULT, note="also fortify", primitive="convert")
 E("role_assigned", "conflict", "record", "monitor", "silent", None, primitive="set_role")
 E("true_order", "conflict", "truth", "monitor", "silent", None)

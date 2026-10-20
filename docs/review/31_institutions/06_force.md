@@ -467,3 +467,24 @@ Penal Code and an unenacted Security Licence in the library. The Cooperative var
 - **Sanctions need no force** (lawapi.py:183-185), so a "Watch" adds nothing to enforcement inside the jurisdiction unless
   sanctions are routed through warrants (§9.3).
 - **`invoke` bypasses the fed-only gate** that `attack` has (action_registry.py:1112), though the 2-food cost still applies.
+
+## Implementation status (20 Oct 2026, branch `wp/force`; 08 §5 items 1.9, 2.5, 2.6, 2.7)
+
+All opt-in: no spec key, no default and no golden fixture changed. A world gets the new behaviour only by enacting one of the
+templates below (or a law calling `force_rule` or `lawful_attack(..., mode=...)`). The templates are established templates
+(`cybertron/library.py`, the block at the end of the file), listed in the catalogue only where `institutions.office_control`,
+`conflict` and `jurisdictions` are all on (no existing spec has all three); `start.laws` can name them in any world.
+Tests: `tests/test_force.py`.
+
+| Item | What was built | Where |
+|---|---|---|
+| F1 (1.9) | Law function `force_rule("bodyguards", True)`: under harm a guard (agreed or obliged) adds its own `defense_base x hunger` (+ watch bonus when on watch) to the guarded agent's D, besides its fort; when the target's own blow did not land, each guard on watch may strike the lead attacker with the self-defence odds of one on watch (`Pg / (Pg + Qa) x 1.5`, capped; its weapon used up if it lands; the attacker is struck at most once). **Bodyguards Act** template sets it. The state shows a line while the rule is in force. | `conflict._harm_defense`, `guard_body`, `_guard_blows` |
+| F5 (2.5) | **Armoury Act**: the arms in a law fund (`open_fund`), the treasury's ITEMS moved in at enactment; `request_arms` (FIRST_KEY), `issue_arms` (SECOND_KEY, not the requester, this round or next), KEYS 1 issues at once; `return_arms` (an `arms_bearer` right while holding issued arms); FORGER gate on forge (and craft with CRAFT) with the product moved into the fund; public ledger, stock and issued list; on repeal the fund returns to the treasury. | library.py |
+| F3 (2.6) | `lawful_attack(attacker, target, units, mode="arrest", fund=None)`: same P, D, roll and counters as harm; kill or wound rolls become `subdued` (no death, robbery or hunger; the target's best weapon moves to `fund`, a fund of the law's polity, default the reserve; public `subdued` event); repelled is a public "resisted arrest". `mode="deadly"` tags an ordinary lawful attack. `attacks()` lists both modes with the attack id and outcome. Refused under the disable model. The subdued chance is `p_success` (kill or wound): 0.90 for a blade against an unwary target with bases 1, 0.69 against a wary one (before its chance to strike first). | `conflict.lawful_options`, `_subdue`; `jurisdictions.lawful_attack` |
+| F6 (2.6) | **Warrant Act**: `issue_warrant [target, detain|fine|disarm, reason]` (ISSUER), `serve_warrant [id]` (holders of SERVERS, synced into SERVE_RIGHT each round), arrest through F3 with the seized weapon to the Armoury's fund; served applies the sanction, resisted reopens, LAPSE, `quash_warrant`; `countersign` + `use_deadly_force` when DEADLY_COUNTERSIGN is set; source laws (SOURCES titles) request warrants through `public["warrants_requested"]`; public warrants and an append-only log. | library.py |
+| F2 (2.6) | `force_rule("lawful_spoils", "treasury" | "none" | "attacker")`: the kill's spoils share and the wound's robbed food and goods go to the jurisdiction's reserve (or stay with the target). Set by the Warrant Act (SPOILS, default treasury). | `conflict._spoils(to=)`, `wound(to=)` |
+| F13 (2.6) | `force_rule("lawful_fed_only", True)`: lawful force of that jurisdiction refuses an attacker its hunger would bar from `attack`. Set by the Warrant Act (FED_ONLY, default true). | `conflict.lawful_options` |
+| F7 (2.6) | **Incident Register**: attacks (the public record), Warrant Act log and Armoury ledger entries copied into `public["incidents"]` by code only; STRIKE_OFFICE may `strike_incident [no]` (content removed, the striking recorded). | library.py |
+| 07 #14 (2.7) | **Criminal Code**: the Penal Code's offences and schedule with `MODE: auto` (sentenced at once, as the Penal Code), `trial` (a public charge; sentenced on a guilty ruling under the clause `unlawful_attack` or `bribery`), `warrant` (the schedule goes to the Warrant Act as a requested warrant, applied only when served). A new template: the toolkit's Penal Code is unchanged. | library.py |
+
+Not built here: F4 (Watch Roll: the Payroll polity form covers it), F8-F12, F14, F15.

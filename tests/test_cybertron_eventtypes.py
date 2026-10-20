@@ -66,7 +66,8 @@ TWELVE = ("jur_joined", "jur_left", "jur_declared", "jur_join_accepted", "jur_jo
 ADDED = {"media.EVENT_TYPES": {"official_stream"}, "life.EVENT_TYPES": {"birth_rules", "conceive_offer", "conceived"},   # review 15 S4
          "jurisdictions.EVENT_TYPES": {"jur_joined", "jur_left", "jur_declared", "jur_join_accepted", "jur_join_refused",
                                        "jur_leave_pending", "jur_born_into"},
-         "conflict.EVENT_TYPES": {"wounded"}}                                   # the harm combat model
+         "conflict.EVENT_TYPES": {"wounded",                                   # the harm combat model
+                                  "force_rule", "subdued"}}                     # review 31.06 F1-F3, F13 (law-set force rules, arrest)
 # Agent-visible (public at some call site) types still unrendered: may only shrink.
 KNOWN_PUBLIC_UNRENDERED = {"round_start", "jur_funded"}
 

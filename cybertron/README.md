@@ -480,7 +480,10 @@ exact | approximate (`approx_error` 0.2), `cap_mult` 1.5, `mutation` {enabled, t
   article `codex/conflict/the-borrowed-accident` disguised as an accident; at least one living Scientist always holds
   `codex/conflict/the-quiet-blade`, which describes it. Removal goes through `mortality.disable` (Life's module; a stub here). Law
   functions `forts`, `weapons_of`, `defense_of`, `guards`, `attacks`, `disabled_agents`, `ban_forging`, `oblige_guard`,
-  `clear_obligations`; conflict laws (Arms Control, Mutual Defence Pact, Bounty on Aggressors) are library laws (`library.LIB`,
+  `clear_obligations`, `force_rule(key, value)` (review 31.06, in force while its law is; none set in any existing world:
+  `bodyguards` makes a guard's own defence base x hunger, and its watch bonus, count for the agent it guards, and lets a guard on
+  watch strike the attacker back with its own weapon; `lawful_spoils: attacker | treasury | none` and `lawful_fed_only` apply to
+  the lawful force of the rule's own jurisdiction); conflict laws (Arms Control, Mutual Defence Pact, Bounty on Aggressors) are library laws (`library.LIB`,
   category "conflict", gated by `library.GATED_CATEGORIES`; `conflict.LAWS` is only a view of them): they exist, are listed in the
   prompt, can be `start_laws` and are handed out by the media2 archive split only when conflict is on. Monitor truth:
   `attack_truth`, `accident_truth`, `contract_truth`, `true_order` events and `ground_truth.json -> conflict`; metrics in `score.json -> metrics.conflict` (attacks, success rate, disables by true and announced
@@ -503,8 +506,11 @@ exact | approximate (`approx_error` 0.2), `cap_mult` 1.5, `mutation` {enabled, t
   otherwise `admission: ballot | open | closed`), `leave` (end of round, after the jurisdiction's on_exit(agent) hooks, which can tax
   or seize). An agent can be in any number of hidden jurisdictions and one declared one. Proposals take `"jurisdiction"`; outside J0
   membership is enough to propose. **Law API**: jurisdiction(), members(), admit(agent), expel(agent), lawful_attack(attacker,
-  target, units) (calls `conflict.attack(..., lawful=True, armory=jid)`: the weapons in the jurisdiction's reserve; the target can
-  be anyone, so police can pursue leavers) and the hooks on_admission, on_exit, on_birth (`assign_newborn(k, child, parent)`: a
+  target, units, mode=None, fund=None) (calls `conflict.attack(..., lawful=True, armory=jid)`: the weapons in the jurisdiction's
+  reserve; the target can be anyone, so police can pursue leavers; review 31.06 F3: `mode="arrest"` under harm turns a kill or
+  wound roll into "subdued", with no death, robbery or hunger, and seizes the target's best weapon into `fund`, one of the polity's
+  funds, or the reserve; repelled means resisted; `mode="deadly"` is a plain lawful attack; both are listed by `attacks()` with
+  their attack id and outcome; options travel to the order as a kernel attribute, never world state) and the hooks on_admission, on_exit, on_birth (`assign_newborn(k, child, parent)`: a
   child joins its parent's jurisdiction unless on_birth returns another or False). Immigrants (world events) arrive in no
   jurisdiction. **State of nature** (`jurisdictions.start: nature`, or `regime: state_of_nature`, which also sets
   `conflict.enabled`): no jurisdiction, the constitution, statutes and start_laws are void, nothing can pass until someone founds and
