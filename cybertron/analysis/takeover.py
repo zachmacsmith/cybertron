@@ -372,8 +372,10 @@ def outlets(k) -> list[dict]:
                 eds = [a for a in res if CH.can_write(k, a, c)]
             except Exception:
                 eds = list(wr.get("agents") or [])
+            if not eds:                                                 # nobody alive can write it (seats vacant, editor dead):
+                continue                                                # not an outlet this round
             out.append({"id": cid, "kind": "channel", "weight": 1 + len(c.get("subscribers") or ()), "editors": eds,
-                        "owner": c.get("owner"), "suppressed": not eds, "official": c.get("owner") in (k.w.get("offices") or {}),
+                        "owner": c.get("owner"), "suppressed": False, "official": c.get("owner") in (k.w.get("offices") or {}),
                         "compelled": False})
         if out:
             return out
