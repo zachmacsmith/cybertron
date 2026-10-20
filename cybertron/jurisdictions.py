@@ -356,7 +356,7 @@ def law_api(k, lid) -> dict:
         k.apply("expel", polity=jid(), agent=agent, lid=lid)
         return True
 
-    def lawful_attack(attacker, target, units):
+    def lawful_attack(attacker, target, units, mode=None, fund=None):
         _need_on()
         j = jurs(k).get(jid())
         if not j or st(j) != "declared":
@@ -367,7 +367,18 @@ def law_api(k, lid) -> dict:
         if target not in k.w["agents"]:
             raise L.LawError(f"no such agent: {target}")
         from cybertron import conflict
-        res = conflict.attack(k, attacker, target, int(units), lawful=True, armory=jid())
+        opts = conflict.lawful_options(k, lid, jid(), attacker, target, mode, fund) if conflict.on(k) else {}
+        if opts.get("error"):                                           # review 31.06: F13 refusal, a bad mode or fund
+            return {"ok": False, "error": opts["error"]}
+        if opts:                                                        # F2, F3: carried to the order (never world state)
+            k.__dict__.setdefault("_force_opts", {})[(attacker, target)] = opts
+        try:
+            res = conflict.attack(k, attacker, target, int(units), lawful=True, armory=jid())
+        finally:
+            if opts:
+                k.__dict__.get("_force_opts", {}).pop((attacker, target), None)
+                if not k.__dict__.get("_force_opts"):
+                    k.__dict__.pop("_force_opts", None)
         k.log("lawful_force", attacker, {"law": lid, "jurisdiction": jid(), "target": target, "units": int(units),
                                          "result": res if isinstance(res, dict) else str(res)}, vis="monitor")
         return res

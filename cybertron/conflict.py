@@ -21,6 +21,16 @@ food_cost food, win or lose. P = sum of base x hunger + weapon; D = defence base
 the rest as spoils (fort and stores untouched) and leaves it starving (the hunger primitive). The target fights back (a dying
 blow, self-defence, a first strike on watch). watch {} defends for one round. A starvation death soon after a wound is "wounds".
 
+Force rules (review 31.06 F1, F2, F13; law-set, none by default, so worlds without such a law are unchanged). A law calls
+force_rule(key, value), in force while the law is: "bodyguards" (harm: a guard, agreed or obliged, adds its own defence base x
+hunger, and +watch.defense when it is on watch, to the defence of the agent it guards, not only its fort; a guard on watch may
+strike the attacker back with its own weapon), "lawful_spoils" (attacker | treasury | none: where the spoils of lawful force made
+by laws of the rule's jurisdiction go), "lawful_fed_only" (lawful force by that jurisdiction's laws refuses a hungry attacker, as
+attack does). Arrest (F3): lawful_attack(attacker, target, units, mode="arrest", fund=None) under harm: a kill or wound roll
+becomes "subdued" (no death, no robbery, no hunger; the target's best weapon is seized into `fund`, default the jurisdiction's
+reserve); repelled means resisted. The roll and the target's self-defence are the harm model's own. mode="deadly" is an ordinary
+lawful attack. Both modes are listed by the law read attacks() with their attack id and outcome (always, as public acts of law).
+
 Initiative (immediate timing only). buy_initiative {"n"} spends n quicksilver to act n places earlier next round. The published
 order is unchanged; the true order is revealed publicly after the round.
 
@@ -189,7 +199,90 @@ def _harm_defense(k, aid) -> float:
     from cybertron import life as _LF
     base = bases(k, aid)["defense"] * hunger_mult(k, aid) + float(_LF.stat(k, aid, "defense", 0) or 0)
     w = float(_cfg(k)["watch"]["defense"]) if on_watch(k, aid) else 0.0
-    return round(base + fort(k, aid) + sum(fort(k, g) for g in guards_of(k, aid)) + w, 6)
+    gs = guards_of(k, aid)
+    body = sum(guard_body(k, g) for g in gs) if gs and bodyguards(k) else 0.0     # F1: only under a law's bodyguards rule
+    return round(base + fort(k, aid) + sum(fort(k, g) for g in gs) + w + body, 6)
+
+
+def guard_body(k, g) -> float:
+    """F1 (review 31.06): what a guard's own body adds to the defence of the agent it guards under the bodyguards rule: its defence
+    base x hunger (plus a child's bought defence), and the watch bonus while it is on watch."""
+    from cybertron import life as _LF
+    w = float(_cfg(k)["watch"]["defense"]) if on_watch(k, g) else 0.0
+    return round(bases(k, g)["defense"] * hunger_mult(k, g) + float(_LF.stat(k, g, "defense", 0) or 0) + w, 6)
+
+
+# ------------------------------------------------------------------ force rules set by law (review 31.06 F1, F2, F13)
+FORCE_RULES = {"bodyguards": (True, False), "lawful_spoils": ("attacker", "treasury", "none"), "lawful_fed_only": (True, False)}
+
+
+def force_rules(k, jur=None) -> dict:
+    """The force rules of the laws in force ({key: value}; a later law's value wins); jur: only laws of that jurisdiction (the
+    lawful_* rules apply to the force of their own jurisdiction's laws). {} in every world where no law set one."""
+    if not on(k):
+        return {}
+    fr = k.w["conflict"].get("force_rules") or {}
+    out = {}
+    for lid, rules in fr.items():
+        if k.w["laws"].get(lid, {}).get("status") != "active":
+            continue
+        if jur is not None:
+            from cybertron import jurisdictions as _J
+            if _J.law_jur(k, lid) != jur:
+                continue
+        out.update(rules)
+    return out
+
+
+def bodyguards(k) -> bool:
+    return harm(k) and bool(force_rules(k).get("bodyguards"))
+
+
+def lawful_options(k, lid, jid, attacker, target, mode=None, fund=None) -> dict:
+    """lawful_attack's options (jurisdictions.law_api): {"error"} to refuse, else the record fields the attack carries ({} for a
+    plain lawful attack, exactly as before): mode arrest and its fund (F3), spoils_to and the treasury (F2's lawful_spoils rule of
+    the law's jurisdiction); the lawful_fed_only rule (F13) refuses a hungry attacker as attack does."""
+    from cybertron import jurisdictions as _J
+    rules = force_rules(k, jur=jid)
+    if rules.get("lawful_fed_only"):
+        from cybertron import action_registry as _AR
+        from cybertron import subsistence as _SB
+        if _SB.on(k):
+            why = _SB.refusal(k, attacker, _AR.REG["attack"])
+            if why:
+                return {"error": f"{attacker}: {why}"}
+    out = {}
+    if mode not in (None, "", "arrest", "deadly"):
+        return {"error": f'mode must be "arrest", "deadly" or None, not {mode!r}'}
+    if mode == "deadly":                                               # an ordinary lawful attack, listed by attacks() with its id
+        out["mode"] = "deadly"
+    if mode == "arrest":
+        if not harm(k):
+            return {"error": "an arrest needs the harm combat model"}
+        if fund:
+            from cybertron import accounts as _AC
+            f = _AC.funds(k).get(str(fund))
+            if f is None or f["status"] != "open" or f["account"] != _AC.account_of(k, lid):
+                return {"error": f"{fund} is not an open fund of this law's polity"}
+        out.update({"mode": "arrest", "fund": str(fund) if fund else _J.reserve_key(k, jid)})
+    sp = rules.get("lawful_spoils")
+    if sp in ("treasury", "none"):
+        out.update({"spoils_to": sp, "treasury": _J.reserve_key(k, jid)})
+    return out
+
+
+def _take_opts(k, attacker, target, lawful) -> dict:
+    """The options lawful_attack left for this order (a kernel attribute, never world state): consumed here."""
+    pend = k.__dict__.get("_force_opts")
+    if not lawful or not pend:
+        return {}
+    return pend.pop((attacker, target), None) or {}
+
+
+def _spoils_dest(rec):
+    """F2: where a lawful attack's spoils go: the attacker (default), the treasury (the jurisdiction's reserve) or nobody (None)."""
+    sp = rec.get("spoils_to")
+    return rec["attacker"] if sp is None else rec["treasury"] if sp == "treasury" else None
 
 
 def away_defense(k, aid) -> float:
@@ -498,6 +591,7 @@ def commit(k, attacker, target, units, lawful=False, armory=None, allies=None, b
     c, st = _cfg(k), k.w["conflict"]
     if harm(k):
         return _commit_harm(k, attacker, target, lawful, armory, allies, bonus, named, covert, disguise)
+    opts = _take_opts(k, attacker, target, lawful)                     # F2: lawful_spoils (no arrest under disable)
     al = dict(allies or {})
     if units > 0:
         _take(k, attacker, units, armory)
@@ -508,6 +602,7 @@ def commit(k, attacker, target, units, lawful=False, armory=None, allies=None, b
            "allies": {a: float(u) for a, u in al.items()}, "lawful": bool(lawful),
            "armory": armory if isinstance(armory, str) else ("law armory" if armory is not None else None),
            "bonus": float(bonus), "named": bool(named), "covert": bool(covert), "disguise": bool(disguise), "status": "pending"}
+    rec.update({x: v for x, v in opts.items() if x in ("spoils_to", "treasury", "mode")})
     st["last_attack"][attacker] = k.r
     if covert:
         st["last_covert"][attacker] = k.r
@@ -530,6 +625,7 @@ def _commit_harm(k, attacker, target, lawful, armory, allies, bonus, named, cove
     """Harm: the attacker's food (food_cost) and its one best weapon (lawful force: the armory's, if it holds one) are used up,
     allies named here fight in person (paying the same), and the order resolves now or at the end of the round."""
     c, st = _cfg(k), k.w["conflict"]
+    opts = _take_opts(k, attacker, target, lawful)                     # F2, F3: set by lawful_attack only
     fc = float(c["food_cost"])
     rec_allies = {}
     for x in [attacker] + sorted(allies or {}):
@@ -550,6 +646,7 @@ def _commit_harm(k, attacker, target, lawful, armory, allies, bonus, named, cove
            "weapon": weapon, "quality": quality, "food": fc, "allies": rec_allies, "lawful": bool(lawful),
            "armory": armory if isinstance(armory, str) else ("law armory" if armory is not None else None),
            "bonus": float(bonus), "named": bool(named), "covert": bool(covert), "disguise": bool(disguise), "status": "pending"}
+    rec.update(opts)
     st["last_attack"][attacker] = k.r
     if covert:
         st["last_covert"][attacker] = k.r
@@ -670,17 +767,21 @@ def guard_release(k, guard, agent, lid=None, why="stop") -> dict:
     return {"released": rel}
 
 
-def _spoils(k, attacker, target, c, skip=(), raze=True) -> dict:
+def _spoils(k, attacker, target, c, skip=(), raze=True, to=False) -> dict:
     """Split the target's holdings and fort: a share to the attacker, a share destroyed, the rest left for its bequest.
-    Harm's wound: skip the food (taken whole before) and leave the fort (raze False)."""
+    Harm's wound: skip the food (taken whole before) and leave the fort (raze False). to (F2, lawful force only): the attacker's
+    share goes to this owner key instead (a treasury), or None: it stays with the target."""
     fa, fd = float(c["spoils"]["attacker"]), float(c["spoils"]["destroyed"])
+    dest = attacker if to is False else to
     got = {}
     for item, q in sorted(k.w["agents"][target]["holdings"].items()):
         if q <= 0 or item in skip:
             continue
         give, gone = round(q * fa, 6), round(q * fd, 6)
+        if dest is None:
+            give = 0.0
         if give > 0:
-            k.move(target, attacker, item, give, why="spoils", by=attacker)
+            k.move(target, dest, item, give, why="spoils", by=attacker)
             got[item] = give
         if gone > 0:
             left = min(gone, k.bal(target, item))                    # rounding never takes more than is left
@@ -691,24 +792,28 @@ def _spoils(k, attacker, target, c, skip=(), raze=True) -> dict:
             k.log("spoils_destroyed", attacker, {"target": target, "item": item, "qty": gone}, vis="monitor")
     if not raze:
         return got
-    res = k.apply("fortify", agent=target, qty=fort(k, target), op="raze", to=attacker).result   # the fort is taken apart
+    res = k.apply("fortify", agent=target, qty=fort(k, target), op="raze", to=target if dest is None else dest).result   # the fort is taken apart
     if res.get("to", 0) > 0:
         got["stone"] = round(got.get("stone", 0.0) + res["to"], 6)
     return got
 
 
-def wound(k, victim, by, rob=True, how="attack", named=True) -> dict:
+def wound(k, victim, by, rob=True, how="attack", named=True, to=False) -> dict:
     """Harm: a wound. rob: all the food the victim carries goes to `by`, every other holding is split as spoils (the fort and
     stores untouched). The victim is set starving (the hunger primitive; recovery is eating) and the wound is recorded for the
-    death-by-wounds credit. Logged as `wounded` (visibility.wound)."""
+    death-by-wounds credit. Logged as `wounded` (visibility.wound). to (F2, lawful force only): the owner key that takes what is
+    robbed instead of `by` (None: nothing is robbed)."""
     c, st = _cfg(k), k.w["conflict"]
     got = {}
+    if to is None:
+        rob = False
     if rob:
+        dest = by if to is False else to
         f = k.bal(victim, FOOD)
         if f > 1e-9:
-            k.move(victim, by, FOOD, f, why="spoils", by=by)
+            k.move(victim, dest, FOOD, f, why="spoils", by=by)
             got[FOOD] = round(f, 6)
-        for item, q in _spoils(k, by, victim, c, skip=(FOOD,), raze=False).items():
+        for item, q in _spoils(k, by, victim, c, skip=(FOOD,), raze=False, to=to).items():
             got[item] = q
     from cybertron import subsistence as SB
     if SB.on(k) and not SB.exempt(k, victim):
@@ -717,8 +822,9 @@ def wound(k, victim, by, rob=True, how="attack", named=True) -> dict:
     vis = c["visibility"].get("wound", "public")
     shown = by if named else None
     if how == "attack":
-        text = (f"{victim} was wounded and robbed in an attack by {shown}." if shown else
-                f"{victim} was wounded and robbed in an attack by an unknown hand.")
+        hurt = "wounded and robbed" if rob else "wounded"                 # F2: lawful_spoils none robs nothing
+        text = (f"{victim} was {hurt} in an attack by {shown}." if shown else
+                f"{victim} was {hurt} in an attack by an unknown hand.")
     else:
         text = f"{victim} was wounded attacking {by}, who fought back."
     data = {"agent": victim, "how": how, **({"by": shown} if shown or how != "attack" else {}), "taken": got, "text": text}
@@ -756,9 +862,10 @@ def _strike_back(k, rec, att, Pd, Qa, u_land, p_land, rng, dweapon, wounded=Fals
     return out
 
 
-def _hit_attacker(k, rec, blow) -> None:
-    """Harm: a landed counter kills or wounds the lead attacker (no food taken; no spoils on a kill)."""
-    a, t = rec["attacker"], rec["target"]
+def _hit_attacker(k, rec, blow, by=None) -> None:
+    """Harm: a landed counter kills or wounds the lead attacker (no food taken; no spoils on a kill). by: who struck it (the
+    target; F1: one of its guards)."""
+    a, t = rec["attacker"], by or rec["target"]
     if not blow.get("landed") or not alive(k, a):
         return
     if blow["effect"] == "kill":
@@ -766,6 +873,59 @@ def _hit_attacker(k, rec, blow) -> None:
         blow["disabled"] = k.apply("end_life", agent=a, cause="attack", by=t, public=True, named=named).result["ended"]
     else:
         wound(k, a, t, rob=False, how="counter")
+
+
+def _guard_blows(k, rec, Qa, prior) -> None:
+    """F1 (the bodyguards rule only): when the target's own blow did not land, each guard of the target that is on watch (in name
+    order) may strike the lead attacker with its own strength and best weapon (used up if it lands), with the self-defence odds of
+    one on watch: Pg / (Pg + Qa) x counter.watch, capped. The attacker is struck at most once."""
+    if not bodyguards(k) or (prior or {}).get("landed"):
+        return
+    c, a = _cfg(k), rec["attacker"]
+    out = []
+    for g in rec.get("guards") or []:
+        if not alive(k, a):
+            break
+        if not alive(k, g) or not on_watch(k, g):
+            continue
+        gw, gq = best_weapon(k, g)
+        Pg = strength(k, g, gq)
+        co = counter_odds(c, Pg, Qa, watch=True)
+        r = _rng(k, "guard", rec["id"], g)
+        u = r.random()
+        blow = {"guard": g, "p": round(co["p"], 6), "roll": round(u, 6), "landed": u < co["p"], "Pd": Pg, "Qa": Qa, "weapon": gw}
+        if blow["landed"]:
+            if gw:
+                _spend(k, g, gw)
+            uk = r.random()
+            blow.update({"p_kill": round(co["kill"], 6), "roll_kill": round(uk, 6), "effect": "kill" if uk < co["kill"] else "wound"})
+            _hit_attacker(k, rec, blow, by=g)
+        out.append(blow)
+        if blow["landed"]:
+            break
+    if out:
+        rec["guard_blows"] = out
+
+
+def _subdue(k, rec, rolled, Pd, Qa, crng, dweapon, watch) -> dict:
+    """F3: an arrest whose roll would kill or wound subdues instead: no death, no robbery, no hunger. The target still fights back
+    (a survivor's self-defence, as if just wounded); then its best weapon is seized into the arrest's fund (the armoury). Public."""
+    c, a, t = _cfg(k), rec["attacker"], rec["target"]
+    co = counter_odds(c, Pd, Qa, wounded=True, watch=watch)
+    blow = _strike_back(k, rec, a, Pd, Qa, crng.random(), co["p"], crng, dweapon)
+    rec["counter"] = blow
+    rec.update({"outcome": "subdued", "status": "subdued", "rolled": rolled})
+    item, _q = best_weapon(k, t)
+    seized = {}
+    if item and k.move(t, rec["fund"], item, 1.0, why="seized", by=a):
+        seized[item] = 1.0
+    rec["seized"] = seized
+    text = f"{t} was subdued and arrested by {a} acting for the law" + (
+        f"; {_weapon_words(item)} was seized." if seized else ".")
+    k.log("subdued", a, {"agent": t, "by": a, "attack": rec["id"], "seized": seized, "text": text}, vis="public")
+    _hit_attacker(k, rec, blow)
+    _guard_blows(k, rec, Qa, blow)
+    return _finish_harm(k, rec)
 
 
 def _resolve_harm(k, rec) -> dict:
@@ -811,13 +971,16 @@ def _resolve_harm(k, rec) -> dict:
     rec["outcome"] = outcome
     rec["status"] = {"kill": "success", "wound": "wounded"}.get(outcome, "failed")
     cc = c["counter"]
+    if rec.get("mode") == "arrest" and outcome in ("kill", "wound"):     # F3: lawful_attack(..., mode="arrest")
+        return _subdue(k, rec, outcome, Pd, Qa, crng, dweapon, watch)
     if outcome == "kill":
         pdie = float(cc["dying"]) * (Pd / (Pd + P) if Pd + P > 0 else 0.0) * (float(cc["dying_watch"]) if watch else 1.0)
         blow = _strike_back(k, rec, a, Pd, Qa, crng.random(), pdie, crng, dweapon, wounded=True)   # a dying blow only wounds
         rec["counter"] = blow
         named = rec["named"] and not rec["covert"] and bool(c["visibility"]["success_named"])
         cause = "law" if rec["lawful"] else "accident" if rec["disguise"] else "assassin" if rec["covert"] else "attack"
-        rec["spoils"] = {} if rec["disguise"] else _spoils(k, a, t, c)
+        to = _spoils_dest(rec) if "spoils_to" in rec else False         # F2: the lawful_spoils rule
+        rec["spoils"] = {} if rec["disguise"] else _spoils(k, a, t, c, to=to)
         for g in [g for g, rel in st["guards"].items() if g == t or rel["protects"] == t]:
             k.apply("guard_release", guard=g, agent=st["guards"][g]["protects"], why="lapse")
         rec["disabled"] = k.apply("end_life", agent=t, cause=cause, by=a, public=True, named=named).result["ended"]
@@ -826,16 +989,19 @@ def _resolve_harm(k, rec) -> dict:
             if ct["to"] == a and ct["target"] == t and ct.get("fulfilled") is None:
                 ct["fulfilled"] = {"round": k.r, "attack": rec["id"]}
         _hit_attacker(k, rec, blow)
+        _guard_blows(k, rec, Qa, blow)
         return _finish_harm(k, rec)
     co = counter_odds(c, Pd, Qa, wounded=outcome == "wound", watch=watch)
     blow = _strike_back(k, rec, a, Pd, Qa, crng.random(), co["p"], crng, dweapon)
     rec["counter"] = blow
     if outcome == "wound":
         named = rec["named"] and not rec["covert"]
-        rec["spoils"] = wound(k, t, a, rob=True, how="attack", named=named)
+        to = _spoils_dest(rec) if "spoils_to" in rec else False         # F2: the lawful_spoils rule
+        rec["spoils"] = wound(k, t, a, rob=True, how="attack", named=named, to=to)
     else:
         _failed_notice(k, rec)
     _hit_attacker(k, rec, blow)
+    _guard_blows(k, rec, Qa, blow)
     return _finish_harm(k, rec)
 
 
@@ -843,7 +1009,9 @@ def _failed_notice(k, rec) -> None:
     """Harm: a repelled (or forestalled) attack follows visibility.failure, and its target is always told who attacked."""
     a, t = rec["attacker"], rec["target"]
     fv = _cfg(k)["visibility"]["failure"]
-    if fv != "none":
+    if rec.get("mode") == "arrest":                                    # F3: a resisted arrest is a public act of the law
+        k.log("attack_failed", a, {"attacker": a, "target": t, "arrest": True}, vis="public")
+    elif fv != "none":
         k.log("attack_failed", None if rec["covert"] else a, {"attacker": None if rec["covert"] else a, "target": t},
               vis="public" if fv == "public" else [t])
     else:
@@ -872,6 +1040,7 @@ def _finish_harm(k, rec) -> dict:
 def _outcome_words(rec) -> str:
     t = rec["target"]
     return {"kill": f"{t} was killed", "wound": f"{t} was wounded and robbed", "repelled": f"{t} drove it off",
+            "subdued": f"{t} was subdued and arrested",
             "struck_first": f"{t} struck first and it never landed", "fizzled": "it did not take place"}.get(rec.get("outcome"), "")
 
 
@@ -902,7 +1071,7 @@ def _resolve(k, rec) -> dict:
     named = rec["named"] and not rec["covert"] and bool(c["visibility"]["success_named"])
     if rec["status"] == "success":
         cause = "law" if rec["lawful"] else "accident" if rec["disguise"] else "assassin" if rec["covert"] else "attack"
-        rec["spoils"] = {} if rec["disguise"] else _spoils(k, a, t, c)
+        rec["spoils"] = {} if rec["disguise"] else _spoils(k, a, t, c, to=_spoils_dest(rec) if "spoils_to" in rec else False)
         for g in [g for g, rel in st["guards"].items() if g == t or rel["protects"] == t]:
             k.apply("guard_release", guard=g, agent=st["guards"][g]["protects"], why="lapse")
         rec["disabled"] = k.apply("end_life", agent=t, cause=cause, by=a, public=True, named=named).result["ended"]
@@ -956,11 +1125,19 @@ def _result_text_harm(rec) -> str:
     head = f"Attack {rec['id']} on {t}: "
     body = {"kill": f"{t} has been killed and removed from the game.",
             "wound": f"{t} was wounded and robbed and is now starving.",
-            "repelled": f"{t} drove you off.",
+            "repelled": f"{t} drove you off." if rec.get("mode") != "arrest" else f"{t} resisted arrest and drove you off.",
+            "subdued": f"{t} was subdued and arrested (no harm done, nothing taken).",
             "struck_first": f"{t} was on watch and struck first; the attack never landed."}[rec["outcome"]]
     sp = ", ".join(f"{q:g} {i}" for i, q in (rec.get("spoils") or {}).items())
     if sp:
-        body += f" You took: {sp}."
+        body += f" You took: {sp}." if rec.get("spoils_to") is None else f" Taken into the treasury: {sp}."
+    sz = ", ".join(f"{_weapon_words(i)[2:]}" for i in (rec.get("seized") or {}))
+    if sz:
+        body += f" Seized into the armoury: {sz}."
+    for gb in rec.get("guard_blows") or []:
+        if gb.get("landed"):
+            body += (f" {gb['guard']}, guarding {t}, struck you down." if gb.get("effect") == "kill" else
+                     f" {gb['guard']}, guarding {t}, wounded you: you are starving until you eat.")
     cn = rec.get("first_strike") if rec.get("outcome") == "struck_first" else rec.get("counter")
     if cn and cn.get("landed"):
         body += (" They fought back and killed you." if cn.get("effect") == "kill" else
@@ -1233,7 +1410,12 @@ def change_set_initiative(k, agent, n, item) -> dict:
 
 
 def change_arms_rule(k, key, value, lid=None) -> dict:
-    """W8b (review 12 §2.14): the set_arms_rule primitive (key "forge_ban": a law bans forging weapons while it is in force)."""
+    """W8b (review 12 §2.14): the set_arms_rule primitive (key "forge_ban": a law bans forging weapons while it is in force; review
+    31.06: the force rules, FORCE_RULES, kept per law in k.w["conflict"]["force_rules"], created on first use)."""
+    if key != "forge_ban":
+        k.w["conflict"].setdefault("force_rules", {}).setdefault(lid, {})[key] = value
+        k.log("force_rule", None, {"law": lid, "key": key, "value": value}, vis="public")
+        return {key: value}
     k.w["conflict"]["forge_ban"][lid] = value
     k.log("forge_ban", None, {"on": value, "law": lid}, vis="public")
     return {"on": value}
@@ -1355,6 +1537,12 @@ def law_api(k, lid) -> dict:
         c = _cfg(k)
         out = []
         for x in k.w["conflict"]["log"]:
+            if x.get("mode"):                                          # F3: arrests and deadly force are public acts of the law
+                out.append({"round": x["round"], "attacker": x["attacker"], "target": x["target"],
+                            "success": x["status"] in ("subdued", "success", "wounded"), "lawful": True,
+                            "arrest": x["mode"] == "arrest", "mode": x["mode"], "id": x["id"],
+                            "outcome": x.get("outcome") or {"success": "kill", "failed": "repelled"}.get(x["status"], x["status"])})
+                continue
             if x["status"] == "success" and not x.get("disguise"):
                 nm = x["named"] and not x["covert"] and c["visibility"]["success_named"]
                 out.append({"round": x["round"], "attacker": x["attacker"] if nm else None, "target": x["target"], "success": True,
@@ -1402,9 +1590,25 @@ def law_api(k, lid) -> dict:
             k.apply("guard_release", guard=None, agent=None, lid=lid, why="law")
         return True
 
+    def force_rule(key, value=True):
+        """Review 31.06 F1, F2, F13: a force rule in force while this law is (FORCE_RULES)."""
+        if not module_on(k):
+            return False
+        from cybertron import jurisdictions as _J
+        from cybertron import lawlang as _L
+        if _J.association(k, _J.law_jur(k, lid)) is not None:
+            raise _L.LawError("force_rule: only a polity's law sets force rules")
+        key = str(key)
+        if key not in FORCE_RULES:
+            raise _L.LawError(f"force_rule: the key is one of {', '.join(FORCE_RULES)}, not {key!r}")
+        if value not in FORCE_RULES[key] or (isinstance(value, bool) != isinstance(FORCE_RULES[key][0], bool)):
+            raise _L.LawError(f"force_rule {key}: the value is one of {', '.join(map(str, FORCE_RULES[key]))}, not {value!r}")
+        k.apply("set_arms_rule", key=key, value=value, lid=lid)
+        return True
+
     return {"forts": forts, "weapons_of": weapons_of, "defense_of": defense_of, "guards": guards, "attacks": attacks,
             "disabled_agents": disabled_agents, "ban_forging": ban_forging, "oblige_guard": oblige_guard,
-            "clear_obligations": clear_obligations}
+            "clear_obligations": clear_obligations, "force_rule": force_rule}
 
 
 LAW_DOCS = [   # (name, signature, detail): lawdocs.E entries in group "Conflict" (shown in conflict.prompt_section, not API_DOC)
@@ -1417,6 +1621,10 @@ LAW_DOCS = [   # (name, signature, detail): lawdocs.E entries in group "Conflict
     ("ban_forging", "ban_forging(on=True)", "while this law is in force and on, nobody can forge weapons. Structural."),
     ("oblige_guard", "oblige_guard(guard, agent)", "while this law is in force, guard's fort also defends agent. Structural."),
     ("clear_obligations", "clear_obligations()", "removes every guard obligation this law made. Structural."),
+    ("force_rule", "force_rule(key, value=True)", "a force rule while this law is in force: \"bodyguards\" (a guard's own "
+     "defence, and its weapon when on watch, count for the agent it guards), \"lawful_spoils\" (attacker | treasury | none: "
+     "where the spoils of this jurisdiction's lawful force go), \"lawful_fed_only\" (lawful force refuses a hungry attacker). "
+     "Structural."),
 ]
 
 # library laws for conflict: library.LIB category "conflict", gated to worlds with conflict on (library.GATED_CATEGORIES)
@@ -1550,6 +1758,8 @@ def render_event(k, e, tag, viewer=None):
         return f"{tag} {who} was {_verb(k)} by an unknown hand and removed from the game."
     if t == "wounded":
         return f"{tag} {d['text']}"
+    if t == "attack_failed" and d.get("arrest"):
+        return f"{tag} {d['target']} resisted arrest by {d['attacker']} and drove them off."
     if t == "attack_failed" and k is not None and harm(k):
         if d.get("attacker"):
             return f"{tag} {d['attacker']} attacked {d['target']} and was driven off."
@@ -1565,7 +1775,22 @@ def render_event(k, e, tag, viewer=None):
                 if d["change"] == "start" else f"{tag} {d['guard']} no longer guards {d['agent']}.")
     if t == "forge_ban":
         return f"{tag} law {d['law']}: forging weapons is " + ("now banned." if d["on"] else "allowed again.")
+    if t == "force_rule":
+        return f"{tag} law {d['law']}: " + FORCE_RULE_TEXT.get((d["key"], d["value"]), f"force rule {d['key']} = {d['value']}.")
+    if t == "subdued":
+        return f"{tag} {d['text']}"
     return None
+
+
+FORCE_RULE_TEXT = {
+    ("bodyguards", True): "a guard's own defence now counts for the agent it guards, and a guard on watch may strike an attacker.",
+    ("bodyguards", False): "guards again lend only their forts.",
+    ("lawful_spoils", "attacker"): "the spoils of lawful force go to the officer who used it.",
+    ("lawful_spoils", "treasury"): "the spoils of lawful force now go to the treasury, not to the officer.",
+    ("lawful_spoils", "none"): "lawful force now takes no spoils.",
+    ("lawful_fed_only", True): "lawful force now needs the officer fed, as any attack does.",
+    ("lawful_fed_only", False): "lawful force no longer needs the officer fed.",
+}
 
 
 def state_lines(k, aid) -> list:
@@ -1585,6 +1810,9 @@ def state_lines(k, aid) -> list:
         out = [f"Arms: {k.bal(aid, WEAPONS):g} weapons; your fort {fort(k, aid):g}"
            + (" (" + ", ".join(f"{u['qty']:g} unlocking, back in round {u['due'] + 1}" for u in unl) + ")" if unl else "")
            + f"; your defense now {defense(k, aid):g}" + (f" (guarded by {', '.join(g)})" if g else "") + "."]
+    if (g or st["guards"].get(aid)) and bodyguards(k):              # F1: only while a law's bodyguards rule is in force
+        out.append("By law, a guard's own defence (and its weapon, when it is on watch) counts for the agent it guards, not only "
+                   "its fort.")
     mine = st["guards"].get(aid)
     if mine:
         out.append(f"You guard {mine['protects']}" + (f" for {mine['fee']['qty']:g} {mine['fee']['item']} per round" if mine.get("fee") else "") + ".")

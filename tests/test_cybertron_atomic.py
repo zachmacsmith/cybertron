@@ -121,6 +121,7 @@ CALLS = {
     "set_succession_public": "set_succession_public(True)",
     "ban_forging": "ban_forging(True)",
     "oblige_guard": "oblige_guard('{a}', '{b}')",
+    "force_rule": "force_rule('bodyguards', True)",                     # review 31.06
     "clear_obligations": "clear_obligations()",
     "admit": "admit('{outsider}')",
     "expel": "expel('{a}')",

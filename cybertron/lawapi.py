@@ -248,6 +248,7 @@ LAWFNS = _fns(
         F("ban_forging", "sanctions", docs="conflict", primitive="set_arms_rule"),
         F("oblige_guard", "sanctions", ((0, "guard"), (1, "agent")), refused=False, docs="conflict", primitive="guard_bind"),   # neither side may be an outsider
         F("clear_obligations", "sanctions", docs="conflict", primitive="guard_release"),
+        F("force_rule", "sanctions", docs="conflict", primitive="set_arms_rule"),   # review 31.06 F1, F2, F13
     ),
     _module(
         "jurisdictions",

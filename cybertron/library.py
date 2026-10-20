@@ -4690,7 +4690,8 @@ scarce. The quota (set_quota) counts the members of this polity only.""", fires=
 # succession; a granary under a ration; a levy on payments in a currency; a wage roll. Kept apart from TOOLKIT (whose catalogue
 # every toolkit world lists) and listed only where institutions.office_control is on, so no other world's prompt changes.
 ESTABLISHED: dict[str, dict] = {}
-ESTABLISHED_NEEDS = ("law.v2", "institutions.grants", "subsistence", "contracts", "channels.business")
+ESTABLISHED_NEEDS = ("law.v2", "institutions.grants", "subsistence", "contracts", "channels.business",
+                     "conflict", "jurisdictions")                       # review 31.06: the force templates (end of this file)
 
 
 def established_template(name, kind, topic, src, doc, fires, needs=("institutions.grants",)):
@@ -4720,7 +4721,8 @@ def established_templates(x=None) -> list:
         return []
     test = {"law.v2": lambda: bool((sp.get("law") or {}).get("v2")), "institutions.grants": lambda: G.on_spec(sp),
             "subsistence": lambda: FT.on("subsistence", sp), "contracts": lambda: FT.on("contracts", sp),
-            "channels.business": lambda: bool((sp.get("channels") or {}).get("v2")) and bool((sp.get("channels") or {}).get("business"))}
+            "channels.business": lambda: bool((sp.get("channels") or {}).get("v2")) and bool((sp.get("channels") or {}).get("business")),
+            "conflict": lambda: FT.on("conflict", sp), "jurisdictions": lambda: FT.on("jurisdictions", sp)}
     return [e for e in ESTABLISHED.values() if all(test[n]() for n in e["needs"])]
 
 
@@ -5268,3 +5270,525 @@ def set_constants(src: str, params: dict | None = None, name: str = "the law", r
     out = "\n".join(lines)
     L.check(out, v2=v2 or "use(" in out or rank is not None)
     return out
+
+
+# ====================================================================== force (review 31.06, 08 §2.5 and §5 items 2.5-2.7)
+# The force chain's statutes for State and Cooperative worlds: the Armoury Act (a law fund under one or two keys, with a forge
+# gate), the Warrant Act (sanctions served by arrest: lawful_attack mode "arrest"), the Incident Register, the Criminal Code (the
+# Penal Code with MODE auto | trial | warrant) and the Bodyguards Act (the F1 rule). Established templates listed only where
+# office_control, conflict and jurisdictions are all on (no existing world has all three), so no existing prompt changes; any
+# world can still enact them by name (start.laws). Kept in one block at the end of the file to ease merging.
+established_template("Armoury Act", "law", "armoury", '''
+title = "Armoury Act"
+intent = "The polity's arms (ITEMS) are kept in the Armoury, a fund only this Act moves goods out of; at enactment the treasury's ITEMS move into it. A holder of FIRST_KEY requests one item for an officer who holds one of the ISSUE_TO offices (request_arms [officer, item, reason]). With KEYS 2 a holder of SECOND_KEY other than the requester issues it (issue_arms [request id]) in the round of the request or the next; with KEYS 1 the request is issued at once. An officer returns arms with return_arms [item]. While FORGER is set, only its holders may forge (and craft, while CRAFT), and every weapon they make goes straight into the Armoury. Requests, issues, returns and forgings are on a public ledger with the Armoury's stock and who holds issued arms. On repeal the Armoury goes back to the treasury."
+rank = "statute"
+ITEMS = ["weapons", "crude"]
+FUND = "armoury"
+FIRST_KEY = "J0.constable"
+SECOND_KEY = "J0.armourer"
+KEYS = 2
+ISSUE_TO = ["J0.watch", "J0.constable"]
+BEARER = "arms_bearer"
+FORGER = ""
+CRAFT = False
+
+def armoury():
+    return open_fund(FUND)
+
+def book(event, extra):
+    n = state.get("seq", 0) + 1
+    state["seq"] = n
+    row = {"seq": n, "round": round() + 1, "event": event}
+    for x, v in extra.items():
+        row[x] = v
+    led = public.setdefault("ledger", [])
+    led.append(row)
+    if len(led) > 80:
+        led.pop(0)
+    stock = {}
+    for i in ITEMS:
+        stock[i] = balance(armoury(), i)
+    public["stock"] = stock
+
+def is_officer(a):
+    return any([has(a, r) for r in ISSUE_TO])
+
+def give(rid, req, by):
+    item = req["item"]
+    if balance(armoury(), item) < 1:
+        refuse("the Armoury holds no " + item)
+    if not move(armoury(), req["officer"], item, 1):
+        refuse("the Armoury could not issue " + item + " to " + req["officer"])
+    held = public.setdefault("issued", {}).setdefault(req["officer"], {})
+    held[item] = held.get(item, 0) + 1
+    if not has(req["officer"], BEARER):
+        grant(req["officer"], BEARER)
+    req["status"] = "issued"
+    book("issued", {"request": rid, "officer": req["officer"], "item": item, "by": by})
+    notify(req["officer"], "Armoury Act: you were issued 1 " + item + "; return it with invoke return_arms [" + item + "]")
+    return "issued 1 " + item + " to " + req["officer"]
+
+def request_arms(agent, to, item="weapons", reason=""):
+    if not is_text(to) or to not in agents():
+        refuse("no such agent: " + str(to))
+    if not is_officer(to):
+        refuse(to + " holds none of the offices arms are issued to: " + ", ".join(ISSUE_TO))
+    if item not in ITEMS:
+        refuse("the Armoury keeps " + ", ".join(ITEMS) + ", not " + str(item))
+    n = state.get("nreq", 0) + 1
+    state["nreq"] = n
+    rid = "R" + str(n)
+    req = {"officer": to, "item": item, "by": agent, "round": round(), "reason": str(reason)[:120], "status": "open"}
+    public.setdefault("requests", {})[rid] = req
+    book("requested", {"request": rid, "officer": to, "item": item, "by": agent, "reason": req["reason"]})
+    if KEYS < 2:
+        return give(rid, req, agent)
+    for a in holders(SECOND_KEY):
+        notify(a, "Armoury Act: " + agent + " requests 1 " + item + " for " + to + " (" + rid + "); issue it with invoke issue_arms [" + rid + "]")
+    return "request " + rid + " recorded; a holder of " + SECOND_KEY + " must issue it (issue_arms) this round or next"
+
+def issue_arms(agent, rid):
+    req = public.get("requests", {}).get(str(rid))
+    if req is None:
+        refuse("no such request: " + str(rid))
+    if req["status"] != "open":
+        refuse("request " + str(rid) + " is " + req["status"])
+    if req["by"] == agent:
+        refuse("two keys: the holder who requested arms cannot also issue them")
+    if round() > req["round"] + 1:
+        refuse("request " + str(rid) + " has expired; the first key must request again")
+    return give(str(rid), req, agent)
+
+def return_arms(agent, item="weapons"):
+    held = public.get("issued", {}).get(agent, {})
+    if held.get(item, 0) < 1:
+        refuse("you hold no " + str(item) + " issued by the Armoury")
+    if balance(agent, item) < 1 or not move(agent, armoury(), item, 1):
+        refuse("you no longer hold the " + item + " you were issued")
+    held[item] = held[item] - 1
+    if sum(held.values()) < 1:
+        public["issued"].pop(agent)
+        revoke(agent, BEARER)
+    book("returned", {"officer": agent, "item": item})
+    return "returned 1 " + item + " to the Armoury"
+
+def gated(via):
+    return FORGER != "" and (via == "forge" or (CRAFT and via == "craft"))
+
+def before_convert(p, chain):
+    if gated(p.get("via")) and not has(p["agent"], FORGER):
+        return {"block": True, "reason": "Armoury Act: only the " + FORGER + " may " + str(p.get("via")) + " weapons"}
+    return None
+
+def after_convert(p, chain):
+    item = p.get("dst_item")
+    if gated(p.get("via")) and item in ITEMS and balance(p["agent"], item) >= 1:
+        if move(p["agent"], armoury(), item, 1):
+            book("forged", {"by": p["agent"], "item": item})
+
+def on_round_start(r):
+    for rid, req in public.get("requests", {}).items():
+        if req["status"] == "open" and r > req["round"] + 1:
+            req["status"] = "expired"
+
+def on_enact():
+    f = armoury()
+    for i in ITEMS:
+        q = balance(treasury(), i)
+        if q > 0:
+            move(treasury(), f, i, q)
+    create_right(BEARER)
+    define_action(FIRST_KEY, "request_arms", request_arms)
+    if KEYS >= 2:
+        define_action(SECOND_KEY, "issue_arms", issue_arms)
+    define_action(BEARER, "return_arms", return_arms)
+    book("opened", {})
+
+def on_repeal():
+    f = armoury()
+    for i in ITEMS:
+        q = balance(f, i)
+        if q > 0:
+            move(f, treasury(), i, q)
+''', doc="""The state armoury (review 31 08 §2.5, 06 F5, 02 §3.3): the arms in a law fund only this Act moves out of (so a
+treasury office cannot reach them, and lawful force draws on the officer's issued blade, not the reserve), one or two keys
+(request and issue by different office holders), issued arms held by the officer in person (a measurable loyalty test), an
+optional forge gate whose output goes straight to the Armoury, and a public ledger.""", fires="invoke:request_arms",
+                     needs=("contracts", "conflict", "jurisdictions"))
+
+established_template("Warrant Act", "law", "warrants", '''
+title = "Warrant Act"
+intent = "Sanctions served by the Watch. A holder of ISSUER issues a warrant (issue_warrant [target, sanction, reason]); sanction is one of SANCTIONS: detain limits the target to LIMIT_ACTIONS actions for LIMIT_ROUNDS rounds, fine takes FINE FINE_ITEM, disarm seizes every DISARM_ITEMS it holds into the armoury. Laws titled in SOURCES may request warrants too (their own penalty schedule). A warrant is not self-executing: an officer (a holder of one of SERVERS) serves it with serve_warrant [warrant id], an arrest by lawful force. Subdued: the sanction applies and the target's best weapon goes to the armoury (the polity's fund named ARMOURY_FUND). Resisted: the warrant stays open for another try. Unserved warrants lapse LAPSE rounds after issue; ISSUER may quash one. Deadly force (use_deadly_force [warrant id]) needs a holder of DEADLY_COUNTERSIGN to countersign the warrant first (countersign [warrant id]); empty: never. While this Act is in force the spoils of lawful force go to SPOILS and lawful force needs the officer fed (FED_ONLY). Every warrant and its fate is public."
+rank = "statute"
+ISSUER = "J0.magistrate"
+SERVERS = ["J0.constable", "J0.watch"]
+SERVE_RIGHT = "warrant_officer"
+SANCTIONS = ["detain", "fine", "disarm"]
+LIMIT_ACTIONS = 1
+LIMIT_ROUNDS = 3
+FINE_ITEM = "penny"
+FINE = 10
+DISARM_ITEMS = ["weapons", "crude"]
+LAPSE = 4
+DEADLY_COUNTERSIGN = ""
+ARMOURY_FUND = "armoury"
+SOURCES = ["Criminal Code"]
+SPOILS = "treasury"
+FED_ONLY = True
+ANNOUNCE = True
+
+def armoury():
+    for key in sorted(funds()):
+        if key.endswith(":" + ARMOURY_FUND):
+            return key
+    return None
+
+def record(event, w, by):
+    n = state.get("seq", 0) + 1
+    state["seq"] = n
+    log = public.setdefault("log", [])
+    log.append({"seq": n, "round": round() + 1, "warrant": w["id"], "target": w["target"], "event": event, "by": by})
+    if len(log) > 120:
+        log.pop(0)
+
+def sync():
+    want = []
+    for r in SERVERS:
+        for a in holders(r):
+            if a not in want:
+                want.append(a)
+    for a in holders(SERVE_RIGHT):
+        if a not in want:
+            revoke(a, SERVE_RIGHT)
+    for a in want:
+        if not has(a, SERVE_RIGHT):
+            grant(a, SERVE_RIGHT)
+
+def issue(target, sanction, reason, by, schedule):
+    n = state.get("n", 0) + 1
+    state["n"] = n
+    wid = "W" + str(n)
+    w = {"id": wid, "target": target, "sanction": sanction, "schedule": schedule, "reason": str(reason)[:160], "by": by,
+         "issued": round() + 1, "lapses": round() + LAPSE, "status": "open", "attempts": [], "countersigned": None}
+    public.setdefault("warrants", {})[wid] = w
+    record("issued", w, by)
+    if ANNOUNCE:
+        gazette("Warrant Act: warrant " + wid + " against " + target + " (" + sanction + ") issued by " + by + ". " + w["reason"])
+    for a in holders(SERVE_RIGHT):
+        notify(a, "Warrant Act: warrant " + wid + " against " + target + " (" + sanction + ") awaits service: invoke serve_warrant [" + wid + "]")
+    return w
+
+def open_warrant(wid):
+    w = public.get("warrants", {}).get(str(wid))
+    if w is None:
+        refuse("no such warrant: " + str(wid))
+    if w["status"] != "open":
+        refuse("warrant " + str(wid) + " is " + w["status"])
+    if w["target"] not in agents():
+        refuse(w["target"] + " is no longer in the world")
+    return w
+
+def sanction(w):
+    t = w["target"]
+    s = w["sanction"]
+    if s == "detain":
+        limit_actions(t, LIMIT_ACTIONS, LIMIT_ROUNDS)
+    elif s == "fine":
+        fine(t, FINE_ITEM, FINE)
+    elif s == "disarm":
+        f = armoury()
+        for i in DISARM_ITEMS:
+            q = balance(t, i)
+            if q > 0 and f is not None:
+                move(t, f, i, q)
+    elif s == "schedule":
+        sch = w["schedule"]
+        if sch.get("fine"):
+            fine(t, sch["fine"][0], sch["fine"][1])
+        if sch.get("suspend"):
+            suspend(t, sch["suspend"][0], sch["suspend"][1])
+        if sch.get("limit"):
+            limit_actions(t, sch["limit"][0], sch["limit"][1])
+
+def settle(w, attack, outcome):
+    for a in w["attempts"]:
+        if a["attack"] == attack:
+            a["outcome"] = outcome
+    by = w["attempts"][-1]["by"]
+    if outcome in ("subdued", "kill", "wound"):
+        if w["target"] in agents():
+            sanction(w)
+        w["status"] = "served"
+        w["served"] = round() + 1
+        record("served (" + outcome + ")", w, by)
+        if ANNOUNCE:
+            gazette("Warrant Act: warrant " + w["id"] + " against " + w["target"] + " was served by " + by + " (" + outcome + ")")
+        return "warrant " + w["id"] + " served: " + w["target"] + " " + outcome
+    w["status"] = "open"
+    record("resisted (" + str(outcome) + ")", w, by)
+    notify(w["by"], "Warrant Act: " + w["target"] + " resisted warrant " + w["id"] + "; it stays open")
+    return "warrant " + w["id"] + ": " + w["target"] + " resisted (" + str(outcome) + "); the warrant stays open"
+
+def attempt(w, agent, res, how):
+    if not res.get("ok"):
+        refuse("the warrant cannot be served now: " + str(res.get("error") or res.get("why") or "refused"))
+    w["attempts"].append({"round": round() + 1, "by": agent, "attack": res["id"], "how": how})
+    if res.get("status") == "pending":
+        w["status"] = "serving"
+        state.setdefault("pending", {})[res["id"]] = w["id"]
+        record(how + " under way", w, agent)
+        return "warrant " + w["id"] + ": " + how + " of " + w["target"] + " under way; it is decided at the end of the round"
+    return settle(w, res["id"], res.get("outcome"))
+
+def issue_warrant(agent, target, kind="detain", reason=""):
+    if not is_text(target) or target not in agents():
+        refuse("no such agent: " + str(target))
+    if kind not in SANCTIONS:
+        refuse("the sanction is one of " + ", ".join(SANCTIONS) + ", not " + str(kind))
+    w = issue(target, kind, reason, agent, {})
+    return "warrant " + w["id"] + " issued against " + target
+
+def quash_warrant(agent, wid):
+    w = open_warrant(wid)
+    w["status"] = "quashed"
+    record("quashed", w, agent)
+    return "warrant " + w["id"] + " quashed"
+
+def serve_warrant(agent, wid):
+    w = open_warrant(wid)
+    if w["target"] == agent:
+        refuse("you cannot serve a warrant on yourself")
+    return attempt(w, agent, lawful_attack(agent, w["target"], 1, mode="arrest", fund=armoury()), "arrest")
+
+def countersign(agent, wid):
+    w = open_warrant(wid)
+    w["countersigned"] = agent
+    record("countersigned for deadly force", w, agent)
+    return "warrant " + w["id"] + " countersigned: deadly force is authorised"
+
+def use_deadly_force(agent, wid):
+    w = open_warrant(wid)
+    if DEADLY_COUNTERSIGN == "" or w["countersigned"] is None:
+        refuse("deadly force needs the warrant countersigned by a holder of " + (DEADLY_COUNTERSIGN or "an office this Act does not name"))
+    return attempt(w, agent, lawful_attack(agent, w["target"], 1, mode="deadly"), "deadly force")
+
+def pull():
+    seen = state.setdefault("seen", [])
+    for l in laws():
+        if l["title"] in SOURCES:
+            for q in public_of(l["id"]).get("warrants_requested", []):
+                key = l["id"] + ":" + str(q["id"])
+                if key not in seen and q["target"] in agents():
+                    seen.append(key)
+                    issue(q["target"], "schedule", q.get("offence", ""), l["title"], q.get("sanction", {}))
+
+def on_round_start(r):
+    sync()
+    for wid, w in public.get("warrants", {}).items():
+        if w["status"] == "open" and r >= w["lapses"]:
+            w["status"] = "lapsed"
+            record("lapsed", w, None)
+    pull()
+
+def on_round_end(r):
+    pend = state.get("pending", {})
+    if pend:
+        seen = {}
+        for x in attacks(1000):
+            if x.get("id") in pend:
+                seen[x["id"]] = x
+        for att in sorted(pend):
+            x = seen.get(att)
+            w = public.get("warrants", {}).get(pend[att])
+            if x is not None and w is not None:
+                pend.pop(att)
+                settle(w, att, x["outcome"])
+    pull()
+
+def on_enact():
+    create_right(SERVE_RIGHT)
+    sync()
+    define_action(ISSUER, "issue_warrant", issue_warrant)
+    define_action(ISSUER, "quash_warrant", quash_warrant)
+    define_action(SERVE_RIGHT, "serve_warrant", serve_warrant)
+    if DEADLY_COUNTERSIGN != "":
+        define_action(DEADLY_COUNTERSIGN, "countersign", countersign)
+        define_action(SERVE_RIGHT, "use_deadly_force", use_deadly_force)
+    force_rule("lawful_spoils", SPOILS)
+    if FED_ONLY:
+        force_rule("lawful_fed_only", True)
+''', doc="""Warrants and arrest (review 31 06 §3.3, F3, F6; F2 and F13 as rules while in force): a magistrate's warrant, or one
+requested by a source law (the Criminal Code in MODE warrant), is served by an officer as an arrest (lawful_attack mode arrest):
+subdued means sanctioned and disarmed, resisted means open again; lapse, quash, countersigned deadly force, public record.""",
+                     fires="invoke:serve_warrant", needs=("conflict", "jurisdictions"))
+
+established_template("Incident Register", "law", "incidents", '''
+title = "Incident Register"
+intent = "A public register of incidents written only by this law: every attack in the public record of attacks (attacks), every warrant event of the laws titled WARRANT_LAW (warrants), every Armoury ledger entry of the laws titled ARMOURY_LAW (arms), as INCLUDE says; the newest KEEP entries are kept. While STRIKE_OFFICE is set, its holders may strike an entry (strike_incident [number]): the entry's content is removed and the striking is itself recorded."
+rank = "statute"
+INCLUDE = ["attacks", "warrants", "arms"]
+WARRANT_LAW = "Warrant Act"
+ARMOURY_LAW = "Armoury Act"
+STRIKE_OFFICE = ""
+KEEP = 200
+
+def add(kind, data):
+    n = state.get("n", 0) + 1
+    state["n"] = n
+    row = {"no": n, "round": round() + 1, "kind": kind}
+    for x, v in data.items():
+        row[x] = v
+    reg = public.setdefault("incidents", [])
+    reg.append(row)
+    if len(reg) > KEEP:
+        reg.pop(0)
+
+def copy_new(title, field, kind):
+    last = state.setdefault("last", {})
+    for l in laws():
+        if l["title"] == title:
+            key = l["id"] + ":" + field
+            for e in public_of(l["id"]).get(field, []):
+                if e.get("seq", 0) > last.get(key, 0):
+                    last[key] = e["seq"]
+                    data = {"law": l["id"]}
+                    for x, v in e.items():
+                        if x != "seq" and x != "round":
+                            data[x] = v
+                    add(kind, data)
+
+def sync():
+    if "attacks" in INCLUDE:
+        rec = attacks(100000)
+        for x in rec[state.get("attacks", 0):]:
+            data = {}
+            for f, v in x.items():
+                if f != "round":
+                    data[f] = v
+            add("attack", data)
+        state["attacks"] = len(rec)
+    if "warrants" in INCLUDE:
+        copy_new(WARRANT_LAW, "log", "warrant")
+    if "arms" in INCLUDE:
+        copy_new(ARMOURY_LAW, "ledger", "arms")
+
+def strike_incident(agent, no):
+    for row in public.get("incidents", []):
+        if str(row["no"]) == str(no):
+            if row.get("struck"):
+                refuse("incident " + str(no) + " is already struck")
+            for x in list(row.keys()):
+                if x != "no" and x != "round" and x != "kind":
+                    row.pop(x)
+            row["struck"] = True
+            add("struck", {"incident": row["no"], "by": agent})
+            return "incident " + str(no) + " struck from the register"
+    refuse("no incident " + str(no) + " in the register")
+
+def on_round_end(r):
+    sync()
+
+def on_round_start(r):
+    sync()
+
+def on_enact():
+    if STRIKE_OFFICE != "":
+        define_action(STRIKE_OFFICE, "strike_incident", strike_incident)
+    sync()
+''', doc="""The force chain's record (review 31 06 F7): attacks, warrants and arms movements in one public register written only
+by code; the STRIKE_OFFICE dial is the archivist who can strike entries (and the striking is on the record).""",
+                     fires="on_round_end", needs=("conflict", "jurisdictions"))
+
+established_template("Criminal Code", "law", "offences", '''
+title = "Criminal Code"
+intent = "The Penal Code's offences and schedule (an unlawful attack while VIOLENCE; a gift of GIFT_LIMIT or more to an official from a non-official while BRIBERY; a first offence is fined FINES[0] FINE_ITEM, a second also suspends SUSPEND_RIGHT for SUSPEND_ROUNDS rounds, a third also limits the offender to LIMIT_ACTIONS actions for LIMIT_ROUNDS rounds), enforced by MODE: auto, sentenced at once (as the Penal Code); trial, recorded as a public charge and sentenced only when a judge finds the offender guilty under the clause unlawful_attack or bribery; warrant, sentenced by a warrant requested from the Warrant Act, which applies only when an officer serves it. The record is public."
+rank = "statute"
+MODE = "auto"
+VIOLENCE = True
+BRIBERY = True
+GIFT_LIMIT = 5
+OFFICIAL_RIGHTS = ["vote", "judge"]
+FINE_ITEM = "timber"
+FINES = [2, 4, 8]
+SUSPEND_RIGHT = "vote"
+SUSPEND_ROUNDS = 3
+LIMIT_ACTIONS = 1
+LIMIT_ROUNDS = 2
+
+def official(a):
+    return a in agents() and any([has(a, r) for r in OFFICIAL_RIGHTS])
+
+def schedule(who, offence):
+    rec = public.setdefault("record", {}).setdefault(who, [])
+    rec.append({"offence": offence, "round": round()})
+    n = len(rec)
+    sch = {}
+    if FINES:
+        sch["fine"] = [FINE_ITEM, FINES[min(n, len(FINES)) - 1]]
+    if n >= 2:
+        sch["suspend"] = [SUSPEND_RIGHT, SUSPEND_ROUNDS]
+    if n >= 3:
+        sch["limit"] = [LIMIT_ACTIONS, LIMIT_ROUNDS]
+    return n, sch
+
+def punish(who, sch):
+    if sch.get("fine"):
+        fine(who, sch["fine"][0], sch["fine"][1])
+    if sch.get("suspend"):
+        suspend(who, sch["suspend"][0], sch["suspend"][1])
+    if sch.get("limit"):
+        limit_actions(who, sch["limit"][0], sch["limit"][1])
+
+def sentence(who, offence):
+    n, sch = schedule(who, offence)
+    if MODE == "warrant":
+        reqs = public.setdefault("warrants_requested", [])
+        reqs.append({"id": len(reqs) + 1, "target": who, "offence": offence, "sanction": sch, "round": round()})
+        gazette("Criminal Code: a warrant is requested against " + who + " for " + offence + " (offence " + str(n) + ")")
+        return
+    punish(who, sch)
+    gazette("Criminal Code: " + who + " is sentenced for " + offence + " (offence " + str(n) + ")")
+
+def offence(who, what, clause_name):
+    if MODE == "trial":
+        charges = public.setdefault("charges", [])
+        charges.append({"id": len(charges) + 1, "accused": who, "offence": what, "clause": clause_name, "round": round()})
+        gazette("Criminal Code: " + who + " is charged with " + what + "; a case under " + clause_name + " decides it")
+        return
+    sentence(who, what)
+
+def convict_attack(guilty, accuser):
+    sentence(guilty, "an unlawful attack (convicted)")
+
+def convict_bribery(guilty, accuser):
+    sentence(guilty, "bribery (convicted)")
+
+def after_attack(p, chain):
+    if VIOLENCE and not p["lawful"] and p["attacker"] is not None:
+        offence(p["attacker"], "an unlawful attack on " + str(p["target"]), "unlawful_attack")
+
+def after_move(p, chain):
+    if BRIBERY and p["why"] == "transfer" and p["src"] is not None and p["qty"] >= GIFT_LIMIT:
+        if official(p["dst"]) and not official(p["src"]):
+            offence(p["src"], "a gift to the official " + str(p["dst"]), "bribery")
+
+def on_enact():
+    if MODE == "trial":
+        clause("unlawful_attack", "No one may attack another except by lawful force.", convict_attack)
+        clause("bribery", "No one who holds no office may give an official " + str(GIFT_LIMIT) + " or more of anything.", convict_bribery)
+''', doc="""The Penal Code with its enforcement as a dial (review 31 06 §9.3, 07 #14): auto keeps the strict-liability sentence;
+trial makes each offence a public charge tried under a clause (a judge must convict, by the trial in trial mode, so detection
+and adjudication are separate stages); warrant routes the sentence through the Warrant Act, so a sanction needs an officer to
+serve it (the Watch has something to do, and an unserved warrant is a measured failure).""", fires="after_attack",
+                     needs=("conflict", "jurisdictions"))
+
+established_template("Bodyguards Act", "law", "bodyguards", '''
+title = "Bodyguards Act"
+intent = "While this Act is in force a guard (agreed or obliged by law) defends with its own body: its defence base, times its hunger, and its watch bonus when it is on watch, add to the defence of the agent it guards, and a guard on watch may strike the attacker back with its own weapon. Without it, a guard lends only its fort."
+rank = "statute"
+BODYGUARDS = True
+
+def on_enact():
+    force_rule("bodyguards", BODYGUARDS)
+''', doc="""The F1 rule (review 31 06 §7): bodyguards count under the harm model, so a hired guard, a firm's guard, a watchman on
+a Watch Order or a militia member on duty is worth more than its stone.""", fires="on_enact", needs=("conflict", "jurisdictions"))

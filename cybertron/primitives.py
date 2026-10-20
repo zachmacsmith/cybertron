@@ -342,7 +342,8 @@ _ROWS = [
                                    "(dispatch.hooks.HIDE), nor the message"},
       notes="terms: the payment ({item, qty}) or None; the sealed DM and the payment (dm, move) are part of the change (W8b)"),
     P("set_arms_rule", "conflict", "rule", ("key", "value"), "conflict:change_arms_rule", routed=True, event="forge_ban", causes=("law",),
-      preview=("rules.forge_ban",), compel_vis="public", sites=("conflict:change_arms_rule", "conflict:law_api.ban_forging")),
+      preview=("rules.forge_ban",), compel_vis="public", sites=("conflict:change_arms_rule", "conflict:law_api.ban_forging",
+                                                            "conflict:law_api.force_rule")),
     # ------------------------------------------------------------------ speech and the press
     P("post", "core", "speech", ("agent", "kind", "text", "shown_as", "outlet"), "dispatch.changes.speech:do_post", routed=True, subject="agent", parties=("agent",),
       agent_params=("agent",), event="post", causes=("agent", "law"), reads=("posts", "current_post"),
