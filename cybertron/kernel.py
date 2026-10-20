@@ -46,6 +46,7 @@ from cybertron import channels as CH                                    # wave 9
 from cybertron import features as FT                                    # the feature table: phases and merge order (features.py)
 from cybertron import rights as RT                                      # the rights registry: names, docs, secrecy, entrenchment
 from cybertron import stages as ST                                      # law.v2 (W6c): multi-stage procedures, ballot rule functions
+from cybertron import surveillance as SV                              # review 31.04 #10: the pull wiretap (channels.surveillance)
 from cybertron.rights import ENTRENCHED, KERNEL_RIGHTS, NEVER, RENAMED_RIGHTS   # noqa: F401  (derived from the registry)
 from cybertron import eventtypes as ET                                  # the event-type registry: the post family, feeds, renderers
 
@@ -1608,7 +1609,10 @@ class Kernel:
             return False
         if isinstance(vis, list) and aid in vis:
             return True
-        if event["type"] == "dm" and not event["data"].get("encrypted") and self.has(aid, "surveil"):
+        if event["type"] in ("dm", "channel_post") and self.has(aid, "surveil") and SV.pull(self.spec):
+            if SV.can_see(self, aid, event):                            # review 31.04 #10: the pull wiretap (opt-in)
+                return True
+        elif event["type"] == "dm" and not event["data"].get("encrypted") and self.has(aid, "surveil"):   # push (the default)
             return True
         if isinstance(vis, str) and vis.startswith("channel:"):
             ch = self.w["channels"].get(vis.split(":", 1)[1])

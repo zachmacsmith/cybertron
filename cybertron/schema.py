@@ -503,6 +503,7 @@ def _ann():
         "channels.business": dict(types=("bool",)),
         "channels.notices": dict(types=("str", "null")),
         "channels.board_headlines": dict(types=("int",), range=(1, 5)),
+        "channels.surveillance": dict(kind="leaf", types=("bool", "dict", "null"), check=_check_surveillance),   # review 31.04 #10
         "contracts.scripted": dict(types=("bool",)),
         "contracts.enforcement": dict(types=("str",), enum=("escrow", "escrow_court", "word")),     # P4.4: the enforcement dial
         "contracts.breach_cases": dict(types=("bool",)),                 # W7e (review 11 §4.1): breaches open court cases
@@ -1162,7 +1163,9 @@ DOCS = {
     "channels": "message channels",
     "channels.dm": "private messages exist",
     "channels.encryption": "encrypted messages exist",
-    "channels.surveillance": "not read by any code (kept in base.yaml so instance.json stays byte-identical)",
+    "channels.surveillance": "true / false: the push default (a holder of surveil sees unencrypted DMs in its feed; the value is "
+                             "kept in base.yaml so instance.json stays byte-identical); {mode: pull, targets: 2, scope: dms | "
+                             "dms+inboxes}: the pull wiretap (review 31.04 #10, cybertron/surveillance.py)",
     "archive_split.show_others": "false: the manual does not list the documents other Scientists hold",
     "hidden": "codex articles, hidden powers, tips (cybertron/hidden.py)",
     "law_docs": "how much of the law language the prompt documents (cybertron/lawdocs.py)",
@@ -1425,6 +1428,11 @@ def _check_shocks(path, v) -> list:
     return errs
 
 
+def _check_surveillance(path, v) -> list:
+    from cybertron import surveillance as SV
+    return SV.check(v)
+
+
 def _check_start(path, v) -> list:
     from cybertron import start as STT
     return STT.check(path, v)
@@ -1655,7 +1663,7 @@ def _build() -> dict:
             raise AssertionError(f"schema: annotation for unknown key {path}")
     for path in RUNTIME_SAFE:
         nodes[path].runtime_safe = True
-    nodes["channels.surveillance"].unused = nodes["llm.api_key"].unused = True
+    nodes["llm.api_key"].unused = True
     for p, k in nodes.items():                                # children in base.yaml order, then the defaults' order
         if k.kind == "section" and k.children:
             b = base

@@ -950,6 +950,7 @@ ACTION_PRIMITIVES = {
     "represent": ("open_case", "answer_case", "appeal"),               # review 31.07 #7: counsel files, answers, appeals for a client
     "withdraw_case": ("rule",),                                        # review 31.07 #9: a dismissal on withdrawal (not routed)
     "read_register": LOOKUP,                                           # review 31.05 #1
+    "wiretap": LOOKUP,                                                 # review 31.04 #10 (channels.surveillance pull)
     # force, more
     "guard": ("guard_bind", "guard_release", "move"), "join_attack": ("attack", "end_life"), "contract": ("hire_assassin", "move"),
     "buy_initiative": ("set_initiative", "destroy"),

@@ -1248,8 +1248,21 @@ R("withdraw_case", "withdraw a case you filed", "courts", needs=("level:2", "law
   aliases={"case_id": "case", "why": "reason"},
   doc='withdraw_case {"case": "C1", "reason": "..."}: as the accuser, drop an open case before it is decided (where a law lets '
       'accusers withdraw); it is dismissed, no penalty runs, and the withdrawal is public')
-ACTIONS_ORDER += ("read_register", "represent", "withdraw_case")
-DOC_ORDER += ("read_register", "represent", "withdraw_case")
+
+
+def _k_wiretap(inst, k, a, r):
+    from cybertron import surveillance as SV
+    return SV.pull(k)
+
+
+R("wiretap", "read a tapped agent's private messages (surveil)", "INFORMATION", pre=True, needs=("mod:context", "right:surveil"),
+  when=_k_wiretap, args='{"agent": "Name"}', handler="surveillance:act_wiretap", module="context", category="productive",
+  legacy=False, aliases={"target": "agent", "name": "agent", "who": "agent"},
+  doc='wiretap {"agent": "Name"}: as a holder of surveil, read that agent\'s unencrypted private messages (sent and received) of '
+      'the last round and this one; a few agents a round at most (the world\'s limit); the agent is not told, and a message you '
+      'have read this way stays readable to you (you may cite it as evidence)')
+ACTIONS_ORDER += ("read_register", "represent", "withdraw_case", "wiretap")
+DOC_ORDER += ("read_register", "represent", "withdraw_case", "wiretap")
 REG["read_register"] = replace(REG["read_register"], fed=-2)            # a look-up: open to the starving too (as _fed_table)
 FED["read_register"] = -2
 if not sorted(ACTIONS_ORDER) == sorted(REG) == sorted(DOC_ORDER):

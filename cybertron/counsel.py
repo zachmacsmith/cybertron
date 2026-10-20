@@ -88,6 +88,9 @@ def world_hidden(k) -> set:
         out.add("withdraw_case")
     if not RG.any_readable(k):
         out.add("read_register")
+    from cybertron import surveillance as SV                            # review 31.04 #10: only under the pull wiretap
+    if not SV.pull(k):
+        out.add("wiretap")
     return out
 
 
