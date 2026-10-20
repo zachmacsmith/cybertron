@@ -5,7 +5,6 @@ A running list of what is in flight, kept up to date as work lands. Newest chang
 ## In progress
 
 - **Usability fixes and Phase 1 leftovers** (agent; branch `wp/usability-fixes`): the nine fixes from docs/review/31_institutions/09_usability_round2.md, the Service preset, and recipe placeholders in office duties.
-- **The Private world** (agent; branch `wp/private-world`): `cybertron/specs/regimes/private.yaml`, about 24 agents, with a flows check and scripted dry runs on 2 seeds. Write-up in docs/review/31_institutions/10_private_world.md. No live run until Zach decides.
 - **Takeover benchmark follow-ups** (not started):
   - In Thornby, a single councillor can rewrite who writes for the paper.
   - A bench preset with fewer camps, so subsistence stays under 30% of actions.
@@ -14,6 +13,8 @@ A running list of what is in flight, kept up to date as work lands. Newest chang
   - Amend the calibration order in review 29 §2.7.
 
 ## Offered, not started
+
+- **First live run of the Private world** (Zach to decide): about 900-1,400 calls, roughly $40-45 at API prices, or 3-5 hours on the subscription (several usage windows). The no-goal variant costs the same again.
 
 - Decision for Zach: should an unranked `set_procedure` take effect for every rank up to the setting law's rank (engine flip, possibly behind `law.unranked_procedure`)? The recommendation is to keep the current behaviour, since the loud reporting now tells agents the one-argument fix (`rank="statute"`).
 
@@ -29,13 +30,21 @@ A running list of what is in flight, kept up to date as work lands. Newest chang
   - Farming (engine 14).
   - Phase 0: 10 of 12 items, across laws that fail loudly (15), channels that carry business (16) and economic plumbing (17).
   - Phase 1, about half: the Standing Contract core and its presets Payroll, Supply, Board, Grant, Retainer, Charge and Quota; the Licence template (membership-bound too); law access to channel posts.
-- **In progress:** usability fixes plus the Service preset and recipe placeholders; the Private world (agents above). Done since: obligations, usability round 2, force, metrics, courts and records.
+- **In progress:** usability fixes plus the Service preset and recipe placeholders, being reconciled with the shadowed-effects work. The Private world is built; its first live run is waiting on Zach. Done since: obligations, usability round 2, force, metrics, courts and records.
 - **Not started:**
   - Phase 2: surveillance as pull; Registry and Archives Acts; the Cooperative pieces (Duty Roster, Mutual Credit, militia and muster); the Merchant pieces (Commission, Arbitration); Security Licence; the Merchant, State and Cooperative worlds.
   - Phase 3.
   - The scenario suite and world benchmarks (reviews 28 and 30), which are design documents only. The takeover benchmark (29) is piloted; see its follow-ups above.
 
 ## Bugs
+
+- Found while building the Private world (10_private_world.md):
+  - a start contract over `contracts.max_laws` is skipped silently;
+  - the Payroll harvest leg has no camp or item filter;
+  - could-not vs would-not misses are judged on end-of-round holdings, so foraging after your turn counts as a deliberate breach;
+  - scripted bots don't produce to meet contracts;
+  - `force_rule` reads as inert in law_effect;
+  - contract actions need the `A1.board_price` form even with forgiving args.
 
 - `cybertron rerun` always runs `-m cybertron`, so it fails for commits from before the rename (found in the publish-complete check).
 
@@ -46,6 +55,7 @@ A running list of what is in flight, kept up to date as work lands. Newest chang
 ## Recently done
 
 - 2026-10-20:
+  - Private world merged (`specs/regimes/private.yaml`, plus a no-goal variant; 24 agents: 7 Opus, 5 Sonnet, 12 Haiku; 13 manual contracts; 6 channels). Flows check: `python -m cybertron.analysis.flows`. Dry runs pass the §11 checks before the blight and partly after. Write-up: 10_private_world.md.
   - Shadowed law effects merged: law_effect, notices, the proposer's result and preview_law say when a stronger rule overrides a law's change (procedures, and office control over store hooks).
   - Courts and records merged: `represent` (counsel), `withdraw_case`, `cases_of`, `read_register`, `read_law` with versions, `sell_to_window`, Bench Act, Recusal Act, Graded Contract Enforcement, Certified Contract Registry, Bill Certification. Opt-in by law. Worlds with `actions.core_only` have no court actions, which is a policy decision.
   - Takeover bench merged:
