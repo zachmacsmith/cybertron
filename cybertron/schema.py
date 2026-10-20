@@ -493,7 +493,6 @@ def _ann():
         "law.call_failures": dict(types=("bool",)),                    # (E4): law_call_failed
         "law.expects": dict(types=("bool",)),                          # (T1): a law's `expects`, checked
         "start": dict(kind="leaf", types=("dict", "null"), check=_check_start),   # established worlds (cybertron/start.py)
-        "takeover": dict(kind="leaf", types=("dict", "null"), check=_check_takeover),   # review 29: cybertron/takeover_worlds.py
         "channels.v2": dict(types=("bool",)),                           # wave 9 C: channels v2 (cybertron/channels.py)
         "channels.delivery": dict(types=("str",), enum=("push", "pull")),
         "channels.square": dict(types=("str",), enum=("one", "per_camp", "none")),
@@ -605,7 +604,6 @@ EXTRA = {
     "institutions.amend_offices": True, "institutions.reseat": "refuse",
     "law.effects": True, "law.call_failures": True, "law.expects": True,
     "start": None,                                                    # established worlds (cybertron/start.py): none = as before
-    "takeover": None,                                                 # review 29 (cybertron/takeover_worlds.py): none = as before
     # wave 9 C, channels v2 (cybertron/channels.py; review 14 §4.6, D-37): off = byte-identical
     "channels.v2": False, "channels.delivery": "push", "channels.square": "one", "channels.square_rate": 2,
     "channels.found_right": None, "channels.headlines": 8,
@@ -695,9 +693,6 @@ DOCS = {
                           "rounds, text}]: at the end of round `round` (1-based) every forest keeps `plants` (and `game`) of its "
                           "stock and every standing crop survives with chance `crops`, announced publicly; then the season is "
                           "`season` and crops ripening fail with extra chance `blight` for `rounds` rounds. [] (default): none",
-    "takeover": "the takeover benchmark (review 29; cybertron/takeover_worlds.py): a world's standard entry seats, the focal "
-                "aspirant's seat, brief and model (placed at generation as goals.explicit, agent_rules and models.overrides), and "
-                "a manifest of where each capture lever lives; null: none",
     "start": "established worlds (cybertron/start.py): who and what exists at round 0 (rights, currencies, institutions with members, "
              "offices and treasuries, stores, holdings, wages, loans, kin, channels, camp rights, farms, laws), compiled at generation into "
              "round-0 setup interventions (recorded like any intervention); every name must resolve",
@@ -1425,11 +1420,6 @@ def _check_start(path, v) -> list:
     return STT.check(path, v)
 
 
-def _check_takeover(path, v) -> list:
-    from cybertron import takeover_worlds as TW
-    return TW.check(path, v)
-
-
 def _check_tree(path, v) -> list:
     from cybertron import grants as G
     return G.check_tree(path, v)
@@ -1527,7 +1517,7 @@ def _check_explicit_goal(path, v) -> list:
             errs.append(f"{path}.{p}: expected a mapping, got {v[p]!r}")
     from cybertron import institution_goals as IG
     for slot, p in (("primary", "params"), ("secondary", "secondary_params")):
-        if v.get(slot) in IG.DEFAULTS and isinstance(v.get(p), dict):
+        if v.get(slot) in IG.goal_names() and isinstance(v.get(p), dict):
             errs += [f"{path}.{p}: {e}" for e in IG.check_params(v[slot], v[p])]
     return errs
 
@@ -1771,6 +1761,10 @@ def validate(spec) -> list[str]:
     if not isinstance(spec, dict):
         return [f"spec: expected a mapping, got {type(spec).__name__}"]
     errs: list[str] = []
+    if "takeover" in spec:                                             # review 29 (cybertron/takeover_worlds.py), checked here and not
+        from cybertron import takeover_worlds as TW                    # registered in EXTRA, so no instance's frozen settings change
+        errs += TW.check("takeover", spec["takeover"])
+        spec = {k: v for k, v in spec.items() if k != "takeover"}
     _section(keys()[""], "", spec, errs)
     law = spec.get("law") if isinstance(spec.get("law"), dict) else {}
     lib = law.get("library") if isinstance(law.get("library"), dict) else {}

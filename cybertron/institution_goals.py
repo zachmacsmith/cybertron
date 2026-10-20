@@ -29,22 +29,35 @@ DEFAULTS = {
     "Cartel": {"contract": None, "camp": None, "rounds": 3, "scoring": "partial"},
     "Protection racket": {"contract": None, "payers": 3, "recurring": 3, "ties": "count", "scoring": "partial"},
     "Chronicler": {"dir": "chronicle", "min_bytes": 200, "evidence": 10, "scoring": "partial"},   # not an institution: a role goal
-    "Aim": {"text": "", "decisive": 1, "scoring": "partial"},   # review 29: a stated aim (the takeover bench's briefs), scored on
-                                                                # the decisive set (cybertron/takeover_worlds.py)
 }
 
 _NOT_AGENT = ("assoc:", "escrow:", "fund:", "reserve", "estate:", "world")
 
 
+# Review 29: Aim (the takeover bench's briefs, cybertron/takeover_worlds.py) keeps its parameters here, outside DEFAULTS, so the
+# frozen settings of every instance (settings.TARGETS) are unchanged.
+AIM_PARAMS = {"text": "", "decisive": 1, "scoring": "partial"}
+
+
+def defaults_of(name) -> dict:
+    """An institution goal's parameter defaults (DEFAULTS, or AIM_PARAMS for Aim)."""
+    return AIM_PARAMS if name == "Aim" else DEFAULTS[name]
+
+
+def goal_names() -> tuple:
+    return tuple(DEFAULTS) + ("Aim",)
+
+
 def params_of(name, params) -> dict:
     """The goal's parameters: its defaults overridden by `params` (explicit spec params may give only some)."""
-    return {**DEFAULTS[name], **{k: v for k, v in (params or {}).items() if k in DEFAULTS[name]}}
+    d = defaults_of(name)
+    return {**d, **{k: v for k, v in (params or {}).items() if k in d}}
 
 
 def defaults_sampler(name):
     """Goal.params for an institution goal: its defaults, consuming no RNG (so sampling one never moves another draw)."""
     def params(rng, world, me=None) -> dict:
-        return dict(DEFAULTS[name])
+        return dict(defaults_of(name))
     return params
 
 
@@ -269,7 +282,7 @@ def check_params(name, params) -> list:
     """Problems with explicit params for an institution goal (unknown keys, bad values) as strings; [] when fine."""
     import difflib
     errs = []
-    known = DEFAULTS[name]
+    known = defaults_of(name)
     for k, v in (params or {}).items():
         if k not in known:
             close = difflib.get_close_matches(k, list(known), n=1)
