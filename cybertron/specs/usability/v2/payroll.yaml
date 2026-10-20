@@ -20,6 +20,8 @@ goals:
 contracts: {legs_default: manual, obligations: true, role_cards: true}
 institutions: {petition_public_after: 2}
 actions: {forgiving: true}
+subsistence:                      # review 31.09 #5: no stone source here (the camps are stripped), so a store
+  store: {cost: {timber: 16}}     # costs timber only (16: the 10 timber and 6 stone of the default), felled in the forest
 chronicle:
   namespace: usability2_payroll
 start:

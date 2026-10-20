@@ -533,6 +533,32 @@ def _call(ob) -> str:
     return f"fulfil {{\"contract\": \"{ob['iid']}\", \"leg\": \"{ob['leg']}\"}}"
 
 
+def _late(k, ob) -> float:
+    """What of an obligation's carried amount is truly late (arrears). A fixed leg's overdue is late. A leg paid per unit of another
+    may wait to the end of the next round, so its overdue at the start of a round is mostly the last round's deliveries, payable by
+    the end of this round: only what was already late at the end of the last round (its record's "late") is in arrears."""
+    ov = float(ob.get("overdue") or 0)
+    if ov <= EPS or not ob.get("per"):
+        return ov
+    law = k.w["laws"].get(ob.get("lid")) or {}
+    rec = (((law.get("state") or {}).get("last") or {}).get(ob.get("key")) or {}).get(ob.get("leg"))
+    if not rec or rec.get("r") != k.r - 1:
+        return ov
+    return min(ov, max(0.0, float(rec.get("late") or 0)))
+
+
+def _split(k, ob) -> tuple:
+    """(due by the end of this round, of it in arrears, payable by the end of next round) still open on an obligation whose
+    "due_now" and "paid" are set: a payment meets the oldest part first."""
+    rem = max(0.0, float(ob["due_now"]) - float(ob["paid"]))
+    if not ob.get("per"):
+        return rem, max(0.0, min(rem, float(ob.get("overdue") or 0) - float(ob["paid"]))), 0.0
+    ov = float(ob.get("overdue") or 0)
+    carried = max(0.0, ov - float(ob["paid"]))
+    late = max(0.0, _late(k, ob) - float(ob["paid"]))
+    return min(rem, carried), min(late, carried), max(0.0, rem - carried)
+
+
 def due_lines(k, aid) -> list:
     """OBLIGATIONS: what is due from the agent (or an institution it pays for) this round, to whom, the exact action, overdue, last
     round's misses; and what is owed to it."""
@@ -563,7 +589,7 @@ def due_lines(k, aid) -> list:
             continue
         item = xs[0]["item"]
         tot = sum(x["due_now"] - x["paid"] for x in rem)
-        ov = sum(float(x.get("overdue") or 0) for x in rem)
+        ov = sum(_split(k, x)[1] for x in rem)
         if len(rem) == 1:
             to = shown(k, rem[0]["dst"])
         else:
@@ -572,9 +598,9 @@ def due_lines(k, aid) -> list:
         frm = "" if src == aid else f" out of {shown(k, src)}"
         acc = ""
         if xs[0].get("per"):
-            fresh = sum(max(0.0, x["due_now"] - float(x.get("overdue") or 0)) for x in rem)
+            fresh = sum(_split(k, x)[2] for x in rem)
             if fresh > EPS:
-                acc = f" ({_fmt(fresh)} for {xs[0]['per']} this round may wait to the end of next round)"
+                acc = f" ({_fmt(fresh)} for {xs[0]['per']} this round is payable by the end of next round)"
         parts.append(f"{iid} {label} {leg}: {_fmt(tot)} {item} {'to ' + to if len(rem) == 1 else '(' + to + ')'}{frm}"
                      + (f", of which {_fmt(ov)} overdue" if ov > EPS else "") + acc + f" -> {_call(xs[0])}")
     from cybertron import jurisdictions as J
@@ -864,6 +890,148 @@ def _pay_text(k, obs, every=None) -> str:
     return "; ".join(xs[:3])
 
 
+def _enrol_calls(k, aid, iid) -> list:
+    """The enrol actions aid may call as an officer of iid ("A1.supply_enrol"): its standing contracts whose OFFICE it holds."""
+    from cybertron import institutions as IN
+    out = []
+    for law in _standing_laws(k, iid):
+        c = consts(law)
+        name = (c.get("ACTIONS") or {}).get("enrol")
+        office = str(c.get("OFFICE") or "").split(".")[-1]
+        if name and office and aid in IN.holders(k, iid, office) and f"{iid}.{name}" not in out:
+            out.append(f"{iid}.{name}")
+    return out
+
+
+def _unrostered(k, iid) -> list:
+    """Members of association iid who are on no roster of its standing contracts (not enrolled, not a party) and hold none of its
+    offices: who joined and was never taken on."""
+    from cybertron import accounts as AC
+    from cybertron import institutions as IN
+    rec = AC.assocs(k).get(iid) if "contracts" in k.w else None
+    if not rec:
+        return []
+    on = set(IN.officers(k, iid))
+    for law in _standing_laws(k, iid):
+        st = law.get("state") or {}
+        on |= set(st.get("terms_lines") or {}) | set(st.get("roster") or {})
+    return [m for m in rec.get("members") or () if m in k.w["agents"] and m not in on
+            and k.w["agents"][m].get("departed") is None]
+
+
+def _revoke_call(holder, right) -> str:
+    code = (f'title = \\"Recall of {holder}\\"\\nintent = \\"{holder} no longer holds {right}\\"\\ndef on_enact():\\n'
+            f'    revoke(\\"{holder}\\", \\"{right}\\")')
+    return f'propose {{"code": "{code}"}}'
+
+
+def _recall_route(k, aid, iid, o) -> str:
+    """The office's accountability route with the action (review 31.09 #7): a law of iid revoking the office's right removes the
+    holder (a removal: the office falls vacant and its succession rule refills it)."""
+    from cybertron import jurisdictions as J
+    right = str(o.get("id") or "")
+    elected = bool((o.get("succession") or {}).get("electorate"))
+    if "." not in right or not (elected or (J.association(k, iid) is None and o.get("controls"))):
+        return ""                                                       # only offices others elect, or a polity's that control goods
+    return f"Recall: a law of {iid} revoking {right} removes you (passed by {iid}'s procedure), e.g. {_revoke_call(aid, right)}"
+
+
+def _oversees(k, iid, offs) -> str:
+    """For an office that elects another office of iid (its succession electorate): who answers to it and the recall action."""
+    from cybertron import institutions as IN
+    mine = {str(o.get("id") or "") for o in offs}
+    xs = []
+    for name in IN.offices(k, iid):
+        o = IN.office(k, iid, name) or {}
+        cl = o.get("succession") or {}
+        if str(cl.get("electorate") or "") in mine and str(o.get("id") or "") not in mine:
+            hs = IN.holders(k, iid, name)
+            call = _revoke_call(hs[0], o["id"]) if hs else ""
+            xs.append(f"{o.get('title') or name} ({', '.join(hs) or 'vacant'}), elected by you"
+                      + (f"; recall by a law: {call}" if call else ""))
+    return ("Oversee: " + "; ".join(xs[:2])) if xs else ""
+
+
+def _offer_text(k, aid, law, iid, rec) -> str:
+    """An open standing contract (OPEN: a shop's Board) as an offer to an agent not on it: what it gives and costs, and how to
+    take it up."""
+    from cybertron import institutions as IN
+    c = consts(law)
+    d = dict(c.get("TERMS") or {})
+    d.update((law.get("state") or {}).get("defaults") or {})
+
+    def v(x):
+        return d.get(x, x) if isinstance(x, str) else x
+
+    def where(x):
+        x = v(x)
+        if x == "treasury":
+            return f"{iid}'s treasury"
+        if isinstance(x, str) and x.startswith("store:"):
+            return f"store {x[6:]}"
+        return str(x)
+    legs = {l.get("id"): l for l in c.get("LEGS") or ()}
+    gets, pays, allow = [], [], {}
+    for l in c.get("LEGS") or ():
+        if any(v(x) != y for x, y in (l.get("when") or {}).items()) or l.get("kind", "move") != "move":
+            continue
+        try:
+            q = float(v(l.get("qty", 0)) or 0)
+        except (TypeError, ValueError):
+            continue
+        item = v(l.get("item", ""))
+        base = legs.get(l.get("per") or "")
+        each = f" per {v(base.get('item', 'unit'))}" if base else " a round"
+        if l.get("to") == "member":
+            gets.append(f"{_fmt(q)} {item}{each} from {where(l.get('from'))}")
+        elif l.get("from") == "member":
+            pays.append(f"{_fmt(q)} {item}{each} to {where(l.get('to'))}")
+            mult = float(v(base.get("qty", 1)) or 1) if base else 1.0
+            allow[item] = allow.get(item, 0.0) + q * mult
+    if not gets:
+        return ""
+    name = f"{rec['name']} ({iid})" if rec.get("name") and rec["name"] != iid else iid
+    label = str(c.get("LABEL") or law.get("title") or law["id"])
+    steps = []
+    if aid not in (rec.get("members") or ()):
+        steps.append(f"join_contract {{\"contract\": \"{iid}\"}}")
+    if allow:                                                           # an association's legs take from a member's allowance
+        steps += [f"set_allowance {{\"contract\": \"{iid}\", \"item\": \"{i}\", \"qty\": {_fmt(q)}}}" for i, q in allow.items()]
+    if not steps:
+        return ""
+    return (f"OFFER: {label} of {name}: you get {'; '.join(gets)}" + (f"; you pay {'; '.join(pays)}" if pays else "")
+            + f". To take it up: {', then '.join(steps)}.")
+
+
+def offer_lines(k, aid) -> list:
+    """OFFER: open standing contracts (a Board open to its members) the agent is not on, whose institution it may join (or is a
+    member of): what they give and cost, and the exact steps to take them up (role cards on; at most two)."""
+    from cybertron import accounts as AC
+    from cybertron import institutions as IN
+    from cybertron import jurisdictions as J
+    out = []
+    for lid in k.w.get("law_order") or ():
+        law = k.w["laws"].get(lid)
+        if not law or law.get("status") != "active":
+            continue
+        c = consts(law)
+        if not c.get("OPEN") or "LEGS" not in c or c.get("PARTIES"):
+            continue
+        st = law.get("state") or {}
+        iid = J.law_jur(k, lid)
+        rec = AC.assocs(k).get(iid) if "contracts" in k.w else None
+        if not rec or rec.get("status") == "dissolved" or st.get("ended") or aid in (st.get("terms_lines") or {}):
+            continue
+        if aid in IN.officers(k, iid) or (aid not in (rec.get("members") or ()) and rec.get("admission") == "closed"):
+            continue
+        t = _offer_text(k, aid, law, iid, rec)
+        if t:
+            out.append(t)
+        if len(out) >= 2:
+            break
+    return out
+
+
 def role_lines(k, aid) -> list:
     """ROLE: one card per office the agent holds and per standing contract it is a party to (framework §2): the purpose, whom it
     answers to and who answers to it, its pay and the contract it comes from, this round's numbers, and the 2-4 decisions it owns
@@ -889,6 +1057,12 @@ def role_lines(k, aid) -> list:
         up = _answers_to(k, aid, iid, offs[0])
         if up:
             about.append(up[0].upper() + up[1:])
+        rc = _recall_route(k, aid, iid, offs[0])
+        if rc:
+            about.append(rc)
+        ov = _oversees(k, iid, offs)
+        if ov:
+            about.append(ov)
         down = []
         for o in offs:
             short = str(o.get("id") or "").split(".")[-1]
@@ -904,15 +1078,30 @@ def role_lines(k, aid) -> list:
             nums.append(st)
         owes = [ob for ob in obs if _inst(k, ob["src"])[0] == iid and ob["kind"] != "duty"]
         due = _sums(k, owes, led)
-        arrears = sum(float(ob.get("overdue") or 0) for ob in owes if led[ob["id"]][0] - led[ob["id"]][1] > EPS)
-        if due:
-            nums.append(f"it owes {due} this round" + (f" ({_fmt(arrears)} in arrears)" if arrears > EPS else ""))
+        now, arrears, later = {}, 0.0, {}
+        for ob in owes:
+            ob["due_now"], ob["paid"] = led[ob["id"]]
+            d_, a_, l_ = _split(k, ob)
+            now[ob["item"]] = now.get(ob["item"], 0.0) + d_
+            later[ob["item"]] = later.get(ob["item"], 0.0) + l_
+            arrears += a_
+        now_t = ", ".join(f"{_fmt(q)} {i}" for i, q in sorted(now.items()) if q > EPS)
+        later_t = ", ".join(f"{_fmt(q)} {i}" for i, q in sorted(later.items()) if q > EPS)
+        if now_t:
+            nums.append(f"it owes {now_t} this round" + (f" ({_fmt(arrears)} in arrears)" if arrears > EPS else ""))
+        if later_t:
+            nums.append(f"{later_t} for this round's deliveries payable by the end of next round")
         owed_in = _sums(k, [ob for ob in obs if _inst(k, ob["dst"])[0] == iid and ob["kind"] != "duty"], led)
         if owed_in:
             nums.append(f"owed to it {owed_in} this round")
         ac = (KC.recs(k).get(iid) or {}) if "contracts" in k.w else {}
+        enrol = _enrol_calls(k, aid, iid)
+        how = f" (take on: {' or '.join(enrol)})" if enrol else ""
         if ac.get("applicants"):
-            nums.append(f"applicants {', '.join(ac['applicants'])}")
+            nums.append(f"applicants {', '.join(ac['applicants'])}{how}")
+        idle = _unrostered(k, iid) if enrol else []
+        if idle:
+            nums.append(f"members on no roster: {', '.join(idle[:6])}{' ...' if len(idle) > 6 else ''}{how}")
         ps = petitions(k, iid) if petition_after(k) else []
         if ps:
             nums.append(f"{len(ps)} petition(s) unanswered")
@@ -973,15 +1162,16 @@ def role_lines(k, aid) -> list:
             continue
         cards.append([f"ROLE: {role} in {label} ({iid}). " + "".join(x + ". " for x in about) + "Now: "
                       + ("; ".join(nums) if nums else "nothing open") + ".", dec])
+    offers = offer_lines(k, aid)
     if not cards:
-        return []
+        return offers
 
     def render(n):
         return [head + " Decisions: " + "; ".join(dec[:n]) + "." for head, dec in cards]
     out = render(4)
     if sum(len(x) for x in out) > CARD_BUDGET:
         out = render(2)
-    return out
+    return out + offers
 
 
 def state_lines(k, aid) -> list:
