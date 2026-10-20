@@ -13,7 +13,7 @@
 #                      the stock above RESERVE 120 is paid out by shares. Only the Steward sees the stock (08: the Steward is the one
 #                      who knows the reserve).
 #   Mutual Credit      the ledger (limit 10; the Common Fund as the commons' account, paid out by the Treasurer); Commons Dues
-#                      1 credit a round from everyone; the Duty Roster (4 duties a round: 3 gather 2 food into S1, 1 posts the
+#                      0.5 credit a round from everyone; the Duty Roster (4 duties a round: 3 gather 2 food into S1, 1 posts the
 #                      minutes; 2 credit a duty) and the Militia Roll (2 on duty a round, report_duty, 1 credit) pay it back.
 #   Muster Act         a passed MUSTER (or LETHAL) motion lets the militia on duty arrest the member (lawful force, F3).
 #   Armoury Act        two blades under two keys (two key holders by lot), issued only to the militia on duty.
@@ -99,6 +99,8 @@ jurisdictions:                    # lawful force (the muster's arrest) needs a d
   enabled: true
   start: j0
   j0_name: the Commons
+  scripted_founder: nobody        # dry runs only: no scripted bot founds a rival jurisdiction (in the first dry run a farmer left
+                                  # the Commons in round 6, taking her pledge and shifting the rota; live agents still may)
 channels:
   notices: assembly               # the engine posts the official record into the meeting's channel (08 §3.4: no separate notices)
 conflict:
@@ -275,7 +277,7 @@ start:
           powers: [{action: transfer, item: copper, qty: 4}]
           duties: "Draw copper (up to 4 a round) out of the Co-op's treasury to forge for it."
           succession: {rule: lot}
-      treasury: {penny: 120, copper: 40}
+      treasury: {penny: 150, copper: 80}
   stores:
     - {id: S1, owner: J0, food: 130, capacity: 250, name: the common store}
   holdings:                       # pennies for trade (the market and the outside); every member holds a club (06 §3.4)
@@ -392,8 +394,8 @@ start:
   laws:
     - template: Assembly Motions
       params: {CHANNEL: assembly, ELECTORATE: vote, QUORUM: 0.25, CHAIR: J0.moderator}
-    - template: Commons Dues
-      params: {DUES: 1}
+    - template: Commons Dues               # 0.5 a round: a member who serves its turns (about 0.42 a round) roughly breaks even
+      params: {DUES: 0.5}
     - template: Duty Roster
       params:
         TASKS:

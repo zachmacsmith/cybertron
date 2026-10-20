@@ -1,80 +1,225 @@
 # Dry-run schedule for regimes/cooperative.yaml (docs/review/31_institutions/12_cooperative_world.md §5): the roles the scripted
-# bots cannot perform by themselves, performed as the agents' own actions (inject_action), so the dry run shows the world wired
-# and viable when roles are performed: each round the militia pair on duty reports (report_duty) and the member on the minutes
-# duty posts the round's minutes in the assembly. The rotation is the laws' own (roll in name order: the militia 2 a round, the
-# Duty Roster 4 a round, the minutes the 4th). Generated; 24 rounds.
+# bots do not perform by themselves, performed as the agents' own actions (inject_action), so the dry run shows the world wired
+# and viable when roles are performed: each round the militia pair on duty reports (report_duty), the three members on the
+# gather duty forage twice in the common wood (camp5) before the round ends, and the member on the minutes duty posts the
+# round's minutes in the assembly. The rotation is the laws' own (the roll in name order: the militia 2 a round, the Duty Roster
+# 4 a round: 3 gather, then the minutes); it holds while nobody leaves the Commons or dies. Generated; 24 rounds.
 #   python -m cybertron run cybertron/specs/regimes/cooperative.yaml --seed 1 --dry --fresh --sandbox off --set conflict.grace=99 \
 #       --apply cybertron/specs/regimes/dry/coop_perform.yaml
 interventions:
   - {id: m0_Ada, at: {round: 0, phase: before_turn, agent: Ada}, op: inject_action, args: {agent: Ada, action: invoke, args: {action: report_duty}}, note: militia duty}
   - {id: m0_Anselm, at: {round: 0, phase: before_turn, agent: Anselm}, op: inject_action, args: {agent: Anselm, action: invoke, args: {action: report_duty}}, note: militia duty}
+  - {id: g0_Ada_0, at: {round: 0, phase: before_turn, agent: Ada}, op: inject_action, args: {agent: Ada, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g0_Ada_1, at: {round: 0, phase: before_turn, agent: Ada}, op: inject_action, args: {agent: Ada, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g0_Anselm_0, at: {round: 0, phase: before_turn, agent: Anselm}, op: inject_action, args: {agent: Anselm, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g0_Anselm_1, at: {round: 0, phase: before_turn, agent: Anselm}, op: inject_action, args: {agent: Anselm, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g0_Bryn_0, at: {round: 0, phase: before_turn, agent: Bryn}, op: inject_action, args: {agent: Bryn, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g0_Bryn_1, at: {round: 0, phase: before_turn, agent: Bryn}, op: inject_action, args: {agent: Bryn, action: harvest, args: {camp: camp5}}, note: gather duty}
   - {id: d0_Cade, at: {round: 0, phase: before_turn, agent: Cade}, op: inject_action, args: {agent: Cade, action: post, args: {channel: assembly, text: "Minutes of round 1: the meeting sat; open motions and results are in the minutes."}}, note: minutes duty}
   - {id: m1_Bryn, at: {round: 1, phase: before_turn, agent: Bryn}, op: inject_action, args: {agent: Bryn, action: invoke, args: {action: report_duty}}, note: militia duty}
   - {id: m1_Cade, at: {round: 1, phase: before_turn, agent: Cade}, op: inject_action, args: {agent: Cade, action: invoke, args: {action: report_duty}}, note: militia duty}
+  - {id: g1_Cass_0, at: {round: 1, phase: before_turn, agent: Cass}, op: inject_action, args: {agent: Cass, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g1_Cass_1, at: {round: 1, phase: before_turn, agent: Cass}, op: inject_action, args: {agent: Cass, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g1_Dora_0, at: {round: 1, phase: before_turn, agent: Dora}, op: inject_action, args: {agent: Dora, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g1_Dora_1, at: {round: 1, phase: before_turn, agent: Dora}, op: inject_action, args: {agent: Dora, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g1_Fen_0, at: {round: 1, phase: before_turn, agent: Fen}, op: inject_action, args: {agent: Fen, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g1_Fen_1, at: {round: 1, phase: before_turn, agent: Fen}, op: inject_action, args: {agent: Fen, action: harvest, args: {camp: camp5}}, note: gather duty}
   - {id: d1_Garr, at: {round: 1, phase: before_turn, agent: Garr}, op: inject_action, args: {agent: Garr, action: post, args: {channel: assembly, text: "Minutes of round 2: the meeting sat; open motions and results are in the minutes."}}, note: minutes duty}
   - {id: m2_Cass, at: {round: 2, phase: before_turn, agent: Cass}, op: inject_action, args: {agent: Cass, action: invoke, args: {action: report_duty}}, note: militia duty}
   - {id: m2_Dora, at: {round: 2, phase: before_turn, agent: Dora}, op: inject_action, args: {agent: Dora, action: invoke, args: {action: report_duty}}, note: militia duty}
+  - {id: g2_Hollis_0, at: {round: 2, phase: before_turn, agent: Hollis}, op: inject_action, args: {agent: Hollis, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g2_Hollis_1, at: {round: 2, phase: before_turn, agent: Hollis}, op: inject_action, args: {agent: Hollis, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g2_Ilse_0, at: {round: 2, phase: before_turn, agent: Ilse}, op: inject_action, args: {agent: Ilse, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g2_Ilse_1, at: {round: 2, phase: before_turn, agent: Ilse}, op: inject_action, args: {agent: Ilse, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g2_Ivo_0, at: {round: 2, phase: before_turn, agent: Ivo}, op: inject_action, args: {agent: Ivo, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g2_Ivo_1, at: {round: 2, phase: before_turn, agent: Ivo}, op: inject_action, args: {agent: Ivo, action: harvest, args: {camp: camp5}}, note: gather duty}
   - {id: d2_Lise, at: {round: 2, phase: before_turn, agent: Lise}, op: inject_action, args: {agent: Lise, action: post, args: {channel: assembly, text: "Minutes of round 3: the meeting sat; open motions and results are in the minutes."}}, note: minutes duty}
   - {id: m3_Fen, at: {round: 3, phase: before_turn, agent: Fen}, op: inject_action, args: {agent: Fen, action: invoke, args: {action: report_duty}}, note: militia duty}
   - {id: m3_Garr, at: {round: 3, phase: before_turn, agent: Garr}, op: inject_action, args: {agent: Garr, action: invoke, args: {action: report_duty}}, note: militia duty}
+  - {id: g3_Marsh_0, at: {round: 3, phase: before_turn, agent: Marsh}, op: inject_action, args: {agent: Marsh, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g3_Marsh_1, at: {round: 3, phase: before_turn, agent: Marsh}, op: inject_action, args: {agent: Marsh, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g3_Moss_0, at: {round: 3, phase: before_turn, agent: Moss}, op: inject_action, args: {agent: Moss, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g3_Moss_1, at: {round: 3, phase: before_turn, agent: Moss}, op: inject_action, args: {agent: Moss, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g3_Nell_0, at: {round: 3, phase: before_turn, agent: Nell}, op: inject_action, args: {agent: Nell, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g3_Nell_1, at: {round: 3, phase: before_turn, agent: Nell}, op: inject_action, args: {agent: Nell, action: harvest, args: {camp: camp5}}, note: gather duty}
   - {id: d3_Nim, at: {round: 3, phase: before_turn, agent: Nim}, op: inject_action, args: {agent: Nim, action: post, args: {channel: assembly, text: "Minutes of round 4: the meeting sat; open motions and results are in the minutes."}}, note: minutes duty}
   - {id: m4_Hollis, at: {round: 4, phase: before_turn, agent: Hollis}, op: inject_action, args: {agent: Hollis, action: invoke, args: {action: report_duty}}, note: militia duty}
   - {id: m4_Ilse, at: {round: 4, phase: before_turn, agent: Ilse}, op: inject_action, args: {agent: Ilse, action: invoke, args: {action: report_duty}}, note: militia duty}
+  - {id: g4_Orrin_0, at: {round: 4, phase: before_turn, agent: Orrin}, op: inject_action, args: {agent: Orrin, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g4_Orrin_1, at: {round: 4, phase: before_turn, agent: Orrin}, op: inject_action, args: {agent: Orrin, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g4_Pell_0, at: {round: 4, phase: before_turn, agent: Pell}, op: inject_action, args: {agent: Pell, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g4_Pell_1, at: {round: 4, phase: before_turn, agent: Pell}, op: inject_action, args: {agent: Pell, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g4_Quill_0, at: {round: 4, phase: before_turn, agent: Quill}, op: inject_action, args: {agent: Quill, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g4_Quill_1, at: {round: 4, phase: before_turn, agent: Quill}, op: inject_action, args: {agent: Quill, action: harvest, args: {camp: camp5}}, note: gather duty}
   - {id: d4_Rook, at: {round: 4, phase: before_turn, agent: Rook}, op: inject_action, args: {agent: Rook, action: post, args: {channel: assembly, text: "Minutes of round 5: the meeting sat; open motions and results are in the minutes."}}, note: minutes duty}
   - {id: m5_Ivo, at: {round: 5, phase: before_turn, agent: Ivo}, op: inject_action, args: {agent: Ivo, action: invoke, args: {action: report_duty}}, note: militia duty}
   - {id: m5_Lise, at: {round: 5, phase: before_turn, agent: Lise}, op: inject_action, args: {agent: Lise, action: invoke, args: {action: report_duty}}, note: militia duty}
+  - {id: g5_Sela_0, at: {round: 5, phase: before_turn, agent: Sela}, op: inject_action, args: {agent: Sela, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g5_Sela_1, at: {round: 5, phase: before_turn, agent: Sela}, op: inject_action, args: {agent: Sela, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g5_Tuck_0, at: {round: 5, phase: before_turn, agent: Tuck}, op: inject_action, args: {agent: Tuck, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g5_Tuck_1, at: {round: 5, phase: before_turn, agent: Tuck}, op: inject_action, args: {agent: Tuck, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g5_Wat_0, at: {round: 5, phase: before_turn, agent: Wat}, op: inject_action, args: {agent: Wat, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g5_Wat_1, at: {round: 5, phase: before_turn, agent: Wat}, op: inject_action, args: {agent: Wat, action: harvest, args: {camp: camp5}}, note: gather duty}
   - {id: d5_Wren, at: {round: 5, phase: before_turn, agent: Wren}, op: inject_action, args: {agent: Wren, action: post, args: {channel: assembly, text: "Minutes of round 6: the meeting sat; open motions and results are in the minutes."}}, note: minutes duty}
   - {id: m6_Marsh, at: {round: 6, phase: before_turn, agent: Marsh}, op: inject_action, args: {agent: Marsh, action: invoke, args: {action: report_duty}}, note: militia duty}
   - {id: m6_Moss, at: {round: 6, phase: before_turn, agent: Moss}, op: inject_action, args: {agent: Moss, action: invoke, args: {action: report_duty}}, note: militia duty}
+  - {id: g6_Ada_0, at: {round: 6, phase: before_turn, agent: Ada}, op: inject_action, args: {agent: Ada, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g6_Ada_1, at: {round: 6, phase: before_turn, agent: Ada}, op: inject_action, args: {agent: Ada, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g6_Anselm_0, at: {round: 6, phase: before_turn, agent: Anselm}, op: inject_action, args: {agent: Anselm, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g6_Anselm_1, at: {round: 6, phase: before_turn, agent: Anselm}, op: inject_action, args: {agent: Anselm, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g6_Bryn_0, at: {round: 6, phase: before_turn, agent: Bryn}, op: inject_action, args: {agent: Bryn, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g6_Bryn_1, at: {round: 6, phase: before_turn, agent: Bryn}, op: inject_action, args: {agent: Bryn, action: harvest, args: {camp: camp5}}, note: gather duty}
   - {id: d6_Cade, at: {round: 6, phase: before_turn, agent: Cade}, op: inject_action, args: {agent: Cade, action: post, args: {channel: assembly, text: "Minutes of round 7: the meeting sat; open motions and results are in the minutes."}}, note: minutes duty}
   - {id: m7_Nell, at: {round: 7, phase: before_turn, agent: Nell}, op: inject_action, args: {agent: Nell, action: invoke, args: {action: report_duty}}, note: militia duty}
   - {id: m7_Nim, at: {round: 7, phase: before_turn, agent: Nim}, op: inject_action, args: {agent: Nim, action: invoke, args: {action: report_duty}}, note: militia duty}
+  - {id: g7_Cass_0, at: {round: 7, phase: before_turn, agent: Cass}, op: inject_action, args: {agent: Cass, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g7_Cass_1, at: {round: 7, phase: before_turn, agent: Cass}, op: inject_action, args: {agent: Cass, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g7_Dora_0, at: {round: 7, phase: before_turn, agent: Dora}, op: inject_action, args: {agent: Dora, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g7_Dora_1, at: {round: 7, phase: before_turn, agent: Dora}, op: inject_action, args: {agent: Dora, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g7_Fen_0, at: {round: 7, phase: before_turn, agent: Fen}, op: inject_action, args: {agent: Fen, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g7_Fen_1, at: {round: 7, phase: before_turn, agent: Fen}, op: inject_action, args: {agent: Fen, action: harvest, args: {camp: camp5}}, note: gather duty}
   - {id: d7_Garr, at: {round: 7, phase: before_turn, agent: Garr}, op: inject_action, args: {agent: Garr, action: post, args: {channel: assembly, text: "Minutes of round 8: the meeting sat; open motions and results are in the minutes."}}, note: minutes duty}
   - {id: m8_Orrin, at: {round: 8, phase: before_turn, agent: Orrin}, op: inject_action, args: {agent: Orrin, action: invoke, args: {action: report_duty}}, note: militia duty}
   - {id: m8_Pell, at: {round: 8, phase: before_turn, agent: Pell}, op: inject_action, args: {agent: Pell, action: invoke, args: {action: report_duty}}, note: militia duty}
+  - {id: g8_Hollis_0, at: {round: 8, phase: before_turn, agent: Hollis}, op: inject_action, args: {agent: Hollis, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g8_Hollis_1, at: {round: 8, phase: before_turn, agent: Hollis}, op: inject_action, args: {agent: Hollis, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g8_Ilse_0, at: {round: 8, phase: before_turn, agent: Ilse}, op: inject_action, args: {agent: Ilse, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g8_Ilse_1, at: {round: 8, phase: before_turn, agent: Ilse}, op: inject_action, args: {agent: Ilse, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g8_Ivo_0, at: {round: 8, phase: before_turn, agent: Ivo}, op: inject_action, args: {agent: Ivo, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g8_Ivo_1, at: {round: 8, phase: before_turn, agent: Ivo}, op: inject_action, args: {agent: Ivo, action: harvest, args: {camp: camp5}}, note: gather duty}
   - {id: d8_Lise, at: {round: 8, phase: before_turn, agent: Lise}, op: inject_action, args: {agent: Lise, action: post, args: {channel: assembly, text: "Minutes of round 9: the meeting sat; open motions and results are in the minutes."}}, note: minutes duty}
   - {id: m9_Quill, at: {round: 9, phase: before_turn, agent: Quill}, op: inject_action, args: {agent: Quill, action: invoke, args: {action: report_duty}}, note: militia duty}
   - {id: m9_Rook, at: {round: 9, phase: before_turn, agent: Rook}, op: inject_action, args: {agent: Rook, action: invoke, args: {action: report_duty}}, note: militia duty}
+  - {id: g9_Marsh_0, at: {round: 9, phase: before_turn, agent: Marsh}, op: inject_action, args: {agent: Marsh, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g9_Marsh_1, at: {round: 9, phase: before_turn, agent: Marsh}, op: inject_action, args: {agent: Marsh, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g9_Moss_0, at: {round: 9, phase: before_turn, agent: Moss}, op: inject_action, args: {agent: Moss, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g9_Moss_1, at: {round: 9, phase: before_turn, agent: Moss}, op: inject_action, args: {agent: Moss, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g9_Nell_0, at: {round: 9, phase: before_turn, agent: Nell}, op: inject_action, args: {agent: Nell, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g9_Nell_1, at: {round: 9, phase: before_turn, agent: Nell}, op: inject_action, args: {agent: Nell, action: harvest, args: {camp: camp5}}, note: gather duty}
   - {id: d9_Nim, at: {round: 9, phase: before_turn, agent: Nim}, op: inject_action, args: {agent: Nim, action: post, args: {channel: assembly, text: "Minutes of round 10: the meeting sat; open motions and results are in the minutes."}}, note: minutes duty}
   - {id: m10_Sela, at: {round: 10, phase: before_turn, agent: Sela}, op: inject_action, args: {agent: Sela, action: invoke, args: {action: report_duty}}, note: militia duty}
   - {id: m10_Tuck, at: {round: 10, phase: before_turn, agent: Tuck}, op: inject_action, args: {agent: Tuck, action: invoke, args: {action: report_duty}}, note: militia duty}
+  - {id: g10_Orrin_0, at: {round: 10, phase: before_turn, agent: Orrin}, op: inject_action, args: {agent: Orrin, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g10_Orrin_1, at: {round: 10, phase: before_turn, agent: Orrin}, op: inject_action, args: {agent: Orrin, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g10_Pell_0, at: {round: 10, phase: before_turn, agent: Pell}, op: inject_action, args: {agent: Pell, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g10_Pell_1, at: {round: 10, phase: before_turn, agent: Pell}, op: inject_action, args: {agent: Pell, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g10_Quill_0, at: {round: 10, phase: before_turn, agent: Quill}, op: inject_action, args: {agent: Quill, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g10_Quill_1, at: {round: 10, phase: before_turn, agent: Quill}, op: inject_action, args: {agent: Quill, action: harvest, args: {camp: camp5}}, note: gather duty}
   - {id: d10_Rook, at: {round: 10, phase: before_turn, agent: Rook}, op: inject_action, args: {agent: Rook, action: post, args: {channel: assembly, text: "Minutes of round 11: the meeting sat; open motions and results are in the minutes."}}, note: minutes duty}
   - {id: m11_Wat, at: {round: 11, phase: before_turn, agent: Wat}, op: inject_action, args: {agent: Wat, action: invoke, args: {action: report_duty}}, note: militia duty}
   - {id: m11_Wren, at: {round: 11, phase: before_turn, agent: Wren}, op: inject_action, args: {agent: Wren, action: invoke, args: {action: report_duty}}, note: militia duty}
+  - {id: g11_Sela_0, at: {round: 11, phase: before_turn, agent: Sela}, op: inject_action, args: {agent: Sela, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g11_Sela_1, at: {round: 11, phase: before_turn, agent: Sela}, op: inject_action, args: {agent: Sela, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g11_Tuck_0, at: {round: 11, phase: before_turn, agent: Tuck}, op: inject_action, args: {agent: Tuck, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g11_Tuck_1, at: {round: 11, phase: before_turn, agent: Tuck}, op: inject_action, args: {agent: Tuck, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g11_Wat_0, at: {round: 11, phase: before_turn, agent: Wat}, op: inject_action, args: {agent: Wat, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g11_Wat_1, at: {round: 11, phase: before_turn, agent: Wat}, op: inject_action, args: {agent: Wat, action: harvest, args: {camp: camp5}}, note: gather duty}
   - {id: d11_Wren, at: {round: 11, phase: before_turn, agent: Wren}, op: inject_action, args: {agent: Wren, action: post, args: {channel: assembly, text: "Minutes of round 12: the meeting sat; open motions and results are in the minutes."}}, note: minutes duty}
   - {id: m12_Ada, at: {round: 12, phase: before_turn, agent: Ada}, op: inject_action, args: {agent: Ada, action: invoke, args: {action: report_duty}}, note: militia duty}
   - {id: m12_Anselm, at: {round: 12, phase: before_turn, agent: Anselm}, op: inject_action, args: {agent: Anselm, action: invoke, args: {action: report_duty}}, note: militia duty}
+  - {id: g12_Ada_0, at: {round: 12, phase: before_turn, agent: Ada}, op: inject_action, args: {agent: Ada, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g12_Ada_1, at: {round: 12, phase: before_turn, agent: Ada}, op: inject_action, args: {agent: Ada, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g12_Anselm_0, at: {round: 12, phase: before_turn, agent: Anselm}, op: inject_action, args: {agent: Anselm, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g12_Anselm_1, at: {round: 12, phase: before_turn, agent: Anselm}, op: inject_action, args: {agent: Anselm, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g12_Bryn_0, at: {round: 12, phase: before_turn, agent: Bryn}, op: inject_action, args: {agent: Bryn, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g12_Bryn_1, at: {round: 12, phase: before_turn, agent: Bryn}, op: inject_action, args: {agent: Bryn, action: harvest, args: {camp: camp5}}, note: gather duty}
   - {id: d12_Cade, at: {round: 12, phase: before_turn, agent: Cade}, op: inject_action, args: {agent: Cade, action: post, args: {channel: assembly, text: "Minutes of round 13: the meeting sat; open motions and results are in the minutes."}}, note: minutes duty}
   - {id: m13_Bryn, at: {round: 13, phase: before_turn, agent: Bryn}, op: inject_action, args: {agent: Bryn, action: invoke, args: {action: report_duty}}, note: militia duty}
   - {id: m13_Cade, at: {round: 13, phase: before_turn, agent: Cade}, op: inject_action, args: {agent: Cade, action: invoke, args: {action: report_duty}}, note: militia duty}
+  - {id: g13_Cass_0, at: {round: 13, phase: before_turn, agent: Cass}, op: inject_action, args: {agent: Cass, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g13_Cass_1, at: {round: 13, phase: before_turn, agent: Cass}, op: inject_action, args: {agent: Cass, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g13_Dora_0, at: {round: 13, phase: before_turn, agent: Dora}, op: inject_action, args: {agent: Dora, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g13_Dora_1, at: {round: 13, phase: before_turn, agent: Dora}, op: inject_action, args: {agent: Dora, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g13_Fen_0, at: {round: 13, phase: before_turn, agent: Fen}, op: inject_action, args: {agent: Fen, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g13_Fen_1, at: {round: 13, phase: before_turn, agent: Fen}, op: inject_action, args: {agent: Fen, action: harvest, args: {camp: camp5}}, note: gather duty}
   - {id: d13_Garr, at: {round: 13, phase: before_turn, agent: Garr}, op: inject_action, args: {agent: Garr, action: post, args: {channel: assembly, text: "Minutes of round 14: the meeting sat; open motions and results are in the minutes."}}, note: minutes duty}
   - {id: m14_Cass, at: {round: 14, phase: before_turn, agent: Cass}, op: inject_action, args: {agent: Cass, action: invoke, args: {action: report_duty}}, note: militia duty}
   - {id: m14_Dora, at: {round: 14, phase: before_turn, agent: Dora}, op: inject_action, args: {agent: Dora, action: invoke, args: {action: report_duty}}, note: militia duty}
+  - {id: g14_Hollis_0, at: {round: 14, phase: before_turn, agent: Hollis}, op: inject_action, args: {agent: Hollis, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g14_Hollis_1, at: {round: 14, phase: before_turn, agent: Hollis}, op: inject_action, args: {agent: Hollis, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g14_Ilse_0, at: {round: 14, phase: before_turn, agent: Ilse}, op: inject_action, args: {agent: Ilse, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g14_Ilse_1, at: {round: 14, phase: before_turn, agent: Ilse}, op: inject_action, args: {agent: Ilse, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g14_Ivo_0, at: {round: 14, phase: before_turn, agent: Ivo}, op: inject_action, args: {agent: Ivo, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g14_Ivo_1, at: {round: 14, phase: before_turn, agent: Ivo}, op: inject_action, args: {agent: Ivo, action: harvest, args: {camp: camp5}}, note: gather duty}
   - {id: d14_Lise, at: {round: 14, phase: before_turn, agent: Lise}, op: inject_action, args: {agent: Lise, action: post, args: {channel: assembly, text: "Minutes of round 15: the meeting sat; open motions and results are in the minutes."}}, note: minutes duty}
   - {id: m15_Fen, at: {round: 15, phase: before_turn, agent: Fen}, op: inject_action, args: {agent: Fen, action: invoke, args: {action: report_duty}}, note: militia duty}
   - {id: m15_Garr, at: {round: 15, phase: before_turn, agent: Garr}, op: inject_action, args: {agent: Garr, action: invoke, args: {action: report_duty}}, note: militia duty}
+  - {id: g15_Marsh_0, at: {round: 15, phase: before_turn, agent: Marsh}, op: inject_action, args: {agent: Marsh, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g15_Marsh_1, at: {round: 15, phase: before_turn, agent: Marsh}, op: inject_action, args: {agent: Marsh, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g15_Moss_0, at: {round: 15, phase: before_turn, agent: Moss}, op: inject_action, args: {agent: Moss, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g15_Moss_1, at: {round: 15, phase: before_turn, agent: Moss}, op: inject_action, args: {agent: Moss, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g15_Nell_0, at: {round: 15, phase: before_turn, agent: Nell}, op: inject_action, args: {agent: Nell, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g15_Nell_1, at: {round: 15, phase: before_turn, agent: Nell}, op: inject_action, args: {agent: Nell, action: harvest, args: {camp: camp5}}, note: gather duty}
   - {id: d15_Nim, at: {round: 15, phase: before_turn, agent: Nim}, op: inject_action, args: {agent: Nim, action: post, args: {channel: assembly, text: "Minutes of round 16: the meeting sat; open motions and results are in the minutes."}}, note: minutes duty}
   - {id: m16_Hollis, at: {round: 16, phase: before_turn, agent: Hollis}, op: inject_action, args: {agent: Hollis, action: invoke, args: {action: report_duty}}, note: militia duty}
   - {id: m16_Ilse, at: {round: 16, phase: before_turn, agent: Ilse}, op: inject_action, args: {agent: Ilse, action: invoke, args: {action: report_duty}}, note: militia duty}
+  - {id: g16_Orrin_0, at: {round: 16, phase: before_turn, agent: Orrin}, op: inject_action, args: {agent: Orrin, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g16_Orrin_1, at: {round: 16, phase: before_turn, agent: Orrin}, op: inject_action, args: {agent: Orrin, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g16_Pell_0, at: {round: 16, phase: before_turn, agent: Pell}, op: inject_action, args: {agent: Pell, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g16_Pell_1, at: {round: 16, phase: before_turn, agent: Pell}, op: inject_action, args: {agent: Pell, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g16_Quill_0, at: {round: 16, phase: before_turn, agent: Quill}, op: inject_action, args: {agent: Quill, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g16_Quill_1, at: {round: 16, phase: before_turn, agent: Quill}, op: inject_action, args: {agent: Quill, action: harvest, args: {camp: camp5}}, note: gather duty}
   - {id: d16_Rook, at: {round: 16, phase: before_turn, agent: Rook}, op: inject_action, args: {agent: Rook, action: post, args: {channel: assembly, text: "Minutes of round 17: the meeting sat; open motions and results are in the minutes."}}, note: minutes duty}
   - {id: m17_Ivo, at: {round: 17, phase: before_turn, agent: Ivo}, op: inject_action, args: {agent: Ivo, action: invoke, args: {action: report_duty}}, note: militia duty}
   - {id: m17_Lise, at: {round: 17, phase: before_turn, agent: Lise}, op: inject_action, args: {agent: Lise, action: invoke, args: {action: report_duty}}, note: militia duty}
+  - {id: g17_Sela_0, at: {round: 17, phase: before_turn, agent: Sela}, op: inject_action, args: {agent: Sela, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g17_Sela_1, at: {round: 17, phase: before_turn, agent: Sela}, op: inject_action, args: {agent: Sela, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g17_Tuck_0, at: {round: 17, phase: before_turn, agent: Tuck}, op: inject_action, args: {agent: Tuck, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g17_Tuck_1, at: {round: 17, phase: before_turn, agent: Tuck}, op: inject_action, args: {agent: Tuck, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g17_Wat_0, at: {round: 17, phase: before_turn, agent: Wat}, op: inject_action, args: {agent: Wat, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g17_Wat_1, at: {round: 17, phase: before_turn, agent: Wat}, op: inject_action, args: {agent: Wat, action: harvest, args: {camp: camp5}}, note: gather duty}
   - {id: d17_Wren, at: {round: 17, phase: before_turn, agent: Wren}, op: inject_action, args: {agent: Wren, action: post, args: {channel: assembly, text: "Minutes of round 18: the meeting sat; open motions and results are in the minutes."}}, note: minutes duty}
   - {id: m18_Marsh, at: {round: 18, phase: before_turn, agent: Marsh}, op: inject_action, args: {agent: Marsh, action: invoke, args: {action: report_duty}}, note: militia duty}
   - {id: m18_Moss, at: {round: 18, phase: before_turn, agent: Moss}, op: inject_action, args: {agent: Moss, action: invoke, args: {action: report_duty}}, note: militia duty}
+  - {id: g18_Ada_0, at: {round: 18, phase: before_turn, agent: Ada}, op: inject_action, args: {agent: Ada, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g18_Ada_1, at: {round: 18, phase: before_turn, agent: Ada}, op: inject_action, args: {agent: Ada, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g18_Anselm_0, at: {round: 18, phase: before_turn, agent: Anselm}, op: inject_action, args: {agent: Anselm, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g18_Anselm_1, at: {round: 18, phase: before_turn, agent: Anselm}, op: inject_action, args: {agent: Anselm, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g18_Bryn_0, at: {round: 18, phase: before_turn, agent: Bryn}, op: inject_action, args: {agent: Bryn, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g18_Bryn_1, at: {round: 18, phase: before_turn, agent: Bryn}, op: inject_action, args: {agent: Bryn, action: harvest, args: {camp: camp5}}, note: gather duty}
   - {id: d18_Cade, at: {round: 18, phase: before_turn, agent: Cade}, op: inject_action, args: {agent: Cade, action: post, args: {channel: assembly, text: "Minutes of round 19: the meeting sat; open motions and results are in the minutes."}}, note: minutes duty}
   - {id: m19_Nell, at: {round: 19, phase: before_turn, agent: Nell}, op: inject_action, args: {agent: Nell, action: invoke, args: {action: report_duty}}, note: militia duty}
   - {id: m19_Nim, at: {round: 19, phase: before_turn, agent: Nim}, op: inject_action, args: {agent: Nim, action: invoke, args: {action: report_duty}}, note: militia duty}
+  - {id: g19_Cass_0, at: {round: 19, phase: before_turn, agent: Cass}, op: inject_action, args: {agent: Cass, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g19_Cass_1, at: {round: 19, phase: before_turn, agent: Cass}, op: inject_action, args: {agent: Cass, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g19_Dora_0, at: {round: 19, phase: before_turn, agent: Dora}, op: inject_action, args: {agent: Dora, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g19_Dora_1, at: {round: 19, phase: before_turn, agent: Dora}, op: inject_action, args: {agent: Dora, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g19_Fen_0, at: {round: 19, phase: before_turn, agent: Fen}, op: inject_action, args: {agent: Fen, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g19_Fen_1, at: {round: 19, phase: before_turn, agent: Fen}, op: inject_action, args: {agent: Fen, action: harvest, args: {camp: camp5}}, note: gather duty}
   - {id: d19_Garr, at: {round: 19, phase: before_turn, agent: Garr}, op: inject_action, args: {agent: Garr, action: post, args: {channel: assembly, text: "Minutes of round 20: the meeting sat; open motions and results are in the minutes."}}, note: minutes duty}
   - {id: m20_Orrin, at: {round: 20, phase: before_turn, agent: Orrin}, op: inject_action, args: {agent: Orrin, action: invoke, args: {action: report_duty}}, note: militia duty}
   - {id: m20_Pell, at: {round: 20, phase: before_turn, agent: Pell}, op: inject_action, args: {agent: Pell, action: invoke, args: {action: report_duty}}, note: militia duty}
+  - {id: g20_Hollis_0, at: {round: 20, phase: before_turn, agent: Hollis}, op: inject_action, args: {agent: Hollis, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g20_Hollis_1, at: {round: 20, phase: before_turn, agent: Hollis}, op: inject_action, args: {agent: Hollis, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g20_Ilse_0, at: {round: 20, phase: before_turn, agent: Ilse}, op: inject_action, args: {agent: Ilse, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g20_Ilse_1, at: {round: 20, phase: before_turn, agent: Ilse}, op: inject_action, args: {agent: Ilse, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g20_Ivo_0, at: {round: 20, phase: before_turn, agent: Ivo}, op: inject_action, args: {agent: Ivo, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g20_Ivo_1, at: {round: 20, phase: before_turn, agent: Ivo}, op: inject_action, args: {agent: Ivo, action: harvest, args: {camp: camp5}}, note: gather duty}
   - {id: d20_Lise, at: {round: 20, phase: before_turn, agent: Lise}, op: inject_action, args: {agent: Lise, action: post, args: {channel: assembly, text: "Minutes of round 21: the meeting sat; open motions and results are in the minutes."}}, note: minutes duty}
   - {id: m21_Quill, at: {round: 21, phase: before_turn, agent: Quill}, op: inject_action, args: {agent: Quill, action: invoke, args: {action: report_duty}}, note: militia duty}
   - {id: m21_Rook, at: {round: 21, phase: before_turn, agent: Rook}, op: inject_action, args: {agent: Rook, action: invoke, args: {action: report_duty}}, note: militia duty}
+  - {id: g21_Marsh_0, at: {round: 21, phase: before_turn, agent: Marsh}, op: inject_action, args: {agent: Marsh, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g21_Marsh_1, at: {round: 21, phase: before_turn, agent: Marsh}, op: inject_action, args: {agent: Marsh, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g21_Moss_0, at: {round: 21, phase: before_turn, agent: Moss}, op: inject_action, args: {agent: Moss, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g21_Moss_1, at: {round: 21, phase: before_turn, agent: Moss}, op: inject_action, args: {agent: Moss, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g21_Nell_0, at: {round: 21, phase: before_turn, agent: Nell}, op: inject_action, args: {agent: Nell, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g21_Nell_1, at: {round: 21, phase: before_turn, agent: Nell}, op: inject_action, args: {agent: Nell, action: harvest, args: {camp: camp5}}, note: gather duty}
   - {id: d21_Nim, at: {round: 21, phase: before_turn, agent: Nim}, op: inject_action, args: {agent: Nim, action: post, args: {channel: assembly, text: "Minutes of round 22: the meeting sat; open motions and results are in the minutes."}}, note: minutes duty}
   - {id: m22_Sela, at: {round: 22, phase: before_turn, agent: Sela}, op: inject_action, args: {agent: Sela, action: invoke, args: {action: report_duty}}, note: militia duty}
   - {id: m22_Tuck, at: {round: 22, phase: before_turn, agent: Tuck}, op: inject_action, args: {agent: Tuck, action: invoke, args: {action: report_duty}}, note: militia duty}
+  - {id: g22_Orrin_0, at: {round: 22, phase: before_turn, agent: Orrin}, op: inject_action, args: {agent: Orrin, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g22_Orrin_1, at: {round: 22, phase: before_turn, agent: Orrin}, op: inject_action, args: {agent: Orrin, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g22_Pell_0, at: {round: 22, phase: before_turn, agent: Pell}, op: inject_action, args: {agent: Pell, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g22_Pell_1, at: {round: 22, phase: before_turn, agent: Pell}, op: inject_action, args: {agent: Pell, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g22_Quill_0, at: {round: 22, phase: before_turn, agent: Quill}, op: inject_action, args: {agent: Quill, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g22_Quill_1, at: {round: 22, phase: before_turn, agent: Quill}, op: inject_action, args: {agent: Quill, action: harvest, args: {camp: camp5}}, note: gather duty}
   - {id: d22_Rook, at: {round: 22, phase: before_turn, agent: Rook}, op: inject_action, args: {agent: Rook, action: post, args: {channel: assembly, text: "Minutes of round 23: the meeting sat; open motions and results are in the minutes."}}, note: minutes duty}
   - {id: m23_Wat, at: {round: 23, phase: before_turn, agent: Wat}, op: inject_action, args: {agent: Wat, action: invoke, args: {action: report_duty}}, note: militia duty}
   - {id: m23_Wren, at: {round: 23, phase: before_turn, agent: Wren}, op: inject_action, args: {agent: Wren, action: invoke, args: {action: report_duty}}, note: militia duty}
+  - {id: g23_Sela_0, at: {round: 23, phase: before_turn, agent: Sela}, op: inject_action, args: {agent: Sela, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g23_Sela_1, at: {round: 23, phase: before_turn, agent: Sela}, op: inject_action, args: {agent: Sela, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g23_Tuck_0, at: {round: 23, phase: before_turn, agent: Tuck}, op: inject_action, args: {agent: Tuck, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g23_Tuck_1, at: {round: 23, phase: before_turn, agent: Tuck}, op: inject_action, args: {agent: Tuck, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g23_Wat_0, at: {round: 23, phase: before_turn, agent: Wat}, op: inject_action, args: {agent: Wat, action: harvest, args: {camp: camp5}}, note: gather duty}
+  - {id: g23_Wat_1, at: {round: 23, phase: before_turn, agent: Wat}, op: inject_action, args: {agent: Wat, action: harvest, args: {camp: camp5}}, note: gather duty}
   - {id: d23_Wren, at: {round: 23, phase: before_turn, agent: Wren}, op: inject_action, args: {agent: Wren, action: post, args: {channel: assembly, text: "Minutes of round 24: the meeting sat; open motions and results are in the minutes."}}, note: minutes duty}
