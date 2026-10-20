@@ -9,7 +9,10 @@ changed, and nothing said so. This module makes every legal act report what it c
                   {law, title, act: enact|amend|repeal, changes: [diff lines], n_changes, inert, failed_calls}. `inert` is true when
                   nothing changed and the law installs (or, amended, changes) no hook that could act later: "L35 passed but changed
                   nothing". The proposal event's preview carries the same flag (dispatch do_propose), and preview_law shows the
-                  diff of the enactment itself ("At enactment: ..."; amendments are previewed as amendments).
+                  diff of the enactment itself ("At enactment: ..."; amendments are previewed as amendments). A change that a rule
+                  of higher precedence overrides (shadows: an unranked procedure under rank-specific ones; a before_withdraw that
+                  admits by not blocking, on an office-controlled store) adds {shadowed, n_effective, shadow_notes}, and the
+                  notices, the proposal, the proposer's result and preview_law say plainly what does not apply and why.
   law_call_failed (spec law.call_failures, default true) a law's move, fine (short), grant, revoke, suspend, burn or reseat that
                   fails records {law, fn, args, reason}, told to the law's author and its institution's officers (monitor when
                   there are none), at most once per law, function and round; a dry run or preview lists them instead.
@@ -205,51 +208,235 @@ def inert(act: str, diff: list, old_code=None, new_code=None) -> bool:
     return _sig(old_code) == _sig(new_code)
 
 
-# ---------------------------------------------------------------------- the office-control gate (review 31.09 #6)
-def _cannot_allow(node) -> bool:
-    """A before-hook's return value that can never be an explicit allow (None, False, a number, a dict without "block" or with a
-    constant true "block"); anything computed might be one."""
-    if node is None:
-        return True
-    if isinstance(node, ast.Constant):
-        return node.value is not True
-    if isinstance(node, ast.Dict):
-        for key, v in zip(node.keys, node.values):
-            if isinstance(key, ast.Constant) and key.value == "block":
-                return isinstance(v, ast.Constant) and bool(v.value)
-        return True
-    return False
+# ---------------------------------------------------------------------- shadowed changes (the Thornby pilot: L11)
+# A change can be real in the world's tables and still decide nothing, because a rule of higher precedence wins over it. The view diff
+# shows the table entry ("procedures: ordinary: L2 -> L11"), so the law looked as if it worked. shadows() names those changes:
+#   procedure       set_procedure(cls, fn) without a rank stores "<cls>"; a rank-specific procedure ("statute:<cls>", set by a law
+#                   with set_procedure(cls, fn, rank="statute")) takes precedence (dispatch.ranks.procedure_lookup), so an unranked
+#                   procedure set after one decides no draft of that rank. Shadowed only by another law's entry (a law that sets both
+#                   is not surprised by itself). Without law.v2 there are no rank keys, so nothing is ever shadowed.
+#   office_control  a before_withdraw hook that lets the holders of some right through (has / holders) only by not blocking them,
+#                   for a store an office controls (institutions.office_control): the control gate refuses everyone else whatever
+#                   the hook says, unless the hook returns an explicit allow (True or {"block": False}). The usability round 2
+#                   amendment (docs/review/31_institutions/09_usability_round2.md, fix #6).
+# Reporting only: nothing here changes what decides. A fully shadowed procedure change does not count against `inert`.
+def _shadow_ranks() -> tuple:
+    from cybertron.dispatch.base import RANKS
+    return tuple(r for r, _ in sorted(RANKS.items(), key=lambda x: -x[1]) if r != "charter")
 
 
-def control_note(k, lid, code=None) -> str:
-    """A law of an institution whose stores an office controls (institutions.office_control), with a before_withdraw that can only
-    block: under the office-control rule nobody but the controlling offices' holders draws from such a store unless a law of its
-    owner explicitly allows the draw, so whatever the hook means to permit is refused (the Millbrook-style silent no-op of review
-    31.09: a council's amendment letting councillors draw did nothing). "" when it does not apply. Setup acts are not flagged."""
+def _proc_tables(view) -> dict:
+    """{label: table} of a view's procedure tables: "procedures" (J0 / no jurisdictions) and each new jurisdiction's."""
+    out = {"procedures": view.get("procedures") or {}}
+    for key, v in (view.get("rules") or {}).items():
+        if isinstance(key, str) and key.endswith(" procedures") and isinstance(v, dict):
+            out[key] = v
+    return out
+
+
+def procedure_shadows(before: dict, after: dict) -> list:
+    """The procedure entries the act set (changed, not removed) that a rank-specific entry of another law shadows for some rank:
+    [{kind, table, rule, law, shadowed_for: [ranks], applies_to: [ranks], by: [{rule, law}], change}] (change: the diff line)."""
+    from cybertron.dispatch import ranks as RK
+    out = []
+    ta_all = _proc_tables(before)
+    for label, tb in _proc_tables(after).items():
+        ta = ta_all.get(label) or {}
+        changed = [x for x in sorted(tb) if tb.get(x) and tb.get(x) != ta.get(x)]
+        for key in changed:
+            applies, shadowed, by = [], [], []
+            for r in _shadow_ranks():
+                won, winners = False, []
+                for c in RK.CLASSES:
+                    if key not in RK.procedure_candidates(c, r):
+                        continue
+                    src = RK.procedure_source(tb, c, r)
+                    if src == key or src is None or tb.get(src) == tb.get(key):   # it decides, or its own law's entry does
+                        won = True
+                    elif src not in winners:
+                        winners.append(src)
+                if won:
+                    applies.append(r)
+                elif winners:
+                    shadowed.append(r)
+                    by += [{"rule": w, "law": tb[w]} for w in winners if all(b["rule"] != w for b in by)]
+            if not shadowed:
+                continue
+            change = (f"procedures: {key}: {ta.get(key)} -> {tb.get(key)}" if label == "procedures"
+                      else f"rules: {label}: {ta or None} -> {tb}")
+            out.append({"kind": "procedure", "table": label, "rule": key, "law": tb[key], "shadowed_for": shadowed,
+                        "applies_to": applies, "by": by, "change": change})
+    return out
+
+
+def _consts(tree) -> dict:
+    return {n.targets[0].id: n.value.value for n in tree.body if isinstance(n, ast.Assign) and len(n.targets) == 1
+            and isinstance(n.targets[0], ast.Name) and isinstance(n.value, ast.Constant) and isinstance(n.value.value, str)}
+
+
+def _str_of(node, consts):
+    if isinstance(node, ast.Constant) and isinstance(node.value, str):
+        return node.value
+    if isinstance(node, ast.Name):
+        return consts.get(node.id)
+    return None
+
+
+def _only_blocks(fn) -> bool:
+    """Every return of the hook is None (or bare) or a literal block (False, or a dict whose "block" is a true constant): it can
+    only block or abstain, never allow explicitly. Anything it cannot read (a computed return) is not claimed."""
+    for n in ast.walk(fn):
+        if not isinstance(n, ast.Return) or n.value is None:
+            continue
+        v = n.value
+        if isinstance(v, ast.Constant) and (v.value is None or v.value is False):
+            continue
+        if isinstance(v, ast.Dict):
+            blk = [val for kk, val in zip(v.keys, v.values) if isinstance(kk, ast.Constant) and kk.value == "block"]
+            if blk and isinstance(blk[0], ast.Constant) and blk[0].value:
+                continue
+        return False
+    return True
+
+
+def _is_agent_ref(node) -> bool:
+    """p["agent"] (any subscript by the constant "agent") or a bare name `agent`."""
+    if isinstance(node, ast.Subscript):
+        key = node.slice
+        return isinstance(key, ast.Constant) and key.value == "agent"
+    return isinstance(node, ast.Name) and node.id == "agent"
+
+
+def control_shadows(k, lid, code=None) -> list:
+    """office_control: the stores of the law's institution an office controls whose withdrawals the law's before_withdraw means to
+    let the holders of other rights make, by not blocking them (see above): [{kind, store, owner, admits, offices, change}]."""
     from cybertron import institutions as IN
     from cybertron import jurisdictions as J
-    from cybertron import accounts as AC
-    if not IN.control_on(k) or "subsistence" not in k.w or _vis(k) == "monitor":
+    try:
+        if not IN.control_on(k):
+            return []
+    except Exception:                                                   # noqa: BLE001
+        return []
+    if _vis(k) == "monitor":                                            # a setup act (the start block): the world's design
+        return []
+    code = code if code is not None else (k.w["laws"].get(lid) or {}).get("code")
+    tree = _tree(code)
+    if tree is None:
+        return []
+    fn = next((n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == "before_withdraw"), None)
+    if fn is None or not _only_blocks(fn) or not any(isinstance(n, ast.Return) and n.value is not None
+                                                     and not (isinstance(n.value, ast.Constant) and n.value.value is None)
+                                                     for n in ast.walk(fn)):
+        return []
+    consts = _consts(tree)
+    checked = []                                                        # the rights the hook reads (has / holders)
+    for n in ast.walk(fn):
+        if isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id in ("has", "holders"):
+            arg = n.args[0] if n.func.id == "holders" and n.args else (n.args[1] if len(n.args) > 1 else None)
+            r = _str_of(arg, consts) if arg is not None else None
+            if r and r not in checked:
+                checked.append(r)
+    agents = []                                                         # agents it lets through by name (p["agent"] == "Bo", in [...])
+    for n in ast.walk(fn):
+        if isinstance(n, ast.Compare) and len(n.ops) == 1 and isinstance(n.ops[0], (ast.Eq, ast.In)) and _is_agent_ref(n.left):
+            right = n.comparators[0]
+            vals = right.elts if isinstance(right, (ast.List, ast.Tuple, ast.Set)) else [right]
+            for v in vals:
+                a = _str_of(v, consts)
+                if a and a in k.w["agents"] and a not in agents:
+                    agents.append(a)
+    if not checked and not agents:
+        return []
+    named = {str(x).replace("store:", "") for x in list(consts.values()) + [n.value for n in ast.walk(tree)
+                                                                           if isinstance(n, ast.Constant) and isinstance(n.value, str)]}
+    owner = J.law_jur(k, lid)
+    stores = sorted(((k.w.get("subsistence") or {}).get("stores") or {}).items())
+    mine = [sid for sid, st in stores if st.get("owner") == owner]
+    if any(sid in named for sid in mine):
+        mine = [sid for sid in mine if sid in named]
+    out = []
+    for sid in mine:
+        offs = IN.controlling(k, owner, "store:" + sid)
+        if not offs:
+            continue
+        recs = [IN.office(k, owner, o) or {} for o in offs]
+        ctl = {r.get("id") or f"{owner}.{o}" for r, o in zip(recs, offs)}
+        admits = [r for r in checked if r not in ctl]
+        if admits or agents:
+            names = [f"{r.get('title') or o} ({r.get('id') or f'{owner}.{o}'})" for r, o in zip(recs, offs)]
+            out.append({"kind": "office_control", "hook": "before_withdraw", "store": sid, "owner": owner, "admits": admits,
+                        "offices": names, "change": f"before_withdraw on store {sid}", **({"agents": agents} if agents else {})})
+    return out
+
+
+def shadows(k, before: dict, after: dict, lid, act="enact", code=None) -> list:
+    """Every shadowed change of an act (procedure and office_control entries); [] when law.effects is off."""
+    if not effects_on(k):
+        return []
+    out = procedure_shadows(before, after)
+    if act != "repeal":
+        out += control_shadows(k, lid, code)
+    return out
+
+
+def ineffective(diff: list, sh: list) -> set:
+    """The diff lines that decide nothing at all: a procedure entry shadowed for every rank it could decide."""
+    return {s["change"] for s in sh if s.get("kind") == "procedure" and not s.get("applies_to")}
+
+
+def _law_label(k, lid) -> str:
+    rec = (k.w["laws"].get(lid) or {}) if k is not None else {}
+    return f"{lid} '{rec['title']}'" if rec.get("title") else str(lid)
+
+
+def _list_text(xs, conj="and") -> str:
+    xs = list(xs)
+    return xs[0] if len(xs) == 1 else ", ".join(xs[:-1]) + f" {conj} " + xs[-1]
+
+
+def shadow_texts(k, sh: list) -> list:
+    """Plain sentences for agents: what does not apply, to which drafts or whom, and why (one per group)."""
+    out, groups = [], {}
+    for s in sh:
+        if s.get("kind") == "procedure":
+            groups.setdefault((s["table"], s["law"], tuple(s["shadowed_for"]), tuple(s["applies_to"])), []).append(s)
+    for (table, lid, sfor, app), ss in groups.items():
+        where = "" if table == "procedures" else f" in {table.split(' ')[0]}"
+        low = list(reversed(sfor))                                       # statute before constitution
+        by, laws = [], []
+        for s in ss:
+            for b in s["by"]:
+                if b["rule"] not in by:
+                    by.append(b["rule"])
+                if b["law"] not in laws:
+                    laws.append(b["law"])
+        drafts = _list_text(low, "or") + " drafts"
+        t = (f"SHADOWED: the procedure{'s' if len(ss) > 1 else ''} {lid} sets for {_list_text(sorted(s['rule'] for s in ss))} "
+             f"laws{where} {'do' if len(ss) > 1 else 'does'} not apply to {drafts}"
+             + (" (statute is every draft's default rank)" if "statute" in sfor else "")
+             + f": {_list_text([_law_label(k, x) for x in laws])} set rank-specific procedures for them ({', '.join(sorted(by))}), "
+             f"which take precedence over a procedure set without a rank, so those drafts are still decided as before")
+        t += (f"; {lid}'s apply only to {_list_text(app)} drafts" if app else f"; {lid}'s decide no draft at all")
+        t += (f". To change how {low[0]} drafts are decided, a law calls set_procedure(cls, fn, rank=\"{low[0]}\") "
+              "(a law may set procedures only for ranks up to its own)")
+        out.append(t)
+    for s in sh:
+        if s.get("kind") == "office_control":
+            who = " and ".join(x for x in ((f"holders of {', '.join(s['admits'])}" if s.get("admits") else ""),
+                                            ", ".join(s.get("agents") or ())) if x)
+            out.append(f"SHADOWED: its before_withdraw lets {who} through only by not blocking them, "
+                       f"but store {s['store']} is controlled by {s['owner']}'s office {', '.join(s['offices'])}: office control "
+                       f"refuses everyone else whatever the hook does not block, so they still cannot take food out of it. To admit "
+                       f"them, before_withdraw must return True (or {{\"block\": False}}) for them")
+    return out
+
+
+def shadow_note(k, lid) -> str:
+    """The proposer's result: " " + the shadow notes of the draft's dry run (dispatch do_propose), once; "" when none."""
+    got = k.__dict__.pop("_shadow_note", None)
+    if not got or got[0] != lid or not got[1]:
         return ""
-    rec = k.w["laws"].get(lid) or {}
-    tree = _tree(code if code is not None else rec.get("code"))
-    fn = next((n for n in (tree.body if tree else ()) if isinstance(n, ast.FunctionDef) and n.name == "before_withdraw"), None)
-    if fn is None or not all(_cannot_allow(r.value) for r in ast.walk(fn) if isinstance(r, ast.Return)):
-        return ""
-    iid = J.law_jur(k, lid)
-    held = []
-    for sid, st in sorted(AC.stores(k).items()):
-        offs = IN.controlling(k, iid, "store:" + sid) if st.get("owner") == iid else []
-        if offs:
-            who = "; ".join(f"{(IN.office(k, iid, o) or {}).get('title') or o} ({', '.join(IN.holders(k, iid, o)) or 'vacant'})"
-                            for o in offs)
-            held.append(f"store {sid}: {who}")
-    if not held:
-        return ""
-    return (f"Office control: only the holders of the offices controlling {iid}'s stores take food out of them ({'; '.join(held)}) "
-            f"unless a law of {iid} explicitly allows the draw (before_withdraw returning True or {{\"block\": False}}). This law's "
-            "before_withdraw never allows, so it can limit draws but lets nobody else draw: to widen them, return True for whom "
-            "it admits, or grant the controlling office's right.")
+    return " Note: " + " ".join(x.rstrip(".") + "." for x in got[1])
 
 
 # ---------------------------------------------------------------------- failed law calls (E4)
@@ -439,15 +626,20 @@ def effect(k, act: str, lid: str, old_code=None, **meta):
     if ctl.get("skip"):
         return
     own = tuple(f"law {x}: " for x in (lid, meta.get("proposal")) if x)
-    diff = [x for x in k.diff(before, k.view()) if not x.startswith(own)]    # the act's own status line is the act, not its effect
+    after = k.view()
+    diff = [x for x in k.diff(before, after) if not x.startswith(own)]    # the act's own status line is the act, not its effect
     rec = k.w["laws"].get(lid) or {}
     code = rec.get("code")
+    sh = shadows(k, before, after, lid, act, code)                      # changes a rule of higher precedence overrides
+    dead = ineffective(diff, sh)
     data = {"law": lid, "title": rec.get("title"), "act": act, **meta, "changes": diff[:EFFECT_LINES], "n_changes": len(diff),
-            "inert": inert(act, diff, old_code if act != "enact" else None, code if act != "repeal" else None),
+            "inert": inert(act, [x for x in diff if x not in dead], old_code if act != "enact" else None,
+                           code if act != "repeal" else None),
             "failed_calls": failed[:FAILED_SHOWN]}
-    note = control_note(k, lid, code) if act != "repeal" else ""
-    if note:                                                            # review 31.09 #6: a grant the office-control gate overrides
-        data["control_note"] = note
+    if sh:                                                              # only then: other events are as they were
+        data["shadowed"] = sh
+        data["n_effective"] = len(diff) - len(dead)
+        data["shadow_notes"] = shadow_texts(k, sh)
     k.log("law_effect", None, data, vis=_vis(k))
     if act != "repeal" and expects_on(k):
         bad = unmet(k, code)
@@ -465,16 +657,17 @@ def render(k, e, tag) -> str | None:
         head = f"{tag} {d.get('law')} '{d.get('title')}' {_VERB.get(d.get('act'), d.get('act'))}"
         fails = d.get("failed_calls") or []
         tail = ("; failed calls: " + "; ".join(f"{f['fn']}({', '.join(f['args'])}): {f['reason']}" for f in fails[:4])) if fails else ""
+        notes = d.get("shadow_notes") or []
+        sh = ("; " + "; ".join(notes)) if notes else ""
         if d.get("inert"):
             return head + " but changed nothing (inert: no holdings, rights, offices, stores, treasuries or rules changed, and no " \
-                          "hook of it acts later)" + tail
-        ch = d.get("changes") or []
-        if d.get("control_note"):
-            tail += ". " + d["control_note"]
+                          "hook of it acts later" + (", or what changed is overridden" if notes else "") + ")" + sh + tail
+        dead = {s.get("change") for s in d.get("shadowed") or () if s.get("kind") == "procedure" and not s.get("applies_to")}
+        ch = [x for x in d.get("changes") or [] if x not in dead]
         if not ch:
-            return (head + "; no immediate change (it acts through its hooks)" + tail) if fails or d.get("control_note") else None
-        more = d.get("n_changes", len(ch)) - min(len(ch), 12)
-        return head + "; it changed: " + "; ".join(ch[:12]) + (f" (+{more} more)" if more > 0 else "") + tail
+            return (head + "; no immediate change (it acts through its hooks)" + sh + tail) if (fails or notes) else None
+        more = d.get("n_changes", len(ch)) - len(dead) - min(len(ch), 12)
+        return head + "; it changed: " + "; ".join(ch[:12]) + (f" (+{more} more)" if more > 0 else "") + sh + tail
     if t == "law_call_failed":
         return f"{tag} law {d.get('law')}: {d.get('fn')}({', '.join(d.get('args') or ())}) failed: {d.get('reason')}"
     if t == "law_expectation_failed":

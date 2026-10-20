@@ -1122,12 +1122,14 @@ class Kernel:
         before = self.view()
         self.dry = True
         loud = LE.effects_on(self)
-        at_enact = None
+        at_enact, shadow = None, []
         try:
             with D.isolated(self), LE.collect(self) as failed:          # law.v2: the preview's cascades are its own
                 self.enact(lid, via="preview")
                 if loud:                                                # law.effects: what the enactment itself changes
-                    at_enact = self.diff(before, self.view())
+                    v1 = self.view()
+                    at_enact = self.diff(before, v1)
+                    shadow = LE.shadows(self, before, v1, lid, code=self.w["laws"][lid]["code"])   # and what of it is overridden
                 if LE.expects_on(self):                                 # law.expects: the draft's stated effect, checked at once
                     bad = LE.unmet(self, self.w["laws"][lid]["code"])
                     if bad:
@@ -1151,7 +1153,7 @@ class Kernel:
             self.dry = False
             self._restore(snap)
             if loud:                                                    # read by the proposal (dispatch do_propose): its inert flag
-                self.__dict__["_dry_enact"] = (lid, at_enact)
+                self.__dict__["_dry_enact"] = (lid, at_enact, shadow)
 
     def trial(self, lid, rounds=1) -> list:
         """W9 (dispatch.ranks.requirement): what a draft does, on a copy of the world: enact it and run `rounds` round-ends of hooks

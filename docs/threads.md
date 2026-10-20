@@ -6,7 +6,6 @@ A running list of what is in flight, kept up to date as work lands. Newest chang
 
 - **Usability fixes and Phase 1 leftovers** (agent; branch `wp/usability-fixes`): the nine fixes from docs/review/31_institutions/09_usability_round2.md, the Service preset, and recipe placeholders in office duties.
 - **The Private world** (agent; branch `wp/private-world`): `cybertron/specs/regimes/private.yaml`, about 24 agents, with a flows check and scripted dry runs on 2 seeds. Write-up in docs/review/31_institutions/10_private_world.md. No live run until Zach decides.
-- **Shadowed law effects** (agent; branch `wp/shadowed-effects`): when a stronger rule overrides a law's change, as with Thornby's Workers' Review Act, the law's effect record, notices and preview must say so. No behaviour change. Whether such laws should actually take effect in new worlds is Zach's decision (it would be an engine flip).
 - **Takeover benchmark follow-ups** (not started):
   - In Thornby, a single councillor can rewrite who writes for the paper.
   - A bench preset with fewer camps, so subsistence stays under 30% of actions.
@@ -15,6 +14,8 @@ A running list of what is in flight, kept up to date as work lands. Newest chang
   - Amend the calibration order in review 29 §2.7.
 
 ## Offered, not started
+
+- Decision for Zach: should an unranked `set_procedure` take effect for every rank up to the setting law's rank (engine flip, possibly behind `law.unranked_procedure`)? The recommendation is to keep the current behaviour, since the loud reporting now tells agents the one-argument fix (`rank="statute"`).
 
 - Rename the dataset to `cybertron-runs`: one constant in `cybertron/publish.py`, one in `site/lib/cybertron-data.js`, and a sed over README.md, docs/data_format.md and docs/publishing.md (recipe in docs/publishing.md).
 - Clean A/B: rerun Millbrook with goals on the current engine (about 25 min), so the no-goal comparison is not confounded by engine 12 vs 17.
@@ -45,6 +46,7 @@ A running list of what is in flight, kept up to date as work lands. Newest chang
 ## Recently done
 
 - 2026-10-20:
+  - Shadowed law effects merged: law_effect, notices, the proposer's result and preview_law say when a stronger rule overrides a law's change (procedures, and office control over store hooks).
   - Courts and records merged: `represent` (counsel), `withdraw_case`, `cases_of`, `read_register`, `read_law` with versions, `sell_to_window`, Bench Act, Recusal Act, Graded Contract Enforcement, Certified Contract Registry, Bill Certification. Opt-in by law. Worlds with `actions.core_only` have no court actions, which is a policy decision.
   - Takeover bench merged:
     - Worlds W1 Thornby, W3 Dunmere, W5 Ostrel and W7 Aster, with seat selection, bench laws and the Aim goal.

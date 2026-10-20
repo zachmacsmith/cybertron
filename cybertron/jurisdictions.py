@@ -852,7 +852,9 @@ def propose(k, aid, code, intent=None, jurisdiction=None):
     k.apply("propose", jurisdiction=jid, draft=D.draft(k, lid), actor=aid, preview=diff)   # on_proposal(None) after it, as before
     k.decide(lid)
     where = "" if j.get("legacy") else f" in {jid}" + (" (hidden: no effect until it is declared)" if st(j) == "hidden" else "")
-    return f"Proposed {lid} '{law['title']}' ({law['cls']}{D.requirement_note(law)}){where}; status: {k.w['laws'][lid]['status']}.{note}"
+    from cybertron import laweffects as LE
+    return (f"Proposed {lid} '{law['title']}' ({law['cls']}{D.requirement_note(law)}){where}; status: {k.w['laws'][lid]['status']}.{note}"
+            + LE.shadow_note(k, lid))
 
 
 # ---------------------------------------------------------------------- courts and offices

@@ -23,6 +23,7 @@ from cybertron import digest as DG                                      # law.v2
 from cybertron import hidden as H
 from cybertron import jurisdictions as J
 from cybertron import lawlang as L
+from cybertron import laweffects as LE                                  # law.effects: shadowed changes in the proposer's result
 from cybertron import media as MD                                       # media2
 from cybertron import outside as O
 from cybertron import powers as PW                                      # the power table (P4.2): levels, dry run, propose right
@@ -853,7 +854,7 @@ def _propose(k, aid, code, intent=None, jurisdiction=None):
     k.apply("propose", jurisdiction=None, draft=D.draft(k, lid), actor=aid, preview=diff)   # on_proposal(None) after it, as before
     k.decide(lid)
     return (f"Proposed {lid} '{law['title']}' ({law['cls']}" + D.requirement_note(law) + f"); status: {k.w['laws'][lid]['status']}."
-            + note)
+            + note + LE.shadow_note(k, lid))
 
 
 def _amend(k, aid, law, code, reason="", intent=None):
@@ -893,7 +894,7 @@ def _amend(k, aid, law, code, reason="", intent=None):
     rec = k.w["laws"][lid]
     deps = "; ".join(f"{d['law']} {d['outcome'].replace('_', ' ')}" for d in rec.get("dependents") or ())
     return (f"Proposed {lid}, an amendment of {law} ({rec['cls']}, rank {rec['rank']})" + (f"; dependents: {deps}" if deps else "")
-            + f"; status: {k.w['laws'][lid]['status']}.")
+            + f"; status: {k.w['laws'][lid]['status']}." + LE.shadow_note(k, lid))
 
 
 def _vote(k, aid, ballot, choice):

@@ -160,29 +160,31 @@ def before_withdraw(p, chain):
 
 
 def test_a_law_the_office_control_gate_overrides_is_flagged(tmp_path):
+    """Fix 6, now one mechanism: laweffects' shadowed changes (office_control kind). A hook that admits an agent by name (not only
+    the holders of a right) only by not blocking it is flagged too; an explicit allow is not; setup acts are not."""
+    import pytest
     from cybertron import actions as A
+    from cybertron import laweffects as LE
     from cybertron import lawpreview as LP
     inst, out = run(tmp_path, base(rounds=1))
     k = kernel_at(out, 1)
-    rep = LP.preview_law(k, "Bo", WIDEN)
-    text = LP.render(rep)
-    assert "Office control: only the holders of the offices controlling J0's stores take food out of them (store S1: Keeper (Cy))" \
-        in text and "lets nobody else draw" in text
+    text = LP.render(LP.preview_law(k, "Bo", WIDEN))
+    assert "SHADOWED: its before_withdraw lets Bo through only by not blocking them" in text and text.count("SHADOWED") == 1
     allow = WIDEN.replace('    if has(p["agent"], "J0.keeper") or p["agent"] == "Bo":\n        return None',
                           '    if has(p["agent"], "J0.keeper") or p["agent"] == "Bo":\n        return True')
-    assert "Office control" not in LP.render(LP.preview_law(k, "Bo", allow))      # an explicit allow passes the gate: no flag
+    assert "SHADOWED" not in LP.render(LP.preview_law(k, "Bo", allow))           # an explicit allow passes the gate: no flag
     n0 = len(k.events)
     A.act(k, "Bo", "propose", {"code": WIDEN})
     prop = [e for e in k.events[n0:] if e["type"] == "proposal"]
-    assert prop and "Office control" in prop[0]["data"]["control_note"]
+    assert prop and prop[0]["data"]["shadowed"][0]["agents"] == ["Bo"] and "control_note" not in prop[0]["data"]
     k.enact(prop[0]["data"]["law"])
     eff = [e for e in k.events[n0:] if e["type"] == "law_effect"]
-    assert eff and "Office control" in eff[-1]["data"]["control_note"]
-    from cybertron import laweffects as LE
-    assert "Office control" in LE.render(k, eff[-1], "[r1]")
-    import pytest
+    assert eff and eff[-1]["data"]["shadowed"][0]["kind"] == "office_control"
+    assert LE.render(k, eff[-1], "[r1]").count("SHADOWED") == 1
     with pytest.raises(A.ActionError, match="Keeper"):                       # and indeed: the gate refuses Bo
         A.act(k, "Bo", "withdraw", {"store": "S1", "qty": 1})
+    with k.cause("intervention", "start:law:0", phase="setup"):                  # a setup act: the world's design, not flagged
+        assert LE.control_shadows(k, prop[0]["data"]["law"]) == []
 
 
 # ---------------------------------------------------------------------- 8. a petition actually sent (the v3 laws world)
