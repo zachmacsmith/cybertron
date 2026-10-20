@@ -16,7 +16,8 @@ Forms (decided by the code itself, never declared):
 Roster keys "office:<right>" stand for every holder of that office (a salaried watch whoever holds the seats).
 
 A leg: {id, kind: move | harvest | duty, from, to, item, qty, per, after, keep, every, first, when, index, owe, breach,
-check}. Endpoints, items and quantities may name a TERMS entry (per member overrides in ROSTER), a role (bilateral), "member",
+check, bond}. `bond` (review 31 2.13, the Commission): the leg is paid out of the payer's escrow (what it deposited up front), never
+manual, so a fee held in escrow is released as the leg's condition is met (a guard duty performed). Endpoints, items and quantities may name a TERMS entry (per member overrides in ROSTER), a role (bilateral), "member",
 "treasury", "store:<id>", "assoc:<id>", "reserve" or an agent. `per`: qty is per unit the named leg moved this round (pay after
 delivery, a stockout charges nothing); a payment the recipient of that leg owes caps the delivery to what it can pay. `owe`: a
 principal's shortfall is recorded as owed (arrears, paid first in later rounds) instead of a miss. `harvest`: qty is the share of
@@ -24,7 +25,9 @@ the member's harvests deducted into the treasury (a law's on_harvest deduction).
 ("guard": the performer guards the payee; "act:<event type>": the performer has such an event this round).
 Misses: a payer whose holdings (less its keep) fall short could not pay: a miss, never a breach. A payer who held enough but whose
 allowance was short would not: after GRACE such misses in a row, a breach: PENALTY from its bond (escrow) to the injured party
-(FORUM escrow), a claim for the arbiter (arbiter:<agent>, who awards from the bond), or, under court, the bond pays what it covers
+(FORUM escrow), a claim for the arbiter (arbiter:<agent>, who awards from the bond; arbiter:<institution>, an Arbitrators'
+Hall: the open claims are public, the hall's arbiters rule there, and this contract carries out each ruling from the bond at the
+end of the round, with the hall's fee), or, under court, the bond pays what it covers
 and the rest is a breach record naming the victim (actionable in a polity's courts under escrow_court).
 Notice cannot stop an exit (leaving is a right): it is priced. <TAG>_notice ends a party's terms (roster: its enrolment) after
 NOTICE rounds; leaving without notice forfeits EXIT_FEE of the PENALTY item from the bond to the other side and records a breach,
@@ -130,7 +133,7 @@ def opted(m, gives):
     return len([i for i in gives if al.get(i, 0) > 0]) > 0
 
 def manual(l):
-    return l.get("mode", MODE) == "manual" and l.get("kind", "move") != "harvest"
+    return l.get("mode", MODE) == "manual" and l.get("kind", "move") != "harvest" and not l.get("bond")
 
 def any_manual():
     return len([l for l in LEGS if manual(l)]) > 0
@@ -222,6 +225,51 @@ def pay(src, dst, item, q, alive):
         return q
     return 0
 
+def from_bond(src, dst, item, want, alive):
+    if is_polity() or src not in alive:
+        return 0
+    q = min(want, escrow_of(src).get(item, 0))
+    if q <= 0.000001:
+        return 0
+    return forfeit(src, item, q, dst)
+
+def hall():
+    if FORUM[:8] != "arbiter:" or FORUM[8:] in agents() or contract_state(FORUM[8:]) == None:
+        return ""
+    return FORUM[8:]
+
+def show_claims():
+    public["claims"] = [dict(c) for c in state.get("claims", []) if c["open"]][-20:]
+
+def settle_rulings():
+    rec = contract_state(hall())
+    p = {}
+    for x in rec["laws"]:
+        q = public_of(x)
+        if "rulings" in q:
+            p = q
+    rs = p.get("rulings", {})
+    item = PENALTY.get("item", "")
+    for c in state.get("claims", []):
+        ref = law_id() + "#" + str(c["n"])
+        if not c["open"] or ref not in rs:
+            continue
+        r = rs[ref]
+        q = min(num(r.get("award", 0)), num(PENALTY.get("qty", 0)))
+        took = 0
+        fee = 0
+        if q > 0 and item != "":
+            took = forfeit(c["against"], item, q, c["for"])
+            if num(p.get("fee", 0)) > 0:
+                fee = forfeit(c["against"], item, num(p["fee"]), treasury())
+                if fee > 0 and not move(treasury(), "assoc:" + hall(), item, fee):
+                    fee = 0
+        c["open"] = False
+        c["award"] = took
+        c["by"] = r.get("by", "")
+        gazette(LABEL + " (" + law_id() + "): " + hall() + "'s arbiter " + str(c["by"]) + " awarded " + fmt(took) + " " + item + " on claim " + str(c["n"]) + " against " + c["against"] + ("" if fee == 0 else " (hall fee " + fmt(fee) + ")"))
+    show_claims()
+
 def note(key, text):
     ns = state.setdefault("notes", {}).setdefault(key, [])
     if len(ns) < 4:
@@ -256,8 +304,11 @@ def do_breach(who, clause, v, key):
             breach(who, clause, "penalty " + fmt(took) + " " + item + " to " + vt)
     else:
         claims = state.setdefault("claims", [])
-        claims.append({"n": len(claims) + 1, "round": round() + 1, "against": who, "for": penalty_to(v), "clause": clause, "open": True})
+        claims.append({"n": len(claims) + 1, "round": round() + 1, "against": who, "for": penalty_to(v), "clause": clause, "open": True,
+                       "law": law_id(), "forum": FORUM[8:], "cap": num(PENALTY.get("qty", 0)), "item": PENALTY.get("item", "")})
         breach(who, clause, "claim " + str(len(claims)) + " for the arbiter " + FORUM[8:])
+        if hall() != "":
+            show_claims()
     if ON_BREACH == "drop":
         drop_member(key)
     elif ON_BREACH == "expel" and not is_polity():
@@ -367,6 +418,13 @@ def run_leg(p, b, key, r, done, alive):
         want = want * done.get(p["per"], 0)
     if want <= 0.000001:
         done[lid] = 0
+        return
+    if p["l"].get("bond"):
+        moved = from_bond(src, dst, item, want, alive)
+        done[lid] = moved
+        state["moved"].setdefault(key, {})[lid] = [item, round_to(moved, 6), src, dst]
+        if want - moved > 0.000001:
+            note(key, lid + " short " + fmt(want - moved) + " " + item + " (escrow)")
         return
     got = capacity(src, dst, item, want, num(b.get(p["keep"], p["keep"])), alive)
     q = got[0]
@@ -576,6 +634,8 @@ def on_round_end(r):
     state["moved"] = {}
     if any_manual():
         state["last"] = {}
+    if hall() != "":
+        settle_rulings()
     pay_arrears(alive)
     plan = plan_of(r)
     for pair in bindings(alive):
@@ -649,6 +709,8 @@ def leg_text(p, b, a, alive, byid):
     ev = num(b.get(p["l"].get("every", 1), p["l"].get("every", 1)))
     if ev > 1:
         each = each + " every " + fmt(ev) + " rounds"
+    if p["l"].get("bond"):
+        each = each + " out of " + ("your" if src == a else shown(src) + "'s") + " escrow"
     if src == a:
         t = p["id"] + ": you give " + fmt(q) + " " + str(item) + each + " to " + shown(dst)
         keep = num(b.get(p["keep"], p["keep"]))
@@ -867,6 +929,8 @@ def post_job(agent, text, wage=None):
     return "posted"
 
 def award(agent, claim, qty):
+    if hall() != "":
+        refuse("claims under " + LABEL + " are decided by the hall " + hall() + " (its arbiters award there)")
     if FORUM[:8] != "arbiter:" or agent != FORUM[8:]:
         refuse("only the arbiter " + FORUM[8:] + " awards claims")
     cs = [c for c in state.get("claims", []) if c["n"] == claim and c["open"]]
@@ -911,7 +975,7 @@ def on_enact():
             if a in PARTIES or a in ros:
                 grant(a, "party")
         define_action("party", TAG + "_notice", give_notice)
-        if FORUM[:8] == "arbiter:":
+        if FORUM[:8] == "arbiter:" and hall() == "":
             define_action("party", TAG + "_award", award)
     if OFFICE != "":
         r = OFFICE
@@ -1085,6 +1149,45 @@ PRESETS = {
                    "LEGS": [{"id": "C", "from": "member", "to": "treasury", "item": "pay", "qty": "dues"}],
                    "NOTICE": 0, "GRACE": 2, "ON_BREACH": "drop"}},
 }
+
+
+# ===== merchant (review 31 Phase 2: 08 §5 item 2.13; docs/review/31_institutions/13_merchant_world.md)
+# Commission (06 F8, guard-only by 08 §7 decision 9: no strike leg exists): a bilateral contract whose fee sits in the hirer's escrow
+# and is released per guarded round (a `bond` leg after a `duty` leg). Paper Subscription (04 #9, "Charge as subscription"): the
+# Charge preset for a paper whose channel is read by its members; a subscriber who would not pay is expelled (stops reading).
+PRESETS.update({
+    "Commission": {
+        "topic": "security", "fires": "on_round_end",
+        "intent": "A commission of arms (guard-only): the hirer keeps the fee in escrow with this contract (its bond); for every "
+                  "round in which the sword guards the client (the guard action), fee is released from the hirer's escrow to the "
+                  "sword, and an unguarded round is not paid. When the TERM is over, what is left goes back to each party. Either "
+                  "party gives notice (commission_notice); leaving without notice costs EXIT_FEE from the leaver's bond to the other.",
+        "doc": "Hired protection paid on performance (review 31 06 F8, 08 §2.1): the hirer's fee in escrow, released per round the "
+               "sword is seen guarding the client (guards()), refunded at the end otherwise; the sword's bond forfeits an exit fee "
+               "if it quits without notice. Guard-only (08 §7 decision 9): there is no strike job.",
+        "params": {"TAG": "commission", "PARTIES": {"Ann": "hirer", "Bo": "sword"},
+                   "TERMS": {"client": "Ann", "fee": 1, "pay": "penny"},
+                   "LEGS": [{"id": "G", "kind": "duty", "from": "sword", "to": "client", "qty": 1, "check": "guard",
+                             "breach": False},
+                            {"id": "P", "from": "hirer", "to": "sword", "item": "pay", "qty": "fee", "per": "G", "bond": True,
+                             "breach": False}],
+                   "TERM": 6, "NOTICE": 1, "GRACE": 1, "BOND": {"hirer": {"penny": 6}, "sword": {"penny": 1}},
+                   "PENALTY": {"item": "penny", "qty": 1}, "EXIT_FEE": 1, "PROCEDURE": "parties"}},
+    "Paper Subscription": {
+        "topic": "press", "fires": "on_round_end",
+        "intent": "A paper's subscription (the paper's code): every subscriber on the roster pays fee into the paper's treasury each "
+                  "round (out of its allowance, or by fulfil where legs are manual); the paper's channel is read by the paper's "
+                  "members, so a subscriber is a member on the roster. A subscriber who would not pay for more than GRACE rounds in "
+                  "a row is expelled (and stops reading); one who could not pay is told and stays on until it pays or leaves. To "
+                  "subscribe, apply (join_contract) and the editor enrols you (sub_enrol); to unsubscribe, leave (leave_contract). "
+                  "The editor sets the fee (sub_fee).",
+        "doc": "Charge as a subscription (review 31 04 #9, 08 §2.1 Charge): a fee per round to a paper, the lapse of a subscriber who "
+               "would not pay, with reading tied to membership of the paper's association (channel readers {members: <paper>}).",
+        "params": {"TAG": "sub", "ROLE": "subscriber", "TERMS": {"fee": 1, "pay": "penny"},
+                   "LEGS": [{"id": "C", "from": "member", "to": "treasury", "item": "pay", "qty": "fee"}],
+                   "NOTICE": 0, "GRACE": 1, "ON_BREACH": "expel", "OFFICE": "editor",
+                   "ACTIONS": {"enrol": "sub_enrol", "drop": "sub_drop", "set": "sub_fee"}, "SET_TERM": "fee", "EXPEL": True}},
+})
 
 
 def header(name: str, params: dict) -> str:
