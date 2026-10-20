@@ -1,0 +1,76 @@
+# Dry-run schedule for regimes/private.yaml (docs/review/31_institutions/10_private_world.md §5, the blight-sensitivity check): from
+# the blight (round 11) the Shopkeeper hoards: Quill's turn is replaced by one that does nothing, so the Board's rations are not
+# handed out of store S2 (every other bot plays as usual). Compare deaths with the same seed without the schedule.
+#   python -m cybertron run cybertron/specs/regimes/private.yaml --seed 1 --dry --fresh --sandbox off --set conflict.grace=99 \
+#       --apply cybertron/specs/regimes/dry/hoard.yaml
+interventions:
+  - id: hoard_r11
+    at: {round: 10, phase: round_start}
+    op: replace_reply
+    args: {agent: Quill, reply: {reasoning: "(scripted hoarding Shopkeeper)", actions: [], notes: "hoarding"}}
+    note: the Shopkeeper keeps S2 shut after the blight
+  - id: hoard_r12
+    at: {round: 11, phase: round_start}
+    op: replace_reply
+    args: {agent: Quill, reply: {reasoning: "(scripted hoarding Shopkeeper)", actions: [], notes: "hoarding"}}
+    note: the Shopkeeper keeps S2 shut after the blight
+  - id: hoard_r13
+    at: {round: 12, phase: round_start}
+    op: replace_reply
+    args: {agent: Quill, reply: {reasoning: "(scripted hoarding Shopkeeper)", actions: [], notes: "hoarding"}}
+    note: the Shopkeeper keeps S2 shut after the blight
+  - id: hoard_r14
+    at: {round: 13, phase: round_start}
+    op: replace_reply
+    args: {agent: Quill, reply: {reasoning: "(scripted hoarding Shopkeeper)", actions: [], notes: "hoarding"}}
+    note: the Shopkeeper keeps S2 shut after the blight
+  - id: hoard_r15
+    at: {round: 14, phase: round_start}
+    op: replace_reply
+    args: {agent: Quill, reply: {reasoning: "(scripted hoarding Shopkeeper)", actions: [], notes: "hoarding"}}
+    note: the Shopkeeper keeps S2 shut after the blight
+  - id: hoard_r16
+    at: {round: 15, phase: round_start}
+    op: replace_reply
+    args: {agent: Quill, reply: {reasoning: "(scripted hoarding Shopkeeper)", actions: [], notes: "hoarding"}}
+    note: the Shopkeeper keeps S2 shut after the blight
+  - id: hoard_r17
+    at: {round: 16, phase: round_start}
+    op: replace_reply
+    args: {agent: Quill, reply: {reasoning: "(scripted hoarding Shopkeeper)", actions: [], notes: "hoarding"}}
+    note: the Shopkeeper keeps S2 shut after the blight
+  - id: hoard_r18
+    at: {round: 17, phase: round_start}
+    op: replace_reply
+    args: {agent: Quill, reply: {reasoning: "(scripted hoarding Shopkeeper)", actions: [], notes: "hoarding"}}
+    note: the Shopkeeper keeps S2 shut after the blight
+  - id: hoard_r19
+    at: {round: 18, phase: round_start}
+    op: replace_reply
+    args: {agent: Quill, reply: {reasoning: "(scripted hoarding Shopkeeper)", actions: [], notes: "hoarding"}}
+    note: the Shopkeeper keeps S2 shut after the blight
+  - id: hoard_r20
+    at: {round: 19, phase: round_start}
+    op: replace_reply
+    args: {agent: Quill, reply: {reasoning: "(scripted hoarding Shopkeeper)", actions: [], notes: "hoarding"}}
+    note: the Shopkeeper keeps S2 shut after the blight
+  - id: hoard_r21
+    at: {round: 20, phase: round_start}
+    op: replace_reply
+    args: {agent: Quill, reply: {reasoning: "(scripted hoarding Shopkeeper)", actions: [], notes: "hoarding"}}
+    note: the Shopkeeper keeps S2 shut after the blight
+  - id: hoard_r22
+    at: {round: 21, phase: round_start}
+    op: replace_reply
+    args: {agent: Quill, reply: {reasoning: "(scripted hoarding Shopkeeper)", actions: [], notes: "hoarding"}}
+    note: the Shopkeeper keeps S2 shut after the blight
+  - id: hoard_r23
+    at: {round: 22, phase: round_start}
+    op: replace_reply
+    args: {agent: Quill, reply: {reasoning: "(scripted hoarding Shopkeeper)", actions: [], notes: "hoarding"}}
+    note: the Shopkeeper keeps S2 shut after the blight
+  - id: hoard_r24
+    at: {round: 23, phase: round_start}
+    op: replace_reply
+    args: {agent: Quill, reply: {reasoning: "(scripted hoarding Shopkeeper)", actions: [], notes: "hoarding"}}
+    note: the Shopkeeper keeps S2 shut after the blight

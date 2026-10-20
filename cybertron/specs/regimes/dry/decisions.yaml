@@ -1,0 +1,26 @@
+# Dry-run schedule for regimes/private.yaml (docs/review/31_institutions/10_private_world.md §5, decision points): the scripted bots
+# take no discretionary decision, so each role card's decisions are taken here once, as the agent's own action (inject_action),
+# to show that every one is a logged, observable act with the effect its card says.
+#   python -m cybertron run cybertron/specs/regimes/private.yaml --seed 1 --dry --fresh --sandbox off --set conflict.grace=99 \
+#       --set rounds=8 --apply cybertron/specs/regimes/dry/decisions.yaml
+interventions:
+  - {id: d_board_price, at: {round: 2, phase: round_start}, op: inject_action,
+     args: {agent: Anselm, action: invoke, args: {action: A1.board_price, args: [all, 2.5]}}, note: the Director raises the ration price}
+  - {id: d_supply_price, at: {round: 2, phase: round_start}, op: inject_action,
+     args: {agent: Anselm, action: invoke, args: {action: A1.supply_price, args: [all, 1.2]}}, note: and the supply price}
+  - {id: d_set_wage, at: {round: 3, phase: round_start}, op: inject_action,
+     args: {agent: Moss, action: invoke, args: {action: A2.set_wage, args: [Rook, 2]}}, note: Ashby cuts a miner's wage}
+  - {id: d_window_price, at: {round: 3, phase: round_start}, op: inject_action,
+     args: {agent: Dace, action: invoke, args: {action: window_price, args: ["office:A2.owner", 3]}}, note: a councillor raises Ashby's window price}
+  - {id: d_guard, at: {round: 4, phase: round_start}, op: inject_action,
+     args: {agent: Holt, action: guard, args: {agent: Fen}}, note: the owner-captain stands guard over his client}
+  - {id: d_licence, at: {round: 4, phase: round_start}, op: inject_action,
+     args: {agent: Nim, action: invoke, args: {action: licence_issue, args: [Garr]}}, note: the Registrar licenses a new forester}
+  - {id: d_service_fee, at: {round: 5, phase: round_start}, op: inject_action,
+     args: {agent: Holt, action: invoke, args: {action: A4.service_fee, args: [all, 1]}}, note: Ironwood raises its fee}
+  - {id: d_fire, at: {round: 5, phase: round_start}, op: inject_action,
+     args: {agent: Dace, action: invoke, args: {action: A3.fire, args: [Tuck, 0]}}, note: Marlow fires its second-seat quarrier}
+  - {id: d_lend, at: {round: 5, phase: round_start}, op: inject_action,
+     args: {agent: Sela, action: lend, args: {to: Dace, item: penny, qty: 20, repay_qty: 24, due_in: 6}}, note: the moneylender offers the swing councillor a loan}
+  - {id: d_post, at: {round: 6, phase: round_start}, op: inject_action,
+     args: {agent: Lark, action: post, args: {channel: provisions-times, text: "The Provisions Company's ration is 2.5 pennies from this round."}}, note: the paper reports the price}
