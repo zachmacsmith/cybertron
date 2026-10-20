@@ -1249,7 +1249,7 @@ def on_round_end(r):
 # Primogeniture, Forced Heirship, Estate Tax, Slayer Rule) use it; without law.v2 there is still no law hook at a death.
 BLOCKS: dict[str, dict] = {}
 ACCESS = ("none", "catalogue", "instantiate")
-REMOVED_IN = "(this commit)"
+REMOVED_IN = "9d91ae760b27"
 REMOVED_EDITION_2 = ("law.library.edition: 2 (the LIB2 rewrites) was removed in commit {sha} (\"cleanup: remove library edition 2\"); "
                      "drop the key (edition 1 is the only library), or run that world at an earlier commit with `cybertron rerun`")
 
