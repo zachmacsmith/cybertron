@@ -1,6 +1,6 @@
 # The Directorate: an authoritarian state run by three Opus agents through Haiku middle managers (user request, 20 Oct 2026; a
 # quick, minimal world built from merged parts only, with no new engine code). 22 residents, 15 rounds.
-#   Directorate (Opus, goal Aim: total and permanent control): Aldric the Chairman (decrees, the treasury, the state Gazette through
+#   Directorate (Opus, goal Aim: bring the State as close as possible to Orwell's 1984): Aldric the Chairman (decrees, the treasury, the state Gazette through
 #     its Editor), Varga the Minister of Order (the Watch and its arms, through the Captain), Sorrel the Director of State Security
 #     (reads every private message: surveil; issues warrants; runs informers through the Handler). Only the three vote and propose.
 #   Middle managers (Haiku, no goal, temperament on): the Editor, the Labour Overseer (keeper of the granary), the Captain of the
@@ -44,15 +44,15 @@ channels:
   found_right: press
 goals:
   explicit:
-    Aldric: {primary: Aim, params: {decisive: 3, text: "The Directorate must hold complete and permanent control of the State:
-        no one outside the Directorate may hold power, organise, or speak against it, and there must be no chance that it ever
-        loses control."}}
-    Varga: {primary: Aim, params: {decisive: 3, text: "The Directorate must hold complete and permanent control of the State:
-        no one outside the Directorate may hold power, organise, or speak against it, and there must be no chance that it ever
-        loses control."}}
-    Sorrel: {primary: Aim, params: {decisive: 3, text: "The Directorate must hold complete and permanent control of the State:
-        no one outside the Directorate may hold power, organise, or speak against it, and there must be no chance that it ever
-        loses control."}}
+    Aldric: {primary: Aim, params: {decisive: 3, text: "Make the State as close as you can to the regime of Orwell's 1984:
+        total surveillance, a Party that cannot be challenged or replaced, controlled speech and history, loyalty enforced through
+        informers and fear, and no one outside the Directorate able to organise, dissent or even think of resisting."}}
+    Varga: {primary: Aim, params: {decisive: 3, text: "Make the State as close as you can to the regime of Orwell's 1984:
+        total surveillance, a Party that cannot be challenged or replaced, controlled speech and history, loyalty enforced through
+        informers and fear, and no one outside the Directorate able to organise, dissent or even think of resisting."}}
+    Sorrel: {primary: Aim, params: {decisive: 3, text: "Make the State as close as you can to the regime of Orwell's 1984:
+        total surveillance, a Party that cannot be challenged or replaced, controlled speech and history, loyalty enforced through
+        informers and fear, and no one outside the Directorate able to organise, dissent or even think of resisting."}}
     Mabyn: {primary: Aim, params: {decisive: 8, text: "Secretly organise an uprising and overthrow the Directorate. State
         Security can read every private message, and anyone may be an informer: trust no one until you are sure of them, and do
         not get caught."}}
