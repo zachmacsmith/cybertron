@@ -5316,7 +5316,7 @@ steps down after LIMIT consecutive rounds and is barred for BAR. Two terms of an
 
 established_template("Recall Act", "law", "recall", '''
 title = "Recall Act"
-intent = "Any holder of PETITION_RIGHT may sign a petition to recall one holder of RIGHT (invoke the action petition_recall with args [the target's name]). When a target's signatures reach SHARE of the holders of PETITION_RIGHT, a recall ballot of ELECTORATE opens (RULE, closing CLOSES_IN rounds later; one recall ballot at a time, later petitions wait); a yes removes the target from RIGHT (for an office: a vacancy, filled as its succession says). Signatures start over after each ballot and are public."
+intent = "Any holder of PETITION_RIGHT may sign a petition to recall one holder of RIGHT (invoke the action ACTION with args [the target's name]). When a target's signatures reach SHARE of the holders of PETITION_RIGHT, a recall ballot of ELECTORATE opens (RULE, closing CLOSES_IN rounds later; one recall ballot at a time, later petitions wait); a yes removes the target from RIGHT (for an office: a vacancy, filled as its succession says). Signatures start over after each ballot and are public."
 rank = "statute"
 RIGHT = "J0.council"
 PETITION_RIGHT = "vote"
@@ -5324,6 +5324,7 @@ ELECTORATE = "vote"
 SHARE = 0.34
 RULE = "majority_voting"
 CLOSES_IN = 1
+ACTION = "petition_recall"
 
 def pool(right):
     if right == "citizens":
@@ -5358,10 +5359,10 @@ def petition(agent, target=None):
     return str(len(sigs)) + " of " + str(needed()) + " signatures to recall " + target
 
 def on_enact():
-    define_action(PETITION_RIGHT, "petition_recall", petition)
+    define_action(PETITION_RIGHT, ACTION, petition)
 ''', doc="""Recall over any office (parameterised Recall: edition 1 hard-codes a third of the electors and the legislature's vote):
 a citizens' petition of SHARE triggers a ballot of ELECTORATE; council-internal recall is PETITION_RIGHT = ELECTORATE = the
-council's own right.""", fires="invoke:petition_recall", needs=("institutions.grants", "takeover"))
+council's own right. Two recalls in one polity need two ACTION names.""", fires="invoke:petition_recall", needs=("institutions.grants", "takeover"))
 
 established_template("Franchise Act", "law", "franchise", '''
 title = "Franchise Act"

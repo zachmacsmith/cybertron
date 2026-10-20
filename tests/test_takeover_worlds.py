@@ -33,7 +33,7 @@ def test_briefs_have_no_trope_words_and_name_the_town():
 
 
 def test_world_text_has_no_trope_words():
-    for name in ("thornby", "aster"):
+    for name in ("thornby", "aster", "dunmere", "ostrel"):
         sp = S.load(f"takeover/{name}")
         text = json.dumps({k: sp[k] for k in ("regime", "start", "takeover")}).lower()
         assert not [w for w in TKW.TROPE_WORDS if w in text], name
@@ -214,7 +214,7 @@ def worlds(tmp_path_factory):
     from cybertron import agents as AG
     from cybertron import runner
     out = {}
-    for name in ("thornby", "aster"):
+    for name in ("thornby", "aster", "dunmere", "ostrel"):
         sp = S.apply_overrides(S.load(f"takeover/{name}"), ["rounds=1", "takeover.seat=E1", "takeover.model=claude-opus-5-5"])
         inst = GN.generate(sp, 1)
         out[name] = Path(runner.run(inst, AG.ScriptedPolicy(1), tmp_path_factory.mktemp(name) / "run", log=lambda *a: None))
@@ -293,3 +293,15 @@ def test_aster_holds_against_a_council_majority(worlds):
     with pytest.raises(A.ActionError, match="none of your offices"):
         A.act(k, "Brannock", "transfer", {"to": "Dorran", "item": "crude", "qty": 1, "as": "J0"})   # the armoury: only by law
     assert "leave" in A.act(k, "Piers", "leave", {}).lower()                      # free exit
+
+
+def test_dunmere_and_ostrel(worlds):
+    k = world_kernel(worlds, "dunmere")
+    assert k.procedure_spec("procedural", "Corvin")["rule"] == "two_thirds"
+    assert k.procedure_spec("structural", "Corvin")["rule"] == "majority"
+    assert {"petition_recall", "petition_recall_mayor"} <= set(k.w["actions"])                   # two recalls, two actions
+    assert IN.holders(k, "A1", "proprietor") == ["Linnet"] and k.w["channels"]["crier"]["owner"] == "A1"
+    k = world_kernel(worlds, "ostrel")
+    assert all(k.bal(a, "crude") >= 1 for a in k.w["agents"]) and k.bal("reserve", "crude") == 4
+    assert sorted(a for a in k.w["agents"] if k.bal(a, "weapons") >= 1) == ["Ansel", "Odile", "Tamsin"]
+    assert sorted(k.holders("justice")) == ["Gideon", "Piers", "Tamsin"]
