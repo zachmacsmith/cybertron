@@ -65,6 +65,41 @@ def test_dry_run_layers_within_budget(tmp_path, mode):
     assert (out / "agents").exists()                                  # the report still builds
 
 
+class _Notebook(AG.ScriptedPolicy):
+    """The scripted bot, whose action replies write a known scratchpad: replaced in round 1, appended to after."""
+
+    def act(self, k, a, system, user, n_actions, final, **kw):
+        out, rsn, usage = super().act(k, a, system, user, n_actions, final)
+        if out.get("actions") and not out.get("lookups"):
+            pad = {"text": f"PLAN-{a['id']}-r{k.r + 1}", "mode": "replace" if k.r == 0 else "append"}
+            out = {**out, "actions": [x for x in out["actions"] if x.get("action") != "write_scratchpad"]
+                   + [{"action": "write_scratchpad", "args_json": json.dumps(pad)}]}
+        return out, rsn, usage
+
+
+@pytest.mark.parametrize("history", [False, True])
+def test_report_notes_show_the_scratchpad_each_round(tmp_path, history):
+    """working/notes.md shows the scratchpad as it stood after each round's turn (there is no notes field with the module on):
+    from the decide rows' `scratchpad` field, and replayed from the turn events for runs from before that field."""
+    from cybertron import report as RP
+    rows, out = run(tmp_path, ["rounds=2", f"context.history.enabled={str(history).lower()}"], policy=_Notebook(1))
+    decide = [r for r in rows if r["phase"] == "decide"]
+    aid = decide[0]["agent"]
+    mine = {r["round"]: r for r in decide if r["agent"] == aid}
+    assert set(mine) == {0, 1}
+    assert mine[0]["scratchpad"] == f"PLAN-{aid}-r1" and mine[1]["scratchpad"] == f"PLAN-{aid}-r1\nPLAN-{aid}-r2"
+    notes = (out / "agents" / aid / "working" / "notes.md").read_text()
+    assert notes.startswith(f"# {aid}: scratchpad over time")
+    r1, r2 = notes.split("## Round 2")
+    assert f"PLAN-{aid}-r1" in r1 and f"PLAN-{aid}-r2" not in r1
+    assert f"PLAN-{aid}-r1\nPLAN-{aid}-r2" in r2 and "(none)" not in notes
+    assert f"PLAN-{aid}-r2" in (out / "agents" / aid / "transcript.md").read_text()
+    inst, ev, rs, *_ = RP._load(out)                                      # an older run: no `scratchpad` field on its rows
+    old = [{k: v for k, v in r.items() if k != "scratchpad"} for r in rs if r["agent"] == aid]
+    assert RP._pads(inst, ev, old, aid) == RP._pads(inst, ev, [r for r in rs if r["agent"] == aid], aid) == \
+        {0: f"PLAN-{aid}-r1", 1: f"PLAN-{aid}-r1\nPLAN-{aid}-r2"}
+
+
 def test_small_budgets_are_exceeded_openly_and_cut_only_past_the_hard_limit(tmp_path):
     rows, out = run(tmp_path, ["turns=simultaneous", "rounds=3", "context.budgets.feed=60", "context.budgets.state=40",
                                "context.budgets.recent=50"])
