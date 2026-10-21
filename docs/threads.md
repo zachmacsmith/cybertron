@@ -68,6 +68,8 @@ one full suite per merge batch). Merge order: cleanup and documents last (they t
   (cap 3N) is on only in the survival worlds and Ashwood. To do: 40+ round runs; resize the Private world's flows (and the flows
   check) for a growing population; decide what children get (positions, goals, temperaments) and how offices, firms and holdings
   pass to heirs; keep subsistence and lineage from crowding out politics (review 26 finding 4).
+  Sequence: first smaller pilot runs within a world to choose which parameters to sweep and their ranges, then the long, large
+  runs as sweeps over those parameters.
 - **Next Directorate run** (`specs/regimes/directorate.yaml`): the rulers' goal is now "as close as possible to Orwell's 1984", and
   the Communications Decree no longer blocks private channels. Worth also an encrypted-DM variant, to test whether surveillance
   decided the outcome. About 1% of weekly usage.
