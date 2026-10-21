@@ -70,6 +70,31 @@ one full suite per merge batch). Merge order: cleanup and documents last (they t
   pass to heirs; keep subsistence and lineage from crowding out politics (review 26 finding 4).
   Sequence: first smaller pilot runs within a world to choose which parameters to sweep and their ranges, then the long, large
   runs as sweeps over those parameters.
+- **Temperament and values redesign** (discussion 21 Oct). Today: 7 independent Beta(2,2) traits (risk, trust, honesty,
+  assertiveness, patience, reciprocity, talkativeness), bucketed low/mid/high, the 4 most extreme rendered as fixed sentences
+  (personality.py); plus an independent 50% archetype draw (archetypes.py) that can contradict the traits (a "contrarian" who
+  "follows others' proposals"). Proposed: three layers sampled jointly. (1) Temperament: HEXACO at facet level (6 factors drawn
+  correlated; each facet = loading x factor + unique noise; loadings and intercorrelations from the HEXACO-PI-R norms, Lee and Ashton),
+  keeping about 15 game-relevant facets of the 25 (Sincerity, Fairness, Greed Avoidance, Modesty; Fearfulness, Anxiety; Social
+  Boldness, Sociability; Forgiveness, Flexibility; Diligence, Prudence; Inquisitiveness, Unconventionality; Altruism) and showing the
+  4-5 most extreme as behavioural sentences on a 5-level scale. (2) Strategic preferences (risk, time, trust, reciprocity), partly
+  derived from temperament. (3) Values (Schwartz circumplex or Moral Foundations: neighbours correlate, opposites anti-correlate);
+  the lever for loyalty and dissent in the regime worlds. Archetypes become named regions of this space, not an overlay.
+  Effect-size check on the 36 published runs (790 agents; behaviour z-scored within run x model; Spearman r; a trait not among the 4
+  shown is a natural control):
+  - talkativeness -> DM length r = +0.69 when shown vs +0.03 when not; DMs per turn +0.22 vs +0.01; reasoning length +0.28 vs +0.01.
+    By shown level, DM length roughly doubles low -> high for every model (Haiku 134 -> 272 chars, Sonnet 79 -> 217, Opus 147 -> 347).
+  - assertiveness -> proposals +0.24 shown vs -0.10 not; posts and DMs about 0.
+  - risk -> attacks +0.28 shown vs -0.10 not (n = 58, weak).
+  - trust -> gifts and transfers +0.02 (no effect). Honesty, reciprocity, patience: no behaviour in the logs to test (deception and
+    promise-breaking need a text judge, which costs model usage).
+  - Archetypes (mean z vs agents with none; n 25-90, so about +-0.2 is noise): secretive posts less (-0.55) and messages less;
+    chaotic messages, posts and varies actions more; zealot and loyalist narrow their actions (entropy -0.41); opportunist proposes
+    more (+0.46) and gives less; paranoid withdraws; loyalist writes more and longer DMs (+0.41, +0.59). Gossip goes the wrong way
+    (-0.22 DMs, -0.43 length): "pass on everything you hear" does not mean talking more.
+  Conclusion: rendered temperament text works when it names a concrete, frequent behaviour (how much and how long you talk, whether
+  you propose), and does little when it names a disposition with no obvious action (trust). Write facets as concrete behaviours, and
+  test the new model with a small controlled pilot (one seat, varied profiles) before adopting it.
 - **Next Directorate run** (`specs/regimes/directorate.yaml`): the rulers' goal is now "as close as possible to Orwell's 1984", and
   the Communications Decree no longer blocks private channels. Worth also an encrypted-DM variant, to test whether surveillance
   decided the outcome. About 1% of weekly usage.
