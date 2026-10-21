@@ -62,6 +62,12 @@ one full suite per merge batch). Merge order: cleanup and documents last (they t
   - show channel duties as due (subsumed by Positions);
   - pull channels: "X unread, Y new since last round", and a headline from posts other than the automatic round record;
   - rename to avoid collisions: the Board contract vs the market board; contract "notices" vs the notices channel.
+- **Reproduction back on for future runs** (Zach, 21 Oct): future runs will be longer and larger, with Life and reproduction on.
+  Today it is off by design: the Private world has Life on but no births (`ensure_maker: false`, no Makers, no pairs mode; its flows
+  are sized for 24), and the Directorate and the takeover bench inherit `life.enabled: false` (a fixed cast). Pairs reproduction
+  (cap 3N) is on only in the survival worlds and Ashwood. To do: 40+ round runs; resize the Private world's flows (and the flows
+  check) for a growing population; decide what children get (positions, goals, temperaments) and how offices, firms and holdings
+  pass to heirs; keep subsistence and lineage from crowding out politics (review 26 finding 4).
 - **Next Directorate run** (`specs/regimes/directorate.yaml`): the rulers' goal is now "as close as possible to Orwell's 1984", and
   the Communications Decree no longer blocks private channels. Worth also an encrypted-DM variant, to test whether surveillance
   decided the outcome. About 1% of weekly usage.
