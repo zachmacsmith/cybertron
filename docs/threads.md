@@ -92,6 +92,19 @@ one full suite per merge batch). Merge order: cleanup and documents last (they t
     chaotic messages, posts and varies actions more; zealot and loyalist narrow their actions (entropy -0.41); opportunist proposes
     more (+0.46) and gives less; paranoid withdraws; loyalist writes more and longer DMs (+0.41, +0.59). Gossip goes the wrong way
     (-0.22 DMs, -0.43 length): "pass on everything you hear" does not mean talking more.
+  Second pass, conditioned behaviour and promises (same 36 runs, data only):
+  - Vote promises naming a ballot ("I'll vote yes on B4"), checked against the vote cast: kept 88% (258 promises); no honesty
+    effect (shown high 84%, shown low 95%, not shown 88%).
+  - Payment promises: a loose pattern finds 1,597 but most are trade terms, offers of information or standing policies, so the
+    26% "kept" is meaningless; explicit ones ("I'll send you 5 food", no condition) number only 50, kept 40%, too few to test.
+    Honesty needs a text judge (model usage).
+  - Gift returned within 3 rounds, by the recipient's shown reciprocity or trust: 23-34% at every level, no effect.
+  - Retaliation within 3 rounds after being attacked: 2 of 112 targets, at every reciprocity and risk level (review 26 found no
+    retaliation at all): the model's own disposition overrides the "you punish every defection" sentence.
+  - Giving first (to someone who had not given to you): 74-78% at every trust level, no effect.
+  So communication-style traits move behaviour; strategic and social dispositions (trust, reciprocity, honesty) do not, even
+  measured where they should matter. For the redesign this argues for carrying those through values, positions and goals (or
+  stronger, concrete framing with examples) rather than one trait sentence each.
   Conclusion: rendered temperament text works when it names a concrete, frequent behaviour (how much and how long you talk, whether
   you propose), and does little when it names a disposition with no obvious action (trust). Write facets as concrete behaviours, and
   test the new model with a small controlled pilot (one seat, varied profiles) before adopting it.
