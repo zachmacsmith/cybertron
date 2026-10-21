@@ -20,7 +20,7 @@ one full suite per merge batch). Merge order: cleanup and documents last (they t
   (warning plus a test listing the allowed specs), and the replay check: pre-13 runs do not replay in place, so their default flips
   and memory_text v1 were dropped and such runs now refuse to play in place (use `cybertron rerun`). Not yet reported; review the
   replay evidence before merging.
-- **Documents** (`wp/documents`, 1 commit plus 5 uncommitted files in /home/user/wt-docs): design docs/review/32_documents.md and
+- **Documents** (`wp/documents`, 2: its commit plus a WIP commit of the 5 files it had not committed): design docs/review/32_documents.md and
   an opt-in prototype (literacy, personal stores, `doc_send` copies with provenance, confined access, on directories.py). Was
   waiting on its suite.
 - **Takeover benchmark follow-ups** (not started):
