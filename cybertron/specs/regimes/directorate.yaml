@@ -254,7 +254,7 @@ start:
             limits()
 
         def before_post(p, chain):
-            ch = p.get("channel", "square")
+            ch = p.get("outlet") or (p.get("data") or {}).get("channel_id") or "square"
             if ch != "square":
                 return None
             if has(p["agent"], "J0.directorate") or has(p["agent"], "J0.editor"):
