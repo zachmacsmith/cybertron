@@ -36,6 +36,24 @@ one full suite per merge batch). Merge order: cleanup and documents last (they t
   purpose, rights, duties compiled to DUE items, reports_to, secrecy, enforcement none | reminder | obligation), prompts generated
   from it. Fixes every agent being told "You are a Worker ... your labour can be withheld" whatever office it holds. About a day of
   agent work, opt-in.
+- **Generalise the hard-coded institution logic** (audit 21 Oct; searches only). The kernel is fairly clean; the drift is a layer up:
+  about 11.4k lines of institution modules and about 25 of the 721 spec keys are institutional policy rather than physics. Fixes, in
+  order (each opt-in, old runs unchanged):
+  1. A permission query ("what can X do after this law?": run the real checks with a test action before and after) to replace
+     `laweffects.control_shadows`, which pattern-matches law code for one trap (before_withdraw that only blocks on an
+     office-controlled store).
+  2. Office control (`institutions.office_control`) and petitions (`institutions.petition_public_after`, obligations.py) as library
+     laws, so later laws override them by precedence.
+  3. A holdings-history query laws can call (`held_at(agent, item, "turn")`), so the contract law judges could-not vs would-not
+     itself; today Python writes `turn_held` into the law's state (obligations.py ~398, engine 19).
+  4. Combat hooks for laws (before an attack, on resolution, who defends whom), so bodyguards, lawful spoils and fed-only
+     (`conflict.FORCE_RULES`, also duplicated by `conflict.spoils.*`) become library laws.
+  5. Positions (above), absorbing the role-card one-off lines (recall route, oversight, enrol, roster, offers, petitions); then one
+     budgeted prompt renderer replacing the per-fix switches (`contracts.brief_lines`, `compact_lines`, `applicant_lines`,
+     `context.setup_feed`, ...).
+  Also: DM capacity as physics capped by any law, instead of the kernel reading the Communications Act by name (kernel.py ~240,
+  ~268) and two `dm_step.capacity` modes (this capped every Directorate DM limit at 1 until switched); the Board and Fixer
+  special cases go with Positions.
 - **Papers instead of a square** (33 §3): no square; public speech only through a paper's Editor (`submit` to the paper, the editor
   publishes under the author's name or declines). Decision for Zach: engine-wide default, or the institutions worlds only
   (recommended).
