@@ -645,6 +645,8 @@ def scripted_actions(k, a, n_actions) -> list:
                            "text": f"Evidence from round {r}: {len(seen)} public items on the board. " * 4})]
     if r == 2 and others:
         acts.append(("dir_grant", {"dir": name, "agent": others[0], "path": "people/", "access": "read"}))
+    if r == 2 and others and DOC.on(k):                                 # documents: hand last round's account on as a copy
+        acts.append(("doc_send", {"dir": name, "path": "rounds/r01.md", "to": others[-1]}))
     return [{"action": n, "args_json": json.dumps(x)} for n, x in acts]
 
 

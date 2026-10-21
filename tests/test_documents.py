@@ -185,6 +185,7 @@ def test_scripted_run_and_exact_replay(tmp_path):
     legs = [a["id"] for a in inst["agents"] if a["cls"] == "legislator"]
     assert any(snap[x]["files"] for x in legs)                                   # the owners' bots wrote documents
     assert all(not snap[a["id"]]["owners"] for a in inst["agents"] if a["cls"] == "worker")
+    assert any(p.startswith("received/") for x in snap.values() for p in x["files"])   # the bots' doc_send copies landed
     res = RP.replay(out, tmp_path / "rep", **QUIET)
     assert res["identical"], res
 

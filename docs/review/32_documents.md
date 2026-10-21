@@ -293,4 +293,4 @@ hidden where documents are off (`actions.py`, `core_surface`). Tests (`tests/tes
 world unchanged; literacy gates ownership, statically and live (an office right with a prefix); selector validation; a copy with
 provenance and a quoting notice; a non-literate agent forwarding a copy with the author preserved; copies not recallable and not
 overwritten; an altered copy marked, also after a move; refusals and store limits; the copy routed through `dir_write`; a
-write grant giving confined live access and its revocation; a scripted run with exact replay.
+write grant giving confined live access and its revocation; a scripted run (owners' bots write, grant and, in documents worlds, `doc_send` a copy in round 2) with exact replay.
