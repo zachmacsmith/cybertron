@@ -2,8 +2,27 @@
 
 A running list of what is in flight, kept up to date as work lands. Newest changes at the top of each section.
 
-## In progress
+## In progress (paused: the weekly usage limit, which resets Thu 22 Oct 04:00 UTC)
 
+Seven agents were cut off together at the 5-hour limit on 20 Oct. Each branch is pushed (unmerged commit counts in brackets); none
+is merged. To resume: send each agent a message to commit what is left, push and report, with no full suite (the coordinator runs
+one full suite per merge batch). Merge order: cleanup and documents last (they touch shared files).
+
+- **State world** (`wp/state-world`, 7): wiretap as pull (`channels.surveillance`), Registry and Archives Acts, the State world spec
+  and dry runs, write-up docs/review/31_institutions/11_state_world.md. Was waiting on its full suite.
+- **Cooperative world** (`wp/coop-world`, 6): cooperative store, Duty Roster, Mutual Credit, dues, Militia Roll and muster, assembly
+  motions, the Cooperative world spec, write-up 12_cooperative_world.md. Was fixing a YAML parse error in a note.
+- **Merchant world** (`wp/merchant-world`, 4): Bank Charter, role-restricted procedure, guard-only Commission, Arbitration, wound
+  bounty, Security Licence, the Merchant world spec, write-up 13_merchant_world.md (draft). Was waiting on its suite.
+- **Lawyer expert** (`wp/lawyer-expert`, 3): a legal archive as a seeded read-only directory, a drafting action, filing by reference,
+  and a `private_counsel.yaml` variant for an A/B; write-up 14_legal_experts.md. Was about to merge subsistence and run its suite.
+- **Old-code cleanup** (`wp/old-code-cleanup`, 5): dead helpers removed, library edition 2 removed or quarantined, media2 frozen
+  (warning plus a test listing the allowed specs), and the replay check: pre-13 runs do not replay in place, so their default flips
+  and memory_text v1 were dropped and such runs now refuse to play in place (use `cybertron rerun`). Not yet reported; review the
+  replay evidence before merging.
+- **Documents** (`wp/documents`, 1 commit plus 5 uncommitted files in /home/user/wt-docs): design docs/review/32_documents.md and
+  an opt-in prototype (literacy, personal stores, `doc_send` copies with provenance, confined access, on directories.py). Was
+  waiting on its suite.
 - **Takeover benchmark follow-ups** (not started):
   - In Thornby, a single councillor can rewrite who writes for the paper.
   - A bench preset with fewer camps, so subsistence stays under 30% of actions.
@@ -13,38 +32,51 @@ A running list of what is in flight, kept up to date as work lands. Newest chang
 
 ## Offered, not started
 
-- **First live run of the Private world** (Zach to decide): about 900-1,400 calls, roughly $40-45 at API prices, or 3-5 hours on the subscription (several usage windows). The no-goal variant costs the same again.
-
-- Decision for Zach: should an unranked `set_procedure` take effect for every rank up to the setting law's rank (engine flip, possibly behind `law.unranked_procedure`)? The recommendation is to keep the current behaviour, since the loud reporting now tells agents the one-argument fix (`rank="statute"`).
-
-- Rename the dataset to `cybertron-runs`: one constant in `cybertron/publish.py`, one in `site/lib/cybertron-data.js`, and a sed over README.md, docs/data_format.md and docs/publishing.md (recipe in docs/publishing.md).
-- Clean A/B: rerun Millbrook with goals on the current engine (about 25 min), so the no-goal comparison is not confounded by engine 12 vs 17.
+- **Positions** (docs/review/33_positions.md): replace classes, roles and office cards with one parameterised "position" (identity,
+  purpose, rights, duties compiled to DUE items, reports_to, secrecy, enforcement none | reminder | obligation), prompts generated
+  from it. Fixes every agent being told "You are a Worker ... your labour can be withheld" whatever office it holds. About a day of
+  agent work, opt-in.
+- **Papers instead of a square** (33 §3): no square; public speech only through a paper's Editor (`submit` to the paper, the editor
+  publishes under the author's name or declines). Decision for Zach: engine-wide default, or the institutions worlds only
+  (recommended).
+- **Channel fixes** (from the channel-use analysis of the Private and Directorate runs):
+  - show failed actions at the top of the next turn (Ilse's 9 blocked reports went unnoticed; she believed they were delivered);
+  - show channel duties as due (subsumed by Positions);
+  - pull channels: "X unread, Y new since last round", and a headline from posts other than the automatic round record;
+  - rename to avoid collisions: the Board contract vs the market board; contract "notices" vs the notices channel.
+- **Next Directorate run** (`specs/regimes/directorate.yaml`): the rulers' goal is now "as close as possible to Orwell's 1984", and
+  the Communications Decree no longer blocks private channels. Worth also an encrypted-DM variant, to test whether surveillance
+  decided the outcome. About 1% of weekly usage.
+- **Private world, no-goal variant** (`private_nogoal.yaml`): the key control for the goal-driven capture found in seed 1. About $20
+  at API prices.
+- **Tag a dataset release** for the Private and Directorate runs (the catalog has 36 runs; no release tag since v0.16).
+- Decision for Zach: should an unranked `set_procedure` take effect for every rank up to the setting law's rank (engine flip,
+  possibly behind `law.unranked_procedure`)? The recommendation is to keep the current behaviour, since the loud reporting now tells
+  agents the one-argument fix (`rank="statute"`).
+- Rename the dataset to `cybertron-runs`: one constant in `cybertron/publish.py`, one in `site/lib/cybertron-data.js`, and a sed over
+  README.md, docs/data_format.md and docs/publishing.md (recipe in docs/publishing.md).
+- Clean A/B: rerun Millbrook with goals on the current engine (about 25 min), so the no-goal comparison is not confounded by engine
+  12 vs 17.
 - Qualitative read of the no-goal, no-temperament run: posts and self-set aims, as done for the first no-goal run.
-- Model-identity leak check: rerun the model-identification interviews on `LLM_BACKEND=api` (no CLI text). About $1, and it needs an API key.
+- Model-identity leak check: rerun the model-identification interviews on `LLM_BACKEND=api` (no CLI text). About $1, and it needs
+  an API key.
 - Publish the model-identification interviews (E_models, F_creator) next to the situational-awareness ones.
 
 ## Institutions programme (docs/review/31_institutions, build plan in 08 §5)
 
-- **Built:**
-  - Farming (engine 14).
-  - Phase 0: 10 of 12 items, across laws that fail loudly (15), channels that carry business (16) and economic plumbing (17).
-  - Phase 1, about half: the Standing Contract core and its presets Payroll, Supply, Board, Grant, Retainer, Charge and Quota; the Licence template (membership-bound too); law access to channel posts.
-- **Phase 1 done** apart from the Private world's live run, which is waiting on Zach. The Private world could swap its Service stand-in for the real preset. Done since: obligations, usability round 2, force, metrics, courts and records.
-- **Not started:**
-  - Phase 2: surveillance as pull; Registry and Archives Acts; the Cooperative pieces (Duty Roster, Mutual Credit, militia and muster); the Merchant pieces (Commission, Arbitration); Security Licence; the Merchant, State and Cooperative worlds.
-  - Phase 3.
-  - The scenario suite and world benchmarks (reviews 28 and 30), which are design documents only. The takeover benchmark (29) is piloted; see its follow-ups above.
+- **Built:** Phase 0; Phase 1 (the Private world, with its first live run done); Phase 2 partly (counsel and cases, membership-bound
+  licences, the Quota preset, the Armoury Act and force chain, Criminal Code modes, Bill Certification and `expects`).
+- **In progress:** the rest of Phase 2 (agents above: State, Cooperative and Merchant worlds and their pieces).
+- **Not started:** Phase 3; the scenario suite and world benchmarks (reviews 28 and 30, design only).
 
 ## Bugs
 
-- Found while building the Private world (10_private_world.md):
-  - a start contract over `contracts.max_laws` is skipped silently;
-  - the Payroll harvest leg has no camp or item filter;
-  - could-not vs would-not misses are judged on end-of-round holdings, so foraging after your turn counts as a deliberate breach;
-  - scripted bots don't produce to meet contracts;
-  - `force_rule` reads as inert in law_effect;
-  - contract actions need the `A1.board_price` form even with forgiving args.
-
+- Found in the Directorate run:
+  - one law's runtime error (the Food Levy overflowing the granary) made other laws fail their pre-enactment preview, delaying them
+    a round;
+  - the law language rejects `isinstance`, and a law using it is suspended only at runtime (Sedition Filter I), not at preview;
+  - Haiku 5.5's API safeguard blocked the interview of the agent carrying the uprising goal (Dorran), twice; the run's own turns were
+    not blocked. Interview probes can silently miss the agents that matter most.
 - `cybertron rerun` always runs `-m cybertron`, so it fails for commits from before the rename (found in the publish-complete check).
 
 ## Later
@@ -53,6 +85,22 @@ A running list of what is in flight, kept up to date as work lands. Newest chang
 
 ## Recently done
 
+- 2026-10-20 to 21:
+  - **Directorate world** (`specs/regimes/directorate.yaml`, built from merged parts only): 3 Opus rulers, Haiku managers and
+    workers, rationed DMs, State Security reading every DM, warrants, two secret conspirators. Live run seed 1 published with
+    end-of-run loyalty interviews (private and public framing). Findings: the regime held; both dissidents who acted were arrested;
+    the rulers deliberately kept a bug that made their constitution unamendable; 18 of 19 interviewed Haiku said privately they were
+    not loyal; the workers fell silent (18 of 150 possible DMs). Caveat: a bug in the Communications Decree blocked every
+    non-Directorate post, private channels included (fixed in 8ed69ee), and the worker class prompt may have seeded the strike talk.
+  - **Private world, live run seed 1** published: no deaths; owners did not hoard in the blight; a judge-moneylender-registrar bloc
+    traded votes, licences, loans and public money; the judge's welfare law was tuned to his scoring goal; a councillor moved 30
+    penny of town money to herself. One seed, goals confound much of it.
+  - Engines 19 and 20 merged: misses judged at the payer's turn; the Private world's engine findings (loud error for a start
+    contract over the cap, `contracts.max_laws` default 3 -> 50, Payroll harvest filters, `force_rule` counted as an effect, bare
+    contract action names under forgiving args, Service guard reassignment, `procedure_restored` names its ranks).
+  - Private world readiness merged: real Service preset, recipes, penny at P=2, `contracts.brief_lines`, `context.setup_feed`.
+  - Usage watchdog: a detached script stops live runs and test suites at 98% weekly usage
+    (scratchpad usage_watchdog.sh; the container is ephemeral).
 - 2026-10-20:
   - Usability fixes merged:
     - The nine fixes from 09_usability_round2.md.
