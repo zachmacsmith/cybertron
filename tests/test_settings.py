@@ -147,7 +147,8 @@ def test_infer_version_from_git_history():
 
 CON17 = {"pay_institutions": False, "applicant_lines": False,               # engine 17: economic plumbing
          "miss_judged": "round_end",                                            # engine 19: misses judged at the turn
-         "max_laws": 3, "max_laws_rule": 10, "compact_lines": False}            # engine 20: many laws per institution
+         "max_laws": 3, "max_laws_rule": 10, "compact_lines": False,            # engine 20: many laws per institution
+         "change_rounds": 0}                                                    # engine 22: contract-change ballots stay open a round
 EXTRA15 = {"law.effects": False, "law.call_failures": False, "law.expects": False,    # engine 15: laws that fail loudly
            "institutions.amend_offices": False,
            "law.effects_detail": False, "actions.bare_names": False}                  # engine 20

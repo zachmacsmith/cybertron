@@ -519,6 +519,7 @@ def test_a_replacing_contract_law_keeps_the_office():
     for a in ps[:3]:
         k.w["ballots"][pr["ballot"]]["votes"][a] = "yes"
     next_round(k)
+    next_round(k)                                                       # engine 22: the ballot closes a round after it opens
     o = I.office(k, cid, "treasurer")
     assert o["law"] != old and o["succession"] == {"rule": "seniority"} and holders(k, cid) == [ps[0]]
 

@@ -291,6 +291,7 @@ def test_a_contract_error_suspends_the_law_and_tells_members_not_the_fixer():
     for x in (a, b):
         A.act(k, x, "vote", {"ballot": bid, "choice": "yes"})
     next_round(k)
+    next_round(k)                                                       # engine 22: the ballot closes a round after it opens
     pr = list(rec(k, cid)["proposals"].values())[0]
     assert pr["status"] == "adopted" and rec(k, cid)["status"] == "active" and lid not in rec(k, cid)["laws"]
     assert k.w["fixer_queue"] == q0
@@ -332,6 +333,7 @@ def test_changes_are_voted_by_members_by_default_and_by_the_founder_alone_when_s
     A.act(k, a, "vote", {"ballot": bid, "choice": "yes"})
     A.act(k, b, "vote", {"ballot": bid, "choice": "yes"})
     next_round(k)
+    next_round(k)                                                       # engine 22: the ballot closes a round after it opens
     r = rec(k, cid)
     assert old not in r["laws"] and k.w["laws"][old]["status"] == "repealed" and len(r["laws"]) == 1
     assert k.w["laws"][r["laws"][0]]["title"] == "New" and events(k, "contract_changed")
@@ -343,6 +345,32 @@ def test_changes_are_voted_by_members_by_default_and_by_the_founder_alone_when_s
     A.act(k, c, "propose_contract_change", {"contract": cf, "template": "crowdfund", "params": {"TARGET": 1},
                                             "replaces": rec(k, cf)["laws"][0]})
     assert rec(k, cf)["params"] == {} and "TARGET = 1" in k.w["laws"][rec(k, cf)["laws"][0]]["code"]
+
+
+def test_a_change_ballot_stays_open_a_round_so_members_can_vote_next_round():
+    """Engine 22: under simultaneous turns no member saw a ballot that closed in the round it opened (Lawtown: six changes failed
+    with no votes); contracts.change_rounds 0 is the old window."""
+    k = make()
+    a, b = people(k)[:2]
+    cid = found(k, a, code("x = 1", "Old"))
+    A.act(k, b, "join_contract", {"contract": cid})
+    out = A.act(k, b, "propose_contract_change", {"contract": cid, "code": code("x = 2", "New"), "replaces": rec(k, cid)["laws"][0]})
+    bid = re.search(r"B\d+", out).group()
+    assert "closes at the end of next round" in out
+    next_round(k)
+    assert list(rec(k, cid)["proposals"].values())[0]["status"] == "ballot"   # still open in the round after it opened
+    for x in (a, b):
+        A.act(k, x, "vote", {"ballot": bid, "choice": "yes"})
+    next_round(k)
+    assert k.w["laws"][rec(k, cid)["laws"][0]]["title"] == "New"
+    k = make(extra=("contracts.change_rounds=0",))
+    a, b = people(k)[:2]
+    cid = found(k, a, code("x = 1", "Old"))
+    A.act(k, b, "join_contract", {"contract": cid})
+    out = A.act(k, b, "propose_contract_change", {"contract": cid, "code": code("x = 2", "New"), "replaces": rec(k, cid)["laws"][0]})
+    assert "closes at the end of this round" in out
+    next_round(k)
+    assert events(k, "contract_change_failed")[-1]["data"]["why"].startswith("voted down")
 
 
 def test_the_law_api_reads_the_record_live_after_a_later_join():

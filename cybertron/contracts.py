@@ -119,6 +119,9 @@ SU_EVENTS = ("office_vacant", "office_filled", "office_abolished", "assets_locke
 DEFAULTS = {
     "enabled": False,       # associations: anyone may found a contract with its own treasury, escrow, allowances and code (needs law.v2)
     "max_founded": 3,       # contracts one agent may found
+    "change_rounds": 1,     # a members' ballot on a change to a contract's code closes this many rounds after it opens (engine 22;
+                            # 0 before: it closed in the round it opened, so under simultaneous turns no member could vote and every
+                            # change to a contract of two or more members failed)
     "max_laws": 50,         # laws (code modules) one contract may have in force or suspended (engine 20: was 3; an established
                             # firm's code is a charter, offices, wages and several standing contracts)
     "max_laws_rule": 50,    # the most a polity's company rule max_laws may allow its companies (engine 20: was 10)
@@ -750,7 +753,7 @@ def act_propose_contract_change(k, aid, contract, code=None, replaces=None, temp
 
 
 def _decide(k, rec, pr) -> str:
-    """The contract's procedure for a proposed change: adopt now, open a members' ballot (closes at the end of the round), or fail."""
+    """The contract's procedure for a proposed change: adopt now, open a members' ballot (closes change_rounds rounds on), or fail."""
     proc, cid, lid = INC.effective_procedure(k, rec, PROCEDURES), rec["id"], pr["law"]   # W8e: bounded by the parent's forms
     law = k.w["laws"][lid]
     if proc == "founder":
@@ -782,10 +785,12 @@ def _decide(k, rec, pr) -> str:
         spec = {"electorate": [a for a in res.get("electorate", rec["members"]) if a in rec["members"]],
                 "rule": ST.rule_ref(k, plid, res.get("rule", "majority")), "weights": res.get("weights")}   # W6c: rule functions
     what = f"{cid} '{rec['name']}': adopt {lid} '{law['title']}'" + (f" in place of {pr['replaces']}" if pr["replaces"] else "") + "?"
-    bid = k.open_ballot(what, spec["electorate"], ["yes", "no"], spec["rule"], 0, None, spec.get("weights"), lid)
+    n = max(0, int(cfg(k)["change_rounds"]))
+    bid = k.open_ballot(what, spec["electorate"], ["yes", "no"], spec["rule"], n, None, spec.get("weights"), lid)
     k.w["ballots"][bid]["jurisdiction"] = cid
     pr.update(status="ballot", ballot=bid)
-    return f"Proposed {lid} for {cid}; its members vote on {bid} (closes at the end of this round)."
+    when = "this round" if n == 0 else "next round" if n == 1 else f"round {k.r + n}"
+    return f"Proposed {lid} for {cid}; its members vote on {bid} (closes at the end of {when})."
 
 
 def stage_done(k, lid, pid, passed, why="") -> None:

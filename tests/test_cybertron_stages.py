@@ -424,5 +424,7 @@ def on_enact():
     for x in (b, c):
         A.act(k, x, "vote", {"ballot": bid, "choice": "no"})
     k.end_round()
+    k.start_round()
+    k.end_round()                                                       # engine 22: the ballot closes a round after it opens
     assert k.w["ballots"][bid]["result"] == "yes"
     assert list(CT.recs(k)[cid]["proposals"].values())[-1]["status"] == "adopted"

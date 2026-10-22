@@ -461,7 +461,8 @@ def test_parties_procedure_needs_every_party(tmp_path):
     bid = rec["proposals"]["A2-P1"]["ballot"]
     act(k, "Bo", "vote", ballot=bid, choice="yes")
     step(k)
-    assert rec["proposals"]["A2-P1"]["status"] == "failed"              # Fay did not vote yes
+    step(k)                                                             # engine 22: the ballot closes a round after it opens
+    assert AC.assocs(k)["A2"]["proposals"]["A2-P1"]["status"] == "failed"   # Fay did not vote yes
 
 
 # ---------------------------------------------------------------------- Quota (J0, compulsory), Charge, start sections

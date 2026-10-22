@@ -54,7 +54,7 @@ LOG_FORMAT = 1
 # run plays under, cybertron/settings.py) record it. ENGINE_FLIPS[v]: the commits that made version v (the first decides, by git
 # ancestry, whether a run's recorded sha has it: settings.infer_version) and the default flips, (settings target, key path, old,
 # new); settings.use sets a flip back to `old` for a run of an earlier version whose frozen snapshot lacks the key.
-ENGINE_VERSION = 21
+ENGINE_VERSION = 22
 ENGINE_FLIPS = {
     2: {"commits": ["38070e15cf97e171258cd0dbdb7ddfd710ed30ab"],
         "flips": [("cybertron.channels.DEFAULTS", ("delivery",), "pull", "push")],
@@ -160,6 +160,10 @@ ENGINE_FLIPS = {
          "flips": [],
          "note": "law.v2's duplicate-proposal check is removed: no note in a proposal's result and no similar_to in its event "
                  "(behaviour, not a default; reproducible only by rerun)"},
+    22: {"commits": ["PENDING"],
+         "flips": [("cybertron.contracts.DEFAULTS", ("change_rounds",), 0, 1)],
+         "note": "a members' ballot on a change to a contract's code stays open one round so members can vote (it closed in the "
+                 "round it opened: under simultaneous turns with no votes, so every change to a contract of two or more failed)"},
 }
 
 

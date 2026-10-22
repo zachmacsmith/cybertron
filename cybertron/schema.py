@@ -466,6 +466,7 @@ def _ann():
         "jurisdictions.admission": dict(types=("str",), enum=("ballot", "open", "closed")),
         "jurisdictions.scripted_founder": dict(types=("str", "null")),
         "contracts.max_founded": dict(types=("int",), range=NONNEG),
+        "contracts.change_rounds": dict(types=("int",), range=NONNEG),
         "contracts.max_laws": dict(types=("int",), range=(1, None)),
         "contracts.templates": dict(types=("bool",)),
         "contracts.offer_templates": dict(types=("bool",)),             # review 14 A: the design arm
