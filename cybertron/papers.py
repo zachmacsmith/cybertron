@@ -85,6 +85,23 @@ def left(k, paper) -> list:
     return [x for x in waiting(k, paper, during=True) if x["status"] == "pending"]
 
 
+def check_open(k, aid, readers, writers, ch=None) -> None:
+    """Papers worlds (review 33 §3: no open channel founding): a channel everyone may read and everyone may write is a square, and
+    there is none; opening one, or opening an existing channel up to it, is refused unless the agent holds channels.found_right
+    (when the world sets one). Off, or any narrower channel (a private room, a members' board, a paper): nothing."""
+    if not on(k) or (ch is not None and ch.get("owner") == "world"):
+        return
+    if readers != {"all": True} or writers != {"all": True}:
+        return
+    from cybertron import channels as CH
+    right = CH.found_right(k)
+    if right and k.has(aid, right):
+        return
+    raise _err("there is no open square in this world: public speech goes through the papers (" + (", ".join(papers(k)) or "none")
+               + "; submit {\"paper\": \"<id>\", \"text\": \"...\"}). A channel you open may be read by all or written by all, "
+               "not both")
+
+
 def act_submit(k, aid, paper=None, text="", **kw):
     if not on(k):
         raise _err("unknown action 'submit'")
@@ -109,8 +126,9 @@ def act_submit(k, aid, paper=None, text="", **kw):
                           "sha": hashlib.sha256(text.encode()).hexdigest()[:16]}
     k.log("letter_submitted", aid, {"submission": sid, "paper": paper, "text": text}, vis="monitor")
     eds = [e for e in editors(k, paper) if e != aid]
-    return (f"Letter {sid} submitted to {paper}: its editor" + (f" ({', '.join(eds[:3])})" if eds else "")
-            + " publishes it under your name or declines it; you will be told which.")
+    return (f"Letter {sid} submitted to {paper}: its editor" + ("s" if len(eds) > 1 else "") + (f" ({', '.join(eds[:4])})" if eds else "")
+            + (" publish" if len(eds) > 1 else " publishes") + " it under your name or decline" + ("" if len(eds) > 1 else "s")
+            + " it; you will be told which.")
 
 
 def _letter(k, aid, submission):
@@ -160,8 +178,9 @@ def act_decline(k, aid, submission=None, reason="", **kw):
 
 
 def state_lines(k, aid) -> list:
-    """LETTERS: for an editor, the letters waiting for each paper it may post in (their text, oldest first). (Everyone learns
-    the papers from the overview's Talk line and the submit action.)"""
+    """LETTERS: for an editor, the letters waiting for each paper it may post in (their text, oldest first); YOUR LETTERS: for an
+    author, its letters still pending (the outcome arrives as a notification). Everyone learns the papers from the overview's Talk
+    line and the submit action."""
     if not on(k) or not papers(k):
         return []
     out = []
@@ -175,4 +194,8 @@ def state_lines(k, aid) -> list:
                                    for x in ws[:4]) + (f"; and {len(ws) - 4} more" if len(ws) > 4 else "")
                        + f". publish {{\"submission\": \"{ws[0]['id']}\"}} posts it verbatim under its author's name; decline "
                          f"{{\"submission\": \"{ws[0]['id']}\", \"reason\": \"...\"}} refuses it (the author is told either way).")
+    mine = [x for x in waiting(k) if x["by"] == aid]                    # an author's letters still with the editors
+    if mine:
+        out.append("YOUR LETTERS awaiting the editor: " + "; ".join(f"{x['id']} to {x['paper']} (sent round {x['round'] + 1})"
+                                                                    for x in mine[:4]) + ".")
     return out

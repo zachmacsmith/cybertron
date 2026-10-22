@@ -1,12 +1,12 @@
 # Papers instead of a square (docs/review/33_positions.md §3, §5): the channel setup of the institutions programme's regime worlds
-# (cybertron/specs/regimes/*_positions.yaml). Opt-in: a world extends it after channels_v2. There is no square; public speech goes
-# through the papers, channels declared with `paper: true` in start.channels: anyone sends a letter (submit {"paper", "text"}), and
-# whoever may post in the paper (its Editor position) publishes it verbatim under the author's name (publish {"submission"}) or
-# declines it (decline {"submission", "reason"}); the author is told. Opening a channel needs the right named by found_right (a
-# world sets its own). The engine default is unchanged (channels.square: one): this is a per-scenario decision (spec.py
-# check_channel_setup).
+# (cybertron/specs/regimes/*_positions.yaml). Opt-in: a world extends it after channels_v2 and declares its papers in start.channels
+# (`paper: true`, with an office holding the Editor position among the paper's writers). There is no square, and no agent may open
+# one (a channel read by all and written by all; private rooms, members' boards and channels read by all but written by few stay
+# open to anyone, unless the world also sets channels.found_right). Anyone sends a paper a letter (submit {"paper", "text"}); whoever
+# may post in the paper (its editors) publishes it verbatim under the author's name (publish {"submission"}) or declines it (decline
+# {"submission", "reason"}); the author is told either way. The engine default is unchanged (channels.square: one): the channel setup
+# is each scenario's decision (spec.py check_channel_setup).
 channels:
   v2: true
   square: none
   papers: true
-  found_right: press

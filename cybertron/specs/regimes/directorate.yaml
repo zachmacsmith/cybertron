@@ -40,6 +40,7 @@ regime:
 jurisdictions: {enabled: true}
 dm_step: {capacity: legacy}           # the Communications Decree sets exact limits (natural capacity would cap them at 1)
 channels:
+  square: one                       # declared (review 33: the channel setup is each world's decision; the value it had)
   encryption: false
   found_right: press
 goals:

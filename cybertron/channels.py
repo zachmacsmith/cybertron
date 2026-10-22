@@ -922,6 +922,8 @@ def act_open_channel(k, aid, name, purpose="", readers=None, writers=None, liste
     readers = check_selector(readers if readers is not None else t.get("readers", {"all": True}), "readers", extra_selectors(k))
     writers = check_selector(writers if writers is not None else t.get("writers", {"all": True}), "writers", extra_selectors(k))
     listed = t.get("listed", True) if listed is None else bool(listed)
+    from cybertron import papers as PP                                  # review 33: papers worlds open no new square
+    PP.check_open(k, aid, readers, writers)
     rate = t.get("rate") if rate is None else rate
     if identity not in IDENTITIES or retention not in RETENTIONS:
         raise _err(f"identity is {' or '.join(IDENTITIES)}; retention is {' or '.join(RETENTIONS)}")
@@ -972,6 +974,9 @@ def act_set_channel(k, aid, channel, field, value=None):
         raise _err("followed_by is subscribers (the default: who joins it) or readers (everyone who can read it follows it)")
     elif key in ("readers", "writers"):
         value = check_selector(value, key, extra_selectors(k))
+        from cybertron import papers as PP                              # review 33: papers worlds open no new square
+        PP.check_open(k, aid, value if key == "readers" else ch["readers"], value if key == "writers" else ch["writers"],
+                      ch=ch)
     elif key in ("listed", "inbox"):
         if not isinstance(value, bool):
             raise _err(f"{key} is true or false")
@@ -1175,6 +1180,20 @@ def unread_split(k, aid, cid) -> tuple:
     return n, new, head
 
 
+def new_since(k, aid, cid) -> int:
+    """Review 33 (channels.unread_new): posts in a channel since the start of last round that the agent can see, not its own."""
+    n = 0
+    for s in reversed(_st(k)["log"].get(cid) or []):
+        e = k.events[s - 1] if s - 1 < len(k.events) else None
+        if e is None:
+            continue
+        if e.get("round", 0) < k.r - 1:
+            break
+        if e.get("agent") != aid and k.can_see(aid, e):
+            n += 1
+    return n
+
+
 def editions(k, aid, since) -> list:
     """Edition delivery (review 31.04 §5.2 item 6): for each channel with effective delivery edition that the agent follows, the
     posts of the rounds completed since its last look (rounds from the round of event `since` up to the last one) as one digest
@@ -1239,6 +1258,9 @@ def state_lines(k, aid) -> list:
     out = [own]
     if by["push"] or not pull(k):
         names = ", ".join(sorted(c["id"] for c in by["push"]))
+        if unread_new(k) and by["push"]:                                # review 33: how much each pushed channel had last round
+            names = ", ".join(c + (f" ({n} new since last round)" if n else "")
+                              for c, n in ((c["id"], new_since(k, aid, c["id"])) for c in sorted(by["push"], key=lambda c: c["id"])))
         out.append("Channels you follow: " + (names or "none") + " (read {} lists the directory).")
     if by["pull"] or (pull(k) and not by["push"]):
         heads = max(1, int(cfg(k)["board_headlines"]))

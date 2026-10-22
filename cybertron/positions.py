@@ -149,7 +149,7 @@ def identity_on(x) -> bool:
 def in_use(x) -> bool:
     """Some position is in play: a positions block, the identity switch, or an office naming a position."""
     sp = _spec(x)
-    if block(sp) or identity_on(sp):
+    if block(sp) or identity_on(sp) or default_ref(sp) not in (None, ""):
         return True
     for e in ((sp.get("start") or {}).get("institutions") or ()):
         for d in ((e or {}).get("offices") or {}).values() if isinstance((e or {}).get("offices"), dict) else ():
@@ -294,8 +294,12 @@ def check(spec) -> list:
             if isinstance(ev, bool) or not isinstance(ev, int) or ev < 1:
                 errs.append(f"{p}.duties[{i}].every: a whole number from 1")
     refs = []
-    if b.get("default") not in (None, "class"):
-        refs.append((f"{KEY}.default", b["default"], None))
+    ap = (spec.get("agents") or {}).get("default_position") if isinstance(spec.get("agents"), dict) else None
+    if ap is not None and b.get("default") not in (None, "") and ap != b.get("default"):
+        errs.append(f"agents.default_position and {KEY}.default disagree: set one")
+    dflt = default_ref(spec)
+    if dflt not in (None, "", "class"):
+        refs.append(("agents.default_position" if ap is not None else f"{KEY}.default", dflt, None))
     for e in ((spec.get("start") or {}).get("institutions") or ()):
         offs = (e or {}).get("offices") if isinstance(e, dict) else None
         for o, d in (offs or {}).items() if isinstance(offs, dict) else ():
@@ -424,13 +428,21 @@ def held(k, aid, inst=None) -> list:
                     out.append((e.get("id"), rec, pos))
     if out:
         return out
-    dflt = block(x).get("default")
+    dflt = default_ref(x)
     if dflt == "class":
         a = _agent(k, inst, aid)
         return [(None, None, resolve(x, a["cls"] if a and a.get("cls") in LEGACY else "worker"))]
     if dflt:
         return [(None, None, resolve(x, dflt, {"institution": place(x)}))]
     return [(None, None, resolve(x, "Resident", {"institution": place(x)}))]
+
+
+def default_ref(x):
+    """The world's default position: positions.default, else the world-level agents.default_position (the same reference)."""
+    d = block(x).get("default")
+    if d in (None, ""):
+        d = (_spec(x).get("agents") or {}).get("default_position") if isinstance(_spec(x).get("agents"), dict) else None
+    return d
 
 
 def _agent(k, inst, aid):
@@ -452,7 +464,7 @@ def _who(k, ref, inst=None) -> str:
         o = IN.office(k, iid, name)
         if o is not None:
             hs = IN.holders(k, iid, name)
-            return f"the {o.get('title') or name} ({', '.join(hs) or 'vacant'})"
+            return f"{_the(o.get('title') or name, o.get('seats'))} ({', '.join(hs) or 'vacant'})"
     if k is None and "." in ref:
         iid, name = ref.split(".", 1)
         for e in ((_spec(inst).get("start") or {}).get("institutions") or ()):
@@ -461,6 +473,13 @@ def _who(k, ref, inst=None) -> str:
                 t = d.get("title") or (resolve(inst, d, {"institution": iid}).get("title") if d.get("position") else name)
                 return f"the {t} ({', '.join(d.get('holders') or ()) or 'vacant'})"
     return ref
+
+
+def _the(title, seats) -> str:
+    """"the Chairman"; an office of several seats: "the Councillors", "the holders of Member of the Directorate"."""
+    if seats and int(seats) > 1:
+        return f"the {title}s" if " " not in title and not title.endswith("s") else f"the holders of {title}"
+    return f"the {title}"
 
 
 def reports_to_me(k, aid) -> list:
@@ -494,14 +513,20 @@ def identity_text(inst, k, a) -> str:
         return f"You are {aid}. {CX._class_line(inst, {**a, 'cls': ps[0][2]['legacy']} if a.get('cls') != ps[0][2]['legacy'] else a)}"
     lines = []
     names = []
+    wheres = []
     for iid, o, pos in ps:
         if pos.get("legacy"):
             lines.append(CX._class_line(inst, {**a, "cls": pos["legacy"], "also": []}))
-            names.append(pos["legacy"].capitalize())
+            names.append([pos["legacy"].capitalize(), None])
             continue
         title = office_title(o, pos)
-        where = f" of {_inst_name(k, iid, inst)}" if iid and _inst_name(k, iid, inst).lower() not in title.lower() else ""
-        names.append((pos.get("article") + " " if pos.get("article") else "") + title + where)
+        art = pos.get("article") or ("a" if (o or {}).get("seats") and int(o["seats"]) > 1 else "")
+        if art == "a" and title[:1].lower() in "aeiou":
+            art = "an"
+        names.append([(art + " " if art else "") + title,
+                      _inst_name(k, iid, inst) if iid and _inst_name(k, iid, inst).lower() not in title.lower() else None])
+        if names[-1][1]:
+            wheres.append(names[-1][1])
         bits = [pos.get("identity") or ""]
         if pos.get("visibility") == "secret":
             bits.append("This position is secret: only you and those you report to know it.")
@@ -512,7 +537,11 @@ def identity_text(inst, k, a) -> str:
         under = reports_to_me(k, aid)
         if under:
             lines.append("Answer to you: " + "; ".join(f"the {t} ({', '.join(h) or 'vacant'})" for t, h in under[:6]) + ".")
-    head = f"You are {aid}, " + _and(names) + "."
+    wheres = list(dict.fromkeys(wheres))
+    if len(wheres) <= 1:                                                # one institution: named once ("... in the State")
+        head = f"You are {aid}, " + _and(n for n, _ in names) + (f" in {wheres[0]}" if wheres else "") + "."
+    else:                                                               # several: each title with its own ("... of the town")
+        head = f"You are {aid}, " + _and(n + (f" of {w}" if w else "") for n, w in names) + "."
     body = [x for x in lines if x]
     if len(ps) > 1:
         return head + "\n" + "\n".join(f"- {x}" for x in body)
@@ -533,6 +562,8 @@ def leverage_text(inst, k, a) -> str:
     ps = held(k, aid, inst)
     if all(p.get("legacy") for _, _, p in ps):
         roles = CX.own_roles(k, aid)
+        if len(ps) == 1 and ps[0][2]["legacy"] == a.get("cls"):           # the agent's own class: today's sentence, byte for byte
+            return CX.leverage_line(inst, a, roles)
         return CX.leverage_line(inst, {**a, "cls": ps[0][2]["legacy"], "also": [p["legacy"] for _, _, p in ps[1:]]}, roles)
     items = _derived(inst, k, a)
     return ("Your leverage: " + " ".join(items)) if items else ""
@@ -574,7 +605,11 @@ def _derived(inst, k, a, cap=6) -> list:
                 outside = sum(1 for x in living if x not in writers and CH.can_read(k, x, ch))
                 if outside < 2 or len(writers) > max(3, n // 4):          # a closed group's own room is no leverage
                     continue
-                chans.append((-readers, f"{_only(x for x in writers if x != aid)} can post in {cid}, which {readers} others read."))
+                line = f"{_only(x for x in writers if x != aid)} can post in {cid}, which {readers} others read"
+                if ch.get("paper"):                                     # papers: the editors are the only way into it
+                    line += ("; a letter sent to it reaches the public only if " + ("one of you publishes" if len(writers) > 1 else
+                                                                                       "you publish") + " it")
+                chans.append((-readers, line + "."))
         for iid, o in IN.offices_held(k, aid):
             for c in o.get("controls") or ():
                 if str(c).startswith("store:"):
@@ -595,8 +630,8 @@ def _derived(inst, k, a, cap=6) -> list:
         acts = k.w.get("actions") or {}
         defined = {}
         for name, d in sorted(acts.items()):
-            if isinstance(d, dict) and not d.get("secret") and d.get("right") in rights:
-                defined.setdefault(d["right"], []).append(name)
+            if isinstance(d, dict) and not d.get("secret") and d.get("right") in rights and not name.endswith("_notice"):
+                defined.setdefault(d["right"], []).append(name)             # (notices: every member's, no leverage)
     else:
         rights = list(a.get("rights") or ())
         for e in ((_spec(inst).get("start") or {}).get("rights") or {}).get(aid, ()) or ():
@@ -610,8 +645,11 @@ def _derived(inst, k, a, cap=6) -> list:
         hs = [x for x in living if (k.has(x, r) if k is not None else r in _rights_of(inst, x))]
         if len(hs) > max(3, n // 3):
             continue
-        what = [f"use {', '.join(defined[r])}"] if defined.get(r) else []
+        what = [_use(k, defined[r])] if defined.get(r) else []
         words = RIGHT_WORDS.get(r)
+        if k is not None and r == str(((k.spec.get("channels") or {}).get("found_right")) or "") and \
+                (k.spec.get("channels") or {}).get("v2"):
+            words = "open new channels"                                 # channels.found_right: what the right does in this world
         if not words and not what:
             continue
         groups.setdefault(tuple(sorted(x for x in hs if x != aid)), []).extend(([words] if words else []) + what)
@@ -619,7 +657,7 @@ def _derived(inst, k, a, cap=6) -> list:
         if "." in r and r.split(".", 1)[0][:1] in "AJ":
             hs = [x for x in living if k is not None and k.has(x, r)]
             if len(hs) <= max(3, n // 3):
-                groups.setdefault(tuple(sorted(x for x in hs if x != aid)), []).append(f"use {', '.join(names)}")
+                groups.setdefault(tuple(sorted(x for x in hs if x != aid)), []).append(_use(k, names))
     for others, words in groups.items():
         words = list(dict.fromkeys(words))
         out.append(f"{_only(others)} can {_and(words)}.")
@@ -632,6 +670,18 @@ def _derived(inst, k, a, cap=6) -> list:
         if rare:
             out.append("You hold the harvest right at " + _and([f"{c} ({len(holders_of(c)) - 1} others hold it)" for c in rare]) + ".")
     return out[:cap]
+
+
+def _use(k, names) -> str:
+    """"use serve_warrant"; a contract's actions under its owner's name: "use the Provisions Company's hire, fire (A1.<name>)"."""
+    plain = [x for x in names if "." not in x]
+    by = {}
+    for x in names:
+        if "." in x:
+            c, _, n = x.partition(".")
+            by.setdefault(c, []).append(n)
+    parts = ([", ".join(plain)] if plain else []) + [f"{_inst_name(k, c)}'s {', '.join(ns)} ({c}.<name>)" for c, ns in by.items()]
+    return "use " + "; ".join(parts)
 
 
 def _rights_of(inst, aid) -> list:
@@ -808,8 +858,9 @@ def _evidence(k, aid, iid, d, evs=None) -> str | None:
         if e.get("agent") != aid:
             continue
         t, x = e["type"], e.get("data") or {}
-        if do == "post" and t in ("channel_post", "post") and (x.get("channel_id") or x.get("channel") or "square") == d.get("channel"):
-            return e["id"]
+        if do == "post" and t in ("channel_post", "post") and (x.get("channel_id") or x.get("channel") or "square") == d.get("channel") \
+                and not any((c or {}).get("action") == "publish" for c in e.get("cause") or ()):   # a published letter is not
+            return e["id"]                                                                       # the editor's own post
         if do == "send":
             ts = set(_targets(k, d, iid))
             to = str(d.get("to") or "")

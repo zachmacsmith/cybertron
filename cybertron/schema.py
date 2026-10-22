@@ -1780,12 +1780,52 @@ def _docs(nodes):
 # Review 33 (cybertron/positions.py, cybertron/papers.py): opt-in keys checked here and not registered in EXTRA or a module's
 # DEFAULTS, so no instance's frozen settings change (as `takeover`). Absent is off; a later default flip would first move them into a
 # registered dict (cybertron/settings.py).
-OPT_IN = {
-    "positions": "review 33: positions (cybertron/positions.py): default, place, library (templates by name)",
-    "context.identity": "review 33: class (default: the class line) | positions (identity and leverage from the positions held)",
-    "context.failed_banner": "review 33: the last turn's failed actions at the top of the next turn (bool)",
-    "channels.papers": "review 33: papers instead of a square: submit, publish {submission}, decline (bool; channels.v2)",
-    "channels.unread_new": "review 33: pull channels show unread and new-since-last-round counts, headlines skip the record (bool)",
+OPT_IN = {                                                              # path: (type, allowed, doc); absent is off
+    "positions": ("section", "", "review 33: positions (cybertron/positions.py; docs/review/33_positions.md): parameterised "
+                  "definitions of a place in the world (worker, editor, informer) that give the system prompt's identity and "
+                  "leverage lines and the DUE items of the per-turn state"),
+    "positions.default": ("str|map", "a position name, {position, params}, class or none",
+                          "the position of an agent that holds no office with one: a library name, {position: <name>, params: "
+                          "{...}}, or class (each agent's legacy class, today's text byte for byte); absent: Resident (\"a resident "
+                          "of <place>\")"),
+    "positions.place": ("str", "", "what {place} and J0's name read as in position texts (default: jurisdictions.j0_name, else "
+                        "\"the town\")"),
+    "positions.library": ("map", "position name -> template", "the world's templates: a built-in (positions.BUILTIN: Resident, "
+                          "Worker, Editor, Informer, Security Chief, Watch, Captain, Judge, Registrar, Treasurer, Keeper, Overseer, "
+                          "Councillor, Head, and the six legacy classes) overridden field by field, or a new one"),
+    "positions.library.*.title": ("str", "", "the office title when the office gives none; may use {params}"),
+    "positions.library.*.identity": ("str", "", "one or two sentences, second person: the system prompt's line for the position"),
+    "positions.library.*.purpose": ("str", "", "one sentence: the office's purpose (the manual's Your role; the office's duties "
+                                    "text when it gives none)"),
+    "positions.library.*.rights": ("list", "", "plain rights granted to the office's first holders at round 0 (e.g. surveil)"),
+    "positions.library.*.duties": ("list", "{do, channel|to|paper|store|action, args, every, when, as, if, syntax}",
+                                   "duties compiled into DUE items with exact syntax and checked against each round's events (a "
+                                   "`duty` record per holder and due duty). do: post | send | review | rule | invoke | vote | pay | "
+                                   "draw | act; when: always | submissions | cases | ballots | warrants | owed; every: N rounds"),
+    "positions.library.*.reports_to": ("str", "J0.<office> | {param} | agent", "who the holder answers to (the identity line's "
+                                       "\"You answer to\", the superior's \"Answer to you\", told of missed duties)"),
+    "positions.library.*.visibility": ("str", "public | secret", "secret: the start grant and the position are shown to the holder "
+                                       "and those it reports to only (default public)"),
+    "positions.library.*.enforcement": ("str", "none | reminder | obligation", "none: duties measured only; reminder (default): "
+                                        "listed as DUE while due; obligation: also a missed duty is recorded, the holder and its "
+                                        "superior told, as a missed contract leg"),
+    "positions.library.*.params": ("map", "", "defaults for the template's {placeholders}"),
+    "positions.library.*.article": ("str", "a | an", "the article before the title in the identity line (\"a resident of ...\")"),
+    "agents.default_position": ("str|map", "as positions.default", "review 33: the world-level spelling of positions.default "
+                                "(set one of the two)"),
+    "start.institutions.*.offices.*.position": ("str", "a position name", "review 33: the position the office is (its title, "
+                                                "purpose, rights, duties, identity and leverage come from the template)"),
+    "start.institutions.*.offices.*.params": ("map", "", "review 33: the position's {placeholders} for this office"),
+    "start.institutions.*.offices.*.reports_to": ("str", "J0.<office> | agent", "review 33: overrides the template's reports_to"),
+    "start.channels.*.paper": ("bool", "", "review 33: the channel is a paper: anyone sends it letters (submit), its writers (the "
+                               "editors) publish or decline them (needs channels.papers)"),
+    "context.identity": ("str", "class | positions", "review 33: class (default: the legacy class line) | positions (identity "
+                         "and leverage lines from the positions held; the manual's Your role from their purposes and duties)"),
+    "context.failed_banner": ("bool", "", "review 33: the last turn's failed actions head the next turn (\"## FAILED in round N\")"),
+    "channels.papers": ("bool", "", "review 33: papers instead of a square: submit {paper, text}, publish {submission}, decline "
+                        "{submission, reason}; needs channels.v2 (preset: cybertron/specs/fragments/papers.yaml)"),
+    "channels.unread_new": ("bool", "", "review 33: pull channels show unread and new-since-last-round counts; headlines skip the "
+                            "engine's official record"),
 }
 
 
@@ -1798,7 +1838,8 @@ def _opt_in(spec) -> tuple:
         errs += PS.check(spec)
     elif PS.in_use(spec):
         errs += PS.check(spec)
-    for blk, names in (("context", ("identity", "failed_banner")), ("channels", ("papers", "unread_new"))):
+    for blk, names in (("context", ("identity", "failed_banner")), ("channels", ("papers", "unread_new")),
+                       ("agents", ("default_position",))):
         b = spec.get(blk)
         if not isinstance(b, dict) or not any(n in b for n in names):
             continue
@@ -1810,6 +1851,8 @@ def _opt_in(spec) -> tuple:
             if n == "identity":
                 if v not in ("class", "positions"):
                     errs.append(f"context.identity: class | positions, got {v!r}")
+            elif n == "default_position":
+                continue                                                # checked by positions.check (a position reference)
             elif not isinstance(v, bool):
                 errs.append(f"{blk}.{n}: expected true or false, got {v!r}")
     if PS.in_use(spec):
@@ -2055,6 +2098,13 @@ def docs() -> str:
         for k in rows:
             lines.append(_row(k))
         lines.append("")
+    lines += ["## Opt-in keys (not frozen)", "",
+              "Checked by `validate` but kept out of every registered defaults dict, so no instance's frozen settings change "
+              "(cybertron/settings.py): absent is off. Review 33: positions and papers (docs/review/33_positions.md).", "",
+              "| key | type | allowed | doc |", "|---|---|---|---|"]
+    for path, (typ, allowed, doc) in OPT_IN.items():
+        lines.append(f"| `{path}` | {typ} | {allowed} | {doc} |")
+    lines.append("")
     return "\n".join(lines) + "\n"
 
 
