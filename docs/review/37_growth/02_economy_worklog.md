@@ -8,6 +8,7 @@
 | Phase | What | State |
 |---|---|---|
 | P0 | Design note (diagnosis, critique of the brief, plan) and this log | done |
+| P0b | Productivity analysis: what an action is worth under autarky, spot trade and institutions (02b) | done; design under discussion with Zach, nothing built |
 | P1 | Goods and recipes layer: `economy` spec block (off by default), goods table, recipes, `make` action routed through `convert`, facilities | not started |
 | P2 | Needs: the ration accepts several foods (bread), clothing changes the lean-season ration | not started |
 | P3 | Trade skills by practice; tools that raise one trade's yield and wear out | not started |
@@ -22,6 +23,18 @@ byte-identically (no default moves, so no engine version bump unless that change
 calls (scripted dry runs and unit tests only); everything generated can be fixed by hand in a spec.
 
 ## Log
+
+### 22 Oct (later)
+
+- Zach: worlds are almost always seeded with an existing society (resolves 02a §6: seed, and test that the order pays).
+- Zach: wants S-curve scaling for some resources, tools that matter, everything justifying itself, and buildings owned by agents or
+  institutions that enable recipes, with builders as a trade.
+- Wrote 02b_productivity.md and its model 02b_productivity_model.py. Main results: with skill and cheap exchange, institutions are
+  2.1x as productive as autarky at the proposed calibration (load 25% vs 53%); exchange cost is the dominant parameter (0.5 actions
+  per unit moved erases the gain); the crew mine and the watermill add little unless the scale economy sits on a large share of the
+  cost of needs.
+- Coordination board (branch coord) Post 1 mentions 37.2; reply drafted with Zach before posting. Nothing built until the design is
+  confirmed.
 
 ### 22 Oct
 

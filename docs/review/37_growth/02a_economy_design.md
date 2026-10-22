@@ -109,7 +109,11 @@ Chokepoints: the mill, the forge, the mine, the forest licence, the tax office (
 Prompt budget: show a recipe only to those with the skill or facility, and summarise needs in one line ("bread for 2 rounds; tools
 worn").
 
-## 6. Open decision
+## 6. Open decision (resolved 22 Oct: seeded)
+
+**Zach, 22 Oct: worlds are almost always seeded with an existing society.** So: seed the structure and require that it pays; see
+02b §6 for what that changes.
+
 
 The brief's goal is emergent ("people specialise because it pays"). Specialisation emerging from nothing in about 40 rounds with a
 Haiku bulk at 24 agents is unlikely: the first batch's Haiku foraged and little else. The benchmark needs dependence that exists,
