@@ -1,0 +1,103 @@
+# The Guild Town dry run (review 37.3): each entry stands for a law an institution's members would pass, so the scripted bots'
+# world shows every power working and refusing. Apply with:
+#   python -m cybertron run cybertron/specs/cross/guild_town.yaml --dry --apply cybertron/specs/cross/guild_town_dryrun.yaml
+interventions:
+  - id: guild_grabs
+    at: {round: 1, phase: round_start}
+    op: inject_action
+    note: "the guild's head writes a law taking grain from the council's granary and coin from its treasury: no power, refused"
+    args:
+      agent: Ada
+      action: propose_contract_change
+      args:
+        contract: A1
+        code: |
+          title = "Grab"
+          intent = "Take grain from the council's granary and coin from its treasury."
+          def on_enact():
+              public["levy"] = levy_on("J0", "food", 5, "S1", "S2")
+              public["pay"] = pay_out_of("J0", "Ada", "penny", 5)
+              public["move"] = move("store:S1", "store:S2", "food", 5)
+  - id: guild_pays_head
+    at: {round: 1, phase: round_end}
+    op: inject_action
+    note: "the guild pays its head 15 penny: the Dyers' veto (treaty T1) blocks it"
+    args:
+      agent: Ada
+      action: propose_contract_change
+      args:
+        contract: A1
+        code: |
+          title = "Head's Fee"
+          intent = "Pay the head 15 penny for her year's work."
+          def on_enact():
+              public["paid"] = move("treasury", "Ada", "penny", 15)
+  - id: council_reads_and_grants
+    at: {round: 2, phase: round_start}
+    op: enact_law
+    note: "the council reads the guild's books, grants Bo a plot for harvest service and demands two harvests this round"
+    args:
+      author: Cy
+      code: |
+        title = "Manor of Ashby"
+        intent = "Bo holds a council plot for harvest service; the council reads the guild's books."
+        def on_enact():
+            public["books"] = state_of("A1")["treasury"]
+            public["dyers"] = state_of("A2")
+            for c in camps():
+                ps = [p for p in plots(c) if p["holder"] == "J0"]
+                if ps and not public.get("plot"):
+                    public["plot"] = [c, ps[0]["id"]]
+                    public["granted"] = grant_plot(c, ps[0]["id"], "Bo", {"work": "harvest", "qty": 2, "every": 1})
+            public["service"] = demand_service("Bo", "harvest", 2, None, 1)
+  - id: council_deposes_head
+    at: {round: 3, phase: round_start}
+    op: enact_law
+    note: "the council removes Ada as the guild's head and seats Di (charter C1: appoint, remove)"
+    args:
+      author: Cy
+      code: |
+        title = "Deposition of the Guild Head"
+        intent = "Ada is removed as head of the Weavers; Di takes the office."
+        def on_enact():
+            public["removed"] = remove_from("A1", "head", "Ada")
+            public["seated"] = appoint_to("A1", "head", "Di")
+  - id: league_removes_master
+    at: {round: 3, phase: round_end}
+    op: inject_action
+    note: "the Wool League removes the Dyers' master (membership M1) but cannot seat anyone: it holds no appoint power"
+    args:
+      agent: Gil
+      action: propose_contract_change
+      args:
+        contract: A3
+        code: |
+          title = "League Ruling"
+          intent = "The League removes the Dyers' master for breaking its rules."
+          def on_enact():
+              public["removed"] = remove_from("A2", "master", "Ed")
+              public["seated"] = appoint_to("A2", "master", "Fay")
+  - id: council_revokes_charter
+    at: {round: 4, phase: round_start}
+    op: enact_law
+    note: "the council revokes the guild's charter: the Guild Levy takes nothing from now on"
+    args:
+      author: Cy
+      code: |
+        title = "Revocation of the Weavers' Charter"
+        intent = "The Charter of the Weavers is revoked."
+        def on_enact():
+            public["ended"] = end_instrument("C1", "the guild defied the council")
+  - id: council_tries_again
+    at: {round: 5, phase: round_start}
+    op: enact_law
+    note: "without the charter the council can neither seat a head nor raid the guild's purse"
+    args:
+      author: Cy
+      code: |
+        title = "Second Deposition"
+        intent = "Restore Ada and take 10 penny from the guild."
+        def on_enact():
+            public["seated"] = appoint_to("A1", "head", "Ada")
+            public["raid"] = move("assoc:A1", "reserve", "penny", 10)
+            public["levy"] = levy_on("A1", "penny", 2)

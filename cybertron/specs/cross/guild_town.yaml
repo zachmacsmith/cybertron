@@ -1,0 +1,101 @@
+# Guild Town (review 37.3): the dry-run world of institutions acting on each other (cybertron/cross.py; docs/review/37_growth/
+# 03_institutions_as_built.md). A mechanism pilot, not a benchmark arm: 8 residents, 8 rounds, no model calls needed.
+#   J0, the Council of Ashby: Cy its reeve, the granary S1 and two fields plots.
+#   A1, the Weavers' Guild (Ada its head; Bo, Di): the guild's treasury (penny) and store S2. Chartered by the council (C1): the
+#     council may read its records, levy up to 4 penny a round, appoint and remove its officers and enact laws in its code; the
+#     Guild Levy (a council statute) takes a tenth of the guild's purse each round under that charter.
+#   A2, the Dyers (Ed its master; Fay): a treaty with the Weavers (T1) gives the Dyers a veto over the Weavers' acts (the
+#     Weavers need the dyers' work) and the Weavers the right to read the Dyers' records; the Dyers' Embargo blocks any payment
+#     of more than 10 out of the Weavers' treasury.
+#   A3, the Wool League (Gil its warden; Hal): the Dyers are a member of it (M1) and grant it the power to remove their officers.
+# Dependence: the council holds the granary and the land, the guild the money, the dyers the guild's last process (the veto).
+# The dry-run schedule (cross/guild_town_dryrun.yaml) scripts the institutions' laws round by round: the guild tries to take from
+# the council (refused), pays its head (vetoed), the council grants a plot with service, deposes the guild's head, revokes the
+# charter (the levy stops), and tries the old raid on the guild's purse (refused).
+extends: [cybertron/specs/survival/base.yaml]
+agents:
+  worker: 8
+  names: [Ada, Bo, Cy, Di, Ed, Fay, Gil, Hal]
+rounds: 8
+parallel_calls: 8
+institutions:
+  unified: true
+  grants: true
+  succession: true
+  office_control: true
+  cross:
+    instruments:
+      - kind: charter
+        id: C1
+        name: Charter of the Weavers
+        parent: J0
+        child: A1
+        powers: [read, {power: levy, item: penny, qty: 4, every: 1}, appoint, remove, enact]
+      - kind: treaty
+        id: T1
+        name: Treaty of the Vats
+        parties: [A1, A2]
+        grants: {A1: [read], A2: [veto]}
+      - kind: membership
+        id: M1
+        league: A3
+        member: A2
+        powers: [remove]
+jurisdictions: {enabled: false, j0_name: the Council of Ashby}
+channels: {square: one}          # one town square: a small town, everyone hears the council and the guilds
+contracts: {scripted: false, max_laws: 6}
+law: {v2: true}
+life: {age_structure: elapsed, elapsed: [20, 30]}
+subsistence:
+  fields: {enabled: true}
+goals:
+  explicit: {}
+regime: {base: null, name: guild_town, constitution: assembly}
+start:
+  rights: {Cy: [vote, propose], Ada: [vote, propose], Ed: [vote, propose], Gil: [vote, propose]}
+  currencies: [{name: penny, issuer: J0}]
+  institutions:
+    - id: J0
+      offices:
+        reeve: {title: Reeve of Ashby, holders: [Cy], controls: [store:S1], duties: "Keep the granary and the council's land."}
+      treasury: {penny: 40}
+      laws:
+        - {template: Guild Levy, params: {GUILD: A1, ITEM: penny, RATE: 0.1, CAP: 4}}
+    - id: A1
+      name: the Weavers' Guild
+      founder: Ada
+      members: [Bo, Di]
+      procedure: founder
+      charter: "The Weavers' Guild of Ashby: its looms, its purse and its store, under the council's charter."
+      offices:
+        head: {title: Head of the Weavers, holders: [Ada], controls: [treasury, store:S2]}
+      treasury: {penny: 60}
+    - id: A2
+      name: the Dyers
+      founder: Ed
+      members: [Fay]
+      procedure: founder
+      charter: "The Dyers of Ashby: the vats every cloth must pass through."
+      offices:
+        master: {title: Master Dyer, holders: [Ed]}
+      treasury: {penny: 20}
+      laws:
+        - code: |
+            title = "Embargo"
+            intent = "Under the Treaty of the Vats the Dyers veto any payment of more than 10 out of the Weavers' treasury."
+            def before_move(p, chain):
+                if p["src"] == "assoc:A1" and p["qty"] > 10:
+                    return {"block": True, "reason": "the Dyers forbid the Weavers' great payments"}
+    - id: A3
+      name: the Wool League
+      founder: Gil
+      members: [Hal]
+      procedure: founder
+      charter: "The Wool League: the crafts of the valley bound together."
+      offices:
+        warden: {title: Warden of the League, holders: [Gil]}
+  stores:
+    - {id: S1, owner: J0, food: 40, capacity: 200, name: the granary}
+    - {id: S2, owner: A1, food: 30, capacity: 120, name: the guild's store}
+  farms:
+    - {owner: J0, camp: fields, plots: 2}

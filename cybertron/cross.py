@@ -66,9 +66,9 @@ WORK = ("harvest", "sow", "tend", "reap")
 INSTRUMENT_KEYS = {"charter": ("kind", "id", "name", "parent", "child", "powers", "child_powers", "incorporate"),
                    "treaty": ("kind", "id", "name", "parties", "grants"),
                    "membership": ("kind", "id", "name", "league", "member", "powers")}
-VERB = {"read": "read its records", "levy": "levy on its treasury and stores", "pay": "pay out of its treasury",
-        "appoint": "appoint its officers", "remove": "remove its officers", "enact": "enact laws in its code",
-        "veto": "veto its acts", "seize": "seize its land"}
+OF = {"read": "read the records of {x}", "levy": "levy on the treasury and stores of {x}", "pay": "pay out of the treasury of {x}",
+      "appoint": "appoint the officers of {x}", "remove": "remove the officers of {x}", "enact": "enact laws in the code of {x}",
+      "veto": "veto the acts of {x}", "seize": "seize the land of {x}"}
 EVENTS = ("cross_instrument", "cross_act", "cross_refused", "tenure", "service_demanded", "service_missed")
 
 
@@ -279,7 +279,7 @@ def powers_over(k, holder, over) -> list:
 
 def why_not(k, holder, over, power) -> str:
     """The in-world reason holder may not use `power` over `over`."""
-    base = f"{name(k, holder)} holds no power to {VERB[power].replace('its', name(k, over) + chr(39) + 's', 1)}"
+    base = f"{name(k, holder)} holds no power to {OF[power].format(x=name(k, over))}"
     near = [r for r in instruments(k) if holder in r["parties"] and over in r["parties"]]
     for r in reversed(near):
         if r["status"] == "ended":
@@ -997,8 +997,20 @@ def after_change(k, name_, payload) -> None:
             p = _plot(c, payload.get("plot"))
             if p is None or p.get("holder") != s["institution"]:
                 continue
-        s["done"] = round(s["done"] + 1.0, 6)
+        s["done"] = round(s["done"] + _labour(k, a), 6)
         break
+
+
+def _labour(k, aid) -> float:
+    """One action's work units: 37.1's labour(agent) (a minor's fraction) when the engine has it (cybertron.life.labour), else 1."""
+    from cybertron import life as LF
+    fn = getattr(LF, "labour", None)
+    if not callable(fn):
+        return 1.0
+    try:
+        return float(fn(k, aid))
+    except Exception:                                                   # noqa: BLE001 (an older or different signature: one unit)
+        return 1.0
 
 
 def end_round(k) -> None:
@@ -1016,21 +1028,26 @@ def end_round(k) -> None:
 
 
 # ---------------------------------------------------------------------- prompt lines (agents.state_view)
-def _fmt_grant(k, g) -> str:
-    v = VERB[g["power"]]
+SHORT = {"read": "read records", "levy": "levy on treasury and stores", "pay": "pay out of treasury", "appoint": "appoint officers",
+         "remove": "remove officers", "enact": "enact laws", "veto": "veto acts", "seize": "seize land"}
+
+
+def _fmt_grant(g) -> str:
+    v = SHORT[g["power"]]
     if g["power"] in LIMITED and g["qty"] is not None:
         per = "a round" if g["every"] == 1 else f"every {g['every']} rounds"
-        v = ("levy up to" if g["power"] == "levy" else "pay out up to") + f" {g['qty']:g} {g['item'] or 'goods'} {per} from its treasury"
+        v = ("levy" if g["power"] == "levy" else "pay out") + f" up to {g['qty']:g} {g['item'] or 'goods'} {per}"
     elif g["power"] in LIMITED and g["item"]:
         v += f" ({g['item']})"
     return v
 
 
-def _side(k, rec, holder, over) -> str:
-    gs = [g for g in rec["grants"] if g["holder"] == holder and g["over"] == over]
-    if not gs:
-        return ""
-    return f"{holder} may " + ", ".join(_fmt_grant(k, g) for g in gs)
+def _sides(grants) -> str:
+    """"J0 over A1: read records, levy up to 4 penny a round; A1 over J0: read records"."""
+    out = {}
+    for g in grants:
+        out.setdefault((g["holder"], g["over"]), []).append(_fmt_grant(g))
+    return "; ".join(f"{h} over {o}: {', '.join(v)}" for (h, o), v in out.items())
 
 
 def _concerns(k, rec, aid) -> bool:
@@ -1054,20 +1071,21 @@ def state_lines(k, aid) -> list:
         if rec["status"] == "ended" or (rec["status"] == "active" and not live(k, rec)) or not _concerns(k, rec, aid):
             continue
         a, b = rec["parties"]
-        sides = [s for s in (_side(k, rec, a, b), _side(k, rec, b, a)) if s]
         title = f"{rec['kind'].capitalize()} {rec['id']}" + (f" '{rec['name']}'" if rec["name"] else "")
         head = f"{title} between {name(k, a)} and {name(k, b)}"
+        sides = _sides(rec["grants"]) or "no powers"
         if rec["status"] == "offered":
             waits = [p for p in rec["parties"] if p not in rec["consent"]]
-            out.append(f"{head}, offered by {rec['by']}: " + ("; ".join(sides) or "no powers") +
-                       f". In force once {', '.join(waits)} accepts by a law calling accept_instrument(\"{rec['id']}\").")
+            out.append(f"{head}, offered by {rec['by']}. {sides}. In force once {', '.join(waits)} accepts by a law calling "
+                       f"accept_instrument(\"{rec['id']}\").")
         else:
-            out.append(f"{head}: " + ("; ".join(sides) or "no powers") + " (its laws use them: read_law for the calls).")
+            out.append(f"{head}. {sides} (laws use these powers: read_law for the calls).")
     for t in st["tenures"]:
         if t["status"] == "held" and t["grantee"] == aid:
             sv = t["service"]
             out.append(f"You hold {t['camp']} plot {t['plot']} of {name(k, t['grantor'])}" +
-                       (f", owing service: {sv['work']} {sv['qty']:g} time(s) every {sv['every']} round(s) when it demands" if sv else "")
+                       (f", owing service when it demands: {sv['work']} {sv['qty']:g} time(s) "
+                        + ("a round" if sv["every"] == 1 else f"every {sv['every']} rounds") if sv else "")
                        + "; it may take the plot back.")
     for s in st["services"].values():
         if s["agent"] == aid and service_status(k, s) == "open":
@@ -1084,7 +1102,7 @@ def render_event(k, e, tag, viewer=None) -> str | None:
     if t == "cross_instrument":
         what = {"offered": "was offered", "in force": "is in force", "ended": "ended"}.get(d["what"], d["what"])
         by = f" ({d['by']} ended it" + (f": {d['reason']}" if d.get("reason") else "") + ")" if d["what"] == "ended" and d.get("by") else ""
-        gs = "; ".join(f"{g['holder']} may {_fmt_grant(k, g).replace('its', g['over'] + chr(39) + 's', 1)}" for g in d["grants"])
+        gs = _sides(d["grants"])
         return f"{tag} {d['kind'].capitalize()} {d['instrument']} between {' and '.join(d['parties'])} {what}{by}" + (f": {gs}" if gs and d['what'] != "ended" else "")
     if t == "cross_act":
         p = d["power"]
@@ -1105,7 +1123,8 @@ def render_event(k, e, tag, viewer=None) -> str | None:
         if d["what"] == "granted":
             sv = d.get("service")
             return (f"{tag} {d['grantor']} granted {d['camp']} plot {d['plot']} to {d['grantee']}" +
-                    (f", for service ({sv['work']} {sv['qty']:g} every {sv['every']} round(s))" if sv else ""))
+                    (f", for service ({sv['work']} {sv['qty']:g} time(s) "
+                     + ("a round)" if sv["every"] == 1 else f"every {sv['every']} rounds)") if sv else ""))
         return f"{tag} {d['grantor']} took back {d['camp']} plot {d['plot']} from {d['grantee']}"
     if t == "service_demanded":
         return (f"{tag} {d['institution']} demands service of {d['agent']}: {d['work']}" + (f" at {d['camp']}" if d.get("camp") else "")

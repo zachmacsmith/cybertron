@@ -152,7 +152,7 @@ def test_council_levies_the_guild_only_while_the_charter_grants_it(tmp_path):
                                   '    public["y"] = levy_on("A1", "penny", 2)\n'))
     assert pub(k, lid) == {"x": 2.0, "end": True, "y": False}
     why = evs(k, "cross_refused")[-1]["why"]
-    assert why == "J0 (the Council) holds no power to levy on A1 (the Weavers)'s treasury and stores (the charter C1 ended in round 2)"
+    assert why == "J0 (the Council) holds no power to levy on the treasury and stores of A1 (the Weavers) (the charter C1 ended in round 2)"
     ended = [e for e in evs(k, "cross_instrument") if e["what"] == "ended"][-1]
     assert ended["by"] == "J0" and ended["reason"] == "the guild defied the council"
 
@@ -220,7 +220,7 @@ def test_a_league_court_ruling_binds_a_member_office(tmp_path):
     assert [(a["power"], a["agent"]) for a in evs(k, "cross_act")] == [("remove", "Ada"), ("appoint", "Bo")]
     k, lid = _court_world(tmp_path / "x", member=False)               # no membership: the ruling binds nobody's office
     assert pub(k, lid) == {"removed": False, "seated": False} and IN.holders(k, "A1", "head") == ["Ada"]
-    assert "holds no power to remove A1 (the Weavers)'s officers" in evs(k, "cross_refused")[0]["why"]
+    assert "holds no power to remove the officers of A1 (the Weavers)" in evs(k, "cross_refused")[0]["why"]
 
 
 # ---------------------------------------------------------------------- hierarchy, enact, read, veto
@@ -318,9 +318,9 @@ def test_plots_granted_as_tenures_with_service_and_seized(tmp_path):
 def test_prompt_lines_are_short_in_world_terms_and_reach_only_those_concerned(tmp_path):
     k = kernel(tmp_path, world(instruments=[CHARTER]))
     line = CR.state_lines(k, "Ada")
-    assert line == ["Charter C1 'Charter of the Weavers' between J0 (the Council) and A1 (the Weavers): J0 may read its records, "
-                    "levy up to 5 penny a round from its treasury, appoint its officers, remove its officers, enact laws in its "
-                    "code (its laws use them: read_law for the calls)."]
+    assert line == ["Charter C1 'Charter of the Weavers' between J0 (the Council) and A1 (the Weavers). J0 over A1: read records, "
+                    "levy up to 5 penny a round, appoint officers, remove officers, enact laws (laws use these powers: read_law for "
+                    "the calls)."]
     assert CR.state_lines(k, "Cy") == line and CR.state_lines(k, "Bo") == line    # J0's officer; a guild member
     assert CR.state_lines(k, "Fay") == [] and CR.state_lines(k, "Ed") == []       # the Dyers are not concerned
     from cybertron import agents as AG
