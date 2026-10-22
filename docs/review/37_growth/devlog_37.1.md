@@ -200,3 +200,21 @@ Dropped (Zach, 22 Oct): automatic or hazard births (fertility stays a choice), d
 - **Lesson for the live test:** with the bot's rule fixed, loop 1 in dry runs measures the bot rule. What matters is whether
   models respond to the same incentives, which only the live test can show.
 - **Doing:** re-running eldest, partible and the baseline.
+
+### 2026-10-22 18:37 UTC: second dry runs (growth_probe, seed 1, 150 rounds, bots)
+
+| Arm | Population | Peak | Births | Deaths | Coming of age |
+|---|---|---|---|---|---|
+| growth, eldest | 16 -> 25 | 33 | 42 | 24 old age, 16 starvation, 1 accident | 23 loyal, 16 own |
+| growth, partible | 16 -> 22 | 31 | 43 | 23 old age, 21 starvation, 1 accident | 26 loyal, 13 own, 1 estranged |
+| baseline (today's pairs, no growth fragment) | 16 -> 28 | 34 | 38 | 30 old age, 4 starvation | (inherit mode) |
+
+- **Read:** the growth settings do not raise growth in bot runs, and they bring four to five times the starvation. The two arms
+  differ in bot rule as well as settings: the baseline bot conceives only when it holds 14+ food, so its children start with 10
+  food; the family bot conceives on household food per head, and a child starts with 2 food, keeps 2, and is frail at 0.6. The
+  likely cause is underfed minors, which is the mechanism working as designed under a bot that does not feed its children
+  enough. Not yet checked against the starvation events.
+- Q: is minor frailty 0.6 with 2 food at birth the intended severity? Cheap conception plus a frail child means a careless parent
+  loses children often.
+- **Next:** break starvation deaths down by minors and adults; then retune (provisions or frailty) or make the family bot feed its
+  minors, whichever the breakdown points to.
