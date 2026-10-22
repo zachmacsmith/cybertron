@@ -36,6 +36,43 @@ Every rule (shelter, warmth, cooking, storage, speech, smithing, milling, copyin
 **A room by itself gives two things:** a roof (out of the weather: from "unsheltered" to "damaged", 02e §3.2) and **a speech
 scope** (02h §4a: everyone with access to the room hears what is said in it).
 
+### 2b. Building bigger: capacity that scales (Zach, 22 Oct)
+
+The three sizes above are points on a curve, not the only choices. An owner can build a room of any capacity, or add rooms to a
+building, and both get cheaper per person as they grow.
+
+**A bigger room costs less per person.** Walls and roof grow more slowly than the floor they enclose. Rule (proposal): cost =
+8 timber x (capacity / 4)^0.7, and fitting slots = 2 x (capacity / 4)^0.6.
+
+| Capacity (people) | Cost (timber-equivalent) | Per person | Fitting slots |
+|---|---|---|---|
+| 4 | 8 | 2.0 | 2 |
+| 10 | 15 | 1.5 | 3-4 |
+| 25 | 29 | 1.15 | 6 |
+| 50 | 47 | 0.94 | 9 |
+| 100 | 76 | 0.76 | 14 |
+| 200 | 124 | 0.62 | 21 |
+
+**More rooms in one building cost less than separate buildings.** Each room after the first shares a wall and the roof (proposal:
+x0.8). Eight 4-person rooms in one building cost 53 against 64 for eight huts, and share one footprint's land.
+
+**What stops it, so one giant hall does not win everything:**
+
+| Limit | What it does |
+|---|---|
+| **span by material** | wattle and timber up to about 25 people a room; larger needs great beams (old-growth oak, 02g §1c) or stone with columns and arches (masons). The great hall and the cathedral are a society's work, built from its hardest resources |
+| **rooms by material** | wattle up to 2 rooms a building, a timber frame up to about 6, stone limited only by labour |
+| **heat** | a hearth warms about 10 people. A bigger room needs more hearths, or the far end is cold, so heating cost grows with size once past one hearth |
+| **upkeep** | grows with the cost: a hall built for 200 and used by 20 is a burden |
+| **land** | footprints use the node's lots (02e §3.9) |
+| **fire** | the bigger the building, the more one fire takes (§6) |
+
+**Fittings scale by number.** More beds, more shelves, bigger bins: each takes a slot. A bigger room has more slots, so an archive
+or a dormitory grows with its room.
+
+**The result:** a hamlet builds small rooms; a town builds halls; a capital builds a great hall that only it can afford, out of oak
+or stone. That is the same threshold pattern as every other layer (02c §8).
+
 ## 3. The fittings (a closed vocabulary)
 
 A closed list, like the old channel selectors: every fitting has a cost, a capacity, upkeep, prerequisites and one hook in the
@@ -140,5 +177,7 @@ left for collection (02g §4). The tree is what owners tend to build, not a rule
    lock and anvil-bellows, with the rest by era.
 3. **Booking rooms as channels** (§4), on the old channel record?
 4. **Fire spreading from forges and kilns to neighbouring rooms** (§6)?
+6. **Capacity that scales** (§2b): cost growing with capacity to the 0.7, adjoining rooms at x0.8, limits by span (great beams
+   or stone for big halls), rooms per building, heat, upkeep, land and fire?
 5. **Document capacity in documents or in pages** (§3, shelves)? Pages tie archives to what reading costs in the prompt; documents are
    simpler.
