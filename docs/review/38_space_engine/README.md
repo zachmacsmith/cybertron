@@ -22,7 +22,7 @@ they are and know everything else as dated beliefs. Two LLM runs so far.
 | [porting.md](porting.md) | **the running ledger** of which old systems exist in cybertron2, how faithfully, and what changed. Keep it up to date with every port |
 | [01_forest_run.md](01_forest_run.md) | run 1: two households in a forest (8 agents, 3 places, 20 rounds, $1.78): findings and the fixes they led to |
 | [02_perception.md](02_perception.md) | what an agent sees and how it changes (principles, knowledge store, prompt sections; §9: as built) |
-| 03 (to come) | run 2: the hills and the forest (11 agents, 5 places, raiders): written when the run finishes |
+| [03_hills_run.md](03_hills_run.md) | run 2: the hills and the forest (11 agents, 5 places, $3.92): the raiders never raided; they traded blades in good faith, and two starved |
 | [../37_growth/02e_shelter.md](../37_growth/02e_shelter.md) | the shelter design that cybertron2 implements (houses, the hearth, breaks, the cold) |
 | [../37_growth/02c_economics_guide.md](../37_growth/02c_economics_guide.md) | the economy design guide: production shapes, ladders, range and threshold on a map (§9 is about space) |
 
@@ -67,12 +67,14 @@ they are and know everything else as dated beliefs. Two LLM runs so far.
 - **Run 1** (01): households stocked up and came through winter; one starvation from a risky hunt; the game hunted out (a porting
   bug, fixed); mixed-household hunting parties; the first credit offer; subsistence at 88% of actions with walking at 40% (fixed
   by placing houses at their resources).
-- **Run 2** (in progress at the handoff, `runs/cybertron2/hills_and_forest_seed2`): 10 rounds done, no fights yet, no failed calls,
-  about $0.2 a round. The write-up (03) will follow on `wp/cybertron2`.
+- **Run 2** (03): no fight in 20 rounds. The Irons, who cannot gather food, chose to trade blades from round 1, handed them over
+  before payment, were paid by the Alders (whose stock it nearly emptied) and not by Wynn, and two of the three starved in
+  winter beside well-stocked houses. Walking fell to 18% of actions; subsistence to 76%.
 
 ## 7. Suggested next steps for cybertron2 (37.4's call)
 
-1. Read run 2 (03) and decide whether the raiders' situation needs recalibration.
+1. Read run 2 (03): the raiders never raided. Find out whether any agent will (other seeds, aims from hints to explicit), and give
+   trade a mechanism (an escrowed exchange in one action, or contracts).
 2. Settle the node interface with the other packages (board Post 2 promised one): what a node holds (land types, capacity, sites),
    edges (cost, and later carrying, as 02d §4 measured), and how a household, plot, building or office names its node.
 3. Port the calendar and micro-events from 37.4's draft.
