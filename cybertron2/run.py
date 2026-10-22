@@ -111,6 +111,9 @@ def run(spec_path: str, out_dir: str, backend: str | None = None, rounds: int | 
                 n = futs[f]
                 try:
                     replies[n], meta[n] = f.result()
+                    if replies[n].get("_error"):                                # the backend's failed-call placeholder
+                        errors[n] = str(replies[n]["_error"])[:500]
+                        replies[n] = {"actions": []}
                 except Exception as e:                                          # a failed call: the agent rests this round
                     replies[n], meta[n], errors[n] = {"actions": []}, {"model": w.s["agents"][n]["model"]}, repr(e)[:500]
         plans = {}
@@ -120,7 +123,7 @@ def run(spec_path: str, out_dir: str, backend: str | None = None, rounds: int | 
                 w.s["agents"][n]["notes"] = replies[n]["note"][:1500]
         order = list(names)
         w.rng("order", rnd).shuffle(order)
-        done = {n: [] for n in names}
+        done = {n: ([f"(Your reply could not be used, so you did nothing: {errors[n][:160]})"] if n in errors else []) for n in names}
         budget = {n: w.actions_for(n) for n in names}
         used = {n: 0 for n in names}
         for i in range(max((len(p) for p in plans.values()), default=0)):           # interleaved: one action each in turn

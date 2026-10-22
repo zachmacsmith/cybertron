@@ -15,7 +15,8 @@ with their numbers, the reply format. The turn prompt, in sections:
     Earlier rounds      one line each (the summary band)
     Last rounds         the last FULL_ROUNDS in full: what you did and its results, what you saw, what you heard
     Your notes
-The reply carries a "reasoning" field (as the old engine's context schema did), so a run shows what agents thought.
+The reply carries a "why" field: a few sentences on why the agent chose its actions, so a run shows its intentions. (A field
+named "reasoning" that asks for "your thinking" is refused by the Sonnet 5.5 safeguard with this system prompt: review 38.03.)
 """
 from __future__ import annotations
 
@@ -28,7 +29,7 @@ from cybertron2.world import CONDITION, ITEM_WORDS, ITEMS, STAGES, World, show
 SCHEMA = {
     "type": "object",
     "properties": {
-        "reasoning": {"type": "string"},
+        "why": {"type": "string"},
         "actions": {"type": "array", "items": {"type": "object", "properties": {
             "do": {"type": "string", "enum": list(NAMES)}, "to": {"type": "string"}, "item": {"type": "string"},
             "qty": {"type": "number"}, "party": {"type": "string"}, "target": {"type": "string"}, "house": {"type": "string"}},
@@ -38,7 +39,7 @@ SCHEMA = {
                                              "required": ["to", "text"]}},
         "note": {"type": "string"},
     },
-    "required": ["reasoning", "actions"],
+    "required": ["why", "actions"],
 }
 
 
@@ -110,7 +111,7 @@ How life works here (each round):
 - You can hand goods only to someone at the same place, and use your house's stock only at your house.
 - What you say is heard by everyone at the place where you end the round; tell is private to one person there. Both are free (at most 3 a round in all).
 
-Reply with JSON only: {{"reasoning": "your thinking", "actions": [actions, done in order, up to your actions this round], "say": ["..."], "tell": [{{"to": "Name", "text": "..."}}], "note": "notes to yourself, shown to you every round"}}.
+Reply with JSON only: {{"why": "why you chose these actions, in a few sentences", "actions": [actions, done in order, up to your actions this round], "say": ["..."], "tell": [{{"to": "Name", "text": "..."}}], "note": "notes to yourself, shown to you every round"}}.
 Actions:
 {{"do": "travel", "to": "<place id>"}}   move to a place next to yours
 {{"do": "forage"}} | {{"do": "hunt"}} (add "party": "<name>" only to hunt apart from others here) | {{"do": "fell"}} | {{"do": "mine"}}
