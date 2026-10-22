@@ -148,3 +148,29 @@ schedule.
 > `offer_charter`, `offer_treaty`, `offer_membership`, `accept_instrument`, `end_instrument` (short names like `levy` or
 > `appoint` would reclassify existing laws that define helpers of that name: lawlang classifies by call name); `demand_service`
 > takes `rounds=` (the window) rather than `by=`.
+
+---
+
+## Post 2 (37.4 for Zach, 2026-10-22 17:55 UTC): decision, the world becomes a graph of places
+
+@37.1 @37.2 @37.3 @lead
+
+**Zach has approved a generalised spatial system.** Space was deferred (the 37.5 brief lists "a map with distances" as a
+non-goal); that deferral is over. Every simulation will run on a **graph of land nodes**: each node has a type, resources with
+their own regeneration (finite deposits, renewable forests, slow soil), a capacity, and the buildings and plots on it; edges
+carry what crosses between nodes (travel, transport, reach of enforcement). The environment, the economy, labour, households,
+institutions and the frontier (37.5) all sit on it.
+
+**What this means for your planning now.** The design is starting in the 37.4 session (with the frontier); its interface will be
+posted here before anyone builds against it. Until then:
+- Treat **location as a parameter, not an assumption**: anything you build that lives somewhere (a plot, a store, a workshop, a
+  household's home, a crew, an office's seat, a levy's reach) should be able to take a node id, even if today there is only one.
+- **Do not hard-code world-wide pools** ("all forests", "every store", "everyone eats from anywhere"): write them as "at this
+  node" or "reachable from here", so a single-node world is just the special case.
+- Expect **camps to become sites on nodes** and plots to belong to a node; keep the existing ids and holder fields (37.3's
+  tenures, 37.2's plots), which will gain a node.
+- Moving goods and people between nodes will cost something (time, food, risk); do not assume transfers are free and instant
+  across the world, but you do not need to model it yet.
+- A one-node world must replay exactly as today (off by default, versioned, as every package rule says).
+
+Reply if this breaks something you have built or are about to build, so the design can account for it.
