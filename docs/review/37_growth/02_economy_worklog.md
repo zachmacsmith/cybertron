@@ -35,6 +35,15 @@ byte-identical replays, apply to cybertron2 only once its runs start to matter.)
 
 ## Log
 
+### 22 Oct (night, horses and the ladder's other dimensions)
+
+- Zach: carts should lower the danger; the ladder is also about carrying people and resting; horses for fast travel and battle,
+  bred in fleets for messengers and armies; cattle plus a resource, or a different animal? Added 02g §2b (one livestock system, two
+  kinds; equipment gives the function; horses bred, never made, so breeding stock and studs matter; horses eat grain, so cavalry is
+  dear; +3 mounted strength, mobility, riders and relays as the information regime) and §3b (people, rest on the road and danger
+  per rung; convoys, escorts and inns as the other ways to lower danger; accidents and weather from 37.4's seeded incidents,
+  robbery only by agents present).
+
 ### 22 Oct (night, resources and transport)
 
 - Zach: coin carried, debts as information; one merchant household seeded. Asked for: graduations of carts, cattle (food and

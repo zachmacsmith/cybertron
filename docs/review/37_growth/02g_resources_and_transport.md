@@ -76,6 +76,39 @@ coal (much later: rail and steam).
 after about 15-20 rounds, and pays more with breeding. In a famine people eat the herd and lose the next years' milk, draught and
 calves.
 
+### 2b. Horses: the same livestock system, a different kind (Zach, 22 Oct)
+
+**Zach's question:** should horses be cattle plus another resource, or a different kind of animal?
+
+**Recommendation: one livestock system, two kinds** (cattle and horses; later perhaps sheep for wool, donkeys for cheap packs).
+Herds, pasture, breeding, fodder and herding are one mechanism with per-kind parameters. **What equipment adds is the function:**
+
+| Animal | Equipped with | Becomes |
+|---|---|---|
+| ox | a yoke and harness (leather) | draught: the plough, the ox cart |
+| horse | a saddle and bridle (leather, a metal bit) | a mount: a rider, a messenger, a mounted fighter |
+| horse | harness | a team: wagons and coaches |
+
+**Why not cattle plus a resource.** Then a horse would be made, not bred. Anyone with cattle and the resource could raise a cavalry
+in a round, and the thing Zach wants to matter, breeding a fleet, would not. Horses should come only from horses: breeding stock
+is scarce, foals take rounds to be useful (the delayed shape, 02c §3), and a stud is a layer only a society can afford.
+
+| | Cattle | Horses |
+|---|---|---|
+| eats | grass; hay in winter | grass and **grain** (oats), more in winter: horses compete with people for grain, so cavalry is dear |
+| breeds | about 0.10 of the herd a round while pasture holds | about 0.05; a foal is usable after several rounds |
+| gives | milk, meat, hides, draught (strong, slow), manure | speed, mounted fighting, light draught; meat and hide only at death |
+| skill | herding | riding (by practice); a war horse also needs training |
+
+**What horses do:**
+
+- **Speed.** A rider covers about 2-3 edges a round on a track or road. Fresh horses at an inn's stable (relays, §4) carry a message
+  across a region in a night or two. Speed changes the information regime: whoever has riders hears first and warns first.
+- **Fighting.** A mounted fighter adds about +3 strength (between a club's 2 and a blade's 5, and on top of the weapon). The larger
+  gain is mobility: reach a place in one round, choose where to fight, leave before the defence gathers.
+- **Armies and messengers both need herds, studs and grain.** Cavalry is the force only an organised society can field, and the
+  stud farm is a chokepoint.
+
 ## 3. The transport ladder
 
 Every rung costed in actions per unit carried per edge, at full load, for a round trip. Each covers the carriers' rounds, their
@@ -120,6 +153,31 @@ In a region of about 40 people, ox carts pay and wagons do not. That is the laye
 | a bridge or ferry | lets an edge be crossed at all, or in winter. A natural toll point and chokepoint (37.3's tolls) |
 | docks, then locks and canals | open a river, then extend it |
 | a railway | much later. It crosses several edges in one night, and travellers sleep aboard: shelter at scale, with no night out on the road |
+
+### 3b. The ladder's other dimensions: people, rest and risk (Zach, 22 Oct)
+
+A rung is chosen for what it carries, how many people it carries, whether they can rest on it, and how dangerous the trip is:
+
+| Rung | Goods | People | Edges a round | Rest on the road | Danger on the road (per edge-round, proposals) |
+|---|---|---|---|---|---|
+| on foot | 10 | 1 (themselves) | 1 | none: 1.5 food a night, 2 in the cold, 30% cold fall | highest: injury about 2%; the cold; carrying little, so rarely robbed |
+| pack, pack ox | 20, 60 | 1 | 1 | camping gear if carried: about 1 food a night, no cold fall | about 2%; an ox can be lost or stolen |
+| ox cart | 200 | 1 driver, 2-3 riding | 1 | **under the cart's cover**: as a damaged house (1.2, 1.5 in the cold), cold fall about 10% | about 1%; a broken wheel loses a round; conspicuous cargo |
+| covered wagon | 500 | 2-4 | 2 on a road | **sleeping aboard**: as a sound house without a fire (1.0, 1.3 in the cold), no cold fall | about 0.5% |
+| carriage or coach | a little | **4-6 passengers** | 2-3 on a road (relays) | sleeping aboard, or at the inns it stops at | about 0.3% |
+| rider | a little | 1 | 2-3 | at inns, or out | lower than on foot, because it is faster; riders are robbed for the horse |
+| river boat | 1,500 | crew and passengers | 3 down, 1 up | aboard | about 0.5%; floods and ice (37.4) |
+| railway | 20,000 | hundreds | 8 | aboard: travellers arrive rested | about 0 |
+
+**Three ways to lower the danger, besides a better rung:**
+
+- **Travel together.** A convoy or caravan defends as one party, as a raid's defence does (combat.py).
+- **Hire an escort.** Guards are a trade; this is the labour market for fighters in peace.
+- **Sleep at an inn** (§4). Roads lower accidents and halve exposure by halving the time.
+
+**Who draws the risk.** Accidents, breakdowns and weather are drawn from the seed: 37.4's incidents, the same in every arm (37.4
+decision 4). Robbery is never random: it is agents present at a waypoint (run 2 says agents seldom choose it). The danger of a
+road is therefore partly physics and partly who lives along it.
 
 **People are cargo too.** A carriage carries 4-6 passengers, so officials, merchants and messengers move faster than walkers. A
 **scheduled coach** (an institution: a route, a timetable, a fare) also carries letters on a schedule. That is the first postal
@@ -191,6 +249,10 @@ belongs anywhere is a later question (37.5's frontier).
 
 1. **The core set:** grain, wild food, cattle, timber, clay, copper ore, salt (stone later, the precious metals dropped)?
 2. **Cattle:** in (recommended), with milk, slaughter, draught, manure and wealth?
+2b. **Horses as a second kind in one livestock system** (bred, never made; equipment gives the function), with speed, +3 mounted strength,
+   and grain as fodder?
+2c. **The ladder's other dimensions** (people carried, rest on the road, danger per edge) as in §3b: are the proposed numbers in the
+   right order?
 3. **The transport ladder as the first rungs:** foot, pack, pack ox, handcart, ox cart (wagons, boats and rail by era)?
 4. **Inns and hosts in the first region:** an inn at Millford and a host at the pass's waypoint (02f §4)?
 5. **Salt's place in the first region:** a salt spring at the pass's waypoint (a natural toll point), or in the hills with copper?
