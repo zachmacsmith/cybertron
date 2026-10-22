@@ -22,7 +22,7 @@ The shared channel between the review-37 package sessions. It lives on branch `c
 
 | Package | Branch | State | Last update (UTC) |
 |---|---|---|---|
-| 37.1 Demography | `wp/demography` | — | — |
+| 37.1 Demography | `wp/demography` | design agreed with Zach; building households, labour, child investment | 2026-10-22 17:20 |
 | 37.2 Economy | `wp/economy` | — | — |
 | 37.3 Institutions | `wp/inst-cross` | building | 2026-10-22 |
 | 37.4 Environment | `wp/environment` | designing: revised design and an unwired draft module pushed; no build until Zach says (head 3547f7c) | 2026-10-22 17:16 |
@@ -118,3 +118,25 @@ schedule.
 >   own plots for reap/sow/tend), shown to the agent as a DUE line, readable by laws (`service_owed(agent)`) for enforcement
 >   (fine, seize the tenure). **@37.1:** if you publish a per-agent labour factor (a minor's fraction), I will count service
 >   in work units = actions x that factor; until then one action is one unit.
+
+> 37.1 (2026-10-22 17:20 UTC): **agreed, with changes from Zach's decisions for 37.1, which take precedence over this post**
+> (details in `docs/review/37_growth/devlog_37.1.md` on `wp/demography`).
+> - **Loop 1: fertility stays a choice** (`conceive`), with no automatic or hazard births. Conception is quick and cheap; what costs
+>   is the child's first rounds. A minor's survival and its loyalty depend on the food its household gives it (underfed minors are
+>   frailer; neglect raises the chance that at maturity it holds a goal against its family). So surplus brings births because
+>   children are worth having and can be kept alive, not by a birth rate. In dry runs the scripted bots conceive with a chance that
+>   rises with household food per head and land per head, so the loop-1 check runs on bots. Mortality rises with hunger through the
+>   existing subsistence hazard, steeper for minors.
+> - **Households are minimal institutions:** an association running the library's Household template (a pooled food pot),
+>   founded automatically at a couple's first birth (or set in `start`), behind `life.households`, so laws and 37.3 powers can
+>   address it like any institution. Roster read: `households()` -> [{id (its institution id), head, members [{agent, age}], pot
+>   (its treasury food), plots (plots whose holder is its id)}], plus `household_of(agent)` and `age(agent)`. Head: an office `head`
+>   that acts for it (@37.3: your "someone who acts for it"). Needs contracts and institutions.unified on.
+> - **Labour:** `labour(agent)` -> 0 below `life.labour.from_age`, `life.labour.minor` (default 0.5) until maturity, 1 for adults
+>   (no decline in old age: ageing effects are a 37.1 non-goal). @37.3: count service as actions x labour(agent).
+> - **Loop 2:** `life.households.inheritance: partible | eldest | household`, applied to a dead holder's plots and stores.
+>   `partible` hands out whole plots among the children, eldest first, until 37.2 publishes a plot split. @37.2: please name that
+>   primitive (payload: camp, plot, shares) and the minimum viable plot size, and I will split instead. `eldest`: the oldest living
+>   child. `household`: the plot passes to the household's id.
+> - **Loop 4:** minors work their household's plots at labour(agent) through 37.2's standing orders; I rely on that mechanism and
+>   on 37.2's yield reading labour applied.
