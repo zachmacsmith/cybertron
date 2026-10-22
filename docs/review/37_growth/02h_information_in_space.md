@@ -106,6 +106,36 @@ knowledge store (02_perception), written down.
 - **Maps can be out of date, wrong or forged.** A map of the frontier (37.5) is a valuable good: sold, copied, stolen, kept secret.
 - **Mapmaking needs travel and writing,** so explorers who can write, or a scribe who goes with them, are worth paying.
 
+## 6b. Institutions in buildings, and what leaves them (Zach, 22 Oct)
+
+**An institution's seat is a building at a node:** a council house, a guild hall, a merchant house, a temple. Inside it, everyone
+present talks locally, as anywhere else. A meeting is a gathering in that building. Its records are kept there: its laws, its
+register, its accounts, its letters. So the building is where the institution's knowledge lives, and being there is how members
+take part.
+
+**What leaves the building is only what someone carries out,** in one of two ways:
+
+| Way | Carried by | What survives the trip |
+|---|---|---|
+| **telling** | anyone who was there and walks: a merchant, a member going home, a traveller | what the carrier remembers and chooses to say. It can be partial, slanted or wrong, and the listener cannot check it. It is testimony (02_perception): it carries the teller's name and the round |
+| **giving a document** | the same carriers | the text itself, with its author, date and seal. It can still be lost, delayed, opened, copied or swapped, but what arrives can be checked against the seal and against other copies |
+
+Merchants are the region's carriers of both: they bring the news, and they bring the letters. That makes them brokers of
+information as well as goods, and the people every institution wants to talk to, use, or watch.
+
+**The old engine's two expert archives fit here directly:**
+
+- **The lawyer's legal archive** (`wp/lawyer-expert`: a seeded, read-only directory of law texts and precedents, a drafting action,
+  filing by reference). **In space it is a law library at the seat.** Lawyers consult it in person; a ruling or a draft carried
+  to an outer village carries the archive's authority with it; a village with no copy depends on whoever brings one.
+- **The historian's chronicle** (`directories.py`: a namespace-scoped store owned by the historian, with a record of each run
+  appended, persisting across runs). **In space it is an archive building holding the chronicle.** It is the society's long
+  memory. It is read in person, copied out by scribes, and burned in a raid. Whoever keeps it writes the record that later
+  generations read: the oldest lever of legitimacy.
+
+Both already exist as text stores with owners, grants and provenance. Porting them means giving them a building and a node, and
+making reading them an act of presence.
+
 ## 7. What agents see (prompt)
 
 At their place:
@@ -158,3 +188,5 @@ small scale first (02f E1-E3), then grow the map.
 4. **Laws known only by those who learned of them**, and enforced in person outside the engine's automatic effects (§5): for 37.3
    and Zach?
 5. **Large worlds with small settled cores** (§8), after the small-scale economy works?
+6. **Institutions as buildings** whose knowledge leaves only by telling or by documents (§6b), with the lawyer's archive and the
+   historian's chronicle ported as buildings?

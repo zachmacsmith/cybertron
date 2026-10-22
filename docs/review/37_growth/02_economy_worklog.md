@@ -37,6 +37,10 @@ byte-identical replays, apply to cybertron2 only once its runs start to matter.)
 
 ### 22 Oct (night, information in space)
 
+- Zach (during): institutions in buildings where everyone talks locally; information travels by telling merchants or giving them
+  documents; the lawyer's and historian's archives belong here. Added 02h §6b (the seat as a building; telling vs giving a document;
+  merchants as information brokers; the legal archive as a law library at the seat; the chronicle as an archive building).
+
 - Zach: maps, parchment, writing and information matter most; how do the old engine's generalised channels, laws and libraries work
   in space; writing from processed timber; large worlds with small settlements? Wrote 02h_information_in_space.md: knowledge crosses
   space as speech, objects or signals; writing makes knowledge an object (parchment from hides, paper from fibre at a paper mill,
