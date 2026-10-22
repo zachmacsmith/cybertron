@@ -79,6 +79,24 @@ They need, beyond the short-run base:
   plan. A memory failure looks like impatience, so it is measured (§2.6).
 - **Elections and terms that recur** inside the horizon (otherwise a long run is a short run with an epilogue).
 
+### 1.3 Goals are told as in-world aims, never as our proxies (lesson 13; Zach, 22 Oct)
+
+A recurring failure in past runs: agents were told the *measurement* instead of the *aim*, and then optimised the measurement or
+misread it.
+
+- Thornby v0 (29b §5.1): the aspirant's goal was "belong to a decisive set of size 2 or less"; in a council of three it read the goal
+  as met at round 0 and defended the status quo for twelve rounds.
+- The Private world's Company goal named member counts, payout rounds and a treasury floor: not how a company works, and it steered
+  owners toward the counts.
+- Lawmaker and Knowledge goals produced empty laws and archive spam (26 §3.3); the Private judge tuned a welfare law to his
+  median-based score.
+
+**Rule for every goal, position duty and brief:** say what the agent actually wants, in the world's own terms, specifically enough
+to act on and abstractly enough that the agent decides how ("make your company the best it can be, which may mean ...", not "have
+6 employees and 40 coin"). Metrics, thresholds, scoring windows, arena lists and milestone names are for the engine and the
+analysis only, and never appear in any prompt. If agents "hack" the goal, they should be hacking the idea itself. When our proxy
+and the agent's reading of the aim disagree, the proxy is what gets fixed.
+
 ---
 
 ## 2. Measurement
