@@ -104,6 +104,7 @@ actions:
   forgiving: true
   core_only: false                # courts, warrants, loans and the window need the full surface
 channels:
+  square: one                     # declared (review 33: the channel setup is each world's decision; the value it had). Papers when converted to positions
   notices: gazette                # the Gazette Record: the engine posts the official record into `gazette`
   encryption: false               # no encryption: every private message can be tapped
   surveillance: {mode: pull, targets: 2, scope: dms+inboxes}   # the pull wiretap (04 #10): the Constable taps 2 agents a round

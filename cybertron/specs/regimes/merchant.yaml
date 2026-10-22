@@ -104,6 +104,7 @@ actions:
                                   # respond) are not in the design arm's core surface
 jurisdictions: {enabled: false}
 channels:
+  square: one                     # declared (review 33: the channel setup is each world's decision; the value it had). Papers when converted to positions
   notices: notices                # the engine posts the official record into `notices`
 conflict:
   enabled: true

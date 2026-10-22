@@ -102,6 +102,7 @@ jurisdictions:                    # lawful force (the muster's arrest) needs a d
   scripted_founder: nobody        # dry runs only: no scripted bot founds a rival jurisdiction (in the first dry run a farmer left
                                   # the Commons in round 6, taking her pledge and shifting the rota; live agents still may)
 channels:
+  square: one                     # declared (review 33: the channel setup is each world's decision; the value it had). Papers when converted to positions
   notices: assembly               # the engine posts the official record into the meeting's channel (08 §3.4: no separate notices)
 conflict:
   enabled: true
