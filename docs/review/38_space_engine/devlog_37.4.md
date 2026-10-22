@@ -27,15 +27,24 @@ changed in its code yet.
 7. **Resources by how they come back:** finite (a seam), fast renewable (plants), renewable with a threshold (game), slow (soil,
    timber), periodic (a migrating herd).
 
+8. **Arrival, then decide (restores decision 3).** An agent comes with a plan but adapts on arrival: travel is the last physical
+   act of a turn; the agent arrives at the start of the next round, sees the place, and decides there. Nobody trades blind at a
+   place they have not seen.
+9. **Transport and communication between nodes are delayed.** Goods, letters and people cross only by being carried. Merchants
+   carry trade, messages and passengers between places; institutions must send people to reach outer villages.
+10. **Both kinds of distance are supported.** An edge has a length in rounds; while on a long edge an agent is in transit (no
+    model call; provisions and the risk drawn each round). A world can instead put real nodes along the way (a forest to cross, a
+    pass) where travellers sleep, forage, meet and can be ambushed. An edge of length d is a chain of d - 1 nodes nobody acts in.
+
 ## Proposed, not yet decided
 
 - **Speech (Zach: not a round late).** Port cybertron 1's DM step (fast mode: messages in the plans are delivered before any
   action runs; recipients are asked again and may reply and change their plan, up to `exchanges` waves), limited to the people at
   the agent's node at the start of the round.
-- **Time and travel, revised:** a round is a work period (actions are stints of work); an edge costs actions by its length;
-  a short hop is done inside the round (the agent acts at the destination without having seen it, since plans are decided once);
-  a trip longer than the round's actions continues next round; ending a round on the road means sleeping out (unsheltered
-  unless carrying gear). Revises decision 3's "arrive next round" for short hops; Zach to confirm.
+- ~~Time and travel as work periods with short hops inside a round~~: rejected by Zach (an agent would trade blind on arrival);
+  see decision 8.
+- **Letters** are items (sender, recipient, text, sealed or not) handed over in person; a carrier can read an unsealed one, lose
+  it or keep it. Errands (carry this to X at Y) shown to the carrier as a due line.
 - **Node size:** a hamlet or neighbourhood (2-5 households, up to about 15-20 people, a handful of buildings); a village is a
   cluster of such nodes joined by short edges.
 - **Node kinds set comparative advantage**; no kind self-sufficient.
@@ -46,6 +55,9 @@ changed in its code yet.
 - Physical goods change hands only between people at the same node; money and credit (once ported) move anywhere.
 
 ## Log
+
+- **22 Oct.** Zach: arrive then decide (decision 8); transport and messages between nodes delayed and carried, merchants as the
+  carriers (9); edge lengths and waypoint nodes both supported (10).
 
 - **22 Oct.** Zach: speech must not lag a round (keep a DM step, limited to people present); how time and space interact; node
   size (neighbourhood or village); travel gear (packs, camping gear); node kinds as comparative advantage. Proposals above.
