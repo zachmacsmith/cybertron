@@ -162,6 +162,9 @@ def _act(k, aid: str, name: str, args: dict) -> str:
         hidden_here |= set(_CF.HARM_ACTIONS)
     if sub and not any(c.get("type") == "fields" for c in k.w["camps"].values()):   # review 19: fields off: no farming action
         hidden_here |= {"farm", "tend", "improve", "practice", "clear"}
+    if (name not in ACTIONS or name in hidden_here) and bare_action(k, aid, name):   # engine 20: board_price -> invoke A1.board_price
+        given = args.get("args", []) if isinstance(args, dict) else args
+        name, args = "invoke", {"action": name, "args": given}
     if name not in ACTIONS or name in hidden_here:
         raise ActionError(f"unknown action '{name}'. Actions: {', '.join(x for x in ACTIONS if x not in hidden_here)}")
     if sub:                                                             # review 15 S1: hunger closes actions (Act.fed; agency: both)
@@ -238,6 +241,25 @@ def _act(k, aid: str, name: str, args: dict) -> str:
         raise ActionError(str(e))
     except (ValueError, KeyError, AttributeError, IndexError) as e:     # a malformed argument must fail the action, never the run
         raise ActionError(f"bad arguments for {name}: {type(e).__name__}: {e}")
+
+
+def bare_action(k, aid, name):
+    """actions.forgiving with actions.bare_names (engine 20): a contract or office action named without its institution
+    ("board_price" for "A1.board_price") is read as the one the agent may use; None when the name is not such a bare name, an
+    ActionError listing the qualified names when it is ambiguous."""
+    from cybertron import laweffects as LE
+    if not isinstance(name, str) or "." in name or name in k.w["actions"] or not _forgiving(k) \
+            or not LE.setting(k.spec, "actions.bare_names"):
+        return None
+    cands = sorted(n for n, v in k.w["actions"].items() if "." in n and n.split(".", 1)[1] == name
+                   and not (isinstance(v, dict) and v.get("secret")))
+    if not cands:
+        return None
+    usable = [n for n in cands if k.has(aid, k.w["actions"][n]["right"])] or cands
+    if len(usable) > 1:
+        raise ActionError(f"'{name}' is an action of more than one institution: name one, e.g. invoke {{\"action\": \"{usable[0]}\"}} "
+                          f"(choices: {', '.join(usable)})")
+    return usable[0]
 
 
 def _forgiving(k) -> bool:
@@ -976,6 +998,7 @@ def _request_fix(k, aid, law, text):
 
 
 def _invoke(k, aid, action, args=None):
+    action = bare_action(k, aid, action) or action                    # engine 20: an unambiguous bare name (actions.forgiving)
     if H.claims(k, action):                                           # hidden powers and unknown words (hidden.py)
         return H.invoke(k, aid, action, args)
     a = k.w["actions"].get(action)

@@ -113,7 +113,11 @@ def extra_view(k) -> dict:
     clauses = {c: v.get("law") for c, v in sorted((k.w.get("clauses") or {}).items())
                if (k.w["laws"].get(v.get("law")) or {}).get("status") == "active"}
     ballots = {b: str(v.get("question"))[:80] for b, v in sorted((k.w.get("ballots") or {}).items()) if v.get("status") == "open"}
-    return {"offices": offices, "stores": stores, "treasuries": treasuries, "clauses": clauses, "ballots": ballots}
+    out = {"offices": offices, "stores": stores, "treasuries": treasuries, "clauses": clauses, "ballots": ballots}
+    if setting(k.spec, "law.effects_detail") and k.w.get("conflict"):   # engine 20: the force rules each law in force sets
+        out["force_rules"] = {f"{lid}:{key}": v for lid, rules in sorted((k.w["conflict"].get("force_rules") or {}).items())
+                              if (k.w["laws"].get(lid) or {}).get("status") == "active" for key, v in sorted(rules.items())}
+    return out
 
 
 def _names(x) -> str:
@@ -158,6 +162,13 @@ def diff_extra(a: dict, b: dict) -> list:
     out += [f"clause {c} created" for c in sorted(set(cb) - set(ca))] + [f"clause {c} gone" for c in sorted(set(ca) - set(cb))]
     ba, bb = a.get("ballots") or {}, b.get("ballots") or {}
     out += [f"ballot {x} opened: {bb[x]}" for x in sorted(set(bb) - set(ba))]
+    fa, fb = a.get("force_rules"), b.get("force_rules")
+    if fa is not None or fb is not None:                               # engine 20 (law.effects_detail)
+        fa, fb = fa or {}, fb or {}
+        for x in sorted(set(fa) | set(fb)):
+            if fa.get(x) != fb.get(x):
+                lid, _, key = x.partition(":")
+                out.append(f"force rule {key} ({lid}): {'unset' if x not in fa else fa[x]} -> {'unset' if x not in fb else fb[x]}")
     return out
 
 
