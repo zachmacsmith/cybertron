@@ -12,18 +12,20 @@
 | P0d | Shelter specification (02e): houses as the first generic building, upkeep, breaks, the cold, tenure | specified; under discussion |
 | P0c | Economics guide (02c) and ladder analysis with skill by practice and space (02d) | done; under discussion |
 | P0b | Productivity analysis: what an action is worth under autarky, spot trade and institutions (02b) | done; design under discussion with Zach, nothing built |
-| P1 | Goods and recipes layer: `economy` spec block (off by default), goods table, recipes, `make` action routed through `convert`, facilities | not started |
-| P2 | Needs: the ration accepts several foods (bread); shelter (02e) | not started (clothing parked) |
-| P3 | Trade skills by practice; tools that raise one trade's yield and wear out | not started |
-| P4 | Crew sites (output by crew size, to the holder) | not started |
-| P5 | Coin that closes the loop: taxes and rents in coin, window spread | not started |
-| P6 | Dependence check (cut test, autarky arm), a 24-agent dry-run world, acceptance evidence | not started |
+| ~~P1-P6~~ | the old-engine build plan | **superseded** by [02f_economy_plan.md](02f_economy_plan.md) (22 Oct) |
+| E1 | Exchange at a node: escrowed swaps, standing offers, prices per node | planned (02f) |
+| E2 | Households at work: standing work orders, the house pot, skill by practice, tools | planned |
+| E3 | Production and buildings: sites, the five shapes, workshops, recipes, first chains | planned |
+| E4 | Transport and merchants: carrying capacity, weight, goods in transit, consignment, letters | planned |
+| E5 | Money and credit: coin, debts, ledgers, tolls and taxes | planned |
+| E6 | Calibration and acceptance on a seeded four-node region | planned |
 
 ## Rules I am following
 
-From docs/review/37_growth/README.md and docs/scenario_design.md: every change behind a spec key, off by default; old runs replay
-byte-identically (no default moves, so no engine version bump unless that changes); prompts in world terms within budget; no model
-calls (scripted dry runs and unit tests only); everything generated can be fixed by hand in a spec.
+From docs/review/37_growth/README.md and docs/scenario_design.md, as they apply in cybertron2: prompts in world terms within budget;
+everything generated can be fixed by hand in a spec; dry runs with scripted bots as smoke tests and small LLM runs as evidence (Zach,
+22 Oct); nothing built in `cybertron2/` without Zach's go and 37.4's agreement on the board. (The old engine's rules, opt-in keys and
+byte-identical replays, apply to cybertron2 only once its runs start to matter.)
 
 ## Parked
 
@@ -32,6 +34,14 @@ calls (scripted dry runs and unit tests only); everything generated can be fixed
   agents) and make flax compete with grain for plots. Parked in favour of shelter, which reuses the building model.
 
 ## Log
+
+### 22 Oct (night, the plan for cybertron2)
+
+- Zach: rewrite the plan for cybertron2, since the world now has merchants, transport and households. Wrote 02f_economy_plan.md
+  on 37.4's decisions (nodes are villages with sites inside; travel takes rounds; goods cross only by being carried; merchants;
+  hamlets of up to 15-20). Main consequence: one node is too small for the deep layers (02d thresholds), so they must serve several
+  nodes, and transport and merchants become central. Phases E1-E6, exchange at a node first (run 2's lesson); a four-node first
+  region; open decisions (coin carried or not; merchants seeded; carrying capacities; what prices agents see).
 
 ### 22 Oct (night, handoff)
 
