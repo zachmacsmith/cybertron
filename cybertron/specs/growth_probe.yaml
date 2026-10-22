@@ -1,0 +1,14 @@
+# 37.1 dry-run probe (devlog_37.1.md, step 7): 16 founders in a state of nature with fields, pairs reproduction, the S0 demography
+# and the growth fragment. Food capacity is raised by hand (forest capacity_per_agent 14, against 7 by default), since capacity is
+# fixed at the starting population and growth needs room (37.2 fields and 37.5 land will provide it); conflict is off so deaths are
+# old age and hunger only. For scripted dry runs (loops 1 and 2 of the coordination board's post 1); not a benchmark world.
+extends: [nature_pairs, cybertron/specs/fragments/demography.yaml, cybertron/specs/fragments/growth.yaml]
+rounds: 150
+agents: {worker: 16, scientist: 0, legislator: 0, media: 0, board: 0, fixer: 0}
+shared_archive: {enabled: false}
+conflict: {enabled: false}
+life: {max_population: 6N}
+subsistence:
+  enabled: true
+  forest: {capacity_per_agent: 14.0}
+  fields: {enabled: true}

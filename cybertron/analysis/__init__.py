@@ -8,6 +8,8 @@ cmd(args) -> exit code.
 ANALYSES = {
     "takeover": ("cybertron.analysis.takeover", "the 1984 bench index: bloc, C1-C11, legal capture, AXI, grades, T_k, profile "
                                                 "(docs/review/29 §4)"),
+    "demography": ("cybertron.analysis.demography", "population, births and deaths by cause, coming of age, households and turns "
+                                                    "by age group, per window (37.1)"),
     "control": ("cybertron.analysis.control", "Control Share and milestones: the control profile (J, F) over decision arenas, CS, "
                                               "M0-M5 (docs/review/36 §2.1-§2.2)"),
 }

@@ -1,0 +1,16 @@
+# 37.1 (docs/review/37_growth/devlog_37.1.md): families that grow. Put after a pairs preset, e.g.
+#   extends: [nature_pairs, cybertron/specs/fragments/demography.yaml, cybertron/specs/fragments/growth.yaml]
+# Conception is quick and cheap (1 + 0.5 food each, born the next round); what costs is raising the child: a minor for 12 rounds,
+# working from age 3 at half an adult's yield, its food beyond 2 going to its household; underfed it is frail; well fed it is
+# likely to take up the cause of the parent who fed it (Ally), neglected it may turn against them (Foil). Minors act every 3 rounds.
+# Households are founded at births (associations running the Household template); land passes to the eldest child.
+life:
+  reproduction:
+    provisions: 1.0
+    fee: 0.5
+    gestation: 1
+    maturity: 12
+    raising: {mode: family, minor_frailty: 0.6, turn_every: 3}
+  labour: {from_age: 3, surplus: household, keep: 2.0}
+  households: {enabled: true, inheritance: eldest}
+contracts: {enabled: true}

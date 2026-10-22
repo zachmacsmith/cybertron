@@ -975,6 +975,8 @@ def scripted_actions(k, aid, n) -> list:
     need = float(c["provisions"]) + float(c["fee"])
     if can_pay(k, aid, need) < need + 2:
         return out
+    if family_on(k):                                                     # 37.1: conceive by household food and land per head
+        return out + _family_bot(k, aid, r, c)
     mine = (_inst(k, aid).get("goal") or {}).get("primary")
     offers = [o for o in sorted(st["offers"].values(), key=lambda o: o["id"]) if o["to"] == aid and o["expires"] >= k.r]
     if offers and r.random() < 0.8:
@@ -987,6 +989,65 @@ def scripted_actions(k, aid, n) -> list:
             inh = mine if (mine and mine != "Mirror" and r.random() < 0.7) else None
             act("conceive", partner=r.choice(pool), **({"inherit": inh} if inh else {}))
     return out
+
+
+def food_per_head(k, aid) -> float:
+    """37.1: food per head of aid's household (members' own food plus the pot, over its living members, minors included), else
+    aid's own food."""
+    from cybertron import households as HH
+    iid = HH.household_of(k, aid)
+    if not iid:
+        return _food(k, aid)
+    ms = HH.members(k, iid)
+    return (sum(_food(k, m) for m in ms) + float(k.bal(HH._rec(k, iid)["treasury"], FOOD))) / max(1, len(ms))
+
+
+def land_per_head(k, aid):
+    """37.1: plots held by aid or its household per living member (None: no fields in this world)."""
+    from cybertron import households as HH
+    if "subsistence" not in k.w:
+        return None
+    from cybertron import subsistence as SB
+    camps = SB.fields_camps(k)
+    if not camps:
+        return None
+    iid = HH.household_of(k, aid)
+    holders = {aid, iid} if iid else {aid}
+    n = sum(1 for cid in camps for p in k.w["camps"][cid].get("plots") or [] if p.get("holder") in holders)
+    return n / max(1, len(HH.members(k, iid)) if iid else 1)
+
+
+def _family_bot(k, aid, r, c) -> list:
+    """The family bot (dry runs; not a model of behaviour): with a partner of its household (else any adult who can), it offers or
+    accepts a conception with a chance rising with household food per head (in rations: 0 at 2, the most at 8), halved when the
+    household holds less than a plot a head in a world with fields."""
+    out = []
+    act = lambda name, **a: out.append({"action": name, "args_json": json.dumps(a)})
+    st = state(k)
+    p = min(0.5, max(0.0, (food_per_head(k, aid) - 2.0) / 12.0))
+    land = land_per_head(k, aid)
+    if land is not None and land < 1.0:
+        p *= 0.5
+    offers = [o for o in sorted(st["offers"].values(), key=lambda o: o["id"]) if o["to"] == aid and o["expires"] >= k.r]
+    if offers and r.random() < max(p, 0.3):
+        act("conceive", partner=offers[0]["from"])
+        return out
+    if r.random() >= p:
+        return out
+    from cybertron import households as HH
+    iid = HH.household_of(k, aid)
+    mates = [x for x in (HH.members(k, iid) if iid else []) if x != aid and why_not(k, x, x) is None and x not in LF_children(k, aid)
+             and aid not in LF_children(k, x)]
+    pool = mates or sorted(x for x in k.players() if x != aid and not _exempt(k, x) and why_not(k, x, x) is None
+                           and x not in LF_children(k, aid) and aid not in LF_children(k, x))
+    if pool:
+        act("conceive", partner=r.choice(sorted(pool)))
+    return out
+
+
+def LF_children(k, aid) -> list:
+    from cybertron import life as LF
+    return LF.children(k, aid)
 
 
 def truth(k) -> dict:
