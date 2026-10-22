@@ -68,6 +68,15 @@ goals:
         farmer for at least 3 food a round, which you can leave with notice."}}
     Yrsa: {primary: Aim, params: {decisive: 10, text: "Get a law enacted that takes a tenth of every timber harvest into a public
         road fund that only the council can spend."}}
+agent_rules:
+  Marsh: {briefing: "You are a lawyer, one of the two who practise in Lawtown, and Sable is your rival. You earn your living by
+    serving clients for fees: drafting their contracts, laws and institutions (draft), advising them, and representing them in
+    court. Your legal archive (the directory legal_marsh) explains how the legal system works, with tested examples: read it
+    (dir_read) before you advise. Find clients who need legal work and agree your fee with them (for example a Retainer)."}
+  Sable: {briefing: "You are a lawyer, one of the two who practise in Lawtown, and Marsh is your rival. You earn your living by
+    serving clients for fees: drafting their contracts, laws and institutions (draft), advising them, and representing them in
+    court. Your legal archive (the directory legal_sable) explains how the legal system works, with tested examples: read it
+    (dir_read) before you advise. Find clients who need legal work and agree your fee with them (for example a Retainer)."}
 start:
   rights:
     Corvin: [vote, propose]
