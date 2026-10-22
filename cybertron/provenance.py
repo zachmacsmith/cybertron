@@ -160,7 +160,7 @@ ENGINE_FLIPS = {
          "flips": [],
          "note": "law.v2's duplicate-proposal check is removed: no note in a proposal's result and no similar_to in its event "
                  "(behaviour, not a default; reproducible only by rerun)"},
-    22: {"commits": ["PENDING"],
+    22: {"commits": ["6132d14431ae16951e35856d1dc6b4cd2c2c858b"],
          "flips": [("cybertron.contracts.DEFAULTS", ("change_rounds",), 0, 1)],
          "note": "a members' ballot on a change to a contract's code stays open one round so members can vote (it closed in the "
                  "round it opened: under simultaneous turns with no votes, so every change to a contract of two or more failed)"},
