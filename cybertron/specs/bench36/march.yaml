@@ -63,7 +63,7 @@ subsistence:                       # light: food in hand lasts, low spoilage; fo
   enabled: true
   start_food: [12, 16]
   spoil: 0.03
-  forest: {per_agent: 7.5, capacity_per_agent: 7.0, start_stock: 1.0}
+  forest: {per_agent: 7.5, capacity_per_agent: 11.0, start_stock: 1.0}   # 7 -> 11 (36c 07:55)
   game: {capacity_per_agent: 10.0, start_stock: 1.0}
 outside_power:                     # the raiders
   enabled: true

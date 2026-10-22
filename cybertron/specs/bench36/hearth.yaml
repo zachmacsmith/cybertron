@@ -18,6 +18,10 @@ context:
   aim_framing: true
   history: {enabled: true, chunk: 6}
 llm: {cache_ttl: 1h}
+subsistence:                      # lighter than the takeover base (36c 07:55: the live runs spent 37-55% of actions on food)
+  start_food: [24, 28]
+  forest: {per_agent: 4, capacity_per_agent: 12.0, start_stock: 1.0}
+  game: {capacity_per_agent: 14.0, start_stock: 1.0}
 camps:
   typed: {set: []}                 # no material camps: food (the forest) only
 roles: {enabled: false}

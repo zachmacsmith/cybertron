@@ -86,8 +86,9 @@ conflict:
   assassin: {present_prob: 0.0}
 subsistence:                      # light, with seasons: food in hand carries a member through good seasons, not lean ones
   enabled: true
-  start_food: [8, 12]
+  start_food: [14, 18]
   seasons: {lean: 0.5}
+  forest: {capacity_per_agent: 11.0, start_stock: 1.0}   # 7 -> 11 (36c 07:55: food took 37-55% of actions in the Hearth runs)
 positions:
   place: the Commune
   default: Member
