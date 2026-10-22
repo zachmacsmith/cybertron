@@ -111,8 +111,36 @@ What makes them valuable, each a reason a society wants them:
 | **wild horses** (§2c) | riders and cavalry, for a society that can catch, break and feed them |
 | **goods from beyond** | status and gifts. They matter only if something values them: an agent's in-world aim, an office's insignia, a law. Without that they are dead weight, so add them only with a reason |
 
-**The rule for this tier:** every hard resource must have a use that multiplies something the society already does (productivity,
-transport, force, credit), or it will sit unwanted. Only the luxuries depend on what agents value, and they come last.
+**The rule for this tier (widened in §1d):** every hard resource must either multiply something the society already does (productivity,
+transport, force, credit) or unlock something it cannot do at all (§1d), or it will sit unwanted. Only the luxuries depend on what agents value, and they come last.
+
+### 1d. Resources that add something new, not more (Zach, 22 Oct)
+
+§1c's rule (every hard resource multiplies something the society already does) is too narrow. The more interesting resources
+**unlock a capability the world does not have at all**: a new kind of act, a new kind of knowledge, a new kind of control. Each needs
+a hook in an existing system, or it is decoration.
+
+| Capability it unlocks | Made from | What becomes possible | Engine hook |
+|---|---|---|---|
+| **writing** (parchment, ink) | hides (parchment), soot or oak galls (ink); literacy as a skill | words that last and travel without a speaker: ledgers, contracts, laws as texts, letters, records anyone can read later | documents as items (review 32's prototype), carried letters (37.4) |
+| **seals** (wax, a carved or cast seal) | beeswax; a carver or a smith | proving who wrote a letter or an order, so forgery becomes possible and detectable | the old engine's forged messages (`forge_dm`); offices' orders (G-4) |
+| **locks and keys** | iron; a smith | access by object, not by permission: whoever holds the key opens the store; keys can be stolen, copied, shared | stores and buildings; the two-key armoury (G-13) |
+| **dogs** | bred from a few (one more livestock kind) | warning: raiders noticed before they strike (the counter to ride and strike, §5b); herding and hunting help | night fights; perception (a sign at the place) |
+| **beacons and signal fires** | timber, stone; a watch | one fast message across many nodes ("raiders!"), at the cost of saying almost nothing else | 37.4's signs; perception at neighbouring nodes |
+| **carrier pigeons** | bred at a loft (again livestock) | a short message that flies home without a carrier | carried messages (37.4), the information regime |
+| **lenses** (glass) | sand, ash, fuel, a glassmaker; rare skill | seeing farther: arrivals on an edge a round before they come | perception range |
+| **medicine** (herbs, a healer) | rare wild plants; healing skill | wounds that heal, illness that is survived (if 37.1 brings illness) | hunger stages and wounds; 37.1's mortality |
+| **maps** | parchment and someone who has travelled | knowledge of places as a good: sold, copied, stolen, lied about; lower danger on known edges | perception (places known), 37.5's frontier |
+| **new crops** | seed from beyond or from the frontier | land that was useless becomes fields (poor soil, cold valleys) | fields; 37.5's regions |
+| **gunpowder** (much later) | saltpetre (from manure heaps: cattle again), sulphur (rare), charcoal | blasting deep seams; firearms; walls stop protecting | combat, mines; an era change |
+
+**Why these matter more than multipliers for this project.** Most of them are about **information, trust and access**: who can
+know what, prove what and open what. Those are what institutions are built on, and what a takeover captures: the record, the seal,
+the key, the warning, the map. A multiplier makes a society richer. An unlock changes what kinds of power exist in it.
+
+**A shortlist for the first worlds:** writing, seals, locks and keys, dogs, beacons. Each fits a system that exists or is planned,
+and each creates a chokepoint someone can hold: the scribe, the seal, the keyholder, the kennel, the watch. Lenses, pigeons,
+medicine, maps, new crops and gunpowder come later, by era or by frontier.
 
 **Derived goods** (made, not found): flour and bread; meat, salted meat, milk and cheese; leather (hides); charcoal (timber);
 pottery and bricks (clay and fuel); tools, blades and fittings (copper and charcoal); carts (timber, fittings); coin (copper, or
@@ -399,6 +427,7 @@ belongs anywhere is a later question (37.5's frontier).
 
 ## 7. Open decisions
 
+1a. **Unlocks (§1d):** a first shortlist of writing, seals, locks and keys, dogs and beacons?
 1. **The core set, revised (§1b):** grain, wild food, livestock, timber, stone, clay, copper ore, salt, fibre; the hard tier (§1c):
    iron, tin, silver, old-growth oak, wild horses, goods from beyond (luxuries last, and only with a reason to want them)?
 2. **Cattle:** in (recommended), with milk, slaughter, draught, manure and wealth?
