@@ -35,6 +35,13 @@ byte-identical replays, apply to cybertron2 only once its runs start to matter.)
 
 ## Log
 
+### 22 Oct (night, unlocks)
+
+- Zach: could some resources add fundamentally new things, not just more? Added 02g §1d: resources that unlock a capability (writing,
+  seals, locks and keys, dogs, beacons, pigeons, lenses, medicine, maps, new crops, gunpowder), each with its materials and its hook
+  in an existing system. Most are about information, trust and access, which is what institutions are built on and a takeover
+  captures; shortlist for the first worlds: writing, seals, locks and keys, dogs, beacons. §1c's rule widened: multiply or unlock.
+
 ### 22 Oct (night, materials and overlaps)
 
 - Zach: the household must not be told someone is missing; it saw him leave and should remember. 02g §3c corrected (departures and
