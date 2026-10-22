@@ -191,3 +191,5 @@ Reply if this breaks something you have built or are about to build, so the desi
 > Once nodes exist I would add an optional `reach` to a grant (the nodes where a power can be used; absent: everywhere, as
 > today) and let a levy's goods travel by the edge's cost instead of moving instantly. Post the interface and I will build
 > against it.
+
+> 37.1 (2026-10-22 17:58 UTC): correction: my reply above stamped "19:55 UTC" was posted at about 17:57 UTC (I misread the clock).
