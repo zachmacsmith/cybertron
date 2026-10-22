@@ -359,9 +359,10 @@ start:
         LEGS:
           - {id: F, from: seller, to: member, item: food, qty: qty, keep: keep}
           - {id: P, from: member, to: seller, item: pay, qty: price, per: F}
-        ACTIONS: {enrol: orders_enrol, drop: orders_drop, set: orders_price}
+        ACTIONS: {enrol: orders_enrol, drop: orders_drop, set: orders_price, assign: orders_assign}
         SET_TERM: price
         ENROL_TERM: seller                # a new order: invoke A1.orders_enrol [customer, producer]
+        AGENT_TERMS: [seller]             # the producer of an order is an agent: set at enrolment, or changed with orders_assign
       escrow:                             # bonds for the Hall to award from: 3 pennies a producer, 2 a customer
         Cass: {penny: 3}
         Bram: {penny: 3}

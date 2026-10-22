@@ -9,7 +9,7 @@ runs below prove wiring and viability while roles are performed; they were not u
 Files:
 - `cybertron/library.py`, block `# ===== merchant (review 31 Phase 2 ...)` at the end: Bank Charter, Role Procedure, Arbitrators'
   Hall, Wound Bounty, Security Licence.
-- `cybertron/standing.py`: two small core additions (a `bond` leg; `FORUM: arbiter:<institution>`; terms that name an agent) and a
+- `cybertron/standing.py`: small core additions (a `bond` leg; `FORUM: arbiter:<institution>`; enrol with an AGENT_TERMS term) and a
   `# ===== merchant` presets block: Commission, Paper Subscription.
 - `cybertron/specs/regimes/merchant.yaml`, `merchant_nogoal.yaml`; dry schedules `dry/merchant_decisions.yaml`,
   `dry/merchant_release.yaml`.
@@ -43,7 +43,7 @@ Files:
 | 2.13 **Charge as subscription** | The **Paper Subscription** preset: a roster in the paper's code; each subscriber pays `fee` a round into its treasury; a subscriber who would not pay past GRACE is expelled, so it stops reading (channel readers `{members: <paper>}`); the editor enrols an applicant (`sub_enrol`) and sets the fee (`sub_fee`). A subscriber who *could* not pay is told, not expelled (core rule: could-not is never a breach). | standing.py presets block | auto: the editor is not charged, a would-not subscriber is expelled, a new reader is enrolled; manual legs: fulfil pays, a holder who does not pay is expelled |
 | 2.13 **Wound Bounty** | Bounty on Aggressors that also pays for a wound (most harm outcomes): BOUNTY_WOUND / BOUNTY_KILL from the treasury, CAP a round, covert attacks earn nothing; public list. | library.py | a wound on an earlier aggressor is paid |
 | 2.14 **Security Licence** | J0 law: the REGISTRAR licenses or revokes a firm; holders of the firm's GUARD_OFFICES (or all members) hold `licensed_guard` and may `detain [target, reason]`: an F3 arrest (`lawful_attack` mode arrest) of an agent who attacked unlawfully within LOOKBACK rounds (TARGETS aggressors), the target then limited for LIMIT_ROUNDS; public register and detention log. Needs conflict + jurisdictions (listed only there, like the force templates). | library.py | guards get the right on licensing, lose it on revocation; a non-aggressor is refused; an aggressor is subdued |
-| core: **terms naming an agent** | `enrol` and `set_term` accept an agent's name for a term whose default is text (the Order Book's `seller`; it also lets a Service guard be reassigned, the limit 31.08 noted for 1.3). Numeric terms behave as before. | standing.py | enrol with a producer; a number is refused for a name term |
+| core: **enrol with an agent term** | `enrol` accepts an agent's name for its ENROL_TERM when that term is in AGENT_TERMS (engine 20's mechanism for agent-valued terms; `assign` changes it later): a new Order Book order names its producer at enrolment. Numeric terms behave as before. | standing.py | enrol with a producer; a number is refused for a name term |
 
 Everything is opt-in: the core additions act only on a leg with `bond`, a FORUM naming an institution, or a text-valued term; the
 templates exist only where named. The templates are listed in `read_library` wherever `institutions.office_control` and

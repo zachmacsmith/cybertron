@@ -365,10 +365,10 @@ def test_roster_term_naming_an_agent_is_set_by_enrol_and_checked(tmp_path):
                          "TERMS": {"seller": "", "qty": 1, "price": 2, "pay": "penny"},
                          "LEGS": [{"id": "F", "from": "seller", "to": "member", "item": "food", "qty": "qty"},
                                   {"id": "P", "from": "member", "to": "seller", "item": "pay", "qty": "price", "per": "F"}],
-                         "ACTIONS": {"enrol": "orders_enrol"}, "ENROL_TERM": "seller"},
+                         "ACTIONS": {"enrol": "orders_enrol"}, "ENROL_TERM": "seller", "AGENT_TERMS": ["seller"]},
               "allowances": {"Bo": {"food": 2}, "Di": {"penny": 2}, "Fay": {"penny": 2}}}
     k = setup(tmp_path, world(inst=book, contracts=[orders]))
-    with pytest.raises(ActionError, match="an agent's name"):
+    with pytest.raises(ActionError, match="a living agent's name"):
         inv(k, "Cy", "A1.orders_enrol", "Di", 3)
     inv(k, "Cy", "A1.orders_enrol", "Di", "Bo")
     lid = AC.assocs(k)["A1"]["laws"][-1]

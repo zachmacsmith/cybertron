@@ -936,16 +936,17 @@ def drop(agent, member, severance=0):
     return member + " is off the roster"
 
 def check_term(term, value):
-    if is_text(defaults().get(term)):
-        if not is_text(value) or value not in agents():
-            refuse("the " + term + " is an agent's name")
+    if term in AGENT_TERMS:
+        if value != "treasury" and (not is_text(value) or value not in agents()):
+            refuse("the " + term + " is a living agent's name (or treasury: the institution itself)")
     elif not is_number(value) or value < 0:
         refuse("the " + term + " is a number from 0")
 
 def set_term(agent, member, value):
     if SET_TERM == "":
         refuse("no term can be set here")
-    check_term(SET_TERM, value)
+    if not is_number(value) or value < 0:
+        refuse("the " + SET_TERM + " is a number from 0")
     if member == "" or member == "all":
         old = defaults().get(SET_TERM)
         state.setdefault("defaults", {})[SET_TERM] = value
