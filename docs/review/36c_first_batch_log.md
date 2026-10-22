@@ -115,3 +115,7 @@ Runs on this cloud session's subscription (`LLM_BACKEND=claude_code`), launched 
   `L2_seed1_290a036c` (round 50) through a `redirect` entry; the accidental directory is kept as `*_restart_by_mistake` and must
   not be analysed. The other runs that had started (M1s, M1h, N1, M2o, M3*, N3) began after the food change, so they rerun into
   their own directories correctly.
+- 11:31 check-in 5. **The container was reclaimed again** (uptime 0 min at 11:31); runs had advanced only ~7 minutes past 10:43
+  (L1 65, L2 62, L3 106, L4 115, L5 123, M1o 10) before dying around 10:50, i.e. shortly after this session went idle. Reading:
+  the cloud container is reclaimed when the session is inactive, so background runs only progress while the session is working.
+  From now to 14:00 the session stays active (a monitoring loop of 10-minute checks) instead of ending its turn. Relaunched.
