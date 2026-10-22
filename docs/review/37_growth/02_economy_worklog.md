@@ -35,6 +35,20 @@ byte-identical replays, apply to cybertron2 only once its runs start to matter.)
 
 ## Log
 
+### 22 Oct (night, materials and overlaps)
+
+- Zach: the household must not be told someone is missing; it saw him leave and should remember. 02g §3c corrected (departures and
+  stated plans as lasting memories, absence the household's own inference); the phase-0 prompt's "not seen for N rounds" for kin
+  flagged to 37.4.
+- Zach: resources were not chosen against what buildings and infrastructure consume; and some resources should be hard to get but
+  valuable to a complex society. Added 02g §1b (a bill of materials for 20 built things: stone is core after all, for millstones,
+  roads, bridges, walls and foundations; fibre is core, for rope, sacks and sails; leather is the herds' second product; charcoal is
+  the hidden demand on the woods; iron is what the higher rungs are made of) and §1c (difficulty: deep, rare, slow, skill-gated,
+  from beyond; uses: iron, tin, silver, old-growth oak, wild horses, luxuries only with a reason). Revised core set: nine.
+- Checked the other briefs for economic layers: 37.7 (works, granaries, defence) and 37.5 (deposits, expeditions, claims) overlap
+  02g §5 and §1c. Proposed split in 02g §6b: one building and works model; 37.2 owns what works do and cost, 37.7 how groups pay
+  for and govern them, 37.5 discovery and claims.
+
 ### 22 Oct (night, danger, riders, raids)
 
 - Zach: edges differ in danger, worse in winter; a traveller who dies is never announced, maybe found by a later traveller; wild
