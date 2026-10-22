@@ -63,6 +63,8 @@ def test_history_off_reproduces_every_prompt_from_before(name, tmp_path, monkeyp
     from cybertron import schema as SC
     for key, v in LE.BEFORE.items():
         monkeypatch.setitem(SC.EXTRA, key, v)
+    monkeypatch.setitem(SC.EXTRA, "law.similar_check", True)             # engine 21 turns law.v2's duplicate-proposal note off
+    monkeypatch.setitem(__import__("cybertron.contracts").contracts.DEFAULTS, "change_rounds", 0)   # engine 22: contract ballots
     assert _call_prompts(name, OFF, tmp_path) == json.loads(OFF_PROMPTS.read_text())[name]
 
 

@@ -513,6 +513,7 @@ def _ann():
         "law.expects": dict(types=("bool",)),                          # (T1): a law's `expects`, checked
         "law.effects_detail": dict(types=("bool",)),                   # engine 20: force rules in law_effect; ranks on procedure_restored
         "actions.bare_names": dict(types=("bool",)),                   # engine 20: forgiving resolves a bare contract action name
+        "law.similar_check": dict(types=("bool",)),                    # engine 21 (true before): law.v2 notes a duplicate proposal
         "start": dict(kind="leaf", types=("dict", "null"), check=_check_start),   # established worlds (cybertron/start.py)
         "channels.v2": dict(types=("bool",)),                           # wave 9 C: channels v2 (cybertron/channels.py)
         "channels.delivery": dict(types=("str",), enum=("push", "pull")),
@@ -643,6 +644,7 @@ EXTRA = {
     "law.effects": True, "law.call_failures": True, "law.expects": True,
     "law.effects_detail": True,                                        # engine 20 (false before): force_rule changes count in law_effect
                                                                        # (not inert) and procedure_restored names the ranks
+    "law.similar_check": False,                                        # engine 21 (true before): law.v2's duplicate-proposal note
     "start": None,                                                    # established worlds (cybertron/start.py): none = as before
     # wave 9 C, channels v2 (cybertron/channels.py; review 14 §4.6, D-37): off = byte-identical
     "channels.v2": False, "channels.delivery": "push", "channels.square": "one", "channels.square_rate": 2,
@@ -754,6 +756,11 @@ DOCS = {
                    "own diff and previews amendments as amendments (amends). false: none of this (the behaviour before)",
     "law.effects_detail": "engine 20: law_effect also lists the force rules a law sets, and procedure_restored names the ranks it "
                           "restores (cybertron/laweffects.py)",
+    "law.similar_check": "law.v2's duplicate-proposal check (cybertron/dispatch/changes/legal.py similar_laws): a proposal whose "
+                         "normalised code is identical (or within difflib ratio 0.95) to an active or pending law of the same "
+                         "jurisdiction gets \"Note: ... has the same code\" (\"nearly the same code\") in its result and similar_to "
+                         "in its proposal event (noted, never blocked). Engine 21 set it false (spotting a duplicate is the agents' "
+                         "business: read_law, a before_propose law); true before, so earlier runs replay",
     "actions.bare_names": "engine 20, with actions.forgiving: a contract or office action named without its institution (board_price for "
                           "A1.board_price) resolves when exactly one of the agent's institutions offers it; otherwise the error lists the choices",
     "law.call_failures": "a law's move, fine, grant, revoke, suspend, burn or reseat that fails logs law_call_failed with the reason, "

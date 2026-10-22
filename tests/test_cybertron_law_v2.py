@@ -17,10 +17,12 @@ from cybertron.kernel import Kernel
 import cybertron_law_v2_laws as V2
 
 
-def world(v2=True, preset="E4", sets=(), gas=None, seed=1):
+def world(v2=True, preset="E4", sets=(), gas=None, seed=1, similar=False):
     sp = S.apply_overrides(S.load(preset), [*sets, "shared_archive.enabled=false"])
     if v2:
         sp["law"] = {"v2": True}
+    if similar:
+        sp.setdefault("law", {})["similar_check"] = True               # engine 21 turned the duplicate-proposal check off
     inst = generator.generate(sp, seed)
     if gas:
         inst["spec"]["law"]["gas"] = dict(gas)                       # not a schema key yet: set after validation
@@ -345,9 +347,9 @@ def test_constitutional_review_blocks_a_draft_before_the_procedure(k):
 
 
 def test_a_duplicate_proposal_is_neither_noted_nor_blocked():
-    """Engine 21: the engine does not police duplicates (the haiku runs' two identical Harvest Quotas were a finding about the
-    agents; a polity can review drafts with a before_propose law). The copy is proposed like any law, with no note in the result
-    and no similar_to in the event, in either law edition."""
+    """Engine 21 (law.similar_check false): the engine does not police duplicates (the haiku runs' two identical Harvest Quotas
+    were a finding about the agents; a polity can review drafts with a before_propose law). The copy is proposed like any law, with
+    no note in the result and no similar_to in the event, in either law edition."""
     body = "def on_round_end(r):\n    gazette('quota')\n"
     for v2 in (True, False):
         k = world(v2=v2)
@@ -355,6 +357,99 @@ def test_a_duplicate_proposal_is_neither_noted_nor_blocked():
         A.act(k, leg[0], "propose", {"code": law("Harvest Quotas", body)})
         out = A.act(k, leg[-1], "propose", {"code": law("Harvest Quotas II", "# a copy\n" + body)})
         assert "Proposed" in out and "Note:" not in out and "similar_to" not in events(k, "proposal")[-1]["data"]
+
+
+def test_a_duplicate_proposal_is_noted_not_blocked():
+    """Under law.similar_check (on before engine 21, so earlier runs replay). The haiku runs: two identical Harvest Quotas (different
+    authors) were proposed and enacted in one round. law.v2 notes an active or pending law with the same normalised code (title,
+    intent, comments and layout aside); law v1 says nothing."""
+    body = "def on_round_end(r):\n    gazette('quota')\n"
+    for v2 in (True, False):
+        k = world(v2=v2, similar=True)
+        leg = [x for x in k.roster() if k.has(x, "propose")]
+        first = A.act(k, leg[0], "propose", {"code": law("Harvest Quotas", body)})
+        assert "Note:" not in first
+        same = law("Harvest Quotas II", "# a copy\ndef on_round_end(r):\n    gazette( 'quota' )\n")
+        out = A.act(k, leg[-1], "propose", {"code": same})
+        prop = events(k, "proposal")[-1]["data"]
+        if v2:
+            assert "Note:" in out and "the same code" in out and "Proposed" in out                     # noted, not refused
+            assert prop["similar_to"][0]["match"] == "identical" and prop["similar_to"][0]["title"] == "Harvest Quotas"
+        else:
+            assert "Note:" not in out and "similar_to" not in prop
+    k = world(similar=True)
+    leg = next(x for x in k.roster() if k.has(x, "propose"))
+    A.act(k, leg, "propose", {"code": law("A", body)})
+    assert "Note:" not in A.act(k, leg, "propose", {"code": law("B", "def on_round_end(r):\n    gazette('a different law')\n    move('reserve', 'x', 'grain', 1)\n")})
+
+
+def _similar_before(k, lid, near=0.95):
+    """similar_laws as it was: difflib's ratio() on every candidate (the reference for the fast path)."""
+    import difflib
+    from cybertron import jurisdictions as J
+    from cybertron.dispatch.changes import legal as LG
+    mine, jur, out = LG._norm_code(k.w["laws"][lid]["code"]), J.law_jur(k, lid), []
+    for oid, o in k.w["laws"].items():
+        if oid == lid or o.get("status") not in LG._PENDING or J.law_jur(k, oid) != jur or o.get("amends"):
+            continue
+        theirs = LG._norm_code(o.get("code"))
+        if theirs == mine:
+            out.append({"law": oid, "title": o.get("title"), "status": o.get("status"), "match": "identical"})
+        elif theirs and difflib.SequenceMatcher(None, mine, theirs, autojunk=False).ratio() >= near:
+            out.append({"law": oid, "title": o.get("title"), "status": o.get("status"), "match": "near"})
+    return out
+
+
+def test_similar_laws_is_unchanged_by_the_fast_path(monkeypatch):
+    """similar_laws skips ratio() where the length, real_quick_ratio or quick_ratio bound rules `near` out, and finds difflib's
+    longest matches with a suffix automaton on large ranges (_FAST): the same identical, near and far results as before."""
+    from cybertron.dispatch.changes import legal as LG
+    k = world(similar=True)
+    lines = "".join(f"    gazette('line {i} of the quota law')\n" for i in range(60))
+    base = "def on_round_end(r):\n" + lines
+    for title, body in [("Q", base), ("Q copy", "# a copy\n" + base),                                  # identical
+                        ("Q near", base.replace("line 7 of", "line seven of")),                        # near (one line)
+                        ("Q half", "def on_round_end(r):\n" + lines[:len(lines) // 2]),               # length rules it out
+                        ("Far", "def on_round_end(r):\n    move('reserve', 'x', 'grain', 1)\n")]:     # far
+        k.new_law(law(title, body), "a")
+    lids = [lid for lid, o in k.w["laws"].items() if o["status"] == "draft"]
+    for fast in (LG._FAST, 0):                                         # 0: every range takes the suffix automaton
+        monkeypatch.setattr(LG, "_FAST", fast)
+        for lid in lids:
+            for near in (0.5, 0.95, 0.999):
+                assert LG.similar_laws(k, lid, near) == _similar_before(k, lid, near), (lid, near, fast)
+    got = {s["title"]: s["match"] for s in LG.similar_laws(k, lids[0])}
+    assert got == {"Q copy": "identical", "Q near": "near"}
+
+
+def test_the_fast_matcher_has_difflibs_matching_blocks(monkeypatch):
+    import difflib
+    import random
+    from cybertron.dispatch.changes import legal as LG
+    monkeypatch.setattr(LG, "_FAST", 0)
+    rng = random.Random(7)
+    for t in range(3000):
+        alpha = ("ab", "abc", "abcdefgh \n")[t % 3]
+        a = "".join(rng.choice(alpha) for _ in range(rng.randrange(40)))
+        b = "".join(rng.choice(alpha) for _ in range(rng.randrange(40)))
+        if t % 2:
+            b = a[:rng.randrange(len(a) + 1)] + b[:5] + a[rng.randrange(len(a) + 1):]
+        assert LG._Matcher(None, a, b, autojunk=False).get_matching_blocks() == \
+            difflib.SequenceMatcher(None, a, b, autojunk=False).get_matching_blocks(), (a, b)
+
+
+def test_two_standing_contract_presets_compare_quickly():
+    """Two ~35,000-character presets (the same CORE, different parameters): difflib's ratio() took ~15 s a pair (0.9918 for these
+    two at fb70b9b, 0.9924 since the presets changed; near either way), which made preview_law of a preset ~600 s in the Private
+    world. The check is off from engine 21 (law.similar_check); the matcher serves replays of earlier runs."""
+    import time
+    from cybertron import standing as ST
+    from cybertron.dispatch.changes import legal as LG
+    a, b = (LG._norm_code(ST.code(n)) for n in ("Payroll", "Retainer"))
+    t = time.perf_counter()
+    assert LG._near(a, b, 0.95) and not LG._near(a, b, 0.995)
+    assert round(LG._Matcher(None, a, b, autojunk=False).ratio(), 10) == 0.9923979745
+    assert time.perf_counter() - t < 3
 
 
 def test_before_enact_strikes_down_an_enactment(k):

@@ -162,9 +162,9 @@ ENGINE_FLIPS = {
                  "actions.forgiving (actions.bare_names); new code: harvest-leg camps/items filters, the Service guard assign "
                  "action, resource_of(camp); a start contract over the cap fails generation"},
     21: {"commits": ["db7a16d44ae7dc8015a093df84b38c3504706e81"],
-         "flips": [],
-         "note": "law.v2's duplicate-proposal check is removed: no note in a proposal's result and no similar_to in its event "
-                 "(behaviour, not a default; reproducible only by rerun)"},
+         "flips": [("cybertron.schema.EXTRA", ("law.similar_check",), True, False)],
+         "note": "law.v2's duplicate-proposal check is off (law.similar_check true -> false): no 'same code' / 'nearly the same "
+                 "code' note in a proposal's result and no similar_to in its event; earlier runs replay with it on"},
     22: {"commits": ["6132d14431ae16951e35856d1dc6b4cd2c2c858b"],
          "flips": [("cybertron.contracts.DEFAULTS", ("change_rounds",), 0, 1)],
          "note": "a members' ballot on a change to a contract's code stays open one round so members can vote (it closed in the "

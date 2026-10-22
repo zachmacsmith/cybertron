@@ -144,7 +144,8 @@ CON17 = {"pay_institutions": False, "applicant_lines": False,               # en
          "change_rounds": 0}                                                    # engine 22: contract-change ballots stay open a round
 EXTRA15 = {"law.effects": False, "law.call_failures": False, "law.expects": False,    # engine 15: laws that fail loudly
            "institutions.amend_offices": False,
-           "law.effects_detail": False, "actions.bare_names": False}                  # engine 20
+           "law.effects_detail": False, "actions.bare_names": False,                  # engine 20
+           "law.similar_check": True}                                                 # engine 21: the duplicate-proposal note
 SUB14 = {"game": {"hunt_mode": "shared"}, "forest": {"clearing": 5},                     # engine 14: farming, the individual hunt
          "fields": {"plots_per_agent": 0.4, "plots_max_per_agent": 0.8, "mult": 3.5}}
 

@@ -8,6 +8,8 @@ agent's action only; on_enact/on_repeal stay lifecycle hooks of the law itself (
 primitives has a CHECKS entry except propose under law.v2 (ranks.check_propose). set_conflict_rule's change is ranks'."""
 from __future__ import annotations
 
+import difflib
+
 from cybertron import code as DC
 from cybertron import jurisdictions as J
 from cybertron import lawlang as L
@@ -69,6 +71,129 @@ def draft(k, lid) -> dict:
             **({"requires": dict(law["requires"])} if law.get("requires") else {})}   # W9: ranks.requirement
 
 
+# ---------------------------------------------------------------------- duplicate proposals (law.v2: a signal, never a block)
+_PENDING = ("active", "draft", "ballot", "gated", "veto_window")
+
+
+def _norm_code(code) -> str | None:
+    """A law's code without comments, formatting, title or intent (ast round trip), or None if it does not parse."""
+    import ast
+    try:
+        tree = ast.parse(str(code))
+    except SyntaxError:
+        return None
+    tree.body = [n for n in tree.body if not (isinstance(n, ast.Assign) and len(n.targets) == 1
+                                             and isinstance(n.targets[0], ast.Name) and n.targets[0].id in ("title", "intent"))]
+    return ast.unparse(tree)
+
+
+def _longest_match(a, alo, ahi, b, blo, bhi):
+    """difflib's find_longest_match(alo, ahi, blo, bhi) for two strings with no junk (isjunk None, autojunk False), in linear time:
+    the longest common substring of a[alo:ahi] and b[blo:bhi] (a suffix automaton of b's range), the earliest in a, then in b, of
+    the longest; (alo, blo, 0) when none. difflib's own scan is O(len(a) * len(b) / alphabet): ~15 s for two 35,000-character
+    standing-contract presets, nearly all of it in the first, whole-range call."""
+    nxt, link, length, last = [{}], [-1], [0], 0
+    for c in b[blo:bhi]:
+        cur = len(length)
+        nxt.append({}); link.append(0); length.append(length[last] + 1)
+        p = last
+        while p != -1 and c not in nxt[p]:
+            nxt[p][c] = cur
+            p = link[p]
+        if p != -1:
+            q = nxt[p][c]
+            if length[p] + 1 == length[q]:
+                link[cur] = q
+            else:
+                clone = len(length)
+                nxt.append(dict(nxt[q])); link.append(link[q]); length.append(length[p] + 1)
+                while p != -1 and nxt[p].get(c) == q:
+                    nxt[p][c] = clone
+                    p = link[p]
+                link[q] = link[cur] = clone
+        last = cur
+    v = n = best = 0
+    end = alo
+    for i in range(alo, ahi):                                          # n: the longest match ending at a[i]
+        c = a[i]
+        while v and c not in nxt[v]:
+            v = link[v]
+            n = length[v]
+        if c in nxt[v]:
+            v, n = nxt[v][c], n + 1
+        if n > best:                                                   # strict: the earliest end, so the earliest start, wins
+            best, end = n, i
+    if not best:
+        return difflib.Match(alo, blo, 0)
+    i = end - best + 1
+    return difflib.Match(i, b.find(a[i:end + 1], blo, bhi), best)
+
+
+class _Matcher(difflib.SequenceMatcher):
+    """SequenceMatcher(None, a, b, autojunk=False) for strings, with the same matching blocks (so the same ratio()): ranges larger
+    than _FAST (len(a) * len(b)) use _longest_match, smaller ones difflib's own scan."""
+    def find_longest_match(self, alo=0, ahi=None, blo=0, bhi=None):
+        ahi = len(self.a) if ahi is None else ahi
+        bhi = len(self.b) if bhi is None else bhi
+        if (ahi - alo) * (bhi - blo) <= _FAST:
+            return super().find_longest_match(alo, ahi, blo, bhi)
+        return _longest_match(self.a, alo, ahi, self.b, blo, bhi)
+
+
+_FAST = 1_000_000
+
+
+def _near(mine, theirs, near) -> bool:
+    """SequenceMatcher(None, mine, theirs, autojunk=False).ratio() >= near, cheapest test first: the length bound
+    (2 * min / (a + b)), real_quick_ratio and quick_ratio are upper bounds of ratio(), then _Matcher's exact ratio()."""
+    la, lb = len(mine), len(theirs)
+    if 2.0 * min(la, lb) / (la + lb) < near:                          # ratio()'s own arithmetic, so the bound is exact
+        return False
+    sm = _Matcher(None, mine, theirs, autojunk=False)
+    return sm.real_quick_ratio() >= near and sm.quick_ratio() >= near and sm.ratio() >= near
+
+
+def similar_laws(k, lid, near=0.95) -> list:
+    """law.v2 under law.similar_check (engine 21 set it false; true before, so earlier runs replay): active or pending laws (same
+    jurisdiction) whose normalised code is identical or near-identical (difflib ratio >= near) to lid's:
+    [{"law", "title", "status", "match": identical|near}]. The haiku runs enacted two identical Harvest Quotas in one round. Engine
+    21 turned the check off: spotting a duplicate is the agents' business (read_law, a before_propose law), and the near tier
+    measured "built from the same template" (every two standing-contract presets score ~0.99 over the shared CORE)."""
+    from cybertron import laweffects as LE
+    if not v2(k) or not LE.setting(k.spec, "law.similar_check"):
+        return []
+    law = k.w["laws"][lid]
+    if law.get("amends") or law.get("repeal_target"):
+        return []
+    mine, jur = _norm_code(law["code"]), J.law_jur(k, lid)
+    if not mine:
+        return []
+    out = []
+    for oid, o in k.w["laws"].items():
+        if oid == lid or o.get("status") not in _PENDING or J.law_jur(k, oid) != jur or o.get("amends"):
+            continue
+        theirs = _norm_code(o.get("code"))
+        if not theirs:
+            continue
+        if theirs == mine:
+            match = "identical"
+        elif _near(mine, theirs, near):
+            match = "near"
+        else:
+            continue
+        out.append({"law": oid, "title": o.get("title"), "status": o.get("status"), "match": match})
+    return out
+
+
+def similar_note(k, lid) -> str:
+    """The proposal result's note on similar_laws (empty when none)."""
+    sims = similar_laws(k, lid)
+    if not sims:
+        return ""
+    return (" Note: " + "; ".join(f"{s['law']} '{s['title']}' ({s['status']}) has {'the same' if s['match'] == 'identical' else 'nearly the same'} code"
+                                  for s in sims[:3]) + " (not blocked; if both are enacted, both run).")
+
+
 # ---------------------------------------------------------------------- the changes
 def do_propose(k, jurisdiction, draft, actor=None, preview=None) -> dict:
     """A checked draft goes to the procedure: the proposal is published with its dry-run preview (inline, or monitor-only when
@@ -103,6 +228,9 @@ def do_propose(k, jurisdiction, draft, actor=None, preview=None) -> dict:
                 extra["shadowed"] = sh
                 extra["shadow_notes"] = LE.shadow_texts(k, sh)
                 k.__dict__["_shadow_note"] = (lid, extra["shadow_notes"])   # the proposer's result (actions, jurisdictions)
+    sims = similar_laws(k, lid)                                        # law.v2 and law.similar_check: a duplicate is noted, not refused
+    if sims:
+        extra["similar_to"] = sims
     k.log("proposal", actor, {"law": lid, "title": law["title"], "intent": law["intent"], "class": law["cls"], "code": law["code"],
                               **({"jurisdiction": jurisdiction} if jurisdiction is not None else {}), **extra,
                               **({"preview": preview[:40]} if shown else {})}, vis="public")

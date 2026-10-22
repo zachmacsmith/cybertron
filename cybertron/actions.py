@@ -883,10 +883,12 @@ def _propose(k, aid, code, intent=None, jurisdiction=None):
             k.w["laws"][lid]["status"] = "failed_check"                # the dry run restored a copy of the world: not `law`
             k.log("proposal_check_failed", aid, {"law": lid, "error": str(e)}, vis=[aid])
             raise ActionError(f"your law failed the 3-round dry run: {e}")
+    from cybertron.dispatch.changes import legal as LG
+    note = LG.similar_note(k, lid)                                     # law.v2, law.similar_check: a (near-)identical active or pending law is noted
     k.apply("propose", jurisdiction=None, draft=D.draft(k, lid), actor=aid, preview=diff)   # on_proposal(None) after it, as before
     k.decide(lid)
     return (f"Proposed {lid} '{law['title']}' ({law['cls']}" + D.requirement_note(law) + f"); status: {k.w['laws'][lid]['status']}."
-            + LE.shadow_note(k, lid))
+            + note + LE.shadow_note(k, lid))
 
 
 def _amend(k, aid, law, code, reason="", intent=None):
