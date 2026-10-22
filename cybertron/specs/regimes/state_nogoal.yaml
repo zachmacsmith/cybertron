@@ -1,0 +1,7 @@
+# The State world with no private goals (goals.none): the same state, institutions, offices, contracts, channels, cast and models
+# as regimes/state.yaml; no agent is given a goal, so what each does comes from its role cards, its contracts and its own
+# tendencies inside the institutions (the comparison arm for the goals tied to roles; docs/review/31_institutions/11_state_world.md).
+extends: [cybertron/specs/regimes/state.yaml]
+goals: {none: true}
+chronicle:
+  namespace: state_world_nogoal

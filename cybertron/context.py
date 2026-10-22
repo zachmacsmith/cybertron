@@ -101,6 +101,8 @@ ACTIONS = ("manual", "manual_search", "search_board", "search_dms", "recent", "r
     + ("preview_law", "legal_position", "recall")                       # agent actions this module adds (preview_law: law.v2 only;
                                                                         # legal_position: law.v2 with law.digest)
 ACTIONS += ("read_register",)                                           # review 31.05 #1: only where a law declares READ
+ACTIONS += ("wiretap",)                                                 # review 31.04 #10: only under channels.surveillance mode pull
+ACTIONS += ("dir_history",)                                             # review 31.05 #3: only where a store keeps a version log
 BOARD_TYPES = ET.names("board")                                       # what search_board searches (posts and the gazette)
 FETCHED_HEADER = "## Lookups (fetched this turn)"
 
@@ -736,6 +738,10 @@ def lookup(k, aid, name, args: dict) -> str:
         from cybertron import registers as RG
         if RG.any_readable(k):
             return RG.read_register(k, aid, args)
+    if name == "wiretap":                                               # review 31.04 #10: the pull wiretap (surveil holders)
+        from cybertron import surveillance as SV
+        if SV.pull(k):
+            return SV.wiretap(k, aid, args)
     if name == "read_file":
         init_agent(k, aid)
         nm = args.get("name", first)
@@ -765,6 +771,8 @@ def lookup(k, aid, name, args: dict) -> str:
     from cybertron import directories as DR
     if name in DR.LOOKUPS and DR.enabled(k):                            # directories: list, read, search (access checked there)
         return DR.lookup(k, aid, name, args)
+    if name == DR.HISTORY_LOOKUP and DR.history_on(k):                  # review 31.05 #3: a file's version log
+        return DR.lookup(k, aid, name, args)
     raise _error(f"no lookup {name!r}; lookups: {', '.join(lookup_names(k))}")
 
 
@@ -776,10 +784,13 @@ def lookup_names(k) -> tuple:
     from cybertron import directories as DR
     from cybertron import channels as CH
     from cybertron import registers as RG
+    from cybertron import surveillance as SV
     return tuple(n for n in LOOKUPS if (n != "preview_law" or LP.enabled(k)) and (n != "legal_position" or DG.enabled(k))
                  and (n != "recall" or _recall_on(k))) \
         + (DR.LOOKUPS if DR.enabled(k) else ()) + (("read",) if CH.active(k) else ()) \
-        + (("read_register",) if RG.any_readable(k) else ())          # review 31.05 #1: only where a law declares READ
+        + (("read_register",) if RG.any_readable(k) else ()) \
+        + (("wiretap",) if SV.pull(k) else ()) \
+        + ((DR.HISTORY_LOOKUP,) if DR.history_on(k) else ())          # review 31.04 #10 wiretap; 31.05 #3 dir_history
 
 
 def _recall_on(k) -> bool:

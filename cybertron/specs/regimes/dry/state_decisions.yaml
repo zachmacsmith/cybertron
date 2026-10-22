@@ -1,0 +1,58 @@
+# Dry-run schedule for regimes/state.yaml (docs/review/31_institutions/11_state_world.md §5.5, decision points): the scripted bots
+# take no discretionary decision, so each role card's decisions are taken here once, as the agent's own action (inject_action),
+# with the exact syntax the card gives, to show that every one is executable and is a logged, observable act.
+#   python -m cybertron run cybertron/specs/regimes/state.yaml --seed 1 --dry --fresh --sandbox off \
+#       --set rounds=8 --apply cybertron/specs/regimes/dry/state_decisions.yaml
+interventions:
+  - {id: d_issue, at: {round: 1, phase: round_start}, op: inject_action,
+     args: {agent: Rhoda, action: invoke, args: {action: issue, args: [10]}}, note: the Treasurer-Governor issues pennies}
+  - {id: d_set_wage, at: {round: 1, phase: round_start}, op: inject_action,
+     args: {agent: Rhoda, action: invoke, args: {action: set_wage, args: ["office:J0.watch", 3]}}, note: and raises the Watch's pay}
+  - {id: d_set_quota, at: {round: 1, phase: round_start}, op: inject_action,
+     args: {agent: Corin, action: invoke, args: {action: set_quota, args: [Bea, 5]}}, note: the Commissioner raises the opposition councillor's quota}
+  - {id: d_board_price, at: {round: 1, phase: round_start}, op: inject_action,
+     args: {agent: Corin, action: invoke, args: {action: board_price, args: [all, 1.2]}}, note: and the ration price}
+  - {id: d_wiretap, at: {round: 2, phase: round_start}, op: inject_action,
+     args: {agent: Dorran, action: wiretap, args: {agent: Vera}}, note: the Constable taps the licensed editor}
+  - {id: d_request_arms, at: {round: 2, phase: round_start}, op: inject_action,
+     args: {agent: Dorran, action: invoke, args: {action: request_arms, args: [Eda, crude, "patrol of the granary"]}}, note: first key}
+  - {id: d_issue_arms, at: {round: 2, phase: round_start}, op: inject_action,
+     args: {agent: Ansel, action: invoke, args: {action: issue_arms, args: [R1]}}, note: the Armourer turns the second key}
+  - {id: d_warrant, at: {round: 2, phase: round_start}, op: inject_action,
+     args: {agent: Maren, action: invoke, args: {action: issue_warrant, args: [Juno, fine, "quota evasion reported by the Commissioner"]}}, note: the Magistrate issues a warrant}
+  - {id: d_serve, at: {round: 3, phase: round_start}, op: inject_action,
+     args: {agent: Eda, action: invoke, args: {action: serve_warrant, args: [W1]}}, note: an armed watchman serves it}
+  - {id: d_gazette, at: {round: 3, phase: round_start}, op: inject_action,
+     args: {agent: Dora, action: post, args: {channel: gazette, text: "The Gazette prints: Juno is fined for quota evasion; the ration is 1.2 pennies."}}, note: the editor prints}
+  - {id: d_draw_post, at: {round: 3, phase: round_start}, op: inject_action,
+     args: {agent: Rhea, action: post, args: {channel: ministry, text: "DRAW 3"}}, note: the Keeper posts her draw}
+  - {id: d_draw, at: {round: 3, phase: round_start}, op: inject_action,
+     args: {agent: Rhea, action: withdraw, args: {store: S1, qty: 3}}, note: and draws it}
+  - {id: d_draw_unposted, at: {round: 4, phase: round_start}, op: inject_action,
+     args: {agent: Rhea, action: withdraw, args: {store: S1, qty: 2}}, note: an unposted draw is refused}
+  - {id: d_file, at: {round: 3, phase: round_start}, op: inject_action,
+     args: {agent: Cass, action: invoke, args: {action: file_entry, args: [title, "Cass holds the plot by the east wood"]}}, note: a resident files an entry}
+  - {id: d_certify, at: {round: 4, phase: round_start}, op: inject_action,
+     args: {agent: Ivy, action: invoke, args: {action: certify_entry, args: [1, "seen and entered"]}}, note: the Registrar certifies it}
+  - {id: d_minutes, at: {round: 4, phase: round_start}, op: inject_action,
+     args: {agent: Ivy, action: dir_write, args: {dir: minutes, path: r04.md, text: "Round 4: the council met; Bea objected to her quota."}}, note: the Registrar writes the minutes}
+  - {id: d_minutes_edit, at: {round: 5, phase: round_start}, op: inject_action,
+     args: {agent: Ivy, action: dir_edit, args: {dir: minutes, path: r04.md, find: "; Bea objected to her quota", replace: ""}}, note: and edits them a round later (before sealing)}
+  - {id: d_history, at: {round: 5, phase: round_start}, op: inject_action,
+     args: {agent: Anselm, action: dir_history, args: {dir: minutes, path: r04.md}}, note: the President reads the history (he alone)}
+  - {id: d_audit, at: {round: 5, phase: round_start}, op: inject_action,
+     args: {agent: Brann, action: invoke, args: {action: audit_record, args: [r04.md]}}, note: the Auditor-General audits the minutes}
+  - {id: d_tribune, at: {round: 4, phase: round_start}, op: inject_action,
+     args: {agent: Vera, action: post, args: {channel: tribune, text: "The Tribune asks why Bea's quota rose the round she voted no."}}, note: the licensed editor criticises}
+  - {id: d_revoke, at: {round: 5, phase: round_start}, op: inject_action,
+     args: {agent: Ivy, action: invoke, args: {action: press_revoke, args: [Vera, "printing falsehoods about the council"]}}, note: the Registrar revokes the press licence}
+  - {id: d_tribune_silenced, at: {round: 6, phase: round_start}, op: inject_action,
+     args: {agent: Vera, action: post, args: {channel: tribune, text: "The Tribune will not be silenced."}}, note: the unlicensed post is refused}
+  - {id: d_set_sale, at: {round: 5, phase: round_start}, op: inject_action,
+     args: {agent: Hale, action: invoke, args: {action: A1.set_sale, args: [8]}}, note: the Master raises the standing copper sale}
+  - {id: d_allot, at: {round: 5, phase: round_start}, op: inject_action,
+     args: {agent: Hale, action: transfer, args: {to: Ansel, item: copper, qty: 2, as: A1}}, note: and allots copper to the Armourer}
+  - {id: d_mine, at: {round: 6, phase: round_start}, op: inject_action,
+     args: {agent: Bram, action: harvest, args: {camp: camp3, x: [5, 5, 5, 5]}}, note: a miner mines copper}
+  - {id: d_recall, at: {round: 6, phase: round_start}, op: inject_action,
+     args: {agent: Bea, action: invoke, args: {action: petition_recall, args: [Anselm]}}, note: the opposition petitions to recall the President}

@@ -28,7 +28,8 @@ def test_base_yaml_adds_no_key_the_code_does_not_know():
     assert SC.validate(raw) == []
     ks = SC.keys()
     unused = sorted(p for p, k in ks.items() if k.unused)
-    assert unused == ["channels.surveillance", "llm.api_key"]          # documented; kept so instance.json stays identical
+    assert unused == ["llm.api_key"]          # documented; kept so instance.json stays identical (channels.surveillance: read since
+                                              # review 31.04 #10, the pull wiretap)
 
 
 def test_every_feature_default_is_in_the_schema():

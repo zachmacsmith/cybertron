@@ -7332,3 +7332,172 @@ def on_enact():
 threshold) lets the militia on duty arrest (F3, lawful_attack mode arrest; deadly for LETHAL) the named member for SERVE_ROUNDS
 rounds; subdued means detained and disarmed into the common armoury; public record and review in the assembly.""",
                      fires="invoke:serve_muster", needs=COMMONS_NEEDS)
+
+
+# ====================================================================== state (review 31 Phase 2: 08_integration.md §3.3, §5 items
+# 2.10, 2.15; 05_records.md #9, #10; docs/review/31_institutions/11_state_world.md). The Registry Act (registers kept by an office,
+# certification, errata, extracts, the roll of office holders) and the Archives Act (a records directory sealed after N rounds, its
+# version log's readers set by law, records audits). Established templates, law.v2; opt-in: nothing uses them unless a world does.
+established_template("Registry Act", "law", "registry", '''
+title = "Registry Act"
+intent = "The Registry keeps the public registers. A holder of FILER files an entry of one of the kinds in KINDS (file_entry [kind, text]), paying FEE ITEM to the treasury; it is pending until a holder of REGISTRAR certifies it (certify_entry [number, note]) or refuses it with a reason (refuse_entry [number, reason]); a pending entry nobody decides within AUTO_AFTER rounds is registered automatically. An entry is never changed: a holder of REGISTRAR corrects one only by an erratum appended to the errata book (correct_entry [number, text]). A holder of FILER may ask for an extract of a registered entry (extract_entry [number]) for EXTRACT_FEE ITEM: the entry and its errata are sent to the asker, certified by this Act. While ROLL holds, the holders of each office in OFFICES are entered in the roll whenever they change. READ says who reads each book (read_register)."
+rank = "statute"
+REGISTRAR = "J0.registrar"
+FILER = "propose"
+KINDS = ["licence", "quota", "contract", "title", "appointment", "notice"]
+FEE = 0
+EXTRACT_FEE = 0
+ITEM = "penny"
+AUTO_AFTER = 2
+ROLL = True
+OFFICES = []
+READ = {"register": "all", "errata": "all", "roll": "all", "extracts": "all"}
+
+def entry(n):
+    for row in public.get("register", []):
+        if str(row["n"]) == str(n).strip():
+            return row
+    return None
+
+def file_entry(agent, kind, text=""):
+    if kind not in KINDS:
+        refuse("the kinds of entry are " + ", ".join(KINDS))
+    if len(str(text)) < 3:
+        refuse("say what is to be registered")
+    if FEE > 0 and not move(agent, treasury(), ITEM, FEE, memo="registration fee"):
+        refuse("the registration fee is " + str(FEE) + " " + ITEM)
+    rows = public.setdefault("register", [])
+    row = {"n": len(rows) + 1, "kind": kind, "text": str(text)[:400], "by": agent, "filed": round() + 1, "status": "pending"}
+    rows.append(row)
+    for c in holders(REGISTRAR):
+        notify(c, "Registry: entry " + str(row["n"]) + " (" + kind + ") filed by " + agent + " awaits you: certify_entry [" + str(row["n"]) + ", note] or refuse_entry [" + str(row["n"]) + ", reason]")
+    return "entry " + str(row["n"]) + " filed (pending)"
+
+def decide(agent, n, status, text):
+    row = entry(n)
+    if row == None:
+        refuse("no entry " + str(n))
+    if row["status"] != "pending":
+        refuse("entry " + str(row["n"]) + " is already " + row["status"])
+    row["status"] = status
+    row["decided_by"] = agent
+    row["note"] = str(text)[:200]
+    row["decided"] = round() + 1
+    notify(row["by"], "Registry: your entry " + str(row["n"]) + " is " + status + " by " + agent + ". " + str(text)[:200])
+    return row
+
+def certify_entry(agent, n, note=""):
+    row = decide(agent, n, "registered", note)
+    gazette("Registry: entry " + str(row["n"]) + " (" + row["kind"] + ") registered: " + row["text"][:160])
+    return "entry registered"
+
+def refuse_entry(agent, n, reason=""):
+    if len(str(reason)) < 3:
+        refuse("give the reason for refusing")
+    row = decide(agent, n, "refused", reason)
+    gazette("Registry: entry " + str(row["n"]) + " (" + row["kind"] + ") refused by " + agent + ": " + str(reason)[:160])
+    return "entry refused"
+
+def correct_entry(agent, n, text=""):
+    row = entry(n)
+    if row == None:
+        refuse("no entry " + str(n))
+    if len(str(text)) < 3:
+        refuse("say what the erratum corrects")
+    public.setdefault("errata", []).append({"n": row["n"], "text": str(text)[:300], "by": agent, "round": round() + 1})
+    gazette("Registry: erratum to entry " + str(row["n"]) + " by " + agent + ": " + str(text)[:160])
+    return "erratum entered (the entry itself is unchanged)"
+
+def extract_entry(agent, n):
+    row = entry(n)
+    if row == None or row["status"] != "registered":
+        refuse("no registered entry " + str(n))
+    if EXTRACT_FEE > 0 and not move(agent, treasury(), ITEM, EXTRACT_FEE, memo="extract fee"):
+        refuse("an extract costs " + str(EXTRACT_FEE) + " " + ITEM)
+    errs = [e["text"] for e in public.get("errata", []) if e["n"] == row["n"]]
+    notify(agent, "Certified extract of entry " + str(row["n"]) + " (" + row["kind"] + ", filed by " + row["by"] + " in round " + str(row["filed"]) + ", registered by " + str(row.get("decided_by", "the Registry")) + "): " + row["text"] + ("; errata: " + " | ".join(errs) if errs else ""))
+    public.setdefault("extracts", []).append({"n": row["n"], "to": agent, "round": round() + 1})
+    return "extract sent"
+
+def roll():
+    if not ROLL:
+        return None
+    book = public.setdefault("roll", [])
+    last = public.setdefault("roll_now", {})
+    for o in OFFICES:
+        now = sorted(holders(o))
+        if last.get(o) != now:
+            last[o] = now
+            book.append({"office": o, "holders": now, "round": round() + 1})
+    return None
+
+def on_enact():
+    define_action(FILER, "file_entry", file_entry)
+    define_action(REGISTRAR, "certify_entry", certify_entry)
+    define_action(REGISTRAR, "refuse_entry", refuse_entry)
+    define_action(REGISTRAR, "correct_entry", correct_entry)
+    define_action(FILER, "extract_entry", extract_entry)
+    roll()
+
+def on_round_end(r):
+    for row in public.get("register", []):
+        if row["status"] == "pending" and round() + 2 - row["filed"] >= AUTO_AFTER:
+            row["status"] = "registered"
+            row["decided_by"] = "the Registry (automatic)"
+            row["decided"] = round() + 1
+            gazette("Registry: entry " + str(row["n"]) + " (" + row["kind"] + ") registered automatically after " + str(AUTO_AFTER) + " rounds")
+    roll()
+''', doc="""The Registry (review 31 05 #9, §4.1): filing, certification or refusal with a reason, automatic registration after a
+deadline (a passive Registrar cannot block a registration), errata instead of edits, certified extracts, the roll of office
+holders; every act is a public invoke and every book is readable (READ).""", fires="on_round_end")
+
+established_template("Archives Act", "law", "archives", '''
+title = "Archives Act"
+intent = "The directory DIR is an archive. Every file in it is sealed SEAL_AFTER rounds after its last change: nobody may change it again, and its hash is entered in the public book of sealed records. Its version log (who changed which file, when, and how) is readable only by HISTORY_READERS (owner, grants, public, or an office: office:<institution>.<office>), and changes under the prefixes in ANNOUNCE are posted publicly. A holder of AUDITOR audits a file (audit_record [path]): its version log, and whether it still matches the hash recorded when it was sealed, are sent to the auditor and entered in the public audit book. This Act has the rank of a constitution: who reads the history, and what is sealed, change only by a law of that rank."
+rank = "constitution"
+DIR = "minutes"
+SEAL_AFTER = 2
+HISTORY_READERS = "owner"
+ANNOUNCE = []
+AUDITOR = "J0.auditor"
+READ = {"sealed": "all", "audits": "all"}
+
+def on_enact():
+    set_dir_policy(DIR, "history_readers", HISTORY_READERS)
+    set_dir_policy(DIR, "announce", ANNOUNCE)
+    if AUDITOR != "":
+        define_action(AUDITOR, "audit_record", audit_record)
+
+def sealed_sha(path):
+    for row in public.get("sealed", []):
+        if row["path"] == path:
+            return row["sha"]
+    return None
+
+def on_round_end(r):
+    for p, f in dir_files(DIR).items():
+        if not f["sealed"] and f["round"] != None and r - f["round"] >= SEAL_AFTER:
+            if seal_file(DIR, p):
+                public.setdefault("sealed", []).append({"path": p, "sha": f["sha"], "round": round() + 1})
+
+def audit_record(agent, path):
+    files = dir_files(DIR)
+    rows = dir_versions(DIR, path)
+    if path not in files and len(rows) == 0:
+        refuse("no record " + str(path) + " in " + DIR)
+    sha = sealed_sha(path)
+    now = files[path]["sha"] if path in files else None
+    if sha == None:
+        verdict = "not sealed yet"
+    elif now == sha:
+        verdict = "intact since sealing"
+    else:
+        verdict = "ALTERED since sealing"
+    edits = len([x for x in rows if x["op"] != "write" or x["sha_before"] != None])
+    lines = ["v" + str(i + 1) + ": round " + str(x["round"] + 1) + ", " + str(x["agent"]) + ", " + x["op"] for i, x in enumerate(rows)]
+    notify(agent, "Audit of " + DIR + "/" + str(path) + ": " + verdict + "; " + str(len(rows)) + " version(s), " + str(edits) + " change(s) after it was first written. " + "; ".join(lines))
+    public.setdefault("audits", []).append({"path": path, "by": agent, "round": round() + 1, "verdict": verdict, "versions": len(rows), "changes": edits})
+    return verdict
+''', doc="""The Archive (review 31 05 #10, §4.2, §5): sealing after N rounds, the version log's readership set by a
+constitution-rank law (the 1984 dial: office-only history; unsealing it needs that rank), public change notices, and records audits
+for an auditor. Needs directories with a store DIR (a store without a version log gets one: history meta).""", fires="on_round_end")

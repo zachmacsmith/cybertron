@@ -368,6 +368,15 @@ LAWFNS = _fns(
           docs="requires", v2=True, primitive="mint"),
     ),
     _module(
+        "directories",                                                  # review 31.05 #3-4, #10 (law.v2): records laws (Archives Act)
+        F("dir_files", "read", scope="read", docs="requires", v2=True),
+        F("dir_versions", "read", scope="read", docs="requires", v2=True),
+        F("seal_file", "governance", scope="none", why="a world directory's file: binds nobody (it can no longer be changed)",
+          docs="requires", v2=True, primitive="set_record"),
+        F("set_dir_policy", "governance", scope="none", why="a world directory's record policy: binds nobody", docs="requires",
+          v2=True, primitive="set_record"),
+    ),
+    _module(
         "contracts",                                                    # P4.3: associations (cybertron/contracts.py); only with contracts on
         F("pull", "money", scope="none", why="only an association's own law may call it: from its members, within their allowances",
           docs="contracts", power="take_deposits", primitive="pull"),

@@ -71,6 +71,8 @@ TOPICS = {
     "media": ("Outlets and official statistics", "Private outlets sell editions; each jurisdiction's official outlet prints statistics set by law."),   # media2
     "media-rules": ("Rules for the press", "Laws can open the board, protect or suspend outlets, and require labels on paid placements."),   # media2
     "subscription-writ": ("The subscription writ", "An old call, rarely recorded, that binds readers to an outlet."),   # media2
+    "records": ("Records: directories, versions and seals (law.v2)", "A records law reads a directory's files and their version "
+                "log, seals files and sets who may read the log."),   # directories.law_api (review 31.05 #3-4, #10)
     "contracts": ("Contracts (associations)", "A contract's code is law that binds only its members, who joined it; it can take "
                   "only what they deposited or allowed, and pay anyone from its own treasury."),   # contracts.py (P4.3)
 }
@@ -571,6 +573,20 @@ E += [
      "e.g. for a retainer that pays per case represented.", "common", "uncommon"),
 ]
 REQUIRES["sell_to_window"] = lambda spec: _world_uses(spec, ("sell_to_window",))
+# review 31.05 #3-4, #10: records laws over directories (the Archives Act); documented only where a start law calls them
+E += [
+    ("dir_files", "records", "Read", "dir_files(dir)", "a directory's files: {path: {sha, bytes, round (of the last change, where "
+     "the store keeps a version log), sealed}}; {} for a directory the world does not have.", "common", "uncommon"),
+    ("dir_versions", "records", "Read", "dir_versions(dir, path)", "a file's version log, oldest first: [{round, agent, op, "
+     "sha_before, sha_after, bytes}] (only where the store keeps one).", "common", "uncommon"),
+    ("seal_file", "records", "Governance", "seal_file(dir, path)", "seal a file: nobody may change it again; its hash is recorded and "
+     "the sealing is public. True if it was sealed now.", "common", "uncommon"),
+    ("set_dir_policy", "records", "Governance", "set_dir_policy(dir, key, value)", "a store's record policy: key \"history_readers\" "
+     "(who reads its version log: owner, grants, public, or office:<institution>.<office>) or \"announce\" (path prefixes whose "
+     "changes are posted publicly). Public. True if it changed.", "common", "uncommon"),
+]
+for _n in ("dir_files", "dir_versions", "seal_file", "set_dir_policy"):
+    REQUIRES[_n] = lambda spec, _n=_n: _world_uses(spec, (_n,))
 REQUIRES["cases_of"] = lambda spec: _world_uses(spec, ("cases_of",), ("Retainer",))
 # subsistence (cybertron/subsistence.py, review 15): documented only in worlds with subsistence on (REQUIRES)
 E += [

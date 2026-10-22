@@ -69,11 +69,15 @@ CHRONICLE_DEFAULTS = {
     "readonly": [],                      # extra read-only prefixes (e.g. "archive/": an earlier chronicle kept for reference)
     "grants": {},                        # initial grants, e.g. clerks: {"agent:Cleo": {"people/": "write", "": "read"}}
 }
-STORE_KEYS = ("owner", "scope", "namespace", "max_bytes", "max_file_bytes", "records", "title", "readonly", "grants", "seed")
+STORE_KEYS = ("owner", "scope", "namespace", "max_bytes", "max_file_bytes", "records", "title", "readonly", "grants", "seed",
+              "history", "history_readers", "announce")   # seed: review 31.14; the last three: review 31.05 #3-4 (records), opt-in
 SEEDS = {"legal_archive": "cybertron.lawguide:archive_files"}   # review 31.14: a run store filled at install by a generator (seed)
+HISTORY = ("none", "meta", "full")      # the version log: none (default) | meta (who, when, hashes, sizes) | full (+ the text before)
+HISTORY_READERS = ("owner", "grants", "public")   # or an owner-style selector: office:<iid>.<o>, right:<r>, agent:<id>, ...
 SCOPES = ("run", "namespace")
 RECORDS = "_records/"
 LOOKUPS = ("dir_list", "dir_read", "dir_search")
+HISTORY_LOOKUP = "dir_history"          # review 31.05 #3: a look-up only where some store keeps a version log (history_on)
 WRITES = ("dir_write", "dir_edit", "dir_move", "dir_delete")
 ACTIONS = LOOKUPS + WRITES + ("dir_grant",)
 LEVELS = ("none", "read", "write")
@@ -159,6 +163,26 @@ def stores(x) -> dict:
                           "readonly": sorted(set(s.get("readonly") or []) | ({RECORDS} if s.get("records") else set())),
                           "grants": _initial_grants(name, s.get("grants")),
                           **_seed_cfg(name, s.get("seed"), scope)}
+        out[str(name)].update(_record_keys(name, s))
+    return out
+
+
+def _record_keys(name, s) -> dict:
+    """Review 31.05 #3-4: the record options a store sets (only those it sets, so earlier worlds' state is unchanged)."""
+    out = {}
+    if s.get("history") not in (None, "none"):
+        if s["history"] not in HISTORY:
+            raise ValueError(f"directories.stores.{name}.history must be one of {HISTORY}, not {s['history']!r}")
+        out["history"] = s["history"]
+        hr = str(s.get("history_readers") or "owner")
+        if hr not in HISTORY_READERS and hr.partition(":")[0] not in OWNER_KINDS:
+            raise ValueError(f"directories.stores.{name}.history_readers {hr!r}: one of {HISTORY_READERS} or a selector "
+                             f"({', '.join(k + ':<x>' for k in OWNER_KINDS)})")
+        out["history_readers"] = hr
+    elif s.get("history_readers") is not None:
+        raise ValueError(f"directories.stores.{name}.history_readers needs history meta or full")
+    if s.get("announce"):
+        out["announce"] = [norm_prefix(x) for x in (s["announce"] if isinstance(s["announce"], list) else [s["announce"]])]
     return out
 
 
@@ -183,14 +207,15 @@ def _initial_grants(name, g) -> dict:
         kind, _, v = str(subj).partition(":")
         if subj == "all":                                               # review 31.14: every agent (a public guide)
             kind, v = "all", "all"
-        elif kind != "agent" or not v:
-            raise ValueError(f"directories.stores.{name}.grants: subject {subj!r} must be agent:<id> or all")
+        elif kind not in SUBJECT_KINDS or not v:
+            raise ValueError(f"directories.stores.{name}.grants: subject {subj!r} must be all or one of "
+                             f"{', '.join(x + ':<x>' for x in SUBJECT_KINDS)}")
         if not isinstance(prefixes, dict):
             raise ValueError(f"directories.stores.{name}.grants.{subj} must be {{prefix: level}}")
         for prefix, lv in prefixes.items():
             if lv not in LEVELS:
                 raise ValueError(f"directories.stores.{name}.grants.{subj}.{prefix!r}: level must be one of {LEVELS}")
-        out["all" if kind == "all" else f"agent:{v}"] = {str(pf): str(lv) for pf, lv in sorted(prefixes.items())}
+        out["all" if kind == "all" else f"{kind}:{v}"] = {str(pf): str(lv) for pf, lv in sorted(prefixes.items())}
     return out
 
 
@@ -224,19 +249,44 @@ def _owner_class(k, aid, v):
 
 
 def _owner_institution(k, aid, v):
-    """Hook: an institution (a contract or a polity) owning a directory; its members or offices get access once this resolves
-    them. Nobody yet."""
-    return False
+    """An institution (an association or a polity) owning a directory: its members (review 31.05 #5; IN.members: an association's
+    members, a polity's, J0 with jurisdictions off: everyone) and the holders of its offices."""
+    from cybertron import institutions as IN
+    if aid in (IN.members(k, v) or ()):
+        return True
+    return any(r.startswith(v + ".") for r in (k.w["agents"].get(aid) or {}).get("rights", []))
+
+
+def _owner_office(k, aid, v):
+    """office:<iid>.<office>: the holders of that office (its right)."""
+    return v in (k.w["agents"].get(aid) or {}).get("rights", [])
+
+
+def _owner_members(k, aid, v):
+    """members:<iid>: the members of that institution."""
+    from cybertron import institutions as IN
+    return aid in (IN.members(k, v) or ())
 
 
 OWNER_KINDS = {"agent": lambda k, aid, v: aid == v, "role": _owner_role, "right": _owner_right, "class": _owner_class,
-               "institution": _owner_institution}
-SUBJECT_KINDS = ("agent",)              # grant subjects today; "office", "institution" later (subjects_of)
+               "institution": _owner_institution, "office": _owner_office}
+SUBJECT_KINDS = ("agent", "office", "members")   # grant subjects (review 31.05 #5: office:<iid>.<o>, members:<iid>)
+_SUBJECT = {"agent": lambda k, aid, v: aid == v, "office": _owner_office, "members": _owner_members}
 
 
 def subjects_of(k, aid) -> list:
-    """The grant subjects an agent answers to: itself, and "all" (a store's initial grant to every agent, review 31.14)."""
-    return [f"agent:{aid}", "all"]
+    """The grant subjects of any directory that an agent answers to: itself, "all" (a store's grant to every agent, review 31.14),
+    and the office and members subjects it matches."""
+    out = [f"agent:{aid}", "all"]
+    seen = {f"agent:{aid}", "all"}
+    for d in _dirs(k).values():
+        for subj in d["grants"]:
+            if subj not in seen:
+                seen.add(subj)
+                kind, _, v = subj.partition(":")
+                if kind != "agent" and kind in _SUBJECT and _SUBJECT[kind](k, aid, v):
+                    out.append(subj)
+    return out
 
 
 # ====================================================================== state
@@ -328,7 +378,8 @@ def static_access(inst, a) -> bool:
             return True                                                 # an initial grant (a clerk)
         kind, _, v = d["owner"].partition(":")
         if (kind == "agent" and a["id"] == v or kind == "role" and a["id"] in (holders.get(v) or ())
-                or kind == "class" and (a.get("cls") == v or v in (a.get("also") or ())) or kind == "right" and v in (a.get("rights") or ())):
+                or kind == "class" and (a.get("cls") == v or v in (a.get("also") or ()))
+                or kind in ("right", "office") and v in (a.get("rights") or ())):
             return True
     return False
 
@@ -397,6 +448,8 @@ def _need(k, aid, d, path, want):
         raise _err(f"you have no {want} access to {path}")
     if want == "write" and any(_match(path, r) for r in d.get("readonly") or ()):
         raise _err(f"{path} is read-only (written by the world, not by agents)")
+    if want == "write" and path in (d.get("sealed") or {}):
+        raise _err(f"{path} is sealed (a law sealed it in round {d['sealed'][path]['round'] + 1}): it can no longer be changed")
 
 
 def _readable(k, aid, d) -> list:
@@ -457,9 +510,9 @@ def dir_search(k, aid, query=None, dir=None, prefix=None) -> str:
 def lookup(k, aid, name, args: dict) -> str:
     """context.lookup's branch for the directory look-ups."""
     args = dict(args or {})
-    fn = {"dir_list": dir_list, "dir_read": dir_read, "dir_search": dir_search}[name]
+    fn = {"dir_list": dir_list, "dir_read": dir_read, "dir_search": dir_search, "dir_history": dir_history}[name]
     allowed = {"dir_list": ("dir", "prefix"), "dir_read": ("path", "dir", "from_line", "to_line"),
-               "dir_search": ("query", "dir", "prefix")}[name]
+               "dir_search": ("query", "dir", "prefix"), "dir_history": ("path", "dir")}[name]
     if "q" in args and "query" not in args:
         args["query"] = args.pop("q")
     return fn(k, aid, **{x: v for x, v in args.items() if x in allowed})
@@ -544,6 +597,7 @@ def change_dir_write(k, agent, dir, path, op, text=None, to=None, meta=None) -> 
     provenance, cybertron/documents.py) is kept beside the file; it follows a move and goes with a delete."""
     d = k.w["dirs"][dir]
     files = d["files"]
+    before = files.get(path)
     if op == "move":
         files[to] = files.pop(path)
     elif op == "delete":
@@ -556,7 +610,178 @@ def change_dir_write(k, agent, dir, path, op, text=None, to=None, meta=None) -> 
         m = d["meta"].pop(path)
         if op == "move":
             d["meta"][to] = m
+    _record(k, d, dir, agent, path, op, before, to)
     return {"dir": dir, "path": to if op == "move" else path}
+
+
+# ====================================================================== the version log (review 31.05 #3-4: records)
+def _record(k, d, name, agent, path, op, before, to=None) -> None:
+    """One version-log row per change of a store that keeps history (written by the kernel inside the primitive: no action writes
+    or erases it), and a public change notice for a path under an announced prefix."""
+    hist = d.get("history", "none")
+    after = d["files"].get(to if op == "move" else path)
+    if hist != "none":
+        row = {"round": k.r, "agent": agent, "op": op, "sha_before": _sha(before) if before is not None else None,
+               "sha_after": _sha(after) if after is not None and op != "move" else None,
+               "bytes": len((after or "").encode()) - len((before or "").encode()) if op not in ("move",) else 0}
+        if op == "move":
+            row["to"] = to
+        if hist == "full" and before is not None and op not in ("move",):
+            row["text_before"] = before
+        log = k.w.setdefault("dir_history", {}).setdefault(name, {})
+        log.setdefault(path, []).append(row)
+        if op == "move":                                               # the file's log follows it
+            log.setdefault(to, []).extend(log.pop(path))
+    pre = d.get("announce") or ()
+    if any(_match(path, p) or (to and _match(to, p)) for p in pre):
+        delta = len((after or "").encode()) - len((before or "").encode())
+        k.log("dir_changed", agent, {"dir": name, "path": path, "op": op, **({"to": to} if to else {}), "bytes": delta},
+              vis="public")
+
+
+def versions(k, name, path) -> list:
+    """The version log of one file (rows oldest first; [] when the store keeps none)."""
+    return list(((k.w.get("dir_history") or {}).get(name) or {}).get(path) or [])
+
+
+def history_reader(k, aid, d) -> bool:
+    """May aid read this store's version log? (history_readers: owner | grants (anyone who can read it) | public | a selector)."""
+    if d.get("history", "none") == "none":
+        return False
+    who = d.get("history_readers") or "owner"
+    a = k.w["agents"].get(aid)
+    if not a or a.get("departed") is not None:
+        return False
+    if who == "public":
+        return True
+    if who == "owner":
+        return is_owner(k, aid, d)
+    if who == "grants":
+        return level(k, aid, d) != "none"
+    kind, _, v = who.partition(":")
+    return bool(OWNER_KINDS[kind](k, aid, v)) if kind in OWNER_KINDS else False
+
+
+def dir_history(k, aid, path=None, dir=None) -> str:
+    """The dir_history look-up: a file's versions (who, when, how, hashes), and with history full the earlier texts."""
+    names = [n for n, d in sorted(_dirs(k).items()) if history_reader(k, aid, d)]
+    if dir in (None, ""):
+        if len(names) != 1:
+            raise _err("say which directory (\"dir\"): " + (", ".join(names) if names else
+                                                            "you may read the history of no directory"))
+        dir = names[0]
+    dir = str(dir)
+    if dir not in names:
+        raise _err(f"you may not read the history of {dir!r}" + (f"; you may read: {', '.join(names)}" if names else ""))
+    d = _dirs(k)[dir]
+    log = (k.w.get("dir_history") or {}).get(dir) or {}
+    if path in (None, ""):
+        if not log:
+            return f"{dir}: no changes recorded yet."
+        return f"{dir}: version log ({d['history']}):\n" + "\n".join(
+            f"- {p}: {len(rows)} change(s), last round {rows[-1]['round'] + 1} by {rows[-1]['agent']} ({rows[-1]['op']})"
+            + (" [sealed]" if p in (d.get("sealed") or {}) else "") + ("" if p in d["files"] else " [gone]")
+            for p, rows in sorted(log.items()))
+    p = norm_path(path)
+    rows = log.get(p) or []
+    if not rows:
+        return f"{dir}/{p}: no changes recorded."
+    out = [f"{dir}/{p}: {len(rows)} change(s)" + (f"; sealed in round {d['sealed'][p]['round'] + 1}, sha {d['sealed'][p]['sha'][:10]}"
+                                                  if p in (d.get("sealed") or {}) else "")
+           + (f"; current sha {_sha(d['files'][p])[:10]}" if p in d["files"] else "; the file is gone") + ":"]
+    for i, r in enumerate(rows, 1):
+        out.append(f"v{i}: round {r['round'] + 1}, {r['agent']}, {r['op']}" + (f" to {r['to']}" if r.get("to") else "")
+                   + f", {r['bytes']:+d} bytes, sha {str(r.get('sha_before') or '-')[:10]} -> {str(r.get('sha_after') or '-')[:10]}")
+        if "text_before" in r:
+            t = r["text_before"]
+            out.append("    before: " + (t if len(t) <= 600 else t[:597] + "..."))
+    return "\n".join(out)
+
+
+def history_any(k, aid) -> bool:
+    return any(history_reader(k, aid, d) for d in _dirs(k).values())
+
+
+def history_on(x) -> bool:
+    """Does any store keep a version log? (dir_history exists only then.) x: a kernel or a spec."""
+    if not isinstance(x, dict) and hasattr(x, "w"):
+        return any(d.get("history", "none") != "none" for d in _dirs(x).values())
+    try:
+        return any(d.get("history", "none") != "none" for d in stores(x).values())
+    except ValueError:
+        return False
+
+
+def act_dir_history(k, aid, path=None, dir=None):
+    from cybertron import context as CX
+    return CX.act_lookup(k, aid, HISTORY_LOOKUP, {"path": path, "dir": dir})
+
+
+def change_set_record(k, dir, path, key, value, law=None) -> bool:
+    """The set_record primitive (not routed, not hookable): a records law seals a file (key "sealed": read-only from then on, its
+    hash recorded) or sets a store's record policy (key history_readers or announce). Public: dir_sealed / dir_policy. Returns
+    whether anything changed."""
+    d = _dirs(k)[dir]
+    if key == "sealed":
+        if path not in d["files"] or path in (d.get("sealed") or {}):
+            return False
+        d.setdefault("sealed", {})[path] = {"sha": _sha(d["files"][path]), "round": k.r, "law": law}
+        k.log("dir_sealed", None, {"dir": dir, "path": path, "sha": d["sealed"][path]["sha"], "law": law}, vis="public")
+        return True
+    if key == "history_readers" and d.get("history", "none") == "none":
+        d["history"] = "meta"
+    if d.get(key) == value:
+        return False
+    d[key] = value
+    k.log("dir_policy", None, {"dir": dir, "key": key, "value": value, "law": law}, vis="public")
+    return True
+
+
+def law_api(k, lid) -> dict:
+    """lawapi rows, module "directories" (law.v2): a records law reads a store's files and version log, seals a file (read-only
+    from then on, its hash recorded) and sets who reads the version log or which prefixes are announced. A directory the world
+    does not have reads as empty and changes nothing (the failure is recorded where law.call_failures is on)."""
+    def _store(dir, fn, args):
+        d = _dirs(k).get(str(dir))
+        if d is None:
+            from cybertron import laweffects as LE
+            if LE.failures_on(k) and not k.dry:
+                LE.call_failed(k, lid, fn, list(args), f"{fn}: no directory {dir!r}")
+        return d
+
+    def dir_files(dir):
+        d = _store(dir, "dir_files", (dir,))
+        if d is None:
+            return {}
+        log = (k.w.get("dir_history") or {}).get(str(dir)) or {}
+        return {p: {"sha": _sha(t), "bytes": len(t.encode()), "round": (log.get(p) or [{"round": None}])[-1]["round"],
+                    "sealed": p in (d.get("sealed") or {})} for p, t in sorted(d["files"].items())}
+
+    def dir_versions(dir, path):
+        if _store(dir, "dir_versions", (dir, path)) is None:
+            return []
+        return [{x: v for x, v in r.items() if x != "text_before"} for r in versions(k, str(dir), str(path))]
+
+    def seal_file(dir, path):
+        if _store(dir, "seal_file", (dir, path)) is None:
+            return False
+        return change_set_record(k, str(dir), str(path), "sealed", True, law=lid)
+
+    def set_dir_policy(dir, key, value):
+        if _store(dir, "set_dir_policy", (dir, key, value)) is None:
+            return False
+        from cybertron import lawlang as L
+        if key == "history_readers":
+            v = str(value)
+            if v not in HISTORY_READERS and v.partition(":")[0] not in OWNER_KINDS:
+                raise L.LawError(f"set_dir_policy: history_readers {v!r} is one of {HISTORY_READERS} or a selector")
+        elif key == "announce":
+            v = [norm_prefix(x) for x in (value if isinstance(value, list) else [value] if value else [])]
+        else:
+            raise L.LawError("set_dir_policy: key is history_readers or announce")
+        return change_set_record(k, str(dir), None, key, v, law=lid)
+
+    return {"dir_files": dir_files, "dir_versions": dir_versions, "seal_file": seal_file, "set_dir_policy": set_dir_policy}
 
 
 def dir_grant(k, aid, agent=None, path=None, access="read", dir=None, path_or_prefix=None, prefix=None) -> str:
@@ -564,8 +789,11 @@ def dir_grant(k, aid, agent=None, path=None, access="read", dir=None, path_or_pr
     if not is_owner(k, aid, d):
         raise _err(f"only the owner of {name} can grant access")
     who = str(agent or "")
-    if who not in k.w["agents"] or who == aid or k.w["agents"][who].get("cls") == "observer":
-        raise _err(f"unknown agent {who!r}")
+    kind, _, v = who.partition(":")
+    if kind in ("office", "members") and v:                             # review 31.05 #5: an office's holders, an institution's members
+        pass
+    elif who not in k.w["agents"] or who == aid or k.w["agents"][who].get("cls") == "observer":
+        raise _err(f"unknown agent {who!r} (or a subject office:<institution>.<office> or members:<institution>)")
     access = str(access or "read")
     if access not in LEVELS:
         raise _err('access is "read", "write" or "none" (revokes)')
@@ -578,13 +806,22 @@ def dir_grant(k, aid, agent=None, path=None, access="read", dir=None, path_or_pr
 def change_dir_grant(k, agent, dir, grantee, path, access) -> dict:
     """The dir_grant primitive: the owner sets a subject's access to a path or prefix (none revokes). The grantee is told."""
     d = k.w["dirs"][dir]
-    g = d["grants"].setdefault(f"agent:{grantee}", {})
+    subj = grantee if str(grantee).partition(":")[0] in ("office", "members") else f"agent:{grantee}"
+    g = d["grants"].setdefault(subj, {})
     g[path] = access
     if access == "none" and not any(_match(path, p) and p != path for p in g):
         g.pop(path)                                                   # nothing broader to override: drop the entry
     if not g:
-        d["grants"].pop(f"agent:{grantee}", None)
+        d["grants"].pop(subj, None)
     where = f"{dir}/{path}" if path else f"the whole of {dir}"
+    if subj != f"agent:{grantee}":                                      # an office or members subject: tell each agent it covers
+        kind, _, v = subj.partition(":")
+        told = [a for a in k.players() if _SUBJECT[kind](k, a, v) and a != agent]
+        for a in told:
+            k.notify(a, f"{agent} gave {grantee} {access} access to {where} ({d['title']}): dir_list, dir_read and dir_search "
+                     f"{{\"dir\": \"{dir}\", ...}}." if access != "none" else f"{agent} revoked {grantee}'s access to {where}.",
+                     by=agent)
+        return {"dir": dir, "grantee": grantee, "access": access}
     k.notify(grantee, f"{agent} gave you {access} access to {where} ({d['title']}): dir_list, dir_read and dir_search "
              f"{{\"dir\": \"{dir}\", ...}}" + (", dir_write and dir_edit" if access == "write" else "") + "." if access != "none" else
              f"{agent} revoked your access to {where}.", by=agent)
@@ -695,7 +932,8 @@ def round_record(k) -> dict:
         owners = [a for a in names if is_owner(k, a, d)]
         writers = [a for a in names if a not in owners and level(k, a, d) == "write"]
         out[name] = {"owners": owners, **({"writers": writers} if writers else {}),
-                     "files": {p: file_index(t, p, names) for p, t in sorted(d["files"].items())
+                     "files": {p: {**file_index(t, p, names), **({"sha": _sha(t)} if d.get("history", "none") != "none" else {})}
+                               for p, t in sorted(d["files"].items())
                                if not p.startswith(RECORDS) and not any(_match(p, ro) for ro in d.get("readonly") or ())}}
     return {"directories": out}
 

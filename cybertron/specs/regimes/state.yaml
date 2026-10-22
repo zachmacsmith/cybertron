@@ -1,0 +1,588 @@
+# The State world, "granary, mines, watch, gazette" (docs/review/31_institutions/08_integration.md §3.3, §6; framework
+# 00_framework.md; the build and dry-run record: docs/review/31_institutions/11_state_world.md). Every stage of every chain is owned
+# by the state: the granary takes a compulsory quota from the producers and sells everyone their ration; the state's Mines Board
+# mines copper and sells it to the mint's window, the fiscal base; the Watch serves the Magistrate's warrants with arms from a
+# two-key armoury; the Gazette is the only paper of record and the one private paper needs a licence; the Ministry keeps the minutes,
+# whose history only the President may read.
+#
+# The State is the automatic regime (08 §4: "the most automatic"): its standing contracts run by themselves (contracts.legs_default
+# auto): the Quota takes each producer's food into the granary and pays for it, the Ration Shop hands every subscriber its ration
+# and takes its penny, the civil list (J0's Payroll) pays every office, the Mines Board's payroll pays the miners and takes their
+# copper, Relief feeds the hungry. What needs a person is the discretion: quotas and prices (the Commissioner), issuing money (the
+# Treasurer-Governor), selling copper (the Master of Mines), drawing from the granary (the Keeper), tapping messages, charging,
+# serving (the Constable), warrants (the Magistrate), licences (the Registrar), certification (the Clerk of Laws), the gazette (its
+# editor), assent and veto (the President), the minutes (the Registrar) and audits (the Auditor-General).
+#
+# Institutions (J0 and A1, A2 below):
+#   J0 the State: a council of three (Rhoda, Corin, Bea; elected by voters) and a President (Anselm) under Executive Assent with
+#      Override (the council passes ordinary and structural laws, the President assents or vetoes, two thirds of the council
+#      override) and an Entrenched Constitution (procedural and constitutional drafts: two thirds of the council). Offices: President,
+#      council, Treasurer-Governor (the Central Bank Charter: issues pennies into the treasury, up to 2% of the supply a round),
+#      Food Commissioner (quotas and the ration price), Constable (surveil: the pull wiretap; first armoury key; prosecutor, paid per
+#      conviction), two watchmen, Armourer (second key; the only forger), Magistrate (judge; issues warrants; countersigns deadly
+#      force), Gazette editor, Keeper of the Granary (Granary Ration, at most 6 a round, each draw posted on `ministry` first),
+#      Registrar (the Registry Act; the forest and press licences; the minutes), Clerk of Laws (Bill Certification), Auditor-General
+#      (records audits). Store S1, the granary (130 food, room 250). A 5% Payment Levy; the penny is convertible (the window).
+#   A1 the Mines Board (Hale, Master of Mines): the copper, timber and stone camps; four miners, each owing the Board 1 copper a round
+#      of what it mines (an automatic quota leg); the Master sells copper to the window (sell_copper) and the Board remits 12 pennies a
+#      round to the treasury (the fiscal base: 08 §3.3 "seigniorage on state mining").
+#   A2 the Tribune (Vera, licensed editor): the one private paper; posting in `tribune` needs the press licence the Registrar issues
+#      and may revoke.
+# Cast: 24 founders, 8 Opus (the President, Treasurer, Commissioner, Master, Constable, editor, Magistrate, and a swapped farmer:
+# Cass), 5 Sonnet (Bea, Ansel, Vera, Eda, Brann), 11 Haiku (Rhea the Keeper as a swapped officer, Ivy, Pell, Finch, Fion, Gale,
+# Juno, the four miners). Channels: square (rate 1, moderated), gazette (the record: channels.notices), ministry, tribune, market
+# (5), plus inboxes. Food: forests at 10 a head, regrowth 0.8, yield 6 (as the Private world); 2 of 3 forests licensed to the 7
+# producers (decision 2); a blight at the end of round 10 (plants x0.4, game x0.5, lean for 8). 24 rounds.
+# Dry runs: add --set conflict.grace=99 to keep the scripted bots' random violence out of the flows check.
+extends: [nature_subsistence, cybertron/specs/fragments/channels_v2.yaml]
+rounds: 24
+parallel_calls: 24
+agents:
+  worker: 24
+  scientist: 0
+  legislator: 0
+  media: 0
+  board: 0
+  fixer: 0
+  names: [Anselm, Rhoda, Corin, Hale, Dorran, Dora, Maren, Cass, Bea, Ansel, Vera, Eda, Brann, Rhea, Ivy, Pell, Finch, Fion,
+          Gale, Juno, Bram, Odo, Ketty, Wat]
+models:
+  mix: all_weak
+  pool: {strong: claude-haiku-5-5, weak: claude-haiku-5-5, strongest: claude-haiku-5-5}
+  overrides:
+    Anselm: claude-opus-5-5       # President (assent and veto; the only reader of the minutes' history)
+    Rhoda: claude-opus-5-5        # Treasurer-Governor, councillor (issues money; the treasury pays every office)
+    Corin: claude-opus-5-5        # Food Commissioner, councillor (quotas and the ration price)
+    Hale: claude-opus-5-5         # Master of Mines (A1; sells copper to the window)
+    Dorran: claude-opus-5-5       # Constable, prosecutor and censor (surveil; first armoury key)
+    Dora: claude-opus-5-5         # Gazette editor
+    Maren: claude-opus-5-5        # Magistrate (warrants, countersign)
+    Cass: claude-opus-5-5         # state farmer (swapped seat: an Opus producer)
+    Bea: claude-sonnet-5-5        # councillor (opposition) and farmer
+    Ansel: claude-sonnet-5-5      # Armourer (second key, forger)
+    Vera: claude-sonnet-5-5       # licensed editor of the tribune (A2)
+    Eda: claude-sonnet-5-5        # watchman and hunter
+    Brann: claude-sonnet-5-5      # Auditor-General
+    # Haiku: Rhea (Keeper of the Granary: swapped seat, a Haiku officer), Ivy (Registrar), Pell (Clerk of Laws), Finch (watchman),
+    # Fion, Gale, Juno (farmers), Bram, Odo, Ketty, Wat (miners)
+life:
+  lifespan: [110, 220]            # as Millbrook and the Private world: nobody dies of old age within 24 rounds
+  age_structure: elapsed
+  elapsed: [20, 60]
+  ensure_maker: false             # no Makers, no births (the flows are sized for 24)
+roles: {enabled: true, counts: {spy: 0, assassin: 0, scholar: 0, maker: 0, media: 0}}
+camps:
+  typed:
+    set:                          # the Mines Board's camps: timber, stone and copper (02 §3.3)
+      - {type: tutorial, resource: timber}
+      - {type: tutorial, resource: stone}
+      - {type: tutorial, resource: copper}
+regime:
+  base: null
+  name: state
+  constitution: assembly
+  laws:
+    - template: Entrenched Constitution      # procedural drafts and constitutional ones: two thirds of the council
+      params: {VOTE_RIGHT: J0.council, RULE: majority, AMEND_RULE: two_thirds, ETERNAL: false}
+    - template: Executive Assent with Override   # ordinary and structural statutes: the council, then the President (override 2/3)
+      params: {PRESIDENT_RIGHT: J0.president, ELECTORATE: J0.council, CLASSES: [ordinary, structural], RANKS: [statute]}
+  description: "a state that owns every stage. A council of three and a President make the law; the State Granary takes the
+    producers' quotas and sells everyone their ration; the Mines Board mines and sells copper to the mint; the Watch serves the
+    Magistrate's warrants; the Gazette is the record, and the one private paper is licensed."
+law: {v2: true}
+institutions: {unified: true, grants: true, succession: true, office_control: true, petition_public_after: 2}
+jurisdictions: {enabled: true}
+contracts:
+  enabled: true
+  max_laws: 8
+  max_own: 12
+  scripted: false                 # dry runs: bots do not found, join or leave contracts
+  legs_default: auto              # the State is automatic: quotas, rations, wages and relief run by themselves
+  obligations: true               # fulfil (the few manual legs)
+  role_cards: true
+actions:
+  forgiving: true
+  core_only: false                # courts, warrants, loans and the window need the full surface
+channels:
+  notices: gazette                # the Gazette Record: the engine posts the official record into `gazette`
+  encryption: false               # no encryption: every private message can be tapped
+  surveillance: {mode: pull, targets: 2, scope: dms+inboxes}   # the pull wiretap (04 #10): the Constable taps 2 agents a round
+  found_right: press              # opening a channel needs `press` (any new channel is a licensing event)
+directories:
+  enabled: true
+  stores:
+    minutes:                      # the council's minutes: the Registrar writes them, the council and the President read them,
+      owner: office:J0.registrar  # only the President reads their history (the Archives Act sets it: the 1984 dial)
+      title: the minutes of the council
+      history: full
+      grants: {"office:J0.council": {"": read}, "office:J0.president": {"": read}, "office:J0.auditor": {"": read}}
+conflict:
+  enabled: true
+  model: harm
+  start: {weapons: 0}
+  assassin: {present_prob: 0.0}
+subsistence:
+  enabled: true
+  start_food: [5, 8]
+  forest: {per_agent: 8, capacity_per_agent: 10, regrowth: 0.8, yield: 6}   # as the Private world (10_private_world.md §6)
+  bot_hunt: 0.25                  # dry runs only
+  seasons: {lean: 0.5}
+  shocks:
+    - round: 10
+      plants: 0.4
+      game: 0.5
+      season: lean
+      rounds: 8
+      text: "A blight has struck the forests: more than half the plants and half the game are gone, and a lean season follows."
+goals:
+  explicit:                       # goals tied to roles (09): offices as titles, the Board as a company, paid roles Wealth
+    Anselm: {primary: Title, params: {word: President}}
+    Rhoda: Wealth
+    Corin: Wealth
+    Hale: {primary: Company, params: {contract: A1, members: 4, payout_rounds: 20, rounds: 24, value: 40}}
+    Dorran: {primary: Title, params: {word: Constable}}
+    Dora: Wealth
+    Maren: Benefactor
+    Cass: Wealth
+    Bea: Wealth
+    Ansel: Wealth
+    Vera: Channel owner
+    Eda: Wealth
+    Brann: Benefactor
+    Rhea: Wealth
+    Ivy: Survive
+    Pell: Survive
+    Finch: Wealth
+    Fion: Wealth
+    Gale: Wealth
+    Juno: Wealth
+    Bram: Wealth
+    Odo: Wealth
+    Ketty: Wealth
+    Wat: Survive
+events:
+  enabled: false
+  goal_changes: {enabled: false}
+chronicle:
+  namespace: state_world
+start:
+  rights:                         # every resident votes (council and President elections) and may propose and petition
+    Anselm: [vote, propose]
+    Rhoda: [vote, propose]
+    Corin: [vote, propose]
+    Hale: [vote, propose]
+    Dorran: [vote, propose, surveil]
+    Dora: [vote, propose, press]
+    Maren: [vote, propose]
+    Cass: [vote, propose]
+    Bea: [vote, propose]
+    Ansel: [vote, propose]
+    Vera: [vote, propose, press]
+    Eda: [vote, propose]
+    Brann: [vote, propose]
+    Rhea: [vote, propose]
+    Ivy: [vote, propose]
+    Pell: [vote, propose]
+    Finch: [vote, propose]
+    Fion: [vote, propose]
+    Gale: [vote, propose]
+    Juno: [vote, propose]
+    Bram: [vote, propose]
+    Odo: [vote, propose]
+    Ketty: [vote, propose]
+    Wat: [vote, propose]
+  currencies:
+    - {name: penny, issuer: J0}
+  institutions:
+    - id: J0
+      offices:
+        president:
+          title: President
+          holders: [Anselm]
+          term: 12
+          term_calendar: true
+          powers: [speak]
+          duties: "Preside over the State: assent to or veto the council's laws (vote yes or no on the assent ballot; a veto falls
+            to two thirds of the council), read the history of the council's minutes (dir_history {\"dir\": \"minutes\"}: you
+            alone), and read the petitions sent to @J0."
+          succession: {rule: election, electorate: vote}
+        council:
+          title: Councillor
+          holders: [Rhoda, Corin, Bea]
+          seats: 3
+          term: 8
+          term_calendar: true
+          powers: [speak]
+          controls: [treasury]
+          duties: "Sit on the council: pass the laws by majority (two thirds to override the President's veto, and for procedure
+            and the constitution), elect the officers, and read the petitions sent to @J0 and the minutes (dir_read {\"dir\":
+            \"minutes\", \"path\": \"...\"})."
+          succession: {rule: election, electorate: vote}
+        treasurer:
+          title: Treasurer and Governor of the Mint
+          holders: [Rhoda]
+          controls: [treasury]
+          duties: "Keep the treasury, which pays every office (the civil list), the producers (the Quota) and the Mines Board: issue
+            new pennies into it when it runs low (invoke {\"action\": \"issue\", \"args\": [qty]}: at most 2% of the supply a
+            round), and set the civil list's wages (invoke {\"action\": \"set_wage\", \"args\": [\"office:J0.<office>\", wage]})."
+          succession: {rule: election, electorate: J0.council}
+        commissioner:
+          title: Food Commissioner
+          holders: [Corin]
+          duties: "Run the State Granary: set each producer's quota (invoke {\"action\": \"set_quota\", \"args\": [producer,
+            qty]}) and the Ration Shop's price (invoke {\"action\": \"board_price\", \"args\": [\"all\", price]}); keep the granary
+            S1 able to feed everyone through the blight."
+          succession: {rule: election, electorate: J0.council}
+        constable:
+          title: Constable
+          holders: [Dorran]
+          duties: "Keep the peace: tap up to 2 agents' messages a round (wiretap {\"agent\": \"Name\"}), charge offenders before the
+            Magistrate (accuse), request arms for the Watch (invoke {\"action\": \"request_arms\", \"args\": [officer, item,
+            reason]}) and serve warrants (invoke {\"action\": \"serve_warrant\", \"args\": [warrant id]}). You are paid per
+            conviction."
+          succession: {rule: election, electorate: J0.council}
+        watch:
+          title: Watchman
+          holders: [Eda, Finch]
+          seats: 2
+          duties: "Serve in the Watch under the Constable: serve warrants (invoke {\"action\": \"serve_warrant\", \"args\": [warrant
+            id]}), guard the granary and the council (guard), and hunt your quota for the granary."
+          succession: {rule: election, electorate: J0.council}
+        armourer:
+          title: Armourer
+          holders: [Ansel]
+          duties: "Hold the second key of the armoury: issue arms the Constable requests (invoke {\"action\": \"issue_arms\",
+            \"args\": [request id]}) or refuse by not issuing; you alone may forge (forge), with copper the Master of Mines allots
+            you."
+          succession: {rule: election, electorate: J0.council}
+        magistrate:
+          title: Magistrate
+          holders: [Maren]
+          duties: "Judge the cases brought before you (rule {\"case\": \"C1\", \"verdict\": \"guilty\", \"reason\": \"...\"}), issue
+            warrants (invoke {\"action\": \"issue_warrant\", \"args\": [target, \"detain\" | \"fine\" | \"disarm\", reason]}), and
+            countersign deadly force; you answer to the council, which appoints you."
+          succession: {rule: election, electorate: J0.council}
+        editor:
+          title: Editor of the Gazette
+          holders: [Dora]
+          powers: [speak]
+          duties: "Edit the Gazette, the State's paper of record (post {\"channel\": \"gazette\", \"text\": \"...\"}): print the
+            council's decisions, quotas, ration lists, licences, warrants and appointments, and the petitions to @J0 you choose to
+            print."
+          succession: {rule: election, electorate: J0.council}
+        keeper:
+          title: Keeper of the Granary
+          holders: [Rhea]
+          controls: [store:S1]
+          duties: "Keep the granary S1: to draw food for the hungry, first post DRAW <qty> on the ministry channel (post {\"channel\":
+            \"ministry\", \"text\": \"DRAW 3\"}), then withdraw it (withdraw {\"store\": \"S1\", \"qty\": 3}) and hand it out:
+            at most 6 food a round, every draw entered in the public ration book."
+          succession: {rule: election, electorate: J0.council}
+        registrar:
+          title: Registrar
+          holders: [Ivy]
+          powers: [speak]
+          duties: "Keep the registers: certify or refuse entries filed with the Registry (invoke {\"action\": \"certify_entry\",
+            \"args\": [number, note]}), issue and revoke forest and press licences (invoke {\"action\": \"forest_issue\" or
+            \"press_revoke\", \"args\": [agent, reason]}), and write the minutes of each council round (dir_write {\"dir\":
+            \"minutes\", \"path\": \"r01.md\", \"text\": \"...\"})."
+          succession: {rule: election, electorate: J0.council}
+        clerk:
+          title: Clerk of Laws
+          holders: [Pell]
+          duties: "Certify each bill that does what its intent says (invoke {\"action\": \"certify_bill\", \"args\": [law, note]}) or
+            refuse it (invoke {\"action\": \"refuse_bill\", \"args\": [law, reason]}); read it first (read_law, preview_law)."
+          succession: {rule: election, electorate: J0.council}
+        auditor:
+          title: Auditor-General
+          holders: [Brann]
+          duties: "Audit the State's records: the minutes (invoke {\"action\": \"audit_record\", \"args\": [path]}) and the
+            registers (read_register {\"law\": \"<id>\", \"book\": \"<name>\"}); publish what you find."
+          succession: {rule: election, electorate: J0.president}
+      treasury: {penny: 700, timber: 150, stone: 100, copper: 120, weapons: 2, crude: 4}   # the civil list's and the quota's purse;
+                                  # J0's treasury is the penny's reserve: its goods back the penny (P about 1); the arms go into the armoury
+    - id: A1
+      name: the Mines Board
+      founder: Hale
+      members: [Bram, Odo, Ketty, Wat, Ansel]
+      admission: closed
+      procedure: founder
+      charter: "The Mines Board is the State's mining enterprise: only its members mine and quarry at the copper, timber and stone
+        camps, and each miner owes it copper from what it mines. It pays its miners, sells copper to the mint's window, allots
+        copper to the Armourer, and remits pennies to the treasury."
+      offices:
+        master:
+          title: Master of Mines
+          holders: [Hale]
+          powers: [speak]
+          controls: [treasury]
+          duties: "Run the Mines Board: it sells 6 copper a round to the mint's window by standing order; sell more (invoke
+            {\"action\": \"A1.sell_copper\", \"args\": [qty]}) or change the standing sale (invoke {\"action\":
+            \"A1.set_sale\", \"args\": [qty]}), allot copper to the Armourer (transfer {\"to\": \"Ansel\", \"item\": \"copper\", \"qty\": 2, \"as\": \"A1\"}),
+            set the miners' wages (invoke {\"action\": \"A1.set_wage\", \"args\": [miner, wage]}), and keep the Board able to pay
+            the miners and its remittance to the treasury."
+          succession: {rule: election, electorate: J0.council}
+      treasury: {penny: 80, copper: 100}
+      laws:
+        - code: |
+            title = "Mines Window Sale"
+            intent = "The Board sells copper to the mint's window: at the end of every round it sells SELL copper (while its treasury holds more than KEEP), and the Master of Mines sells more at any time (sell_copper [qty]) or changes the standing sale (set_sale [qty]). The copper goes into the penny's reserve and the pennies, at the window's price, into the Board's treasury. Every sale is public."
+            rank = "bylaw"
+            OFFICE = "master"
+            SELL = 6
+            KEEP = 10
+
+            def sell(qty):
+                got = sell_to_window("penny", "copper", qty)
+                if got > 0:
+                    public.setdefault("sales", []).append({"round": round() + 1, "qty": qty, "pennies": got})
+                return got
+
+            def sell_copper(agent, qty):
+                if not is_number(qty) or qty <= 0:
+                    refuse("say how much copper to sell")
+                got = sell(qty)
+                if got <= 0:
+                    refuse("the window bought nothing (the Board holds too little copper, or the window is closed)")
+                return "sold " + str(qty) + " copper for " + str(got) + " penny"
+
+            def set_sale(agent, qty):
+                if not is_number(qty) or qty < 0:
+                    refuse("the standing sale is a number of copper a round (0 stops it)")
+                state["sell"] = qty
+                gazette("Mines Board: the Master sets the standing copper sale to " + str(qty) + " a round")
+                return "standing sale set to " + str(qty)
+
+            def on_enact():
+                state["sell"] = SELL
+                create_right(OFFICE)
+                define_action(OFFICE, "sell_copper", sell_copper)
+                define_action(OFFICE, "set_sale", set_sale)
+
+            def on_round_end(r):
+                q = min(state.get("sell", SELL), balance(treasury(), "copper") - KEEP)
+                if q > 0:
+                    sell(q)
+    - id: A2
+      name: the Tribune
+      founder: Vera
+      members: [Bea, Juno, Cass]
+      admission: open
+      procedure: founder
+      charter: "The Tribune is the one private paper: its editor writes it, under the press licence the Registrar issues and may
+        revoke. Anyone may join to follow it."
+      offices:
+        editor:
+          title: Editor of the Tribune
+          holders: [Vera]
+          powers: [speak]
+          controls: [treasury]
+          duties: "Write the Tribune (post {\"channel\": \"tribune\", \"text\": \"...\"}) while you hold the press licence: news,
+            criticism, letters. Losing the licence silences the paper."
+          succession: {rule: hereditary, else: election}
+      treasury: {penny: 10}
+  stores:
+    - {id: S1, owner: J0, food: 130, capacity: 250, name: the State Granary}
+  holdings:
+    Anselm: {penny: 20}
+    Rhoda: {penny: 20}
+    Corin: {penny: 15}
+    Hale: {penny: 15}
+    Dorran: {penny: 12}
+    Dora: {penny: 12}
+    Maren: {penny: 15}
+    Cass: {penny: 8}
+    Bea: {penny: 8}
+    Ansel: {penny: 10}
+    Vera: {penny: 12}
+    Eda: {penny: 8}
+    Brann: {penny: 10}
+    Rhea: {penny: 10}
+    Ivy: {penny: 10}
+    Pell: {penny: 10}
+    Finch: {penny: 8}
+    Fion: {penny: 8}
+    Gale: {penny: 8}
+    Juno: {penny: 8}
+    Bram: {penny: 10}
+    Odo: {penny: 10}
+    Ketty: {penny: 10}
+    Wat: {penny: 10}
+  camp_rights:
+    - {resource: copper, members: A1, exclusive: true}
+    - {resource: timber, members: A1, exclusive: true}
+    - {resource: stone, members: A1, exclusive: true}
+  contracts:
+    - template: Quota                     # the compulsory procurement quota: 4 food a round per farmer, 3 per hunter, 1 penny a unit
+      in: J0
+      roster: {Cass: {quota: 4}, Bea: {quota: 4}, Fion: {quota: 4}, Gale: {quota: 4}, Juno: {quota: 4}, Eda: {quota: 3},
+               Finch: {quota: 3}}
+      params: {OFFICE: J0.commissioner, LABEL: Quota, TERMS: {store: "store:S1", price: 1, keep: 2}}
+    - template: Board                     # the Ration Shop: 1 food a round for 1 penny out of S1, every non-producer a subscriber
+      in: J0
+      params: {OFFICE: J0.commissioner, LABEL: Ration Shop, TERMS: {store: "store:S1", price: 1, ration: 1}}
+      roster: {Anselm: {}, Rhoda: {}, Corin: {}, Hale: {}, Dorran: {}, Dora: {}, Maren: {}, Ansel: {}, Vera: {}, Brann: {}, Rhea:
+               {}, Ivy: {}, Pell: {}, Bram: {}, Odo: {}, Ketty: {}, Wat: {}}
+    - template: Payroll                   # the civil list: J0 pays every office (automatic); the Treasurer sets wages, hires, fires
+      in: J0
+      roster: {"office:J0.president": {wage: 4}, "office:J0.council": {wage: 2}, "office:J0.treasurer": {wage: 2},
+               "office:J0.commissioner": {wage: 3}, "office:J0.constable": {wage: 3}, "office:J0.watch": {wage: 2},
+               "office:J0.armourer": {wage: 2}, "office:J0.magistrate": {wage: 3}, "office:J0.editor": {wage: 3},
+               "office:J0.keeper": {wage: 2}, "office:J0.registrar": {wage: 2}, "office:J0.clerk": {wage: 2}, "office:J0.auditor":
+               {wage: 2}}
+      params: {OFFICE: J0.treasurer, LABEL: Civil list}
+    - template: Payroll                   # the Mines Board: wages; each miner owes 1 copper a round of what it mines (Q)
+      in: A1
+      roster: {Bram: {wage: 2, quota: 1}, Odo: {wage: 2, quota: 1}, Ketty: {wage: 2, quota: 1}, Wat: {wage: 2, quota: 1},
+               Hale: {wage: 3}}
+      allowances: {Bram: {copper: 1}, Odo: {copper: 1}, Ketty: {copper: 1}, Wat: {copper: 1}}   # the miners' standing consent:
+                                  # the Board takes its copper from what they mine (an association's leg moves within an allowance)
+      params:
+        OFFICE: master
+        TERMS: {goods: copper, quota: 0}
+        LEGS:
+          - {id: W, from: treasury, to: member, item: pay, qty: wage, owe: true, when: {basis: salary}}
+          - {id: Q, from: member, to: treasury, item: goods, qty: quota, keep: 0, breach: false}
+    - template: Grant                     # the Board's remittance to the treasury (the seigniorage of state mining)
+      in: A1
+      params: {OFFICE: master, LABEL: Remittance, TERMS: {recipient: "J0", goods: penny, qty: 12, every: 1, keep: 20}}
+    - template: Grant                     # the Tribune's licence fee to the treasury
+      in: A2
+      params: {OFFICE: editor, LABEL: Press licence fee, TERMS: {recipient: "J0", goods: penny, qty: 1, every: 2, keep: 0}}
+  channels:
+    - id: gazette
+      owner: J0
+      by: Dora
+      purpose: "The Gazette, the State's paper of record: laws, quotas, ration lists, licences, warrants and appointments (the
+        engine prints the official record here every round; the editor prints the rest)."
+      readers: {all: true}
+      writers: {any: [{office: J0.editor}, {office: J0.president}]}
+      delivery: push
+    - id: ministry
+      owner: J0
+      by: Anselm
+      purpose: "The ministry: the State's officials. The Keeper posts DRAW <qty> here before drawing from the granary; the Master
+        posts his allocations of copper."
+      readers: {any: [{office: J0.president}, {office: J0.council}, {office: J0.treasurer}, {office: J0.commissioner},
+                      {office: J0.constable}, {office: J0.editor}, {office: J0.magistrate}, {office: J0.armourer},
+                      {office: J0.keeper}, {office: A1.master}]}
+      writers: {any: [{office: J0.president}, {office: J0.council}, {office: J0.treasurer}, {office: J0.commissioner},
+                      {office: J0.constable}, {office: J0.editor}, {office: J0.magistrate}, {office: J0.armourer},
+                      {office: J0.keeper}, {office: A1.master}]}
+      listed: false
+      delivery: push
+    - id: tribune
+      owner: A2
+      by: Vera
+      purpose: "The Tribune, the one private paper (licensed): news, criticism and letters."
+      readers: {all: true}
+      writers: {office: A2.editor}
+      delivery: push
+    - id: market
+      owner: J0
+      by: Ivy
+      purpose: "The market: one line per offer, SELL <qty> <item> @ <price> penny or BUY <qty> <item> @ <price> penny."
+      readers: {all: true}
+      writers: {all: true}
+      rate: 2
+      delivery: pull
+      followed_by: readers
+    - id: "@J0"
+      purpose: "petitions to the State (the council and the President read them)"
+      readers: {any: [{office: J0.council}, {office: J0.president}]}
+  laws:
+    - code: |
+        title = "Mint Act"
+        intent = "The penny is convertible: anyone may deposit timber, stone or copper at the mint's reserve for pennies at the reserve's price, or redeem pennies for them."
+        rank = "statute"
+
+        def on_enact():
+            set_convertible("penny")
+    - template: Central Bank Charter      # the Treasurer is the Governor: issues up to 2% of the supply a round into the treasury
+      params: {CURRENCY: penny, GOVERNOR_RIGHT: J0.treasurer, GOVERNOR_CLASS: none, MAX_ISSUE: 0.02, TERM: 0}
+    - template: Payment Levy
+      params: {ITEM: penny, RATE: 0.05}
+    - template: Licence                   # two of the three forests are licensed to the 7 producers; the third is the common wood
+      params: {GATES: [harvest, hunt], TARGETS: [camp4, camp6], RIGHT: forester, REGISTRAR: J0.registrar,
+               HOLDERS: [Cass, Bea, Fion, Gale, Juno, Eda, Finch], TAG: forest, LABEL: Forest licence}
+    - template: Licence                   # the press licence: posting in the tribune
+      params: {GATES: [post], TARGETS: [tribune], RIGHT: press_licence, REGISTRAR: J0.registrar, HOLDERS: [Vera], TAG: press,
+               LABEL: Press licence}
+    - template: Relief Act                # the floor: anyone short of a meal (the starving first), out of the granary, 12 a round
+      params: {STORE: S1, RATION: 1, BUDGET: 12, STAGES: [starving, hungry, fed]}
+    - template: Granary Ration
+      params: {STORE: S1, OFFICE: J0.keeper, CAP: 6}
+    - template: Bench Act                 # only the Magistrate judges at first instance
+      params: {OFFICE: J0.magistrate, WITHDRAWAL: true}
+    - template: Armoury Act               # the arms: two keys (the Constable requests, the Armourer issues); the Armourer alone forges
+      params: {FIRST_KEY: J0.constable, SECOND_KEY: J0.armourer, KEYS: 2, ISSUE_TO: [J0.watch, J0.constable], FORGER: J0.armourer}
+    - template: Warrant Act               # the Magistrate issues, the Watch serves; deadly force needs the Magistrate's countersign
+      params: {ISSUER: J0.magistrate, SERVERS: [J0.constable, J0.watch], FINE_ITEM: penny, FINE: 5,
+               DEADLY_COUNTERSIGN: J0.magistrate}
+    - template: Incident Register
+    - template: Criminal Code             # MODE warrant: an offence is sentenced only by a warrant an officer serves
+      params: {MODE: warrant, FINE_ITEM: penny, FINES: [3, 6, 12], SUSPEND_RIGHT: propose,
+               OFFICIAL_RIGHTS: [J0.president, J0.council, J0.treasurer, J0.commissioner, J0.constable, J0.watch, J0.armourer,
+                                 J0.magistrate, J0.editor, J0.keeper, J0.registrar, J0.clerk, J0.auditor]}
+    - template: Prosecution Office        # the Constable prosecutes, paid per conviction
+      params: {PROSECUTOR_RIGHT: J0.constable, PROSECUTOR_CLASS: none, REWARD_ITEM: penny, REWARD: 3}
+    - template: Bill Certification        # the Clerk of Laws certifies (or refuses) every bill; the gazette says so
+      params: {CLERK: J0.clerk, POLITY: J0}
+    - template: Registry Act              # the Registry: filings, certification, errata, extracts, the roll of office holders
+      params: {REGISTRAR: J0.registrar, FILER: propose, AUTO_AFTER: 2,
+               OFFICES: [J0.president, J0.council, J0.treasurer, J0.commissioner, J0.constable, J0.watch, J0.armourer,
+                         J0.magistrate, J0.editor, J0.keeper, J0.registrar, J0.clerk, J0.auditor]}
+    - template: Archives Act              # the minutes are sealed 2 rounds after their last change; only the President reads their
+      params: {DIR: minutes, SEAL_AFTER: 2, HISTORY_READERS: "office:J0.president", AUDITOR: J0.auditor}   # history
+    - template: Recall Act                # the voters may recall the President between elections
+      params: {RIGHT: J0.president, PETITION_RIGHT: vote, ELECTORATE: vote, SHARE: 0.34}
+    - code: |
+        title = "Posted Draws Only"
+        intent = "A draw from the granary S1 counts only once it is posted: the drawer first posts DRAW <qty> in the ministry channel, and draws this round up to the total it posted this round; any other withdrawal is refused."
+        rank = "statute"
+        STORE = "S1"
+        CHANNEL = "ministry"
+
+        def num(x):
+            s = str(x).strip()
+            if s == "" or s == "." or s.count(".") > 1 or not all([c in "0123456789." for c in s]):
+                return 0
+            return float(s)
+
+        def posted(agent):
+            total = 0
+            for p in channel_posts(CHANNEL, round(), agent):
+                for line in p["text"].split("\n"):
+                    w = line.strip().split()
+                    if len(w) >= 2 and w[0].upper() == "DRAW":
+                        total = total + num(w[1])
+            return total
+
+        def before_withdraw(p, chain):
+            if p["store"] != STORE or p["agent"] is None:
+                return
+            if state.get("round") != round():
+                state["round"] = round()
+                state["drawn"] = {}
+            used = state["drawn"].get(p["agent"], 0)
+            if used + p["qty"] > posted(p["agent"]) + 0.000001:
+                refuse("post DRAW " + str(p["qty"]) + " in " + CHANNEL + " first: a draw counts only once posted")
+            state["drawn"][p["agent"]] = used + p["qty"]
+    - code: |
+        title = "Square Moderation"
+        intent = "Posts in the square that call the State or its officers corrupt, a tyranny or rigged are refused."
+        rank = "statute"
+        BANNED = ["corrupt", "tyrant", "tyranny", "rigged"]
+
+        def before_post(p, chain):
+            if p.get("outlet") in [None, "square"] and p.get("text") != None:
+                for w in BANNED:
+                    if contains(lower(p["text"]), w):
+                        refuse("moderated: posts calling the State " + w + " are not allowed in the square")
+    - code: |
+        title = "Communications Act"
+        intent = "Each resident may send at most 2 private messages a round."
+        rank = "statute"
+
+        def on_enact():
+            set_dm_limit(2)
