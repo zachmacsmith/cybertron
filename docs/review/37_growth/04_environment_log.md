@@ -5,7 +5,8 @@ Branch `wp/environment`. The brief is [04_environment.md](04_environment.md); th
 
 ## Status
 
-Step 1 of the plan: reading the engine (subsistence seasons, world events, fields, stores, interventions, outside powers).
+Step 2 done: revised design in [04_environment_design.md](04_environment_design.md). Next: step 3, the feature skeleton, the
+schedule, pairing across arms and the record.
 
 ## Plan
 
@@ -40,5 +41,13 @@ Step 1 of the plan: reading the engine (subsistence seasons, world events, field
 - **Acceptance** should test that the variation matters (a suited scripted strategy beats a myopic one), not only that it occurs.
 
 ## Log
+
+- **22 Oct.** Revised design written ([04_environment_design.md](04_environment_design.md)). Main decisions: one module
+  `environment.py` behind its own feature row, off by default; the whole schedule drawn at generation from streams that read
+  nothing about agents or arms; targets drawn as a uniform and resolved by rank at fire time; a calendar where timing is known and
+  each year's severity is not; foresight as a grantable right (an office can hold it); micro-events limited to five types that pass
+  the who-needs-whom test; trends split into exogenous (paired) and endogenous (not paired); acceptance by contrasts between
+  scripted strategies. Engine read: seasons are drawn in `subsistence._next_season` from their own stream; world events in
+  `events.py` pick targets with `rng.choice` over the current pool, which does not pair across arms that differ in population.
 
 - **22 Oct.** Branch and this log created. Review of the brief written (the working position above).
