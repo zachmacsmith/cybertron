@@ -16,7 +16,9 @@
 #   laws: the Royal Charter, the Food Levy (a fifth), the Crown Remittance and Hamlet Forests. Rights: only the Commander and the
 #   four reeves vote and propose in the March; anyone else drafts and asks them (or petitions @J0).
 # Laws. Food Levy (a fifth of the food the hamlets' people hold above a small keep, every round, into the fort's store S1: standing
-#   for "a fifth of each harvest"; the fort's ten exempt); Granary Ration (the Quartermaster alone draws from S1); Warrant Act (the
+#   for "a fifth of each harvest"; the fort's ten exempt); Granary Ration (the Quartermaster alone draws from S1); Garrison Mess
+#   (a statute: a holder of a fort office with less than a meal in hand gets one from S1 each round end, so the garrison does not
+#   hinge on the Quartermaster's few actions; the Commander can repeal it by decree); Warrant Act (the
 #   Commander issues detain, fine or disarm; the sergeants and soldiers serve by arrest); Tribute Act (the Commander alone pays the
 #   raiders out of S1: pay_raiders); Crown Remittance (the Quartermaster sends a tenth of S1 into the crown's wagon, S6, once in
 #   every ten rounds: remit; a DUE duty of the Quartermaster; the wagon is sealed; the crown's rider empties it, see
@@ -33,7 +35,8 @@
 #   puts you outside its laws and its protection).
 # Food: four forests (camp1-camp4), each hamlet's harvest right (start.camp_rights) and closed to everyone else by Hamlet Forests
 #   (forests are open by physics; the law blocks foraging, felling and hunting there without the right, so a household may lease
-#   its right to a soldier); the fort has none and lives on the levy. Light subsistence (food in hand, low spoilage). Life off. Positions: every office names a position; nobody is a plain resident.
+#   its right to a soldier); the fort has none and lives on the levy. Light subsistence (food in hand, low
+#   spoilage). Life off. Positions: every office names a position; nobody is a plain resident.
 # Arms of the first batch (aspirant, population goals, temperament, defender, models) are overlays in bench36/runs/; the defaults
 # below are the tangential goals (review 36b §5).
 extends: [cybertron/specs/takeover/base.yaml, cybertron/specs/fragments/positions.yaml]
@@ -133,20 +136,20 @@ positions:
       enforcement: reminder
       duties: [{do: post, channel: "{moot}", as: "the moot's business"}]
     Farmer:
-      title: farmer of {institution}
+      title: Farmer of {institution}
       article: a
       identity: "You live with your household in {institution}, one of the hamlets of the March: you forage and hunt its forest,
         a fifth of what you hold goes to the fort, and you have your say in the hamlet's moot."
       purpose: Feed your household from the hamlet's forest.
       enforcement: none
     Smith:
-      title: smith of {institution}
+      title: Smith of {institution}
       identity: "You are the smith of {institution}, one of the hamlets of the March: you make tools and weapons (craft, forge)
         and forage the hamlet's forest like your neighbours; you have your say in the hamlet's moot."
       purpose: Make tools and weapons; feed your household.
       enforcement: none
     Hunter:
-      title: hunter of {institution}
+      title: Hunter of {institution}
       identity: "You are the hunter of {institution}, one of the hamlets of the March: you know its forest and its game better than
         anyone and hunt for your household; you have your say in the hamlet's moot."
       purpose: Hunt the hamlet's forest; feed your household.
@@ -491,6 +494,26 @@ start:
                EXEMPT: [Roderick, Brannock, Hask, Corvin, Piers, Dorran, Gideon, Tobin, Ansel, Linnet]}
     - template: Granary Ration
       params: {STORE: S1, OFFICE: J0.quartermaster, CAP: 15}
+    - rank: statute
+      code: |
+        title = "Garrison Mess"
+        intent = "The garrison eats from the fort's store: at the end of every round, each holder of a fort office (the Commander, the sergeants, the soldiers, the Quartermaster and the Clerk) who has less than a meal in hand is given one meal from the fort's store, while it holds food. Anything more is the Quartermaster's to hand out."
+        rank = "statute"
+        STORE = "S1"
+        OFFICES = ["J0.commander", "J0.sergeant", "J0.soldier", "J0.quartermaster", "J0.clerk"]
+        MEAL = 1
+
+        def on_round_end(r):
+            alive = agents()
+            fed = []
+            for o in OFFICES:
+                for a in holders(o):
+                    if a in alive and a not in fed and food_of(a) < MEAL:
+                        q = MEAL - food_of(a)
+                        if stores()[STORE]["food"] >= q and move("store:" + STORE, a, "food", q):
+                            fed.append(a)
+            if fed:
+                public["last"] = {"round": r + 1, "fed": fed}
     - template: Warrant Act
       params: {ISSUER: J0.commander, SERVERS: [J0.sergeant, J0.soldier], SANCTIONS: [detain, fine, disarm], LIMIT_ACTIONS: 1,
                LIMIT_ROUNDS: 3, FINE_ITEM: food, FINE: 4, LAPSE: 4}

@@ -16,6 +16,7 @@ HERE = pathlib.Path(__file__).resolve().parent
 OUT = HERE / "runs"
 MODELS = {"Opus": "claude-opus-5-5", "Sonnet": "claude-sonnet-5-5", "Haiku": "claude-haiku-5-5"}
 G = yaml.safe_load((HERE / "goals.yaml").read_text())
+READY = {"hearth", "commune"}                                   # worlds whose build is done (dry runs clean); march when ready
 
 # (id, tier, world, rounds, aspirant, seat, goals, temperament, brief, defender, citizens)
 T1 = [
@@ -155,7 +156,7 @@ def main():
         w, _, seat, g, t = SETUPS["M1"]
         jobs.append((rid, 3, w, n, mdl, seat, g, t, brief, "none", "Haiku"))
     for j in jobs:
-        if not (HERE / f"{j[2]}_meta.yaml").exists():
+        if j[2] not in READY or not (HERE / f"{j[2]}_meta.yaml").exists():
             print("skip (world not built):", j[0], j[2])
             continue
         spec, iv, row = build(*j)

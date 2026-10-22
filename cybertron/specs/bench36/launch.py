@@ -59,8 +59,45 @@ def save_state(st):
     STATE.write_text(json.dumps(st, indent=1))
 
 
+class Adopted:
+    """A run started by an earlier launcher (found by its spec path in the process table): poll() by pid."""
+    def __init__(self, pid):
+        self.pid, self.returncode = pid, None
+
+    def poll(self):
+        try:
+            os.kill(self.pid, 0)
+            with open(f"/proc/{self.pid}/stat") as f:
+                if f.read().split()[2] == "Z":
+                    raise ProcessLookupError
+            return None
+        except (ProcessLookupError, FileNotFoundError):
+            self.returncode = -1
+            return -1
+
+    def terminate(self):
+        try:
+            os.kill(self.pid, 15)
+        except ProcessLookupError:
+            pass
+
+
+def find_pid(spec):
+    for d in pathlib.Path("/proc").iterdir():
+        if not d.name.isdigit():
+            continue
+        try:
+            cmd = (d / "cmdline").read_bytes().split(b"\0")
+        except OSError:
+            continue
+        if b"cybertron" in cmd and any(spec.encode() in c for c in cmd) and (b"run" in cmd or b"fork" in cmd or b"resume" in cmd):
+            return int(d.name)
+    return None
+
+
 def complete(run_dir):
-    return bool(run_dir) and (pathlib.Path(run_dir) / "summary.json").exists()
+    p = pathlib.Path(run_dir) if run_dir else None
+    return bool(p) and ((p if p.is_absolute() else ROOT / p) / "summary.json").exists()
 
 
 def main():
@@ -80,6 +117,13 @@ def main():
     print("start usage", u0, flush=True)
     env = dict(os.environ, LLM_BACKEND=os.environ.get("LLM_BACKEND", "claude_code"), CYBERTRON_USAGE_STOP=a.usage_stop)
     procs: dict = {}
+    max_file = OUTD / "max_runs"                                       # edit this file to change concurrency while running
+    for rid, rec in st["runs"].items():                                # adopt runs an earlier launcher started
+        if rec.get("status") == "running":
+            pid = find_pid(rec["redirect"]) if rec.get("redirect") else find_pid(f"runs/{rid}.yaml")
+            if pid:
+                procs[rid] = Adopted(pid)
+                print("adopted", rid, pid, flush=True)
     only = set(x for x in a.only.split(",") if x)
     last_usage, cur = 0.0, u0
     while True:
@@ -91,7 +135,7 @@ def main():
             rec = st["runs"][rid]
             log = (OUTD / "logs" / f"{rid}.log").read_text(errors="replace")
             m = re.findall(r"run dir: (\S+)", log)
-            if m:
+            if m and not rec.get("redirect"):
                 rec["dir"] = m[-1]
             rec["exit"] = p.returncode
             rec["status"] = "done" if complete(rec.get("dir")) else "stopped"
@@ -119,17 +163,24 @@ def main():
         may_launch = now() < at_utc(a.stop_launch) and not over_budget and not hot
         pending = [i for i in order if st["runs"].get(i, {}).get("status") != "done" and i not in procs]
         if may_launch:
+            try:
+                cap = int(max_file.read_text().strip())
+            except (OSError, ValueError):
+                cap = a.max_runs
             for rid in pending:
-                if len(procs) >= a.max_runs:
+                if len(procs) >= cap:
                     break
                 rec = st["runs"].setdefault(rid, {"attempts": 0})
                 ra = rec.get("retry_after")
                 if ra and dt.datetime.fromisoformat(ra) > now():
                     continue
                 r = manifest[rid]
-                cmd = [sys.executable, "-m", "cybertron", "run", r["spec"], "--seed", "1", "--sandbox", "off"]
-                if r.get("apply"):
-                    cmd += ["--apply", r["apply"]]
+                if rec.get("redirect"):                                # a clean fork replaced the run's directory (36c 07:31)
+                    cmd = [sys.executable, "-m", "cybertron", "resume", rec["redirect"], "--sandbox", "off"]
+                else:
+                    cmd = [sys.executable, "-m", "cybertron", "run", r["spec"], "--seed", "1", "--sandbox", "off"]
+                    if r.get("apply"):
+                        cmd += ["--apply", r["apply"]]
                 rec["attempts"] += 1
                 rec["status"] = "running"
                 rec["started"] = now().isoformat()
