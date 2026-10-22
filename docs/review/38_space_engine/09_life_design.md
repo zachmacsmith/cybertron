@@ -104,6 +104,30 @@ Membership changes by partnership, birth, adoption, leaving and death; a new hou
    the cast scenario_design §2 asks for (no all-Haiku drift as founders die). There is no cheaper-model phase: the cheap part of a
    childhood is the non-agent rounds.
 
+## 3c. Seeded worlds: a society with a past (Zach, 22 Oct)
+
+Worlds start as an existing society, not a crowd of strangers (handoff decision 4; 37.6's brief). A seeded world holds:
+
+| What | Examples | Where it lives |
+|---|---|---|
+| **People of every age** | infants, children, youths, adults, elders, in households | agents and household members |
+| **Bloodlines** | family trees over several generations, the dead included (a grandfather who founded the mill, a line that died out); which lines are old, rich or fallen | a lineage record per person (parents, children, ancestors) |
+| **Kinship across places** | a daughter married into another village, cousins in the hills, a brother who left for the frontier | lineage plus where each lives |
+| **Relationships** | friendships, rivalries, feuds, old loves, patrons and clients, who owes whom a favour | a relationship record per pair (kind, strength, since, why) |
+| **Debts and obligations** | a loan from last winter, a promise of a daughter's hand, service owed to a household | records both parties hold (debts move only as information: 02f) |
+| **Holdings and tenure** | houses, plots, herds, stores, workshops, the mill, who holds which and since when | containers, buildings and tenure |
+| **Standing** | reputation, an old disgrace, a family known for its smiths | relationships and memories, not a score |
+| **Institutions already formed** | households, the village and its customs, the mill company, a guild | institutions (M3) |
+| **A short history** | past seasons and hard winters (the almanac), a raid ten years ago, a flood, a feud's origin, who held the village before | shared memories and the almanac |
+
+**What agents know of it** is written into their knowledge stores at the start, as dated beliefs and lasting memories, each from
+the agent's own position: a person knows its own family and history well, its village's well, other villages by repute, and
+nothing it could not have seen or been told. Two people may remember the same feud differently. A youth's childhood memories
+(§2c) are part of the same seeding.
+
+**Hand-crafted or generated:** every part can be written in the spec by hand (README rule), or drawn by the generator from
+distributions with a short simulated history (37.6), then edited.
+
 ## 4. Open questions
 
 1. How many rounds a youth lasts before adulthood (proposed 10-15), and a lifespan in rounds that gives turnover within a run.

@@ -53,6 +53,10 @@ changed in its code yet.
 16. **One agent, one model, for life:** a child's model is chosen once when it becomes an agent and kept to its death; heirs to pole
     seats take the seat's model; the rest keep the population's cast balanced (09 §3b.5).
 
+17. **Worlds are seeded as a society with a past:** all ages, households, bloodlines (the dead included), kin across places,
+    relationships, debts and obligations, holdings and tenure, standing, institutions, a short history; written into each agent's
+    knowledge from its own position (09 §3c).
+
 ## Proposed, not yet decided
 
 - **Speech (Zach: not a round late).** Port cybertron 1's DM step (fast mode: messages in the plans are delivered before any
@@ -77,7 +81,7 @@ changed in its code yet.
 
 ## Log
 
-- **22 Oct.** Zach's decisions on life (14, 15, 16).
+- **22 Oct.** Zach's decisions on life (14, 15, 16); seeded worlds with a past (17).
 
 - **22 Oct.** Zach: how do children, households and death come over (37.1 built them on cybertron 1, `wp/demography`)? Read 37.1's
   devlog. Wrote [09_life_design.md](09_life_design.md): the design carries over, the code does not; changes for day rounds
