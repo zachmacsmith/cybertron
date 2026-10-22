@@ -26,6 +26,27 @@ Size, as a rule of thumb: **2-5 households, up to about 15-20 people, a handful 
 inn), plus its land. A market or crossroads node can hold more buildings and more passing people, which is what makes it
 different.
 
+### Buildings on a node
+
+What limits a node is **people present** (about 15-20, for witnessing, the message step and the prompt), not buildings: the
+prompt can list buildings briefly ("four houses, a store, a smithy, an inn"). So buildings are capped by **land**, as slots set
+by the node's kind, and different buildings take different room:
+
+| Building | Slots | Needs |
+|---|---|---|
+| House (a household: 4-6 beds) | 1 | |
+| Store or granary | 1 (granary 2) | |
+| Workshop (smithy, carpenter, tannery) | 1 | the trade's site (a forge needs fuel; a tannery water) |
+| Inn | 2 | |
+| Mill | 2 | a river or wind (valley, moor) |
+| Hall or shrine | 2 | |
+| Wall or palisade | none (it encloses the node) | upkeep scales with what it encloses |
+
+Slots by kind, as a starting point: river valley 10-12, woodland 6-8, hills 4-6, moor and fen 3-4 (fen more once drained),
+crossroads 14-20, deep forest and pass 0-1 (a camp or a toll post). So an ordinary node holds **about 5-12 buildings**, of which
+2-5 are houses; a market node up to about 20. Plots are land too but counted apart (a kind's plots). Whether the limit is a
+hard cap or a rising cost (crowding: thinner forage, more fever) is open question 4.
+
 ### Nights away
 
 A night away from home is the cost of an edge:
