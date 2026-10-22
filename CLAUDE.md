@@ -14,4 +14,6 @@ version:
   run.
 - Read any progress metric against the null arm and with a qualitative end-state reading.
 
-Engine gaps are tracked in `docs/engine_gaps.md`; add to it when a design needs something the engine lacks.
+Engine gaps are tracked in `docs/engine_gaps.md`; add to it when a design needs something the engine lacks. The work packages for
+worlds that grow (demography, economy, institutions acting on each other, environment, frontier, generated populations,
+coordination problems) are in `docs/review/37_growth/`.
