@@ -761,7 +761,7 @@ _ROWS = [
     P("dir_write", "directories", "create", ("agent", "dir", "path", "op"), "directories:change_dir_write", routed=True,
       subject="agent", parties=("agent",), agent_params=("agent",), causes=("agent",),
       sites=("directories:change_dir_write", "directories:dir_write", "directories:dir_edit", "directories:dir_move",
-             "directories:dir_delete"),
+             "directories:dir_delete", "documents:doc_send"),
       why={"compel": _LNA, "gate": "law.v2: before_dir_write gates it (who changes which path of which directory; never the text)",
            "event": "private writing; the runner's turn record keeps the action"},
       notes="op: write, append, edit, move (option to: the new path) or delete; the text is an option, not payload"),
@@ -970,7 +970,7 @@ ACTION_PRIMITIVES = {
     "invoke": ("invoke", "use_power"),
     # directories
     "dir_list": LOOKUP, "dir_read": LOOKUP, "dir_search": LOOKUP, "dir_write": ("dir_write",), "dir_edit": ("dir_write",),
-    "dir_move": ("dir_write",), "dir_delete": ("dir_write",), "dir_grant": ("dir_grant",),
+    "dir_move": ("dir_write",), "dir_delete": ("dir_write",), "dir_grant": ("dir_grant",), "doc_send": ("dir_write",),
     # subsistence (review 15): farm sows or reaps (its first primitive depends on its arguments: ANY_FIRST)
     "farm": ("sow", "reap", "set_farm"), "build": ("build",), "withdraw": ("withdraw", "move"), "hunt": ("hunt", "move"),
     "tend": ("tend",), "improve": ("improve",), "practice": ("learn",), "clear": ("clear",),   # engine 14: farming

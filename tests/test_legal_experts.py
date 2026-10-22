@@ -114,7 +114,7 @@ def test_the_archive_is_generated_from_the_engine(k):
             assert f"{leg['id']}: " in doc
     for key in SD.BASE:                                                 # every parameter, with its comment from the source
         assert re.search(rf"^- {key} = .+: \S", fs["guide/06-standing.md"], re.M), key
-    est = fs["guide/10-templates-laws.md"] + fs["guide/11-templates-contracts.md"]
+    est = "".join(t for p_, t in sorted(fs.items()) if p_.startswith(("guide/10-templates-laws", "guide/11-templates-contracts")))
     for n, e in LB.ESTABLISHED.items():
         if not SD.is_preset(n):
             assert f"- {n} (" in est, n

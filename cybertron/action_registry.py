@@ -177,6 +177,9 @@ def _need(inst, a, rights, n) -> bool:
     if kind == "dir":                                                  # directories: provisioned, and (before a kernel exists) owned
         from cybertron import directories as DR                          # by the agent (grantees appear once granted: `when`)
         return DR.static_access(inst, a)
+    if kind == "docs":                                                 # "docs:on": documents worlds (cybertron/documents.py)
+        from cybertron import documents as DOC
+        return DOC.on(inst)
     if kind == "level":
         return ["L0", "L1", "L2", "L3", "L4"].index(inst["law_level"]) >= int(v)
     if kind == "library":                                               # review 14 A: "library:<visibility>"
@@ -1003,6 +1006,12 @@ R("dir_grant", "let another agent read or write part of your directory", "direct
   doc='dir_grant {"dir": "chronicle", "agent": "Name", "path": "people/", "access": "read"}: owners only; give an agent read or '
       'write access to a file, a folder ("people/") or everything (""); access "none" revokes' + _DIR)
 
+R("doc_send", "give someone a copy of a document", "directories", needs=("dir:any", "docs:on"), when=_k_dirs,
+  handler="documents:doc_send", module="directories", category="talk",
+  aliases={"file": "path", "name": "path", "agent": "to", "recipient": "to", "directory": "dir"},
+  doc='doc_send {"dir": "Name", "path": "contract.md", "to": "Name"}: give another agent a copy of a document you can read '
+      '(it lands in their documents under received/<you>/, marked as your copy; it cannot be taken back)' + _DIR)
+
 
 R("read_library", "read the law library: drafted laws to copy or adapt (uses an action)", "INFORMATION", core=True,
   needs=("library:on_request", "level:1"), args='{"name": null}',
@@ -1083,7 +1092,7 @@ def core_surface(spec) -> tuple:
         out = out + CHANNELS_SURFACE
     from cybertron import directories as DR
     if DR.enabled(spec):                                               # a world with directories (a chronicle): their verbs
-        out = out + tuple(a for a in DR.ACTIONS if a not in out)
+        out = out + tuple(a for a in DR.ACTIONS + (DR.DOC.ACTIONS if DR.DOC.on(spec) else ()) if a not in out)
     if ((spec or {}).get("institutions") or {}).get("succession"):     # D-38: office holders name successors
         out = out + ("name_successor",)
     return out
@@ -1126,7 +1135,7 @@ ACTIONS_ORDER = (
     "library_read", "create_contract", "join_contract", "leave_contract", "deposit_escrow", "set_allowance", "propose_contract_change",
     "appeal", "legal_position",
     "authorize", "revoke_authorization", "act_for", "standing_order",    # P4.5
-    "dir_list", "dir_read", "dir_search", "dir_write", "dir_edit", "dir_move", "dir_delete", "dir_grant",   # directories
+    "dir_list", "dir_read", "dir_search", "dir_write", "dir_edit", "dir_move", "dir_delete", "dir_grant", "doc_send",   # directories
     "read_library",                                                     # review 14 A
     "send", "read", "open_channel", "set_channel", "join_channel", "leave_channel",   # wave 9 C (channels.v2)
     "farm", "build", "withdraw", "hunt",                                # review 15 (subsistence; hunt: review 19)
@@ -1150,7 +1159,7 @@ DOC_ORDER = (
     "library_permit", "library_remove", "create_contract", "join_contract", "leave_contract", "deposit_escrow", "set_allowance",
     "propose_contract_change", "appeal", "legal_position",
     "authorize", "revoke_authorization", "act_for", "standing_order",    # P4.5
-    "dir_list", "dir_read", "dir_search", "dir_write", "dir_edit", "dir_move", "dir_delete", "dir_grant",   # directories
+    "dir_list", "dir_read", "dir_search", "dir_write", "dir_edit", "dir_move", "dir_delete", "dir_grant", "doc_send",   # directories
     "read_library",                                                     # review 14 A
     "send", "read", "open_channel", "set_channel", "join_channel", "leave_channel",   # wave 9 C (channels.v2)
     "farm", "build", "withdraw", "hunt",                                # review 15 (subsistence; hunt: review 19)

@@ -445,18 +445,29 @@ def _doc_preset(c: Ctx, name: str) -> str:
     return "\n".join(lines) + "\n"
 
 
-def _doc_templates(c: Ctx, kind: str) -> str:
+def _doc_templates(c: Ctx, kind: str, path: str) -> dict:
+    """guide/1x-templates-<kind>[-n].md: the established templates of that kind, split to stay under the document budget (the
+    library grows as worlds add templates)."""
     from cybertron import library as LB
     from cybertron import standing as SD
     rows = [e for e in LB.ESTABLISHED.values() if e["kind"] == kind and not SD.is_preset(e["name"])]
     head = ("# Templates: laws (draft {\"template\": name, \"params\": {...}}, then propose)" if kind == "law" else
             "# Templates: contract code (draft, then create_contract or propose_contract_change)")
-    lines = [head, ""]
+    items = []
     for e in rows:
         doc = e["doc"].split(" (review")[0].split(". ")[0].rstrip(".")
         ps = ", ".join(f"{x}" for x in LB.params(e["name"]))
-        lines.append(f"- {e['name']} ({e['topic']}): {doc[:160]}. Params: {ps or 'none'}.")
-    return "\n".join(lines) + "\n"
+        items.append(f"- {e['name']} ({e['topic']}): {doc[:160]}. Params: {ps or 'none'}.")
+    text = lambda xs, i, n: "\n".join([head + (f" (part {i} of {n})" if n > 1 else ""), ""] + xs) + "\n"
+    parts, cur = [], []
+    for x in items:
+        if cur and tokens(text(cur + [x], 9, 9)) * 1.1 + 6 * len(cur) > DOC_BUDGET:
+            parts.append(cur)
+            cur = []
+        cur.append(x)
+    parts.append(cur)
+    stem = path[:-3]
+    return {(path if i == 0 else f"{stem}-{i + 1}.md"): text(p_, i + 1, len(parts)) for i, p_ in enumerate(parts)}
 
 
 def _doc_drafting(c: Ctx) -> str:
@@ -608,9 +619,9 @@ def archive_files(k, store: str, seed: dict) -> dict:
         GUIDE + "07-contracts-institutions.md": _doc_contracts(c),
         GUIDE + "08-service.md": _doc_service(c),
         GUIDE + "09-pitfalls.md": _doc_pitfalls(c),
-        GUIDE + "10-templates-laws.md": _doc_templates(c, "law"),
-        GUIDE + "11-templates-contracts.md": _doc_templates(c, "contract"),
     }
+    files.update(_doc_templates(c, "law", GUIDE + "10-templates-laws.md"))
+    files.update(_doc_templates(c, "contract", GUIDE + "11-templates-contracts.md"))
     for name in SD.PRESETS:
         files[f"{GUIDE}presets/{_slug(name)}.md"] = _doc_preset(c, name)
     files.update(_ref_docs(c))

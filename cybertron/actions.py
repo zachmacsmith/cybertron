@@ -143,6 +143,8 @@ def _act(k, aid: str, name: str, args: dict) -> str:
             hidden_here.add("fulfil")
     if not DR.enabled(k):                                              # directories: only where some directory is provisioned
         hidden_here |= set(DR.ACTIONS)
+    if not DR.DOC.on(k):                                               # documents (review 32): doc_send only where documents are on
+        hidden_here |= set(DR.DOC.ACTIONS)
     hidden_here |= AR.hidden(k.spec)                                   # review 14 A: the design arm's flags (none by default)
     hidden_here |= AR.channel_hidden(k.spec)                           # wave 9 C: channels.v2's verbs (off: unknown, as before)
     from cybertron import counsel as _CN                                # review 31.05/31.07: represent, withdraw_case, read_register
