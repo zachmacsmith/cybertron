@@ -21,6 +21,9 @@ MUTATORS = {"append", "remove", "extend", "sort", "insert", "clear", "pop", "rev
 EXCEPTIONS = {
     ("events.py", "leave_world"): "a departure (end_life cause departure, P2.4b): the agent leaves play with its rights cleared, as "
                                   "today's depart did; recorded in the departure event, not a law's grant or revocation",
+    ("positions.py", "resolve"): "review 33: a position template's rights list, filled from its parameters (a description; the "
+                                 "office's rights are granted through k.apply at generation and appointment)",
+    ("positions.py", "_derived"): "review 33: the leverage text reads an agent's rights into a local list (nothing is written)",
     ("lawpreview.py", "_procedure"): "the previewer lends the propose right for one call inside a transaction that is undone (P3.5)",
     # world generation: instance dicts before any kernel exists (no k.w, nothing to log)
     ("generator.py", "_generate"): "generation: the instance's agents (no kernel yet)",
