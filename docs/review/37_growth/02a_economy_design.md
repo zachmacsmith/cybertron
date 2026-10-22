@@ -44,6 +44,9 @@ A dependence edge survives only when self-supply is blocked by one of:
 
 ## 3. Design
 
+*Superseded as a build plan (22 Oct): the economy is now planned for cybertron2 in [02f_economy_plan.md](02f_economy_plan.md). The
+mechanisms below still describe what is wanted.*
+
 ### 3.1 Goods and recipes (engine; the core of the package)
 
 `economy.goods`: item -> unit value, spoilage, wear. `economy.recipes`: name -> inputs, outputs, facility needed (optional),
