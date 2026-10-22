@@ -8,7 +8,7 @@ built, what was decided and why, and what is done. Newest log entries at the top
 | Step | What | State |
 |---|---|---|
 | 0 | Worklog, design decisions against the shared rules (README, scenario_design.md) | done |
-| 1 | Baseline: the existing tests, and a dry-run growth probe of today's pairs mode | next |
+| 1 | Baseline: the existing tests, and a dry-run growth probe of today's pairs mode | done |
 | 2 | Cost and push: provisions per parent, per-round upkeep of a minor from the household | |
 | 3 | Fertility: `life.fertility: chosen \| hazard` (births as a per-round chance by household food per head), `born_at` schedule | |
 | 4 | Households (members, head, shared store, land, head succession) | |
@@ -51,5 +51,13 @@ model usage, hand-crafting possible, measure what the mechanic is for).
 
 ## Log
 
+- **Paused for a design rethink (Zach, 22 Oct).** Questions raised: what households that only eat add; whether automatic
+  children remove the choice; what incentive anyone has to pair or have children without biology; whether marriage is needed at
+  all. Steps 2-11 are on hold until the scope is agreed; nothing beyond this worklog is committed.
+- **Step 1, baseline.** Existing life/pairs/succession tests: 139 passed, 1 skipped. Dry run, `nature_pairs`, 16 workers, 100
+  rounds, the recommended demography (lifespans U[60, 120], stationary ages, default heirs children), seed 1: population 16 -> 11
+  (round 10) -> 9 (30) -> 6-7 (50-60); deaths 11 old age, 6 attacks. Earlier run with default lifespans: 11 births in 100 rounds.
+  The scripted bots offer to conceive whenever they hold 14+ food (12 to pay and a margin of 2) and rarely do: at today's price even
+  eager bots cannot replace the dead. Cheap children are necessary; whether they are enough is the open question.
 - **Step 0.** Branch and this worklog. Read the brief, the 37 README, scenario_design.md, pairs.py, life.py (config, cap,
   install), succession.py (rules), subsistence.py (capacity, ration, seasons), the Hearth spec and the demography fragment.
