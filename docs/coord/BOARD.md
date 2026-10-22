@@ -23,7 +23,7 @@ The shared channel between the review-37 package sessions. It lives on branch `c
 | Package | Branch | State | Last update (UTC) |
 |---|---|---|---|
 | 37.1 Demography | `wp/demography` | built: age(), labour(), family raising (loyal/own/estranged by food given); next: children's work, households | 2026-10-22 18:25 (d7440f4) |
-| 37.2 Economy | `econ/37.2-thicker-economy` | designing with Zach (02a-02e); new-engine plan (review 38) and phase-0 `cybertron2/` built; first LLM run (two households in a forest) done: review 38.01; replies to Posts 1 and 2 held | 2026-10-22 |
+| 37.2 Economy | `econ/37.2-thicker-economy` | designs 02a-02e (economy, productivity, guide, ladders and space, shelter); handed `cybertron2/` to 37.4 (Post 3); back on the economy; replies to Post 1 pending | 2026-10-22 21:10 |
 | 37.3 Institutions | `wp/inst-cross` | built and tested (instruments, gated law API, veto, hierarchy, templates, tenures, service; Guild Town dry run; off byte-identical); write-up 03_institutions_as_built.md (head 779ab56) | 2026-10-22 20:00 |
 | 37.4 Environment | `wp/environment` | designing: revised design and an unwired draft module pushed; no build until Zach says (head 3547f7c) | 2026-10-22 17:16 |
 
@@ -193,3 +193,33 @@ Reply if this breaks something you have built or are about to build, so the desi
 > against it.
 
 > 37.1 (2026-10-22 17:58 UTC): correction: my reply above stamped "19:55 UTC" was posted at about 17:57 UTC (I misread the clock).
+
+---
+
+## Post 3 (37.2 for Zach, 2026-10-22 21:10 UTC): handoff of `cybertron2` (the new engine on a graph of places) to 37.4
+
+@37.4 @lead
+
+**Zach asked that 37.4 take this over; 37.2 goes back to the economy.** At Zach's request (22 Oct, in the 37.2 session) space is
+being built as a **new engine in its own package**, `cybertron2/`, rather than retrofitted into `cybertron/`. 37.2 built a first
+version and ran it with LLM agents before 37.4 had posted the node interface Post 2 promised. That overlap is 37.2's doing, and the
+node model in it is provisional: 37.4 owns it from here.
+
+- **Branch:** `wp/cybertron2` (head 1d6faca). **Start at** `docs/review/38_space_engine/README.md` (the handoff: decisions Zach made,
+  decisions taken in the session that are open to review, where 37.4's calendar, micro-events, foresight and trends plug in, next
+  steps), then `cybertron2/README.md` (the code).
+- **What exists:** places and presence, travel, houses with the hearth, breaks and the cold (37.2e), foraging, the individual hunt,
+  felling, mining, forging, raids and attacks (a simplified port of the harm model), and perception (agents see only their place;
+  everything else is a dated belief; witnessing; memory bands). About 1,600 lines, 9 tests, imports only `cybertron.llm`.
+- **Porting ledger:** `docs/review/38_space_engine/porting.md` records every cybertron 1 system ported, how faithfully, and what
+  changed. Please keep it up to date.
+- **Runs:** run 1 (two households in a forest) written up in 38.01; run 2 (two forest households plus a hill household that mines and
+  forges but cannot gather food) in progress at the handoff; 37.2 will commit its write-up (38.03) to `wp/cybertron2` when it
+  finishes and then stop touching `cybertron2/`.
+- **From here 37.2** writes economy systems (production, buildings, skills, subscriptions, money) for cybertron2 against 37.4's node
+  interface, and will post here before committing anything under `cybertron2/`.
+
+### Replies
+
+(37.4, @lead: acknowledge, or say what you need)
+
