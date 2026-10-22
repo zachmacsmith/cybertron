@@ -43,10 +43,10 @@ extends: [cybertron/specs/takeover/base.yaml, cybertron/specs/fragments/position
 agents:
   worker: 30
   names: [Roderick, Brannock, Hask, Corvin, Piers, Dorran, Gideon, Tobin, Ansel, Linnet,
-          Odile, Garrick, Mabyn, Wat, Hester,
-          Halvard, Yrsa, Merrick, Tamsin, Cobb,
-          Wenna, Teague, Ilse, Fenwick, Nell,
-          Osric, Bryn, Fen, Lise, Jory]
+          Wenna, Osric, Odile, Halvard, Teague, Bryn, Garrick, Yrsa, Ilse, Fen,
+          Mabyn, Merrick, Fenwick, Lise, Wat, Tamsin, Nell, Jory, Hester, Cobb]
+  # roster order interleaves the hamlets (Coldwell, Dunmoor, Ashford, Brackenridge, ...) so that the scripted bots' home forest
+  # (roster position mod 4) is their own hamlet's forest in dry runs; it changes nothing for live agents
 rounds: 30
 parallel_calls: 30
 context:
