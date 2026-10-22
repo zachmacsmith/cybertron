@@ -26,7 +26,7 @@ Dropped (Zach, 22 Oct): automatic or hazard births (fertility stays a choice), d
 
 ## Entries
 
-### 2026-10-22 16:45 UTC: review and baseline
+### 2026-10-22 17:02 UTC: review and baseline
 
 - **Doing:** reading the brief against the shared rules (37 README, scenario_design.md) and the code.
 - **Found:**
@@ -48,7 +48,7 @@ Dropped (Zach, 22 Oct): automatic or hazard births (fertility stays a choice), d
 - **Q:** in growth worlds, drop the lineage-scoring line from the prompt? (It is a scoring proxy; the in-world fact "what you hold
   passes to your children, or to the polity if you have none" can replace it.)
 
-### 2026-10-22 17:20 UTC: coordination board
+### 2026-10-22 17:18 UTC: coordination board
 
 - **Doing:** replied to post 1 on `coord` (the couplings contract): agreed, with Zach's changes (choice fertility; households as
   minimal institutions; `labour(agent)`; inheritance `partible | eldest | household`; minors' work through 37.2's standing orders).
@@ -62,7 +62,7 @@ Dropped (Zach, 22 Oct): automatic or hazard births (fertility stays a choice), d
   - `subsistence.minor_yield` (0.5): a minor's foraging fraction, which becomes the labour factor.
 - **Next:** step 2.
 
-### 2026-10-22 18:20 UTC: steps 2-3, ages, labour, raising a child
+### 2026-10-22 17:45 UTC: steps 2-3, ages, labour, raising a child
 
 - **Doing:** ages, the labour factor, and family raising.
 - **Built:**
@@ -95,7 +95,7 @@ Dropped (Zach, 22 Oct): automatic or hazard births (fertility stays a choice), d
   - The target is the parent who gave more food: the investment decides whose cause it is.
 - **Next:** step 4, children's work (a minor's surplus to the household; minors play every k rounds).
 
-### 2026-10-22 19:05 UTC: steps 4-5, children's work and households
+### 2026-10-22 17:52 UTC: steps 4-5, children's work and households
 
 - **Built:**
   - Children's work:
@@ -123,7 +123,7 @@ Dropped (Zach, 22 Oct): automatic or hazard births (fertility stays a choice), d
 - **Next:** step 6, inheritance (`partible | eldest | household`) in `subsistence.on_death`, where stores and plots already pass
   to `_store_heir`.
 
-### 2026-10-22 19:30 UTC: step 6, inheritance (board loop 2)
+### 2026-10-22 17:53 UTC: step 6, inheritance (board loop 2)
 
 - **Built:** `life.households.inheritance: none | partible | eldest | household` (read whenever pairs is on, with or without
   households), applied in `subsistence.on_death`:
@@ -137,7 +137,7 @@ Dropped (Zach, 22 Oct): automatic or hazard births (fertility stays a choice), d
   primitive (asked on the board).
 - **Next:** step 7, family-aware scripted bots and a growth preset; dry runs for loops 1 and 2.
 
-### 2026-10-22 20:00 UTC: step 7 (bots, preset, analysis) and step 8 (the seat carries the model)
+### 2026-10-22 17:56 UTC: step 7 (bots, preset, analysis) and step 8 (the seat carries the model)
 
 - **Built:**
   - Family bot (`pairs._family_bot`, family worlds only, so other bots and goldens are unchanged). It conceives with a chance
