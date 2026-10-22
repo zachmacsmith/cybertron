@@ -33,6 +33,14 @@ calls (scripted dry runs and unit tests only); everything generated can be fixed
 
 ## Log
 
+### 22 Oct (night, perception)
+
+- Zach: the most important thing is what agents see and how it changes. Wrote docs/review/38_space_engine/02_perception.md: perceive
+  where you are; know your body exactly; everything else a belief with a source and an age; count what you can count, estimate the
+  rest in words; show change; talk is testimony; the prompt scales with the neighbourhood. An engine-written knowledge store
+  (places, houses, people, witnessed acts, testimony, deaths), a sectioned prompt, and the first run's failures mapped to the
+  perception that would have exposed them (Dara's hunger visible to the party-mates beside her).
+
 ### 22 Oct (night, run result)
 
 - Forest run, seed 1, 20 rounds, $1.78, no errors (docs/review/38_space_engine/01_forest_run.md; logs committed under
