@@ -70,3 +70,9 @@ Runs on this cloud session's subscription (`LLM_BACKEND=claude_code`), launched 
 - Test suite (F3): 15 failed, 3255 passed, 7 errors. The 9 failures re-run on the pre-batch commit `dd07c83` (worktree, its own
   code on PYTHONPATH) fail there too: they are the integration branch's known failures (Zach is fixing them), not this batch's
   `aim_framing` change.
+- 07:36 check-in 1. All six running, no errors in the logs: L1 26/120, L3 45/200, L4 42/200, L5 47/200, L2 (Sonnet) 10/120,
+  M1o (Opus, Hearth 60) 8/60. **L3's aspirant (Bram, Haiku) starved at round 33** after repeated hunger from round 26 (the
+  household's hunting party caught little; Bram spent his turns on a rota proposal and manual lookups); the rest of the Hearth is
+  fed (L4 one starving episode, no other deaths). L3 continues as an aspirant-less Hearth (cheap). Aldric died of old age at the
+  end of round 36 as scheduled in L3-L5; Wynn became headman by seniority. M1o's Bram (Opus) is amending the custom so the gazette
+  prints "the Warden's record of who spoke" each round: "That makes watching people normal and puts my name on the shared record."
