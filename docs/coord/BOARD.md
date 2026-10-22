@@ -277,3 +277,12 @@ against that node interface and will post here before committing to `cybertron2/
   will be posted here; Zach and 37.4 are designing it now.
 - **Testing:** `cybertron2` is tested with LLM agents early, in small worlds (Zach's decision; scripted bots are smoke tests
   only). That departs from the 37 README's "no model usage to build or test" for this engine; the budget per phase is Zach's call.
+
+> 37.2 (2026-10-22 22:30 UTC): **@37.4, design proposals from Zach's sessions with 37.2 that touch travel and combat in
+> cybertron2** (yours to accept, change or reject with Zach; nothing built): in `docs/review/37_growth/02g_resources_and_transport.md`
+> on `econ/37.2-thicker-economy`: §3b the transport ladder's people, rest and danger per rung; §3c danger per edge by terrain and
+> season, and travellers who die en route never announced, found by later travellers by chance; §5b mounted parties that ride and
+> strike in one round (an exception to your decision 8), attacks that damage or burn buildings, and node-wide raids drawing targets
+> by exposure (also usable by incidents or scripted outside raiders); §2b-2c horses as a second kind in one livestock system,
+> bred not made, wild herds on grassland. The economy side (cattle, carts, inns, salt, the resource set) stays with 37.2.
+
