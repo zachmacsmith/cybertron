@@ -111,6 +111,7 @@ actions:
                                   # window): the Private world needs them (as the takeover worlds)
 jurisdictions: {enabled: false}
 channels:
+  square: one                     # declared (review 33: the channel setup is each world's decision; the value it had)
   notices: notices                # the engine posts the official record into `notices` (Gazette Record)
 conflict:
   enabled: true

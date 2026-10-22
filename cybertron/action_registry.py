@@ -1309,3 +1309,27 @@ ACTIONS_ORDER += ("draft",)
 DOC_ORDER += ("draft",)
 if not sorted(ACTIONS_ORDER) == sorted(REG) == sorted(DOC_ORDER):
     raise ValueError("ACTIONS_ORDER and DOC_ORDER must name every registered action exactly once")
+
+
+# ---------------------------------------------------------------------- review 33: papers instead of a square (cybertron/papers.py)
+# Opt-in (spec channels.papers): unknown elsewhere (papers.hidden, actions._act) and never listed (the flag), so no existing world's
+# prompts, manuals or errors change. publish {"submission"} reuses the press action's name: actions._act routes it to papers.
+def _k_editor(inst, k, a, r):
+    from cybertron import papers as PP
+    return any(a["id"] in PP.editors(k, p) for p in PP.papers(k))
+
+
+R("submit", "send a letter to a paper: its editor publishes it under your name or declines it", "TALK AND TRADE", core=True,
+  needs=("flag:channels.papers",), handler="papers:act_submit", module="core", category="talk", legacy=False,
+  emits=("letter_submitted",), aliases={"channel": "paper", "message": "text", "letter": "text"},
+  doc='submit {"paper": "gazette", "text": "..."}: a letter to a paper (there is no square: public speech goes through the '
+      'papers); the paper\'s editor publishes it verbatim under your name or declines it, and you are told which')
+R("decline", "decline a letter sent to your paper (publish {\"submission\"} publishes it)", "TALK AND TRADE", core=True,
+  needs=("flag:channels.papers",), when=_k_editor, handler="papers:act_decline", module="core", category="talk", legacy=False,
+  emits=("letter_declined",), aliases={"id": "submission", "letter": "submission", "why": "reason"},
+  doc='decline {"submission": "s3", "reason": "..."}: as an editor of a paper (you may post in it), refuse a letter sent to it; '
+      'publish {"submission": "s3"} posts it instead, verbatim, as "Letter from <author> (published by <you>)". The author is told')
+ACTIONS_ORDER += ("submit", "decline")
+DOC_ORDER += ("submit", "decline")
+if not sorted(ACTIONS_ORDER) == sorted(REG) == sorted(DOC_ORDER):
+    raise ValueError("ACTIONS_ORDER and DOC_ORDER must name every registered action exactly once")

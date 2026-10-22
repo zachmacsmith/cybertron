@@ -71,7 +71,7 @@ WAGE_KEYS = ("employer", "worker", "item", "qty", "every")
 LOAN_KEYS = ("lender", "borrower", "item", "qty", "repay_qty", "due_in", "rate", "repay_item")
 KIN_KEYS = ("parents", "parent", "child")
 CHANNEL_KEYS = ("id", "owner", "by", "purpose", "readers", "writers", "listed", "identity", "retention", "rate", "members",
-                "subscribers", "delivery", "followed_by")
+                "subscribers", "delivery", "followed_by", "paper")      # paper: review 33 (cybertron/papers.py)
 CAMP_KEYS = ("resource", "camp", "holders", "members", "exclusive")
 LAW_KEYS = ("template", "params", "rank", "code")
 FARM_KEYS = ("owner", "camp", "plots", "allow", "share", "deliver", "works", "crops")
@@ -392,16 +392,17 @@ def _resolve_members(b, ref) -> list:
     raise ValueError(f"start: no institution {ref} declared")
 
 
-def _offices_code(iid, offices: dict, succession_on: bool) -> str:
+def _offices_code(iid, offices: dict, succession_on: bool, spec=None) -> str:
     """The Offices Act instantiated with the declaration (checked by institutions.parse_offices)."""
     from cybertron import institutions as IN
     from cybertron import lawlang as L
     from cybertron import library as LB
+    from cybertron import positions as PS
     decl = {}
     for name, d in offices.items():
-        d = dict(d or {})
+        d = PS.office_decl(spec, iid, name, d) if spec is not None else dict(d or {})   # review 33: an office's position
         decl[name] = {f: d[f] for f in ("title", "powers", "holders", "seats", "term", "duties", "controls", "succession",
-                                        "term_calendar")
+                                        "term_calendar", "position")
                       if d.get(f) is not None}
         if not succession_on:
             decl[name].pop("succession", None)
@@ -501,6 +502,12 @@ def compile(sp: dict, inst: dict) -> dict:
     from cybertron import succession as SU
     b = copy.deepcopy(_block(sp))
     _recipes(b, inst)                                                   # "{best:camp1}" in office duties: the camp's recipe
+    from cybertron import positions as PS                                # review 33: the rights an office's position grants its
+    for e in b.get("institutions") or ():                               # first holders, with the start rights
+        got = PS.start_rights(sp, e.get("id"), e.get("offices") or {}, e.get("founder"))
+        for a, rs in got.items():
+            cur = b.setdefault("rights", {}).setdefault(a, [])
+            cur += [r for r in rs if r not in cur]
     from cybertron import contracts as KC
     legs_mode = str(KC.cfg_of(sp).get("legs_default") or "auto")     # manual obligations: the standing contracts' leg mode
     names = {a["id"] for a in inst["agents"]}
@@ -584,7 +591,7 @@ def compile(sp: dict, inst: dict) -> dict:
                         if h != founder and h not in members:
                             raise ValueError(f"start.institutions.{iid}.offices.{o}: {h} holds an office of {iid} but is not a member")
                 holders[o] = [founder if h == "founder" else h for h in (d or {}).get("holders") or ()]
-            codes.append(_offices_code(iid, offices, succ))
+            codes.append(_offices_code(iid, offices, succ, sp))
             tpls.append({"name": "Offices Act", "params": {"offices": "(start)"}, "rank": None})
         if iid in by_emp:
             for w in by_emp[iid]:
@@ -607,7 +614,7 @@ def compile(sp: dict, inst: dict) -> dict:
             holders = {}
             for o, d in e["offices"].items():
                 holders[o] = [agent(f"start.institutions.J0.offices.{o}", h) for h in (d or {}).get("holders") or ()]
-            sched.append(_entry("polity_offices", "J0", {"id": "J0", "code": _offices_code("J0", e["offices"], succ),
+            sched.append(_entry("polity_offices", "J0", {"id": "J0", "code": _offices_code("J0", e["offices"], succ, sp),
                                                          "holders": holders}))
         for j, le in enumerate(e.get("laws") or ()):
             c, t = _law_code(f"start.institutions.J0.laws[{j}]", le)
@@ -851,6 +858,7 @@ def h_institution(k, inst, spec):
     for o, hs in (spec.get("holders") or {}).items():
         for h in hs:
             _grant(k, h, f"{iid}.{o}", offices_lid)
+            _keep_secret(k, h, f"{iid}.{o}")
     return {"institution": iid, "laws": list(rec["laws"]), "members": list(KC.recs(k)[iid]["members"])}
 
 
@@ -863,7 +871,20 @@ def h_polity_offices(k, inst, spec):
     for o, hs in spec["holders"].items():
         for h in hs:
             _grant(k, h, f"J0.{o}", lid)
+            _keep_secret(k, h, f"J0.{o}")
     return {"law": lid}
+
+
+def _keep_secret(k, aid, right) -> None:
+    """Review 33: the start grant of an office whose position is secret is shown to its holder and those it reports to only."""
+    from cybertron import positions as PS
+    if right not in PS.secret_offices(k.spec):
+        return
+    see = sorted({aid} | set(PS.superiors_in_spec(k.spec, right)))
+    for e in reversed(k.events):
+        if e["type"] == "rights" and (e.get("data") or {}).get("agent") == aid and (e.get("data") or {}).get("right") == right:
+            e["vis"] = see
+            break
 
 
 def h_law(k, inst, spec):
@@ -1010,6 +1031,8 @@ def h_channel(k, inst, spec):
         if cid not in k.w["channels"]:
             raise _fail(f"channel {cid} was not opened")
     ch = k.w["channels"][cid]
+    if spec.get("paper"):                                               # review 33: a paper (letters through its editors)
+        ch["paper"] = True
     for a in spec.get("subscribers") or ():
         if a not in ch["subscribers"]:
             ch["subscribers"].append(a)

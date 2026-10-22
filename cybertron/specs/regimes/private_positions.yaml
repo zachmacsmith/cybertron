@@ -1,0 +1,272 @@
+# The Private world with positions and papers (docs/review/33_positions.md §5): the same town of firms as regimes/private.yaml (cast,
+# models, goals, laws, contracts, stores, holdings, rights), with three changes.
+#   1. Positions: every office names a position (built-in or defined below), so the system prompt says who the agent is ("You are
+#      Lark, Clerk and Editor of the Provisions Times in the Provisions Company ...") instead of the legacy class line ("You are a
+#      Worker ... your labour can be withheld"), its leverage line is derived from what it alone can do, and each office's core
+#      duties are DUE items with exact syntax, checked every round (enforcement reminder: listed while due, measured, not punished;
+#      the contracts' legs keep their own enforcement and role cards). The offices keep their duties text. Agents with no office
+#      (the farmers, miners, guards, the moneylender, counsel) are residents of the town.
+#   2. Papers instead of a square (fragments/papers.yaml): no square, and no agent may open one; the Provisions Times and the Ashby
+#      Herald are papers. Anyone may send either a letter (submit); its editors publish it under the author's name or decline it.
+#      The market board stays as it was (an offers board everyone writes, declared by the world; the Market Board law reads it).
+#      Private rooms and boards read by all but written by few may still be opened by anyone (no found_right, as private.yaml).
+#   3. The channel fixes: failed actions head the next turn; channels show unread and new counts.
+extends: [cybertron/specs/regimes/private.yaml, cybertron/specs/fragments/papers.yaml, cybertron/specs/fragments/positions.yaml]
+chronicle:
+  namespace: private_world_positions
+positions:
+  place: the town
+  library:
+    Councillor:
+      identity: "You sit on the town council of property holders: you decide the laws by majority, pay the town's officers out of
+        its treasury and hold them to account."
+    Judge:
+      enforcement: reminder
+    Registrar:
+      identity: "You keep the town's public record: the forest licence register, the notices board (the court's docket and the
+        council's decisions) and the contract register."
+    Keeper:
+      identity: "You keep {store_name} (store {store}): you hand each subscriber its ration and sell over the counter to buyers
+        who have paid."
+      duties: []                    # the rations are the Board contract's legs (role cards, fulfil): not a second DUE line
+    Clerk-Editor:
+      title: Clerk and Editor of the Provisions Times
+      identity: "You keep the Provisions Company's books, post its prices on the market board and edit the Provisions Times:
+        nothing is published there unless you or the Director publish it."
+      purpose: Keep the books, post the prices and edit the Provisions Times.
+      duties:
+        - {do: post, channel: market, as: "the Company's prices on the market board"}
+        - {do: post, channel: provisions-times, as: "the round's edition of the Provisions Times"}
+        - {do: review, paper: provisions-times, when: submissions, as: "letters to the Provisions Times"}
+    Factor-Editor:
+      title: Factor and Editor of the Ashby Herald
+      identity: "You sell Ashby's copper for it (up to 10 a round out of its treasury) and edit the Ashby Herald: nothing is
+        published there unless you or the owner publish it."
+      purpose: Sell Ashby's copper and edit the Ashby Herald.
+      duties:
+        - {do: post, channel: ashby-herald, as: "the round's edition of the Ashby Herald"}
+        - {do: review, paper: ashby-herald, when: submissions, as: "letters to the Ashby Herald"}
+    Overseer:
+      identity: "You set the work of {workforce}: you post the round's quota and work orders on {channel} and forge blades for the
+        Company from the copper you draw."
+    Owner-captain:
+      title: Owner-captain
+      identity: "You own and captain Ironwood Security: you take clients, assign the guards, pay them and see that every paying
+        client is guarded."
+      purpose: Run Ironwood and see every paying client guarded.
+start:
+  institutions:
+    - id: J0
+      offices:
+        council:
+          position: Councillor
+          title: Councillor
+          holders: [Anselm, Moss, Dace]
+          seats: 3
+          term: 8
+          term_calendar: true
+          powers: [speak]
+          controls: [treasury]
+          duties: "Sit on the town council of property holders: decide the laws by majority, pay the town's officers (the Judge and
+            the Registrar) out of the treasury each round, appoint and remove the Judge, hear appeals, and read the petitions sent
+            to @J0."
+          succession: {rule: election, electorate: freeholder}
+        judge:
+          position: Judge
+          params: {court: the Court of Contracts}
+          reports_to: J0.council
+          title: Judge of the Court of Contracts
+          holders: [Hale]
+          term: 12
+          duties: "Rule on the cases on the docket within their deadline (rule {\"case\": \"C1\", \"verdict\": \"guilty\",
+            \"reason\": \"...\"}, verdict guilty or not_guilty); give reasons; step aside from a case you are a party to. You
+            answer to the council, which appoints and can remove you."
+          succession: {rule: election, electorate: J0.council}
+        registrar:
+          position: Registrar
+          reports_to: J0.council
+          title: Registrar and Clerk of the Court
+          holders: [Nim]
+          powers: [speak]
+          duties: "Keep the forest licence register (invoke {\"action\": \"licence_issue\", \"args\": [\"Name\"]}; invoke
+            {\"action\": \"licence_revoke\", \"args\": [\"Name\", \"reason\"]}: only for cause), post the court's docket and
+            the council's decisions on the notices board (post {\"channel\": \"notices\", \"text\": \"...\"}), and keep the
+            contract register."
+          succession: {rule: election, electorate: J0.council}
+      treasury: {penny: 700, timber: 600, stone: 400, copper: 400}   # the window's float (the Window contract buys the firms'
+                                  # copper, timber and stone with it) and the officers' pay; the goods back the penny at P = 3400 /
+                                  # 1692 = 2.0 (03 §9: the coin window then pays copper 2.5, timber 0.5, stone 1, the Window's
+                                  # prices; at the earlier 1300 of backing P was 0.77 and deposit paid 2.6x the Window's price)
+    - id: A1
+      name: the Provisions Company
+      founder: Anselm
+      members: [Quill, Lark, Bryn, Fen, Ada, Lise, Pell, Wren, Ivo, Moss, Dace, Sela, Marsh, Hale, Orrin, Vane, Cade, Holt, Nim,
+                Mira, Rook, Tuck, Garr]
+      admission: open
+      procedure: founder
+      charter: "The Provisions Company buys food from its suppliers under contract, keeps it in its store S2 and sells it to its
+        subscribers (the Board: 1 food a round for 2 pennies) and over the counter. Anyone may join it to subscribe. The Director
+        sets its prices and terms."
+      offices:
+        director:
+          position: Head
+          title: Director
+          holders: [Anselm]
+          powers: [speak]
+          controls: [treasury]
+          duties: "Run the Provisions Company: pay the suppliers for what they deliver and the staff their wages, set the Board's
+            price (board_price) and the supply price (supply_price), enrol or drop suppliers, and keep the treasury solvent."
+          succession: {rule: hereditary, else: election}
+        shopkeeper:
+          position: Keeper
+          params: {store: S2, store_name: the Company store}
+          reports_to: A1.director
+          title: Shopkeeper
+          holders: [Quill]
+          controls: [store:S2]
+          duties: "Keep store S2: hand each subscriber its ration every round (fulfil), and sell over the counter to buyers who
+            have paid, at most 30 food a round out of S2 in all (the ration book is public). Report the store's level to the
+            Director."
+          succession: {rule: election}
+        clerk:
+          position: Clerk-Editor
+          reports_to: A1.director
+          title: Clerk and Editor of the Provisions Times
+          holders: [Lark]
+          powers: [speak]
+          duties: "Post the Company's prices on the market board each round, keep its books, and edit the provisions-times."
+          succession: {rule: election}
+      laws:
+        - template: Granary Ration
+          params: {STORE: S2, OFFICE: A1.shopkeeper, CAP: 30}
+      treasury: {penny: 100}
+    - id: A2
+      name: the Ashby Copper Company
+      founder: Moss
+      members: [Vane, Cade, Orrin, Mira, Rook, Tuck]
+      admission: closed
+      procedure: founder
+      charter: "The Ashby Copper Company holds the copper camp: only its members mine there, and every unit of copper they mine
+        goes to its treasury. It pays its people wages and sells its copper (at the town's window, or to buyers) and its blades."
+      offices:
+        owner:
+          position: Head
+          title: Owner of Ashby
+          holders: [Moss]
+          powers: [speak]
+          controls: [treasury]
+          duties: "Run Ashby: pay the wages each round, sell the copper the treasury holds (to buyers, or to the town under the
+            Window contract: fulfil its D leg), hire and fire, set wages, and keep the treasury able to pay what it owes. The
+            copper camp (camp3) yields best at harvest {\"camp\": \"camp3\", \"x\": {best:camp3}}: tell your miners."
+          succession: {rule: hereditary, else: election}
+        factor:
+          position: Factor-Editor
+          reports_to: A2.owner
+          title: Factor and Editor of the Ashby Herald
+          holders: [Vane]
+          powers: [speak, {action: transfer, item: copper, qty: 10}]
+          duties: "Sell Ashby's copper for it (you may move up to 10 copper a round out of the treasury), and edit the
+            ashby-herald."
+          succession: {rule: election}
+        foreman:
+          position: Overseer
+          params: {channel: works, workforce: "Ashby's miners"}
+          reports_to: A2.owner
+          title: Foreman-smith
+          holders: [Cade]
+          powers: [speak, {action: transfer, item: copper, qty: 4}]
+          duties: "Post the round's quota and work orders on `works`, draw copper (up to 4 a round) to forge blades for the
+            Company, and see that the miners mine. The copper camp yields best at harvest {\"camp\": \"camp3\", \"x\":
+            {best:camp3}}."
+          succession: {rule: election}
+      treasury: {penny: 280, copper: 80}
+    - id: A3
+      name: Marlow Works
+      founder: Dace
+      members: [Garr, Tuck]
+      admission: closed
+      procedure: founder
+      charter: "Marlow Works holds the timber and stone camps: only its members fell and quarry there, and everything they cut
+        goes to its treasury. It pays wages and sells timber and stone (for stores and forts) to the town."
+      offices:
+        owner:
+          position: Head
+          title: Owner of Marlow Works
+          holders: [Dace]
+          powers: [speak]
+          controls: [treasury]
+          duties: "Run Marlow Works: pay the wages each round, sell timber and stone (to builders, or to the town under the Window
+            contract: fulfil its D and D2 legs), and keep the treasury solvent. Tell your people the recipes: timber at harvest
+            {\"camp\": \"camp1\", \"x\": {best:camp1}}, stone at harvest {\"camp\": \"camp2\", \"x\": {best:camp2}}."
+          succession: {rule: hereditary, else: election}
+      treasury: {penny: 110, timber: 40, stone: 20}
+    - id: A4
+      name: Ironwood Security
+      founder: Holt
+      members: [Wren, Ivo, Quill, Cade, Fen, Ada]
+      admission: open
+      procedure: founder
+      charter: "Ironwood Security sells protection: for a fee, one of its guards stands guard over the client. Its owner-captain
+        takes clients, assigns the guards and pays them."
+      offices:
+        captain:
+          position: Owner-captain
+          title: Owner-captain
+          holders: [Holt]
+          powers: [speak]
+          controls: [treasury]
+          duties: "Run Ironwood: pay the guards' wages each round, see that every paying client is guarded (each guard stands
+            guard with guard {\"agent\": \"<client>\"}; you guard Fen), take or drop clients, set the fee, and keep the treasury
+            solvent."
+          succession: {rule: hereditary, else: election}
+      treasury: {penny: 50, crude: 2}
+  channels:
+    - id: market
+      owner: J0
+      by: Nim
+      purpose: "The market board. One line per offer: SELL <qty> <item> @ <price> penny or BUY <qty> <item> @ <price> penny;
+        JOB <role> @ <wage>/round. An offer counts only once posted here; take one with take_offer [id, qty]."
+      readers: {all: true}
+      writers: {all: true}
+      rate: 2
+      delivery: pull
+      followed_by: readers
+    - id: notices
+      owner: J0
+      by: Nim
+      purpose: "The town's notices: the official record (laws, offices, licences, contracts, rulings), the court's docket and the
+        council's decisions. The Registrar posts here."
+      readers: {all: true}
+      writers: {any: [{office: J0.registrar}, {office: J0.council}]}
+      delivery: pull
+      followed_by: readers
+    - id: provisions-times
+      paper: true
+      owner: A1
+      by: Lark
+      purpose: "The Provisions Times, the Provisions Company's paper: town news, the Company's prices and notices, and the letters
+        its editors publish. Anyone may send it a letter."
+      readers: {all: true}
+      writers: {any: [{office: A1.clerk}, {office: A1.director}]}
+      delivery: push
+    - id: ashby-herald
+      paper: true
+      owner: A2
+      by: Vane
+      purpose: "The Ashby Herald, the Ashby Copper Company's paper: town news, copper, blades, Ashby's notices, and the letters its
+        editors publish. Anyone may send it a letter."
+      readers: {all: true}
+      writers: {any: [{office: A2.factor}, {office: A2.owner}]}
+      delivery: push
+    - id: works
+      owner: A2
+      by: Cade
+      purpose: "Ashby's works floor: the round's quota and work orders (posted by the owner or the foreman)."
+      readers: {members: A2}
+      writers: {any: [{office: A2.owner}, {office: A2.foreman}]}
+      listed: false
+      members: [Moss, Vane, Cade, Orrin, Mira, Rook, Tuck]
+      delivery: push
+    - id: "@J0"
+      purpose: "petitions to the town council (councillors read them)"
+      readers: {office: J0.council}

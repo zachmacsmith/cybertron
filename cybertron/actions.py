@@ -152,6 +152,8 @@ def _act(k, aid: str, name: str, args: dict) -> str:
     from cybertron import lawguide as _LGD                              # review 31.14: draft only where a legal archive exists
     if not _LGD.on(k):
         hidden_here.add("draft")
+    from cybertron import papers as _PP                                  # review 33: submit and decline only with channels.papers
+    hidden_here |= _PP.hidden(k)
     sub = "subsistence" in k.w
     if not sub:                                                         # review 15: farm, withdraw, build only with subsistence on
         hidden_here |= set(SUBSISTENCE_ACTIONS)
@@ -208,6 +210,9 @@ def _act(k, aid: str, name: str, args: dict) -> str:
     fn = AR.resolve(CH.OVERRIDES[name] if name in CH.OVERRIDES and CH.on(k) else AR.REG[name].handler)   # channels.v2: post ...
     if name in _LGD.FILE_ACTIONS and isinstance(args, dict) and "draft" in args:   # review 31.14: file a draft by reference
         args = _LGD.with_draft(k, aid, args)
+    if name == "publish" and isinstance(args, dict) and ("submission" in args or "letter" in args) and _PP.on(k):
+        fn = AR.resolve("papers:act_publish")                          # review 33: publish {"submission"}: a letter to a paper
+        args = {"submission": args.get("submission") or args.get("letter")}
     forgiving = _forgiving(k)
     if forgiving:
         args = _forgive(k, aid, name, args)

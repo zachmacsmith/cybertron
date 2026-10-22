@@ -280,6 +280,10 @@ def prompt_section(inst: dict, a: dict) -> str:
     known = "; ".join(f"{TITLES[x]}: {', '.join(h.get(x) or []) or 'nobody'}" for x in ("scholar", "maker", "media")
                       + tuple(x for x in OPTIONAL if x in h))
     out = [f"Known roles in this world (public): {known}. Roles are separate from classes; their holders keep their class."]
+    from cybertron import positions as PS                                # review 33: context.identity positions has no classes
+    if PS.identity_on(inst):
+        out[0] = out[0].replace("separate from classes; their holders keep their class", "separate from positions; their holders keep "
+                                "their positions")
     for x in ROLES:
         if a["id"] in (h.get(x) or []):
             out.append(role_text(inst, x))

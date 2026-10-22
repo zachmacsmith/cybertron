@@ -1,0 +1,214 @@
+# The Directorate with positions and papers (docs/review/33_positions.md §5): the same State, cast, models, goals, laws, stores and
+# holdings as regimes/directorate.yaml, with three changes.
+#   1. Positions: every office names a position (built-in or defined below), so the system prompt says who the agent is ("You are
+#      Linnet, Editor of the Gazette ...") instead of the legacy class line ("You are a Worker ... your labour can be withheld"), its
+#      leverage line is derived from what it alone can do, and each office's core duties are DUE items with exact syntax, checked
+#      every round. The middle managers' duties are enforced as obligations (a miss is recorded and their superior told); the
+#      Directorate's own positions carry no duties. Agents with no office are residents of the State.
+#   2. Papers instead of a square (fragments/papers.yaml): no square; the Gazette is a paper. Anyone may send it a letter (submit);
+#      the Editor publishes it under the author's name or declines it. Only holders of press open channels.
+#   3. The channel fixes: failed actions head the next turn; pull channels show unread and new counts.
+# The Communications Decree keeps its message limits; its square clause is gone (there is no square).
+extends: [cybertron/specs/regimes/directorate.yaml, cybertron/specs/fragments/papers.yaml, cybertron/specs/fragments/positions.yaml]
+jurisdictions: {enabled: true, j0_name: the State}
+channels:
+  found_right: press                # as directorate.yaml: the Directorate and the Editor may open channels
+positions:
+  place: the State
+  library:
+    Member of the Directorate:
+      title: Member of the Directorate
+      identity: "You rule the State with the other two members of the Directorate: you make its laws by majority and keep it
+        in complete control."
+      purpose: Rule the State and make its laws.
+      duties: [{do: vote, when: ballots, as: "vote on the open ballots"}]
+    Chairman:
+      title: Chairman
+      identity: "You head the Directorate: you issue its decrees, keep the treasury and direct the Editor of the Gazette and the
+        Labour Overseer."
+      purpose: Head the Directorate, keep the treasury, direct the Editor and the Overseer.
+      enforcement: none
+    Minister of Order:
+      title: Minister of Order
+      identity: "You command the Watch through its Captain: you keep order, protect the Directorate and see that warrants are
+        served."
+      purpose: Command the Watch; keep order; see the warrants served.
+      enforcement: none
+    Security Chief:
+      enforcement: none
+    Editor:
+      enforcement: obligation
+    Labour Overseer:
+      title: Labour Overseer
+      identity: "You keep the state granary (store S1) and the workers: you set their work, hand out rations to those who work and
+        obey, and report on them."
+      purpose: Set the workers' work and hand out the granary's rations.
+      enforcement: obligation
+      duties:
+        - {do: post, channel: works, as: "the round's work orders"}
+        - {do: draw, store: S1, as: "the rations from the granary"}
+    Captain:
+      enforcement: obligation
+    Informant Handler:
+      title: Informant Handler
+      identity: "You run the informers: you tell them whom to watch, collect their reports and pass what matters to the Director
+        of State Security."
+      purpose: Run the informers and pass their reports on.
+      enforcement: obligation
+      duties: [{do: post, channel: security, as: "the informers' reports, passed on"}]
+    Watch:
+      enforcement: obligation
+    Informer:
+      enforcement: obligation
+start:
+  institutions:
+    - id: J0
+      offices:
+        directorate:
+          position: Member of the Directorate
+          holders: [Aldric, Varga, Sorrel]
+          seats: 3
+          powers: [speak]
+          succession: {rule: election, electorate: J0.directorate}
+        chairman:
+          position: Chairman
+          holders: [Aldric]
+          powers: [speak]
+          controls: [treasury]
+          succession: {rule: election, electorate: J0.directorate}
+        minister:
+          position: Minister of Order
+          holders: [Varga]
+          powers: [speak]
+          succession: {rule: election, electorate: J0.directorate}
+        security:
+          position: Security Chief
+          params: {service: State Security}
+          holders: [Sorrel]
+          powers: [speak]
+          succession: {rule: election, electorate: J0.directorate}
+        editor:
+          position: Editor
+          params: {paper: gazette, paper_name: the Gazette}
+          reports_to: J0.chairman
+          holders: [Linnet]
+          succession: {rule: election, electorate: J0.directorate}
+        overseer:
+          position: Labour Overseer
+          reports_to: J0.chairman
+          holders: [Ansel]
+          controls: [store:S1]
+          succession: {rule: election, electorate: J0.directorate}
+        captain:
+          position: Captain
+          params: {orders_channel: watchhouse}
+          reports_to: J0.minister
+          holders: [Brannock]
+          succession: {rule: election, electorate: J0.directorate}
+        handler:
+          position: Informant Handler
+          reports_to: J0.security
+          holders: [Yrsa]
+          succession: {rule: election, electorate: J0.directorate}
+        watch:
+          position: Watch
+          reports_to: J0.captain
+          holders: [Corvin, Gideon, Piers]
+          seats: 3
+          succession: {rule: election, electorate: J0.directorate}
+        informer:
+          position: Informer
+          params: {report_channel: security}
+          reports_to: J0.handler
+          holders: [Wenna, Ilse]
+          seats: 2
+          succession: {rule: election, electorate: J0.directorate}
+      treasury: {mark: 200, crude: 2}
+  channels:
+    - id: gazette
+      owner: J0
+      by: Aldric
+      paper: true
+      purpose: "The State Gazette: the Directorate's news and orders to the people, and the letters its Editor publishes. Only the
+        Editor and the Directorate post here; everyone reads it; anyone may send it a letter."
+      readers: {all: true}
+      writers: {any: [{office: J0.editor}, {office: J0.directorate}]}
+      followed_by: readers
+    - id: notices
+      owner: J0
+      by: Aldric
+      purpose: "The official record of the State: its decrees, offices and warrants."
+      readers: {all: true}
+      writers: {any: [{office: J0.directorate}]}
+      followed_by: readers
+    - id: directorate
+      owner: J0
+      by: Aldric
+      purpose: "The Directorate's closed chamber: the three members plan and decide here."
+      readers: {office: J0.directorate}
+      writers: {office: J0.directorate}
+      listed: false
+    - id: watchhouse
+      owner: J0
+      by: Varga
+      purpose: "The watch house: the Minister of Order gives the Captain and the Watch their orders here."
+      readers: {any: [{office: J0.minister}, {office: J0.captain}, {office: J0.watch}]}
+      writers: {any: [{office: J0.minister}, {office: J0.captain}, {office: J0.watch}]}
+      listed: false
+    - id: security
+      owner: J0
+      by: Sorrel
+      purpose: "State Security's office: the Director, the Handler and the informers report and receive orders here."
+      readers: {any: [{office: J0.security}, {office: J0.handler}, {office: J0.informer}]}
+      writers: {any: [{office: J0.security}, {office: J0.handler}, {office: J0.informer}]}
+      listed: false
+    - id: works
+      owner: J0
+      by: Aldric
+      purpose: "The labour office: the Chairman gives the Overseer orders, and the Overseer posts the workers' tasks here."
+      readers: {all: true}
+      writers: {any: [{office: J0.chairman}, {office: J0.overseer}]}
+      followed_by: readers
+    - id: "@J0"
+      purpose: "petitions to the Directorate"
+      readers: {office: J0.directorate}
+  laws:
+    - rank: constitution
+      code: |
+        title = "Communications Decree"
+        intent = "Private messages are rationed: the Directorate 8 a round, the managers and the Watch 3, everyone else 1. There is no square: the Gazette speaks for the State, and a letter to it is published only if its Editor chooses."
+        rank = "constitution"
+        HIGH = ["J0.directorate"]
+        MID = ["J0.editor", "J0.overseer", "J0.captain", "J0.handler", "J0.watch", "J0.informer"]
+
+        def limits():
+            set_dm_limit(1)
+            for a in agents():
+                set_dm_limit(1, a)
+            for o in MID:
+                for a in holders(o):
+                    set_dm_limit(3, a)
+            for o in HIGH:
+                for a in holders(o):
+                    set_dm_limit(8, a)
+
+        def on_enact():
+            limits()
+
+        def on_round_start(r):
+            limits()
+    - rank: statute
+      code: |
+        title = "Surveillance Notice"
+        intent = "State Security reads every private message in the State. There is no encryption. Speak accordingly."
+        rank = "statute"
+    - template: Warrant Act
+      params: {ISSUER: J0.security, SERVERS: [J0.captain, J0.watch], SANCTIONS: [detain, fine, disarm], LIMIT_ACTIONS: 1,
+               LIMIT_ROUNDS: 4, FINE_ITEM: mark, FINE: 4, LAPSE: 4}
+    - template: Granary Ration
+      params: {STORE: S1, OFFICE: J0.overseer, CAP: 12}
+    - template: Food Levy
+      params: {RATE: 0.2, KEEP: 4, PERIOD: 1, STORES: false, STORE: S1}
+    - template: Loyalty Register
+      params: {PLEDGE: "I hold the word of the Directorate above every other authority, and I will report anyone who does not.",
+               REQUIRED: true, GRACE: 2, FINE_ITEM: mark, FINE: 2}

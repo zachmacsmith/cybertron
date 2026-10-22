@@ -821,6 +821,11 @@ def act_post(k, aid, text, channel=None, **kw):
         if channel in (None, "") and len(sq) != 1:
             mine = [c for c in sq if can_write(k, aid, k.w["channels"][c])]
             if len(mine) != 1:
+                from cybertron import papers as PP
+                if not sq and PP.on(k):                                 # review 33: no square; letters to the papers
+                    raise _err("there is no square: public speech goes through the papers (" + (", ".join(PP.papers(k)) or "none")
+                               + "): submit {\"paper\": \"<id>\", \"text\": \"...\"}, or post {\"channel\": \"<id>\", \"text\": \"...\"} in a "
+                               "channel you may write in")
                 raise _err("name the square to post in (\"channel\"): " + (", ".join(mine) or "you are at no camp's square"))
             channel = mine[0]
         elif channel in (None, ""):
@@ -917,6 +922,8 @@ def act_open_channel(k, aid, name, purpose="", readers=None, writers=None, liste
     readers = check_selector(readers if readers is not None else t.get("readers", {"all": True}), "readers", extra_selectors(k))
     writers = check_selector(writers if writers is not None else t.get("writers", {"all": True}), "writers", extra_selectors(k))
     listed = t.get("listed", True) if listed is None else bool(listed)
+    from cybertron import papers as PP                                  # review 33: papers worlds open no new square
+    PP.check_open(k, aid, readers, writers)
     rate = t.get("rate") if rate is None else rate
     if identity not in IDENTITIES or retention not in RETENTIONS:
         raise _err(f"identity is {' or '.join(IDENTITIES)}; retention is {' or '.join(RETENTIONS)}")
@@ -967,6 +974,9 @@ def act_set_channel(k, aid, channel, field, value=None):
         raise _err("followed_by is subscribers (the default: who joins it) or readers (everyone who can read it follows it)")
     elif key in ("readers", "writers"):
         value = check_selector(value, key, extra_selectors(k))
+        from cybertron import papers as PP                              # review 33: papers worlds open no new square
+        PP.check_open(k, aid, value if key == "readers" else ch["readers"], value if key == "writers" else ch["writers"],
+                      ch=ch)
     elif key in ("listed", "inbox"):
         if not isinstance(value, bool):
             raise _err(f"{key} is true or false")
@@ -1145,6 +1155,45 @@ def unread(k, aid, cid, heads=1) -> tuple:
     return n, latest
 
 
+def unread_new(k) -> bool:
+    """Spec channels.unread_new (review 33 §5, channel fixes; not frozen: absent is off): pull channels show "X unread, Y new since
+    last round" and their headline is the latest post that is not the engine's official record."""
+    return bool((_spec(k).get("channels") or {}).get("unread_new"))
+
+
+def unread_split(k, aid, cid) -> tuple:
+    """(unread, of them posted since the start of last round, the latest unread post that is not an official record or None)."""
+    seqs = _st(k)["log"].get(cid) or []
+    mark = _st(k)["read"].get(aid, {}).get(cid, 0)
+    n = new = 0
+    head = None
+    for s in seqs[bisect.bisect_right(seqs, mark):]:
+        e = k.events[s - 1] if s - 1 < len(k.events) else None
+        if e is None or e.get("agent") == aid or not k.can_see(aid, e):
+            continue
+        n += 1
+        if e.get("round", 0) >= k.r - 1:
+            new += 1
+        d = e.get("data") or {}
+        if not d.get("record") and d.get("as") != RECORD_AS:
+            head = e
+    return n, new, head
+
+
+def new_since(k, aid, cid) -> int:
+    """Review 33 (channels.unread_new): posts in a channel since the start of last round that the agent can see, not its own."""
+    n = 0
+    for s in reversed(_st(k)["log"].get(cid) or []):
+        e = k.events[s - 1] if s - 1 < len(k.events) else None
+        if e is None:
+            continue
+        if e.get("round", 0) < k.r - 1:
+            break
+        if e.get("agent") != aid and k.can_see(aid, e):
+            n += 1
+    return n
+
+
 def editions(k, aid, since) -> list:
     """Edition delivery (review 31.04 §5.2 item 6): for each channel with effective delivery edition that the agent follows, the
     posts of the rounds completed since its last look (rounds from the round of event `since` up to the last one) as one digest
@@ -1194,8 +1243,10 @@ def writable_line(k, aid) -> list:
     def row(ch):
         n = sum(1 for x in others if can_read(k, x, ch))                     # who it reaches (readers by any rule, not only followers)
         return f"{ch['id']} (read by {n} other{'' if n == 1 else 's'}): {ch['purpose'] or 'no purpose given'}"
+    tail = "a post without a channel goes to the square." if squares(k) or not (_spec(k).get("channels") or {}).get("papers") \
+        else "there is no square."                                      # review 33: papers worlds
     return ["You can post in: " + "; ".join(row(ch) for ch in sorted(mine, key=lambda c: c["id"]))
-            + ". Post there with post {\"channel\": \"<id>\", \"text\": \"...\"}; a post without a channel goes to the square."]
+            + ". Post there with post {\"channel\": \"<id>\", \"text\": \"...\"}; " + tail]
 
 
 def state_lines(k, aid) -> list:
@@ -1207,6 +1258,9 @@ def state_lines(k, aid) -> list:
     out = [own]
     if by["push"] or not pull(k):
         names = ", ".join(sorted(c["id"] for c in by["push"]))
+        if unread_new(k) and by["push"]:                                # review 33: how much each pushed channel had last round
+            names = ", ".join(c + (f" ({n} new since last round)" if n else "")
+                              for c, n in ((c["id"], new_since(k, aid, c["id"])) for c in sorted(by["push"], key=lambda c: c["id"])))
         out.append("Channels you follow: " + (names or "none") + " (read {} lists the directory).")
     if by["pull"] or (pull(k) and not by["push"]):
         heads = max(1, int(cfg(k)["board_headlines"]))
@@ -1216,7 +1270,12 @@ def state_lines(k, aid) -> list:
             rows.append((n, ch["id"], latest))
         rows.sort(key=lambda x: (-x[0], x[1]))
         cap = int(cfg(k)["headlines"])
-        if heads == 1:
+        if unread_new(k):                                               # review 33: counts of new posts, headlines not the record
+            parts = []
+            for n, cid, _ in rows[:cap]:
+                tot, new, head = unread_split(k, aid, cid)
+                parts.append(f"{cid} {tot} unread, {new} new since last round" + (f", latest {_headline(head)}" if head is not None else ""))
+        elif heads == 1:
             parts = [f"{cid} {n} unread" + (f", latest {_headline(e)}" if e is not None else "") for n, cid, e in rows[:cap]]
         else:
             parts = [f"{cid} {n} unread" + (", latest " + " | ".join(_headline(e) for e in reversed(es)) if es else "")

@@ -119,6 +119,9 @@ def _memory(v):
 @SC.section("Your role")
 def _role(v):
     from cybertron import agents as AG
+    from cybertron import positions as PS
+    if PS.identity_on(v.inst):                                          # review 33: the positions held, purposes and duties
+        return PS.role_text(v.inst, v.k, v.a)
     return AG.class_brief(v.inst, v.a, archive_index=False)
 
 

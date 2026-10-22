@@ -403,6 +403,8 @@ def legacy_actions(inst: dict, a: dict) -> list:
     absent |= {n for n, x in AR.REG.items() if x.module == "subsistence"}   # review 15: the legacy prompt never sees subsistence (D-4)
     absent |= AR.hidden(sp)                                             # review 14 A: the design arm's flags (read_library unless asked)
     absent |= AR.channel_hidden(sp)                                     # wave 9 C: channels.v2's verbs only where it is on
+    from cybertron import papers as _PP                                  # review 33: submit, decline only with channels.papers
+    absent |= _PP.hidden(inst)
     out = [k for k in ACTION_DOC if k not in absent] + {
         "board": ["veto"], "fixer": ["patch"], "scientist": ["read_archive", "search_archive", "write_archive"],
         "media": ["publish", "write_digest", "report", "create_channel", "add_member", "remove_member", "close_channel"]}.get(a["cls"], []) + (["rule"] if lvl >= 2 else []) \
@@ -771,6 +773,8 @@ def state_view(k, aid: str) -> str:
         lines += part                                                   # credit, channels, projects ... media2 (features.TAILS order)
     from cybertron import institutions as _IN                              # established worlds: the offices held and their duties
     lines += _IN.office_lines(k, aid)                                    # (institutions.office_control; off: none)
+    from cybertron import papers as _PP, positions as _PS                # review 33: positions' DUE items, papers' letters (each
+    lines += _PS.state_lines(k, aid) + _PP.state_lines(k, aid)           # opt-in; none: nothing)
     return "\n".join(lines)
 
 

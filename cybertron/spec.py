@@ -72,6 +72,7 @@ def load(name_or_path: str, _seen: tuple = ()) -> dict:
     out = _merge_file(merged, raw)
     if not _seen:
         warn_frozen(out, path.name)
+        check_channel_setup(out, path, declares_channels(path))
     return out
 
 
@@ -88,6 +89,63 @@ def warn_frozen(spec: dict, name: str = "spec") -> None:
     m = (spec or {}).get("media2")
     if isinstance(m, dict) and m.get("enabled") not in (None, False):
         warnings.warn(f"{name}: {MEDIA2_FROZEN}", FrozenModuleWarning, stacklevel=3)
+
+
+# ---------------------------------------------------------------------- review 33: the channel setup is a per-scenario decision
+STRICT_DIRS = ("regimes",)                                              # specs here must declare it (an error, not a warning)
+QUIET_DIRS = ("fragments",)                                             # presets, not worlds: never checked on their own
+GENERIC_SETUP = ("fragments/channels_v2.yaml",)                        # switches channels v2 on with the engine's square: no decision
+
+
+class ChannelSetupWarning(UserWarning):
+    pass
+
+
+def _rel(path):
+    try:
+        return Path(path).resolve().relative_to(SPEC_DIR.resolve())
+    except ValueError:
+        return None
+
+
+def declares_channels(name_or_path, _seen: tuple = ()) -> bool:
+    """Whether the file, or a file it extends other than the generic presets (GENERIC_SETUP), sets channels.square or
+    channels.papers: the world chose its public channels rather than inheriting the engine's one square."""
+    path = _find(name_or_path)
+    if str(path) in _seen:
+        return False
+    raw = _parse(path.read_text())
+    rel = _rel(path)
+    ch = raw.get("channels") if isinstance(raw.get("channels"), dict) else {}
+    if (rel is None or rel.as_posix() not in GENERIC_SETUP) and ("square" in ch or "papers" in ch):
+        return True
+    return any(declares_channels(x, _seen + (str(path),)) for x in raw.get("extends") or ())
+
+
+def check_channel_setup(spec: dict, path=None, declared: bool = True) -> str | None:
+    """Review 33: a channels-v2 world's public channels are a deliberate per-scenario decision, never a silent fallback to the
+    engine's open square. When the loaded spec does not declare them (declares_channels: channels.square or channels.papers set by
+    the world or a world it extends; or, positions.channel_setup_problem, square none with no paper), a ChannelSetupWarning names
+    what it fell back to; for specs under cybertron/specs/regimes/ and worlds using positions it is an error. The resolved spec is
+    never changed."""
+    from cybertron import positions as PS
+    rel = _rel(path) if path is not None else None
+    if rel is not None and len(rel.parts) > 1 and rel.parts[0] in QUIET_DIRS:
+        return None
+    why = PS.channel_setup_problem(spec)
+    if not why and not declared and (spec.get("channels") or {}).get("v2"):
+        why = ("channels.v2 is on but the world does not declare its channel setup: it inherits the engine's default "
+               f"channels.square: {(spec.get('channels') or {}).get('square', 'one')} from a generic preset. Decide it: set "
+               "channels.square (one | per_camp | none) in the world's spec and, with none, declare the papers (channels.papers "
+               "and start.channels entries with paper: true; cybertron/specs/fragments/papers.yaml)")
+    if not why:
+        return None
+    strict = PS.in_use(spec) or (rel is not None and len(rel.parts) > 1 and rel.parts[0] in STRICT_DIRS)
+    if strict:
+        raise ValueError(f"{path}: {why}")
+    import warnings
+    warnings.warn(f"{path}: {why}", ChannelSetupWarning, stacklevel=3)
+    return why
 
 
 # Named placements a file clears by setting them to {} (merging {} into an inherited mapping kept every entry: haiku100's
