@@ -35,6 +35,16 @@ byte-identical replays, apply to cybertron2 only once its runs start to matter.)
 
 ## Log
 
+### 22 Oct (night, buildings from parts)
+
+- Zach: channels as rooms groups can book; a ladder for buildings that branches by specialisation; rather than template buildings,
+  rooms, capacities and fittings with resource costs (a room to sleep, a room to talk, a hearth, cooking, workshops, archives).
+  Wrote 02i_buildings.md: functions attach to fittings, not building types; structure (material sets breaks and fire), rooms (size
+  sets people and fitting slots; a room gives a roof and a speech scope), a closed vocabulary of 17 fittings each with one hook
+  (the hearth gives warmth and cooking, which a room alone does not); rooms as bookable channels; the branching ladder from a lean-to
+  to a printing house; limits against a sandbox (slots, land, upkeep, sites, fire from forges and kilns); blueprints as named sets
+  of parts so building stays one action.
+
 ### 22 Oct (night, information in space)
 
 - Zach: private messages to anyone at the same node; buildings as access to information (you hear what is said in the buildings you
