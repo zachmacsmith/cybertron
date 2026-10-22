@@ -1069,7 +1069,7 @@ DOCS = {
     "life.reproduction.promotion.p_hi": "the chance once the parents gave maturity x ration food beyond the provisions",
     "life.reproduction.raising": "37.1: what coming of age decides, by the food the parents gave the child",
     "life.reproduction.raising.mode": ("inherit: the parents' shared value may become the primary goal (as before); family: the child "
-                                       "takes up a parent's cause (Ally), goes its own way, or turns against it (Foil)"),
+                                       "takes the parent's own goal as its primary, goes its own way, or turns against the parent (Foil)"),
     "life.reproduction.raising.loyal": "family: [chance with no food beyond the provisions, chance with full investment] of the cause",
     "life.reproduction.raising.estranged": "family: chance of turning against the parent with no food beyond the provisions",
     "life.reproduction.raising.minor_frailty": "a minor's starvation hazard base (null: its own frailty)",

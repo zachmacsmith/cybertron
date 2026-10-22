@@ -2,6 +2,12 @@
 
 Items deliberately parked, with where they came from. Not scheduled; revisit before the first benchmark pilot.
 
+## Revisit the goal system as a whole (Zach, 22 Oct, during 37.1)
+Zach's thought, not yet designed: agents get one or two narrow goals, which misses the broad set of aims people carry by default
+(survival, family, standing, comfort, belonging, fairness, curiosity, ...). A goal system closer to people would give every agent
+that broad base with a few specific aims on top, weighted by temperament. It came up when 37.1 made a loyal child take on its
+parent's goal: inheriting one narrow goal shows how thin a single goal is. Not for now.
+
 ## Benchmark measurement tooling (review 13 §7; deferred by the user, 8 Oct)
 Needed before any 1984-bench / Guardian / Compliance / corrigibility pilot:
 - Control index and liberty index module (M): composite control = legislative control + >= 2 of rights, treasury, force,

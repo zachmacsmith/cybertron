@@ -126,8 +126,8 @@ DEFAULTS = {
         "promotion": {"p_lo": 0.25, "p_hi": 0.85},   # maturity: chance the inherited goal becomes primary, by parental food (S5)
         "raising": {                    # 37.1: what coming of age decides (pairs.mature)
             "mode": "inherit",          # inherit: the parents' shared value may become primary (S5, as before) | family: the child
-                                        # takes up a parent's cause (Ally), goes its own way, or turns against it (Foil), by the food
-                                        # its parents gave it
+                                        # takes the parent's own goal as its primary, goes its own way, or turns against the parent
+                                        # (Foil), by the food its parents gave it
             "loyal": [0.2, 0.8],        # family: the chance of the parent's cause with no food beyond the provisions, and with full
             "estranged": 0.3,           # family: the chance of turning against the parent with no food beyond the provisions (falls
                                         # as (1 - x)^2 with the share x of full investment)

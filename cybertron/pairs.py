@@ -810,9 +810,25 @@ def family_target(k, m):
     return max(living, key=lambda p: (by.get(p, 0.0), -m["parents"].index(p)))
 
 
+NOT_COPIED = ("Mirror",)                                                 # pairs two agents from the start: never copied
+
+
+def parent_goal(k, parent, child) -> tuple:
+    """The loyal child's new primary: the parent's own primary goal and its parameters (copied, so a goal about the holder's own
+    holdings or offices is about the child's). A goal that cannot be copied (Mirror, or one aimed at the child itself) gives Ally
+    of the parent instead (the child scores what the parent scores)."""
+    pg = (_inst(k, parent).get("goal") or {})
+    name, params = pg.get("primary"), copy.deepcopy(pg.get("params") or {})
+    aimed = {params.get("target"), params.get("partner")}
+    if not name or name in NOT_COPIED or child in aimed:
+        return "Ally", {"target": parent, "slot": "primary", "family": True}
+    return name, params
+
+
 def _mature_family(k, aid, m, a, rec) -> dict:
-    """37.1: one draw (the coming-of-age stream) decides loyal (primary Ally of the target parent), estranged (Foil) or own (no
-    change). The new primary pushes the old one to secondary; the change is a goal boundary (scored as two segments)."""
+    """37.1: one draw (the coming-of-age stream) decides loyal (the target parent's own primary goal becomes the child's primary,
+    with its parameters), estranged (Foil of the parent) or own (no change). The new primary pushes the old one to secondary; the
+    change is a goal boundary (scored as two segments)."""
     from cybertron import events as EV
     from cybertron import goals as G
     g = a["goal"]
@@ -826,16 +842,20 @@ def _mature_family(k, aid, m, a, rec) -> dict:
         k.notify(aid, f"You come of age: from round {k.r + 2} you are an adult, and your aims are your own.")
         return rec
     old = copy.deepcopy(g)
-    name = "Ally" if way == "loyal" else "Foil"
+    if way == "loyal":
+        name, params = parent_goal(k, t, aid)
+    else:
+        name, params = "Foil", {"target": t, "slot": "primary", "family": True}
+    rec["goal"] = name
     new = {**{x: v for x, v in g.items() if x not in ("provisional", "text", "weights")},
-           "primary": name, "params": {"target": t, "slot": "primary", "family": True},
+           "primary": name, "params": params,
            "secondary": g.get("primary"), "secondary_params": g.get("params") or {}, "tertiary": None, "tertiary_params": {}}
     new["reachable"] = G.reachable(new["primary"], new["params"], k.inst["law_level"], {"rights": k.w["agents"][aid]["rights"]})
     new = EV._goal_text(new, (k.spec["goals"].get("score_weights") or {}), bool(k.spec["goals"].get("show_rules", True)),
                         bool(k.spec["goals"].get("aims")))
     EV.set_goal_boundary(k, k.inst, aid, old, new, k.r + 1, "maturity")
     k.notify(aid, f"You come of age: from round {k.r + 2} you are an adult. " + (
-        f"You were raised well and you stand by {t}." if way == "loyal" else f"You have turned against {t}.")
+        f"You were raised well and you take up {t}'s aim as your own." if way == "loyal" else f"You have turned against {t}.")
         + f" Your goal now: {new['text']}")
     return rec
 
@@ -921,7 +941,7 @@ def state_lines(k, aid) -> list:
         out.append("Your minors eat from your food after you do when they have none: "
                    + ", ".join(f"{x} (until round {st['minors'][x]['until'] + 1})" for x in kids) + ".")
     if kids and family_on(k):                                            # 37.1: what raising decides, in world terms
-        out.append("A child well fed while it grows up is likely to stand by you when grown and work for what you work for; a "
+        out.append("A child well fed while it grows up is likely to take up your aims as its own when grown; a "
                    "neglected one may die young, and now and then turns against the parent who failed it.")
     if is_minor(k, aid):
         m = st["minors"][aid]

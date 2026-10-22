@@ -218,3 +218,13 @@ Dropped (Zach, 22 Oct): automatic or hazard births (fertility stays a choice), d
   loses children often.
 - **Next:** break starvation deaths down by minors and adults; then retune (provisions or frailty) or make the family bot feed its
   minors, whichever the breakdown points to.
+
+### 2026-10-22 21:37 UTC: a loyal child takes the parent's own goal (Zach)
+
+- **Changed (Zach):** at coming of age a loyal child's new primary is the parent's own primary goal with its parameters
+  (`pairs.parent_goal`), not Ally of the parent. A goal about the holder's own holdings or offices is then about the child's.
+  Fallback to Ally of the parent where a copy makes no sense: Mirror (pairs two agents from the start), or a goal aimed at the
+  child itself (Rival, Kingmaker, ... with the child as target). Estranged stays Foil of the parent. The parent's prompt line now
+  reads "likely to take up your aims as its own when grown". Test added (29).
+- **Noted (Zach):** revisit the goal system as a whole: narrow goals miss the broad aims people carry by default. Parked in
+  docs/BACKLOG.md ("Revisit the goal system as a whole"); not now.

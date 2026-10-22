@@ -81,7 +81,7 @@ def test_no_child_gets_an_inherited_value_in_family_mode():
 
 # ---------------------------------------------------------------------- coming of age
 @pytest.mark.parametrize("loyal,estranged,fed,way,goal", [
-    ("[1.0, 1.0]", 0.0, True, "loyal", "Ally"),
+    ("[1.0, 1.0]", 0.0, True, "loyal", "parent"),
     ("[0.0, 0.0]", 1.0, False, "estranged", "Foil"),                 # neglect: nothing beyond the provisions
     ("[0.0, 0.0]", 0.0, True, "own", None),
 ])
@@ -98,9 +98,16 @@ def test_coming_of_age_ways(loyal, estranged, fed, way, goal):
     if goal is None:
         assert g["primary"] == first and bounds == []
         return
-    assert g["primary"] == goal and g["params"] == {"target": t, "slot": "primary", "family": True} and g["secondary"] == first
-    assert bounds and bounds[0]["why"] == "maturity"
-    assert GR.FAMILY_TEXTS[goal].format(target=t) in g["text"] and "secretly" not in g["text"].split(".")[0]
+    assert g["secondary"] == first and bounds and bounds[0]["why"] == "maturity"
+    if goal == "Foil":
+        assert g["primary"] == "Foil" and g["params"] == {"target": t, "slot": "primary", "family": True}
+        assert GR.FAMILY_TEXTS["Foil"].format(target=t) in g["text"] and "secretly" not in g["text"].split(".")[0]
+    else:                                                              # loyal: the parent's own goal, copied
+        pg = next(x for x in inst["agents"] if x["id"] == t)["goal"]
+        want = PR.parent_goal(k, t, ch)
+        assert (g["primary"], g["params"]) == want
+        if pg["primary"] != "Mirror" and ch not in {pg.get("params", {}).get("target"), pg.get("params", {}).get("partner")}:
+            assert want == (pg["primary"], pg.get("params") or {})
 
 
 def test_odds_follow_the_food_given():
@@ -143,7 +150,7 @@ def test_prompt_lines_in_world_terms():
     inst, k, a, b, ch, rec = family_child(["life.reproduction.maturity=6"])
     pa = " ".join(PR.state_lines(k, a))
     pc = " ".join(PR.state_lines(k, ch))
-    assert "stand by you when grown" in pa and "score" not in pa
+    assert "take up your aims as its own" in pa and "score" not in pa
     assert "take up their cause" in pc
     assert "How a child is raised matters" in PR.rules_text(k.spec)
 
@@ -317,3 +324,14 @@ def test_start_households_are_set_by_hand():
     iid = ST.h_household(k, inst, e["args"]["spec"])["household"]
     assert HH.household_of(k, "Bo") == iid and HH.head_of(k, iid) == "Ada" and HH._rec(k, iid)["name"] == "House Ada"
     assert HH.household_of(k, "Di") is None
+
+
+def test_a_loyal_child_copies_the_parents_goal_or_falls_back_to_ally():
+    inst, k, a, b, ch, rec = family_child()
+    ag = {x["id"]: x for x in inst["agents"]}
+    ag[b]["goal"]["primary"], ag[b]["goal"]["params"] = "Hoard", {"resource": "food"}
+    assert PR.parent_goal(k, b, ch) == ("Hoard", {"resource": "food"})
+    ag[b]["goal"]["primary"], ag[b]["goal"]["params"] = "Rival", {"target": ch}
+    assert PR.parent_goal(k, b, ch) == ("Ally", {"target": b, "slot": "primary", "family": True})
+    ag[b]["goal"]["primary"], ag[b]["goal"]["params"] = "Mirror", {"partner": a}
+    assert PR.parent_goal(k, b, ch)[0] == "Ally"
