@@ -30,4 +30,5 @@ Each item has an owner (README "Who owns what") who resolves it, with Zach where
 | Q-7 | First land kinds (proposed: river valley, woodland, hills, crossroads) | 38.04 §7 | 37.4 |
 | Q-8 | Which signs, incidents and eras first | 37.4 environment | 37.4 |
 | Q-9 | 37.2's open decisions in 02f §6, 02g §7, 02h §9, 02i §8, 02j, 02k | those notes | 37.2 |
+| ~~Q-11~~ | ~~Who holds a plot; can plots be split; the minimum plot size (37.1's question)~~ resolved by D4-23 (spec/world/holding.md) | board | 37.4 |
 | Q-10 | The first LLM world for M1 (a small version of 02f §4's region) | 38.08 §2 | 37.4 with 37.2 |

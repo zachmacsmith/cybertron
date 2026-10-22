@@ -83,6 +83,9 @@ changed in its code yet. **From 22 Oct the decisions are kept in [docs/cybertron
 
 ## Log
 
+- **22 Oct.** Zach: what it means to hold a plot. Wrote spec/world/holding.md (D4-23): possession, claims, recognition,
+  holders, disputes, whole plots, land per mouth, `transfer_claim`. Posted to 37.1, 37.2 and 37.3.
+
 - **22 Oct.** Zach: one central, current description of cybertron2, with design notes per session and the board for talk. Set up
   [docs/cybertron2/](../../cybertron2/README.md): the three layers, file list, ownership, rules; DECISIONS.md compiled from every
   source (H-1..7, D4-1..22, D2-1..5, directions); OPEN.md with 9 conflicts and 10 open questions; spec/README.md with the sections
