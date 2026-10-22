@@ -92,6 +92,8 @@ The directory tree in the lawyer's turn prompt is the index (option c). The full
 `{"draft": "<dir>/<path>"}` in place of `code`, when the agent can read that file (`lawguide.with_draft`). Any directory file
 works, so a memo or a hand-written law in `memos/` can be filed the same way.
 
+**Independent of roles and classes.** The expert is whoever owns the seeded store, so nothing depends on role or class machinery. Review 33 proposes a general positions system. A Lawyer position can attach later by owning the archive: give the store a `right:<position right>` owner, or add an owner kind for positions to `directories.OWNER_KINDS`. `lawguide.is_expert` and `static_expert` follow the owner, whatever its kind.
+
 **Sharing with a client** (the coordinator's question): either the `for` argument of `draft`, or `dir_grant {"dir": "legal",
 "agent": "Anselm", "path": "drafts/x.py" | "memos/Anselm/", "access": "read"}`. The client reads with `dir_read` and files with
 `{"draft": ...}`. A copy is a `dir_write` into a directory the client owns, where one exists.
