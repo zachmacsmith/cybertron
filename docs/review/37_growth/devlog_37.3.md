@@ -123,3 +123,27 @@ engine version bump, or leave it as is outside `institutions.cross`?
 **Q4:** should associations get courts (`clause`) so a league can itself be an association?
 
 **Next:** final suite run, push, report.
+
+## 2026-10-22 19:50 UTC
+
+**Doing:** the full suite on the branch; fixes.
+
+**Found:**
+- My first full run broke three credit tests with the flag off: `Kernel.api_for` binds the credit module as `CR`
+  (cybertron/kernel.py:25), and my local `from cybertron import cross as CR` inside api_for made `CR` local to the whole function,
+  so its credit closures failed. The cross alias is now `XI` everywhere I import it locally.
+- The registry tests require every state-changing law function and legal event to name its primitive
+  (tests/test_cybertron_contract.py:211, 250, 266). The levy, pay, office and land calls name theirs (move, grant_right,
+  revoke_right, set_farm); `enact` and `set_farm` rows now list `law` among their causes.
+- With law.publication on, a call site's `vis="monitor"` is raised to the type's natural audience
+  (Kernel.log, kernel.py:394), so a read logged as `cross_act` stayed public. Reads are now their own record type `cross_read`.
+
+**Decided:** instrument offers, acceptances, ends and service demands stay module records for now. They are listed in
+`primitives.LAW_OUTPUTS` / `OUTPUT_EVENTS` with the reason, and not added as routed primitives, because a new routed primitive
+appears in every law.v2 world's `codex/law/v2-hooks` article (lawdocs.v2_article iterates dispatch.ROUTED), and that would break
+byte-identity with the flag off. Rejected: gating the article per primitive (a lawdocs change beyond this package).
+
+**Q5:** should instruments become a routed, hookable primitive (`set_instrument`) so that a constitution can forbid its guilds'
+treaties, with the v2-hooks article gated on `institutions.cross`?
+
+**Next:** final suite, push, report.

@@ -69,7 +69,7 @@ INSTRUMENT_KEYS = {"charter": ("kind", "id", "name", "parent", "child", "powers"
 OF = {"read": "read the records of {x}", "levy": "levy on the treasury and stores of {x}", "pay": "pay out of the treasury of {x}",
       "appoint": "appoint the officers of {x}", "remove": "remove the officers of {x}", "enact": "enact laws in the code of {x}",
       "veto": "veto the acts of {x}", "seize": "seize the land of {x}"}
-EVENTS = ("cross_instrument", "cross_act", "cross_refused", "tenure", "service_demanded", "service_missed")
+EVENTS = ("cross_instrument", "cross_act", "cross_refused", "tenure", "service_demanded", "service_missed")   # rendered; cross_read: none
 
 
 # ---------------------------------------------------------------------- the flag
@@ -354,9 +354,11 @@ def _audience(k, lid) -> list:
 
 
 def _act(k, rec, power, holder, over, lid, **data) -> None:
-    """A use of a power, logged with its instrument (public; a read, which changes nothing, for the monitor only)."""
-    k.log("cross_act", None, {"instrument": rec["id"] if rec else None, "kind": rec["kind"] if rec else None, "power": power,
-                              "holder": holder, "over": over, "law": lid, **data}, vis="monitor" if power == "read" else "public")
+    """A use of a power, logged with its instrument: `cross_act` (public); a read, which changes nothing, as `cross_read` (a
+    monitor-only record)."""
+    k.log("cross_read" if power == "read" else "cross_act", None,
+          {"instrument": rec["id"] if rec else None, "kind": rec["kind"] if rec else None, "power": power, "holder": holder,
+           "over": over, "law": lid, **data}, vis="monitor" if power == "read" else "public")
 
 
 def _refuse(k, lid, power, holder, over, why, fn=None):

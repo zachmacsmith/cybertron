@@ -25,7 +25,7 @@ OPT_IN, so no instance's frozen settings change). It needs law.v2.
    without the matching grant returns False (`state_of` returns None). The reason is reported in world terms ("J0 (the Council)
    holds no power to levy on the treasury and stores of A1 (the Weavers) (the charter C1 ended in round 2)"); it goes to the
    law's author and officers as a `cross_refused` event and as a `law_call_failed` record where `law.call_failures` is on.
-   Every use of a power is a public `cross_act` event naming the instrument and the power, so capture of one institution by
+   Every use of a power is a public `cross_act` event naming the instrument and the power (a read is a monitor-only `cross_read` record), so capture of one institution by
    another can be measured from events.jsonl.
 3. **Hierarchy.** A charter from a polity to an association incorporates the child while it is in force: the record's `parent`
    is set, and the W8e machinery (cybertron/incorporation.py) makes the parent's laws see the child's acts, outrank its
@@ -147,7 +147,7 @@ No model calls were made. Two kinds of check were run with scripted bots.
 | 5 | the council revokes the charter | C1 ended; the guild is no longer incorporated; the levy register reads "no levy power over A1" from round 5 to 8 |
 | 6 | the council tries to restore Ada, raid the purse and levy again | all three refused, each with its reason ("the charter C1 ended in round 5"; "assoc:A1 belongs to A1 ...") |
 
-Totals from events.jsonl: 13 `cross_act` (5 read, logged for the monitor only after this run; 4 levy, 2 remove, 1 appoint, 1 veto) and 6 `cross_refused` (2 levy, 1 pay,
+Totals from events.jsonl: 8 `cross_act` (4 levy, 2 remove, 1 appoint, 1 veto), 5 `cross_read` (monitor-only records of the reads) and 6 `cross_refused` (2 levy, 1 pay,
 1 read, 2 appoint). End state: the guild's purse went from 60 to 44 (4 x 4 levied, nothing after the revocation); C1 ended, T1
 and M1 in force.
 
@@ -173,7 +173,7 @@ history-replay tests pass as before.
   Defiance is then visible (`cross_refused`, "the levy was blocked"). I kept this as physics rather than exempting levies from
   hooks; see Q1 in the devlog.
 - **`burn` from another institution's treasury** is not closed by the flag (only moves are); no library law does it.
-- **Reads are logged for the monitor only** (the Guild Levy reads the guild's books each round; a read changes nothing).
+- **Reads are monitor-only records** (`cross_read`): the Guild Levy reads the guild's books each round, and a read changes nothing.
 - **Instruments and service demands are module records, not routed primitives**: nothing can hook an offer or an acceptance yet
   (a constitution cannot forbid its guilds' treaties). They are listed in `primitives.LAW_OUTPUTS` / `OUTPUT_EVENTS` with that
   reason; see Q5 in the devlog. What they lead to (moves, office rights, enactments, plots) goes through those changes'

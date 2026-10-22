@@ -557,6 +557,8 @@ E("cross_instrument", "cross", "legal_act", "public", "event", "contracts",
 E("cross_act", "cross", "legal_act", "public", "event", "contracts",
   note="a law used a power over another institution (levy, pay, appoint, remove, enact, read, veto, seize; transfer: a payment "
        "into another's treasury): {instrument, power, holder, over, law, ...}")
+E("cross_read", "cross", "record", "monitor", "silent", None,
+  note="a law read another institution's records with its read power (state_of): measurement only, never shown")
 E("cross_refused", "cross", "summary", "parties|monitor", "event", "contracts",
   note="a law's call over another institution was refused (no power, a limit, a block): told to the law's author and officers")
 E("tenure", "cross", "legal_act", "public", "event", "contracts", primitive="set_farm",
