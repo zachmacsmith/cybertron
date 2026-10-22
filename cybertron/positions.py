@@ -397,6 +397,10 @@ def _inst_name(k, iid, x=None) -> str:
         return str(rec["name"])
     if iid == "J0":
         return place(x if x is not None else k)
+    if k is None:                                                       # the spec path (the starting prompt): a start association's name
+        for e in ((_spec(x).get("start") or {}).get("institutions") or ()):
+            if isinstance(e, dict) and e.get("id") == iid and e.get("name"):
+                return str(e["name"])
     return str(iid)
 
 
