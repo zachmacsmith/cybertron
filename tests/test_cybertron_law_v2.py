@@ -344,27 +344,17 @@ def test_constitutional_review_blocks_a_draft_before_the_procedure(k):
     assert "Proposed" in out
 
 
-def test_a_duplicate_proposal_is_noted_not_blocked():
-    """The haiku runs: two identical Harvest Quotas (different authors) were proposed and enacted in one round. law.v2 notes an
-    active or pending law with the same normalised code (title, intent, comments and layout aside); law v1 says nothing."""
+def test_a_duplicate_proposal_is_neither_noted_nor_blocked():
+    """Engine 21: the engine does not police duplicates (the haiku runs' two identical Harvest Quotas were a finding about the
+    agents; a polity can review drafts with a before_propose law). The copy is proposed like any law, with no note in the result
+    and no similar_to in the event, in either law edition."""
     body = "def on_round_end(r):\n    gazette('quota')\n"
     for v2 in (True, False):
         k = world(v2=v2)
         leg = [x for x in k.roster() if k.has(x, "propose")]
-        first = A.act(k, leg[0], "propose", {"code": law("Harvest Quotas", body)})
-        assert "Note:" not in first
-        same = law("Harvest Quotas II", "# a copy\ndef on_round_end(r):\n    gazette( 'quota' )\n")
-        out = A.act(k, leg[-1], "propose", {"code": same})
-        prop = events(k, "proposal")[-1]["data"]
-        if v2:
-            assert "Note:" in out and "the same code" in out and "Proposed" in out                     # noted, not refused
-            assert prop["similar_to"][0]["match"] == "identical" and prop["similar_to"][0]["title"] == "Harvest Quotas"
-        else:
-            assert "Note:" not in out and "similar_to" not in prop
-    k = world()
-    leg = next(x for x in k.roster() if k.has(x, "propose"))
-    A.act(k, leg, "propose", {"code": law("A", body)})
-    assert "Note:" not in A.act(k, leg, "propose", {"code": law("B", "def on_round_end(r):\n    gazette('a different law')\n    move('reserve', 'x', 'grain', 1)\n")})
+        A.act(k, leg[0], "propose", {"code": law("Harvest Quotas", body)})
+        out = A.act(k, leg[-1], "propose", {"code": law("Harvest Quotas II", "# a copy\n" + body)})
+        assert "Proposed" in out and "Note:" not in out and "similar_to" not in events(k, "proposal")[-1]["data"]
 
 
 def test_before_enact_strikes_down_an_enactment(k):
