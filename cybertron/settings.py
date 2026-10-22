@@ -32,7 +32,6 @@ from pathlib import Path
 TARGETS = (
     "cybertron.channels.DEFAULTS", "cybertron.conflict.DEFAULTS", "cybertron.context.DEFAULTS", "cybertron.contracts.DEFAULTS",
     "cybertron.courts.DEFAULTS", "cybertron.credit.DEFAULTS", "cybertron.directories.DEFAULTS", "cybertron.directories.CHRONICLE_DEFAULTS",
-    "cybertron.documents.DEFAULTS",
     "cybertron.hidden.DEFAULTS", "cybertron.institution_goals.DEFAULTS", "cybertron.jurisdictions.DEFAULTS", "cybertron.life.DEFAULTS",
     "cybertron.media.DEFAULTS", "cybertron.observer.DEFAULTS", "cybertron.outside.DEFAULTS", "cybertron.projects.DEFAULTS",
     "cybertron.resources.UPKEEP_DEFAULTS", "cybertron.roles.DEFAULTS", "cybertron.subsistence.DEFAULTS",

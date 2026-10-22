@@ -99,6 +99,9 @@ documents:
   confined to reading it (it can still hand copies on). Labourers are simply not selected.
 - Static (system prompt before a kernel): `literate_static` uses classes, roles, rights and profiles from the instance; offices are
   not known yet, so office-holders see the verbs from their first live turn (`when`).
+- **Positions (review 33).** Literacy is kept a simple opt-in attribute here. Once positions exist, `literate` can name
+  positions (a `positions: [...]` selector key, or a position attribute `literate: true`) instead of classes and rights; the
+  live check in `documents.literate` is the one place to change.
 - Alternative considered: literacy as a skill that can be taught or bought (a Life stat, an apprenticeship contract). Worth a later
   step (§9); the selector is the dial an experiment needs first.
 
@@ -244,6 +247,10 @@ the prototype's stores add `owners` per store, and `meta` is in the checkpointed
 - Off by default; `documents` unset changes no state, prompt or action list (tests: `test_off_by_default`,
   `test_chronicle_world_without_documents_has_no_doc_send`; the full suite and golden fixtures pass unchanged). No default flips, so
   no engine-version bump is needed under `docs/engine_versions.md`; runs that set the key record it in their frozen settings.
+- **Frozen settings.** `documents.DEFAULTS` is deliberately *not* yet in `settings.TARGETS` (exempted by name in
+  `tests/test_settings.py`): registering it adds the key to every instance.json and changes only the golden `instance.json`
+  hashes (events, snapshots, scores and prompts are identical; checked). Register it at integration and re-record those hashes
+  once, as dfa3d58 did. Until then a documents run's explicit spec keys are recorded but its unset defaults are not frozen.
 - Files to directories: a documents world sets `context.file_space: 0` (or leaves the base default) so personal files are not
   offered twice. Converting an old world's files is not needed (old runs replay under their own code).
 - Archive: unchanged. A world wanting a shared Scientists' notebook uses a `class:scientist` directory.

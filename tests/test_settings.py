@@ -79,7 +79,9 @@ def test_every_module_defaults_dict_is_registered():
         for m in re.finditer(r"^([A-Z_]*DEFAULTS)\s*(?::[^=]*)?=\s*\{", p.read_text(), re.M):
             if m.group(1) != "FEATURE_DEFAULTS":                         # schema's table of getters, not values
                 found.add(f"{mod}.{m.group(1)}")
-    assert found - set(ST.TARGETS) == set()
+    # review 32: documents.DEFAULTS is not frozen yet, so instance.json (and the golden hashes) stay unchanged; register it in
+    # settings.TARGETS at integration, re-recording the golden instance.json hashes only (as dfa3d58 did for other new keys)
+    assert found - set(ST.TARGETS) == {"cybertron.documents.DEFAULTS"}
 
 
 def test_resume_after_a_default_flip_plays_the_run_as_it_began(reference, tmp_path, monkeypatch):
