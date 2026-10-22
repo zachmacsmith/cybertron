@@ -37,6 +37,10 @@ byte-identical replays, apply to cybertron2 only once its runs start to matter.)
 
 ### 22 Oct (night, buildings from parts)
 
+- Zach: capacity should extend, with bigger rooms or more rooms scaling efficiently. Added 02i §2b: room cost grows with capacity to
+  the 0.7 (2.0 a person at 4, 1.15 at 25, 0.62 at 200), adjoining rooms at x0.8; limits by span (big halls need oak beams or stone),
+  rooms per material, heat (a hearth warms about 10), upkeep, land and fire; fittings scale by number of slots.
+
 - Zach: channels as rooms groups can book; a ladder for buildings that branches by specialisation; rather than template buildings,
   rooms, capacities and fittings with resource costs (a room to sleep, a room to talk, a hearth, cooking, workshops, archives).
   Wrote 02i_buildings.md: functions attach to fittings, not building types; structure (material sets breaks and fire), rooms (size
