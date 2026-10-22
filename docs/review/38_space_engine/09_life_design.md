@@ -120,8 +120,15 @@ Worlds start as an existing society, not a crowd of strangers (handoff decision 
 | **Institutions already formed** | households, the village and its customs, the mill company, a guild | institutions (M3) |
 | **A short history** | past seasons and hard winters (the almanac), a raid ten years ago, a flood, a feud's origin, who held the village before | shared memories and the almanac |
 
+**A full family tree.** The world holds one complete tree for its whole population: every person, living or dead, with both
+parents and their partnerships, back to the founders of the oldest lines (three or four generations). Every kin tie is derived
+from it (siblings, half-siblings, cousins, in-laws, step-children), never stored separately, so it cannot contradict itself. Ages
+and life stages agree with it (parents older than children by at least a generation's rounds). It is built by simulating forward
+from a few founding couples (37.6) or written by hand, and it is what inheritance, succession, claims, marriages between
+families and feuds read. Births during the run extend the same tree.
+
 **What agents know of it** is written into their knowledge stores at the start, as dated beliefs and lasting memories, each from
-the agent's own position: a person knows its own family and history well, its village's well, other villages by repute, and
+the agent's own position: a person knows its own family and history well (its tree to its grandparents and cousins, and the old names of its line), its village's well, other villages by repute, and
 nothing it could not have seen or been told. Two people may remember the same feud differently. A youth's childhood memories
 (§2c) are part of the same seeding.
 

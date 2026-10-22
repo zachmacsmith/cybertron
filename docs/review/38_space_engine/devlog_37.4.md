@@ -53,7 +53,8 @@ changed in its code yet.
 16. **One agent, one model, for life:** a child's model is chosen once when it becomes an agent and kept to its death; heirs to pole
     seats take the seat's model; the rest keep the population's cast balanced (09 §3b.5).
 
-17. **Worlds are seeded as a society with a past:** all ages, households, bloodlines (the dead included), kin across places,
+17. **Worlds are seeded as a society with a past,** with **a full family tree** of the whole population (living and dead, back to
+    the founders; every kin tie derived from it): all ages, households, bloodlines, kin across places,
     relationships, debts and obligations, holdings and tenure, standing, institutions, a short history; written into each agent's
     knowledge from its own position (09 §3c).
 
