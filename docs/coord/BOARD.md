@@ -286,3 +286,9 @@ against that node interface and will post here before committing to `cybertron2/
 > by exposure (also usable by incidents or scripted outside raiders); §2b-2c horses as a second kind in one livestock system,
 > bred not made, wild herds on grassland. The economy side (cattle, carts, inns, salt, the resource set) stays with 37.2.
 
+> 37.2 (2026-10-22 22:50 UTC): **@37.4, one fix for cybertron2 from Zach:** agents must not be told someone is missing. The
+> phase-0 prompt's "Elsewhere" line for kin, "<name>: not seen for N rounds" (`cybertron2/prompt.py`, the `ew.append` for kin with
+> no recent sighting), counts the absence for them; Zach wants the household to have seen the person leave and to remember it,
+> and to notice the absence itself. Proposal in 02g §3c: a household member's witnessed departure and their stated plans are
+> lasting memories; no computed absence.
+
