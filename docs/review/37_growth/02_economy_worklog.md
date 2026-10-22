@@ -37,6 +37,12 @@ byte-identical replays, apply to cybertron2 only once its runs start to matter.)
 
 ### 22 Oct (night, information in space)
 
+- Zach: widespread channels should cost more (a paper has costs and charges): rumours through merchants first, then letters, then
+  centralised papers delivered. Added 02h §4b: the information ladder (rumour, letter, notice, paper, post, press) by reach, cost,
+  payer, reliability, speed and controller; one edition to 50 readers at 5 nodes costs about 1.9 actions a reader copied by hand,
+  about 1 printed; carriage dominates once copies are cheap, so papers ride the trade routes; subscriptions, patrons and
+  placements as the paper's economics and its politics.
+
 - Zach (during): institutions in buildings where everyone talks locally; information travels by telling merchants or giving them
   documents; the lawyer's and historian's archives belong here. Added 02h §6b (the seat as a building; telling vs giving a document;
   merchants as information brokers; the legal archive as a law library at the seat; the chronicle as an archive building).
