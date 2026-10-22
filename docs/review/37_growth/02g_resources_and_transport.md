@@ -116,6 +116,10 @@ transport, force, credit) or unlock something it cannot do at all (§1d), or it 
 
 ### 1e. The chains: from the ground to use (Zach, 22 Oct)
 
+*A catalogue, not a build list (22 Oct, after Zach asked whether these were already here). They are drawn from history, not from
+the old engine: it has timber, stone and copper from camps, blades, crude weapons, stores, forts and four farm improvements, and
+none of these intermediate steps. Most of the steps below have a single use and should not be built. §1f says which to keep.*
+
 ```
 TIMBER   standing wood (a forest, or a managed woodlot that regrows)
            └ fell (axe; a crew for big trees) → logs: heavy, bulky; float downriver as rafts
@@ -171,6 +175,43 @@ woodland trend is economic.
 **Each step is a trade and a building part:** charcoal burner, sawyer, quarryman, mason, potter, brickmaker, tanner, smelter,
 smith; their fittings or works (charcoal clamp, saw pit, quarry, lime kiln, kiln, tannery, bloomery) join 02i's vocabulary
 as each chain is built.
+
+### 1f. Pruning: few goods, many uses (22 Oct)
+
+Zach: do we need this many variants, if each has one use? No. **A good or a processing step earns its place only if:**
+
+1. **several things use it** (stone: walls, storeys, roads, hearths, millstones), or
+2. **it creates a chokepoint or a trade** someone can hold (the mill, the smith), or
+3. **it changes weight or shelf life enough to move where things happen** (salted meat keeps; ore smelted at the mine is lighter), or
+4. **it unlocks something** (§1d: writing).
+
+Otherwise **fold the step into the recipe that uses it.** A blade is made at a forge from copper and timber, and the smelting and
+the charcoal are inside that recipe's cost, not separate goods.
+
+**The lean set for the first worlds (about ten goods):**
+
+| Good | Uses | Why it stays |
+|---|---|---|
+| grain | food, bread at a mill, fodder for horses | the staple, and the mill's chokepoint |
+| wild food | food | the bottom rung |
+| livestock (cattle; horses later) | milk, meat, hides, draught | one entity, five dependences (§2) |
+| timber | fuel, building, carts, fittings | used by almost everything |
+| stone | walls, storeys, roads, hearths, millstones | used by every larger or lasting build (02i §2c) |
+| copper | tools, blades, fittings, coin | the metal; the hill camp's trade |
+| salt | keeping meat; cattle | the long-distance good and the tax (§1) |
+| hides | packs, harness, bellows, parchment | the herds' second product, and writing (02h §2) |
+| tools and blades | yield, fighting | made goods that wear out: the smith's trade |
+| documents | writing | the unlock Zach rates highest (02h) |
+
+**Dropped or deferred, by the rule:**
+
+- **Folded into recipes:** charcoal, planks, lime, gravel, dressed stone, slate, leather (hides are used as they are).
+- **Deferred to later eras:** pitch and boats; clay, pottery and bricks; fibre, rope and cloth; iron and tin; tannin.
+- **Clay is the one to watch.** Its distinct use is storage that cuts spoilage. Bins (timber) and cellars (stone) cover that at
+  first, so it waits.
+
+**The same rule cuts 02i's fittings** to beds, hearth, bins, benches, shelves, lock, anvil-and-bellows and millstones (with a water
+wheel by a river). The rest come with the goods that need them.
 
 ### 1d. Resources that add something new, not more (Zach, 22 Oct)
 
