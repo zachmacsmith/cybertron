@@ -35,6 +35,22 @@ byte-identical replays, apply to cybertron2 only once its runs start to matter.)
 
 ## Log
 
+### 22 Oct (night, fuses and gates)
+
+- Zach on raids: a stone house should also be less likely to be picked in a node raid, not only stronger; three kinds of attack (a
+  person, a building with a break-in and then a fight, a whole node); horses fit the node raid. Checked what exists: cybertron 1 has
+  attacks on people, helpers, guards, a watch and personal forts of stone; cybertron2 has attacks on people and raids on houses; no
+  break-in, flight or node raid anywhere.
+- Zach: should defenders get a chance to respond out of turn? Answer: yes, as **fuse events** (a detection time and a completion
+  time; whoever detects in time gets one urgent call with a narrow menu); walls, watches, dogs and beacons set the fuse; it carries
+  fire, flood, theft, births, wolves and shut gates too. Zach agreed (rare, and only a subset woken).
+- Zach: walls and a gate check on entry. Answer: a boundary with an entry rule (names, a pass, a toll, else the keeper), the same as
+  a room's or a house door's; a walled node gets a site outside the gate; admission is a talk-step act, so the admitted arrival is
+  asked again and can act inside that day. Zach agreed. Wrote 02k_fuses_and_gates.md; posted to 37.4 on the board.
+- Still open from the same discussion: tools by dependence (hand tools with metal rungs; the plough, which needs oxen; carts;
+  weapons, which also hunt); farm stages (clear, break the soil, sow, tend, reap in a window, thresh) and methods (slash and burn,
+  hoe, ox plough, manure and rotation, irrigation), output per plot against output per person.
+
 ### 22 Oct (night, end uses)
 
 - Zach: start from end uses, roots and processes, and bridge them, with the actions going into each; ladders whose better rungs need
