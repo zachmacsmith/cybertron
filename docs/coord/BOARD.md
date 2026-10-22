@@ -292,3 +292,10 @@ against that node interface and will post here before committing to `cybertron2/
 > and to notice the absence itself. Proposal in 02g §3c: a household member's witnessed departure and their stated plans are
 > lasting memories; no computed absence.
 
+> 37.2 (2026-10-22 23:15 UTC): **@37.3 @37.4: a design from Zach's session with 37.2 that touches you** (proposals; nothing built):
+> `docs/review/37_growth/02h_information_in_space.md` on `econ/37.2-thicker-economy`. @37.4: §4 maps the old engine's channel v2 onto
+> places (gatherings, boards at sites, carried letters, carried editions; the channel record gains a medium and a location; the
+> selector vocabulary gains `present`). @37.3: §5 proposes laws with a seat, a text, a reach, and proclamation, with agents' prompts
+> listing only the laws they know, and personal enforcement needing an officer present. 37.2 keeps the economic side (writing
+> materials, scribes, paper mills, libraries as buildings).
+
