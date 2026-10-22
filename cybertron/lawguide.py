@@ -30,10 +30,11 @@ import json
 import re
 
 SEED = "legal_archive"
-GUIDE, REF, PUBLIC, DRAFTS = "guide/", "ref/", "public/", "drafts/"
+GUIDE, REF, PUBLIC, DRAFTS, LIB = "guide/", "ref/", "public/", "drafts/", "lib/"
 DOC_BUDGET = 950                    # tokens (len // 4) of one document as dir_read shows it: under the lookup budget (1,000)
 FILE_ACTIONS = ("propose", "amend", "create_contract", "propose_contract_change", "preview_law")
-REF_TOPICS = ("governance", "ballots", "ranks", "chains", "rights", "sanctions", "meta", "courts", "court-rules", "output", "contracts")
+REF_TITLES = {"linker": ("Imports and exports (law.v2)", "Laws build on laws: exports offer names, use() links them.")}
+REF_TOPICS = ("linker", "governance", "ballots", "ranks", "chains", "rights", "sanctions", "meta", "courts", "court-rules", "output", "contracts")
 
 
 def _err(msg):
@@ -170,6 +171,21 @@ expects = [{{"office": "J0.{c.office}", "holders": ["{c.appointee}"]}}]
 def on_enact():
     reseat("J0", "{c.office}", ["{c.appointee}"])
 '''},
+        {"id": "exporter", "kind": "law", "code": '''title = "Fee Rules"
+intent = "Shared fee arithmetic that other laws import by this law's id."
+exports = ["RATE", "fee_for"]
+RATE = 0.05
+
+def fee_for(qty):
+    return qty * RATE
+'''},
+        {"id": "census", "kind": "law", "code": f'''title = "Census Book"
+intent = "Each round the number of living agents is entered in a public book, kept with the library's Ledger block."
+book = use("{_lib_ref('Ledger')}")
+
+def on_round_end(r):
+    book["record"](public.setdefault("census", {{}}), "agents", {{"count": len(agents())}})
+'''},
         {"id": "guild", "kind": "contract", "code": '''title = "Carters Guild"
 intent = "Members pay 1 penny a round in dues (set_allowance in penny); the Warden, the founder at first, keeps the treasury and pays out of it."
 offices = {"warden": {"title": "Warden", "holders": ["founder"], "controls": ["treasury"], "powers": ["speak"], "duties": "Keep the guild's treasury and pay what the members agree."}}
@@ -179,6 +195,11 @@ def on_round_end(r):
         pull(m, "penny", 1)
 '''},
     ]
+
+
+def _lib_ref(name: str) -> str:
+    from cybertron import library as LB
+    return LB.ref(name)
 
 
 def _code_block(code: str) -> str:
@@ -445,18 +466,24 @@ def _doc_preset(c: Ctx, name: str) -> str:
     return "\n".join(lines) + "\n"
 
 
-def _doc_templates(c: Ctx, kind: str) -> str:
+def _doc_templates(c: Ctx, kind: str) -> list:
+    """The established templates of one kind, one line each, split into parts under the document budget."""
     from cybertron import library as LB
     from cybertron import standing as SD
     rows = [e for e in LB.ESTABLISHED.values() if e["kind"] == kind and not SD.is_preset(e["name"])]
     head = ("# Templates: laws (draft {\"template\": name, \"params\": {...}}, then propose)" if kind == "law" else
             "# Templates: contract code (draft, then create_contract or propose_contract_change)")
-    lines = [head, ""]
+    parts, cur = [], []
     for e in rows:
         doc = e["doc"].split(" (review")[0].split(". ")[0].rstrip(".")
         ps = ", ".join(f"{x}" for x in LB.params(e["name"]))
-        lines.append(f"- {e['name']} ({e['topic']}): {doc[:160]}. Params: {ps or 'none'}.")
-    return "\n".join(lines) + "\n"
+        line = f"- {e['name']} ({e['topic']}): {doc[:160]}. Params: {ps or 'none'}."
+        if cur and tokens("\n".join([head, ""] + cur + [line])) * 1.1 + 6 * len(cur) > DOC_BUDGET:
+            parts.append(cur)
+            cur = []
+        cur.append(line)
+    parts.append(cur)
+    return [("\n".join([head + (f" (part {i + 1})" if len(parts) > 1 else ""), ""] + p) + "\n") for i, p in enumerate(parts)]
 
 
 def _doc_drafting(c: Ctx) -> str:
@@ -491,6 +518,39 @@ the Warden office and pays out of the treasury; members join_contract, then set_
 Then: a store for it (build {{"kind": "store", "owner": "A5"}}), standing contracts in its code (draft a Payroll or a Supply
 Contract and propose_contract_change), and a seat in the town's law if it needs a licence (Licence template).
 """
+
+
+def _doc_imports(c: Ctx) -> str:
+    ex = {e["id"]: e for e in examples(c)}
+    return f"""# Composing laws: exports and imports
+
+A law can offer names to other laws and use theirs. Nothing is hidden: every layer is ordinary law code you can read and copy.
+- Offer: exports = ["RATE", "fee_for"] (top-level constants and functions; exported functions may not touch `state` or
+  `public`: pass the data in as an argument, as the library blocks do).
+- Use: fees = use("L12") at the top level follows L12's current version; use("L12@<sha>") pins one version (read_law gives
+  versions); use("lib:<name>@<sha>") imports a library block (lib/ in this archive lists each with its exact reference). Then
+  fees["fee_for"](qty).
+- The imported code runs as your law's own: your powers, your jurisdiction, your gas, and it counts in your class.
+- Amending L12: laws that follow it are relinked to the new version (or pinned to the old one if it dropped a name they use).
+  Repealing L12: followers are pinned to its last version and keep working. Pin when you need stability; follow when the
+  exporter's owners should be able to fix it for everyone.
+- Editing all the way down: to change an imported block, copy its code into a law of your own, change it, and point use()
+  at that law's id.
+
+An exporter (enacted by the engine's tests); an importer then writes fees = use("<its id>") and fees["fee_for"](qty):
+{_code_block(ex['exporter']['code'])}
+An importer of a library block:
+{_code_block(ex['census']['code'])}
+A draft's own code (drafts/*.py) is long for a standing contract: page through it with dir_read {{"path": ..., "from_line": 1,
+"to_line": 80}} and edit a copy with dir_edit before filing it by reference.
+"""
+
+
+def _doc_lib(name: str) -> str:
+    from cybertron import library as LB
+    b = LB.BLOCKS[name]
+    return (f"# Library block: {name}\n\nImport: x = use(\"{LB.ref(name)}\") (pinned by hash: the code below never changes "
+            "under you). Copy it into a law of your own to change it.\n\n```law\n" + b["code"].rstrip("\n") + "\n```\n")
 
 
 def _doc_pitfalls(c: Ctx) -> str:
@@ -562,7 +622,7 @@ The basics:
 
 def _doc_ref(topic: str, names: list) -> str:
     from cybertron import lawdocs as LD
-    title, intro = LD.TOPICS[topic]
+    title, intro = LD.TOPICS.get(topic) or REF_TITLES[topic]
     lines = [f"# Law functions: {title}", "", intro, ""]
     for n in names:
         e = LD.ENTRIES[n]
@@ -608,9 +668,14 @@ def archive_files(k, store: str, seed: dict) -> dict:
         GUIDE + "07-contracts-institutions.md": _doc_contracts(c),
         GUIDE + "08-service.md": _doc_service(c),
         GUIDE + "09-pitfalls.md": _doc_pitfalls(c),
-        GUIDE + "10-templates-laws.md": _doc_templates(c, "law"),
-        GUIDE + "11-templates-contracts.md": _doc_templates(c, "contract"),
+        GUIDE + "12-imports.md": _doc_imports(c),
     }
+    for no, kind in (("10", "law"), ("11", "contract")):
+        for i, text in enumerate(_doc_templates(c, kind)):
+            files[f"{GUIDE}{no}-templates-{kind}s" + (f"-{i + 1}" if i else "") + ".md"] = text
+    from cybertron import library as LB
+    for name in getattr(LB, "BLOCKS", {}):
+        files[f"{LIB}{_slug(name)}.md"] = _doc_lib(name)
     for name in SD.PRESETS:
         files[f"{GUIDE}presets/{_slug(name)}.md"] = _doc_preset(c, name)
     files.update(_ref_docs(c))
@@ -742,8 +807,7 @@ def act_draft(k, aid, template=None, parties=None, roster=None, terms=None, para
     bilateral = kind == "preset" and bool(({**SD.PRESETS[tname]["params"], **p}).get("PARTIES"))
     return (f"Draft saved as {ref} ({len(code):,} characters of code: file it by reference, never paste it). "
             f"{_summary(tname, kind, p, code)}. " + (f"Shared (read) with {', '.join(shared)}. " if shared else "")
-            + (f"Check it with preview_law {{\"draft\": \"{ref}\"}}. " if kind != "preset" else
-               "It passed the law check here (a preset is long: previewing it is slow; its legs are summarised above). ")
+            + f"Check it with preview_law {{\"draft\": \"{ref}\"}}. "
             + _filing(kind, bilateral, ref, tname))
 
 

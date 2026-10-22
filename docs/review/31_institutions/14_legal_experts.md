@@ -121,12 +121,14 @@ this; §8).
 | guide/07-contracts-institutions.md | associations, escrow and allowances, founding institutions, manual legs, fulfil and tags | ~470 |
 | guide/08-service.md | the practice: what to offer, draft and file, memos and grants, getting paid | ~380 |
 | guide/09-pitfalls.md | 14 pitfalls from the runs above, each with its fix | ~490 |
-| guide/10-, 11-templates | every established template with params (generated) | ~830, ~80 |
+| guide/10-templates-laws*.md, 11-templates-contracts.md | every established template with params (generated, split under the budget) | ~1,000 in all |
+| guide/12-imports.md | exports and use(), follow vs pin, amendment and repeal of an exporter, editing a block by copying it; 2 tested examples | ~570 |
+| lib/*.md (8) | every library block verbatim with its pinned `use("lib:...@sha")` reference | 220-375 each |
 | guide/presets/*.md (9) | one per preset: intent, terms, legs, officer actions, defaults, a draft call, how to file (generated) | 150-330 each, 2,281 |
 | ref/*.md (13) | law functions by topic: governance, ballots, ranks, chains, rights, sanctions, meta, courts, court rules, output, contracts | 4,382 |
 | public/legal-help.md | who counsel is, code not prose, filing a shared draft, fulfil, courts | ~290 |
 
-The archive has 35 files and about 13.6 k tokens. The largest file is 875 tokens as `dir_read` shows it; the cap is 950, under the
+With `wp/law-imports` the archive has 45 files and about 16.7 k tokens (35 files and 13.6 k before). The largest file is 875 tokens as `dir_read` shows it; the cap is 950, under the
 1,000-token lookup budget.
 
 **Prompt cost.**
@@ -136,7 +138,7 @@ The archive has 35 files and about 13.6 k tokens. The largest file is 875 tokens
 - Reading: ~0.5-0.9 k tokens per document read. A lawyer who reads 2-3 documents a round adds ~2 k input tokens a round, about
   50 k over 24 rounds on one Opus seat: under $0.25.
 
-## 6. Tests (`tests/test_legal_experts.py`, 15)
+## 6. Tests (`tests/test_legal_experts.py`, 17)
 
 | What is checked | How |
 |---|---|
@@ -153,13 +155,12 @@ The archive has 35 files and about 13.6 k tokens. The largest file is 875 tokens
 | Drafts work end to end | a Retainer is drafted for a new client, founded by reference and joined, and counsel then has `represent`; a template law is drafted, previewed and proposed by reference; a roster preset takes the world's manual leg mode |
 | Without an archive nothing changes | `draft` is unknown and absent from the error's action list, and no `draft` argument is read |
 
-**Finding (engine, not fixed here).** Proposing or previewing a preset in the 24-agent Private world is very slow.
-`preview_law` of a Retainer draft took 627 s under heavy load (`proposal` goes the same way); a small law takes 3.6 s. A profile
-puts 600 s of that in `dispatch/changes/legal.py` `similar_laws`. That function runs `difflib.SequenceMatcher(...).ratio()` on the
-~33 KB normalised code of every pending or active law of the jurisdiction, and the world has a dozen presets. `create_contract`
-does not run the check, which is why founding a preset by reference is fast (2.7 s). The fix (a length and `quick_ratio` pre-filter,
-same results) is filed as a separate task, because another work package owns engine fixes. Until it lands, the lawyer should file
-bilateral presets with `create_contract`, which is what `draft` recommends, and not preview them.
+**Finding, since fixed (engine 21).** Proposing or previewing a preset in the 24-agent Private world was very slow:
+`preview_law` of a Retainer took 627 s. The cause was `similar_laws`, the law.v2 duplicate-proposal check, which ran difflib over
+the ~33 KB code of every pending or active law. Engine 21 (Zach's branch `claude/charming-wozniak-4iqwdk`, merged on
+`wp/law-imports`) removes the check, notes included ("if they repeat laws, that's on them"). Nothing of it remains: no identical-code
+note, no `similar_to` on the proposal event. `draft` again suggests `preview_law` for every draft, presets included, and the
+Retainer test previews one by reference.
 
 ## 7. Proposed live A/B: private (A) vs private_counsel (B)
 
@@ -179,9 +180,60 @@ bilateral presets with `create_contract`, which is what `draft` recommends, and 
 - **Hypothesis.** B shows more valid legal acts per run (proposals enacted and not inert, contracts founded, cases filed), fewer
   legal errors, and a lawyer with paying clients beyond the starting two.
 - **Cost.** The run estimate in 10 §9 is ≈ 900-1,400 calls and ≈ $40-45 per run at list prices (3-5 h on `claude_code`). B adds
-  under $1 of reading. For 2 seeds × 2 arms that is **≈ $170-180 and 12-20 hours**, or half that with seed 1 only. Fix the `similar_laws` slowness above first.
+  under $1 of reading. For 2 seeds × 2 arms that is **≈ $170-180 and 12-20 hours**, or half that with seed 1 only.
 
-## 8. Status
+## 8. Law imports: analysis (wp/law-imports)
+
+**What exists.** Composition is already in the engine under law.v2 (`cybertron/linker.py`, P3.3), and agents can use it:
+- `exports = [...]` offers a law's constants and functions; `x = use("L12")` follows its current version; `use("L12@<sha>")` pins
+  one version; `use("lib:<name>@<sha>")` imports a library block (`library.BLOCKS`: Ledger, Schedule, Seize, Escrow, Tax
+  Schedules, Ballot Helpers, Contract Procedures, Credit Helpers).
+- Imported code runs as the importer's own: its powers, jurisdiction and gas, and it counts in its class (no confused deputy).
+- Amending an exporter relinks its followers, or pins them when a name they use is dropped. Repealing it pins its followers to its
+  last version, and they keep working.
+- `use` and `public_of` are in the core prompt's law-language summary. The contract templates use blocks: the club imports
+  Schedule and Ledger.
+
+So the imports Zach asked about (by id, by library name, pinned or following, surviving repeal) need no new engine work.
+
+**What was missing for agents.**
+1. The archive did not teach imports: the `linker` topic was not among its reference topics, and there was no guide to
+   composition.
+2. The blocks could not be read in the archive.
+
+Both are now generated:
+- `guide/12-imports.md` covers exports, follow vs pin, amendment and repeal, and editing a block by copying it into your own law
+  and pointing `use()` at it. It has two tested examples: an exporter, and an importer of the Ledger block.
+- `ref/linker.md` is the reference topic.
+- `lib/<block>.md` holds each block verbatim with its exact pinned reference.
+
+Tests check that every block appears verbatim with its reference. They also check that a law importing the exporter example by id
+works, and that it keeps working, pinned, after the exporter is repealed.
+
+**Should the standing-contract presets become thin files over a shared core? Not now.** This is a judgement against the evidence:
+- **Size and founding.** No contract was ever founded live because the ~8,300-token code could not be pasted. `draft` plus
+  filing by reference (§4) already fixes that. A thin file would make the draft shorter to *read* (about 600 tokens of
+  parameters and hook wiring) but not easier to found.
+- **The 14 recurring mistakes** (§1) are basics: title and intent, prose instead of code, class vs rank, `isinstance`,
+  shadowing, office control, fines. Imports help with none of them. The archive and its tested examples do.
+- **Editable all the way down holds today.** A draft is a single file of ordinary law code. The lawyer pages through it
+  (`dir_read` with `from_line`/`to_line`), edits a copy (`dir_edit`) and files the copy. Nothing is hidden behind the template.
+- **The cost is real.** `standing.CORE` reads about 25 module constants (PARTIES, LEGS, TERMS, ...) and `state` throughout. An
+  exported function may not name `state` or `public` (lawlang), and an imported function resolves globals in the exporter's linked
+  namespace, not the importer's. So the core would have to be rewritten as functions over `(cfg, st)`, about 800 lines.
+- **Callbacks.** Every callback the contract registers (the `define_action` handlers for notice, enrol, drop, set, post and
+  award, and the `by_parties` procedure) would have to stay a local wrapper. `Kernel.checkpoint_state` rebuilds registered
+  functions against the registering law's own namespace (`_dump_fn`), which an imported function does not live in.
+- **Existing worlds.** Every established world founds presets inline, so the thin form would have to be opt-in, with a
+  scenario-equivalence test between the inline and thin forms.
+
+That is a work package of its own. The gain, a shorter draft to read and one shared core to fix, would be measured only after
+the A/B in §7 shows whether lawyers read and edit drafts at all. Recommendation:
+1. Run the A/B with the archive as it is (imports now documented).
+2. If transcripts show lawyers reading or editing the core, do the `(cfg, st)` refactor as `lib:standing_core`, with thin presets
+   behind a spec key and an engine-22 note.
+
+## 9. Status
 
 The full suite has been run on the branch tip after merging origin/subsistence; its summary line is reported to the coordinator.
 No live model call was made.

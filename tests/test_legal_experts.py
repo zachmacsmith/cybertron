@@ -114,7 +114,7 @@ def test_the_archive_is_generated_from_the_engine(k):
             assert f"{leg['id']}: " in doc
     for key in SD.BASE:                                                 # every parameter, with its comment from the source
         assert re.search(rf"^- {key} = .+: \S", fs["guide/06-standing.md"], re.M), key
-    est = fs["guide/10-templates-laws.md"] + fs["guide/11-templates-contracts.md"]
+    est = "".join(t for p, t in fs.items() if re.match(r"guide/1[01]-templates-", p))
     for n, e in LB.ESTABLISHED.items():
         if not SD.is_preset(n):
             assert f"- {n} (" in est, n
@@ -234,8 +234,10 @@ def test_a_retainer_drafted_for_a_new_client_is_founded_by_reference_and_makes_c
               **{"for": "Orrin"})
     ref = re.search(r"legal/drafts/\S+\.py", out).group()
     assert "Shared (read) with Orrin" in out and "create_contract" in out and "8," not in out.split("Draft saved")[0]
-    assert "passed the law check" in out and "fee=1" in out
+    assert f'preview_law {{"draft": "{ref}"}}' in out and "fee=1" in out
     assert LG.with_draft(k, "Orrin", {"draft": ref, "scenario": "none"})["code"].startswith("title = 'Retainer'")
+    prev = CX.lookup(k, "Orrin", "preview_law", {"draft": ref, "scenario": "none"})   # engine 21: no duplicate check, fast
+    assert prev.startswith("Preview of 'Retainer'"), prev[:200]
     with pytest.raises(ActionError, match="cannot read"):
         act(k, "Hale", "create_contract", name="x", draft=ref)          # not shared with Hale
     got = act(k, "Orrin", "create_contract", name="Retainer (Orrin)", draft=ref)
@@ -279,3 +281,30 @@ def test_without_an_archive_nothing_exists():
     with pytest.raises(ActionError):                                    # a "draft" argument is not read as a file
         act(k, CLIENT, "create_contract", name="x", draft="legal/drafts/x.py")
     assert "dirs" not in k.w
+
+
+# ---------------------------------------------------------------------- composition: exports, imports, library blocks
+def test_the_archive_documents_imports_and_every_library_block_verbatim(k):
+    from cybertron import library as LB
+    fs = files(k)
+    assert "use(" in fs["guide/12-imports.md"] and "ref/linker.md" in fs
+    for name, b in LB.BLOCKS.items():
+        doc = fs[f"lib/{LG._slug(name)}.md"]
+        assert LB.ref(name) in doc and b["code"].rstrip("\n") in doc, name
+
+
+def test_an_importer_uses_the_exporter_example_by_id_and_survives_its_repeal(k):
+    c = LG.Ctx(k, "legal", {"name": LG.SEED})
+    exp = next(e for e in LG.examples(c) if e["id"] == "exporter")
+    lid = k.new_law(exp["code"], LAWYER)
+    k.enact(lid)
+    imp = k.new_law(f'title = "Market Fee"\nintent = "t"\nfees = use("{lid}")\n\ndef on_enact():\n'
+                    '    public["fee"] = fees["fee_for"](10)\n\ndef on_round_end(r):\n    public["late"] = fees["fee_for"](20)\n', LAWYER)
+    k.enact(imp)
+    assert k.w["laws"][imp]["status"] == "active" and k.w["laws"][imp]["public"]["fee"] == 0.5
+    k.enact(k.new_law(f'title = "Repeal"\nintent = "r"\ndef on_enact():\n    repeal("{lid}")\n', LAWYER))
+    assert k.w["laws"][lid]["status"] != "active"
+    rec = next(x for x in k.w["laws"][imp]["imports"] if x["target"] == lid)
+    assert rec["mode"] == "pinned"                                      # followers are pinned to the repealed law's last version
+    k.end_round()
+    assert k.w["laws"][imp]["public"]["late"] == 1.0                    # and keep working
