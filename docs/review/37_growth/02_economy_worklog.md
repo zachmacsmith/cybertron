@@ -8,6 +8,7 @@
 | Phase | What | State |
 |---|---|---|
 | P0 | Design note (diagnosis, critique of the brief, plan) and this log | done |
+| R0 | New engine phase 0 (`cybertron2/`): households in a forest, first LLM run | built; run in progress |
 | P0d | Shelter specification (02e): houses as the first generic building, upkeep, breaks, the cold, tenure | specified; under discussion |
 | P0c | Economics guide (02c) and ladder analysis with skill by practice and space (02d) | done; under discussion |
 | P0b | Productivity analysis: what an action is worth under autarky, spot trade and institutions (02b) | done; design under discussion with Zach, nothing built |
@@ -31,6 +32,16 @@ calls (scripted dry runs and unit tests only); everything generated can be fixed
   agents) and make flax compete with grain for plots. Parked in favour of shelter, which reuses the building model.
 
 ## Log
+
+### 22 Oct (night, run)
+
+- Zach: a small real LLM run with two households in a forest. Built the phase-0 slice of the new engine as `cybertron2/` (world and
+  end of round, actions with presence, prompts, run loop, report; about 900 lines; imports only the leaf `cybertron.llm`; forest,
+  hunt and hunger formulas ported from the old engine). World `cybertron2/specs/forest_households.yaml`: the Clearing (two
+  houses), the Near Wood, the Deep Wood; 8 agents (2 Opus heads, 3 Sonnet, 3 Haiku); 20 rounds, winter rounds 12-17.
+- Smoke test with scripted bots: deterministic (two runs byte-identical); found and fixed a quantity-rounding bug (amounts rounded
+  up past what an agent held). One-round live test: 8 of 8 replies parsed, $0.13 a round. Full run launched
+  (runs/cybertron2/forest_households_seed1, not committed: runs/ is ignored).
 
 ### 22 Oct (night, latest)
 
