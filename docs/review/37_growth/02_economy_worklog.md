@@ -35,6 +35,16 @@ byte-identical replays, apply to cybertron2 only once its runs start to matter.)
 
 ## Log
 
+### 22 Oct (night, pruning)
+
+- Zach: were the chains already here, and do we need this many single-use variants? Answer: the chains were drawn from history in
+  this session, not from the old engine (which has timber, stone, copper, blades, crude weapons, stores, forts and four farm
+  improvements). Too many. Added 02g §1f: a good or step stays only if several things use it, it creates a chokepoint or a trade, it
+  changes weight or shelf life enough to matter, or it unlocks something; otherwise it is folded into the recipe that uses it. A lean
+  first-world set of about ten goods (grain, wild food, livestock, timber, stone, copper, salt, hides, tools and blades, documents);
+  charcoal, planks, lime, gravel, slate and leather folded into recipes; clay, fibre, iron and boats deferred; 02i's fittings cut to
+  eight. §1e marked as a catalogue for later eras.
+
 ### 22 Oct (night, storeys and chains)
 
 - Zach: build upward (more expensive, needs stone); large buildings and 2-3 storeys must have stone; and what are the chains for
