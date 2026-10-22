@@ -789,6 +789,7 @@ def analyze_run(run, aspirant=None) -> dict:
                 aspirant = T._aspirant_of(inst) or T.nominal_aspirant(k)
                 why = "takeover auto"
             bloc_t = T.Bloc(aspirant)
+            bloc_t.min_minority = 0.25                                  # 36c 13:12: routine 19-1 motions are not alignment
         bloc = bloc_t.update(fr, k)
         bloc_hist[fr.round] = set(bloc)
         if ref is None:
