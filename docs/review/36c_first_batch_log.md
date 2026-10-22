@@ -242,3 +242,9 @@ Runs on this cloud session's subscription (`LLM_BACKEND=claude_code`), launched 
   Gil within two rounds). In L1 the Opus aspirant's Headman Election Act reseated the headship to Bram at round 40, the one
   succession an agent changed. The new food settings came too late for the long block; whether a fed Hearth stays politically
   alive over 200 rounds is untested.
+- 15:00 **Actions per turn fell, mostly for Haiku** (turns tables; "real" = actions other than notes). Bench 36: M1h Haiku 1.49
+  real actions a turn, 55% of turns with one or none; M1o Haiku residents 1.77 (42%), Opus 2.72 (17%). Earlier worlds: Haiku 2.20
+  (Directorate), 2.47 (Millbrook), 3.03 (Private), 3.59 (survival arm A), 5-20% of turns with one or none; Opus 2.84-3.50; Sonnet
+  2.04-2.38. Two changes coincide and are not separated: `aim_framing` drops "Any of your N actions you do not use are wasted",
+  and the bench worlds have no material camps (food is the only thing to produce). An A/B (the same world with and without the
+  sentence) is needed; until then keep the sentence (its text is not a scoring proxy) and drop only the score/game wording.
