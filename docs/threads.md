@@ -2,29 +2,21 @@
 
 A running list of what is in flight, kept up to date as work lands. Newest changes at the top of each section.
 
-## In progress (resumed 22 Oct after the usage reset)
+## In progress (22 Oct)
 
-- **Positions** (`wp/positions`, agent started 22 Oct): review 33 steps 1-2, the channel fixes (failed-action banner, unread and new counts), papers and submissions (opt-in, the regime-world default), and positions variants of the Private and Directorate worlds.
-
-Seven agents were cut off together at the 5-hour limit on 20 Oct. Each branch is pushed (unmerged commit counts in brackets); none
-is merged. To resume: send each agent a message to commit what is left, push and report, with no full suite (the coordinator runs
-one full suite per merge batch). Merge order: cleanup and documents last (they touch shared files).
-
-- **State world** (`wp/state-world`, 7): wiretap as pull (`channels.surveillance`), Registry and Archives Acts, the State world spec
-  and dry runs, write-up docs/review/31_institutions/11_state_world.md. Was waiting on its full suite.
-- **Cooperative world** (`wp/coop-world`, 6): cooperative store, Duty Roster, Mutual Credit, dues, Militia Roll and muster, assembly
-  motions, the Cooperative world spec, write-up 12_cooperative_world.md. Was fixing a YAML parse error in a note.
-- **Merchant world** (`wp/merchant-world`, 4): Bank Charter, role-restricted procedure, guard-only Commission, Arbitration, wound
-  bounty, Security Licence, the Merchant world spec, write-up 13_merchant_world.md (draft). Was waiting on its suite.
-- **Lawyer expert** (`wp/lawyer-expert`, 3): a legal archive as a seeded read-only directory, a drafting action, filing by reference,
-  and a `private_counsel.yaml` variant for an A/B; write-up 14_legal_experts.md. Was about to merge subsistence and run its suite.
-- **Old-code cleanup** (`wp/old-code-cleanup`, 5): dead helpers removed, library edition 2 removed or quarantined, media2 frozen
-  (warning plus a test listing the allowed specs), and the replay check: pre-13 runs do not replay in place, so their default flips
-  and memory_text v1 were dropped and such runs now refuse to play in place (use `cybertron rerun`). Not yet reported; review the
-  replay evidence before merging.
-- **Documents** (`wp/documents`, 2: its commit plus a WIP commit of the 5 files it had not committed): design docs/review/32_documents.md and
-  an opt-in prototype (literacy, personal stores, `doc_send` copies with provenance, confined access, on directories.py). Was
-  waiting on its suite.
+- **Full suite on subsistence 9938395** (engine 22, batch 2 merged) gates `main`; `--durations=40` recorded to cut the slow tests.
+- **Testing tiers** (Zach, 22 Oct: full suites for every merge are too slow): a merge gate `scripts/test_fast.sh BASE` (goldens,
+  prompts, schema, settings, every spec loads, plus the tests importing any module changed since BASE: 3-5 min) gates
+  `subsistence`; the full suite (~25 min at -n 3) runs in the background daily or before `main` moves and never blocks; mark the
+  slowest tests `slow`. Not built yet. Agents: targeted tests only, unique `--basetemp`.
+- **Benchmark scenario design**: Zach's agent elsewhere, from docs/review/35_benchmark_scenarios_brief.md.
+- **Decisions waiting for Zach** (from positions): 36 older channels-v2 worlds (ashwood*, millbrook*, survival/*, takeover/*,
+  usability/*) warn at load until each declares `channels.square`; the Directorate positions variant runs its middle managers
+  under `enforcement: obligation` (or `reminder`), renames J0 "the State" and uses the short duty texts; still outside positions:
+  roles (spy, scholar...), Board and Fixer, camp rules naming the class ("open to Workers only").
+- **Temperament norms**: `personality.model: hexaco` is built but `norms: published` refuses to draw until the HEXACO-PI-R tables are
+  filled in `cybertron/temperament.py` (hexaco.org, PMC, OSF are blocked by both environments' network policy: allow them or paste
+  the tables); `norms: uncorrelated` works for the one-dimension pilot.
 - **Takeover benchmark follow-ups** (not started):
   - In Thornby, a single councillor can rewrite who writes for the paper.
   - A bench preset with fewer camps, so subsistence stays under 30% of actions.
@@ -155,6 +147,27 @@ one full suite per merge batch). Merge order: cleanup and documents last (they t
 - Fragment composer, a pairwise interlock matrix of institutions, and the slim Private-regime world (docs/review/31_institutions/08_integration.md).
 
 ## Recently done
+
+- 2026-10-22:
+  - **Batch 2 integrated, engine 22, on `subsistence` (9938395)**: State, Cooperative and Merchant worlds; documents; lawyer expert and
+    law imports (`use("L12")`, pinned versions, library blocks); old-code cleanup (MIN_ENGINE 13, library edition 2 removed);
+    temperament redesign (review 34, opt-in); positions and papers (review 33 §5 "As built": identity and derived leverage in the
+    system prompt, duties as DUE with none/reminder/obligation, failed-action banner, unread/new counts, submit/publish/decline,
+    a spec-load check that every channels-v2 world declares its channel setup: an error under specs/regimes/ and for positions
+    worlds; `directorate_positions.yaml`, `private_positions.yaml`).
+  - **Engine 21 made a frozen flip** (`law.similar_check` true -> false): runs of engines 13-20 replay again.
+  - **Engine 22** (`contracts.change_rounds` 0 -> 1): a members' ballot on a contract change closed in the round it opened, so under
+    simultaneous turns every change to a contract of two or more members failed with no votes (Lawtown; also earlier runs).
+  - **Lawtown live run** (`specs/regimes/lawtown.yaml`, 10 agents, 10 rounds; two Opus lawyers with archives and `draft`, Haiku
+    clients with legal goals): clients did their own legal work (a company, a supply contract, the Road Fund Act) and declined
+    counsel; lawyers mostly harvested, never drafted or read their archives; Marsh found and fixed a 100% transfer-tax bug in the
+    Road Fund Act (its on_transfer returned qty). Lesson: legal expertise only pays where the legal surface is complex (an existing
+    body of law, disputes in court, amending a complex institution, deals between institutions). Not published.
+  - **Engine limits for lawyers** (open): institutions are islands (one institution's laws cannot read or move another's; a contract
+    cannot read its members' J0 cases, 07 #6); `draft` fills templates and presets only; office duties were free text (positions
+    fixes).
+  - **Registry tables**: dir_changed, dir_sealed and dir_policy were never shown to agents (declared rendered in agents.py, no branch);
+    fixed with the other bookkeeping gaps of the merged branches.
 
 - 2026-10-20 to 21:
   - **Directorate world** (`specs/regimes/directorate.yaml`, built from merged parts only): 3 Opus rulers, Haiku managers and
