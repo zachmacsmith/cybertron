@@ -5,9 +5,9 @@ Branch `wp/environment`. The brief is [04_environment.md](04_environment.md); th
 
 ## Status
 
-Paused at Zach's question, waiting on whether to go on with the engine wiring or settle the design first. Step 3 in progress:
-`cybertron/environment.py` drafted (committed as work in progress; registered only in settings.TARGETS, not yet in features,
-schema, event types, the generator or the subsistence hooks, so nothing calls it and every world is unchanged).
+Design only (Zach: no building until he says). Scope widened: the environment, the frontier (37.5) and a general spatial
+system (a graph of land nodes) are being designed together here. `cybertron/environment.py` stays an unwired draft and will be
+reworked to sit on the spatial graph and one central scheduler.
 
 ## Plan
 
@@ -42,6 +42,15 @@ schema, event types, the generator or the subsistence hooks, so nothing calls it
 - **Acceptance** should test that the variation matters (a suited scripted strategy beats a myopic one), not only that it occurs.
 
 ## Log
+
+- **22 Oct.** Design discussion with Zach. Decisions: (1) external change (eras, cycles, incidents: drawn from the seed, paired
+  across arms, one central scheduler) is separate from internal consequences (depletion, exhaustion, collapse: resource physics,
+  diverges by arm); (2) three time scales, each modulating the one below: eras and trends to adapt through, cycles to understand
+  and build around, incidents to react to; (3) signs: one in-world sentence, with an audience, a lag and a reliability, kept
+  separate from effects (so a 2x2 with a placebo arm measures noticing and over-reaction); (4) resources by regeneration
+  regime (finite, fast renewable, threshold, slow, periodic); (5) the frontier is designed here too; (6) **space approved**: every
+  world runs on a graph of land nodes. Posted as Post 2 on the coord board. The existing scheduler to build on is `events.py`
+  (registry, per-type Poisson streams, visibility modes); the draft `environment.py` duplicated it and will not.
 
 - **22 Oct.** Draft of `cybertron/environment.py`: the schedule drawn at generation (year severities, micro-events with a rank
   draw `u`, a hash of the paired part), the calendar (12-round year, timing known, severity announced in autumn; winter ration
