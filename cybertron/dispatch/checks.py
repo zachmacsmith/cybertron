@@ -29,6 +29,10 @@ def check_move(k, p):
         for key in (p["src"], p["dst"]):
             if not AC.law_key_allowed(k, key) and not estate_access(k, str(p["why"])[4:], key):
                 raise L.LawError(f"no such agent: {key}")
+    if (k.spec.get("institutions") or {}).get("cross"):                 # review 37.3: another institution's account only by a power
+        from cybertron import cross as CR
+        if CR.on(k):
+            CR.check_law_move(k, p["src"], p["why"])
     if isinstance(p["src"], str) and p["src"].startswith(AC.FUND):    # P4.4: only a fund's own law moves goods out of it
         AC.check_fund_move(k, p["src"], p["why"])
     if any(isinstance(x, str) and x.startswith(AC.STORE) for x in (p["src"], p["dst"])):   # review 15 S3: food stores

@@ -73,6 +73,9 @@ TOPICS = {
     "subscription-writ": ("The subscription writ", "An old call, rarely recorded, that binds readers to an outlet."),   # media2
     "records": ("Records: directories, versions and seals (law.v2)", "A records law reads a directory's files and their version "
                 "log, seals files and sets who may read the log."),   # directories.law_api (review 31.05 #3-4, #10)
+    "cross": ("Institutions acting on each other (charters, treaties, memberships)",
+              "One institution's law acts on another only with a power the other granted it by a charter, a treaty or a membership "
+              "(read, levy, pay, appoint, remove, enact, veto, seize); without it the call is refused and the reason reported."),
     "contracts": ("Contracts (associations)", "A contract's code is law that binds only its members, who joined it; it can take "
                   "only what they deposited or allowed, and pay anyone from its own treasury."),   # contracts.py (P4.3)
 }
@@ -671,9 +674,67 @@ E += [
      "common"),
 ]
 OPTIONAL.update({e[0]: "contracts" for e in E if e[1] == "contracts"})
+# review 37.3 (cybertron/cross.py): documented only in law.v2 worlds with institutions.cross on (REQUIRES)
+_CROSS = "Institutions"
+E += [
+    ("powers_over", "cross", _CROSS, "powers_over(institution)", "the powers this law's institution holds over another now "
+     "([\"levy\", \"appoint\", ...]).", "prompt", "common"),
+    ("instruments", "cross", _CROSS, "instruments()", "this institution's charters, treaties and memberships: [{id, kind, name, "
+     "parties, status (offered | active | ended), grants: [{holder, over, power, item, qty, every}], consented}].", "prompt", "common"),
+    ("state_of", "cross", _CROSS, "state_of(institution)", "with the read power: {members, treasury, stores, offices, laws} of "
+     "the other institution; None without it.", "prompt", "common"),
+    ("levy_on", "cross", _CROSS, "levy_on(institution, item, qty, store=None, into=None)", "with the levy power: takes up to qty "
+     "of item from the other's treasury (or a store it owns) into this institution's treasury (or a store of its own), within the "
+     "grant's limit per period; returns what was taken (False when refused).", "prompt", "common"),
+    ("pay_out_of", "cross", _CROSS, "pay_out_of(institution, to, item, qty)", "with the pay power: pays from the other's "
+     "treasury to an agent, an institution or a store, within the grant's limit. True or False.", "prompt", "common"),
+    ("pay_into", "cross", _CROSS, "pay_into(institution, item, qty)", "pays from this institution's treasury into another's "
+     "(no power needed). True or False.", "prompt", "common"),
+    ("appoint_to", "cross", _CROSS, "appoint_to(institution, office, agent)", "with the appoint power: makes agent a holder of "
+     "one of the other's offices (a member, for an association). True or False.", "prompt", "common"),
+    ("remove_from", "cross", _CROSS, "remove_from(institution, office, agent)", "with the remove power: takes agent out of the "
+     "other's office. True or False.", "prompt", "common"),
+    ("enact_in", "cross", _CROSS, "enact_in(institution, code)", "with the enact power: puts a law in force in the other's code "
+     "at once, past its own procedure; returns the new law's id, or False.", "prompt", "common"),
+    ("offer_charter", "cross", _CROSS, "offer_charter(child, powers, name=None, child_powers=None)", "offers another institution "
+     "a charter: this institution will hold `powers` over it (e.g. [\"read\", {\"power\": \"levy\", \"item\": \"penny\", "
+     "\"qty\": 5}, \"appoint\"]) and it `child_powers` over this one; in force once the child's law calls accept_instrument. "
+     "Returns the charter's id. A charter from a polity to an association makes it the polity's: its laws see and outrank the "
+     "child's.", "prompt", "common"),
+    ("offer_treaty", "cross", _CROSS, "offer_treaty(other, give=None, take=None, name=None)", "offers a treaty: `give` are the "
+     "powers the other gets over this institution, `take` those this institution gets over the other; in force once the other "
+     "accepts. Returns its id.", "prompt", "common"),
+    ("offer_membership", "cross", _CROSS, "offer_membership(league, powers, name=None)", "asks to join another institution as a "
+     "member, granting it `powers` over this one; in force once the league accepts. Returns its id.", "prompt", "common"),
+    ("accept_instrument", "cross", _CROSS, "accept_instrument(id)", "this institution consents to a charter, treaty or membership "
+     "offered to it. True or False.", "prompt", "common"),
+    ("end_instrument", "cross", _CROSS, "end_instrument(id, reason=None)", "this institution revokes, withdraws from or leaves an "
+     "instrument (or declines an offer): its grants end at once. True or False.", "prompt", "common"),
+    ("grant_plot", "cross", _CROSS, "grant_plot(camp, plot, to, service=None)", "hands a fields plot this institution holds to "
+     "an agent or institution as a tenure, with optional service terms {\"work\": harvest | sow | tend | reap, \"qty\": n, "
+     "\"every\": rounds}. True or False.", "common", "common"),
+    ("seize_plot", "cross", _CROSS, "seize_plot(camp, plot)", "takes back a plot this institution granted, or a plot held by an "
+     "institution it holds seize over. True or False.", "common", "common"),
+    ("demand_service", "cross", _CROSS, "demand_service(agent, work, qty, camp=None, rounds=1)", "demands labour of a member "
+     "(when this institution may compel its members) or of a holder of its land: work (harvest, sow, tend or reap; sow, tend and "
+     "reap on this institution's plots) done qty times within `rounds` rounds. Returns the demand's id, or False.", "common",
+     "common"),
+    ("service_owed", "cross", _CROSS, "service_owed(agent=None)", "this institution's service demands: [{id, agent, work, qty, "
+     "done, due, status (open | done | missed)}].", "common", "common"),
+    ("tenures", "cross", _CROSS, "tenures()", "the plots this institution granted or holds of another: [{camp, plot, grantor, "
+     "grantee, service, status}].", "common", "common"),
+]
+
+
+def _cross_on(spec) -> bool:
+    from cybertron import cross as CR
+    return bool((spec.get("law") or {}).get("v2")) and CR.on_spec(spec)
+
+
+REQUIRES.update({e[0]: _cross_on for e in E if e[1] == "cross"})
 ENTRIES ={e[0]: {"name": e[0], "topic": e[1], "group": e[2], "prompt": e[3], "detail": e[4], "core": e[5], "minimal": e[6]} for e in E}
 GROUP_ORDER = ["Hooks", "Read", "Rights", "Money", "Camps", "Governance", "Output", "Names", "Sanctions", "Messages", "Text", "Meta", "Powers",
-               "Jurisdictions", "Media", "Life", "Contracts"]
+               "Jurisdictions", "Media", "Life", "Contracts", "Institutions"]
 ALWAYS_ARTICLE = {"disclose_capability_use", "capability_holders", "revoke_capability"}     # new with the powers: never in the old prompt
 ARTICLE_ONLY = {"compel_subscription"}                  # media2: a hidden call, in an article even under preset full (with REQUIRES)
 

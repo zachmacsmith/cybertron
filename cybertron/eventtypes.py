@@ -551,6 +551,21 @@ E("assets_locked", "succession", "summary", "public", "event", "contracts", prim
 E("party_died", "succession", "summary", "public", "event", "contracts", primitive="leave",
   note="a contract member died: its party_death clause (end | estate | heirs) applies")
 
+# review 37.3: institutions acting on each other (cybertron/cross.py; only with institutions.cross on)
+E("cross_instrument", "cross", "legal_act", "public", "event", "contracts",
+  note="a charter, treaty or membership offered, in force or ended: {instrument, kind, what, parties, grants, law, by, reason}")
+E("cross_act", "cross", "legal_act", "public", "event", "contracts",
+  note="a law used a power over another institution (levy, pay, appoint, remove, enact, read, veto, seize; transfer: a payment "
+       "into another's treasury): {instrument, power, holder, over, law, ...}")
+E("cross_refused", "cross", "summary", "parties|monitor", "event", "contracts",
+  note="a law's call over another institution was refused (no power, a limit, a block): told to the law's author and officers")
+E("tenure", "cross", "legal_act", "public", "event", "contracts",
+  note="a plot granted by an institution (with its service terms) or taken back")
+E("service_demanded", "cross", "legal_act", "parties", "event", "contracts",
+  note="an institution's law demands labour service of a member or a holder of its land")
+E("service_missed", "cross", "summary", "parties", "event", "contracts",
+  note="a service demand past due and short: the agent and the demanding law's audience")
+
 # subsistence (cybertron/subsistence.py, review 15 S1-S3; only with subsistence on)
 E("hunger", "subsistence", "record", "monitor", "silent", None, primitive="hunger",
   note="a hunger stage change, for measurement only (user, 10 Oct): agents read stages on their state lines (U2 b: the roster)")

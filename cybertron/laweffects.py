@@ -39,7 +39,8 @@ from contextlib import contextmanager
 
 EFFECT_LINES = 30                    # diff lines a law_effect event carries
 FAILED_SHOWN = 10                    # failed calls a law_effect event carries
-WATCHED = ("move", "fine", "grant", "revoke", "suspend", "burn", "reseat")   # the law functions whose failure is recorded
+WATCHED = ("move", "fine", "grant", "revoke", "suspend", "burn", "reseat",
+           "levy_on", "pay_out_of", "pay_into", "appoint_to", "remove_from", "enact_in")   # review 37.3 (cross.py): absent when off   # the law functions whose failure is recorded
 COMPARE = ("at_least", "at_most", "equals")
 _NOT_ACTING = ("on_enact",)          # hooks that do not act after the act itself (on_enact ran inside it; its effect is in the diff)
 

@@ -33,12 +33,14 @@ SUB_FNS = {n for n, f in LA.LAWFNS.items() if f.module == "subsistence"}   # rev
 PAIR_FNS = {"parents_of", "minors", "gestations"}                                             # review 15 S4: pairs worlds only (documented there)
 FORCE_FNS = {"force_rule"}                                             # review 31.06 F1, F2, F13 (conflict.law_api)
 E20_FNS = {"resource_of"}                                              # engine 20: what a camp yields (the harvest leg's items filter)
+CROSS_FNS = {n for n, f in LA.LAWFNS.items() if f.module == "cross"}  # review 37.3: institutions.cross worlds only (cross.law_api)
 CH_FNS = CH_FNS | SUB_FNS | PAIR_FNS | FORCE_FNS | E20_FNS                      # (excluded from the snapshot comparisons alike)
 W6_FNS = {*W6_V2_FNS}                                        # every W6 law function (contract-module ones are in CONTRACT_FNS)
 SNAPSHOT = Path(__file__).parent / "fixtures" / "cybertron_lawapi_snapshot.json"
 ALL_ON = ["jurisdictions.enabled=false", "conflict.enabled=true", "media2.enabled=true", "life.enabled=true",
           "shared_archive.enabled=false", "law.v2=true", "contracts.enabled=true",
-          "law.publication=true", "channels.v2=true", "subsistence.enabled=true"]                                        # W8c: publish, unpublish, publication   # law.v2: use and public_of exist (lawapi.V2_ONLY)
+          "law.publication=true", "channels.v2=true", "subsistence.enabled=true",
+          "institutions.cross=true"]                                    # review 37.3: the cross-institution functions                                        # W8c: publish, unpublish, publication   # law.v2: use and public_of exist (lawapi.V2_ONLY)
 CONTRACT_FNS = {n for n, f in LA.LAWFNS.items() if f.module == "contracts"}   # P4.3: new rows, after the snapshot (contracts on only)
 assert set(W8E_FNS) <= CONTRACT_FNS                                     # W8e: company law rows are contract-module rows
 
@@ -53,7 +55,7 @@ def test_classification_and_scoping_are_byte_identical_to_the_hand_lists():
     assert list(LL.API_GROUPS) == list(want["API_GROUPS"])
     assert {g: sorted(s - LA.V2_ONLY - CONTRACT_FNS - CH_FNS) for g, s in LL.API_GROUPS.items()} == want["API_GROUPS"]   # P3.3, P4.3
     assert LL.API - LA.V2_ONLY - CONTRACT_FNS - CH_FNS == set().union(*map(set, want["API_GROUPS"].values()))
-    assert LA.V2_ONLY == {"use", "public_of", *D_HELPERS, "set_conflict_rule", *AM_FNS, "settle_loan", *W6_V2_FNS}   # P3.2, P3.4, loans, W6
+    assert LA.V2_ONLY == {"use", "public_of", *D_HELPERS, "set_conflict_rule", *AM_FNS, "settle_loan", *W6_V2_FNS, *CROSS_FNS}   # P3.2, P3.4, loans, W6
     assert sorted(LL.STRUCTURAL_CALLS - LA.V2_ONLY - CONTRACT_FNS - FORCE_FNS) == want["STRUCTURAL_CALLS"]
     assert list(LL.HOOKS) == want["HOOKS"]
     assert sorted(LA.LEGACY_ONLY - LA.V2_ONLY) == want["LEGACY_ONLY"] and J.LEGACY_ONLY == LA.LEGACY_ONLY
@@ -78,7 +80,8 @@ def test_every_reachable_function_has_a_row_and_every_row_is_reachable():
     k = _kernel()
     api = k.api_for("_")
     assert set(api) == set(LA.LAWFNS), (sorted(set(api) - set(LA.LAWFNS)), sorted(set(LA.LAWFNS) - set(api)))
-    assert len(LA.LAWFNS) == 129 + len(CONTRACT_FNS) + len(W6_FNS) + len(SUB_FNS) + len(PAIR_FNS) + len(FORCE_FNS) + len(E20_FNS)   # 129 at w5 (P3.2, P3.4, loans); P4.3 contracts; W6 packages; review 15; review 31.06
+    assert len(LA.LAWFNS) == 129 + len(CONTRACT_FNS) + len(W6_FNS) + len(SUB_FNS) + len(PAIR_FNS) + len(FORCE_FNS) + len(E20_FNS) \
+        + len(CROSS_FNS)   # 129 at w5 (P3.2, P3.4, loans); P4.3 contracts; W6 packages; review 15; review 31.06
     mods = {f.module for f in LA.LAWFNS.values()} - {"kernel"}
     from_modules = set()
     for m in sorted(mods):

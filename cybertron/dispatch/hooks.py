@@ -91,6 +91,9 @@ def bound_laws(k, P, payload, phase) -> list:
     if "channels_v2" in k.w:                                            # wave 9 C: the owning institution's laws see its channels
         from cybertron import channels as CH
         laws = laws + [l for l in CH.owner_laws(k, P, payload, allv) if l not in laws]
+    if "cross" in k.w:                                                 # review 37.3: veto holders' laws see the institution's changes
+        from cybertron import cross as CR
+        laws = laws + [l for l in CR.veto_laws(k, payload, allv) if l not in laws]
     if P.name == "withdraw" and "subsistence" in k.w:                 # review 15 S3: the owning institution's code sees withdrawals
         from cybertron import subsistence as SB                          # from its stores (it decides who may make one)
         laws = laws + [l for l in SB.owner_laws(k, P, payload, allv) if l not in laws]

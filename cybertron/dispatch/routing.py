@@ -214,6 +214,9 @@ def _apply_v2(k, cas, P, fn, p, opts) -> Outcome:
     verdicts = _run_before(k, cas, P, p, opts, depth, raw, hide) if P.before and not unhooked else []
     v2d = resolve_v2(k, P, p, verdicts) if P.before and not unhooked else DecisionV2()
     if v2d.block and P.blockable and not ENTRENCHED_WHEN.get(name, lambda x: False)(p):
+        if "cross" in k.w:                                              # review 37.3: a veto holder's block is a use of its veto
+            from cybertron import cross as CR
+            CR.note_veto(k, P, p, v2d)
         out = on_block(k, cas, P, p, v2d, chain)
         if out is not None:
             return out
@@ -228,6 +231,9 @@ def _apply_v2(k, cas, P, fn, p, opts) -> Outcome:
         cas.changes += 1
         if note is not None:
             compelled(k, note, result)
+        if "cross" in k.w:                                              # review 37.3: work counted toward service demands
+            from cybertron import cross as CR
+            CR.after_change(k, name, p)
         charged = _apply_charges(k, P, p, v2d, depth, d.charged) if v2d.charges else ()
         prim_causes = list(k._causes)
     _legacy_after(k, P, p, chain, result)

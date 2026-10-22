@@ -115,6 +115,7 @@ from cybertron import succession as SU                                   # insti
 
 KEY = "contracts"
 EVENT_TYPES = ET.rendered_by("contracts")
+CROSS_EVENTS = ("cross_instrument", "cross_act", "cross_refused", "tenure", "service_demanded", "service_missed")   # cross.EVENTS
 SU_EVENTS = ("office_vacant", "office_filled", "office_abolished", "assets_locked", "institution_escheat", "party_died")
 DEFAULTS = {
     "enabled": False,       # associations: anyone may found a contract with its own treasury, escrow, allowances and code (needs law.v2)
@@ -2266,6 +2267,9 @@ def render_event(k, e, tag, viewer=None) -> str | None:
     d, t, who = e["data"], e["type"], e["agent"]
     if t in SU_EVENTS:                                                  # institutions.succession's events (rendered here)
         return SU.render_event(k, e, tag, viewer)
+    if t in CROSS_EVENTS:                                               # review 37.3 (institutions.cross; rendered here)
+        from cybertron import cross as CR
+        return CR.render_event(k, e, tag, viewer)
     c = d.get("contract")
     if t == "contract_created":
         return (f"{tag} {who} founded contract {c} '{d['name']}'" + (f" ({d['template']})" if d.get("template") else "")

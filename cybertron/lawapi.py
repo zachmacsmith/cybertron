@@ -43,7 +43,7 @@ AGENTISH = {"a", "aid", "agent", "guard", "borrower", "attacker", "target", "src
 # lawlang.API_GROUPS keys, in their historical order
 GROUPS = ("read", "rights", "money", "camps", "governance", "output", "names", "sanctions", "text", "meta", "projects", "projects_read")
 STRUCTURAL_GROUPS = ("rights", "money", "sanctions", "projects")     # a call in these makes a law structural
-STRUCTURAL_EXTRA = ("open_ballot", "repeal")                       # governance and meta, but structural (repeal: review F1, P1.4)
+STRUCTURAL_EXTRA = ("open_ballot", "repeal", "enact_in")                       # governance and meta, but structural (repeal: review F1, P1.4)
 PROCEDURAL = ("set_procedure", "set_conflict_rule", "propose_law", "propose_amendment",   # makes a law procedural (P3.2, P3.4: law.v2)
               "set_court_rule",                                                          # courts v2 (law.v2)
               "publish", "unpublish")                                                    # review 12 WP2 (law.publication)
@@ -377,6 +377,36 @@ LAWFNS = _fns(
           v2=True, primitive="set_record"),
     ),
     _module(
+        "cross",                                                        # review 37.3 (institutions.cross, law.v2): powers over others
+        F("powers_over", "read", scope="read", docs="requires", v2=True),
+        F("instruments", "read", scope="read", docs="requires", v2=True),
+        F("state_of", "read", scope="read", docs="requires", v2=True),     # needs the read power (else None)
+        F("tenures", "read", scope="read", docs="requires", v2=True),
+        F("service_owed", "read", ((0, "agent"),), scope="read", docs="requires", v2=True),
+        F("levy_on", "money", scope="none", why="only the calling law's own institution acts, and only over another institution it holds the power over (cross.holds)", docs="requires", v2=True, primitive="move"),
+        F("pay_out_of", "money", ((1, "to"),), scope="none", why="only the calling law's own institution acts, and only over another institution it holds the power over (cross.holds)", docs="requires", v2=True, primitive="move"),
+        F("pay_into", "money", scope="none", why="from the calling law's own treasury into another institution's: binds nobody",
+          docs="requires", v2=True, primitive="move"),
+        F("appoint_to", "rights", ((2, "agent"),), scope="none", why="only the calling law's own institution acts, and only over another institution it holds the power over (cross.holds)", docs="requires", v2=True, primitive="grant_right"),
+        F("remove_from", "rights", ((2, "agent"),), scope="none", why="only the calling law's own institution acts, and only over another institution it holds the power over (cross.holds)", docs="requires", v2=True, primitive="revoke_right"),
+        F("enact_in", "governance", scope="none", why="only the calling law's own institution acts, and only over another institution it holds the power over (cross.holds)", docs="requires", v2=True, primitive="enact"),
+        F("offer_charter", "rights", scope="none", why="an offer by the calling law's own institution; binds nobody until accepted",
+          docs="requires", v2=True),
+        F("offer_treaty", "rights", scope="none", why="an offer by the calling law's own institution; binds nobody until accepted",
+          docs="requires", v2=True),
+        F("offer_membership", "rights", scope="none", why="an offer by the calling law's own institution; binds nobody until accepted",
+          docs="requires", v2=True),
+        F("accept_instrument", "rights", scope="none", why="the calling law's own institution consents", docs="requires", v2=True),
+        F("end_instrument", "rights", scope="none", why="the calling law's own institution leaves an instrument", docs="requires",
+          v2=True),
+        F("grant_plot", "rights", ((2, "to"),), scope="none", why="a plot the calling law's own institution holds; `to` receives it",
+          docs="requires", v2=True, primitive="set_farm"),
+        F("seize_plot", "rights", scope="none", why="a plot the calling law's institution granted, or one an institution it holds "
+          "seize over holds", docs="requires", v2=True, primitive="set_farm"),
+        F("demand_service", "sanctions", ((0, "agent"),), scope="none", why="only of the calling law's institution's members (with "
+          "compel_members) or holders of its land (checked)", docs="requires", v2=True),
+    ),
+    _module(
         "contracts",                                                    # P4.3: associations (cybertron/contracts.py); only with contracts on
         F("pull", "money", scope="none", why="only an association's own law may call it: from its members, within their allowances",
           docs="contracts", power="take_deposits", primitive="pull"),
@@ -423,6 +453,7 @@ LAWFNS.update({n: replace(LAWFNS[n], power=p) for p, names in (
 #   deny    never (rights, sanctions, camp rules, currencies, force, J0's reserve functions, offices: compulsion and kernel rights)
 # contracts.scope_api applies it (and contracts.check_code refuses a contract whose code calls a denied function).
 CONTRACT_ALLOW_GROUPS = ("read", "text", "projects_read")
+CROSS_FNS = tuple(f.name for f in LAWFNS.values() if f.module == "cross")   # review 37.3: an association's law may call them too
 CONTRACT_COLUMN = {
     **{f.name: "allow" for f in LAWFNS.values() if f.group in CONTRACT_ALLOW_GROUPS},
     **{n: "allow" for n in ("name", "gazette", "notify", "open_ballot", "set_procedure", "repeal", "breach", "admit", "expel", "use",
@@ -430,7 +461,8 @@ CONTRACT_COLUMN = {
                             "refuse", "open_fund",                      # W6a: a contract's law may refuse too; P4.4 funds
                             "reseat",                                   # its own offices only (institutions.law_api checks)
                             "sell_to_window",                           # review 31.03 #5: its own treasury only
-                            "send_message")},                           # wave 9 C: messages in its own name (channels.v2)
+                            "send_message",                             # wave 9 C: messages in its own name (channels.v2)
+                            *CROSS_FNS)},                               # review 37.3: gated by the grants it holds (cross.py)
     **{n: "escrow" for n in ("move", "fine", "pull", "forfeit", "refund", "swap")},
     # P4.5: its own currencies (shares), rights and offices only: contracts.scope_api names them "<cid>.<name>", mints to anyone,
     # burns only what it holds, grants only to members (escrow-style: never beyond what the association itself created or holds)

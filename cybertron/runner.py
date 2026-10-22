@@ -305,6 +305,8 @@ def _run(inst, policy, out, sandbox, log, resume, live, notices, dry, instance_s
         rs = RunState(shared_snap=shared_snap, const=const, agents=agents, out=out)
         from cybertron import start as STT                                # established worlds: the start block's round-0 entries
         _setup(k, inst, rs, IV.merge(STT.schedule(inst), list(schedule or [])), live, notices, 0, log)   # by id: a replay's recorded schedule repeats the start entries
+        from cybertron import cross as CR                                # review 37.3: the spec's charters, treaties, memberships
+        CR.install(k)                                                    # (institutions.cross; off: nothing)
         for name in inst["spec"].get("start_laws") or []:              # library laws in force from round 0 (spec start_laws)
             k.enact(k.new_law(LB.code(name, inst), "constitution"))
         if (inst["spec"].get("law") or {}).get("v2"):                  # W6d: the legal fingerprint at round 0 (law.v2 worlds only)

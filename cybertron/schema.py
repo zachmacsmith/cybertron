@@ -1904,6 +1904,10 @@ OPT_IN = {                                                              # path: 
                         "{submission, reason}; needs channels.v2 (preset: cybertron/specs/fragments/papers.yaml)"),
     "channels.unread_new": ("bool", "", "review 33: pull channels show unread and new-since-last-round counts; headlines skip the "
                             "engine's official record"),
+    "institutions.cross": ("bool|map", "true | {enabled, instruments: [{kind: charter | treaty | membership, ...}]}",
+                           "review 37.3 (cybertron/cross.py; needs law.v2): institutions act on each other by powers granted in "
+                           "charters, treaties and memberships (read, levy, pay, appoint, remove, enact, veto, seize), plots granted "
+                           "as tenures and labour service; `instruments` lists those in force at round 0"),
 }
 
 
@@ -1933,6 +1937,11 @@ def _opt_in(spec) -> tuple:
                 continue                                                # checked by positions.check (a position reference)
             elif not isinstance(v, bool):
                 errs.append(f"{blk}.{n}: expected true or false, got {v!r}")
+    ins = spec.get("institutions")
+    if isinstance(ins, dict) and "cross" in ins:                       # review 37.3: institutions.cross (cybertron/cross.py)
+        from cybertron import cross as CR
+        out["institutions"] = {key: v for key, v in ins.items() if key != "cross"}
+        errs += CR.check(spec)
     if PS.in_use(spec):
         why = PS.channel_setup_problem(spec)
         if why:
