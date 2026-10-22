@@ -35,6 +35,14 @@ byte-identical replays, apply to cybertron2 only once its runs start to matter.)
 
 ## Log
 
+### 22 Oct (night, storeys and chains)
+
+- Zach: build upward (more expensive, needs stone); large buildings and 2-3 storeys must have stone; and what are the chains for
+  timber, stone and the rest? Added 02i §2c (ground x1.0, second x1.3 with stone below, third x1.6 with stone throughout; heavy
+  fittings on the ground floor; material limits on room size, storeys and rooms; towns build up, villages out; fire climbs) and 02g
+  §1e (the chains for timber, stone, clay, copper, iron, fibre and hides, from the ground to use; Weber's rule: weight-losing steps at
+  the source, weight-gaining at the market; fuel as the hidden spine of every chain; each step a trade and a building part).
+
 ### 22 Oct (night, buildings from parts)
 
 - Zach: capacity should extend, with bigger rooms or more rooms scaling efficiently. Added 02i §2b: room cost grows with capacity to
