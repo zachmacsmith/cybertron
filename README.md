@@ -133,7 +133,13 @@ Everything is offline (scripted bots, no model calls). `pip install -e ".[dev]"`
 python -m pytest -m "not slow" -n auto     # the quick loop: everything except the long scripted runs
 python -m pytest -n auto                   # the full suite
 python -m pytest tests/test_cybertron_golden.py tests/test_cybertron_history.py   # one area, serially
+python scripts/test_fast.py origin/subsistence -n 3 -- --basetemp=/tmp/pt_$USER     # the merge gate (below)
 ```
+
+**Merge gate.** `scripts/test_fast.py BASE` runs the tests a change can break: the gate set (goldens, prompts, schema, settings,
+the registry tables, every spec loading) plus every changed test file and every test file that imports a changed module directly
+(`--list` shows the selection). It gates merges into `subsistence`; the full suite runs in the background (daily, and before
+`main` moves) and never blocks a merge. Agents working in parallel give pytest a unique `--basetemp` each (pytest wipes it).
 
 `slow` marks tests that take more than about 10 s on their own: full scripted runs, resume and replay round trips, the
 History-versus-legacy scorer comparisons. Golden runs (tests/cybertron_golden_cases.py) are built once per session and shared by
