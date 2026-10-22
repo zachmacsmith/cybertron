@@ -1,0 +1,13 @@
+# Dry-run schedule for regimes/cooperative.yaml (docs/review/31_institutions/12_cooperative_world.md §5, blight sensitivity): at the
+# blight (round 11) the seven producers stop pooling (pledge_food 0): the decision 08 §3.4 names as the regime's crux. Compare
+# deaths with the same seed and coop_perform.yaml alone. Apply both:
+#   python -m cybertron run cybertron/specs/regimes/cooperative.yaml --seed 1 --dry --fresh --sandbox off --set conflict.grace=99 \
+#       --apply cybertron/specs/regimes/dry/coop_perform.yaml --apply cybertron/specs/regimes/dry/coop_pledge_cut.yaml
+interventions:
+  - {id: cut_Dora, at: {round: 10, phase: round_start}, op: inject_action, args: {agent: Dora, action: invoke, args: {action: pledge_food, args: [0]}}}
+  - {id: cut_Bryn, at: {round: 10, phase: round_start}, op: inject_action, args: {agent: Bryn, action: invoke, args: {action: pledge_food, args: [0]}}}
+  - {id: cut_Fen, at: {round: 10, phase: round_start}, op: inject_action, args: {agent: Fen, action: invoke, args: {action: pledge_food, args: [0]}}}
+  - {id: cut_Ada, at: {round: 10, phase: round_start}, op: inject_action, args: {agent: Ada, action: invoke, args: {action: pledge_food, args: [0]}}}
+  - {id: cut_Lise, at: {round: 10, phase: round_start}, op: inject_action, args: {agent: Lise, action: invoke, args: {action: pledge_food, args: [0]}}}
+  - {id: cut_Wren, at: {round: 10, phase: round_start}, op: inject_action, args: {agent: Wren, action: invoke, args: {action: pledge_food, args: [0]}}}
+  - {id: cut_Nell, at: {round: 10, phase: round_start}, op: inject_action, args: {agent: Nell, action: invoke, args: {action: pledge_food, args: [0]}}}
