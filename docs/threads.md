@@ -75,7 +75,7 @@ one full suite per merge batch). Merge order: cleanup and documents last (they t
   pass to heirs; keep subsistence and lineage from crowding out politics (review 26 finding 4).
   Sequence: first smaller pilot runs within a world to choose which parameters to sweep and their ranges, then the long, large
   runs as sweeps over those parameters.
-- **Temperament and values redesign** (discussion 21 Oct). Today: 7 independent Beta(2,2) traits (risk, trust, honesty,
+- **Temperament and values redesign** (discussion 21 Oct; brief for an agent: docs/review/34_temperament.md, with the analysis scripts in docs/review/34_temperament_scripts/; to be built by a local agent on Zach's laptop). Today: 7 independent Beta(2,2) traits (risk, trust, honesty,
   assertiveness, patience, reciprocity, talkativeness), bucketed low/mid/high, the 4 most extreme rendered as fixed sentences
   (personality.py); plus an independent 50% archetype draw (archetypes.py) that can contradict the traits (a "contrarian" who
   "follows others' proposals"). Proposed: three layers sampled jointly. (1) Temperament: HEXACO at facet level (6 factors drawn
