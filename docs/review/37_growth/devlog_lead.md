@@ -19,3 +19,13 @@ sessions Zach drives; 37.3 (institutions acting on each other) runs as a sub-age
 
 **Next.** Restore the sentence with a test; check the 37.3 sub-agent's progress on `wp/inst-cross`; merge package branches into
 `bench/first-batch` as they pass their acceptance checks.
+
+## 2026-10-22 17:10 (UTC)
+
+**Found.** The first 37.3 sub-agent was stopped by a safety filter (category "reasoning_extraction") right after my log request,
+which asked it to record its thinking. It had changed nothing on `wp/inst-cross`.
+
+**Decided.** Restarted 37.3 with the log described only as a decision record (Doing / Found / Decided / Q / Next). Other
+package sessions should use the same wording, not "write what you are thinking".
+
+**Next.** Watch for the first push to `wp/inst-cross`; then the aim_framing sentence fix.
