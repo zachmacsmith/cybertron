@@ -354,8 +354,9 @@ def _audience(k, lid) -> list:
 
 
 def _act(k, rec, power, holder, over, lid, **data) -> None:
+    """A use of a power, logged with its instrument (public; a read, which changes nothing, for the monitor only)."""
     k.log("cross_act", None, {"instrument": rec["id"] if rec else None, "kind": rec["kind"] if rec else None, "power": power,
-                              "holder": holder, "over": over, "law": lid, **data}, vis="public")
+                              "holder": holder, "over": over, "law": lid, **data}, vis="monitor" if power == "read" else "public")
 
 
 def _refuse(k, lid, power, holder, over, why, fn=None):

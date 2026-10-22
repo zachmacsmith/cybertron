@@ -635,9 +635,11 @@ _ROWS = [
       why={"compel": "the Board's power", "gate": "entrenched: board_veto"},
       notes="a Board member's veto vote; the kernel resolves the window at round end (process_veto_queue: vetoed, or enact/amend)"),
     P("enact", "core", "legal", ("jurisdiction", "law", "via"), "dispatch.changes.legal:do_enact", routed=True, subject="jurisdiction", parties=("jurisdiction",),
-      legal=True, event="enact", causes=("kernel",), reads=("laws",), preview=("laws",),
+      legal=True, event="enact", causes=("kernel", "law"), reads=("laws",), preview=("laws",), compel_vis="public",
       sites=("dispatch.changes.legal:do_enact", "kernel:Kernel.enact", "jurisdictions:intercept_enact"),
-      notes="via: procedure, veto_window, preview (dry run), start (setup), intervention, kernel (any other caller)"),
+      notes="via: procedure, veto_window, preview (dry run), start (setup), intervention, kernel (any other caller); law: a "
+            "parent's enact_in (review 37.3, institutions.cross: a law in force in another institution's code by its enact power; "
+            "an association's code is adopted through contracts._adopt instead)"),
     P("repeal", "core", "legal", ("jurisdiction", "law", "by_law", "via"), "dispatch.changes.legal:do_repeal", routed=True, subject="jurisdiction",
       parties=("jurisdiction",), legal=True, event="repeal", causes=("law", "kernel"), reads=("laws",), preview=("laws",),
       compel_vis="public", sites=("dispatch.changes.legal:do_repeal", "kernel:Kernel.repeal", "dispatch.validity:expire_laws"),
@@ -838,9 +840,10 @@ _ROWS = [
       why={"compel": _LNA, "gate": "law.v2: before_tend gates it (who may work which land: labour and land law)"},
       notes="one tend of a growing crop: a yield bonus with diminishing returns (fields.tend.bonus) and soil care at its harvest"),
     P("set_farm", "subsistence", "rule", ("agent", "camp", "holder", "key", "value"), "camptypes.fields:change_set_farm", routed=True,
-      subject="agent", parties=("agent",), agent_params=("agent",), event="farm_set", causes=("agent",), reads=("farms",),
-      sites=("camptypes.fields:change_set_farm", "camptypes.fields:set_farm"),
-      why={"compel": _LNA, "gate": "law.v2: before_set_farm gates it (land registries, tenancy law, transfer taxes)"},
+      subject="agent", parties=("agent",), agent_params=("agent",), event="farm_set", causes=("agent", "law"), reads=("farms",),
+      sites=("camptypes.fields:change_set_farm", "camptypes.fields:set_farm", "cross:_give"),
+      why={"gate": "law.v2: before_set_farm gates it (land registries, tenancy law, transfer taxes)",
+           "compel": "review 37.3 (institutions.cross): an institution's law hands over plots with grant_plot / seize_plot (give)"},
       notes="a holder's farm setting: allow / disallow (who else works it), share (the crop share of others' harvests paid to the "
             "holder), deliver (the holder's store for it), give (plots to a new holder; land works go with them)"),
     P("improve", "subsistence", "create", ("agent", "camp", "plot", "kind", "holder"), "camptypes.fields:change_improve", routed=True,
@@ -996,6 +999,12 @@ LAW_OUTPUTS = {
     "use": "law.v2 (P3.3): links another law's exports into the calling module when it loads; no change to the world",
     "refuse": "law.v2 (W6a): ends the calling invocation and rolls back what it did (P3.6 journal); a before-hook's refusal is a "
               "block verdict, so the change it gates is refused through that primitive's own block path; no change of its own",
+    # review 37.3 (cybertron/cross.py, institutions.cross only): agreements and demands recorded in k.w["cross"], not routed
+    # primitives yet (devlog 37.3 Q5: a hookable set_instrument would let a constitution refuse treaties); what they lead to (moves,
+    # office rights, enactments, plots) goes through those changes' own primitives
+    **{n: "review 37.3: an instrument record in k.w[\"cross\"] (offered, accepted or ended); not a routed primitive yet"
+       for n in ("offer_charter", "offer_treaty", "offer_membership", "accept_instrument", "end_instrument")},
+    "demand_service": "review 37.3: a service demand recorded in k.w[\"cross\"]; the work itself is the agent's own harvests",
 }
 
 # Event types that are outputs, look-ups or records of no change (EventType.primitive None on purpose); every other type of kind
@@ -1003,6 +1012,11 @@ LAW_OUTPUTS = {
 OUTPUT_EVENTS = {
     "gazette": "an output", "censure": "an output", "proposal_check_failed": "the proposer's private result",
     "sandbox": "a computation's result", "camp_survey": "a survey's result", "archive_read": "a look-up", "archive_search": "a look-up",
+    # review 37.3 (cybertron/cross.py): records kept by the module, not routed primitives yet (LAW_OUTPUTS above)
+    "cross_instrument": "review 37.3: an instrument offered, in force or ended (a record in k.w[\"cross\"])",
+    "cross_act": "review 37.3: the record of a power's use; the change itself is its primitive's (move, grant_right, revoke_right, "
+                 "enact, set_farm), which logs its own event",
+    "service_demanded": "review 37.3: a service demand (a record in k.w[\"cross\"])",
 }
 
 

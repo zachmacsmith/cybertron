@@ -797,9 +797,9 @@ class Kernel:
                 api.update(PUB.law_api(k, lid))                        # review 12 WP2: publish, unpublish, publication
             if IN.amend_setting(k):                                    # institutions.amend_offices: reseat(institution, office, agents)
                 api.update(IN.law_api(k, lid))
-            from cybertron import cross as CR                           # review 37.3 (institutions.cross; off: nothing): powers over
-            if CR.on(k):                                               # other institutions by charter, treaty or membership
-                api.update(CR.law_api(k, lid))
+            from cybertron import cross as XI                           # review 37.3 (institutions.cross; off: nothing): powers over
+            if XI.on(k):                                               # other institutions by charter, treaty or membership
+                api.update(XI.law_api(k, lid))
         return LE.wrap_api(k, lid, J.scope_api(k, lid, api))          # jurisdictions: a law reaches only its members (off: unchanged);
                                                                        # a contract's law: the contract column, v2 functions included
 
@@ -1443,8 +1443,8 @@ class Kernel:
             from cybertron import succession as SU
             PS.end_round(self)                                         # review 33: positions' duties checked (no position: nothing)
             SU.end_round(self)
-            from cybertron import cross as CR                           # review 37.3: service demands past due (off: nothing)
-            CR.end_round(self)
+            from cybertron import cross as XI                           # review 37.3: service demands past due (off: nothing)
+            XI.end_round(self)
         return {"close_ballots": close_ballots, "veto_queue": veto_queue, "regrow": regrow, "expire_cases": expire_cases,
                 "succession": succession, "record": record, "advance": advance}
 

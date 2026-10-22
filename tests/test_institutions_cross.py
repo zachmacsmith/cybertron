@@ -349,3 +349,13 @@ def test_spec_check():
 def test_an_instrument_naming_no_institution_fails_before_the_first_round(tmp_path):
     with pytest.raises(ValueError, match="institutions.cross.instruments"):
         run(tmp_path, world(instruments=[{"kind": "membership", "league": "J0", "member": "A9", "powers": ["remove"]}]))
+
+
+def test_a_refused_invocation_rolls_back_a_levy(tmp_path):
+    """law.atomic: the journal's image holds k.w["cross"] like any key, so a refusal undoes the levy and its use of the limit."""
+    k = kernel(tmp_path, world(instruments=[CHARTER]))
+    enact(k, law("Levy Then Refuse", 'def on_enact():\n    levy_on("A1", "penny", 4)\n    refuse("changed my mind")\n'))
+    assert AC.bal(k, "assoc:A1", "penny") == 50 and CR.state(k)["used"] == {}
+    assert not [e for e in evs(k, "cross_act") if e["power"] == "levy"]
+    lid = enact(k, law("Levy", 'def on_enact():\n    public["got"] = levy_on("A1", "penny", 9)\n'))
+    assert pub(k, lid)["got"] == 5.0                                   # the whole limit is still there

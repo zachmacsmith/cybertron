@@ -201,8 +201,8 @@ def check_store_move(k, src, dst, item, qty, why) -> None:
         if w == "withdraw" or (w == "ration" and dst == rec["owner"]):   # the ration from the eater's own store (eat_from_store)
             return
         if w.startswith("law:") and k.__dict__.get("_cross_permits"):  # review 37.3: a levy or pay of a held power
-            from cybertron import cross as CR
-            if CR.permitted_store_move(k, src):
+            from cybertron import cross as XI
+            if XI.permitted_store_move(k, src):
                 return
         if w.startswith("law:"):
             acct = account_of(k, w[4:])

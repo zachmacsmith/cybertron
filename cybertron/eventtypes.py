@@ -559,7 +559,7 @@ E("cross_act", "cross", "legal_act", "public", "event", "contracts",
        "into another's treasury): {instrument, power, holder, over, law, ...}")
 E("cross_refused", "cross", "summary", "parties|monitor", "event", "contracts",
   note="a law's call over another institution was refused (no power, a limit, a block): told to the law's author and officers")
-E("tenure", "cross", "legal_act", "public", "event", "contracts",
+E("tenure", "cross", "legal_act", "public", "event", "contracts", primitive="set_farm",
   note="a plot granted by an institution (with its service terms) or taken back")
 E("service_demanded", "cross", "legal_act", "parties", "event", "contracts",
   note="an institution's law demands labour service of a member or a holder of its land")

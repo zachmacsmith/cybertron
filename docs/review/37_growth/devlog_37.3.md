@@ -51,3 +51,75 @@ Branch `wp/inst-cross`. Brief: `03_institutions.md`. Newest entry last.
 **Q:** none yet.
 
 **Next:** write cybertron/cross.py (state, instruments, power checks, the law API), wire it, then tests.
+
+## 2026-10-22 17:40 UTC
+
+**Doing:** reply to the coordination board (origin/coord, Post 1: loops 2 and 4 mention 37.3).
+
+**Found:** plots exist today in fields camps: `camp["plots"][i]["holder"]` is an agent or an institution id, handed over by the
+routed `set_farm` primitive with key `give` (cybertron/camptypes/fields.py:419-510). No law function moves a plot.
+
+**Decided:** add land and labour to this package: `grant_plot` / `seize_plot` (tenures with service terms) and `demand_service`
+(over members when the institution holds `compel_members`, or over its tenants), counted from routed harvest/sow/tend/reap.
+Built against today's plots; asked 37.2 for a stable holder field and one routed plot-moving primitive. Rejected: waiting for
+37.2's plots (nothing to build against yet, and the interface is one call).
+
+**Q:** none.
+
+**Next:** wire the module.
+
+## 2026-10-22 18:30 UTC
+
+**Doing:** wiring, tests, templates.
+
+**Found:**
+- lawlang classifies a law by the names it calls, its own helpers included (cybertron/lawlang.py:126-136): adding `appoint` to
+  the API would make the library's Guardianship (library.py:3857 defines `appoint`) structural. Any short name could reclassify
+  an old world's agent-written law.
+- A law's move refused by my check must be a PhysicsError, not a LawError, or the law is suspended instead of getting False
+  (Kernel.move, kernel.py:340-353).
+- Associations cannot declare court clauses (`clause` is not in lawapi.CONTRACT_COLUMN), so a league court is a polity's court.
+- With jurisdictions off, J0 has compel_members over everyone, so it may demand service of anyone.
+
+**Decided:**
+- Structural calls get distinctive names: `levy_on`, `pay_out_of`, `pay_into`, `appoint_to`, `remove_from`, `enact_in`,
+  `offer_charter`, `offer_treaty`, `offer_membership`, `accept_instrument`, `end_instrument`, `grant_plot`, `seize_plot`,
+  `demand_service` (checked: no file in the repository calls any of them). The reads keep short names (reads do not change a
+  class).
+- Templates in their own library family (`CROSS_TEMPLATES`), listed only where the flag is on, so no other world's catalogue
+  changes. Rejected: the established family (its listing is gated on office_control, which would change those worlds' prompts).
+- The acceptance "league court binds a member polity's office" is tested as J0's court binding a member association's office
+  (a membership grants J0 remove and appoint over A1).
+- The test `tests/test_cybertron_lawapi.py` turns the flag on in its all-modules world and counts the new rows (as every
+  package that added law functions did).
+
+**Q:** see the 19:10 entry.
+
+**Next:** dry run with scripted bots.
+
+## 2026-10-22 19:10 UTC
+
+**Doing:** dry runs, write-up, full test suite.
+
+**Found:**
+- Guild Town dry run (cybertron/specs/cross/guild_town.yaml with cross/guild_town_dryrun.yaml): every power worked and refused
+  as designed; 13 cross acts, 6 refusals; levy register 4, 4, 4, 4, then "no levy power over A1" after the revocation.
+- The office's own succession refilled the Dyers' master after the League removed it, although the League held no appoint
+  power: removal makes a vacancy and `institutions.succession` fills it by the office's rule. A remove power is therefore also a
+  "trigger succession" power.
+- The March, 3 rounds dry, base vs branch: events, turns, snapshots, truth, prompts and transcripts byte-identical; calls.jsonl
+  differs only in latency.
+- The clean base (d9acf18) fails 12 tests before any change of mine (listed in the final report).
+
+**Decided:** reads (`state_of`) are logged for the monitor only. The Guild Levy reads every round, and a public event each round
+would crowd the feed; a read changes nothing.
+
+**Q1:** should a levy that a charter allows be exempt from the child's own before-hooks? Today the child's law can block it
+(defiance, visible as "the levy was blocked"). Exempting it would make a charter unbreakable from inside.
+**Q2:** should ending a charter be the parent's alone (revoke), with the child's renunciation needing the parent's consent or
+costing something? Today either party can end any instrument.
+**Q3:** close the off-by-default raid (a J0 law moving out of an association's treasury when jurisdictions are off) with an
+engine version bump, or leave it as is outside `institutions.cross`?
+**Q4:** should associations get courts (`clause`) so a league can itself be an association?
+
+**Next:** final suite run, push, report.

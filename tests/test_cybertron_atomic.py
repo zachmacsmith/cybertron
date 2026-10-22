@@ -169,7 +169,10 @@ JUR_ONLY = {"admit", "expel", "lawful_attack"}
 CONTRACT_ONLY = {n for n, f in LA.LAWFNS.items() if f.module == "contracts"}
 # Wave 9 C: send_message exists only under channels.v2 (tests/test_channels_v2.py covers its rollback).
 CHANNEL_ONLY = {n for n, f in LA.LAWFNS.items() if f.module == "channels"}
-WRITERS = sorted(n for n, f in LA.LAWFNS.items() if f.primitive and n not in CONTRACT_ONLY | CHANNEL_ONLY)
+# Review 37.3: the cross-institution functions exist only under institutions.cross (tests/test_institutions_cross.py covers their
+# rollback: the journal's image holds k.w["cross"] like any other key).
+CROSS_ONLY = {n for n, f in LA.LAWFNS.items() if f.module == "cross"}
+WRITERS = sorted(n for n, f in LA.LAWFNS.items() if f.primitive and n not in CONTRACT_ONLY | CHANNEL_ONLY | CROSS_ONLY)
 
 
 def test_every_writer_has_a_call():

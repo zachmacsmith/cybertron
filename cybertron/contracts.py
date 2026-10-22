@@ -2268,8 +2268,8 @@ def render_event(k, e, tag, viewer=None) -> str | None:
     if t in SU_EVENTS:                                                  # institutions.succession's events (rendered here)
         return SU.render_event(k, e, tag, viewer)
     if t in CROSS_EVENTS:                                               # review 37.3 (institutions.cross; rendered here)
-        from cybertron import cross as CR
-        return CR.render_event(k, e, tag, viewer)
+        from cybertron import cross as XI
+        return XI.render_event(k, e, tag, viewer)
     c = d.get("contract")
     if t == "contract_created":
         return (f"{tag} {who} founded contract {c} '{d['name']}'" + (f" ({d['template']})" if d.get("template") else "")
