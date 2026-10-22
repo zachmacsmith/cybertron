@@ -754,7 +754,7 @@ class Kernel:
 
         api = {
             "agents": agents, "holders": k.law_holders, "has": k.law_has, "balance": k.bal, "reserve": lambda: dict(k.w["reserve"]),
-            "price": k.price, "stock": lambda c: camp_of(c)["S"], "round": lambda: k.r, "laws": laws,
+            "price": k.price, "stock": lambda c: camp_of(c)["S"], "resource_of": lambda c: None if camp_of(c).get("secret") else camp_of(c).get("resource"), "round": lambda: k.r, "laws": laws,
             "proposer": lambda: law()["author"], "value": k.unit_value, "supply": lambda cur: k._cur(cur)["supply"],
             "camps": lambda: [c for c in k.w["camps"] if not k.w["camps"][c].get("secret")], "class_of": lambda a: CIStr(k.cls_of(a)), "holdings_value": k.holdings_value,
             "currencies": lambda: list(k.w["currencies"]),
