@@ -119,3 +119,13 @@ Runs on this cloud session's subscription (`LLM_BACKEND=claude_code`), launched 
   (L1 65, L2 62, L3 106, L4 115, L5 123, M1o 10) before dying around 10:50, i.e. shortly after this session went idle. Reading:
   the cloud container is reclaimed when the session is inactive, so background runs only progress while the session is working.
   From now to 14:00 the session stays active (a monitoring loop of 10-minute checks) instead of ending its turn. Relaunched.
+- 11:31-12:15 Running. The first spike to 14 concurrent runs (five 20-30-agent Commune/March runs at once) drove the load average to
+  120 and CLI calls started failing over to full prompts ("a conversation could not be continued"); the five were stopped at round
+  3-4 (resumable) and concurrency set to 8. Finished by 12:15: **L4** (200 rounds), **L2** (120), **M1h** (60).
+- 12:15 **Publishing caught a leak, then was blocked.** The privacy gate refused the first staging: L4's `calls.jsonl` quotes this
+  container's Claude Code session id inside a CLI error stream ("claude -p produced no result: ... session_id ..."). `publish.sh`
+  now copies each run (without checkpoints and `claude_sessions/`) to `out/_pubsrc/` and replaces the session, container, account
+  and organisation ids with `<redacted>` before staging; the re-staged L4, L2, M1h audit clean
+  (`out/_publish/bench36_20261022T121750`). The push itself was then refused by this session's auto-mode permission check, so
+  **nothing has been uploaded**; it needs Zach's go-ahead (or a permission rule). Command, once allowed:
+  `CARDS=<cards.yaml> bash cybertron/specs/bench36/publish.sh <run dirs>`.
