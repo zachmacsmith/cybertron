@@ -452,7 +452,13 @@ def _hazard(k, aid, c, rec) -> None:
     from cybertron import mortality as MO
     n = int(state(k)["missed"][aid]) - 2
     hz = c["hazard"]
-    h = min(1.0, frailty(k, aid) + float(hz["step"]) * (n - 1))
+    base = frailty(k, aid)
+    if "pairs" in (k.w.get("life") or {}):                               # 37.1: an underfed minor is frailer
+        from cybertron import pairs as PR
+        mf = PR.cfg(k.spec)["raising"].get("minor_frailty")
+        if mf is not None and PR.is_minor(k, aid):
+            base = max(base, float(mf))
+    h = min(1.0, base + float(hz["step"]) * (n - 1))
     u = random.Random(f"{k.inst['seed']}|subsistence|hazard|{k.r}|{aid}").random()
     if u < h or n >= int(hz["max_rounds"]):
         from cybertron import conflict as CF                             # harm: starving soon after a wound is a death by wounds
@@ -551,7 +557,8 @@ def yield_mult(k, aid) -> float:
     if "pairs" in (k.w.get("life") or {}):                               # review 15 §4.4: a minor forages and hunts at x0.5
         from cybertron import pairs as PR
         if PR.is_minor(k, aid):
-            out *= float(c["minor_yield"])
+            from cybertron import life as LF
+            out *= LF.labour(k, aid)                                     # 37.1: life.labour (default: minor_yield, as before)
     return out
 
 

@@ -1348,8 +1348,19 @@ def _entity_label(e):
     return e.split(":")[-1] if e.startswith("resource:") else ("the Board" if e == "board" else e)
 
 
+# 37.1: a child's cause at coming of age (pairs.mature, raising mode family): Ally or Foil of a parent, told in family terms
+FAMILY_TEXTS = {
+    "Ally": "stand by your family: help {target}, your parent, succeed at what they are working for. Ask them what it is and put "
+            "your work behind it; their success is yours",
+    "Foil": "you have turned against your family: see that {target}, your parent, fails at what they are working for. Work out "
+            "what it is from what they say and do, and work against it, without letting them see it",
+}
+
+
 def describe(goal: str, params: dict) -> str:
     """The goal's text rendered with its parameters (a parameter the template names but params lack renders as "")."""
+    if params.get("family") and goal in FAMILY_TEXTS:
+        return FAMILY_TEXTS[goal].format(target=params.get("target") or "")
     p = dict(params)
     if "entity" in p:
         p["entity"] = _entity_label(p["entity"])

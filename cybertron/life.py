@@ -94,6 +94,8 @@ DEFAULTS = {
     "age_sampling": "iid",              # stationary only: iid (independent draws) | systematic (evenly spaced quantiles)
     "max_population": None,             # a model-cost budget guard: the run stops (STOPPED.md) before a round that starts with more living
                                         # agents than this (an int, or "4N": a multiple of the starting agents); births are never refused
+    "labour": {"from_age": 0, "minor": None},   # 37.1 labour(agent): 0 below from_age, a minor's share of an adult's work (None:
+                                        # subsistence.minor_yield), 1 for an adult; it scales a minor's forage, hunt and farm yield
     "default_heirs": "reserve",         # where an estate's unbequeathed part goes: reserve (as before) | children (children, unborn
                                         # included, then co-parents, then the reserve)
     "audit_fixes": None,                # review 16 bugs B2-B5, B7; None: on with the absolute or stationary demography, else off
@@ -113,6 +115,16 @@ DEFAULTS = {
         "split_polity": "auto",         # parents in different polities and none named: auto (none in a world that began in the state
                                         # of nature, else the initiator's) | initiator | none
         "promotion": {"p_lo": 0.25, "p_hi": 0.85},   # maturity: chance the inherited goal becomes primary, by parental food (S5)
+        "raising": {                    # 37.1: what coming of age decides (pairs.mature)
+            "mode": "inherit",          # inherit: the parents' shared value may become primary (S5, as before) | family: the child
+                                        # takes up a parent's cause (Ally), goes its own way, or turns against it (Foil), by the food
+                                        # its parents gave it
+            "loyal": [0.2, 0.8],        # family: the chance of the parent's cause with no food beyond the provisions, and with full
+            "estranged": 0.3,           # family: the chance of turning against the parent with no food beyond the provisions (falls
+                                        # as (1 - x)^2 with the share x of full investment)
+            "minor_frailty": None,      # a minor's starvation hazard base (None: its own frailty, as an adult's)
+            "tell_parents": False,      # family: parents learn which way the child went (false: only that it came of age)
+        },
         "child_goals": {                # review 24: the arm's goal structure for children (defaults: today's draw, unchanged)
             "fixed": None,              # a goal every child holds as primary (e.g. Endure); None: the primary is drawn as today
             "a_slot": True,             # with fixed: the drawn goal becomes the secondary (the A slot); false: the fixed goal alone
@@ -518,6 +530,37 @@ def born_into(k, aid):
 def stat(k, aid, name, default=0):
     """A child's bought stat (attack, defense, lookups, scratchpad), for the modules that use them."""
     return (k.w.get("life") or {}).get("stats", {}).get(aid, {}).get(name, default)
+
+
+def age(k, aid):
+    """37.1: an agent's age in rounds: the rounds behind it when it entered (a founder's elapsed, 0 at birth) plus the rounds since
+    (born agents count from their birth round, arrivals from their arrival). None without Life."""
+    st = k.w.get("life")
+    if not st or aid not in st.get("elapsed", {}):
+        return None
+    from cybertron import events as EV
+    start = st["born"].get(aid)
+    if start is None:
+        start = (EV.state(k).get("arrivals") or {}).get(aid, 0)
+    return int(st["elapsed"][aid]) + max(0, k.r - int(start))
+
+
+def labour(k, aid) -> float:
+    """37.1: the share of an adult's work aid does: 0 below life.labour.from_age, a minor's share (life.labour.minor, else
+    subsistence.minor_yield) while a minor, 1 otherwise."""
+    from cybertron import pairs as PR
+    if not PR.is_minor(k, aid):
+        return 1.0
+    lc = cfg(k.spec).get("labour") or {}
+    a = age(k, aid)
+    if a is not None and a < int(lc.get("from_age") or 0):
+        return 0.0
+    if lc.get("minor") is not None:
+        return float(lc["minor"])
+    if "subsistence" in k.w:
+        from cybertron import subsistence as SB
+        return float(SB.cfg(k.spec)["minor_yield"])
+    return 1.0
 
 
 # ---------------------------------------------------------------------- end of round (step 6: deaths and births)
@@ -1040,6 +1083,12 @@ def law_api(k, lid) -> dict:
         from cybertron import pairs as PR
         return PR.minors_view(k) if _on() else []
 
+    def age_of(agent):
+        return age(k, str(agent)) if _on() else None
+
+    def labour_of(agent):
+        return labour(k, str(agent)) if _on() and str(agent) in k.w["agents"] else None
+
     def gestations():
         from cybertron import pairs as PR
         return PR.gestations_view(k) if _on() else []
@@ -1065,6 +1114,7 @@ def law_api(k, lid) -> dict:
 
     return {"makers": makers, "commissions": commissions, "births": births, "children_of": children_of,
             "lifespan_left": lifespan_left, "parents_of": parents_of, "minors": minors, "gestations": gestations,
+            "age": age_of, "labour": labour_of,
             "set_birth_rules": set_birth_rules,
             "publish_commissions": lambda on=True: _flag("commissions", on), "publish_births": lambda on=True: _flag("births", on)}
 

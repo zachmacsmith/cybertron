@@ -77,6 +77,15 @@ def pairs_spec(spec) -> bool:
     return LF.enabled(spec) and mode(spec) in ("pairs", "both")
 
 
+def family_spec(spec) -> bool:
+    """37.1: children are raised into a family's cause (life.reproduction.raising.mode family, pairs or both)."""
+    return pairs_spec(spec) and str((cfg(spec).get("raising") or {}).get("mode") or "inherit") == "family"
+
+
+def family_on(k) -> bool:
+    return on(k) and family_spec(k.spec)
+
+
 def makers_spec(spec) -> bool:
     """Makers are part of this world (Life on and the mode is makers or both)."""
     return mode(spec) in ("makers", "both")
@@ -489,7 +498,7 @@ def child_goals(k, aid, cls, inherit, grng, born_round=None) -> dict:
     cg = cfg(k.spec).get("child_goals") or {}
     if cg.get("fixed"):                                                  # review 24: a fixed primary (Endure), the drawn goal as the A slot
         return fixed_child_goals(k, aid, cls, rights, grng, cg)
-    if not cg.get("inherit", True):
+    if not cg.get("inherit", True) or family_spec(k.spec):              # 37.1: family raising decides at coming of age instead
         inherit = None
     if not inherit:
         return EV.draw_goals(k, k.inst, aid, cls, rights, grng)
@@ -576,7 +585,9 @@ def birth(k, g):
         lst["stats"][aid] = {x: 0 for x in ("scratchpad", "attack", "defense", "lookups")}
         st["minors"][aid] = {"parents": [a, b], "gestation": gid, "born": k.r + 1, "until": k.r + 1 + int(c["maturity"]),
                              "inherit": inherit, "invested": round(float(hold.get(FOOD, 0.0)) if c["item"] == FOOD else 0.0, 6),
-                             "provisions": float(g.get("provisions", 0.0)), "matured": None}
+                             "provisions": float(g.get("provisions", 0.0)), "matured": None,
+                             **({"by": {x: round(float((g.get("paid") or {}).get(x, {}).get("provisions", 0.0)), 6) for x in (a, b)}}
+                                if family_on(k) else {})}
         g.update({"status": "born", "child": aid, "born_round": k.r + 1, "escrow": {}})
 
     born = k.apply("begin_life", agent=aid, how="born", parent=a, record=ag, inst=k.inst, settle=settle)
@@ -672,6 +683,15 @@ def _parent_source(k, src, parents) -> bool:
     return False
 
 
+def _which_parent(k, src, parents):
+    s = str(src)
+    if s in parents:
+        return s
+    if s.startswith("store:"):
+        return (k.w["subsistence"]["stores"].get(s[len("store:"):]) or {}).get("owner")
+    return s.rsplit(":", 1)[-1]
+
+
 def scan(k) -> None:
     """The investment ledger (U4): food moved to a minor from its parents since the last scan."""
     st = state(k)
@@ -687,6 +707,9 @@ def scan(k) -> None:
                 continue
             if _parent_source(k, d.get("src"), m["parents"]):
                 m["invested"] = round(m["invested"] + float(d.get("qty") or 0.0), 6)
+                if "by" in m:                                            # 37.1: who gave it (family raising)
+                    who = _which_parent(k, d.get("src"), m["parents"])
+                    m["by"][who] = round(m["by"].get(who, 0.0) + float(d.get("qty") or 0.0), 6)
     st["scan"] = len(k.events)
 
 
@@ -708,18 +731,73 @@ def end_of_round(k) -> None:
         del st["offers"][oid]
 
 
-def promotion_p(k, m) -> float:
-    """p = p_lo + (p_hi - p_lo) x clip((I - I0) / I_span, 0, 1): I0 the provisions held for it, I_span = maturity x the ration."""
+def investment_share(k, m) -> float:
+    """x = clip((I - I0) / I_span, 0, 1): I the food that reached the child from its parents, I0 the provisions held for it,
+    I_span = maturity x the ration."""
     c = cfg(k.spec)
-    pr = c["promotion"]
     ration = 1.0
     if "subsistence" in k.w:
         from cybertron import subsistence as SB
         ration = float(SB.cfg(k.spec)["ration"])
     i0 = float(m.get("provisions") or 2 * float(c["provisions"]))
     span = max(1e-9, int(c["maturity"]) * ration)
-    x = min(1.0, max(0.0, (float(m["invested"]) - i0) / span))
-    return float(pr["p_lo"]) + (float(pr["p_hi"]) - float(pr["p_lo"])) * x
+    return min(1.0, max(0.0, (float(m["invested"]) - i0) / span))
+
+
+def promotion_p(k, m) -> float:
+    """p = p_lo + (p_hi - p_lo) x the investment share."""
+    pr = cfg(k.spec)["promotion"]
+    return float(pr["p_lo"]) + (float(pr["p_hi"]) - float(pr["p_lo"])) * investment_share(k, m)
+
+
+def family_odds(k, m) -> tuple:
+    """37.1 (raising mode family): (p_loyal, p_estranged) at coming of age. p_loyal = lo + (hi - lo) x, p_estranged =
+    estranged x (1 - x)^2, x the investment share; the rest goes its own way."""
+    r = cfg(k.spec)["raising"]
+    lo, hi = (float(v) for v in r["loyal"])
+    x = investment_share(k, m)
+    pl = lo + (hi - lo) * x
+    return pl, min(1.0 - pl, float(r["estranged"]) * (1.0 - x) ** 2)
+
+
+def family_target(k, m):
+    """The parent whose cause the child takes up (or turns against): the living parent who gave it more food (the initiator on a
+    tie); None when both are dead."""
+    by = m.get("by") or {}
+    living = [p for p in m["parents"] if MO.alive(k, p)]
+    if not living:
+        return None
+    return max(living, key=lambda p: (by.get(p, 0.0), -m["parents"].index(p)))
+
+
+def _mature_family(k, aid, m, a, rec) -> dict:
+    """37.1: one draw (the coming-of-age stream) decides loyal (primary Ally of the target parent), estranged (Foil) or own (no
+    change). The new primary pushes the old one to secondary; the change is a goal boundary (scored as two segments)."""
+    from cybertron import events as EV
+    from cybertron import goals as G
+    g = a["goal"]
+    pl, pe = family_odds(k, m)
+    u = random.Random(f"{k.inst['seed']}|life|mature|{aid}").random()
+    t = family_target(k, m)
+    way = "own" if t is None or g.get("fixed") else "loyal" if u < pl else "estranged" if u >= 1.0 - pe else "own"
+    rec.update({"p_loyal": round(pl, 6), "p_estranged": round(pe, 6), "u": round(u, 6), "way": way, "target": t,
+                "by": dict(m.get("by") or {}), "share": round(investment_share(k, m), 6)})
+    if way == "own":
+        k.notify(aid, f"You come of age: from round {k.r + 2} you are an adult, and your aims are your own.")
+        return rec
+    old = copy.deepcopy(g)
+    name = "Ally" if way == "loyal" else "Foil"
+    new = {**{x: v for x, v in g.items() if x not in ("provisional", "text", "weights")},
+           "primary": name, "params": {"target": t, "slot": "primary", "family": True},
+           "secondary": g.get("primary"), "secondary_params": g.get("params") or {}, "tertiary": None, "tertiary_params": {}}
+    new["reachable"] = G.reachable(new["primary"], new["params"], k.inst["law_level"], {"rights": k.w["agents"][aid]["rights"]})
+    new = EV._goal_text(new, (k.spec["goals"].get("score_weights") or {}), bool(k.spec["goals"].get("show_rules", True)),
+                        bool(k.spec["goals"].get("aims")))
+    EV.set_goal_boundary(k, k.inst, aid, old, new, k.r + 1, "maturity")
+    k.notify(aid, f"You come of age: from round {k.r + 2} you are an adult. " + (
+        f"You were raised well and you stand by {t}." if way == "loyal" else f"You have turned against {t}.")
+        + f" Your goal now: {new['text']}")
+    return rec
 
 
 def mature(k, aid) -> dict:
@@ -734,6 +812,17 @@ def mature(k, aid) -> dict:
     if a is None:
         return rec
     g = a["goal"]
+    if family_on(k):                                                     # 37.1: loyal, own or estranged
+        _mature_family(k, aid, m, a, rec)
+        k.log("maturity", aid, rec, vis="monitor")
+        tell = bool(cfg(k.spec)["raising"].get("tell_parents"))
+        for p in m["parents"]:
+            if MO.alive(k, p):
+                k.notify(p, f"Your child {aid} comes of age" + (
+                    f": it stands by {rec['target']}." if tell and rec["way"] == "loyal" else
+                    f": it has turned against {rec['target']}." if tell and rec["way"] == "estranged" else
+                    ": it goes its own way." if tell else "."))
+        return rec
     if inherit and g.get("secondary") == inherit and not g.get("fixed"):
         p = promotion_p(k, m)
         u = random.Random(f"{k.inst['seed']}|life|mature|{aid}").random()
@@ -791,10 +880,15 @@ def state_lines(k, aid) -> list:
     if kids and c["household"]:
         out.append("Your minors eat from your food after you do when they have none: "
                    + ", ".join(f"{x} (until round {st['minors'][x]['until'] + 1})" for x in kids) + ".")
+    if kids and family_on(k):                                            # 37.1: what raising decides, in world terms
+        out.append("A child well fed while it grows up is likely to stand by you when grown and work for what you work for; a "
+                   "neglected one may die young, and now and then turns against the parent who failed it.")
     if is_minor(k, aid):
         m = st["minors"][aid]
         out.append(f"You are a minor until round {m['until'] + 1}: at most {int(c['minor_actions'])} actions; you cannot have "
-                   f"children, attack, found, propose or vote. Your parents: {', '.join(m['parents'])}.")
+                   f"children, attack, found, propose or vote. Your parents: {', '.join(m['parents'])}."
+                   + (" How they raise you will weigh on whether you take up their cause when you come of age."
+                      if family_on(k) else ""))
     return out
 
 
@@ -805,13 +899,17 @@ def rules_text(spec) -> str:
             f"naming you within {int(c['offer_lapse'])} rounds). Both must be adults, not already expecting; each pays "
             f"{need:g} {c['item']} ({float(c['provisions']):g} held as the child's first {c['item']}, {float(c['fee']):g} used up), "
             f"from their own {c['item']} and stores. The child is born {int(c['gestation'])} rounds later, mixes its parents' "
-            "temperaments, and has a goal of its own drawn at random. A goal both parents name (\"inherit\") becomes its secondary "
-            "goal, which may become its primary when it comes of age, more likely the more food its parents gave it. The offer may "
-            "name the polity the child is born into, one of yours. A child is a minor for "
+            "temperaments, and has a goal of its own drawn at random. "
+            + ("" if family_spec(spec) else "A goal both parents name (\"inherit\") becomes its secondary goal, which may "
+               "become its primary when it comes of age, more likely the more food its parents gave it. ")
+            + "The offer may name the polity the child is born into, one of yours. A child is a minor for "
             f"{int(c['maturity'])} rounds (at most {int(c['minor_actions'])} actions; no children, attacks, foundings, proposals "
             "or votes)" + ("; a minor with no food eats from its parents' food after they have eaten" if c["household"] else "")
             + (f". At most {int(c['max_children'])} children each" if c.get("max_children") is not None else "")
-            + ". A child counts in both parents' lineages.")
+            + ". A child counts in both parents' lineages."
+            + (" How a child is raised matters: one well fed while it grows up is likely to take up its parent's cause when it "
+               "comes of age; a neglected one may die young, and now and then turns against the parent who failed it."
+               if family_spec(spec) else ""))
 
 
 # ---------------------------------------------------------------------- the scripted bot (dry runs; own stream)

@@ -331,6 +331,19 @@ E += [                                                                  # review
      "(p: a, b, inherit (True if a goal is passed on), polity).", "prompt", "common"),
 ]
 REQUIRES.update({n: _pairs_on for n in ("minors", "gestations")})
+
+
+def _family_on(spec) -> bool:
+    from cybertron import pairs as PR
+    return PR.family_spec(spec)
+
+
+E += [                                                                  # 37.1: ages and labour (family worlds)
+    ("age", "life", "Life", "age(agent)", "an agent's age in rounds (None without a lifespan).", "prompt", "common"),
+    ("labour", "life", "Life", "labour(agent)", "the share of an adult's work an agent does: 0 for a small child, a part while a "
+     "minor, 1 for an adult.", "prompt", "common"),
+]
+REQUIRES.update({n: _family_on for n in ("age", "labour")})
 # linker (cybertron/linker.py, P3.3): documented only in law.v2 worlds (REQUIRES), so every other world's prompt and codex are unchanged
 E += [
     ("use", "linker", "Meta", "use(ref)", "links another law's exports into this law, as a read-only mapping: at the top level only, "

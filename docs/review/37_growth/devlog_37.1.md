@@ -61,3 +61,36 @@ Dropped (Zach, 22 Oct): automatic or hazard births (fertility stays a choice), d
   - `start.kin` for founding families (cybertron/start.py:960).
   - `subsistence.minor_yield` (0.5): a minor's foraging fraction, which becomes the labour factor.
 - **Next:** step 2.
+
+### 2026-10-22 18:20 UTC: steps 2-3, ages, labour, raising a child
+
+- **Doing:** ages, the labour factor, and family raising.
+- **Built:**
+  - `life.age(k, aid)`: elapsed at entry plus rounds since (born agents from their birth, arrivals from arrival).
+  - `life.labour(k, aid)`: 1 for adults; for a minor `life.labour.minor` (default `subsistence.minor_yield`, 0.5), 0 below
+    `life.labour.from_age` (default 0, so unchanged). It now scales a minor's yields (`subsistence.yield_mult`).
+  - Law reads `age(agent)` and `labour(agent)`, documented only in family worlds.
+  - `life.reproduction.raising` (mode `inherit` = today, `family` = new):
+    - the ledger records each parent's food (`minors[c]["by"]`);
+    - at coming of age one draw (the existing stream) gives loyal with p = lo + (hi - lo) x, estranged with p = e (1 - x)^2,
+      else own way, where x is the investment share (the existing formula);
+    - loyal sets primary Ally {target: the parent who gave more, family: true}; estranged sets Foil; the old primary becomes
+      secondary, and a goal boundary means the child is scored as two segments;
+    - Ally and Foil get family wording (`goal_registry.FAMILY_TEXTS`) instead of "secretly ...", and no score wording;
+    - `minor_frailty` raises an underfed minor's starvation hazard base;
+    - parents learn only "comes of age" unless `tell_parents`;
+    - prompt lines in world terms: parents see "a child well fed while it grows up is likely to stand by you ...; a neglected
+      one may die young, and now and then turns against the parent who failed it"; minors see that how they are raised weighs on
+      it.
+  - Tests: `tests/test_family.py` (14).
+- **Found:**
+  - Adding default keys changes `instance.json` in all 11 golden cases. Events, snapshots, scores and prompts are unchanged, so
+    the fingerprints were refreshed (the test's own instructions for a deliberate change).
+  - On a clean `bench/first-batch`, 14 tests fail and 7 error already (consistency, contract, eventtypes, rights_writes, tiers,
+    dataset_naming, farming replay, history, continue). These are not ours. Only `test_cybertron_lawapi` needed updating for the
+    two new law functions.
+- **Decided:**
+  - Loyalty uses the existing Ally and Foil goals rather than a new goal: their scorers already follow a target's score, so a loyal
+    child succeeds exactly when its parent does, which is "another agent working for your goals".
+  - The target is the parent who gave more food: the investment decides whose cause it is.
+- **Next:** step 4, children's work (a minor's surplus to the household; minors play every k rounds).
