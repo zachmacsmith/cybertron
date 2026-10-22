@@ -101,6 +101,8 @@ DEFAULTS = {
     "households": {"enabled": False,    # 37.1 (cybertron/households.py): families as minimal institutions (needs pairs, contracts)
                    "keep": 2.0,         # the Household template's KEEP: food each member keeps out of the pot
                    "name": "{head}'s household",
+                   "head_model": "keep",    # keep | inherit: a new head takes the dead head's model when stronger (the seat
+                                        # carries the model; scenario_design §2)
                    "inheritance": "none"},  # plots and stores at death (read with pairs on, households or not): none (as before) |
                                         # partible (whole plots round the living children, eldest first) | eldest | household
     "default_heirs": "reserve",         # where an estate's unbequeathed part goes: reserve (as before) | children (children, unborn

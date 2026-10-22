@@ -202,11 +202,41 @@ def after_death(k, aid) -> None:
             continue
         nh = _next_head(k, iid, aid)
         st["head"][iid] = nh
-        k.log("household", nh, {"household": iid, "op": "head", "head": nh, "from": aid}, vis="monitor")
+        took = _take_seat_model(k, nh, aid) if nh else None
+        k.log("household", nh, {"household": iid, "op": "head", "head": nh, "from": aid, **({"model": took} if took else {})},
+              vis="monitor")
         for m in members(k, iid):
             if m != aid:
                 k.notify(m, f"{aid}, head of {_rec(k, iid)['name']} ({iid}), is gone; " + (
                     f"{nh} heads it now." if nh else "it has no head."))
+
+
+_RANK = (("opus", 3), ("sonnet", 2), ("haiku", 1))
+
+
+def _model_rank(k, model) -> int:
+    from cybertron import life as LF
+    s = str(model or "").lower()
+    for name, r in _RANK:
+        if name in s:
+            return r
+    return {"strong": 3, "mid": 2, "weak": 1}.get(LF._tier_of(k, model), 1)
+
+
+def _take_seat_model(k, heir, dead):
+    """life.households.head_model inherit (scenario_design §2: never drift to all-Haiku): a new head takes the dead head's model
+    when it is stronger than its own (the seat carries the model). Returns the model taken, or None."""
+    if str(cfg(k.spec).get("head_model") or "keep") != "inherit":
+        return None
+    a = next((x for x in k.inst["agents"] if x["id"] == heir), None)
+    d = next((x for x in k.inst["agents"] if x["id"] == dead), None)
+    if a is None or d is None or _model_rank(k, d.get("model")) <= _model_rank(k, a.get("model")):
+        return None
+    from cybertron import life as LF
+    a["model"] = d["model"]
+    if "tier" in a:
+        a["tier"] = LF._tier_of(k, d["model"])
+    return d["model"]
 
 
 # ---------------------------------------------------------------------- inheritance (board loop 2)

@@ -459,6 +459,7 @@ def _ann():
         "life.households.enabled": dict(types=("bool",)),
         "life.households.keep": dict(range=NONNEG),
         "life.households.name": dict(types=("str",)),
+        "life.households.head_model": dict(types=("str",), enum=("keep", "inherit")),
         "life.households.inheritance": dict(types=("str",), enum=("none", "partible", "eldest", "household")),
         "life.labour.minor": dict(types=("number", "null"), range=PROB),
         "life.labour.surplus": dict(types=("str",), enum=("none", "household")),
@@ -1077,6 +1078,7 @@ DOCS = {
     "life.households.enabled": "found households automatically at births (needs pairs reproduction and contracts)",
     "life.households.keep": "food each member keeps out of the household pot (the Household template's KEEP)",
     "life.households.name": "a new household's name ({head}: its first head)",
+    "life.households.head_model": "keep | inherit: a new household head takes the dead head's model when it is stronger",
     "life.households.inheritance": ("plots and stores at a death: none (the first living child, else a co-parent, else the polity) | "
                                     "partible (whole plots round the children, eldest first) | eldest | household (to its id)"),
     "life.labour": "37.1: labour(agent), the share of an adult's work an agent does (scales a minor's yields)",

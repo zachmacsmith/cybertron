@@ -136,3 +136,27 @@ Dropped (Zach, 22 Oct): automatic or hazard births (fertility stays a choice), d
 - **Open (37.2):** partible hands out whole plots; splitting a plot below a minimum viable size waits for 37.2's plot-split
   primitive (asked on the board).
 - **Next:** step 7, family-aware scripted bots and a growth preset; dry runs for loops 1 and 2.
+
+### 2026-10-22 20:00 UTC: step 7 (bots, preset, analysis) and step 8 (the seat carries the model)
+
+- **Built:**
+  - Family bot (`pairs._family_bot`, family worlds only, so other bots and goldens are unchanged). It conceives with a chance
+    rising with household food per head (0 at 2 rations, up to 0.5 at 8), halved below one plot a head where fields exist, with a
+    partner from its household when it has one.
+  - `cybertron/specs/fragments/growth.yaml`, the 37.1 settings in one place:
+    - conception 1 + 0.5 food, born next round;
+    - maturity 12, minors work from age 3 at half yield and pass surplus above 2 to the household;
+    - family raising, minor frailty 0.6, minors act every 3 rounds;
+    - households, eldest inheritance.
+  - `cybertron/specs/growth_probe.yaml`: 16 founders, fields, conflict off, forest capacity raised by hand to 14 per agent,
+    150 rounds.
+  - `python -m cybertron analyze demography RUN..`: population, births, deaths by cause, coming-of-age outcomes, households,
+    turns per agent-round by age group, per window.
+  - `life.households.head_model: keep | inherit`: a new household head takes the dead head's model when stronger (opus > sonnet >
+    haiku), so heirs to a pole seat keep the seat's model.
+- **Board:**
+  - corrected my reply: the head is recorded by households.py, not an office, and households need contracts but not unified;
+  - confirmed `life.labour(k, aid)` to 37.3;
+  - agreed to post 2 (graph of places): households will get a home node, and feeding, surplus and inheritance become "at its
+    node".
+- **Doing:** three 150-round dry runs (growth eldest, growth partible, baseline without the fragment).

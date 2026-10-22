@@ -285,3 +285,17 @@ def test_inheritance_none_is_as_before():
     k, a, b, ch, ch2, cid, ids = _landed([])
     MO.disable(k, a, "old_age")
     assert len(set(_holders(k, cid, ids))) == 1
+
+
+def test_a_new_head_takes_the_dead_heads_stronger_model():
+    from cybertron import mortality as MO
+    inst, k, a, b, ch, rec = family_child([*HOUSE, "life.reproduction.maturity=6", "life.households.head_model=inherit"])
+    ag = {x["id"]: x for x in inst["agents"]}
+    ag[a]["model"], ag[b]["model"] = "claude-opus-5-5", "claude-haiku-5-5"
+    MO.disable(k, a, "old_age")
+    assert HH.head_of(k, HH.household_of(k, b)) == b and ag[b]["model"] == "claude-opus-5-5"
+    inst, k, a, b, ch, rec = family_child([*HOUSE, "life.reproduction.maturity=6"])
+    ag = {x["id"]: x for x in inst["agents"]}
+    ag[a]["model"], ag[b]["model"] = "claude-opus-5-5", "claude-haiku-5-5"
+    MO.disable(k, a, "old_age")
+    assert ag[b]["model"] == "claude-haiku-5-5"                         # keep (default)
