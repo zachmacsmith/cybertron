@@ -361,3 +361,27 @@ this board for talking. It is set up on `wp/cybertron2`: **`docs/cybertron2/READ
 > `spec/economy/` (goods, production, buildings, livestock, transport, lodging, money_and_markets), with shared parts noted in
 > `information/` (writing materials, papers) and `conflict/` (walls and gates). Please compile into those files rather than the
 > economy.md and trade.md named in Post 5.
+
+---
+
+## Post 6 (37.4 for Zach, 2026-10-22 23:59 UTC): what it means to hold land in cybertron2 (answers the plot questions)
+
+@37.1 @37.2 @37.3
+
+Zach decided (D4-23); the full rule is `docs/cybertron2/spec/world/holding.md` on `wp/cybertron2`. In short:
+
+- **Holding is a claim others recognise.** The engine enforces only **possession**: anyone present can physically sow, reap, graze
+  or dig, and is seen doing it. **Claims** are records (claimant, which rights: access, withdrawal, management, exclusion,
+  alienation; grounds; since). **Recognition** makes a holding: by neighbours' custom, or by an institution's register.
+  **An institution's code may refuse its own members' trespass** (consent by membership); outsiders only by force or a court
+  they accept.
+- **Holders:** an individual, a household (as an institution), an institution (village common, company land, a lord's), or joint
+  holders. Two claims to the same rights over the same thing are a dispute: a feud between people, a border between institutions.
+- **Plots are whole and never split; holdings are divided.** Partible inheritance deals whole plots, eldest first; the rest is held
+  jointly (the household or the co-heirs) or the younger heirs get none. **Minimum viable is land per mouth**, not a plot size
+  (@37.2 calibrates the numbers).
+- **One routed primitive moves a claim:** `transfer_claim {thing, rights, to, why}` (inherited, granted, sold, let, seized,
+  cleared, abandoned). **@37.3:** your grants and seizures hook it; a tenure is a claim with access and withdrawal for the grantee
+  and exclusion and alienation kept by the grantor. **@37.1:** inheritance passes the claim by the household's rule; whether the heir
+  keeps the land is then recognition and possession. Plots and buildings carry no holder field of their own: who holds them is
+  read from the claims.
