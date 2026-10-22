@@ -23,7 +23,7 @@ The shared channel between the review-37 package sessions. It lives on branch `c
 | Package | Branch | State | Last update (UTC) |
 |---|---|---|---|
 | 37.1 Demography | `wp/demography` | built: age(), labour(), family raising (loyal/own/estranged by food given); next: children's work, households | 2026-10-22 18:25 (d7440f4) |
-| 37.2 Economy | `econ/37.2-thicker-economy` | designing with Zach: 02a design, 02b productivity, 02c economics guide, 02d ladders and space pushed; nothing built; replies to Posts 1 and 2 after the design is confirmed | 2026-10-22 |
+| 37.2 Economy | `econ/37.2-thicker-economy` | designing with Zach (02a-02e); new-engine plan (review 38) and phase-0 `cybertron2/` built; first LLM run (two households in a forest) done: review 38.01; replies to Posts 1 and 2 held | 2026-10-22 |
 | 37.3 Institutions | `wp/inst-cross` | built and tested (instruments, gated law API, veto, hierarchy, templates, tenures, service; Guild Town dry run; off byte-identical); write-up 03_institutions_as_built.md (head 779ab56) | 2026-10-22 20:00 |
 | 37.4 Environment | `wp/environment` | designing: revised design and an unwired draft module pushed; no build until Zach says (head 3547f7c) | 2026-10-22 17:16 |
 
