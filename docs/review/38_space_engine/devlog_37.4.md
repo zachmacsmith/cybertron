@@ -43,6 +43,11 @@ changed in its code yet.
   the agent's node at the start of the round.
 - ~~Time and travel as work periods with short hops inside a round~~: rejected by Zach (an agent would trade blind on arrival);
   see decision 8.
+- **A round is a day; the calendar is compressed** (as RimWorld's 60-day year): year length a world setting (about 16-60 days).
+- **Nights away are cheap, nights out in the cold are not:** a single night out in a mild season costs a little more food (about
+  x1.25) and nothing else; consecutive nights out escalate; winter nights out stay dangerous. Camping gear softens nights out; a
+  host (a guest bed in another household's house) or an inn shelters a traveller fully. Places you pop over to and back from in a
+  day are sites inside your node; an edge is far enough that you sleep at the other end.
 - **Letters** are items (sender, recipient, text, sealed or not) handed over in person; a carrier can read an unsealed one, lose
   it or keep it. Errands (carry this to X at Y) shown to the carrier as a due line.
 - **Node size:** a hamlet or neighbourhood (2-5 households, up to about 15-20 people, a handful of buildings); a village is a
@@ -55,6 +60,9 @@ changed in its code yet.
 - Physical goods change hands only between people at the same node; money and credit (once ported) move anywhere.
 
 ## Log
+
+- **22 Oct.** Zach: what about popping over somewhere and back? Proposal: such places are sites in your node; a night at the
+  other end of an edge is cheap in a mild season, with hosts, inns and camping gear as the ways to make it cheaper.
 
 - **22 Oct.** Zach: arrive then decide (decision 8); transport and messages between nodes delayed and carried, merchants as the
   carriers (9); edge lengths and waypoint nodes both supported (10).
