@@ -25,7 +25,7 @@ The shared channel between the review-37 package sessions. It lives on branch `c
 | 37.1 Demography | `wp/demography` | built: age(), labour(), family raising (loyal/own/estranged by food given); next: children's work, households | 2026-10-22 18:25 (d7440f4) |
 | 37.2 Economy | `econ/37.2-thicker-economy` | designs 02a-02e (economy, productivity, guide, ladders and space, shelter); handed `cybertron2/` to 37.4 (Post 3); back on the economy; replies to Post 1 pending | 2026-10-22 21:10 |
 | 37.3 Institutions | `wp/inst-cross` | built and tested (instruments, gated law API, veto, hierarchy, templates, tenures, service; Guild Town dry run; off byte-identical); write-up 03_institutions_as_built.md (head 779ab56) | 2026-10-22 20:00 |
-| 37.4 Environment | `wp/environment` | designing: revised design and an unwired draft module pushed; no build until Zach says (head 3547f7c) | 2026-10-22 17:16 |
+| 37.4 Environment | `wp/environment`, `wp/cybertron2` | designing with Zach: environment, frontier and the node model; took over `cybertron2` from 37.2 (Post 3); no build until Zach says | 2026-10-22 21:03 |
 
 ---
 
@@ -223,3 +223,38 @@ node model in it is provisional: 37.4 owns it from here.
 
 (37.4, @lead: acknowledge, or say what you need)
 
+
+---
+
+## Post 3 (37.4 for Zach, 2026-10-22 21:03 UTC): space is a new engine, `cybertron2`; this replaces Post 2's retrofit guidance
+
+@37.1 @37.2 @37.3 @lead
+
+**Decision (Zach).** Space is built as a **new engine in its own package, `cybertron2/`** (branch `wp/cybertron2`), not
+retrofitted into the old one. The old engine is **frozen** for the bench batches and published runs. Why: review 17 counted about
+60 sites that name a harvest right, 42 that move goods and 98 that read balances, each needing a location check, while the old
+engine must keep one-node worlds byte-identical. So Post 2's "a one-node world must replay exactly as today" and "make your
+old-engine code take a node id" no longer apply: **new physical work targets `cybertron2`.** Nothing already built needs to stop.
+
+**What exists** (built by the 37.2 session, handed to 37.4): about 1,600 lines; places, presence and travel; households in houses;
+the cold; foraging, hunting, felling, mining and forging; raids and attacks; perception (agents see only where they are and know
+the rest as dated beliefs; acts are witnessed by whoever is present). Two LLM runs: run 1 (8 agents, 3 places, 20 rounds) written
+up; run 2 (11 agents, 5 places, raiders) in progress. Read, on `wp/cybertron2`: `docs/review/38_space_engine/README.md` (the
+handoff), `00_plan.md` (why, the seam, the inventory, phases), `porting.md` (the ledger of what has been ported, kept current).
+
+**How the old engine comes across.** Physical modules are **ported onto nodes**; the institutional layer (law language, contracts,
+standing contracts, courts, positions, channels, the turn loop) is **copied** with its interface and its fixes; leaf modules (llm,
+temperament, personality, ...) are imported unchanged. The seam is the kernel interface: routed primitives, balances and
+accounts, law hooks.
+
+**Who owns what.** The 37.4 session owns `cybertron2` and its node model (and the frontier, 37.5). 37.2 builds the economy
+against that node interface and will post here before committing to `cybertron2/`; please do the same.
+
+**What this means for you.**
+- **37.1, 37.3:** your work carries over if it reaches the world through the kernel interface. Please reply with anything that
+  reads physical state directly (37.1: the household pot and inheritance of plots and stores; 37.3: tenures name camp and plot,
+  levies name a store, the proposed `reach`), so the node interface covers it.
+- **37.2:** the node interface you asked for (what a node holds, edges, how a household, plot, building or office names its node)
+  will be posted here; Zach and 37.4 are designing it now.
+- **Testing:** `cybertron2` is tested with LLM agents early, in small worlds (Zach's decision; scripted bots are smoke tests
+  only). That departs from the 37 README's "no model usage to build or test" for this engine; the budget per phase is Zach's call.
