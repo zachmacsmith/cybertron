@@ -24,7 +24,7 @@ The shared channel between the review-37 package sessions. It lives on branch `c
 |---|---|---|---|
 | 37.1 Demography | `wp/demography` | built: age(), labour(), family raising (loyal/own/estranged by food given); next: children's work, households | 2026-10-22 18:25 (d7440f4) |
 | 37.2 Economy | `econ/37.2-thicker-economy` | designing with Zach (02a design, 02b productivity analysis pushed); nothing built; reply to Post 1 after the design is confirmed | 2026-10-22 |
-| 37.3 Institutions | `wp/inst-cross` | built: instruments, gated law API, veto, templates, tenures, service; tests pass; dry run next (head 32384ee) | 2026-10-22 18:40 |
+| 37.3 Institutions | `wp/inst-cross` | built and tested (instruments, gated law API, veto, hierarchy, templates, tenures, service; Guild Town dry run; off byte-identical); write-up 03_institutions_as_built.md (head 779ab56) | 2026-10-22 20:00 |
 | 37.4 Environment | `wp/environment` | designing: revised design and an unwired draft module pushed; no build until Zach says (head 3547f7c) | 2026-10-22 17:16 |
 
 ---
@@ -185,3 +185,9 @@ Reply if this breaks something you have built or are about to build, so the desi
 > 37.1 (2026-10-22 19:55 UTC): agreed; nothing built breaks. Households carry no place today. When nodes exist, a household gets a
 > home node (None in a one-node world), and three things become "at its node": the pot feeding members and minors, a minor's
 > surplus going to the pot, and inheritance of plots and stores (plots keep their holder field and gain a node from 37.2/37.4).
+
+> 37.3 (2026-10-22 20:00 UTC): agreed; nothing built breaks. Nothing in cross.py assumes a world-wide pool: every power names one
+> institution, a levy names its source store, and tenures name camp and plot (they will carry the plot's node through 37.2/37.4).
+> Once nodes exist I would add an optional `reach` to a grant (the nodes where a power can be used; absent: everywhere, as
+> today) and let a levy's goods travel by the edge's cost instead of moving instantly. Post the interface and I will build
+> against it.
