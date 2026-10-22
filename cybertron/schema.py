@@ -244,7 +244,7 @@ def _ann():
         "law.gas.preview": dict(types=("int",), range=(1, None)), "law.previews_per_turn": dict(types=("int",), range=NONNEG),
         "law.preview_tokens": dict(types=("int",), range=(1, None)),
         "law.digest": dict(types=("bool",)), "law.digest_tokens": dict(types=("int",), range=(1, None)),
-        "law.library.edition": dict(types=("int",), enum=(1, 2)),
+        "law.library.edition": dict(types=("int",), enum=(1,)),
         "law.library.access": dict(types=("str",), enum=("none", "catalogue", "instantiate")),
         "law.library.toolkit": dict(kind="leaf", types=("str", "list"), check=_check_toolkit),
         "parallel_calls": dict(types=("int",), range=(1, None)),
@@ -378,7 +378,7 @@ def _ann():
         # ------------------------------------------------------------ feature blocks
         "context.memory_turns": dict(types=("int", "null"), range=(0, None)),
         "context.strategy_prompt": dict(types=("number", "bool"), range=PROB),
-        "context.memory_text": dict(types=("str",), enum=("v1", "v2")),   # review 20 §6.1 (v1: the text before it)
+        "context.memory_text": dict(types=("str",), enum=("v2",)),        # review 20 §6.1 (v1, the text before it, removed)
         "context.dm_delta": dict(types=("bool",)),                       # review 20 §4.5
         "context.setup_feed": dict(types=("bool",)),                     # review 31.10: the world's setup record in round 1's feed
         "context.history.salience.*": dict(types=("int", "null"), range=(0, None)),   # review 20 §4.3 (null: kept for good)
@@ -1155,13 +1155,13 @@ DOCS = {
     "law.digest": "law.v2: true shows each agent a digest of the laws that bind it, grouped by what they act on, in its core "
                   "prompt, and adds the legal_position look-up (cybertron/digest.py; default off)",
     "law.digest_tokens": "law.v2: token budget of the digest in the core prompt (the look-up gets four times as much)",
-    "law.library": "the law library's edition and what agents may do with it (ARCHITECTURE §3.11; cybertron/library.py)",
-    "law.library.edition": "1: today's library laws (every existing spec) | 2: readable rewrites built from lib:* blocks (needs law.v2)",
-    "law.library.toolkit": "edition 2 with access catalogue or instantiate: none (default) | all | a list of toolkit families "
+    "law.library": "what agents may do with the law library (ARCHITECTURE §3.11; cybertron/library.py)",
+    "law.library.edition": "1, the only library (edition 2, the LIB2 rewrites, was removed: 2 is an error)",
+    "law.library.toolkit": "with access catalogue or instantiate: none (default) | all | a list of toolkit families "
                            "(library.FAMILIES): the catalogue also lists those toolkit templates (name, doc, parameters) to copy or "
                            "instantiate (cybertron/library.py, W6d)",
     "law.library.access": "none | catalogue: agents see the lib:* blocks (refs, exports, code) | instantiate: catalogue, and library "
-                          "laws may be copied with their constants changed (edition 2)",
+                          "laws may be copied with their constants changed (needs law.v2)",
     "rng_version": "1: one kernel random stream (every existing run) | 2: named streams per purpose (turn order per round, harvest "
                    "noise per agent/camp/harvest, drift per camp, rng() per law and round), so one extra draw shifts no other",
     "unit_values": "value of one unit of each resource (scoring and welfare)",
@@ -1822,9 +1822,11 @@ def validate(spec) -> list[str]:
     _section(keys()[""], "", spec, errs)
     law = spec.get("law") if isinstance(spec.get("law"), dict) else {}
     lib = law.get("library") if isinstance(law.get("library"), dict) else {}
-    if lib.get("edition") == 2 and law.get("v2") is not True:
-        errs.append("law.library.edition: edition 2 builds laws from lib:* blocks with use(), which needs law.v2: true")
     from cybertron import library as LB
+    if lib.get("edition") == 2:
+        errs.append(LB.REMOVED_EDITION_2.format(sha=LB.REMOVED_IN))
+    if lib.get("access") not in (None, "none") and law.get("v2") is not True:
+        errs.append("law.library.access: the catalogue lists lib:* blocks imported with use(), which needs law.v2: true")
     tk = [n for n in (spec.get("start_laws") or []) if isinstance(n, str) and n in LB.v2_templates()] \
         if isinstance(spec.get("start_laws"), list) else []
     if tk and law.get("v2") is not True:

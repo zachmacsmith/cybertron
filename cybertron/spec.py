@@ -16,6 +16,7 @@ from __future__ import annotations
 import copy
 import functools
 import random
+import warnings
 from pathlib import Path
 
 import yaml
@@ -68,7 +69,25 @@ def load(name_or_path: str, _seen: tuple = ()) -> dict:
     merged: dict = {}
     for parent in raw.pop("extends", []) or []:
         merged = _merge_file(merged, load(parent, _seen + (str(path),)))
-    return _merge_file(merged, raw)
+    out = _merge_file(merged, raw)
+    if not _seen:
+        warn_frozen(out, path.name)
+    return out
+
+
+class FrozenModuleWarning(FutureWarning):
+    """A spec turns on a frozen module (bug fixes only; no new specs): shown by default, never an error."""
+
+
+MEDIA2_FROZEN = ("media2 is frozen (bug fixes only; docs/ARCHITECTURE.md, 'media2 is frozen'): channels v2 is the canonical press "
+                 "and newspaper model. Existing media2 specs still run; a new world should use channels.v2 instead")
+
+
+def warn_frozen(spec: dict, name: str = "spec") -> None:
+    """Warn (FrozenModuleWarning) when a loaded spec has media2 on. tests/test_media2_frozen.py lists the specs allowed to."""
+    m = (spec or {}).get("media2")
+    if isinstance(m, dict) and m.get("enabled") not in (None, False):
+        warnings.warn(f"{name}: {MEDIA2_FROZEN}", FrozenModuleWarning, stacklevel=3)
 
 
 # Named placements a file clears by setting them to {} (merging {} into an inherited mapping kept every entry: haiku100's

@@ -27,6 +27,17 @@ from cybertron.kernel import Kernel
 
 import cybertron_golden_cases as GC
 
+
+def power_set(k, account) -> dict:
+    """The account's whole power set: power -> has_power."""
+    return {n: PW.has_power(k, account, n) for n in PW.POWERS}
+
+
+def source_of(k, account, power: str):
+    """Which source gives the account the power ("seed" | "consent" | "parent" | None)."""
+    return next((s for s, g in G.sources(k, account).items() if g.get(power, False) is not False), None)
+
+
 ON = ["law.v2=true", "contracts.enabled=true", "contracts.scripted=false"]
 UNIFIED = "institutions.unified=true"
 GRANTS = "institutions.grants=true"
@@ -101,7 +112,7 @@ def test_with_no_claims_every_power_set_is_todays():
         a, b, c = people(k)[:3]
         jid = declared_polity(k, a, b)
         cid = found(k, c, code("def on_round_end(r):\n    return None"))
-        sets.append({x: PW.power_set(k, x) for x in ("J0", jid, cid, "nobody")})
+        sets.append({x: power_set(k, x) for x in ("J0", jid, cid, "nobody")})
     assert sets[0] == sets[1]
 
 
@@ -109,15 +120,15 @@ def test_seed_grant_is_the_roots_and_seed_only_powers_stay_there():
     k = world()
     a, b = people(k)[:2]
     jid = declared_polity(k, a, b)
-    assert G.source_of(k, "J0", "legacy_reserve") == "seed" and PW.has_power(k, "J0", "legacy_reserve")
-    assert G.source_of(k, "J0", "propose_right") == "seed"
-    assert not PW.has_power(k, jid, "legacy_reserve") and G.source_of(k, jid, "compel_members") == "consent"
+    assert source_of(k, "J0", "legacy_reserve") == "seed" and PW.has_power(k, "J0", "legacy_reserve")
+    assert source_of(k, "J0", "propose_right") == "seed"
+    assert not PW.has_power(k, jid, "legacy_reserve") and source_of(k, jid, "compel_members") == "consent"
     assert set(PW.J0_ONLY) <= set(G.seed_grant(G.node(k, "J0"))) and not set(PW.J0_ONLY) & set(G.template_grant("polity"))
 
 
 def test_jurisdictions_off_the_world_is_the_seeded_root():
     k = world(preset="E2")
-    assert G.tree(k)[0]["id"] == "J0" and PW.has_power(k, "J0", "legacy_reserve") and G.source_of(k, "J0", "board_veto") == "seed"
+    assert G.tree(k)[0]["id"] == "J0" and PW.has_power(k, "J0", "legacy_reserve") and source_of(k, "J0", "board_veto") == "seed"
 
 
 def test_a_state_of_nature_seeds_no_root():
@@ -132,7 +143,7 @@ def test_consent_claim_at_founding_grants_compulsion_over_members():
     A.act(k, b, "join_contract", {"contract": cid})
     rec = CT.recs(k)[cid]
     assert rec["consent"] == ["compel_members", "unlimited_seizure"]
-    assert PW.has_power(k, cid, "compel_members") and G.source_of(k, cid, "compel_members") == "consent"
+    assert PW.has_power(k, cid, "compel_members") and source_of(k, cid, "compel_members") == "consent"
     assert G.extra(k, cid) == {"compel_members", "unlimited_seizure"}
     api = k.api_for(rec["laws"][0])
     before = k.bal(b, "grain")
@@ -185,7 +196,7 @@ def on_enact():
     k._add(a, "grain", 5)
     co = found(k, a, code("def on_round_end(r):\n    limit_actions(\"x\", 1, 1)"), name="Co", under=jid)   # allowed by the grant
     free = found(k, b, code("def on_round_end(r):\n    return None"), name="Free")
-    assert PW.has_power(k, co, "compel_members") and G.source_of(k, co, "compel_members") == "parent"
+    assert PW.has_power(k, co, "compel_members") and source_of(k, co, "compel_members") == "parent"
     assert not PW.has_power(k, free, "compel_members")
     assert L.classify(L.check(code('def on_enact():\n    child_rule("grants", [])'))) == \
         L.classify(L.check(code('def on_enact():\n    company_rule("grants", [])')))          # the alias classifies as the old name

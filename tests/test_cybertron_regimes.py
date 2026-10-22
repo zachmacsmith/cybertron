@@ -437,11 +437,8 @@ def test_legacy_regimes_have_no_law_set():
 def test_drop_and_amend_of_inherited_statutes():
     inst = generator.generate(sp_for("E4", {"base": "absolute_autocracy", "drop": ["Ruler's Purse"]}), 1)       # no law.v2 needed
     assert [s["name"] for s in inst["regime"]["statutes"]] == ["Harvest Levy"] and "template" not in inst["regime"]["statutes"][0]
-    with pytest.raises(Exception, match="has no constant RATE"):                                             # edition 1: no constants
+    with pytest.raises(Exception, match="has no constant RATE"):                                             # library laws: no constants
         generator.generate(sp_for("E4", {"base": "absolute_autocracy", "amend": {"Harvest Levy": {"RATE": 0.25}}}), 1)
-    sp = spec.set_path(v2_sp({"base": "absolute_autocracy", "amend": {"Harvest Levy": {"RATE": 0.25}}}, rung="E4"), "law.library.edition", 2)
-    st = generator.generate(sp, 1)["regime"]["statutes"]
-    assert "RATE = 0.25" in st[0]["code"] and st[0]["template"] == {"name": "Harvest Levy", "params": {"RATE": 0.25}, "rank": None}
 
 
 # ------------------------------------------------------------------ example law-set regimes (W7d): same dimension point, other laws

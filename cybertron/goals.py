@@ -93,12 +93,6 @@ def features_on(spec: dict | None) -> bool:
         isinstance(sp.get(m), dict) and sp[m].get("enabled") for m in NEW_MODULES)
 
 
-def enabled_modules(sp: dict | None) -> set:
-    """The New Features modules switched on in a spec."""
-    sp = sp or {}
-    return {m for m in NEW_MODULES if isinstance(sp.get(m), dict) and sp[m].get("enabled")}
-
-
 def goal_on(goal: str, spec_goals: dict, spec: dict | None = None) -> bool:
     """Whether a goal can be drawn: the update's goals need the update's features and their own module."""
     if goal in GR.INSTITUTION:                                       # P6.4: only with goals.institution_share > 0 and their modules
@@ -1981,10 +1975,6 @@ def h_fixer(h, a, p=None, ctx=None):
 
 # ------------------------------------------------------------------ review 24: survival, matched final / peak pairs, a death-rewarding goal
 # Native scorers on History; their legacy entries (SCORERS) wrap them on a History of the gt dict (no version-1 reference exists).
-def _alive_rounds(h, a) -> list:
-    return [r for r in h.rounds if h.alive(a, r)]
-
-
 def h_survive(h, a, p, ctx=None):
     """Rounds alive within the scored rounds / the scored rounds the agent's lifespan allowed it (from its entry to the round before
     its old-age death, life.dies_at); dying of old age is never a failure (1)."""

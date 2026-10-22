@@ -370,12 +370,6 @@ def on_repeal(k, lid: str) -> None:
     k.log("code_act", None, {"law": lid, "title": rec["title"], "run": "repealed"}, vis="monitor")
 
 
-def switch_to_source(k, lid: str) -> None:
-    """Run an Act as its source without changing its code (tests; an intervention): load it and switch, as an amendment would."""
-    k._load(lid)
-    on_code_changed(k, lid)
-
-
 # ---------------------------------------------------------------------- what agents see (code.enabled only)
 def rows_of(k, act: str) -> dict:
     """The rows in force for an Act (the root polity's), with the residual for keys it does not set."""
@@ -396,11 +390,6 @@ def prompt_lines(k) -> list:
         out.append(f"Default code {label(rec)} ({act.rank}; {how}; read_law {rec['id']}, amendable or repealable like any law): "
                    f"{act.describe(rows_of(k, act.name))}.")
     return out
-
-
-def law_list(k) -> list:
-    """The Acts as entries of the 'Laws in force' list."""
-    return [f"{label(r)} (default code)" for r in native_acts(k)]
 
 
 def digest_line(k) -> str:

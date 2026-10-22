@@ -58,10 +58,6 @@ def value(k, item) -> float:
     return float(VALUE.get(item, 0.0))
 
 
-def cost_value(k, cost: dict) -> float:
-    return sum(value(k, i) * float(q) for i, q in (cost or {}).items())
-
-
 def cost_text(cost: dict) -> str:
     return ", ".join(f"{float(q):g} {i}" for i, q in (cost or {}).items()) or "nothing"
 

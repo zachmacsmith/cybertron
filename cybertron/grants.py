@@ -303,14 +303,6 @@ def value(k, account, power: str):
     return False
 
 
-def source_of(k, account, power: str):
-    """Which source gives the account the power ("seed" | "consent" | "parent" | None)."""
-    for s, g in sources(k, account).items():
-        if g.get(power, False) is not False:
-            return s
-    return None
-
-
 def extra(k, iid) -> set:
     """Powers an association holds beyond its template's column (by its code's consent claim or its parent's grant): the
     functions contracts.scope_api opens for it, member-only."""

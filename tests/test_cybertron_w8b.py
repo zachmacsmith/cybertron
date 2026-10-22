@@ -7,6 +7,7 @@ Offline: no model calls."""
 from __future__ import annotations
 
 import copy
+import json
 
 import pytest
 
@@ -70,7 +71,7 @@ def test_the_31_rows_are_routed_law():
         assert p.routed and p.tier == "L" and p.fn in p.sites, n
         assert callable(D._fn(p)), n
         assert set(D.OPTIONS[n]).isdisjoint(p.params), n
-        assert PR.json_roundtrip(p), n
+        assert json.loads(json.dumps(p.sample())) == p.sample(), n
     assert not PR.TIER_OF["L-route"]
     assert [p.name for p in PR.PRIMITIVES.values() if not p.routed and p.tier.startswith("L")] == []
     assert {r.id for r in T.RULES if r.note == "L-route until W8b"} == {"C2", "D6", "I6", "R6"}

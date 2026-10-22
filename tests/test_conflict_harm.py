@@ -65,14 +65,14 @@ def test_model_defaults_to_harm_with_subsistence_and_disable_without():
     assert CF.harm(k) and {"watch", "wounds", "bases"} <= set(k.w["conflict"])
 
 
-def test_engine_7_runs_keep_the_disable_model():
-    """The default flip (engine 8): a run frozen under engine 7 has no conflict.model key, so it plays under disable."""
+def test_engine_7_runs_are_not_played_in_place():
+    """The default flip (engine 8) is no longer set back: runs before provenance.MIN_ENGINE (13) are refused for resume, replay and
+    fork (`cybertron rerun` plays them under their own code)."""
     from cybertron import provenance as PV
-    assert PV.ENGINE_VERSION >= 8
-    assert ("cybertron.conflict.DEFAULTS", ("model",), "disable", "auto") in PV.ENGINE_FLIPS[8]["flips"]
+    assert PV.MIN_ENGINE > 8 and PV.ENGINE_FLIPS[8]["flips"] == []
     old = {"engine_version": 7, "defaults": {"cybertron.conflict.DEFAULTS": {"enabled": False}}}
-    with ST.use(old):
-        assert CF.model_of(S.load("nature_subsistence")) == "disable"
+    with pytest.raises(ST.TooOld, match="cybertron rerun"):
+        ST.check_playable(old)
     assert CF.model_of(S.load("nature_subsistence")) == "harm"
 
 

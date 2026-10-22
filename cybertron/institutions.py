@@ -156,12 +156,6 @@ def legacy_view(rec: dict) -> dict:
     return out
 
 
-def legacy_stores(k) -> dict:
-    """{"jurisdictions": {...}, "assoc": {...}}: the old stores, rebuilt from the unified one (tests and migration)."""
-    return {"jurisdictions": {i: legacy_view(r) for i, r in view(k, "polity").items()},
-            "assoc": {i: legacy_view(r) for i, r in view(k, "association").items()}}
-
-
 def sync(k, iid=None) -> None:
     """Refresh a polity's members (all polities' when iid is None) from the membership map. Off: nothing."""
     if not unified(k) or KEY not in k.w:

@@ -1,10 +1,10 @@
 """Novelty (review 14 §5.2, package A, first version): how much of what agents wrote in a run is copied from, adapted from or
 unlike the code the world hands them. Offline (a run directory, or plain code); never shown to agents.
 
-The reference set is everything an agent could have copied: the edition-1 library laws (library.LIB), their edition-2 rewrites
-(LIB2), the lib:* building blocks (BLOCKS), the legal toolkit (TOOLKIT), the contract templates (contracts.TEMPLATES), the starting
-constitutions (library.CONSTITUTIONS, regimes.CONSTITUTIONS), the regimes' own statutes (regimes.STATUTES) and the default code's
-Acts (cybertron/code).
+The reference set is everything an agent could have copied: the library laws (library.LIB), the lib:* building blocks
+(BLOCKS), the legal toolkit (TOOLKIT), the contract templates (contracts.TEMPLATES), the starting constitutions
+(library.CONSTITUTIONS, regimes.CONSTITUTIONS), the regimes' own statutes (regimes.STATUTES) and the default code's Acts
+(cybertron/code).
 
 Similarity of two codes: both are reduced to a token sequence of their syntax tree (normalised: `title`, `intent`, `rank` and
 `exports` lines and docstrings dropped; the agent's own identifiers become ID, every constant C, user-defined function names FN;
@@ -119,7 +119,6 @@ def references() -> dict:
     from cybertron import regimes as RG
     out = {}
     out.update({f"library:{n}": e["code"] for n, e in LB.LIB.items()})
-    out.update({f"library2:{n}": e["code"] for n, e in LB.LIB2.items()})
     out.update({f"block:{n}": e["code"] for n, e in LB.BLOCKS.items()})
     out.update({f"toolkit:{n}": e["code"] for n, e in LB.TOOLKIT.items()})
     out.update({f"toolkit:{n}": e["code"] for n, e in LB.CONTRACT_TEMPLATES.items()})     # review 14 B: Assurance Founding

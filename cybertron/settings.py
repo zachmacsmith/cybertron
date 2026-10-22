@@ -48,6 +48,24 @@ class CodeDrift(SystemExit):
     """An old run's settings cannot be determined (no frozen settings, git sha unknown)."""
 
 
+class TooOld(CodeDrift):
+    """A run of an engine version before provenance.MIN_ENGINE: the current code does not resume, replay or fork it in place."""
+
+
+def check_playable(settings: dict | None, where="this run") -> None:
+    """Refuse (TooOld) to play on a run whose settings name an engine version before provenance.MIN_ENGINE (a replay of a pre-13
+    run diverges at its first prompt: what changed is behaviour, not defaults). Code-drift settings (the current defaults, asked for
+    with --allow-code-drift or by a replay of a run with no recorded sha) are the current engine's and pass."""
+    from cybertron import provenance as PV
+    if not settings or settings.get("code_drift"):
+        return
+    v = int(settings.get("engine_version") or 0)
+    if v < PV.MIN_ENGINE:
+        raise TooOld(f"{where} was made under engine version {v}; the current code (engine {PV.ENGINE_VERSION}) resumes, replays "
+                     f"and forks runs of version {PV.MIN_ENGINE} or later only (older prompts are not reproduced). Use `python -m "
+                     f"cybertron rerun RUN_DIR` to play it under its own recorded code (`cybertron continue` does that by itself).")
+
+
 def targets() -> dict:
     """{name: the live dict} for every registered defaults dict (event types included once their module is imported)."""
     out = {}
@@ -192,6 +210,7 @@ def frozen_run(fn):
     def run(inst, policy, out_dir, *args, allow_code_drift: bool = False, **kw):
         if "settings" not in inst and kw.get("resume") and (Path(out_dir) / "checkpoint.pkl").exists():
             inst["settings"] = resolve(out_dir, inst, allow_code_drift)
+        check_playable(inst.get("settings"), kw.get("instance_source") or str(out_dir))
         with use(inst.get("settings")):
             return fn(inst, policy, out_dir, *args, **kw)
     return run

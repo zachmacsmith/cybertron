@@ -107,9 +107,8 @@ def test_every_function_and_hook_is_documented_by_the_mechanism_its_row_names():
     assert not wrong, f"docs mechanism in lawapi vs lawdocs: {wrong}"
     from cybertron import conflict as CF
     assert {n for n, _, _ in CF.LAW_DOCS} == {n for n, f in LA.LAWFNS.items() if f.docs == "conflict"}
-    for n in rows:
-        p = LA.doc_pointer(n)
-        assert p["mechanism"] in LA.DOCS and (p["core"] or p["mechanism"] == "conflict"), (n, p)
+    for n, r in rows.items():
+        assert r.docs in LA.DOCS and ((LD.ENTRIES.get(n) or {}).get("core") or r.docs == "conflict"), (n, r.docs)
 
 
 def test_every_agent_like_parameter_is_declared():

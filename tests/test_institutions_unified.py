@@ -25,6 +25,13 @@ from cybertron.kernel import Kernel
 
 import cybertron_golden_cases as GC
 
+
+def legacy_stores(k) -> dict:
+    """The old stores, rebuilt from the unified one."""
+    return {"jurisdictions": {i: I.legacy_view(r) for i, r in I.view(k, "polity").items()},
+            "assoc": {i: I.legacy_view(r) for i, r in I.view(k, "association").items()}}
+
+
 ON = ["law.v2=true", "contracts.enabled=true", "contracts.scripted=false"]
 FLAG = "institutions.unified=true"
 
@@ -93,7 +100,7 @@ def outcome(k, log):
     feed, the old stores (the unified one projected back)."""
     ag = k.w["agents"]
     if I.unified(k):
-        stores = I.legacy_stores(k)
+        stores = legacy_stores(k)
         assert "jurisdictions" not in k.w and "assoc" not in k.w["contracts"]
     else:
         stores = {"jurisdictions": copy.deepcopy(k.w["jurisdictions"]), "assoc": copy.deepcopy(k.w["contracts"]["assoc"])}
@@ -390,7 +397,7 @@ def test_dry_runs_and_checkpoints_keep_one_store():
     assert w["institutions"][cid]["members"] == [b] and "assoc" not in w["contracts"]
     k2 = Kernel(k.inst)
     k2.restore_state(st)
-    assert AC.assocs(k2)[cid] is k2.w["institutions"][cid] and I.legacy_stores(k2) == I.legacy_stores(k)
+    assert AC.assocs(k2)[cid] is k2.w["institutions"][cid] and legacy_stores(k2) == legacy_stores(k)
 
 
 # ------------------------------------------------------------------ whole runs: the golden cases with the flag on

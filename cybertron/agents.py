@@ -243,7 +243,7 @@ def library_text(inst: dict, a: dict) -> str:
         return LIBRARY_ON_REQUEST if vis == "on_request" and inst["library"] else ""
     if not inst["library"]:
         return ""
-    cat = LB.catalogue_text(inst)                                       # law.library.access (edition 2): the lib:* blocks
+    cat = LB.catalogue_text(inst)                                       # law.library.access: the lib:* blocks and the toolkit
     return _library_text(inst, a) + ("\n\n" + cat if cat else "")
 
 
@@ -815,7 +815,7 @@ def dm_prompt(k, a: dict, turn_prompt_text: str, first: dict, plan: list, new_dm
                 if wave >= waves else "Anyone you message now is shown it at once and can reply in turn."),
              "Your notes from your last turn are in the turn prompt below; \"notes\" in this reply replaces them.",
              "The turn prompt you saw at the start of this round, for reference:\n" + turn_prompt_text]
-    if CX.enabled(k.inst) and CX.v2(k.inst):                        # review 20 §1.5: with the context module there is no "notes"
+    if CX.enabled(k.inst):                                              # review 20 §1.5: with the context module there is no "notes"
         parts.pop(-2)                                                   # field (the scratchpad replaced it)
     if final:
         parts.append("This is the final round: fill in goal_guesses_json as described.")

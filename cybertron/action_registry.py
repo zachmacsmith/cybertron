@@ -324,7 +324,7 @@ def doc_for(name, spec) -> str | None:
         from cybertron import succession as SU
         if SU.on_spec(spec):                                            # institutions.succession: how each office is refilled
             out += SU.DOC + (SU.CONTRACT_DOC if name == "create_contract" else "")
-    if name == "write_scratchpad" and _memory_text(spec) == "v2":
+    if name == "write_scratchpad":
         out = SCRATCHPAD_DOC_V2                                         # review 20 §6.1: a notebook for thinking, not a status log
     if name == "name_successor" and grants(spec):
         from cybertron import succession as SU
@@ -336,12 +336,6 @@ def doc_for(name, spec) -> str | None:
 SCRATCHPAD_DOC_V2 = ('write_scratchpad {"text": "...", "mode": "replace"}: your lasting notebook, shown every turn: strategy, plans and '
                      'the reasons for them, commitments, who to trust; not just this round\'s status (mode "append" adds; the first '
                      'write each turn uses no action)')
-
-
-def _memory_text(spec) -> str:
-    """context.memory_text of this spec (the context module's default when unset)."""
-    from cybertron import context as CX
-    return str(CX.cfg(spec or {})["memory_text"])
 
 
 # ---------------------------------------------------------------------- grants and offices (wave 9 E; spec institutions.grants)

@@ -140,7 +140,7 @@ def test_assurance_founding_registry_entry():
     assert LB.params("Assurance Founding") == {"ITEM": "grain", "PLEDGE": 1, "QUORUM": 3, "SIGNERS": "", "DEADLINE": 3}
     assert "toolkit:Assurance Founding" in NV.references()
     assert NV.classify(NV.nearest(e["code"])) == "copy"
-    sp = S.apply_overrides(S.load("E2"), ["law.v2=true", "law.library.edition=2", "law.library.access=catalogue",
+    sp = S.apply_overrides(S.load("E2"), ["law.v2=true", "law.library.access=catalogue",
                                           "law.library.toolkit=[contracts]"])
     assert "Assurance Founding" in LB.catalogue_text(sp)
     assert "Assurance Founding" not in LB.catalogue_text(S.apply_overrides(sp, ["law.library.toolkit=[tax]"]))

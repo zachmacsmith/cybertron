@@ -637,7 +637,7 @@ def constitution_code(name: str) -> str:
 
 
 def statute_code(name: str, sp: dict | None = None) -> str:
-    """A statute's code; a library law's in the edition of the spec `sp` (law.library.edition, P3.9)."""
+    """A statute's code: a library law's, else the regime's own."""
     if name in LB.LIB:
         return LB.code(name, sp)
     if name in STATUTES:

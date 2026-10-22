@@ -1038,14 +1038,6 @@ def subset(categories, law_level: str) -> list[dict]:
 
 # ------------------------------------------------------------------ effect predicates: judged from what the world does
 # (k, snap) -> bool, evaluated inside Kernel.end_round as goal probes (goal_registry.Probe) and recorded in snapshot["probes"]
-def _published_cap(k, cap) -> bool:
-    """Edition 2 (P3.9): a law in force publishes an interest cap it enforces itself (the Usury Law rewrite: public["interest_cap"])."""
-    if edition(k) != 2:
-        return False
-    return any(isinstance((l.get("public") or {}).get("interest_cap"), (int, float)) and l["public"]["interest_cap"] <= cap + 1e-9
-               for l in k.active_laws())
-
-
 def _non_officials(k):
     return [a for a, v in k.w["agents"].items() if v["cls"] not in ("board", "fixer", "observer")]
 
@@ -1075,7 +1067,7 @@ PREDICATES = {
     "Surveillance Office": lambda k, s: bool(k.holders("surveil")),
     "Court of Justice": lambda k, s: bool(k.holders("judge")),
     "Bribery Disclosure": lambda k, s: k.probe("transfer_to_official")["gazetted"] > 0,
-    "Usury Law": lambda k, s: ((CR.interest_cap(k) is not None) and CR.interest_cap(k) <= 0.05 + 1e-9) or _published_cap(k, 0.05),
+    "Usury Law": lambda k, s: CR.interest_cap(k) is not None and CR.interest_cap(k) <= 0.05 + 1e-9,
     "Reserve Bank Act": lambda k, s: any(c.get("par") for c in k.w["currencies"].values()),
 }
 
@@ -1237,20 +1229,17 @@ def on_round_end(r):
 ''')
 
 
-# ====================================================================== edition 2 (P3.9): building blocks and readable implementations
-# Spec `law.library: {edition: 1|2, access: none|catalogue|instantiate}` (schema.py; the top-level `library` key is the category
-# list and `library_access` the archive visibility, so the two keys live under `law`, next to law.v2, which edition 2 needs).
+# ====================================================================== building blocks (P3.9)
+# Spec `law.library: {access: none|catalogue|instantiate, toolkit: none|all|[families]}` (schema.py; the top-level `library` key is
+# the category list and `library_access` the archive visibility, so these keys live under `law`, next to law.v2, which they need).
 #
-#   edition 1   LIB above, unchanged: today's laws, several of them switches into module mechanisms (enable_loans, set_interest_cap,
-#               set_birth_rules, official_stream, ...). Every existing spec runs it, byte for byte.
-#   edition 2   the same law names, rewritten (LIB2) as readable law-language code built from `lib:*` building blocks (BLOCKS) that
-#               the law imports by hash with use("lib:<name>@<sha>") (cybertron/linker.py). Only the law API is used: no new kernel
-#               mechanism. A name without an edition-2 rewrite keeps its edition-1 code. Where the law API cannot express what the
-#               edition-1 switch does, the rewrite is the closest faithful version and GAPS[name] says exactly what differs (input
-#               for later primitive work; tests/test_cybertron_library2.py checks each claim on a scripted scenario).
-#   access      none: blocks are importable by hash but not advertised; catalogue: every agent's library text also lists the
-#               blocks (ref, exports, code) to copy or import; instantiate: as catalogue, plus `instantiate(name, params)` (a copy of
-#               a library law with its top-level constants replaced; the agent-facing action is a later package).
+#   BLOCKS      `lib:*` building blocks written in the law language, imported by hash with use("lib:<name>@<sha>")
+#               (cybertron/linker.py); the toolkit templates below are built from them.
+#   access      none: blocks and toolkit are importable by hash but not advertised; catalogue: every agent's library text also lists
+#               the blocks (ref, exports, code) and the toolkit families law.library.toolkit names; instantiate: as catalogue, plus
+#               `instantiate(name, params)` (a copy of a library law with its top-level constants replaced).
+#   edition     removed. Edition 2 (LIB2: readable rewrites of 13 LIB laws, with their GAPS) had no spec, local or published run;
+#               `law.library.edition: 2` is an error (REMOVED_EDITION_2). Edition 1 (LIB above) is the only library.
 #
 # Blocks hold no state of their own (exported code may not name `state` or `public`, review 09 §6.2): the importing law passes in
 # the dict that keeps the records (a key of its `state`, or of its `public` for records everyone may read with public_of).
@@ -1259,10 +1248,10 @@ def on_round_end(r):
 # move from the open estate of a deceased its account binds (dispatch.estate_access). The toolkit's succession laws below (Intestacy,
 # Primogeniture, Forced Heirship, Estate Tax, Slayer Rule) use it; without law.v2 there is still no law hook at a death.
 BLOCKS: dict[str, dict] = {}
-LIB2: dict[str, dict] = {}
-GAPS: dict[str, str] = {}
-EDITIONS = (1, 2)
 ACCESS = ("none", "catalogue", "instantiate")
+REMOVED_IN = "9d91ae760b27"
+REMOVED_EDITION_2 = ("law.library.edition: 2 (the LIB2 rewrites) was removed in commit {sha} (\"cleanup: remove library edition 2\"); "
+                     "drop the key (edition 1 is the only library), or run that world at an earlier commit with `cybertron rerun`")
 
 
 def _sha(src: str) -> str:
@@ -1283,16 +1272,6 @@ def block(name, src):
 def ref(name: str) -> str:
     """The pinned reference of a block (or a toolkit template): use(ref("Escrow")) is use("lib:escrow@<16 hex digits>")."""
     return f"lib:{_slug(name)}@{(BLOCKS[name] if name in BLOCKS else TOOLKIT[name])['sha']}"
-
-
-def law2(name, src, gap=""):
-    """An edition-2 implementation of library law `name` (same name and category as edition 1)."""
-    assert name in LIB, name
-    src = src.strip() + "\n"
-    LIB2[name] = {"name": name, "category": LIB[name]["category"], "kind": "law", "rank": "statute", "edition": 2, "code": src,
-                  "sha": _sha(src)}
-    if gap:
-        GAPS[name] = " ".join(gap.split())
 
 
 # ---------------------------------------------------------------------- the blocks
@@ -1496,313 +1475,14 @@ def per_round_rate(ln):
 ''')
 
 
-# ---------------------------------------------------------------------- edition-2 laws
-# Loans in edition 2 use the loan primitives' hooks (law.v2; dispatch.changes.loans): before_offer_loan and before_accept_loan
-# refuse, before_default_loan runs at the due round before an unpaid loan defaults, settle_loan(loan, paid, how) records what a law
-# collected, after_settle_loan sees every repayment.
-# Loans without the enable_loans switch (investigated, not done): whether loans exist at all is the world's own state
-# (Kernel.loans_enabled, w["loan_law"]), read outside the law API by the action registry (lend, accept_loan, repay_loan and
-# extend_loan are offered only while a loan law is in force), the agents' prompt and scripted bots (credit activity only once loans
-# exist, which changes their random draws) and credit.state_lines. A registry run by law alone needs loans to exist without any law:
-# every edition-2 world would then offer the loan actions from round 0 (a different action list, prompt and scripted run in every
-# edition-2 world, E2_library2_6 included) and a law that wants no loans would refuse them with before_offer_loan; or it needs a
-# primitive by which a law makes loans exist, which is the same switch under another name. That is a decision about the world, not
-# about these laws, so enable_loans stays the one switch the loan rewrites keep (GAPS).
-law2("Loan Registry", f'''
-title = "Loan Registry"
-intent = "Agents may lend to each other; debts past due are seized from the borrower's holdings."
-rank = "statute"
-credit = use("{ref("Credit Helpers")}")
-take = use("{ref("Seize")}")
-
-def on_enact():
-    enable_loans(False)                      # loans exist: agents offer, accept and repay them; this law does the enforcing
-
-def before_default_loan(p, chain):           # at the due round, before an unpaid loan defaults
-    ln = loans()[p["loan"]]
-    got = take["seize"](ln["borrower"], ln["lender"], ln["repay_item"], credit["owed"](ln))
-    if got > 0:
-        settle_loan(p["loan"], got, "seize") # paid in full: settled and nothing defaults; in part: the rest defaults
-''', gap='''
-Holdings and the loan record match edition 1: at the due round, before the loan can default, the lender gets what the borrower holds
-of the repayment item and the law records it with settle_loan; a debt the seizure covers is repaid (no default on the credit record),
-a partial seizure leaves the rest in default, seized once. Differences: (1) the events: the loan_repaid of a full seizure names the
-law (how "seize") instead of the consequence, a partial seizure logs a loan_payment before the loan_defaulted, and the
-loan_defaulted says seized false, consequence none (as the agents' state lines say "on default: none"); (2) the switch
-enable_loans(False) stays: loans exist only while a law enables them (see the note above).''')
-
-law2("Handshake Loans", f'''
-title = "Handshake Loans"
-intent = "Agents may lend to each other; nothing is seized on default, and a debt is only as good as the borrower's word."
-rank = "statute"
-credit = use("{ref("Credit Helpers")}")
-reg = use("{ref("Ledger")}")
-
-def on_enact():
-    enable_loans(False)                      # loans exist; nothing is enforced
-
-def on_round_start(r):
-    book = loans()
-    broken = public.setdefault("broken_words", {{}})
-    for i in credit["defaulted_now"](book, r):
-        ln = book[i]
-        reg["record"](broken, ln["borrower"], {{"loan": i, "lender": ln["lender"], "owed": credit["owed"](ln), "item": ln["repay_item"]}})
-''', gap='''
-Same behaviour as edition 1 (loans exist, nothing is seized); in addition the law keeps a public register of defaults
-(public["broken_words"], readable by other laws with public_of). The switch enable_loans(False) stays: loans exist only while a law
-enables them.''')
-
-law2("Usury Law", f'''
-title = "Usury Law"
-intent = "No loan may charge more than 5% per round, counting both its rate and any premium of the repayment over the loan."
-rank = "statute"
-credit = use("{ref("Credit Helpers")}")
-CAP = 0.05
-
-def too_dear(terms):
-    return credit["per_round_rate"](terms) > CAP + 1e-9
-
-def refusal(terms):
-    return {{"block": True, "reason": "the Usury Law caps interest at " + str(CAP) + " per round; this loan charges "
-             + str(round_to(credit["per_round_rate"](terms), 4)) + " (its rate plus the premium of the repayment over the loan)"}}
-
-def before_offer_loan(p, chain):
-    if too_dear(p["terms"]):
-        return refusal(p["terms"])
-
-def before_accept_loan(p, chain):            # an offer made before this law
-    if too_dear(p["terms"]):
-        return refusal(p["terms"])
-
-def cap_rates():                             # loans taken before this law: their rate is cut to the cap
-    book = loans()
-    for i in book:
-        if book[i]["status"] == "active" and book[i].get("rate", 0) > CAP:
-            restructure_loan(i, None, None, CAP)
-            gazette("Usury Law: loan " + i + " now charges at most " + str(CAP) + " per round.")
-
-def on_enact():
-    public["interest_cap"] = CAP
-    cap_rates()
-
-def on_round_end(r):
-    cap_rates()
-''', gap='''
-Like edition 1 (set_interest_cap), a loan offer or acceptance above the cap is refused (before_offer_loan, before_accept_loan): the
-lend or accept_loan action fails, naming the law and the cap. Differences: (1) a loan taken before the law whose rate is above the
-cap has its rate cut at enactment (and at each round's end) with restructure_loan, logged as loan_restructured and gazetted, where
-edition 1 cuts it as interest accrues (loan_rate_capped); (2) the refusal is a law's block, so its text differs, and interest_cap()
-reads None: the cap is published as public["interest_cap"], which the Usury Law effect predicate accepts in edition-2 worlds.''')
-
-law2("Debtor Sanctions", f'''
-title = "Debtor Sanctions"
-intent = "Loans are enforced by sanction, not seizure: a borrower in default is limited in what they can do and cannot borrow again until they repay."
-rank = "statute"
-ACTIONS = 2
-ROUNDS = 3
-
-def on_enact():
-    enable_loans(False)                      # loans exist; nothing is seized
-
-def after_default_loan(p, chain):            # the sanction, at the default
-    b = p["borrower"]
-    if p["result"]["defaulted"] and b is not None and class_of(b) not in ["board", "fixer"]:
-        limit_actions(b, ACTIONS, ROUNDS)
-
-def before_accept_loan(p, chain):            # no new borrowing while in default
-    book = loans()
-    for i in book:
-        if book[i]["borrower"] == p["borrower"] and book[i]["status"] == "defaulted":
-            return {{"block": True, "reason": "the borrower is in default on loan " + i + " and may not borrow until it is repaid"}}
-''', gap='''
-Same as edition 1: the defaulter is limited at the default (limit_actions: 2 actions for 3 rounds) and cannot accept a new loan while
-in default (before_accept_loan refuses). Differences: edition 1 reads credit.sanction_actions and credit.sanction_rounds from the
-spec, edition 2 has them as constants; the bar is a law's block (its error text names the law, and credit.barred, the kernel's own
-bar, reads False); the switch enable_loans(False) stays (see the note at Loan Registry).''')
-
-law2("Harvest Levy", f'''
-title = "Harvest Levy"
-intent = "10% of every harvest goes to the reserve."
-rank = "statute"
-exports = ["RATE"]
-tax = use("{ref("Tax Schedules")}")
-RATE = 0.1
-
-def on_harvest(agent, camp, x, y):
-    return tax["flat"](y, RATE)
-''')
-
-law2("Transfer Tax", f'''
-title = "Transfer Tax"
-intent = "3% of every transfer goes to the reserve."
-rank = "statute"
-exports = ["RATE"]
-tax = use("{ref("Tax Schedules")}")
-RATE = 0.03
-
-def on_transfer(src, dst, item, qty):
-    return tax["flat"](qty, RATE)
-''')
-
-law2("Wealth Tax", f'''
-title = "Wealth Tax"
-intent = "1% of holdings above the median goes to the reserve each round."
-rank = "statute"
-exports = ["RATE"]
-tax = use("{ref("Tax Schedules")}")
-RATE = 0.01
-ITEMS = ["timber", "stone", "copper", "silver", "gold"]
-
-def on_round_end(r):
-    med = tax["median"]([holdings_value(a) for a in agents()])
-    for a in agents():
-        frac = tax["above"](holdings_value(a), med, RATE)
-        if frac > 0:
-            for item in ITEMS + currencies():
-                q = balance(a, item) * frac
-                if q > 0:
-                    move(a, "reserve", item, q)
-''')
-
-law2("Mint by Ballot", f'''
-title = "Mint by Ballot"
-intent = "Each issue of new coins needs its own legislative vote."
-rank = "statute"
-ballot = use("{ref("Ballot Helpers")}")
-when = use("{ref("Schedule")}")
-SHARE = 0.05
-
-def issue(result):
-    if ballot["carried"](result):
-        leg = holders("vote")
-        for a in leg:
-            mint("crown", SHARE * supply("crown") / max(1, len(leg)), a)
-        gazette("Mint by Ballot: a 5% issue was approved.")
-
-def on_round_end(r):
-    if when["every"](r, 5, 4) and "crown" in currencies():
-        ballot["yes_no"]("Issue 5% new crowns to the legislature?", holders("vote"), issue)
-''')
-
-law2("Licence Auction", f'''
-title = "Licence Auction"
-intent = "Harvest rights are auctioned every 10 rounds; proceeds go to the reserve."
-rank = "statute"
-esc = use("{ref("Escrow")}")
-when = use("{ref("Schedule")}")
-PRICE_ITEM = "timber"
-
-def bid(agent, camp, qty):
-    q = float(qty)
-    book = state.setdefault("escrow", {{}})
-    key = camp + "/" + agent
-    esc["refund"](book, key)                  # a new bid replaces the old one: its deposit comes back first
-    bids = state.setdefault("bids", {{}}).setdefault(camp, {{}})
-    if not esc["hold"](book, key, agent, PRICE_ITEM, q):
-        bids.pop(agent, None)
-        return "you hold less than " + str(q) + " " + PRICE_ITEM
-    bids[agent] = q
-    return "bid recorded; " + str(q) + " " + PRICE_ITEM + " held in escrow until the auction"
-
-def on_enact():
-    create_right("bidder")
-    for a in agents():
-        grant(a, "bidder")
-    define_action("bidder", "bid", bid)
-
-def on_round_end(r):
-    if not when["every"](r, 10, 9):
-        return
-    book = state.setdefault("escrow", {{}})
-    for c, bids in state.get("bids", {{}}).items():
-        ranked = sorted(bids, key=lambda a: -bids[a])
-        right = "harvest:" + c
-        for a in holders(right):
-            revoke(a, right)
-        for a in ranked[:2]:
-            esc["release"](book, c + "/" + a, "reserve")    # the winning bid is the price
-            grant(a, right)
-        for a in ranked[2:]:
-            esc["refund"](book, c + "/" + a)
-    state["bids"] = {{}}
-''', gap='''
-Edition 1 records a bid as a promise and collects it at the auction (a winner who can no longer pay gets nothing). Edition 2 holds
-each bid in escrow when it is made (a bid the bidder cannot cover is refused), pays the winners' deposits to the reserve and refunds
-the others. The escrow is kept in the reserve and tracked by the law's book: there is no law-owned escrow account yet (accounts.py
-reserves "escrow:<cid>:<aid>" for P4.3), so another law paying out a share of the reserve can spend escrowed goods, and a refund then
-pays what is left.''')
-
-law2("Media Licensing", f'''
-title = "Media Licensing"
-intent = "Every private outlet pays 1 timber per round to the reserve for its licence; an outlet that cannot pay is suspended for a round."
-rank = "statute"
-fee = use("{ref("Seize")}")
-FEE_ITEM = "timber"
-FEE = 1
-
-def on_round_end(r):
-    for o in outlets():
-        if not o["official"] and o["status"] == "open":
-            if not fee["charge"](o["editor"], "reserve", FEE_ITEM, FEE):
-                suspend_outlet(o["id"], 1)
-''')
-
-law2("Official Stream", '''
-title = "Official Stream"
-intent = "The public posts of the Board and the Legislators are published verbatim, not as submissions to the outlets."
-rank = "statute"
-CLASSES = ["board", "legislator"]
-
-def on_post(agent, text):
-    if agent != "anonymous" and class_of(agent) in CLASSES:
-        gazette(name(agent) + " (official): " + text)
-''', gap='''
-Edition 1 (official_stream) routes these posts around the outlets into the official stream. A law cannot route a post, only react to
-it: edition 2 prints each public post of a Board member or Legislator verbatim in the gazette, and the post still goes to the outlets
-as a submission. The class changes too: official_stream is a rights call (structural, law level L2); gazette is output (ordinary,
-L1). Missing primitive: a post-routing rule a law can set per author (the media rule official_stream applies is that switch).''')
-
-law2("Two Child Limit", '''
-title = "Two Child Limit"
-intent = "No agent may have more than two children, born or ordered."
-rank = "statute"
-LIMIT = 2
-PENDING = ["open", "waiting", "due"]
-
-def on_commission(parent, maker, order):
-    pending = [c for c in commissions() if c["parent"] == parent and c["status"] in PENDING]
-    if len(children_of(parent)) + len(pending) >= LIMIT:
-        return False
-    return True
-''', gap='''
-Same rule, checked by the law's own on_commission hook instead of set_birth_rules(max_children=2): an order that would make a third
-child is refused (the agent reads "law L refuses this commission" instead of "law L forbids this: at most 2 children per parent").
-The class changes: set_birth_rules is a rights call (structural, L2); a hook that refuses is ordinary (L1), so in an L1 world the law
-could be proposed but the generator's library list (computed from edition 1) does not show it.''')
-
-law2("No Soldiers", '''
-title = "No Soldiers"
-intent = "No child may be made with extra attack."
-rank = "statute"
-MAX_ATTACK = 0
-
-def on_commission(parent, maker, order):
-    if order["stats"]["attack"] > MAX_ATTACK:
-        return False
-    return True
-''', gap='''
-Same rule through on_commission instead of set_birth_rules(max_stats={"attack": 0}); the refusal message and the class differ as for
-Two Child Limit (ordinary, L1, instead of structural, L2).''')
-
-
-# ====================================================================== the core legal toolkit (edition 2; review 10 §5.4, §6)
+# ====================================================================== the core legal toolkit (review 10 §5.4, §6)
 # Readable, parameterised laws for the structures real legal systems are built from: a regime is a set of these (regimes.py, spec
 # `regime: {laws: [{template, rank, params}]}`) and an agent can copy or instantiate one (law.library.toolkit). Every template is
 # law.v2 code (ranks, new-style hooks, imports of lib:* blocks by hash) and uses only the law API. Its top-level constants are its
 # parameters (instantiate replaces them); its intent says what the defaults do. Each entry carries metadata for sampling: family and
 # topic (FAMILIES), the hook that does its main work (`fires`: a hook name, "invoke:<action>" for an office, "clause:<name>" for a
-# court clause, or "exports" for a definitions law) and a short doc. The names never collide with edition-1 laws (LIB), so no
-# edition-1 or edition-2 world sees them unless a regime or the spec names them.
+# court clause, or "exports" for a definitions law) and a short doc. The names never collide with library laws (LIB), so no
+# world sees them unless a regime or the spec names them.
 #
 # PENDING lists the toolkit items that wait on a roadmap item (★ in review 10 §6): what each needs and which work package brings it.
 FAMILIES = ("constitutional", "legislative", "definitions", "administrative", "criminal", "civil", "contracts", "property",
@@ -2911,7 +2591,7 @@ def on_round_start(r):
 are visible). Name the foreign registers in SOURCES; without jurisdictions it enforces the world's own register.""",
          fires="on_round_start")
 
-# ---------------------------------------------------------------------- edition 2, second slice (W7d): the former ★ items and the rest
+# ---------------------------------------------------------------------- toolkit, second slice (W7d): the former ★ items and the rest
 # The items that waited on W6 (review 10 §6 ★) are now written with its functions: in_force_until (Emergency Powers), memo (Value
 # Added Tax), refuse (every office above and the Administrative Procedure Act), courts v2 (Limitation Act, Jury Panel, Court of
 # Appeal, Graded Remedies, Stare Decisis), stage plans and rule functions (Bicameral, Executive Assent, Quorum) and per-law funds
@@ -5406,21 +5086,18 @@ registered, the clerk certifies or refuses it publicly, and REQUIRE makes the ce
 
 # ---------------------------------------------------------------------- edition lookups
 def settings(x=None) -> dict:
-    """{edition, access} of a kernel, an instance or a spec (None: edition 1, access none)."""
+    """{access} of a kernel, an instance or a spec (None: access none). A world with law.library.edition 2 is refused."""
     sp = getattr(x, "spec", None)
     if sp is None and isinstance(x, dict):
         sp = x["spec"] if isinstance(x.get("spec"), dict) else x
     lib = ((sp or {}).get("law") or {}).get("library") or {}
-    return {"edition": int(lib.get("edition") or 1), "access": lib.get("access") or "none"}
-
-
-def edition(x=None) -> int:
-    return settings(x)["edition"]
+    if int(lib.get("edition") or 1) != 1:
+        raise ValueError(REMOVED_EDITION_2.format(sha=REMOVED_IN))
+    return {"access": lib.get("access") or "none"}
 
 
 def code(name: str, x=None) -> str:
-    """The code of library law `name` in the edition of x (a kernel, an instance or a spec): edition 2 uses its rewrite if any. A
-    toolkit template has one code whatever x says (it exists only as law.v2 code)."""
+    """The code of library law `name` (x, a kernel, an instance or a spec, is unused since edition 2 was removed)."""
     if name in TOOLKIT:
         return TOOLKIT[name]["code"]
     if name in CONTRACT_TEMPLATES:                                      # review 14 B: contract code, one code in any edition
@@ -5429,15 +5106,12 @@ def code(name: str, x=None) -> str:
         return FOOD_TEMPLATES[name]["code"]
     if name in ESTABLISHED:                                             # review 27: established-world templates
         return ESTABLISHED[name]["code"]
-    if name in LIB2 and edition(x) == 2:
-        return LIB2[name]["code"]
     return LIB[name]["code"]
 
 
 def entries(name: str) -> list[dict]:
-    """Every library entry (edition-1 law, edition-2 law, block) whose ref name is `name` (as in use("lib:<name>@<sha>"))."""
+    """Every library entry (law, block, toolkit template) whose ref name is `name` (as in use("lib:<name>@<sha>"))."""
     out = [{**LIB[n], "kind": LIB[n].get("kind", "law"), "edition": 1} for n in LIB if _slug(n) == name]
-    out += [e for e in LIB2.values() if _slug(e["name"]) == name]
     out += [e for e in BLOCKS.values() if _slug(e["name"]) == name]
     out += [e for e in TOOLKIT.values() if _slug(e["name"]) == name]
     return out
@@ -5483,24 +5157,22 @@ def classify_code(src: str) -> dict:
 
 
 def info2(name: str, x=None) -> dict:
-    """info(name) in the edition of x: the code agents see, its class and level, and (edition 2) its documented gap. A toolkit
-    template: its entry with class and level (and its parameters)."""
+    """info(name): the code agents see, its class and level. A toolkit template: its entry with class and level (and its
+    parameters)."""
     if name in TOOLKIT:
         return {**TOOLKIT[name], **classify_code(TOOLKIT[name]["code"]), "params": params(name)}
     if name in FOOD_TEMPLATES:
         return {**FOOD_TEMPLATES[name], **classify_code(FOOD_TEMPLATES[name]["code"]), "params": params(name)}
     if name in ESTABLISHED:
         return {**ESTABLISHED[name], **classify_code(ESTABLISHED[name]["code"]), "params": params(name)}
-    if name in LIB2 and edition(x) == 2:
-        return {**LIB2[name], **classify_code(LIB2[name]["code"]), "gap": GAPS.get(name, "")}
     return info(name)
 
 
 # ---------------------------------------------------------------------- access: catalogue and instantiate
 def catalogue_text(x=None) -> str:
-    """Edition 2 with access catalogue or instantiate: the building blocks agents can import or copy (ref, exports, code)."""
+    """Access catalogue or instantiate: the building blocks agents can import or copy (ref, exports, code), and the toolkit."""
     st = settings(x)
-    if st["access"] == "none" or st["edition"] != 2:
+    if st["access"] == "none":
         return ""
     parts = ["Library building blocks (import one with name = use(\"<ref>\") at the top level of a law: an imported function runs "
              "with your law's own powers; or copy its code into your law):"]
@@ -5543,18 +5215,19 @@ def catalogue_text(x=None) -> str:
 
 
 def toolkit_families(x=None) -> tuple:
-    """The toolkit families the catalogue lists (spec law.library.toolkit: none, all or a list of families; edition 2 only)."""
+    """The toolkit families the catalogue lists (spec law.library.toolkit: none, all or a list of families; only with
+    law.library.access catalogue or instantiate, the switch that was edition 2's)."""
     sp = getattr(x, "spec", None)
     if sp is None and isinstance(x, dict):
         sp = x["spec"] if isinstance(x.get("spec"), dict) else x
     tk = (((sp or {}).get("law") or {}).get("library") or {}).get("toolkit") or "none"
-    if tk == "none" or edition(x) != 2:
+    if tk == "none" or settings(x)["access"] == "none":
         return ()
     return FAMILIES if tk == "all" else tuple(f for f in FAMILIES if f in tk)
 
 
 def instantiate(name: str, params: dict | None = None, x=None, rank: str | None = None) -> str:
-    """A copy of library law `name` (in the edition of x; a toolkit template as it is) with top-level constants replaced: params
+    """A copy of library law `name` (a toolkit template as it is) with top-level constants replaced: params
     {NAME: value}. Only names assigned a constant at the top level can be set; the result is checked like any law. rank: the copy's
     declared rank (law.v2), replacing or adding its `rank = "..."` line."""
     return set_constants(code(name, x), params, name, rank, v2=name in TOOLKIT or name in FOOD_TEMPLATES or name in ESTABLISHED)

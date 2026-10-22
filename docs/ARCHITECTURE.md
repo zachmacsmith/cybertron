@@ -320,12 +320,15 @@ order is `sections.LAYOUTS[layer]`, modules' rows are anchored with `after=`; `r
 ```python
 LIB[name] = {"name", "category", "module",            # Feature gate (folds conflict.LAWS, GATED_CATEGORIES)
              "kind": "law" | "contract" | "block",    # block: a lib:* building block for use()
-             "rank": "statute", "edition": 1 | 2,    # v1 = today's switches; v2 = readable implementations from primitives
+             "rank": "statute", "edition": 1,        # edition 2 (LIB2 rewrites) removed: no spec or run used it
              "code", "sha"}                            # sha computed; blocks are in the code store and importable by hash
 ```
 
-Spec `library: {edition: 1|2, access: none|catalogue|instantiate}`: `catalogue` (agents can read library code and copy it),
-`instantiate` (one-call template instantiation with parameters: the experimental "templates" condition).
+Spec `law.library: {access: none|catalogue|instantiate, toolkit}` (needs law.v2): `catalogue` (agents can read the lib:* blocks
+and the listed toolkit templates and copy them), `instantiate` (one-call template instantiation with parameters: the experimental
+"templates" condition). `law.library.edition: 2` (the LIB2 rewrites of 13 library laws, with their documented GAPS) was removed
+by the old-code cleanup: it is a validation error naming the removing commit; such a world runs only at an earlier commit
+(`cybertron rerun`).
 
 As built (W6d, review 10 §5.4 and §6): the core legal toolkit, `TOOLKIT[name] = {name, category: "toolkit", kind: "law", edition:
 2, family, topic, rank, doc, fires, code, sha}` (law.v2 templates; names never collide with LIB; parameters = top-level constants,
@@ -335,7 +338,7 @@ drop, amend}` resolved by `regimes.resolve_laws` from the stream `f"{seed}|regim
 (composability), `lawset.dimensions(laws)` (the dimension vector derived from the laws; `expect` stays the declared label),
 `lawset.fingerprint(k)` (recorded in run.json as `legal_fingerprint`, law.v2 runs) and `lawset.distance(a, b)`. A law made from a
 template carries `template: {name, params, rank}` on its record. Spec `law.library.toolkit: none | all | [families]` lists toolkit
-templates in the edition-2 catalogue.
+templates in the catalogue (with `law.library.access` catalogue or instantiate).
 
 ### 3.12 Intervention ops (`interventions.py`, P5.1)
 
@@ -605,8 +608,8 @@ world is byte-identical, checked by the goldens and `difftest` against the base)
   dissolved), `published` (members | public), `members`, `parent`; a kind's own fields stay on the record as its template's state.
   Laws and offices are indexes (`institutions.laws`, `offices`), not copies. `k.w["jurisdictions"]` and `k.w["contracts"]["assoc"]`
   are not stored: `jurisdictions.jurs(k)` and `accounts.assocs(k)` are read-only views. Snapshots keep their shape (no new snapshot
-  key), so History, the scorer, goals, context and export read what they did; `institutions.legacy_stores(k)` rebuilds the old
-  stores. Checkpoints hold the new key (no migration of old checkpoints into the flag: a run keeps the flag it started with).
+  key), so History, the scorer, goals, context and export read what they did; `institutions.legacy_view(rec)` projects a record back to the old
+  stores' record shape. Checkpoints hold the new key (no migration of old checkpoints into the flag: a run keeps the flag it started with).
 - Hidden is publication, not a status: a secret founding is `forming` with its existence published to its members; declaring
   publishes it and activates it. Secrecy checks read `jurisdictions.secret`, lifecycle checks `jurisdictions.st` (today's names).
 - One path: the `found` action also founds an association when given code or a template (`create_contract` stays as its alias, and
@@ -1011,3 +1014,12 @@ contracts: P2.1 → P4.1 → P4.2 → P4.3 (needs P3.1). Critical path to forks 
 - `composition.apply` semantics, the turn layers, the `lawdocs` tier model, `camptypes/`'s package structure.
 - Golden tests and resume-equivalence tests; add harness, replay and fork tests beside them.
 - No rewrite, no plugin framework, no event bus, no `features/` package, no decorator-driven order for anything order-sensitive.
+
+### media2 is frozen; channels v2 is canonical
+
+The press and newspaper model is channels v2 (`channels.v2`, `cybertron/channels.py`: institution channels with writers, readers,
+delivery push | pull | edition, fees by the owner's code). `media2` (`cybertron/media.py`: private and official outlets, editions,
+licences, placements, polls) is frozen: bug fixes only, no new features, and no new spec may turn it on. Loading a spec with
+`media2.enabled` on prints a `spec.FrozenModuleWarning` (a warning, never an error): the 14 specs that used it when it was frozen
+(society, opus20, scientists, explore15, grand35, haiku100, media2_pilot and pilot2/*) and the published runs made from them keep
+running, replaying and forking. `tests/test_media2_frozen.py` lists those specs and fails on a new one (the list may only shrink).

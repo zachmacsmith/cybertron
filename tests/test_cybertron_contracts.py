@@ -17,6 +17,12 @@ from cybertron import powers as PW
 from cybertron import spec as S
 from cybertron.kernel import Kernel
 
+
+def power_set(k, account) -> dict:
+    """The account's whole power set: power -> has_power."""
+    return {n: PW.has_power(k, account, n) for n in PW.POWERS}
+
+
 ON = ["law.v2=true", "contracts.enabled=true", "contracts.scripted=false"]
 
 
@@ -91,7 +97,7 @@ def test_a_contract_is_an_association_account_with_a_treasury_and_escrows():
 def test_power_table_association_column():
     k = make()
     cid = found(k, people(k)[0], code("x = 1"))
-    ps = PW.power_set(k, cid)
+    ps = power_set(k, cid)
     held = {n for n, v in ps.items() if v}
     assert held == {"take_deposits", "hook_members"}                   # no Board, Fixer, levels, dry run, compulsion, force, ...
     assert not PW.has_power(k, cid, "fixer_patch") and not PW.has_power(k, cid, "kernel_rights")

@@ -96,7 +96,6 @@ def test_load_cards(tmp_path):
     (tmp_path / "many.yaml").write_text("r1:\n  title: A\nr2:\n  tags: [x]\n")
     assert P.load_cards(tmp_path / "one.json") == {"*": {"title": "T"}}
     assert P.load_cards(tmp_path / "many.yaml") == {"r1": {"title": "A"}, "r2": {"tags": ["x"]}}
-    assert P.parse_rounds("rounds 1–23") == [1, 23] and P.parse_rounds(None) is None
 
 
 def test_raw_archive_scrubs_writing_checkout_and_refuses_leftovers(tmp_path):

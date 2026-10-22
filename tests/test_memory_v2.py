@@ -6,24 +6,20 @@ from __future__ import annotations
 import json
 import sys
 import types
-from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
 
-from cybertron import action_registry as AR
 from cybertron import agents as AG
 from cybertron import context as CX
-from cybertron import generator, llm, manual, runner
+from cybertron import generator, llm, runner
 from cybertron import spec as S
 from cybertron.kernel import Kernel
 
-import cybertron_golden_cases as GC
-from test_cybertron_golden import _sha
 
-V1 = ["context.memory_text=v1", "context.dm_delta=false", "context.history.enabled=false", "context.world_name=Charter"]   # world_name: engine 18
+# memory_text v1 (the text before review 20) was removed with the replay of pre-13 runs (provenance.MIN_ENGINE); dm_delta off stays
+V1 = ["context.dm_delta=false", "context.history.enabled=false"]
 OFF = ["context.history.enabled=false"]          # these tests cover the fixed layers (history mode: test_history.py)
-V1_PROMPTS = Path(__file__).parent / "fixtures" / "memory_v1_prompts.json"   # the prompt goldens from before review 20
 
 
 def _world(preset="society", seed=5, sets=()):
@@ -32,24 +28,11 @@ def _world(preset="society", seed=5, sets=()):
 
 
 # ------------------------------------------------------------------ memory_text
-@pytest.mark.parametrize("name", ["prompts_society_5", "prompts_E4_1"])
-def test_v1_reproduces_the_prompts_from_before(name):
-    """memory_text v1: every agent's core prompt and manual are byte-identical to the goldens recorded before review 20."""
-    preset, seed = GC.PROMPT_CASES[name]
-    inst, k = _world(preset, seed, V1)
-    got = {}
-    for a in inst["agents"]:
-        core = CX.core_prompt(inst, a, k) if CX.enabled(inst) else AG.system_prompt(inst, a)
-        got[a["id"]] = {"core": _sha(core.encode()), "manual_base": _sha(manual.sections(inst, k, a["id"])),
-                        "manual": _sha(CX.build_manual(inst, k, a["id"]))}
-    assert got == json.loads(V1_PROMPTS.read_text())[name]
-
-
 def test_defaults_are_v2_and_delta():
     assert CX.DEFAULTS["memory_text"] == "v2" and CX.DEFAULTS["dm_delta"] is True
     from cybertron import schema
     assert schema.validate(S.apply_overrides(S.load("society"), V1)) == []
-    assert any("memory_text" in e for e in schema.validate(S.apply_overrides(S.load("society"), ["context.memory_text=v3"])))
+    assert any("memory_text" in e for e in schema.validate(S.apply_overrides(S.load("society"), ["context.memory_text=v1"])))
 
 
 def _turn(k, a, inst):
@@ -86,15 +69,6 @@ def test_v2_names_who_is_alive_only_with_the_roster():
     assert "laws, who is alive) is always current" in CX.core_prompt(inst, inst["agents"][0], k)
 
 
-def test_v1_text_is_the_old_text():
-    inst, k = _world("society", 5, V1)
-    a = inst["agents"][0]
-    n = CX.memory_turns(k, a["id"])
-    assert f"your own last {n} turns, your\nscratchpad" in CX.core_prompt(inst, a, k)
-    assert f"is forgotten within {n} rounds" in _turn(k, a, inst)
-    assert AG.action_doc("write_scratchpad", inst, a) == AR.REG["write_scratchpad"].doc
-
-
 def test_v2_goal_reminder_never_cuts_a_word():
     long = "Gather " + " ".join(f"profiles{i} of individuals" for i in range(40))
     out = CX._short_goal({"goal": {"text": long}}, whole_words=True)
@@ -107,13 +81,12 @@ def _dm_args(k, a):
                 sent=1, allow=5, n_actions=4, wave=1, waves=2, final=False)
 
 
-def test_dm_prompt_drops_the_stale_notes_line_under_v2_only():
-    for sets, has in (([], False), (V1, True)):
-        inst, k = _world("society", 5, sets)
-        a = inst["agents"][0]
-        p = AG.dm_prompt(k, a, "TURN PROMPT", **_dm_args(k, a))
-        assert ('"notes" in this reply replaces them' in p) is has
-        assert p.endswith("TURN PROMPT")
+def test_dm_prompt_drops_the_stale_notes_line_with_the_context_module():
+    inst, k = _world("society", 5)
+    a = inst["agents"][0]
+    p = AG.dm_prompt(k, a, "TURN PROMPT", **_dm_args(k, a))
+    assert '"notes" in this reply replaces them' not in p
+    assert p.endswith("TURN PROMPT")
 
 
 def test_dm_delta_prompt_is_short_and_keeps_the_scripted_marker():
@@ -275,7 +248,7 @@ def test_a_run_records_the_mode_of_each_dm_reply(tmp_path):
     out, dm = _dry(tmp_path / "off", V1)
     assert dm and all("dm_mode" not in r and "The turn prompt you saw at the start" in r["prompt"] for r in dm)
     run_json = json.loads((out / "run.json").read_text())
-    assert run_json["memory_text"] == "v1" and run_json["dm_delta"] is False
+    assert run_json["memory_text"] == "v2" and run_json["dm_delta"] is False
 
 
 class _Talkers:
@@ -311,7 +284,7 @@ def test_next_round_shows_last_rounds_whole_exchange_in_order(tmp_path, sets):
     texts = ["m1: shall we share the camp?", "r1: only if you give me grain.", "m2: yes, from round 2 on.", "r2: agreed, see you then."]
     for who in (a, b):
         p = next(u for r, x, u in pol.prompts if r == 1 and x == who and "private messages have arrived" not in u)
-        if sets:                                                      # v1 / off: the old prompt, the agent's own replies missing
+        if sets:                                                      # dm_delta off: the agent's own replies missing
             assert CX.EXCHANGE_HEADER not in p and sum(t in p for t in texts) == 2
             continue
         sec = p[p.index(CX.EXCHANGE_HEADER):]
@@ -329,9 +302,9 @@ def test_the_export_tells_delta_and_full_dm_replies_apart(tmp_path):
     X.export([on, off], tmp_path / "ds", fmt="csv")
     data = X.load(tmp_path / "ds")
     runs = {r["run_id"]: r for r in data["runs"]}
-    assert {(r["memory_text"], r["dm_delta"]) for r in runs.values()} == {("v2", True), ("v1", False)}
+    assert {(r["memory_text"], r["dm_delta"]) for r in runs.values()} == {("v2", True), ("v2", False)}
     modes = {}
     for t in data["turns"]:
         if str(t["phase"]).startswith("dm_reply"):
-            modes.setdefault(runs[t["run_id"]]["memory_text"], set()).add(t["dm_mode"])
-    assert modes == {"v2": {"delta"}, "v1": {None}}
+            modes.setdefault(bool(runs[t["run_id"]]["dm_delta"]), set()).add(t["dm_mode"])
+    assert modes == {True: {"delta"}, False: {None}}

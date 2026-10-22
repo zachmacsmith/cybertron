@@ -219,7 +219,7 @@ outside_power:                    # an outside power demanding tribute (cybertro
 #   pin_slots: 0                  # starting pin slots (max_pin_slots: 2)
 #   max_pin_slots: 2
 #   free_scratchpad_writes: 1     # write_scratchpad actions per turn that use no action
-#   memory_text: v2               # review 20: v2 the accurate memory text and the notebook scratchpad text; v1 the earlier text
+#   memory_text: v2               # review 20: the accurate memory text and the notebook scratchpad text (v1, the earlier text, removed)
 #   dm_delta: true                # review 20: DM replies continue the decide conversation; false: the full DM prompt as before
 #   history:                      # review 20 §4 (cybertron/memory.py): one conversation per agent, restarted every chunk rounds
 #     enabled: true               # false: the fixed layers above, every prompt unchanged

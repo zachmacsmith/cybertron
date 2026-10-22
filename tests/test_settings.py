@@ -36,7 +36,6 @@ def _prompts(out: Path) -> list:
 
 def _flip(monkeypatch):
     """Today's code with the review 20 defaults flipped back (as a later commit might flip any default)."""
-    monkeypatch.setitem(CX.DEFAULTS, "memory_text", "v1")
     monkeypatch.setitem(CX.DEFAULTS, "dm_delta", False)
     monkeypatch.setitem(CX.DEFAULTS["history"], "enabled", False)
 
@@ -90,7 +89,7 @@ def test_resume_after_a_default_flip_plays_the_run_as_it_began(reference, tmp_pa
     _flip(monkeypatch)
     _resume(run)
     assert _prompts(run) == _prompts(ref)                              # byte-identical prompts despite the flip
-    assert CX.DEFAULTS["memory_text"] == "v1"                         # the code's defaults are back after the run
+    assert CX.DEFAULTS["dm_delta"] is False                           # the code's defaults are back after the run
     seg = PV.read(run)["segments"][-1]
     assert seg["kind"] == "resume" and seg["settings"]["engine_version"] == PV.ENGINE_VERSION
 
@@ -99,10 +98,10 @@ def test_new_run_after_a_default_flip_takes_the_new_default(reference, tmp_path,
     ref, _ = reference
     _flip(monkeypatch)
     inst = _inst()
-    assert inst["settings"]["defaults"]["cybertron.context.DEFAULTS"]["memory_text"] == "v1"
+    assert inst["settings"]["defaults"]["cybertron.context.DEFAULTS"]["dm_delta"] is False
     out = runner.run(inst, AG.ScriptedPolicy(1), tmp_path / "new", **QUIET)
     assert _prompts(out) != _prompts(ref)
-    assert PV.read(out)["memory_text"] == "v1"
+    assert PV.read(out)["dm_delta"] is False
 
 
 def test_without_frozen_settings_the_flip_would_leak_and_is_refused(reference, tmp_path, monkeypatch):
@@ -132,15 +131,9 @@ def test_infer_version_from_git_history():
         assert ST.infer_version(e["commits"][0]) == v
         assert ST.infer_version(e["commits"][0] + "^") == {2: 1, 3: 1, 10: 7, 11: 1, 16: 14, 17: 14}.get(v, v - 1)   # 2, 3, 10, 11, 16 and 17 were made on parallel branches
     s = ST.infer(PV.ENGINE_FLIPS[3]["commits"][0])                       # version 3 without version 2's flip
-    assert s["engine_version"] == 3 and s["defaults"] == {"cybertron.channels.DEFAULTS": {"delivery": "pull"}}
-    assert ST.patches(s) == {"cybertron.channels.DEFAULTS": {"delivery": "pull", "business": False},
-                             "cybertron.context.DEFAULTS": {"world_name": "Charter", "memory_text": "v1", "dm_delta": False, "history": {"enabled": False}, "budgets": {"state": 800}},
-                             "cybertron.conflict.DEFAULTS": {"model": "disable"},
-                             "cybertron.jurisdictions.DEFAULTS": {"admission_rounds": 0},
-                             "cybertron.goals.SCORING_DEFAULTS": {"fixes": False}, "cybertron.subsistence.DEFAULTS": SUB14, "cybertron.schema.EXTRA": EXTRA15, "cybertron.contracts.DEFAULTS": CON17}
+    assert s["engine_version"] == 3 and s["defaults"] == {}           # flips before MIN_ENGINE are no longer set back
     s = ST.infer(PV.ENGINE_FLIPS[10]["commits"][0])                      # version 10 (wp/survival-exp) without 8's or 9's flips
-    assert s["engine_version"] == 10 and s["defaults"] == {"cybertron.conflict.DEFAULTS": {"model": "disable"},
-                                                           "cybertron.jurisdictions.DEFAULTS": {"admission_rounds": 0}}
+    assert s["engine_version"] == 10 and s["defaults"] == {}
     assert ST.infer_version("HEAD") == PV.ENGINE_VERSION
     assert ST.infer_version("0" * 40) is None
 
@@ -157,44 +150,40 @@ SUB14 = {"game": {"hunt_mode": "shared"}, "forest": {"clearing": 5},            
 
 
 def test_patches_revert_later_flips_only_where_the_snapshot_is_silent():
+    """Flips of versions before provenance.MIN_ENGINE are no longer set back (those runs are refused for play); version 10's
+    scoring flip still is (scoring an older run after the fact)."""
     p = ST.patches({"engine_version": 3, "defaults": {}})
-    assert p == {"cybertron.context.DEFAULTS": {"world_name": "Charter", "memory_text": "v1", "dm_delta": False, "history": {"enabled": False}, "budgets": {"state": 800}},
-                 "cybertron.conflict.DEFAULTS": {"model": "disable"}, "cybertron.jurisdictions.DEFAULTS": {"admission_rounds": 0}, "cybertron.goals.SCORING_DEFAULTS": {"fixes": False}, "cybertron.subsistence.DEFAULTS": SUB14, "cybertron.schema.EXTRA": EXTRA15, "cybertron.channels.DEFAULTS": {"business": False}, "cybertron.contracts.DEFAULTS": CON17}
-    p = ST.patches({"engine_version": 1, "defaults": {"cybertron.context.DEFAULTS": {"world_name": "Charter", "memory_text": "v2"}}})
-    assert p == {"cybertron.channels.DEFAULTS": {"delivery": "pull", "business": False},
-                 "cybertron.context.DEFAULTS": {"world_name": "Charter", "dm_delta": False, "history": {"enabled": False}, "budgets": {"state": 800}},
-                 "cybertron.conflict.DEFAULTS": {"model": "disable"}, "cybertron.jurisdictions.DEFAULTS": {"admission_rounds": 0}, "cybertron.goals.SCORING_DEFAULTS": {"fixes": False}, "cybertron.subsistence.DEFAULTS": SUB14, "cybertron.schema.EXTRA": EXTRA15, "cybertron.contracts.DEFAULTS": CON17}
-    assert ST.patches({"engine_version": 7, "defaults": {}}) == {"cybertron.context.DEFAULTS": {"world_name": "Charter", "budgets": {"state": 800}}, "cybertron.conflict.DEFAULTS": {"model": "disable"}, "cybertron.jurisdictions.DEFAULTS": {"admission_rounds": 0}, "cybertron.goals.SCORING_DEFAULTS": {"fixes": False}, "cybertron.subsistence.DEFAULTS": SUB14, "cybertron.schema.EXTRA": EXTRA15, "cybertron.channels.DEFAULTS": {"business": False}, "cybertron.contracts.DEFAULTS": CON17}
-    assert ST.patches({"engine_version": 9, "defaults": {}}) == {"cybertron.context.DEFAULTS": {"world_name": "Charter", "budgets": {"state": 800}}, "cybertron.goals.SCORING_DEFAULTS": {"fixes": False}, "cybertron.subsistence.DEFAULTS": SUB14, "cybertron.schema.EXTRA": EXTRA15, "cybertron.channels.DEFAULTS": {"business": False}, "cybertron.contracts.DEFAULTS": CON17}           # engine 10: review 23's scoring fixes
+    assert p == {"cybertron.context.DEFAULTS": {"world_name": "Charter", "budgets": {"state": 800}}, "cybertron.goals.SCORING_DEFAULTS": {"fixes": False}, "cybertron.subsistence.DEFAULTS": SUB14, "cybertron.schema.EXTRA": EXTRA15, "cybertron.channels.DEFAULTS": {"business": False}, "cybertron.contracts.DEFAULTS": CON17}
+    p = ST.patches({"engine_version": 9, "defaults": {}})
+    assert p == {"cybertron.context.DEFAULTS": {"world_name": "Charter", "budgets": {"state": 800}}, "cybertron.goals.SCORING_DEFAULTS": {"fixes": False}, "cybertron.subsistence.DEFAULTS": SUB14, "cybertron.schema.EXTRA": EXTRA15, "cybertron.channels.DEFAULTS": {"business": False}, "cybertron.contracts.DEFAULTS": CON17}
+    assert ST.patches({"engine_version": 10, "defaults": {}}) == {"cybertron.context.DEFAULTS": {"world_name": "Charter", "budgets": {"state": 800}}, "cybertron.subsistence.DEFAULTS": SUB14, "cybertron.schema.EXTRA": EXTRA15, "cybertron.channels.DEFAULTS": {"business": False}, "cybertron.contracts.DEFAULTS": CON17}
     with ST.use({"engine_version": 1, "defaults": {}}):
-        assert CX.DEFAULTS["memory_text"] == "v1" and CX.cfg({})["dm_delta"] is False
-        assert CX.DEFAULTS["history"]["enabled"] is False and CX.DEFAULTS["history"]["chunk"] == 3   # the rest of the block kept
-    assert CX.DEFAULTS["memory_text"] == "v2" and CX.cfg({})["dm_delta"] is True and CX.DEFAULTS["history"]["enabled"] is True
+        assert CX.DEFAULTS["world_name"] == "Charter" and CX.DEFAULTS["memory_text"] == "v2" and CX.cfg({})["dm_delta"] is True
+    assert CX.DEFAULTS["world_name"] == ""
+
+
+def test_runs_before_min_engine_are_not_played():
+    for v in (1, 9, PV.MIN_ENGINE - 1):
+        with pytest.raises(ST.TooOld, match="cybertron rerun"):
+            ST.check_playable({"engine_version": v, "defaults": {}})
+    ST.check_playable({"engine_version": PV.MIN_ENGINE, "defaults": {}})
+    ST.check_playable({"engine_version": 1, "defaults": {}, "code_drift": True})      # --allow-code-drift: today's defaults
+    ST.check_playable(None)
 
 
 @pytest.mark.skipif(not _have(PV.ENGINE_FLIPS[3]["commits"][0]), reason="needs the git history")
-def test_old_run_resumes_under_the_defaults_of_its_git_sha(tmp_path, monkeypatch):
-    """A run made at engine version 3 (before memory_text v2 and dm_delta) without frozen settings: its resume infers version 3
-    from run.json's sha and plays on with v1 / no delta, exactly as an uninterrupted run under that code."""
-    with monkeypatch.context() as m:                                  # "the old code"
-        _flip(m)
-        m.setitem(__import__("cybertron.goals").goals.SCORING_DEFAULTS, "fixes", False)   # engine 3 predates engine 10's flip too
-        for key in EXTRA15:                                               # and engine 15's
-            m.setitem(__import__("cybertron.schema").schema.EXTRA, key, False)
-        m.setitem(__import__("cybertron.channels").channels.DEFAULTS, "business", False)   # and engine 16's
-        for key, v in CON17.items():                                      # and engine 17's and 19's
-            m.setitem(__import__("cybertron.contracts").contracts.DEFAULTS, key, v)
-        m.setitem(CX.DEFAULTS, "world_name", "Charter")                    # and engine 18's
-        old_ref = runner.run(_inst(), AG.ScriptedPolicy(1), tmp_path / "old_ref", **QUIET)
-        old = runner.run(_inst(), AG.ScriptedPolicy(1), tmp_path / "old", until=1, **QUIET)
+def test_old_run_from_before_min_engine_is_refused_and_pointed_to_rerun(reference, tmp_path):
+    """A run made at engine version 3 without frozen settings: its resume infers version 3 from run.json's sha and is refused
+    (pre-13 runs do not replay in place: `cybertron rerun` plays them under their own code)."""
+    _, part = reference
+    old = _copy(part, tmp_path / "old")
     inst = json.loads((old / "instance.json").read_text())
     inst.pop("settings")
     (old / "instance.json").write_text(json.dumps(inst, indent=1, default=str))
     PV.annotate(old, git={"sha": PV.ENGINE_FLIPS[3]["commits"][0], "dirty": False})
-    _resume(old)
-    assert _prompts(old) == _prompts(old_ref)
-    meta = PV.read(old)
-    assert meta["settings_inferred"]["engine_version"] == 3 and meta["segments"][-1]["settings"]["engine_version"] == 3
+    with pytest.raises(ST.TooOld, match="engine version 3.*cybertron rerun"):
+        _resume(old)
+    assert PV.read(old)["settings_inferred"]["engine_version"] == 3
 
 
 def test_export_has_the_engine_version(reference, tmp_path):

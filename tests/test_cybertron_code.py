@@ -182,7 +182,7 @@ def test_code_none_leaves_the_residual():
     k = world(sets=["code.select=none"])
     assert all(n == k.dm_cap() for n in roster_limits(k).values())        # no rationing: the hard cap
     assert CO.rules(k, "J0")["deadline"] == 20 and CO.rules(k, "J0")["rulings_per_round"] == 20
-    assert DC.prompt_lines(k) == [] and DC.law_list(k) == []
+    assert DC.prompt_lines(k) == []
 
 
 def test_per_polity_rows_fall_back_to_the_root():
@@ -202,6 +202,12 @@ SCENARIOS = {
 }
 
 
+def _run_as_source(k, lid):
+    """Run an Act as its source without changing its code: load it and switch, as an amendment would."""
+    k._load(lid)
+    DC.on_code_changed(k, lid)
+
+
 def _outcomes(k):
     return {"dm": roster_limits(k), "general": k.dm_general(), "courts": CO.rules(k, "J0"),
             "rows": {a: DC.rows_of(k, a) for a in DC.ACTS}}
@@ -218,7 +224,7 @@ def test_twin_equals_source_on_scripted_scenarios(name, v2):
         lid = native.w["default_code"]["acts"][name]
         code = native.w["laws"][lid]["code"]
         src = world(v2=v2, sets=[sel])
-        DC.switch_to_source(src, lid)                                    # the same code, run as law code
+        _run_as_source(src, lid)                                         # the same code, run as law code
         assert not src.w["laws"][lid]["native"] and lid in src.w["law_order"]
         assert DC.twin_rows(act, code) == DC.source_rows(act, src.ns[lid]), params
         assert _outcomes(native) == _outcomes(src), params
@@ -235,7 +241,7 @@ def test_source_with_computed_constants_runs_only_as_law():
     code = DC.ACTS[COMMS].source.replace("LIMIT = 5", "LIMIT = 2 + 2")
     assert DC.twin_rows(act, code) == {"office": "media"}               # the twin reads literals only
     k.w["laws"]["A1"]["code"] = code
-    DC.switch_to_source(k, "A1")
+    _run_as_source(k, "A1")
     assert DC.rows_of(k, COMMS)["limit"] == 4
 
 
