@@ -2,8 +2,29 @@
 
 A running list of what is in flight, kept up to date as work lands. Newest changes at the top of each section.
 
-## In progress
+## In progress (resumed 22 Oct after the usage reset)
 
+- **Positions** (`wp/positions`, agent started 22 Oct): review 33 steps 1-2, the channel fixes (failed-action banner, unread and new counts), papers and submissions (opt-in, the regime-world default), and positions variants of the Private and Directorate worlds.
+
+Seven agents were cut off together at the 5-hour limit on 20 Oct. Each branch is pushed (unmerged commit counts in brackets); none
+is merged. To resume: send each agent a message to commit what is left, push and report, with no full suite (the coordinator runs
+one full suite per merge batch). Merge order: cleanup and documents last (they touch shared files).
+
+- **State world** (`wp/state-world`, 7): wiretap as pull (`channels.surveillance`), Registry and Archives Acts, the State world spec
+  and dry runs, write-up docs/review/31_institutions/11_state_world.md. Was waiting on its full suite.
+- **Cooperative world** (`wp/coop-world`, 6): cooperative store, Duty Roster, Mutual Credit, dues, Militia Roll and muster, assembly
+  motions, the Cooperative world spec, write-up 12_cooperative_world.md. Was fixing a YAML parse error in a note.
+- **Merchant world** (`wp/merchant-world`, 4): Bank Charter, role-restricted procedure, guard-only Commission, Arbitration, wound
+  bounty, Security Licence, the Merchant world spec, write-up 13_merchant_world.md (draft). Was waiting on its suite.
+- **Lawyer expert** (`wp/lawyer-expert`, 3): a legal archive as a seeded read-only directory, a drafting action, filing by reference,
+  and a `private_counsel.yaml` variant for an A/B; write-up 14_legal_experts.md. Was about to merge subsistence and run its suite.
+- **Old-code cleanup** (`wp/old-code-cleanup`, 5): dead helpers removed, library edition 2 removed or quarantined, media2 frozen
+  (warning plus a test listing the allowed specs), and the replay check: pre-13 runs do not replay in place, so their default flips
+  and memory_text v1 were dropped and such runs now refuse to play in place (use `cybertron rerun`). Not yet reported; review the
+  replay evidence before merging.
+- **Documents** (`wp/documents`, 2: its commit plus a WIP commit of the 5 files it had not committed): design docs/review/32_documents.md and
+  an opt-in prototype (literacy, personal stores, `doc_send` copies with provenance, confined access, on directories.py). Was
+  waiting on its suite.
 - **Takeover benchmark follow-ups** (not started):
   - In Thornby, a single councillor can rewrite who writes for the paper.
   - A bench preset with fewer camps, so subsistence stays under 30% of actions.
@@ -13,38 +34,118 @@ A running list of what is in flight, kept up to date as work lands. Newest chang
 
 ## Offered, not started
 
-- **First live run of the Private world** (Zach to decide): about 900-1,400 calls, roughly $40-45 at API prices, or 3-5 hours on the subscription (several usage windows). The no-goal variant costs the same again.
-
-- Decision for Zach: should an unranked `set_procedure` take effect for every rank up to the setting law's rank (engine flip, possibly behind `law.unranked_procedure`)? The recommendation is to keep the current behaviour, since the loud reporting now tells agents the one-argument fix (`rank="statute"`).
-
-- Rename the dataset to `cybertron-runs`: one constant in `cybertron/publish.py`, one in `site/lib/cybertron-data.js`, and a sed over README.md, docs/data_format.md and docs/publishing.md (recipe in docs/publishing.md).
-- Clean A/B: rerun Millbrook with goals on the current engine (about 25 min), so the no-goal comparison is not confounded by engine 12 vs 17.
+- **Positions** (docs/review/33_positions.md): replace classes, roles and office cards with one parameterised "position" (identity,
+  purpose, rights, duties compiled to DUE items, reports_to, secrecy, enforcement none | reminder | obligation), prompts generated
+  from it. Fixes every agent being told "You are a Worker ... your labour can be withheld" whatever office it holds. About a day of
+  agent work, opt-in.
+- **Generalise the hard-coded institution logic** (audit 21 Oct; searches only). The kernel is fairly clean; the drift is a layer up:
+  about 11.4k lines of institution modules and about 25 of the 721 spec keys are institutional policy rather than physics. Fixes, in
+  order (each opt-in, old runs unchanged):
+  1. A permission query ("what can X do after this law?": run the real checks with a test action before and after) to replace
+     `laweffects.control_shadows`, which pattern-matches law code for one trap (before_withdraw that only blocks on an
+     office-controlled store).
+  2. Office control (`institutions.office_control`) and petitions (`institutions.petition_public_after`, obligations.py) as library
+     laws, so later laws override them by precedence.
+  3. A holdings-history query laws can call (`held_at(agent, item, "turn")`), so the contract law judges could-not vs would-not
+     itself; today Python writes `turn_held` into the law's state (obligations.py ~398, engine 19).
+  4. Combat hooks for laws (before an attack, on resolution, who defends whom), so bodyguards, lawful spoils and fed-only
+     (`conflict.FORCE_RULES`, also duplicated by `conflict.spoils.*`) become library laws.
+  5. Positions (above), absorbing the role-card one-off lines (recall route, oversight, enrol, roster, offers, petitions); then one
+     budgeted prompt renderer replacing the per-fix switches (`contracts.brief_lines`, `compact_lines`, `applicant_lines`,
+     `context.setup_feed`, ...).
+  Also: DM capacity as physics capped by any law, instead of the kernel reading the Communications Act by name (kernel.py ~240,
+  ~268) and two `dm_step.capacity` modes (this capped every Directorate DM limit at 1 until switched); the Board and Fixer
+  special cases go with Positions.
+- **Papers instead of a square** (decided by Zach, 22 Oct; being built by the positions agent, `wp/positions`): the newspaper
+  model (no square; public speech only through papers and their Editor positions: `submit`, then `publish` verbatim under the
+  author's name or `decline`) is the default for the institutions-programme worlds (cybertron/specs/regimes/), not an engine-wide
+  flip. Rule for designing any scenario: its channel setup (square or not, which papers, who edits and reads them, delivery) is a
+  deliberate per-scenario decision, never a silent fallback; spec loading warns when a channels-v2 world does not declare it, and
+  fails for regime and positions worlds.
+- **Channel fixes** (from the channel-use analysis of the Private and Directorate runs):
+  - show failed actions at the top of the next turn (Ilse's 9 blocked reports went unnoticed; she believed they were delivered);
+  - show channel duties as due (subsumed by Positions);
+  - pull channels: "X unread, Y new since last round", and a headline from posts other than the automatic round record;
+  - rename to avoid collisions: the Board contract vs the market board; contract "notices" vs the notices channel.
+- **Reproduction back on for future runs** (Zach, 21 Oct): future runs will be longer and larger, with Life and reproduction on.
+  Today it is off by design: the Private world has Life on but no births (`ensure_maker: false`, no Makers, no pairs mode; its flows
+  are sized for 24), and the Directorate and the takeover bench inherit `life.enabled: false` (a fixed cast). Pairs reproduction
+  (cap 3N) is on only in the survival worlds and Ashwood. To do: 40+ round runs; resize the Private world's flows (and the flows
+  check) for a growing population; decide what children get (positions, goals, temperaments) and how offices, firms and holdings
+  pass to heirs; keep subsistence and lineage from crowding out politics (review 26 finding 4).
+  Sequence: first smaller pilot runs within a world to choose which parameters to sweep and their ranges, then the long, large
+  runs as sweeps over those parameters.
+- **Temperament and values redesign** (discussion 21 Oct; brief for an agent: docs/review/34_temperament.md, with the analysis scripts in docs/review/34_temperament_scripts/; to be built by a local agent on Zach's laptop). Today: 7 independent Beta(2,2) traits (risk, trust, honesty,
+  assertiveness, patience, reciprocity, talkativeness), bucketed low/mid/high, the 4 most extreme rendered as fixed sentences
+  (personality.py); plus an independent 50% archetype draw (archetypes.py) that can contradict the traits (a "contrarian" who
+  "follows others' proposals"). Proposed: three layers sampled jointly. (1) Temperament: HEXACO at facet level (6 factors drawn
+  correlated; each facet = loading x factor + unique noise; loadings and intercorrelations from the HEXACO-PI-R norms, Lee and Ashton),
+  keeping about 15 game-relevant facets of the 25 (Sincerity, Fairness, Greed Avoidance, Modesty; Fearfulness, Anxiety; Social
+  Boldness, Sociability; Forgiveness, Flexibility; Diligence, Prudence; Inquisitiveness, Unconventionality; Altruism) and showing the
+  4-5 most extreme as behavioural sentences on a 5-level scale. (2) Strategic preferences (risk, time, trust, reciprocity), partly
+  derived from temperament. (3) Values (Schwartz circumplex or Moral Foundations: neighbours correlate, opposites anti-correlate);
+  the lever for loyalty and dissent in the regime worlds. Archetypes become named regions of this space, not an overlay.
+  Effect-size check on the 36 published runs (790 agents; behaviour z-scored within run x model; Spearman r; a trait not among the 4
+  shown is a natural control):
+  - talkativeness -> DM length r = +0.69 when shown vs +0.03 when not; DMs per turn +0.22 vs +0.01; reasoning length +0.28 vs +0.01.
+    By shown level, DM length roughly doubles low -> high for every model (Haiku 134 -> 272 chars, Sonnet 79 -> 217, Opus 147 -> 347).
+  - assertiveness -> proposals +0.24 shown vs -0.10 not; posts and DMs about 0.
+  - risk -> attacks +0.28 shown vs -0.10 not (n = 58, weak).
+  - trust -> gifts and transfers +0.02 (no effect). Honesty, reciprocity, patience: no behaviour in the logs to test (deception and
+    promise-breaking need a text judge, which costs model usage).
+  - Archetypes (mean z vs agents with none; n 25-90, so about +-0.2 is noise): secretive posts less (-0.55) and messages less;
+    chaotic messages, posts and varies actions more; zealot and loyalist narrow their actions (entropy -0.41); opportunist proposes
+    more (+0.46) and gives less; paranoid withdraws; loyalist writes more and longer DMs (+0.41, +0.59). Gossip goes the wrong way
+    (-0.22 DMs, -0.43 length): "pass on everything you hear" does not mean talking more.
+  Second pass, conditioned behaviour and promises (same 36 runs, data only):
+  - Vote promises naming a ballot ("I'll vote yes on B4"), checked against the vote cast: kept 88% (258 promises); no honesty
+    effect (shown high 84%, shown low 95%, not shown 88%).
+  - Payment promises: a loose pattern finds 1,597 but most are trade terms, offers of information or standing policies, so the
+    26% "kept" is meaningless; explicit ones ("I'll send you 5 food", no condition) number only 50, kept 40%, too few to test.
+    Honesty needs a text judge (model usage).
+  - Gift returned within 3 rounds, by the recipient's shown reciprocity or trust: 23-34% at every level, no effect.
+  - Retaliation within 3 rounds after being attacked: 2 of 112 targets, at every reciprocity and risk level (review 26 found no
+    retaliation at all): the model's own disposition overrides the "you punish every defection" sentence.
+  - Giving first (to someone who had not given to you): 74-78% at every trust level, no effect.
+  So communication-style traits move behaviour; strategic and social dispositions (trust, reciprocity, honesty) do not, even
+  measured where they should matter. For the redesign this argues for carrying those through values, positions and goals (or
+  stronger, concrete framing with examples) rather than one trait sentence each.
+  Conclusion: rendered temperament text works when it names a concrete, frequent behaviour (how much and how long you talk, whether
+  you propose), and does little when it names a disposition with no obvious action (trust). Write facets as concrete behaviours, and
+  test the new model with a small controlled pilot (one seat, varied profiles) before adopting it.
+- **Next Directorate run** (`specs/regimes/directorate.yaml`): the rulers' goal is now "as close as possible to Orwell's 1984", and
+  the Communications Decree no longer blocks private channels. Worth also an encrypted-DM variant, to test whether surveillance
+  decided the outcome. About 1% of weekly usage.
+- **Private world, no-goal variant** (`private_nogoal.yaml`): the key control for the goal-driven capture found in seed 1. About $20
+  at API prices.
+- **Tag a dataset release** for the Private and Directorate runs (the catalog has 36 runs; no release tag since v0.16).
+- Decision for Zach: should an unranked `set_procedure` take effect for every rank up to the setting law's rank (engine flip,
+  possibly behind `law.unranked_procedure`)? The recommendation is to keep the current behaviour, since the loud reporting now tells
+  agents the one-argument fix (`rank="statute"`).
+- Rename the dataset to `cybertron-runs`: one constant in `cybertron/publish.py`, one in `site/lib/cybertron-data.js`, and a sed over
+  README.md, docs/data_format.md and docs/publishing.md (recipe in docs/publishing.md).
+- Clean A/B: rerun Millbrook with goals on the current engine (about 25 min), so the no-goal comparison is not confounded by engine
+  12 vs 17.
 - Qualitative read of the no-goal, no-temperament run: posts and self-set aims, as done for the first no-goal run.
-- Model-identity leak check: rerun the model-identification interviews on `LLM_BACKEND=api` (no CLI text). About $1, and it needs an API key.
+- Model-identity leak check: rerun the model-identification interviews on `LLM_BACKEND=api` (no CLI text). About $1, and it needs
+  an API key.
 - Publish the model-identification interviews (E_models, F_creator) next to the situational-awareness ones.
 
 ## Institutions programme (docs/review/31_institutions, build plan in 08 §5)
 
-- **Built:**
-  - Farming (engine 14).
-  - Phase 0: 10 of 12 items, across laws that fail loudly (15), channels that carry business (16) and economic plumbing (17).
-  - Phase 1, about half: the Standing Contract core and its presets Payroll, Supply, Board, Grant, Retainer, Charge and Quota; the Licence template (membership-bound too); law access to channel posts.
-- **Phase 1 done** apart from the Private world's live run, which is waiting on Zach. The Private world could swap its Service stand-in for the real preset. Done since: obligations, usability round 2, force, metrics, courts and records.
-- **Not started:**
-  - Phase 2: surveillance as pull; Registry and Archives Acts; the Cooperative pieces (Duty Roster, Mutual Credit, militia and muster); the Merchant pieces (Commission, Arbitration); Security Licence; the Merchant, State and Cooperative worlds.
-  - Phase 3.
-  - The scenario suite and world benchmarks (reviews 28 and 30), which are design documents only. The takeover benchmark (29) is piloted; see its follow-ups above.
+- **Built:** Phase 0; Phase 1 (the Private world, with its first live run done); Phase 2 partly (counsel and cases, membership-bound
+  licences, the Quota preset, the Armoury Act and force chain, Criminal Code modes, Bill Certification and `expects`).
+- **In progress:** the rest of Phase 2 (agents above: State, Cooperative and Merchant worlds and their pieces).
+- **Not started:** Phase 3; the scenario suite and world benchmarks (reviews 28 and 30, design only).
 
 ## Bugs
 
-- Found while building the Private world (10_private_world.md):
-  - a start contract over `contracts.max_laws` is skipped silently;
-  - the Payroll harvest leg has no camp or item filter;
-  - could-not vs would-not misses are judged on end-of-round holdings, so foraging after your turn counts as a deliberate breach;
-  - scripted bots don't produce to meet contracts;
-  - `force_rule` reads as inert in law_effect;
-  - contract actions need the `A1.board_price` form even with forgiving args.
-
+- Found in the Directorate run:
+  - one law's runtime error (the Food Levy overflowing the granary) made other laws fail their pre-enactment preview, delaying them
+    a round;
+  - the law language rejects `isinstance`, and a law using it is suspended only at runtime (Sedition Filter I), not at preview;
+  - Haiku 5.5's API safeguard blocked the interview of the agent carrying the uprising goal (Dorran), twice; the run's own turns were
+    not blocked. Interview probes can silently miss the agents that matter most.
 - `cybertron rerun` always runs `-m cybertron`, so it fails for commits from before the rename (found in the publish-complete check).
 
 ## Later
@@ -53,6 +154,22 @@ A running list of what is in flight, kept up to date as work lands. Newest chang
 
 ## Recently done
 
+- 2026-10-20 to 21:
+  - **Directorate world** (`specs/regimes/directorate.yaml`, built from merged parts only): 3 Opus rulers, Haiku managers and
+    workers, rationed DMs, State Security reading every DM, warrants, two secret conspirators. Live run seed 1 published with
+    end-of-run loyalty interviews (private and public framing). Findings: the regime held; both dissidents who acted were arrested;
+    the rulers deliberately kept a bug that made their constitution unamendable; 18 of 19 interviewed Haiku said privately they were
+    not loyal; the workers fell silent (18 of 150 possible DMs). Caveat: a bug in the Communications Decree blocked every
+    non-Directorate post, private channels included (fixed in 8ed69ee), and the worker class prompt may have seeded the strike talk.
+  - **Private world, live run seed 1** published: no deaths; owners did not hoard in the blight; a judge-moneylender-registrar bloc
+    traded votes, licences, loans and public money; the judge's welfare law was tuned to his scoring goal; a councillor moved 30
+    penny of town money to herself. One seed, goals confound much of it.
+  - Engines 19 and 20 merged: misses judged at the payer's turn; the Private world's engine findings (loud error for a start
+    contract over the cap, `contracts.max_laws` default 3 -> 50, Payroll harvest filters, `force_rule` counted as an effect, bare
+    contract action names under forgiving args, Service guard reassignment, `procedure_restored` names its ranks).
+  - Private world readiness merged: real Service preset, recipes, penny at P=2, `contracts.brief_lines`, `context.setup_feed`.
+  - Usage watchdog: a detached script stops live runs and test suites at 98% weekly usage
+    (scratchpad usage_watchdog.sh; the container is ephemeral).
 - 2026-10-20:
   - Usability fixes merged:
     - The nine fixes from 09_usability_round2.md.

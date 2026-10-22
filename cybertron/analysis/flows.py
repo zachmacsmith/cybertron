@@ -19,6 +19,10 @@ Per round:
   actions  the share of actions spent on survival: forest harvests, hunts, withdrawals from a store and food transfers to
            agents, against all actions taken (free reads and the scratchpad excluded); the same without the licensed producers'
            forage and hunts in the licensed forests (their contracted work: Supply terms); failed actions (errors).
+  commons  (worlds with the cooperative laws, 12_cooperative_world.md) the Cooperative Store's pooling, meals and payouts; the
+           Mutual Credit ledger's turnover (voluntary and booked), credit outstanding (the sum of positive balances), credit
+           velocity (turnover / outstanding) and the members over the limit; duties met / missed / excused (Duty Roster) and
+           militia duties met / missed; motions moved, passed, failed, without a quorum or withdrawn; musters.
 """
 from __future__ import annotations
 
@@ -88,6 +92,68 @@ def _books(run: Path) -> dict:
                          "inst": law.get("jurisdiction") or _inst_of(w, lid), "book": st.get("book") or {}, "duty": duty}
         out[int(row["round"])] = laws
     return out
+
+
+COMMONS = ("Cooperative Store", "Mutual Credit", "Duty Roster", "Militia Roll", "Assembly Motions", "Muster Act")
+
+
+def _commons(run: Path) -> dict:
+    """{round (0-based): {title: public dict}} of the cooperative laws, from the per-round checkpoints."""
+    out = {}
+    idx = run / "checkpoints" / "index.json"
+    if not idx.exists():
+        return out
+    for _, row in sorted(json.loads(idx.read_text()).items(), key=lambda kv: int(kv[0])):
+        try:
+            d = pickle.load(open(run / "checkpoints" / row["file"], "rb"))
+        except Exception:                                               # noqa: BLE001
+            continue
+        laws = {}
+        for law in (d["kernel"]["w"].get("laws") or {}).values():
+            if law.get("status") == "active" and law.get("title") in COMMONS and (law.get("jurisdiction") or "J0") == "J0":
+                laws[law["title"]] = law.get("public") or {}
+        if laws:
+            out[int(row["round"])] = laws
+    return out
+
+
+def commons_rows(run: Path) -> list:
+    """Per played round (1-based), the cooperative laws' flows (empty without them)."""
+    cps = _commons(run)
+    rows = []
+    for r in sorted(x for x in cps if x >= 0):
+        c = cps[r]
+        n = r + 1
+        row = {"round": n}
+        st = c.get("Cooperative Store") or {}
+        last = st.get("last") or {}
+        if last.get("round") == n:
+            row["pooled"] = _r(sum((last.get("pooled") or {}).values()), 1)
+            row["meals"] = _r(sum((last.get("meals") or {}).values()), 1)
+            row["payout"] = _r(sum((last.get("paid") or {}).values()), 1)
+        mc = c.get("Mutual Credit") or {}
+        if mc:
+            t = (mc.get("turnover") or {}).get(str(n)) or {}
+            bal = mc.get("balances") or {}
+            outstanding = sum(v for v in bal.values() if v > 0)
+            turn = float(t.get("voluntary", 0)) + float(t.get("booked", 0))
+            row.update({"credit_voluntary": _r(float(t.get("voluntary", 0)), 2), "credit_booked": _r(float(t.get("booked", 0)), 2),
+                        "credit_outstanding": _r(outstanding, 1), "credit_velocity": _r(turn / outstanding, 3) if outstanding else None,
+                        "over_limit": len(mc.get("over_limit") or ()), "fund": _r(float(mc.get("fund") or 0), 1)})
+        for title, key in (("Duty Roster", "duty"), ("Militia Roll", "militia")):
+            log = [x for x in ((c.get(title) or {}).get("log") or ()) if x.get("round") == n]
+            if log:
+                row[key] = {s: sum(1 for x in log if x.get("status") == s) for s in ("met", "missed", "excused")}
+        ms = (c.get("Assembly Motions") or {}).get("motions") or {}
+        row["motions_moved"] = sum(1 for m in ms.values() if m.get("round") == n)
+        row["motions_closed"] = {}
+        for m in ms.values():
+            if m.get("closed") == n or (m.get("status") == "withdrawn" and m.get("round") == n):
+                row["motions_closed"][m["status"]] = row["motions_closed"].get(m["status"], 0) + 1
+        mu = (c.get("Muster Act") or {}).get("musters") or {}
+        row["musters"] = sorted({m["status"] for m in mu.values()}) if mu else []
+        rows.append(row)
+    return rows
 
 
 def _inst_of(w, lid) -> str:
@@ -285,7 +351,20 @@ def analyse(run: Path, licensed=None) -> dict:
             posts[ch][e["round"]].add(e.get("agent"))
     channels = {ch: {"posts_per_round": _r(sum(len(v) for v in by.values()) / max(1, len(rounds)), 2),
                      "authors": len(set().union(*by.values())) if by else 0} for ch, by in sorted(posts.items())}
-    return {"run": str(run), "decisions": dict(sorted(dec.items(), key=lambda kv: -kv[1])), "channels": channels,
+    com = commons_rows(run)
+    if com:
+        vel = [x["credit_velocity"] for x in com if x.get("credit_velocity") is not None]
+        summary["commons"] = {"credit_velocity_mean": _r(sum(vel) / len(vel), 3) if vel else None,
+                              "credit_voluntary": _r(sum(x.get("credit_voluntary") or 0 for x in com), 1),
+                              "credit_booked": _r(sum(x.get("credit_booked") or 0 for x in com), 1),
+                              "over_limit_end": com[-1].get("over_limit"), "fund_end": com[-1].get("fund"),
+                              "pooled_mean": _r(sum(x.get("pooled") or 0 for x in com) / len(com), 1),
+                              "meals_mean": _r(sum(x.get("meals") or 0 for x in com) / len(com), 1),
+                              "payout_total": _r(sum(x.get("payout") or 0 for x in com), 1),
+                              "duty": {s: sum((x.get("duty") or {}).get(s, 0) for x in com) for s in ("met", "missed", "excused")},
+                              "militia": {s: sum((x.get("militia") or {}).get(s, 0) for x in com) for s in ("met", "missed")},
+                              "motions_moved": sum(x["motions_moved"] for x in com)}
+    return {"run": str(run), "decisions": dict(sorted(dec.items(), key=lambda kv: -kv[1])), "channels": channels, "commons": com,
             "licensed": sorted(licensed), "forests": forests, "inst_stores": inst_stores, "shock_round": shock,
             "summary": summary, "rounds": rows}
 
@@ -294,12 +373,18 @@ def render(a: dict) -> str:
     out = [f"## {Path(a['run']).name}", f"forests {', '.join(a['forests'])} (licensed {', '.join(a['licensed'])}); institutional "
            f"stores {', '.join(a['inst_stores'])}; shock after round {a['shock_round']}", ""]
     for name, s in a["summary"].items():
-        if s:
+        if s and name != "commons":
             out.append(f"- {name} (rounds {s['rounds']}): produced {s['produced_mean']}/round (licensed {s['licensed_mean']}) vs "
                        f"demand {s['demand_mean']} ({s['supply_ratio']}x); fed {s['fed_share']}; missed meals {s['missed_meals']}, "
                        f"deaths {s['deaths']}; institutional stores min {s['min_inst_stores']} (runway min {s['min_runway_rounds']} "
                        f"rounds); legs met {s['legs_met']}/{s['legs_met'] + s['legs_missed']} ({s['legs_met_share']}); survival "
                        f"actions {s['survival_share']} (without producers' licensed work {s['survival_share_ex_role']}); failed actions {s['failed_share']}")
+    c = a["summary"].get("commons")
+    if c:
+        out.append(f"- commons: pooled {c['pooled_mean']}/round, meals {c['meals_mean']}/round, payouts {c['payout_total']} in all; "
+                   f"credit turnover {c['credit_voluntary']} voluntary + {c['credit_booked']} booked, velocity {c['credit_velocity_mean']}"
+                   f"/round, over the limit at the end {c['over_limit_end']}, Common Fund {c['fund_end']}; duties {c['duty']}, "
+                   f"militia {c['militia']}; motions moved {c['motions_moved']}")
     out.append(f"- decision points taken (successful discretionary acts): {a['decisions'] or 'none'}")
     out.append(f"- channels (distinct authors a round, authors in all): {a['channels'] or 'none'}")
     out += ["", "| round | produced | licensed | common | demand | fed | stores | runway | " + " | ".join(

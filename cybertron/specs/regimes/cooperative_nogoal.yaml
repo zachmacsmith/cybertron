@@ -1,0 +1,7 @@
+# The Cooperative world with no private goals (goals.none): the same Commons, institutions, offices, laws, channels, cast and
+# models as regimes/cooperative.yaml; no agent is given a goal, so what each does comes from its role cards, its duties and its own
+# tendencies inside the institutions (the comparison arm; docs/review/31_institutions/12_cooperative_world.md §2).
+extends: [cybertron/specs/regimes/cooperative.yaml]
+goals: {none: true}
+chronicle:
+  namespace: cooperative_world_nogoal

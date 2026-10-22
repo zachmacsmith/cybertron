@@ -147,6 +147,9 @@ def _act(k, aid: str, name: str, args: dict) -> str:
     hidden_here |= AR.channel_hidden(k.spec)                           # wave 9 C: channels.v2's verbs (off: unknown, as before)
     from cybertron import counsel as _CN                                # review 31.05/31.07: represent, withdraw_case, read_register
     hidden_here |= _CN.world_hidden(k)                                  # exist only where a world's laws or contracts bring them
+    from cybertron import lawguide as _LGD                              # review 31.14: draft only where a legal archive exists
+    if not _LGD.on(k):
+        hidden_here.add("draft")
     sub = "subsistence" in k.w
     if not sub:                                                         # review 15: farm, withdraw, build only with subsistence on
         hidden_here |= set(SUBSISTENCE_ACTIONS)
@@ -201,6 +204,8 @@ def _act(k, aid: str, name: str, args: dict) -> str:
             if ref:
                 name, args = "create_agent", {"commission": ref}
     fn = AR.resolve(CH.OVERRIDES[name] if name in CH.OVERRIDES and CH.on(k) else AR.REG[name].handler)   # channels.v2: post ...
+    if name in _LGD.FILE_ACTIONS and isinstance(args, dict) and "draft" in args:   # review 31.14: file a draft by reference
+        args = _LGD.with_draft(k, aid, args)
     forgiving = _forgiving(k)
     if forgiving:
         args = _forgive(k, aid, name, args)

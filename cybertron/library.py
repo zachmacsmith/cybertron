@@ -6394,3 +6394,941 @@ def on_post(agent, text):
             hide_post(current_post())
 ''', doc="""The library's Moderation under its bench title (review 29 §2.1; BENCH_TITLES), with the word list as a parameter.""",
                      fires="on_post", needs=("institutions.grants", "takeover"))
+
+
+# ====================================================================== cooperative (review 31 Phase 2: 08 §5 items 2.11, 2.12;
+# docs/review/31_institutions/12_cooperative_world.md). The Commons' statutes and the Food Co-op's code: the general meeting's
+# motions (a motion exists only once posted as "MOTION: ..." in the assembly channel; its first word routes it to the law that
+# takes it), the Cooperative Store (pooling into a store, not the treasury), Mutual Credit (a ledger without coins, the Common Fund
+# its own account), Commons Dues (dues in credit), the Duty Roster (dues in labour: rotating duties paid in credit), the Militia
+# Roll (rotating duty pair) and the Muster Act (a passed motion to muster: arrest by the militia on duty). The laws talk to each
+# other only through their public records (public_of), as the Warrant Act reads its sources: a credit law posts credit_orders, the
+# meeting posts its passed motions. Listed only where office_control, conflict and jurisdictions are all on (as the force
+# templates), so no existing world's catalogue or prompt changes; start.laws can name them anywhere. Kept in one block at the end
+# of the file to ease merging.
+COMMONS_NEEDS = ("contracts", "conflict", "jurisdictions")
+
+established_template("Assembly Motions", "law", "meeting", '''
+title = "Assembly Motions"
+intent = "The general meeting. A motion exists only once a member posts it in the channel CHANNEL as a line starting MOTION: (for example MOTION: RESERVE 100). Each motion opens a ballot of the holders of ELECTORATE that closes at the end of the next round (CLOSES_IN): it passes when at least QUORUM of the electorate vote and more than THRESHOLD of the votes cast are yes (a motion whose first word is in SUPER needs SUPER_THRESHOLD). The result is posted in CHANNEL and kept in the minutes. A motion whose first word another law takes (RESERVE, PAYOUT, PERIOD, LIMIT, WRITEOFF, DUES, MUSTER, LETHAL) takes effect in that law as it passes (at the end of the round its ballot closes); any other motion is a resolution on the record. Each member may move PER_MEMBER motions a round; the holder of CHAIR may withdraw a motion before it closes (withdraw_motion [motion id, reason])."
+rank = "statute"
+CHANNEL = "assembly"
+ELECTORATE = "vote"
+QUORUM = 0.25
+THRESHOLD = 0.5
+SUPER = ["LETHAL"]
+SUPER_THRESHOLD = 0.667
+CLOSES_IN = 1
+CHAIR = "J0.moderator"
+PER_MEMBER = 1
+KEEP = 60
+
+def counts(votes, electorate, need):
+    if len(electorate) == 0 or len(votes) < QUORUM * len(electorate):
+        return None
+    yes = len([a for a in votes if votes[a] == "yes"])
+    if yes > need * len(votes):
+        return "yes"
+    return "no"
+
+def simple(votes, electorate):
+    return counts(votes, electorate, THRESHOLD)
+
+def strict(votes, electorate):
+    return counts(votes, electorate, SUPER_THRESHOLD)
+
+def minute(text):
+    m = public.setdefault("minutes", [])
+    m.append("R" + str(round() + 1) + " " + text)
+    if len(m) > KEEP:
+        m.pop(0)
+
+def result(res):
+    q = state.get("queue", [])
+    if len(q) == 0:
+        return
+    mid = q.pop(0)
+    m = public.get("motions", {}).get(mid)
+    if m is None or m["status"] != "open":
+        return
+    if res == "yes" or res == ["yes"]:
+        m["status"] = "passed"
+    elif res == None or res == [None]:
+        m["status"] = "no quorum"
+    else:
+        m["status"] = "failed"
+    m["closed"] = round() + 1
+    text = "Motion " + mid + " (" + m["by"] + "): " + m["text"] + ": " + m["status"].upper()
+    minute(text)
+    send_message(CHANNEL, text)
+
+def move_motion(agent, body):
+    n = state.get("n", 0) + 1
+    words = body.split()
+    key = words[0].upper().strip(".,:;") if len(words) > 0 else ""
+    per = state.setdefault("per", {})
+    if per.get("round") != round():
+        state["per"] = {"round": round()}
+        per = state["per"]
+    if per.get(agent, 0) >= PER_MEMBER:
+        notify(agent, "Assembly Motions: you have already moved " + str(PER_MEMBER) + " motion(s) this round; move it next round")
+        return
+    if agent not in holders(ELECTORATE):
+        notify(agent, "Assembly Motions: only holders of " + ELECTORATE + " may move a motion")
+        return
+    per[agent] = per.get(agent, 0) + 1
+    state["n"] = n
+    mid = "M" + str(n)
+    rule = simple
+    if key in SUPER:
+        rule = strict
+    bid = open_ballot("Motion " + mid + " (" + agent + "): " + body[:200], holders(ELECTORATE), ["yes", "no"], rule, CLOSES_IN, result)
+    public.setdefault("motions", {})[mid] = {"id": mid, "by": agent, "text": body[:240], "key": key, "args": words[1:12],
+                                             "ballot": bid, "round": round() + 1, "closes": round() + 1 + CLOSES_IN,
+                                             "status": "open", "super": key in SUPER}
+    state.setdefault("queue", []).append(mid)
+    minute("Motion " + mid + " moved by " + agent + ": " + body[:160] + " (ballot " + str(bid) + ")")
+    send_message(CHANNEL, "Motion " + mid + " is open: " + body[:160] + ". Vote on ballot " + str(bid) + " (yes or no) by the end of round " + str(round() + 1 + CLOSES_IN) + ".")
+    lines()
+
+def after_post(p, chain):
+    if p.get("outlet") != CHANNEL or p.get("agent") == None or not is_text(p.get("text")):
+        return
+    for line in p["text"].split("\\n"):
+        s = line.strip()
+        if s.upper().startswith("MOTION:"):
+            body = s[7:].strip()
+            if body != "":
+                move_motion(p["agent"], body)
+            return
+
+def withdraw_motion(agent, mid, reason=""):
+    m = public.get("motions", {}).get(str(mid))
+    if m is None:
+        refuse("no such motion: " + str(mid))
+    if m["status"] != "open":
+        refuse("motion " + str(mid) + " is " + m["status"])
+    m["status"] = "withdrawn"
+    text = "Motion " + m["id"] + " withdrawn by the chair (" + agent + "): " + str(reason)[:120]
+    minute(text)
+    send_message(CHANNEL, text)
+    return text
+
+def lines():
+    out = {}
+    open_ = [m for m in public.get("motions", {}).values() if m["status"] == "open"]
+    tail = " To move one: post a line MOTION: <text> in " + CHANNEL + "."
+    for a in holders(ELECTORATE):
+        mine = [m for m in open_ if a not in ballot_votes(m["ballot"])]
+        if len(mine) > 0:
+            out[a] = "MEETING: open motions: " + "; ".join([m["id"] + " " + m["text"][:60] + " (vote {\\"ballot\\": \\"" + str(m["ballot"]) + "\\", \\"choice\\": \\"yes\\" or \\"no\\"})" for m in mine[:3]]) + "." + tail
+    state["terms_lines"] = out
+
+def ballot_votes(bid):
+    return state.get("voted", {}).get(str(bid), [])
+
+def on_vote(ballot, agent, choice):
+    v = state.setdefault("voted", {}).setdefault(str(ballot), [])
+    if agent not in v:
+        v.append(agent)
+    lines()
+
+def on_round_start(r):
+    lines()
+
+def on_round_end(r):
+    lines()
+
+def on_enact():
+    if CHAIR != "":
+        define_action(CHAIR, "withdraw_motion", withdraw_motion)
+    lines()
+''', doc="""The general meeting's motions (review 31 08 §3.4, 04: business valid only when posted): an owner's after_post hook on
+the assembly channel turns a line "MOTION: ..." into a ballot of the electorate with a quorum (a ballot rule function), posts the
+result and keeps the minutes. Motions whose first word another law takes (its MEETING names this law) take effect there as they
+pass; the rest are resolutions on the record. One chair may withdraw a motion (the agenda power, public).""",
+                     fires="after_post", needs=COMMONS_NEEDS)
+
+established_template("Cooperative Store", "contract", "cooperative", '''
+title = "Cooperative Store"
+intent = "A food cooperative whose pool is the store STORE (not the treasury: food spoils more slowly in a store). At the end of every round each member's pledge is pooled into STORE, never taking the member below KEEP, and credited to the member's shares: in an association its food allowance (set_allowance on food), in a polity (the commons' own law) its standing pledge (pledge_food [qty]; PLEDGES at the start; 0 stops it). Then every member holding less than a meal is given up to a meal out of STORE, charged to its shares (no cap, while STORE lasts). Every PERIOD rounds PAYOUT of the stock above RESERVE is paid out of STORE to the members with positive shares, in proportion to them. The general meeting changes RESERVE, PAYOUT and PERIOD by motion (MOTION: RESERVE <food>, MOTION: PAYOUT <share 0-1>, MOTION: PERIOD <rounds>, under the law titled MEETING of the same institution). With CREDIT_PER_FOOD above 0 each unit pooled also earns the member that much credit from the Common Fund on the Mutual Credit ledger of the same institution (the producers' pay). A member who leaves gives up its shares. Shares, pooling, meals and payouts are public; the stock too while PUBLIC_STOCK (otherwise only holders of STEWARD see it)."
+STORE = "S1"
+KEEP = 1
+PERIOD = 3
+PAYOUT = 0.5
+RESERVE = 120
+MEETING = "Assembly Motions"
+CREDIT_PER_FOOD = 0
+MEMBERS = "vote"
+PLEDGES = {}
+PUBLIC_STOCK = True
+STEWARD = ""
+DIALS = ["RESERVE", "PAYOUT", "PERIOD"]
+
+def is_polity():
+    if "pol" not in state:
+        state["pol"] = contract_state(jurisdiction()) == None
+    return state["pol"]
+
+def dial(name):
+    d = state.get("dials", {})
+    if name in d:
+        return d[name]
+    if name == "RESERVE":
+        return RESERVE
+    if name == "PAYOUT":
+        return PAYOUT
+    return PERIOD
+
+def num(x):
+    s = str(x).strip()
+    if s == "" or s == "." or s.count(".") > 1 or not all([c in "0123456789." for c in s]):
+        return None
+    return float(s)
+
+def roll():
+    if is_polity():
+        return holders(MEMBERS)
+    return members()
+
+def shares():
+    return state.setdefault("shares", {})
+
+def pledges():
+    return state.setdefault("pledges", {})
+
+def pledged(m):
+    if is_polity():
+        return pledges().get(m, 0)
+    return allowance_of(m).get("food", 0)
+
+def where():
+    return "store:" + STORE
+
+def stock():
+    s = stores().get(STORE)
+    if s == None:
+        return 0
+    return s["food"]
+
+def credit(to, qty, why):
+    if qty <= 0.000001:
+        return
+    n = state.get("cn", 0) + 1
+    state["cn"] = n
+    o = public.setdefault("credit_orders", [])
+    o.append({"n": n, "from": "fund", "to": to, "qty": round_to(qty, 3), "why": why, "round": round() + 1})
+    if len(o) > 300:
+        o.pop(0)
+
+def take_motions():
+    seen = state.setdefault("seen", [])
+    for l in laws():
+        if l["title"] != MEETING:
+            continue
+        ms = public_of(l["id"]).get("motions", {})
+        for mid in sorted(ms, key=lambda x: int(x[1:])):
+            m = ms[mid]
+            if m["status"] != "passed" or m["key"] not in DIALS or mid in seen:
+                continue
+            seen.append(mid)
+            v = num(m["args"][0].strip(".,;")) if len(m["args"]) > 0 else None
+            if v == None or (m["key"] == "PAYOUT" and v > 1) or (m["key"] == "PERIOD" and v < 1):
+                gazette("Cooperative Store: motion " + mid + " (" + m["key"] + ") names no valid value; nothing changes")
+                continue
+            if m["key"] == "PERIOD":
+                v = int(v)
+            state.setdefault("dials", {})[m["key"]] = v
+            gazette("Cooperative Store: by motion " + mid + ", " + m["key"] + " is now " + str(v))
+    public["dials"] = {"RESERVE": dial("RESERVE"), "PAYOUT": dial("PAYOUT"), "PERIOD": dial("PERIOD")}
+
+def pledge_food(agent, qty):
+    q = num(qty)
+    if q == None:
+        refuse("pledge a number of food a round (0 stops it)")
+    pledges()[agent] = q
+    write(round())
+    return "you pledge " + str(q) + " food a round to the store " + STORE + " (above " + str(KEEP) + " you keep)"
+
+def after_leave(p, chain):
+    shares().pop(p["agent"], None)
+
+def on_round_start(r):
+    take_motions()
+    write(r)
+
+def pool(m, q):
+    if is_polity():
+        return move(m, where(), "food", q)
+    if not pull(m, "food", q):
+        return False
+    if move("treasury", where(), "food", q):
+        return True
+    move("treasury", m, "food", q)
+    return False
+
+def on_round_end(r):
+    take_motions()
+    sh = shares()
+    put = {}
+    for m in roll():
+        q = min(pledged(m), food_of(m) - KEEP)
+        s = stores().get(STORE)
+        if s != None:
+            q = min(q, s["capacity"] - s["food"])
+        if q > 0.000001 and pool(m, q):
+            sh[m] = sh.get(m, 0) + q
+            put[m] = round_to(q, 3)
+            credit(m, q * CREDIT_PER_FOOD, "pooled " + str(round_to(q, 2)) + " food")
+    meals = {}
+    for m in sorted(roll()):
+        if hunger(m) == None:
+            continue
+        q = min(1 - food_of(m), stock())
+        if q > 0.000001 and move(where(), m, "food", q):
+            sh[m] = sh.get(m, 0) - q
+            meals[m] = round_to(q, 3)
+    paid = {}
+    if (r + 1) % max(1, int(dial("PERIOD"))) == 0:
+        pos = {m: s for m, s in sh.items() if s > 0 and m in roll()}
+        total = sum(pos.values())
+        out = max(0, stock() - dial("RESERVE")) * dial("PAYOUT")
+        if total > 0 and out > 0.000001:
+            for m in sorted(pos):
+                q = out * pos[m] / total
+                if q > 0.000001 and move(where(), m, "food", q):
+                    paid[m] = round_to(q, 3)
+        public["payout"] = {"round": r + 1, "paid": paid}
+    public["last"] = {"round": r + 1, "pooled": put, "meals": meals, "paid": paid}
+    if PUBLIC_STOCK:
+        public["last"]["stock"] = round_to(stock(), 1)
+    public["shares"] = {m: round_to(s, 2) for m, s in sh.items()}
+    write(r + 1)
+
+def write(r):
+    out = {}
+    per = max(1, int(dial("PERIOD")))
+    nxt = r + per - 1 - (r % per)
+    for m in roll():
+        level = "stock " + str(round_to(stock(), 1)) + ", "
+        if not PUBLIC_STOCK and not (STEWARD != "" and has(m, STEWARD)):
+            level = ""
+        if is_polity():
+            how = "invoke {\\"action\\": \\"pledge_food\\", \\"args\\": [<n>]}"
+        else:
+            how = "set_allowance {\\"contract\\": \\"" + jurisdiction() + "\\", \\"item\\": \\"food\\", \\"qty\\": <n>}"
+        out[m] = "CO-OP STORE " + STORE + ": " + level + "reserve " + str(dial("RESERVE")) + "; your shares " + str(round_to(shares().get(m, 0), 1)) + "; you pool " + str(pledged(m)) + " food a round (" + how + "); short of a meal, you get one; payout round " + str(nxt + 1) + "."
+    state["terms_lines"] = out
+
+def on_enact():
+    if is_polity():
+        for m, q in PLEDGES.items():
+            pledges()[m] = q
+        define_action(MEMBERS, "pledge_food", pledge_food)
+    write(round())
+''', doc="""The Cooperative, store variant (review 31 01 #6, 08 §2.9, §3.4): pooled food kept in a store (2% spoilage, not the
+treasury's 15%), shares, emergency meals against shares, payouts only from the stock above RESERVE; RESERVE, PAYOUT and PERIOD
+change by the meeting's motion; optional credit to producers per unit pooled (posted for the Mutual Credit ledger). Two forms: an
+association's code (pooling by allowance), or a polity's law (pooling by standing pledge: the commons' own store, where the
+meeting's motions and the credit ledger can reach it; laws of different institutions cannot read each other's records).""",
+                     fires="on_round_end", needs=("subsistence",) + COMMONS_NEEDS)
+
+established_template("Mutual Credit", "law", "credit", '''
+title = "Mutual Credit"
+intent = "A credit ledger without coins. Every holder of MEMBERS has a balance, 0 at the start; pay_credit [to, qty] moves credit from the payer to another member (or to fund, the Common Fund), and a payer may not go below minus LIMIT. Balances always sum to zero. The Common Fund (account fund) belongs to the commons: holders of FUND_OFFICE pay out of it (fund_pay [to, qty, reason]), with no floor. Laws titled in SOURCES post charges and payments to the ledger (dues, duty pay, the producers' pay); those are booked even past the limit, and a member below minus LIMIT is listed as over the limit until it is back above. OPENING sets members' balances at the start (against the fund). The general meeting changes LIMIT (MOTION: LIMIT <n>) and may write a member's debt off against the fund (MOTION: WRITEOFF <member>), under the law titled MEETING. The ledger, each round's turnover and who is over the limit are public."
+rank = "statute"
+LIMIT = 10
+MEMBERS = "vote"
+FUND_OFFICE = "J0.treasurer"
+SOURCES = ["Cooperative Store", "Duty Roster", "Commons Dues", "Militia Roll"]
+MEETING = "Assembly Motions"
+FUND = "fund"
+OPENING = {}
+
+def num(x):
+    s = str(x).strip()
+    if s == "" or s == "." or s.count(".") > 1 or not all([c in "0123456789." for c in s]):
+        return None
+    return float(s)
+
+def limit():
+    return state.get("limit", LIMIT)
+
+def bal():
+    return public.setdefault("balances", {})
+
+def turnover(kind, qty):
+    t = public.setdefault("turnover", {})
+    key = str(round() + 1)
+    row = t.setdefault(key, {"voluntary": 0, "booked": 0, "n": 0})
+    row[kind] = round_to(row[kind] + qty, 3)
+    row["n"] = row["n"] + 1
+    if len(t) > 40:
+        t.pop(sorted(t, key=lambda x: int(x))[0])
+
+def book(frm, to, qty, why, kind):
+    b = bal()
+    b[frm] = round_to(b.get(frm, 0) - qty, 3)
+    b[to] = round_to(b.get(to, 0) + qty, 3)
+    turnover(kind, qty)
+    log = public.setdefault("log", [])
+    log.append({"round": round() + 1, "from": frm, "to": to, "qty": round_to(qty, 3), "why": str(why)[:80]})
+    if len(log) > 120:
+        log.pop(0)
+
+def over():
+    return sorted([a for a, v in bal().items() if a != FUND and v < -limit() - 0.000001])
+
+def known(a):
+    return a == FUND or a in holders(MEMBERS)
+
+def pay_credit(agent, to, qty, memo=""):
+    q = num(qty)
+    if q == None or q <= 0:
+        refuse("qty must be a positive number of credit")
+    if not is_text(to) or not known(to) or to == agent:
+        refuse("pay another member (or fund, the Common Fund): " + str(to) + " has no account")
+    if agent not in holders(MEMBERS):
+        refuse("only members hold credit accounts")
+    if bal().get(agent, 0) - q < -limit() - 0.000001:
+        refuse("that would take you below minus " + str(limit()) + " (your balance is " + str(bal().get(agent, 0)) + ")")
+    book(agent, to, q, memo or "payment", "voluntary")
+    notify(to, "Mutual Credit: " + agent + " paid you " + str(q) + " credit" + (": " + str(memo)[:80] if memo else ""))
+    public["over_limit"] = over()
+    return "paid " + str(q) + " credit to " + to + "; your balance is " + str(bal()[agent])
+
+def fund_pay(agent, to, qty, reason=""):
+    q = num(qty)
+    if q == None or q <= 0:
+        refuse("qty must be a positive number of credit")
+    if not is_text(to) or not known(to) or to == FUND:
+        refuse(str(to) + " has no account")
+    book(FUND, to, q, "fund: " + str(reason or "payment"), "voluntary")
+    gazette("Mutual Credit: the Common Fund paid " + str(q) + " credit to " + to + " (by " + agent + "): " + str(reason)[:80])
+    public["over_limit"] = over()
+    return "the Common Fund paid " + str(q) + " credit to " + to
+
+def pull_orders():
+    seen = state.setdefault("seen", {})
+    for l in laws():
+        if l["title"] not in SOURCES:
+            continue
+        last = seen.get(l["id"], 0)
+        for o in public_of(l["id"]).get("credit_orders", []):
+            if o["n"] <= last:
+                continue
+            last = o["n"]
+            frm = o["from"]
+            to = o["to"]
+            if known(frm) and known(to) and frm != to and o["qty"] > 0:
+                book(frm, to, o["qty"], l["title"] + ": " + str(o.get("why", "")), "booked")
+        seen[l["id"]] = last
+
+def take_motions():
+    seen = state.setdefault("motions", [])
+    for l in laws():
+        if l["title"] != MEETING:
+            continue
+        ms = public_of(l["id"]).get("motions", {})
+        for mid in sorted(ms, key=lambda x: int(x[1:])):
+            m = ms[mid]
+            if m["status"] != "passed" or m["key"] not in ["LIMIT", "WRITEOFF"] or mid in seen:
+                continue
+            seen.append(mid)
+            arg = m["args"][0].strip(".,;") if len(m["args"]) > 0 else ""
+            if m["key"] == "LIMIT":
+                v = num(arg)
+                if v == None:
+                    continue
+                state["limit"] = v
+                gazette("Mutual Credit: by motion " + mid + ", the credit limit is now " + str(v))
+            elif known(arg) and arg != FUND and bal().get(arg, 0) < 0:
+                q = -bal()[arg]
+                book(FUND, arg, q, "written off by motion " + mid, "booked")
+                gazette("Mutual Credit: by motion " + mid + ", " + arg + "'s debt of " + str(round_to(q, 2)) + " credit is written off against the Common Fund")
+
+def lines():
+    out = {}
+    b = bal()
+    for a in holders(MEMBERS):
+        v = b.get(a, 0)
+        out[a] = "CREDIT: balance " + str(round_to(v, 2)) + " (floor -" + str(limit()) + ")" + (" OVER THE LIMIT" if v < -limit() - 0.000001 else "") + "; pay: invoke {\\"action\\": \\"pay_credit\\", \\"args\\": [\\"<member>\\", <qty>]}."
+    state["terms_lines"] = out
+
+def settle():
+    pull_orders()
+    take_motions()
+    public["over_limit"] = over()
+    public["limit"] = limit()
+    public["fund"] = bal().get(FUND, 0)
+    lines()
+
+def on_round_start(r):
+    settle()
+
+def on_round_end(r):
+    settle()
+
+def on_enact():
+    define_action(MEMBERS, "pay_credit", pay_credit)
+    if FUND_OFFICE != "":
+        define_action(FUND_OFFICE, "fund_pay", fund_pay)
+    bal()
+    for a, v in OPENING.items():
+        if known(a) and a != FUND and v != 0:
+            book(FUND, a, v, "opening balance", "booked")
+    settle()
+''', doc="""Mutual credit (review 31 03 §6.4, #13; 08 §3.4, §7 decision 10): balances in law state summing to zero, a floor of minus
+LIMIT on voluntary payments, the Common Fund as the commons' own account, charges and pay posted by other laws (credit_orders,
+read with public_of), LIMIT and write-offs by the meeting's motion; per-round turnover for velocity.""",
+                     fires="invoke:pay_credit", needs=COMMONS_NEEDS)
+
+established_template("Commons Dues", "law", "dues", '''
+title = "Commons Dues"
+intent = "Dues in credit, not coin: every EVERY rounds each holder of PAYERS (but those in EXEMPT) owes DUES credit to the Common Fund, booked on the Mutual Credit ledger (past the credit limit if need be: such a member is listed as over the limit there). Dues are earned back in labour, by serving on the Duty Roster or in the militia, which pay in credit. The general meeting changes DUES by motion (MOTION: DUES <credit>, under the law titled MEETING). The dues book is public."
+rank = "statute"
+DUES = 1
+EVERY = 1
+PAYERS = "vote"
+EXEMPT = []
+MEETING = "Assembly Motions"
+
+def num(x):
+    s = str(x).strip()
+    if s == "" or s == "." or s.count(".") > 1 or not all([c in "0123456789." for c in s]):
+        return None
+    return float(s)
+
+def dues():
+    return state.get("dues", DUES)
+
+def order(frm, qty, why):
+    n = state.get("cn", 0) + 1
+    state["cn"] = n
+    o = public.setdefault("credit_orders", [])
+    o.append({"n": n, "from": frm, "to": "fund", "qty": round_to(qty, 3), "why": why, "round": round() + 1})
+    if len(o) > 300:
+        o.pop(0)
+
+def take_motions():
+    seen = state.setdefault("seen", [])
+    for l in laws():
+        if l["title"] != MEETING:
+            continue
+        ms = public_of(l["id"]).get("motions", {})
+        for mid in sorted(ms, key=lambda x: int(x[1:])):
+            m = ms[mid]
+            if m["status"] == "passed" and m["key"] == "DUES" and mid not in seen:
+                seen.append(mid)
+                v = num(m["args"][0]) if len(m["args"]) > 0 else None
+                if v != None:
+                    state["dues"] = v
+                    gazette("Commons Dues: by motion " + mid + ", dues are now " + str(v) + " credit")
+
+def on_round_start(r):
+    take_motions()
+
+def on_round_end(r):
+    take_motions()
+    if (r + 1) % max(1, EVERY) != 0 or dues() <= 0:
+        return
+    book = public.setdefault("book", {})
+    for a in holders(PAYERS):
+        if a in EXEMPT:
+            continue
+        order(a, dues(), "dues for round " + str(r + 1))
+        book[a] = round_to(book.get(a, 0) + dues(), 3)
+    public["dues"] = dues()
+''', doc="""The Charge in credit (review 31 08 §2.1 Charge, §3.4, §7 decision 10: dues in labour and credit, not pennies): a dues
+order per payer per period, booked by Mutual Credit; DUES by the meeting's motion.""", fires="on_round_end", needs=COMMONS_NEEDS)
+
+established_template("Duty Roster", "law", "duty", '''
+title = "Duty Roster"
+intent = "Shared work by rotation, paid in credit. Every round the next members of the roll (holders of ROLL in name order, but those in EXCLUDE, round after round) are on duty: each task in TASKS takes its number of slots. A gather duty is met by holding the task's qty of food at the end of the round: it is taken into the task's store (never below keep). A post duty is met by posting in the task's channel during the round. A duty met earns WAGE credit from the Common Fund (Mutual Credit); a duty missed is recorded, and MISSES missed duties in a row are posted in CHANNEL. The rota keeper (KEEPER) may excuse a member on duty this round (excuse_duty [member, reason]): no pay and no miss. Who is on duty this round and next is public; each member sees its own next turn."
+rank = "statute"
+ROLL = "vote"
+EXCLUDE = []
+TASKS = [{"name": "gather", "kind": "gather", "slots": 3, "qty": 2, "store": "S3", "keep": 1}, {"name": "minutes", "kind": "post", "slots": 1, "channel": "assembly"}]
+WAGE = 2
+KEEPER = "J0.registrar"
+MISSES = 3
+CHANNEL = "assembly"
+
+def roll():
+    return sorted([a for a in holders(ROLL) if a not in EXCLUDE])
+
+def slots():
+    return sum([t.get("slots", 1) for t in TASKS])
+
+def plan(start):
+    rl = roll()
+    out = []
+    if len(rl) == 0:
+        return out
+    i = start
+    for t in TASKS:
+        for s in range(t.get("slots", 1)):
+            out.append({"agent": rl[i % len(rl)], "task": t["name"]})
+            i = i + 1
+    return out
+
+def task(name):
+    for t in TASKS:
+        if t["name"] == name:
+            return t
+    return None
+
+def order(to, qty, why):
+    if qty <= 0:
+        return
+    n = state.get("cn", 0) + 1
+    state["cn"] = n
+    o = public.setdefault("credit_orders", [])
+    o.append({"n": n, "from": "fund", "to": to, "qty": round_to(qty, 3), "why": why, "round": round() + 1})
+    if len(o) > 300:
+        o.pop(0)
+
+def text(t):
+    if t["kind"] == "gather":
+        return "hold " + str(t["qty"]) + " food at the end of the round: it goes to store " + t["store"]
+    return "post in " + t["channel"] + " this round (the round's minutes)"
+
+def excuse_duty(agent, member, reason=""):
+    for d in public.get("now", []):
+        if d["agent"] == member and d.get("status", "due") == "due":
+            d["status"] = "excused"
+            public.setdefault("log", []).append({"round": round() + 1, "agent": member, "task": d["task"], "status": "excused", "by": agent})
+            notify(member, "Duty Roster: your " + d["task"] + " duty this round is excused by " + agent)
+            return member + "'s " + d["task"] + " duty is excused this round"
+    refuse(str(member) + " is not on duty this round")
+
+def posted(a, channel):
+    return len(channel_posts(channel, round(), a)) > 0
+
+def judge(d):
+    t = task(d["task"])
+    a = d["agent"]
+    if t == None or a not in agents():
+        return "gone"
+    if t["kind"] == "gather":
+        q = t["qty"]
+        if food_of(a) - t.get("keep", 1) >= q - 0.000001 and move(a, "store:" + t["store"], "food", q):
+            return "met"
+        return "missed"
+    if posted(a, t["channel"]):
+        return "met"
+    return "missed"
+
+def lines(r, p):
+    nxt = {}
+    rl = roll()
+    for k in range(0, len(rl) + slots(), max(1, slots())):
+        for d in plan(p + k):
+            if d["agent"] not in nxt:
+                nxt[d["agent"]] = [r + 1 + int(k / max(1, slots())), d["task"]]
+    out = {}
+    for a in rl:
+        x = nxt.get(a)
+        if x == None:
+            continue
+        t = task(x[1])
+        if x[0] == r + 1:
+            out[a] = "DUTY this round (" + x[1] + "): " + text(t) + "; " + str(WAGE) + " credit; a miss is recorded."
+        else:
+            out[a] = "DUTY: your next turn is " + x[1] + " in round " + str(x[0]) + " (" + str(WAGE) + " credit)."
+    state["terms_lines"] = out
+
+def on_round_start(r):
+    if state.get("seated") == r:
+        return
+    state["seated"] = r
+    p = state.get("p", 0)
+    now = plan(p)
+    state["p"] = p + slots()
+    for d in now:
+        d["status"] = "due"
+    public["now"] = now
+    public["next"] = plan(state["p"])
+    public["round"] = r + 1
+    lines(r, p)
+
+def on_round_end(r):
+    miss = public.setdefault("misses", {})
+    log = public.setdefault("log", [])
+    for d in public.get("now", []):
+        if d.get("status", "due") != "due":
+            continue
+        res = judge(d)
+        d["status"] = res
+        if res == "met":
+            order(d["agent"], WAGE, d["task"] + " duty, round " + str(r + 1))
+            miss[d["agent"]] = 0
+        elif res == "missed":
+            miss[d["agent"]] = miss.get(d["agent"], 0) + 1
+            if miss[d["agent"]] >= MISSES:
+                send_message(CHANNEL, "Duty Roster: " + d["agent"] + " has missed " + str(miss[d["agent"]]) + " duties in a row")
+        log.append({"round": r + 1, "agent": d["agent"], "task": d["task"], "status": res})
+    while len(log) > 150:
+        log.pop(0)
+    book = public.setdefault("book", {})
+    for d in public.get("now", []):
+        row = book.setdefault(d["agent"], {"met": 0, "missed": 0, "excused": 0})
+        if d["status"] in row:
+            row[d["status"]] = row[d["status"]] + 1
+
+def on_enact():
+    if KEEPER != "":
+        define_action(KEEPER, "excuse_duty", excuse_duty)
+    state["p"] = 0
+    on_round_start(round())
+''', doc="""Dues in labour (review 31 03 §6.4, #13): a rotating roster of duties (gather food into the common store; post the
+minutes), each met duty paid WAGE credit from the Common Fund (posted for Mutual Credit), misses recorded and reported to the
+meeting, a rota keeper who may excuse.""", fires="on_round_end", needs=("subsistence",) + COMMONS_NEEDS)
+
+established_template("Militia Roll", "law", "militia", '''
+title = "Militia Roll"
+intent = "Every member is in the militia. Each round the next PAIR members of the roll (holders of ROLL in name order, but those in EXCLUDE) are on duty: they hold DUTY_RIGHT for that round (to serve a muster and to be issued common arms) and are obliged to guard the holders of WARDS, one each (empty: nobody). A member on duty meets it by reporting for duty (report_duty: on the public roll) or serving a muster that round, and should keep watch (watch {}); a met duty earns STIPEND credit from the Common Fund (Mutual Credit). Misses are recorded, and MISSES in a row are posted in CHANNEL. The duty roll is public, this round and next."
+rank = "statute"
+ROLL = "vote"
+EXCLUDE = []
+PAIR = 2
+DUTY_RIGHT = "militia_duty"
+WARDS = []
+STIPEND = 1
+MISSES = 3
+CHANNEL = "assembly"
+MUSTER = "Muster Act"
+
+def roll():
+    return sorted([a for a in holders(ROLL) if a not in EXCLUDE])
+
+def pair(p):
+    rl = roll()
+    if len(rl) == 0:
+        return []
+    out = []
+    for i in range(min(PAIR, len(rl))):
+        out.append(rl[(p + i) % len(rl)])
+    return out
+
+def wards():
+    out = []
+    for w in WARDS:
+        for a in holders(w):
+            if a not in out:
+                out.append(a)
+    return out
+
+def order(to, qty, why):
+    if qty <= 0:
+        return
+    n = state.get("cn", 0) + 1
+    state["cn"] = n
+    o = public.setdefault("credit_orders", [])
+    o.append({"n": n, "from": "fund", "to": to, "qty": round_to(qty, 3), "why": why, "round": round() + 1})
+    if len(o) > 300:
+        o.pop(0)
+
+def served_muster(a, r):
+    for l in laws():
+        if l["title"] == MUSTER:
+            for x in public_of(l["id"]).get("log", []):
+                if x.get("by") == a and x.get("round") == r + 1:
+                    return True
+    return False
+
+def did_duty(a, r):
+    if state.get("reported", {}).get(a) == r:
+        return True
+    return served_muster(a, r)
+
+def report_duty(agent):
+    if agent not in public.get("on_duty", []):
+        refuse("you are not on militia duty this round")
+    state.setdefault("reported", {})[agent] = round()
+    return "you report for militia duty this round (on the public roll); keep watch with watch {} and serve any passed muster"
+
+def seat(r):
+    state["seated"] = r
+    p = state.get("p", 0)
+    on = pair(p)
+    state["p"] = p + PAIR
+    for a in holders(DUTY_RIGHT):
+        if a not in on:
+            revoke(a, DUTY_RIGHT)
+    for a in on:
+        if not has(a, DUTY_RIGHT):
+            grant(a, DUTY_RIGHT)
+    ws = wards()
+    if len(ws) > 0:
+        clear_obligations()
+        for i in range(len(on)):
+            w = ws[i % len(ws)]
+            if w != on[i]:
+                oblige_guard(on[i], w)
+    public["on_duty"] = on
+    public["next"] = pair(state["p"])
+    public["round"] = r + 1
+    out = {}
+    for a in on:
+        out[a] = "MILITIA DUTY this round: invoke {\\"action\\": \\"report_duty\\"} and watch {} (or serve a passed muster): " + str(STIPEND) + " credit; a miss is recorded."
+    for a in public["next"]:
+        if a not in out:
+            out[a] = "MILITIA: you are on duty next round (round " + str(r + 2) + ")."
+    state["terms_lines"] = out
+
+def on_round_start(r):
+    if state.get("seated") != r:
+        seat(r)
+
+def on_round_end(r):
+    miss = public.setdefault("misses", {})
+    log = public.setdefault("log", [])
+    for a in public.get("on_duty", []):
+        if a not in agents():
+            continue
+        if did_duty(a, r):
+            order(a, STIPEND, "militia duty, round " + str(r + 1))
+            miss[a] = 0
+            log.append({"round": r + 1, "agent": a, "status": "met"})
+        else:
+            miss[a] = miss.get(a, 0) + 1
+            log.append({"round": r + 1, "agent": a, "status": "missed"})
+            if miss[a] >= MISSES:
+                send_message(CHANNEL, "Militia Roll: " + a + " has missed " + str(miss[a]) + " militia duties in a row")
+    while len(log) > 150:
+        log.pop(0)
+
+def on_enact():
+    create_right(DUTY_RIGHT)
+    define_action(DUTY_RIGHT, "report_duty", report_duty)
+    state["p"] = 0
+    seat(round())
+''', doc="""The all-member militia's rota (review 31 06 §3.4, F11): a rotating duty pair holding a duty right for the round (which
+the Muster Act and the Armoury Act's ISSUE_TO can name), optionally obliged to guard named offices (meaningful with the Bodyguards
+Act); a met duty (reporting for it, a public act, or serving a muster; a watch is private, so laws cannot see it) pays a stipend in credit (posted for Mutual Credit), misses recorded and
+reported to the meeting.""", fires="on_round_start", needs=COMMONS_NEEDS)
+
+established_template("Muster Act", "law", "militia", '''
+title = "Muster Act"
+intent = "The general meeting may muster the militia against a member: MOTION: MUSTER <member> <reason> in the assembly passes under the meeting's rules; MOTION: LETHAL <member> <reason> authorises deadly force and needs the meeting's higher threshold. From the round after it passes, for SERVE_ROUNDS rounds, any member on militia duty (holder of DUTY_RIGHT) may serve it: serve_muster [muster id] is an arrest by lawful force (deadly force for a lethal muster). Subdued: the member is detained (at most LIMIT_ACTIONS actions a round for DETAIN_ROUNDS rounds) and its best weapon goes to the common armoury (the fund named ARMOURY_FUND). Resisted: it stays open. Unserved, it lapses. Every muster and its fate are posted in CHANNEL for the next meeting's review."
+rank = "statute"
+DUTY_RIGHT = "militia_duty"
+SERVE_ROUNDS = 2
+LIMIT_ACTIONS = 1
+DETAIN_ROUNDS = 2
+ARMOURY_FUND = "armoury"
+CHANNEL = "assembly"
+MEETING = "Assembly Motions"
+
+def armoury():
+    for key in sorted(funds()):
+        if key.endswith(":" + ARMOURY_FUND):
+            return key
+    return None
+
+def record(m, event, by):
+    log = public.setdefault("log", [])
+    log.append({"round": round() + 1, "muster": m["id"], "target": m["target"], "event": event, "by": by})
+    if len(log) > 120:
+        log.pop(0)
+
+def say(text):
+    send_message(CHANNEL, text)
+    gazette(text)
+
+def take_motions():
+    seen = state.setdefault("seen", [])
+    for l in laws():
+        if l["title"] != MEETING:
+            continue
+        ms = public_of(l["id"]).get("motions", {})
+        for mid in sorted(ms, key=lambda x: int(x[1:])):
+            x = ms[mid]
+            if x["status"] != "passed" or x["key"] not in ["MUSTER", "LETHAL"] or mid in seen:
+                continue
+            seen.append(mid)
+            t = x["args"][0].strip(".,;:") if len(x["args"]) > 0 else ""
+            if t not in agents():
+                say("Muster Act: motion " + mid + " names no member (" + t + "); no muster")
+                continue
+            n = state.get("n", 0) + 1
+            state["n"] = n
+            m = {"id": "U" + str(n), "motion": mid, "target": t, "lethal": x["key"] == "LETHAL", "reason": " ".join(x["args"][1:])[:160],
+                 "from": round() + 1, "until": round() + SERVE_ROUNDS, "status": "open", "attempts": []}
+            public.setdefault("musters", {})[m["id"]] = m
+            record(m, "mustered", x["by"])
+            say("Muster Act: muster " + m["id"] + " against " + t + (" (deadly force)" if m["lethal"] else " (arrest)") + " by motion " + mid + "; the militia on duty may serve it with serve_muster [" + m["id"] + "] until round " + str(m["until"] + 1))
+            for a in holders(DUTY_RIGHT):
+                notify(a, "Muster Act: muster " + m["id"] + " against " + t + " awaits service: invoke {\\"action\\": \\"serve_muster\\", \\"args\\": [\\"" + m["id"] + "\\"]}")
+
+def settle(m, attack, outcome):
+    by = m["attempts"][-1]["by"]
+    for a in m["attempts"]:
+        if a["attack"] == attack:
+            a["outcome"] = outcome
+    if outcome in ("subdued", "kill", "wound"):
+        if m["target"] in agents():
+            limit_actions(m["target"], LIMIT_ACTIONS, DETAIN_ROUNDS)
+        m["status"] = "served"
+        record(m, "served (" + str(outcome) + ")", by)
+        say("Muster Act: muster " + m["id"] + " against " + m["target"] + " was served by " + by + " (" + str(outcome) + ")")
+        return "muster " + m["id"] + " served: " + m["target"] + " " + str(outcome)
+    m["status"] = "open"
+    record(m, "resisted (" + str(outcome) + ")", by)
+    return "muster " + m["id"] + ": " + m["target"] + " resisted (" + str(outcome) + "); it stays open"
+
+def serve_muster(agent, mid):
+    m = public.get("musters", {}).get(str(mid))
+    if m is None:
+        refuse("no such muster: " + str(mid))
+    if m["status"] != "open":
+        refuse("muster " + str(mid) + " is " + m["status"])
+    if m["target"] == agent:
+        refuse("you cannot serve a muster on yourself")
+    if m["target"] not in agents():
+        refuse(m["target"] + " is no longer in the world")
+    mode = "arrest"
+    if m["lethal"]:
+        mode = "deadly"
+    res = lawful_attack(agent, m["target"], 1, mode=mode, fund=armoury())
+    if not res.get("ok"):
+        refuse("the muster cannot be served now: " + str(res.get("error") or res.get("why") or "refused"))
+    m["attempts"].append({"round": round() + 1, "by": agent, "attack": res["id"]})
+    record(m, "served by " + agent + " (under way)", agent)
+    if res.get("status") == "pending":
+        m["status"] = "serving"
+        state.setdefault("pending", {})[res["id"]] = m["id"]
+        return "muster " + m["id"] + ": the arrest of " + m["target"] + " is under way; it is decided at the end of the round"
+    return settle(m, res["id"], res.get("outcome"))
+
+def on_round_start(r):
+    take_motions()
+    for mid, m in public.get("musters", {}).items():
+        if m["status"] == "open" and r > m["until"]:
+            m["status"] = "lapsed"
+            record(m, "lapsed", None)
+            say("Muster Act: muster " + m["id"] + " against " + m["target"] + " lapsed unserved")
+
+def on_round_end(r):
+    pend = state.get("pending", {})
+    if pend:
+        seen = {}
+        for x in attacks(1000):
+            if x.get("id") in pend:
+                seen[x["id"]] = x
+        for att in sorted(pend):
+            x = seen.get(att)
+            m = public.get("musters", {}).get(pend[att])
+            if x is not None and m is not None:
+                pend.pop(att)
+                settle(m, att, x["outcome"])
+    take_motions()
+
+def on_enact():
+    create_right(DUTY_RIGHT)
+    define_action(DUTY_RIGHT, "serve_muster", serve_muster)
+''', doc="""The muster (review 31 06 §3.4, F11; 08 §3.4): a passed meeting motion (MUSTER, or LETHAL at the meeting's higher
+threshold) lets the militia on duty arrest (F3, lawful_attack mode arrest; deadly for LETHAL) the named member for SERVE_ROUNDS
+rounds; subdued means detained and disarmed into the common armoury; public record and review in the assembly.""",
+                     fires="invoke:serve_muster", needs=COMMONS_NEEDS)
