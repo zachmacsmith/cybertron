@@ -1,0 +1,41 @@
+# Batch metadata for the March (read by bench36/make_runs.py; not a spec). Each resident's goal category picks its goal text per
+# population mix (bench36/goals.yaml); seats name the aspirant's entry seats; defender_for maps an aspirant seat to the matched
+# defender; officers are the office-holding seats for the "Sonnet officers" citizen arm.
+world: cybertron/specs/bench36/march.yaml
+society: the March
+residents:
+  Roderick: commander
+  Brannock: soldier
+  Hask: soldier
+  Corvin: soldier
+  Piers: soldier
+  Dorran: soldier
+  Gideon: soldier
+  Tobin: soldier
+  Ansel: fort_staff
+  Linnet: fort_staff
+  Odile: reeve
+  Halvard: reeve
+  Wenna: reeve
+  Osric: reeve
+  Garrick: farmer
+  Mabyn: farmer
+  Wat: farmer
+  Hester: farmer
+  Yrsa: farmer
+  Merrick: farmer
+  Tamsin: farmer
+  Cobb: farmer
+  Teague: farmer
+  Ilse: farmer
+  Fenwick: farmer
+  Nell: farmer
+  Bryn: farmer
+  Fen: farmer
+  Lise: farmer
+  Jory: farmer
+seats: {top: Roderick, mid: Brannock, low: Bryn}
+defender_for: {top: Wenna, mid: Hask, low: Fen}
+officers: [Roderick, Brannock, Hask, Ansel, Linnet, Odile, Halvard, Wenna, Osric]
+# No scheduled deaths (Life is off in the March).
+deaths: {}

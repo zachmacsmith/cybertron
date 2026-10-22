@@ -167,7 +167,7 @@ positions:
       purpose: Build what the Commune needs.
       enforcement: none
     Maker:
-      title: maker in the workshop
+      title: maker
       article: a
       identity: "You work in the workshop: you make what the Commune needs, with the smith and the builder."
       purpose: Make what the Commune needs.
@@ -287,7 +287,7 @@ start:
           holders: [Mirela, Anouk, Ezra]
           succession: {rule: none}
   stores:
-    - {id: S1, owner: J0, food: 100, capacity: 220, name: the common store}
+    - {id: S1, owner: J0, food: 100, capacity: 400, name: the common store}   # room above the steady state (payouts above the reserve)
   holdings:                       # every member holds a crude weapon
     Rowan: {crude: 1}
     Maren: {crude: 1}
