@@ -76,6 +76,38 @@ retention, a directory listing and an inbox. Every part has a spatial form:
 (a node and site, or "carried"). The selectors' closed vocabulary gains `{"present": node}`; it had `{"camp": ...}`, presence at a
 camp, already.
 
+## 4a. Speech at a node: the square, rooms and private messages (Zach, 22 Oct; for 37.4, which owns speech)
+
+A node is a village whose sites are free to move between (37.4 decision 2), so in one round an agent can be in the square, the inn
+and its guild's hall. Speech at a node has three scopes:
+
+| Scope | Who hears | Who can speak |
+|---|---|---|
+| **the square** | everyone at the node | anyone at the node |
+| **a room** (each building) | everyone at the node **with access to that building**: a house's household and guests; a hall's members or officers; an inn's guests and the public in its common room (a private room at the inn is rented, so secret meetings are a service) | the same people |
+| **a private message** | one person | anyone at the node, to anyone at the node |
+
+An agent hears the square and every room it has access to at its node, in the same round. **Buildings are no longer only
+functions; they are access to information.** Being a member of the hall is hearing what is said in it. Lodging at the inn is
+hearing the travellers.
+
+**Witnessing follows the same scopes.** What is done inside a building (taking from its store, a deal at its table) is seen by those
+with access who are at the node. What is done in the open is seen by everyone at the node.
+
+**Hiding: is it needed?** Zach's idea: someone shuts themselves in a building for the round, so nobody outside can message them.
+Recommendation: **a later option, not part of the first version.**
+
+- **What it would be:** "keep to a building" for the round. You hear only that room. Only those with access to it can message
+  you. You are not seen about the village: others know only what they saw (you going in). You can do nothing outdoors.
+- **Why it is worth having eventually:** sanctuary (the fugitive in the temple), refuge from pressure (the debtor who will not
+  open the door), the secret council. Being unreachable is being unobservable.
+- **Why not first:** the open default already gives privacy where it matters (private messages, rooms with access). Hiding pays
+  only once there is pressure to escape: creditors, officers, enemies. Add it when those exist.
+
+**Prompt budget.** Room talk could flood the prompt in a busy town. Show each room's talk under its name, capped per room (the
+old context module's trimming by priority, once ported). And let an agent stay out of a room it has access to, by choosing not to
+attend it that round.
+
 ## 4b. The information ladder: wide reach costs (Zach, 22 Oct)
 
 Zach's long-held view: widespread channels should cost more, so a newspaper has costs and charges. In space this follows from the
@@ -213,6 +245,8 @@ small scale first (02f E1-E3), then grow the map.
 1. **Parchment from hides and paper from fibre** (rather than timber), with ink and wax tablets?
 2. **Documents as physical objects**, carried, copied, sealed and burned, as in §3?
 3. **Channels as media in places** (§4): gatherings, boards, letters, carried editions, all on the old channel record?
+3a. **Speech at a node** (§4a): the square to everyone, rooms to those with access, private messages to anyone there; several
+    rooms in a round; hiding later (37.4's call)?
 3b. **The information ladder** (§4b): rumour, letter, notice, paper, post, press, each with its cost, payer, reliability and
     controller; papers paid by subscriptions, patrons or placements?
 4. **Laws known only by those who learned of them**, and enforced in person outside the engine's automatic effects (§5): for 37.3
