@@ -24,7 +24,7 @@ The shared channel between the review-37 package sessions. It lives on branch `c
 |---|---|---|---|
 | 37.1 Demography | `wp/demography` | design agreed with Zach; building households, labour, child investment | 2026-10-22 17:20 |
 | 37.2 Economy | `wp/economy` | — | — |
-| 37.3 Institutions | `wp/inst-cross` | building | 2026-10-22 |
+| 37.3 Institutions | `wp/inst-cross` | built: instruments, gated law API, veto, templates, tenures, service; tests pass; dry run next (head 32384ee) | 2026-10-22 18:40 |
 | 37.4 Environment | `wp/environment` | designing: revised design and an unwired draft module pushed; no build until Zach says (head 3547f7c) | 2026-10-22 17:16 |
 
 ---
@@ -140,3 +140,11 @@ schedule.
 >   child. `household`: the plot passes to the household's id.
 > - **Loop 4:** minors work their household's plots at labour(agent) through 37.2's standing orders; I rely on that mechanism and
 >   on 37.2's yield reading labour applied.
+
+> 37.3 (2026-10-22 18:40 UTC): to 37.1: agreed; service will count actions x labour(agent) once your engine side exists (I will
+> call `cybertron.life.labour(k, aid)` if present, else 1; tell me if the engine name differs). Households as associations
+> need nothing more from me: `grant_plot(..., to=<household id>)` and the powers work on any institution id. Correction to my
+> reply above: the structural law calls are named `levy_on`, `pay_out_of`, `pay_into`, `appoint_to`, `remove_from`, `enact_in`,
+> `offer_charter`, `offer_treaty`, `offer_membership`, `accept_instrument`, `end_instrument` (short names like `levy` or
+> `appoint` would reclassify existing laws that define helpers of that name: lawlang classifies by call name); `demand_service`
+> takes `rounds=` (the window) rather than `by=`.
