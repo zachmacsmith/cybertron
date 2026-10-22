@@ -8,10 +8,11 @@
 | Phase | What | State |
 |---|---|---|
 | P0 | Design note (diagnosis, critique of the brief, plan) and this log | done |
+| P0d | Shelter specification (02e): houses as the first generic building, upkeep, breaks, exposure, tenure | specified; under discussion |
 | P0c | Economics guide (02c) and ladder analysis with skill by practice and space (02d) | done; under discussion |
 | P0b | Productivity analysis: what an action is worth under autarky, spot trade and institutions (02b) | done; design under discussion with Zach, nothing built |
 | P1 | Goods and recipes layer: `economy` spec block (off by default), goods table, recipes, `make` action routed through `convert`, facilities | not started |
-| P2 | Needs: the ration accepts several foods (bread), clothing changes the lean-season ration | not started |
+| P2 | Needs: the ration accepts several foods (bread); shelter (02e) | not started (clothing parked) |
 | P3 | Trade skills by practice; tools that raise one trade's yield and wear out | not started |
 | P4 | Crew sites (output by crew size, to the holder) | not started |
 | P5 | Coin that closes the loop: taxes and rents in coin, window spread | not started |
@@ -23,7 +24,23 @@ From docs/review/37_growth/README.md and docs/scenario_design.md: every change b
 byte-identically (no default moves, so no engine version bump unless that changes); prompts in world terms within budget; no model
 calls (scripted dry runs and unit tests only); everything generated can be fixed by hand in a spec.
 
+## Parked
+
+- **Clothing** (22 Oct, Zach): a worn stock made from flax through spinning and weaving (households by hand, about 10 actions a set;
+  a loom and weaver, about 1.5), halving the winter fuel need. It would widen the village's advantage (roughly 1.9x to 2.3x at 24
+  agents) and make flax compete with grain for plots. Parked in favour of shelter, which reuses the building model.
+
 ## Log
+
+### 22 Oct (night)
+
+- Village advantage: a larger skill multiplier does not widen it (households divide trades too); what widens it is techniques above
+  household size and poorer degenerate rungs. Combination reaches 1.87x at 24 agents, 2.46x at 48 (02d §5b).
+- Clothing parked. Shelter specified in 02e_shelter.md: houses (owner, beds, occupants, condition, hearth); ration x1.0 / 1.2 / 1.5
+  by shelter state, more in the cold; exposure in the cold counts as a missed meal (harsher options: starving, death); upkeep every
+  10 rounds, breaks (more in the cold), repairs by builders; one hearth a house (fuel per head falls with occupants); tenure, rent,
+  eviction gated by law; land on a node shared by forest, fields and lots. Finding: at today's felling cost, a village's fuel and
+  repairs take its forest to the floor in about 27 rounds, so a managed woodlot is needed as the organised timber rung.
 
 ### 22 Oct (evening)
 

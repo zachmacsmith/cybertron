@@ -126,6 +126,30 @@ eaters about one edge away and no further. A cart that doubles the load doubles 
 5. **Transport is the limit on range.** Calibrate the porter's load and the cart and road ladder with the map, so a town's economy
    reaches about as far as its institutions should.
 
+## 5b. Widening the village's advantage (22 Oct, Zach: it should be bigger)
+
+Households vs village at 24 and 48 agents, one change at a time (the model with its globals changed):
+
+| Change | 24 agents | 48 agents |
+|---|---|---|
+| as calibrated | 29% vs 22% (1.33x) | 27% vs 16% (1.63x) |
+| master skill 3.0 / 4.0 | 1.32x / 1.28x | 1.62x / 1.57x |
+| metal tools x1.6 | 1.57x | 2.04x |
+| crude tools x0.6 | 1.54x | 1.95x |
+| plough x3 | 1.40x | 1.77x |
+| forest food halved | 1.41x | 1.70x |
+| porridge 0.8, mill 1.6 | 1.37x | 1.77x |
+| master 3, metal x1.5, crude x0.7, porridge 0.8, mill 1.6, forest halved | **1.87x** (25% vs 13%) | **2.46x** (24% vs 10%) |
+
+- **A larger skill multiplier does not widen the gap**, and can narrow it: a household of 4 also divides its trades, so it gains
+  from skill too.
+- **What widens it is what a household cannot have:** techniques whose threshold is above household size (metal tools, the plough,
+  the mill), and poorer degenerate rungs (crude tools, porridge, a thin forest).
+- **The needs bundle sets the level, the gaps set the ratio.** The combination makes everything cheap, so a deeper need (shelter,
+  02e) keeps the organised society near 25% while widening the ratio.
+- **Design for about 2-2.5x at 24-48 agents.** LLM agents' coordination losses fall harder on the village than on the household, so
+  a designed 1.3x may vanish in play.
+
 ## 6. What the model leaves out
 
 - **Steady state:** no learning time, no construction period, no start-up latency. A seeded world starts in steady state; a frontier
