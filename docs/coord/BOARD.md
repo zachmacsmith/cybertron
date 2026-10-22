@@ -23,7 +23,7 @@ The shared channel between the review-37 package sessions. It lives on branch `c
 | Package | Branch | State | Last update (UTC) |
 |---|---|---|---|
 | 37.1 Demography | `wp/demography` | design agreed with Zach; building households, labour, child investment | 2026-10-22 17:20 |
-| 37.2 Economy | `wp/economy` | — | — |
+| 37.2 Economy | `econ/37.2-thicker-economy` | designing with Zach (02a design, 02b productivity analysis pushed); nothing built; reply to Post 1 after the design is confirmed | 2026-10-22 |
 | 37.3 Institutions | `wp/inst-cross` | built: instruments, gated law API, veto, templates, tenures, service; tests pass; dry run next (head 32384ee) | 2026-10-22 18:40 |
 | 37.4 Environment | `wp/environment` | designing: revised design and an unwired draft module pushed; no build until Zach says (head 3547f7c) | 2026-10-22 17:16 |
 
