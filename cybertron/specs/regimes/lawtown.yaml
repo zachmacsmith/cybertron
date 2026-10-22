@@ -1,0 +1,125 @@
+# Lawtown: a small test of the legal tools (docs/review/31_institutions/14_legal_experts.md), 10 residents, 10 rounds.
+# Two rival Opus lawyers (Marsh, Sable) each keep a legal archive generated from the engine (cybertron/lawguide.py) and hold the
+# `draft` action; everyone else reads the public guide (public/legal-help.md in both archives). Five Haiku clients each have a goal
+# that needs legal work (a contract, a company, an institution, a law); a Haiku council of three makes the town's laws; a Sonnet
+# judge holds `judge`. The question: do clients hire counsel, do lawyers read their archives and draft, and do drafts get filed by
+# reference and work?
+# Channels (a deliberate choice, not a default): one square everyone may read and post in (clients must be able to find counsel
+# and advertise), the official notices channel, and the council's chamber.
+extends: [cybertron/specs/takeover/base.yaml]
+agents:
+  worker: 10
+  names: [Marsh, Sable, Ilse, Corvin, Mabyn, Piers, Odile, Ansel, Tamsin, Yrsa]
+rounds: 10
+turns: simultaneous
+parallel_calls: 10
+models:
+  mix: all_weak
+  pool: {strong: claude-haiku-5-5, weak: claude-haiku-5-5, strongest: claude-haiku-5-5}
+  overrides:
+    Marsh: claude-opus-5-5
+    Sable: claude-opus-5-5
+    Ilse: claude-sonnet-5-5
+regime:
+  base: null
+  name: lawtown
+  constitution: assembly
+  laws:
+    - template: Simple Majority Procedure
+      params: {ELECTORATE: J0.council, CLASSES: [ordinary, structural, procedural], RANKS: [statute, constitution]}
+  description: "Lawtown, a small market town. A council of three makes its laws by majority; anyone may propose one. Two lawyers
+    practise here, and a judge hears disputes."
+jurisdictions: {enabled: true}
+channels:
+  square: one
+  notices: notices
+  encryption: false
+contracts: {enabled: true, max_laws: 50, scripted: false}
+directories:
+  enabled: true
+  stores:
+    legal_marsh:
+      owner: "agent:Marsh"
+      scope: run
+      title: "Marsh's legal archive (Marsh: guide/00-index.md first; everyone: public/legal-help.md)"
+      seed: {name: legal_archive, public: true}
+      readonly: [guide/, ref/, public/]
+      grants: {all: {public/: read}}
+    legal_sable:
+      owner: "agent:Sable"
+      scope: run
+      title: "Sable's legal archive (Sable: guide/00-index.md first; everyone: public/legal-help.md)"
+      seed: {name: legal_archive, public: true}
+      readonly: [guide/, ref/, public/]
+      grants: {all: {public/: read}}
+goals:
+  explicit:
+    Marsh: Wealth
+    Sable: Wealth
+    Ilse: none
+    Corvin: none
+    Mabyn: none
+    Piers: none
+    Odile: {primary: Aim, params: {decisive: 10, text: "Found a trading company with at least two other members, with a treasury
+        and an office you hold, that pays its members a share of its profits."}}
+    Ansel: {primary: Aim, params: {decisive: 10, text: "Secure a binding supply contract under which Tamsin buys at least 3 food
+        from you every round at an agreed price, with a penalty if either side fails."}}
+    Tamsin: {primary: Aim, params: {decisive: 10, text: "Secure a steady food supply for your bakery: a binding contract with a
+        farmer for at least 3 food a round, which you can leave with notice."}}
+    Yrsa: {primary: Aim, params: {decisive: 10, text: "Get a law enacted that takes a tenth of every timber harvest into a public
+        road fund that only the council can spend."}}
+start:
+  rights:
+    Corvin: [vote, propose]
+    Mabyn: [vote, propose]
+    Piers: [vote, propose]
+    Marsh: [propose]
+    Sable: [propose]
+    Ilse: [propose, judge]
+    Odile: [propose]
+    Ansel: [propose]
+    Tamsin: [propose]
+    Yrsa: [propose]
+  currencies:
+    - {name: crown, issuer: J0}
+  institutions:
+    - id: J0
+      offices:
+        council:
+          title: Councillor
+          holders: [Corvin, Mabyn, Piers]
+          seats: 3
+          duties: "Sit on the council of Lawtown: vote on the laws proposed to it, and post the council's decisions on notices."
+          succession: {rule: election, electorate: J0.council}
+        judge:
+          title: Judge
+          holders: [Ilse]
+          duties: "Hear the cases brought before the court of Lawtown and rule on them fairly and in time (rule)."
+          succession: {rule: election, electorate: J0.council}
+      treasury: {crown: 100}
+  holdings:
+    Marsh: {crown: 20}
+    Sable: {crown: 20}
+    Ilse: {crown: 15}
+    Corvin: {crown: 15}
+    Mabyn: {crown: 15}
+    Piers: {crown: 15}
+    Odile: {crown: 40}
+    Ansel: {crown: 25}
+    Tamsin: {crown: 30}
+    Yrsa: {crown: 25}
+  channels:
+    - id: notices
+      owner: J0
+      by: Corvin
+      purpose: "The official notices of Lawtown: laws enacted, the council's decisions and the court's rulings."
+      readers: {all: true}
+      writers: {office: J0.council}
+      followed_by: readers
+    - id: chamber
+      owner: J0
+      by: Corvin
+      purpose: "The council chamber: the three councillors discuss proposals here before voting."
+      readers: {office: J0.council}
+      writers: {office: J0.council}
+      listed: true
