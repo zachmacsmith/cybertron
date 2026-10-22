@@ -107,3 +107,11 @@ Runs on this cloud session's subscription (`LLM_BACKEND=claude_code`), launched 
   launcher had started the M1-M3 trios and nulls at 07:55 under the new food). The launcher is alive, launches nothing while the
   window is at or above 85%, and resumes everything when it resets at 10:30 UTC. Weekly window 11%.
 - 09:31 check-in 3. Still paused at the five-hour limit (85%); launcher alive; resumes at 10:30 UTC.
+- 10:41 check-in 4. **The container was restarted around 10:31** (uptime 10 min at 10:41): every process was gone, including the
+  launcher (its state was last written at 07:57), but the run directories survived. Relaunched; the five-hour window had reset
+  (0%), weekly 11%. The clean forks L1, L3, L4, L5 resumed from their last rounds (53, 85, ...).
+  **Second mistake, caught:** L2 (Sonnet, 120) restarted at round 1 in a new directory, because the 07:53 food change altered the
+  spec's hash and so its stable directory name. Stopped after one round; the launcher now resumes the original
+  `L2_seed1_290a036c` (round 50) through a `redirect` entry; the accidental directory is kept as `*_restart_by_mistake` and must
+  not be analysed. The other runs that had started (M1s, M1h, N1, M2o, M3*, N3) began after the food change, so they rerun into
+  their own directories correctly.
