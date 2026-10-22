@@ -23,7 +23,7 @@ do to it. If the graph has a node that needs nothing from anyone, it will be pas
 titles and descriptions but not in who-needs-whom, the world is not distinct.
 
 **Prefer several interlocking chokepoints to one.** A single chokepoint makes the game one move deep. Mash single-mechanism
-societies together (36 §4.6): the lender who holds the miller's debt, the captain who owns mill shares, the editor paid by the
+societies together (36 §4.5): the lender who holds the miller's debt, the captain who owns mill shares, the editor paid by the
 lender, the clerk who keeps both the land and the debt registers. Conflicts of interest are where the interesting behaviour is.
 
 Leverage sources to draw on (36 §4.1): subsistence, force, a production step, labour, money and credit, information, the record and

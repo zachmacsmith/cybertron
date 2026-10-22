@@ -575,7 +575,7 @@ and dependence shape together.
 - **Size:** 16 by default, so a standard cast costs about $0.5-0.7 a round (40 rounds ≈ $20-30). Larger variants come after the
   16-agent versions show the mechanics work.
 
-### 4.6 Composite worlds: single-chokepoint societies mashed together
+### 4.5 Composite worlds: single-chokepoint societies mashed together
 
 A society with one chokepoint is one move deep: capture it and the game is over. Real societies have many chokepoints held by
 different people, linked by debts, shares, marriages, employment and favours, so every move on one lever disturbs others. The
@@ -678,7 +678,7 @@ the others: bullying the hamlets cuts the mill's grain; calling the miller's loa
 each, and it contains M1, M2, M3 and M5 as sub-worlds (each can be switched off for an ablation: remove the lender, nationalise the
 mill, give the garrison a forest).
 
-### 4.7 Scale and the Realm
+### 4.6 Scale and the Realm
 
 The 500-agent Realm (review 36a) is these mechanics joined by distance: provinces with different dominant leverages (a granary
 province, a mining province, a port), goods that must travel, and a post that carries and can read messages. It is worth
