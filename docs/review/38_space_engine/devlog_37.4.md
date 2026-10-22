@@ -65,6 +65,11 @@ changed in its code yet.
 
 ## Log
 
+- **22 Oct.** Zach: routine yes; unsure about not calling agents (they should decide); more actions a day, varying; enumerate every
+  action; standing orders (if attacked, if an action fails). Written: [06_actions_design.md](06_actions_design.md) (all 145
+  cybertron 1 actions and 15 cybertron2 actions with their treatment on nodes, what space adds, a day's budget in work units,
+  standing orders of four kinds decided by the agent, everyone called every day in the first runs).
+
 - **22 Oct.** Zach: everyone plans at once, as cybertron 1 (confirmed in 05 §1). Should the round diverge from it? Proposed in 05
   §7: keep it as the core; add standing orders, calls only when something happens (with a k-day floor), fallbacks, reflexes,
   works and errands that persist, and later assemblies on set days.
