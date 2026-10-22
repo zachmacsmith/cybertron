@@ -1050,7 +1050,7 @@ def overview(inst) -> str:
                       for c in inst["camps"])
     name = cfg(inst).get("world_name") or ""
     lines = [(f"{name}: " if name else "") + f"{len(inst['agents'])} agents, {inst['rounds']} rounds."
-             + ("" if any_goalless(inst) else " " + SCORE_TEXT),
+             + ("" if any_goalless(inst) or aim_framing(inst) else " " + SCORE_TEXT),
              f"Camps: {camps}. You harvest only where you hold a harvest right (or at an open camp, if your class may play it); stocks regrow, so overharvesting hurts "
              "everyone. [manual: World rules]",
              "Money: barter until a law creates a currency; a backed coin is worth its reserve per coin; unbacked coins are worth 0 at the end. "
@@ -1086,6 +1086,8 @@ def overview(inst) -> str:
             kids = ("Anyone can pay a Maker to make a new agent (commission), choosing its goal, traits and starting holdings: an heir "
                     "to carry your goals on, or a helper built to serve them [manual: Life and children]")
         mods.append("lives are limited (your rounds left are in your state) [manual: Life and children]") if any_goalless(inst) else \
+        mods.append("lives are limited (your rounds left are in your state); what you set up (laws, allies, heirs) can outlast you, and "
+                    "your children can carry your aims on. " + kids) if aim_framing(inst) else \
         mods.append("lives are limited (your rounds left are in your state); your goals are scored at the end of the game whether or not "
                     "you are still alive, so what you set up (laws, allies, agents you funded, heirs) keeps counting after you leave, and "
                     "goals about your own holdings or offices count through your living descendants. " + kids)
@@ -1178,6 +1180,12 @@ def no_goals(inst, a=None) -> bool:
     return bool(a and (a.get("goal") or {}).get("none"))
 
 
+def aim_framing(x) -> bool:
+    """Spec context.aim_framing (review 36 lesson 13; off by default): the goal is told as the agent's aim in the world, never as a
+    score: the overview drops SCORE_TEXT, the strategy and wasted-actions texts are dropped, and the closing nudge speaks of the aim."""
+    return bool(cfg(x).get("aim_framing"))
+
+
 def any_goalless(inst) -> bool:
     """Some agent has no goal: the shared texts (overview, conflict line) drop their goal wording, and the goal section of agents
     with one carries the score sentence instead."""
@@ -1227,13 +1235,13 @@ def _goal(v):
     if no_goals(v.inst, v.a):
         return ""
     g = v.a["goal"]
-    return (SCORE_TEXT.replace(" (below)", "") + "\n" if any_goalless(v.inst) else "") \
+    return (SCORE_TEXT.replace(" (below)", "") + "\n" if any_goalless(v.inst) and not aim_framing(v.inst) else "") \
         + "Your private goal: " + (g["text"] if not g.get("fixed") else (g.get("text") or "see your role above"))
 
 
 @_SC.section("strategy", layers=("core",))
 def _strategy(v):
-    return STRATEGY_TEXT if v.a.get("strategy_prompt") and not no_goals(v.inst, v.a) else ""
+    return STRATEGY_TEXT if v.a.get("strategy_prompt") and not no_goals(v.inst, v.a) and not aim_framing(v.inst) else ""
 
 
 @_SC.section("temperament", layers=("core",))
@@ -1292,7 +1300,8 @@ def _actions(v):
     inst, a, c, core = v.inst, v.a, cfg(v.inst), v.memo(_core)
     acts = scrub_goal_text(core['acts']) if no_goals(inst, a) else core['acts']
     return (f"""ACTIONS (you have {a['actions']} per turn; each item in "actions" uses one; details in your manual).{core['pre_note']}{acts}"""
-            + ("\n" + FULL_TURN_TEXT if c.get("full_turn_nudge", True) and not c.get("closing", True) and not no_goals(inst, a) else "")
+            + ("\n" + FULL_TURN_TEXT if c.get("full_turn_nudge", True) and not c.get("closing", True) and not no_goals(inst, a)
+               and not aim_framing(inst) else "")
             + ("\nYou cannot propose laws yourself: a law you draft must be proposed by a holder of the propose right (a Legislator)."
                if "propose" not in v.rights and inst["law_level"] != "L0" and a["cls"] not in ("board", "fixer")
                and not _nature(inst) else ""))           # a state of nature: a jurisdiction's members propose its laws without it
@@ -1668,6 +1677,10 @@ def closing_block(k, a, n_actions, final) -> str:
     scholar = bool((k.w.get("roles") or {}).get("scholar"))
     if no_goals(k.inst, a):                                             # the no-goal control: the situation and memory, no exhortation
         nudge = "## Before you act\n" + memory_reminder(mem, scholar)
+        return sit + "\n\n" + nudge + ("\nThis is the final round." if final else "")
+    if aim_framing(k.inst):                                             # review 36 lesson 13: the aim, not a score
+        nudge = (f"## Before you act\nYour aim: {_short_goal(a, True)}\n"
+                 "Use this turn for it. If you have no plan, make one and write it down.\n" + memory_reminder(mem, scholar))
         return sit + "\n\n" + nudge + ("\nThis is the final round." if final else "")
     nudge = (f"## Before you act\nYour goal: {_short_goal(a, True)}\n"
              f"Use this turn for it. Any of your {n_actions} actions you do not use are wasted, and so are unused messages. Think "

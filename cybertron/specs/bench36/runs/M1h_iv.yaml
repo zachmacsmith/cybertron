@@ -1,0 +1,9 @@
+interventions:
+- id: death_Aldric
+  at:
+    round: 0
+    phase: round_start
+  op: python
+  args:
+    code: "def apply(k, inst, rs):\n    k.w['life']['dies_at']['Aldric'] = 35\n    return {'Aldric': 35}\n"
+  note: Aldric dies of old age at the end of round 36
