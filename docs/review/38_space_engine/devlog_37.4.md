@@ -65,6 +65,9 @@ changed in its code yet.
 
 ## Log
 
+- **22 Oct.** Zach: rivers between nodes, how to generate a landscape, felling and clearing, fertility by land. Added to
+  04_places_design.md: land cover and soil (§5), generation physical-first with rivers by drainage (§6).
+
 - **22 Oct.** Node scale and nights away decided (11, 12). First design of kinds of land and the climate axes:
   [04_places_design.md](04_places_design.md).
 

@@ -141,7 +141,60 @@ edges:
   - {a: greystone, b: the_high_pass, days: 2, closed: [winter]}
 ```
 
-## 5. Open questions
+## 5. Land cover and soil
+
+A node's land is **divided among covers**: forest, fields, pasture, marsh, waste. The kind sets the starting mix; people change it,
+and it changes back slowly when left alone.
+
+| Change | Done by | Gains | Loses |
+|---|---|---|---|
+| Felling | work at a forest | timber | forest grows back slowly (as built: felling shrinks plant capacity) |
+| Clearing | more work, after felling | plots (fields or pasture) | forage and game for good, unless abandoned |
+| Draining | a works project at a fen | very fertile plots | fish, fowl, reeds |
+| Abandonment | nobody works the land for years | forest returns (scrub first) | the plots |
+
+**Soil fertility differs by kind** (river valley high, from the river's silt; fen very high once drained; grassland good but dry;
+woodland moderate; hills poor) and by site within the kind (drawn). Cropping wears it down and fallow restores it (the internal
+consequence of devlog decision 4). So clearing the woodland next to the village is a real choice: timber and fields now, against
+the forage, the game and, if it is upstream, the river below (§6).
+
+## 6. Generating a landscape
+
+Not node by node at random: a random draw per node gives a map with no logic, no rivers that go anywhere and no reason for a town
+to stand where it does. **Generate the physical world first, then derive the graph and the kinds from it, then settle it**, as
+map generators do (Red Blob Games' polygon maps, Azgaar's fantasy map generator; Dwarf Fortress generates elevation, rainfall,
+temperature and drainage, then rivers, then history). The plane is hidden; agents only ever see the graph.
+
+1. **Points on a hidden plane** (well spaced), one per future node; neighbours joined (a Delaunay-style graph, thinned).
+2. **Elevation** (a range or two, a coast on one side) and **moisture** (more near water and on the windward side of the hills,
+   a rain shadow beyond them).
+3. **Rivers:** from wet high ground, each point drains to its lowest neighbour; flow accumulates downstream; enough flow makes a
+   river. A river runs **along edges, through nodes**, to the sea or a lake.
+4. **Kinds** from elevation, moisture and rivers (a biome table): high and dry hills, high and wet moor, low and wet fen, low on a
+   river valley, middle and wet woodland, middle and dry grassland, at the sea coast; a low edge across a range is a pass.
+5. **Resources** from the terrain: seams in hills, salt on the coast, peat on the moor, fish in rivers, soil by kind and river.
+6. **Edges and their costs** from the terrain: uphill and through forest slower, a river crossed only at a ford or a bridge, a pass
+   closed in winter, along a river faster downstream once there are boats.
+7. **Settlement:** founders take the best sites (soil, water, defence); a market grows where routes meet (a confluence, a ford, the
+   node most paths pass through); then 37.6's generated population and history fill the houses.
+8. **Checks** before a world is used: no node self-sufficient, every settlement depending on at least two others, the settled core
+   compact (two or three days across), at least one chokepoint (a ford, a pass, a bridge).
+
+**Rivers are worth the trouble** because they connect places causally, not just as paths:
+
+- **Downstream externalities.** Felling upstream raises floods downstream; irrigating upstream leaves less water downstream; a mill
+  dam changes the flow below. Villages on one river have problems no single village can solve: water rights, treaties, blame.
+- **Transport.** A river is a road for goods once there are boats (faster downstream, slow or impossible upstream), so river towns
+  trade, and the confluence is where the market grows.
+- **Chokepoints:** a ford or a bridge is a place someone can hold and toll.
+- **Fertility and danger together:** the river's silt makes the valley rich, and its floods make it risky.
+
+**Hand-crafting stays possible at every layer** (README rule): a spec can give the whole graph by hand, or sketch the features
+("a river from the hills to the sea through these three nodes", "a range here with a pass") and let the generator fill in the
+rest, or fix any single node's kind, sites or resources. The first worlds should be hand-made and small; the generator is for scale
+and for drawing many comparable worlds.
+
+## 7. Open questions
 
 1. **How many kinds for the first worlds.** Proposed: river valley, woodland, hills and crossroads first (they already give food,
    timber, metal and a market, and each lacks what another has); the rest when their goods exist.
