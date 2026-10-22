@@ -35,6 +35,16 @@ byte-identical replays, apply to cybertron2 only once its runs start to matter.)
 
 ## Log
 
+### 22 Oct (night, end uses)
+
+- Zach: start from end uses, roots and processes, and bridge them, with the actions going into each; ladders whose better rungs need
+  qualitative jumps or long chains. Wrote 02j_end_uses.md and 02j_end_uses_model.py: roots, recipes with full costs computed down to
+  the roots, and ladders per end use (tools, shelter, storage, writing; food and transport from 02d and 02g). Findings: copper tools
+  barely beat crude ones (2.0x against 1.8x return); bronze (tin, so trade) and iron (78% charcoal, a bloomery and skill) are the real
+  jumps (4.3-4.5x); the timber frame for ten is the cheapest shelter per person-night and stone pays only for density and permanence;
+  bins win for a household and a stone cellar only at village scale; jars never win (clay waits); salt halves the cost of keeping
+  meat; a page's cost is the scribe's time, so parchment suffices and the press is the jump.
+
 ### 22 Oct (night, pruning)
 
 - Zach: were the chains already here, and do we need this many single-use variants? Answer: the chains were drawn from history in
