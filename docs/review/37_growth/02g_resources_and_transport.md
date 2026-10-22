@@ -114,6 +114,64 @@ What makes them valuable, each a reason a society wants them:
 **The rule for this tier (widened in §1d):** every hard resource must either multiply something the society already does (productivity,
 transport, force, credit) or unlock something it cannot do at all (§1d), or it will sit unwanted. Only the luxuries depend on what agents value, and they come last.
 
+### 1e. The chains: from the ground to use (Zach, 22 Oct)
+
+```
+TIMBER   standing wood (a forest, or a managed woodlot that regrows)
+           └ fell (axe; a crew for big trees) → logs: heavy, bulky; float downriver as rafts
+               ├ split → firewood (fuel: hearths, kilns, lime, bricks)
+               ├ charcoal clamp (about 5 timber → 1 charcoal: light, so it travels) → smelting and smithing
+               ├ saw pit (2 sawyers; later a sawmill on a water wheel) → planks and beams
+               │    → buildings, carts, boats, fittings
+               ├ old-growth oak → great beams (big halls, mill axles, keels: §1c)
+               ├ pine → tar kiln → pitch (boats)
+               └ oak bark → tannin (tanning hides: see HIDES)
+
+STONE    a quarry site (hills, a ridge)
+           └ quarry (a crew, iron tools, dangerous) → rough stone: very heavy, one edge by cart at most
+               ├ mason → dressed stone (walls, arches, columns, upper storeys: 02i §2c)
+               ├ mason → millstones (from a hard stone, found in few places)
+               ├ break → gravel (roads)
+               ├ limestone + kiln + fuel → lime → mortar (stone building), and lime for tired fields
+               └ slate → roofs that do not burn
+
+CLAY     a riverbank
+           └ dig → clay: heavy
+               ├ potter + kiln + fuel → pottery: jars and bins (storage that cuts spoilage)
+               ├ mould, dry, fire in a kiln → bricks (walls, ovens, hearths)
+               └ with wattle → daub (cheap walls)
+
+COPPER   a seam → mine (deep: a crew, props, rope) → ore: heavy
+           └ smelt near the mine (charcoal + bellows) → copper: light for its value
+               └ smith (anvil, bellows, hearth) → tools, fittings, blades, coin
+IRON     the same chain, with far more charcoal and a higher skill (a bloomery)
+
+FIBRE    a flax or hemp field → ret, break, spin → thread → rope, sacks, nets, sails; cloth (parked); paper (rags: 02h §2)
+HIDES    cattle and game → tannery (pits, oak bark, water, rounds of waiting) → leather: harness, bellows, packs, saddles
+           └ scraped and dried instead → parchment (02h §2)
+```
+
+**Where each step happens (Weber's location rule).** A step that loses weight is done near the source, so less is carried. A step
+that gains weight, or makes something fragile, is done near the market:
+
+| Step | Weight | So it sits |
+|---|---|---|
+| charcoal (5 to 1) | loses | in the wood |
+| smelting ore | loses | at the mine |
+| dressing stone | loses a little | at the quarry |
+| quarrying, felling | the raw stuff is heavy | at the source; carried one edge at most, or floated |
+| milling | about even | at the river (power), between fields and town |
+| baking | gains (water) | in town |
+| building | everything converges | where the building is |
+
+**Fuel is the hidden spine.** Hearths, charcoal, lime, bricks, pottery, smelting and smithing all burn wood. A region's woods are
+the limit on everything it makes, which is why managed woodlots (02e §4) and charcoal's weight loss matter, and why 37.4's
+woodland trend is economic.
+
+**Each step is a trade and a building part:** charcoal burner, sawyer, quarryman, mason, potter, brickmaker, tanner, smelter,
+smith; their fittings or works (charcoal clamp, saw pit, quarry, lime kiln, kiln, tannery, bloomery) join 02i's vocabulary
+as each chain is built.
+
 ### 1d. Resources that add something new, not more (Zach, 22 Oct)
 
 §1c's rule (every hard resource multiplies something the society already does) is too narrow. The more interesting resources

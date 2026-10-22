@@ -73,6 +73,33 @@ or a dormitory grows with its room.
 **The result:** a hamlet builds small rooms; a town builds halls; a capital builds a great hall that only it can afford, out of oak
 or stone. That is the same threshold pattern as every other layer (02c §8).
 
+### 2c. Storeys: building up instead of out (Zach, 22 Oct)
+
+Land is finite (02e §3.9), so a crowded node builds up. A storey adds rooms without adding footprint, at a higher cost per room,
+and it needs stone below it:
+
+| Storey | Cost of a room there (x the ground floor) | Needs | Holds |
+|---|---|---|---|
+| ground | x1.0 | any material | anything, and **the heavy fittings only here**: stalls, cellar, kiln, millstones, water wheel, anvil, press |
+| second | x1.3 (floors, stairs, a stronger ground floor) | **stone ground-floor walls**, or a timber frame on a stone footing | light fittings: beds, shelves, benches, desks, looms |
+| third | x1.6 | **stone throughout** below it | light fittings |
+| fourth and up | not for now | | |
+
+**Large buildings must have stone (Zach).** The material limits of §2b become:
+
+| Material | Room size | Storeys | Rooms in a building |
+|---|---|---|---|
+| wattle and timber | up to about 10 people | 1 | 2 |
+| timber frame on stone | up to about 25 | 2 | 6 |
+| stone or brick | larger, with great beams, columns or arches | 3 | limited by labour |
+
+**Consequences:**
+
+- **Towns build up, villages build out.** Where land is short, a third storey is cheaper than land you do not have.
+- **Stone becomes the material of permanence and density.** A town's quarry and its masons (§2d of 02g's chains) are what let it
+  grow upward. A town without stone stays low and spreads.
+- **Fire climbs.** A fire on a lower storey reaches the ones above (§6); stone walls slow it, timber floors carry it.
+
 ## 3. The fittings (a closed vocabulary)
 
 A closed list, like the old channel selectors: every fitting has a cost, a capacity, upkeep, prerequisites and one hook in the
@@ -177,6 +204,7 @@ left for collection (02g §4). The tree is what owners tend to build, not a rule
    lock and anvil-bellows, with the rest by era.
 3. **Booking rooms as channels** (§4), on the old channel record?
 4. **Fire spreading from forges and kilns to neighbouring rooms** (§6)?
+7. **Storeys** (§2c): up to three, x1.3 and x1.6 per room, stone below; heavy fittings on the ground floor only?
 6. **Capacity that scales** (§2b): cost growing with capacity to the 0.7, adjoining rooms at x0.8, limits by span (great beams
    or stone for big halls), rooms per building, heat, upkeep, land and fire?
 5. **Document capacity in documents or in pages** (§3, shelves)? Pages tie archives to what reading costs in the prompt; documents are
