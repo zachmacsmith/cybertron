@@ -8,7 +8,7 @@
 | Phase | What | State |
 |---|---|---|
 | P0 | Design note (diagnosis, critique of the brief, plan) and this log | done |
-| R0 | New engine phase 0 (`cybertron2/`): households in a forest, first LLM run | run done (docs/review/38_space_engine/01_forest_run.md); fixes proposed |
+| R0 | New engine (`cybertron2/`), runs 1-2, perception | **handed to 37.4** on `wp/cybertron2` (board Post 3); 37.2 back on the economy |
 | P0d | Shelter specification (02e): houses as the first generic building, upkeep, breaks, the cold, tenure | specified; under discussion |
 | P0c | Economics guide (02c) and ladder analysis with skill by practice and space (02d) | done; under discussion |
 | P0b | Productivity analysis: what an action is worth under autarky, spot trade and institutions (02b) | done; design under discussion with Zach, nothing built |
@@ -32,6 +32,17 @@ calls (scripted dry runs and unit tests only); everything generated can be fixed
   agents) and make flax compete with grain for plots. Parked in favour of shelter, which reuses the building model.
 
 ## Log
+
+### 22 Oct (night, handoff)
+
+- Zach: hand cybertron2 to the environment agent (37.4) and come back to the economy. Wrote the handoff
+  (docs/review/38_space_engine/README.md) and cybertron2/README.md, made `wp/cybertron2`, posted Post 3 on the board. 37.4 has taken
+  it over (its devlog, 254c799).
+- Run 2 written up (38.03): the Irons never raided; they traded 9 blades for 31.5 food, handed over before payment; the Alders paid
+  (25 food, nearly emptying their stock before winter), Wynn did not; Torvald and Brenna starved in round 16. $3.92.
+- Zach: put the space runs on Hugging Face in their own folder, marked experimental. Wrote cybertron2/publish_hf.py
+  (experimental/cybertron2/ on the dataset, out of the catalog; ids redacted; privacy gate). Staged and audited clean; **not
+  uploaded**: no HF token in this container and huggingface_hub not installed.
 
 ### 22 Oct (night, perception built; second run)
 
