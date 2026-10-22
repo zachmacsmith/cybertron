@@ -41,3 +41,20 @@ those things:
 - **No model usage to build or test.** Dry runs with scripted bots, unit tests, flows checks. Report the dry-run evidence.
 - **Hand-crafting must stay possible**: anything generated or emergent can be fixed explicitly in a spec.
 - **Measure what the mechanic is for** (each brief lists its acceptance checks), and add any new engine gap to docs/engine_gaps.md.
+
+## Development logs and check-ins
+
+Every package keeps a log so its work can be followed without asking.
+
+- **Branch** `wp/<name>` from `origin/bench/first-batch`: 37.1 `wp/demography`, 37.2 `wp/economy`, 37.3 `wp/inst-cross`,
+  37.4 `wp/environment` (later 37.5 `wp/frontier`, 37.6 `wp/population`, 37.7 `wp/coordination`).
+- **Log file** `docs/review/37_growth/devlog_37.N.md` on that branch. Append entries, newest last, headed with the UTC time.
+  Each entry, a few lines per heading:
+  - **Doing:** what you are working on now.
+  - **Found:** what the code actually does, with `file:line` references, especially where it differs from the brief.
+  - **Decided:** each design choice, why, and the alternatives you rejected.
+  - **Open questions** for Zach (mark them `Q:` so they can be grepped).
+  - **Next:** the next step.
+- **Push regularly:** commit the log and code together at least every hour and after each decision, with
+  `git push -u origin wp/<name>`. Small commits are fine; unpushed work cannot be checked.
+- **Blockers go in the log first**, then stop and ask rather than work around them silently.
