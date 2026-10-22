@@ -1,0 +1,13 @@
+extends: [village7]
+# temperament_pilot (docs/review/34_temperament.md §5.2): the base run of the controlled pilot. A small commons world with
+# personality.model hexaco. Once it has played a few rounds, fork it with one seat's profile varied one dimension at a time
+# (docs/review/34_temperament_scripts/pilot.py writes the set_temperament schedules and the fork commands) and measure the
+# seat's decisions in the forked rounds, not its text.
+# norms: uncorrelated until the published tables are filled in (cybertron/temperament.py NORMS); the pilot varies one
+# dimension at a time, so the joint correlations do not enter its contrasts.
+rounds: 8
+models: {mix: all_weak}
+personality:
+  model: hexaco
+  temperament: {norms: uncorrelated}
+shared_archive: {namespace: temperament_pilot}

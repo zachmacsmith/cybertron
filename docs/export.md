@@ -81,7 +81,7 @@ Not yet exported: `state_deltas` (per-round snapshot diffs) and `observer_assess
 
 ## Tables
 
-Dataset schema version **2.7** (`schema_version` 2, `schema_minor` 7). Types: `str`, `int`, `float`, `bool`, `json` (JSON text). Every column may be null.
+Dataset schema version **2.8** (`schema_version` 2, `schema_minor` 8). Types: `str`, `int`, `float`, `bool`, `json` (JSON text). Every column may be null.
 
 ### `runs`
 
@@ -183,6 +183,7 @@ Dataset schema version **2.7** (`schema_version` 2, `schema_minor` 7). Types: `s
 | `personality_reciprocity` | float | personality trait reciprocity (0..1) |
 | `personality_talkativeness` | float | personality trait talkativeness (0..1) |
 | `personality_json` | json | every personality trait |
+| `temperament_json` | json | personality.model hexaco: percentiles of the factors, facets, preferences and values, the archetype, its conditioning, natural regions, dimensions shown, latent (cybertron/temperament.py) |
 | `start_value` | float | holdings value at the start |
 | `end_value` | float | holdings value in the last snapshot |
 | `final_score` | float | final goal score (score.json goals[agent].score) |

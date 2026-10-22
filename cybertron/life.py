@@ -1281,8 +1281,11 @@ def _birth(k, c) -> str | None:
         return EV._goal_text(g, sw)
 
     model = _pool(k)[sp["stats"]["tier"]]
+    from cybertron import temperament as TM                                # review 34: the parent's profile with noise (own stream)
+    tprof = TM.inherit(k, [next((a for a in k.inst["agents"] if a["id"] == parent), None)], f"made:{c['id']}", arch,
+                       sp["cls"]) if TM.on(k.spec) else None
     child = {"goal": goal_fn, "personality": traits, "personality_text": (atxt + " " + ptxt).strip(), "archetype": arch,
-             "archetype_text": atxt, "model": model, "tier": sp["stats"]["tier"],
+             "archetype_text": atxt, "model": model, "tier": sp["stats"]["tier"], "temperament_profile": tprof,
              **({"profiles": _child_profiles(k, c["id"], sp["cls"])} if (k.spec.get("prompts") or {}).get("assign") else {}),
              **({"strategy_prompt": random.Random(f"{k.inst['seed']}|strategy_prompt|{c['id']}").random() < share}   # keyed by the order:
                 # the child's own id does not exist until add_agent

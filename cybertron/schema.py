@@ -153,6 +153,11 @@ def _traits():
     return tuple(P.TRAITS)
 
 
+def _temperament_dims():
+    from cybertron import temperament as T
+    return tuple(T.DIMENSIONS)
+
+
 def _stats():
     from cybertron import media as MD
     return tuple(MD.STATS)
@@ -472,6 +477,17 @@ def _ann():
         "goals.outcome_only": dict(types=("bool",)),
         "goals.none": dict(types=("bool",)),                           # the no-goal control: no goal or score wording in prompts
         "personality.none": dict(types=("bool",)),                     # no temperament text in prompts
+        "personality.model": dict(types=("str",), enum=("legacy", "hexaco")),  # review 34 (cybertron/temperament.py)
+        "personality.temperament.norms": dict(types=("str",), enum=("published", "uncorrelated")),
+        "personality.temperament.archetypes": dict(types=("str",), enum=("natural", "drawn")),
+        "personality.temperament.budget": dict(types=("int",), range=(1, None)),
+        "personality.temperament.values_max": dict(types=("int",), range=NONNEG),
+        "personality.temperament.examples": dict(types=("bool",)),
+        "personality.temperament.shift": dict(kind="map", keys=_temperament_dims),
+        "personality.temperament.shift.*": dict(types=("number",)),
+        "personality.temperament.spread": dict(kind="map", keys=_temperament_dims),
+        "personality.temperament.spread.*": dict(types=("number",), range=NONNEG),
+        "personality.temperament.inherit_sd": dict(types=("number",), range=NONNEG),
         "goals.show_rules": dict(types=("bool",)),
         "goals.score_at_end": dict(types=("bool",)),
         "goals.aims": dict(types=("bool",)),                           # review 24: aims (time structure) instead of texts
@@ -589,6 +605,15 @@ EXTRA = {
     "goals.outcome_only": False,
     "goals.none": False,
     "personality.none": False,
+    "personality.model": "legacy",                                     # review 34: hexaco (cybertron/temperament.py); legacy = byte-identical
+    "personality.temperament.norms": "published",
+    "personality.temperament.archetypes": "natural",
+    "personality.temperament.budget": 5,
+    "personality.temperament.values_max": 2,
+    "personality.temperament.examples": False,
+    "personality.temperament.shift": {},
+    "personality.temperament.spread": {},
+    "personality.temperament.inherit_sd": 0.3,
     "goals.show_rules": True,
     "goals.score_at_end": True,                                        # life: lineage override and departures (scorer.score)
     "actions.core_only": False,
@@ -665,6 +690,21 @@ DOCS = {
                         "only, and the score stays a hidden measure (user, 9 Oct)",
     "goals.none": "the no-goal control: agents get no private goal, and every goal or score line is left out of their prompts (header, strategy and closing nudges, the manual's goals section, final-round guesses)",
     "personality.none": "no temperament text in the prompts (with goals.none: agents' own tendencies inside the world)",
+    "personality.model": "legacy: the 7 Beta(2, 2) traits and archetypes; hexaco: HEXACO facets, strategic preferences and Schwartz "
+                         "values drawn jointly, archetypes as regions, behaviour sentences on 5 levels (docs/review/34_temperament.md)",
+    "personality.temperament": "the hexaco model's settings (personality.model hexaco)",
+    "personality.temperament.norms": "published: the norms tables in cybertron/temperament.py (refused while unfilled); "
+                                     "uncorrelated: every dimension independent",
+    "personality.temperament.archetypes": "natural: an agent's archetype is the region its drawn profile lies in; drawn: drawn "
+                                          "first (personality.archetypes.prob, weights) and the profile conditioned into it",
+    "personality.temperament.budget": "temperament sentences per agent (the archetype's included)",
+    "personality.temperament.values_max": "at most this many of the sentences are values",
+    "personality.temperament.examples": "append a worked example to the dispositions that did nothing in the published runs",
+    "personality.temperament.shift": "population mean shift per dimension, in SD units (a conformist society: {conformity: 0.8})",
+    "personality.temperament.shift.*": "mean shift of this dimension, in SD units",
+    "personality.temperament.spread": "population SD multiplier per dimension",
+    "personality.temperament.spread.*": "SD multiplier of this dimension",
+    "personality.temperament.inherit_sd": "a child's latent noise (SD units) around its parents' blend (0 with life.mutation off)",
     "goals.outcome_only": "review 14 A: draw only outcome goals (wealth, rank, security, influence, following, lineage, the commons; "
                           "goal_registry.GOAL_CLASS): never a goal naming an institution or an action recipe, no institution or "
                           "counter goals",
@@ -1506,13 +1546,17 @@ def _check_child_fixed(path, v) -> list:
 
 
 def _check_explicit_traits(path, v) -> list:
-    """{trait: 0..1} / none or null (this agent has no temperament text)"""
+    """{trait: 0..1} / none or null (this agent has no temperament text). personality.model hexaco: any dimension of
+    cybertron/temperament.py (a percentile 0..1) and `archetype`."""
     if v is None or v == "none":
         return []
     if not isinstance(v, dict):
         return [f"{path}: expected {{trait: value}} or none, got {v!r}"]
-    names = _traits()
-    errs = [f"{path}.{k}: unknown key in {path}{_close(k, names)}; known: {', '.join(names)}" for k in v if k not in names]
+    names = _traits() + _temperament_dims()
+    errs = [f"{path}.{k}: unknown key in {path}{_close(k, names)}; known: {', '.join(names)}, archetype" for k in v
+            if k not in names and k != "archetype"]
+    if "archetype" in v and v["archetype"] not in _archetypes() + ("none", None):
+        errs.append(f"{path}.archetype: unknown archetype {v['archetype']!r}; known: {', '.join(_archetypes())}")
     return errs + [f"{path}.{k}: expected a number in [0, 1], got {x!r}" for k, x in v.items()
                    if k in names and (isinstance(x, bool) or not isinstance(x, (int, float)) or not 0 <= x <= 1)]
 

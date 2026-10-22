@@ -30,11 +30,12 @@ from dataclasses import dataclass
 from pathlib import Path
 
 SCHEMA_VERSION = 2           # major: a column removed, renamed, or changed in type or meaning (docs/data_format.md)
-SCHEMA_MINOR = 7             # additive changes (a new column or table) since the major. 1: channels v2 (wave 9 C) columns;
+SCHEMA_MINOR = 8             # additive changes (a new column or table) since the major. 1: channels v2 (wave 9 C) columns;
                              # 2: review 20 (runs.memory_text, runs.dm_delta, turns.dm_mode); 3: runs.engine_version (D-43);
                              # 4: history mode (runs.history_chunk, runs.history_restarts, turns.history_*); 5: the attacks table (harm);
                              # 6: the interviews table (cybertron/interview.py; blobs kind interview_prompt)
                              # 7: the calls_seen table (what each model call was shown for the first time; replaces viewer.json)
+                             # 8: agents.temperament_json (personality.model hexaco, review 34)
 TYPES = ("str", "int", "float", "bool", "json")
 
 
@@ -146,6 +147,8 @@ SCHEMA: dict[str, tuple] = {
         ("goal_spans_json", "json", "[{r0, r1, primary}] the goals held and their rounds"),
         *((f"personality_{t}", "float", f"personality trait {t} (0..1)") for t in TRAITS),
         ("personality_json", "json", "every personality trait"),
+        ("temperament_json", "json", "personality.model hexaco: percentiles of the factors, facets, preferences and values, the "
+                                     "archetype, its conditioning, natural regions, dimensions shown, latent (cybertron/temperament.py)"),
         ("start_value", "float", "holdings value at the start"),
         ("end_value", "float", "holdings value in the last snapshot"),
         ("final_score", "float", "final goal score (score.json goals[agent].score)"),
@@ -841,6 +844,7 @@ def run_tables(run, run_id: str | None = None, running_scores: bool = False, *, 
             "goal_fixed": g.get("fixed"), "goal_reachable": (a.get("goal") or {}).get("reachable"),
             "n_goal_changes": n_changes.get(aid, 0), "goal_spans_json": spans,
             **{f"personality_{t}": pers.get(t) for t in TRAITS}, "personality_json": pers or None,
+            "temperament_json": a.get("temperament") or None,
             "start_value": (gt.get("start_values") or {}).get(aid), "end_value": (last.get("values") or {}).get(aid),
             "final_score": gs.get("score"), "lineage_score": asc.get("lineage_score"), "strategy_prompt": asc.get("strategy_prompt"),
             "n_calls": cnt[0], "tokens_in": cnt[1], "tokens_out": cnt[2], "n_call_errors": cnt[3]})

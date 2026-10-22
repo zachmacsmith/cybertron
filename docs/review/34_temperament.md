@@ -1,6 +1,6 @@
 # Review 34: temperament and values, a redesign brief
 
-*22 Oct 2026. A brief for an agent to build from: nothing here is built. Read docs/threads.md ("Temperament and values
+*22 Oct 2026. A brief for an agent to build from; section 8 says what was built. Read docs/threads.md ("Temperament and values
 redesign") for the discussion that led here, and docs/review/33_positions.md for the positions system being built in parallel
 on `wp/positions` (see section 7 on how the two fit together).*
 
@@ -121,6 +121,71 @@ it cares about; goals say what it wants. Keep the three apart in the prompt (ide
 can vary one at a time. The positions agent edits context.py, agents.py and generator.py (class and identity text): keep this
 work's edits to those files minimal (a hook each) and put the substance in the new module, to keep merges easy. Coordinate the
 prompt section order with `wp/positions` before merging.
+
+## 8. As built (22 Oct 2026)
+
+Built on `claude/charming-wozniak-4iqwdk` (on `subsistence`), opt-in; `personality.model: legacy` (the default) is unchanged:
+the legacy draws still happen, so no other draw of a world moves, and the golden runs' events and prompts are identical.
+
+**Not done: the norms.** The published tables (HEXACO-PI-R inter-factor correlations and facet loadings, the Schwartz value
+intercorrelations, factor-value and facet-preference correlations) could not be read from the build environment (its network
+policy refused hexaco.org, PMC, OSF, ResearchGate and the publishers), and section 3 forbids made-up numbers. `NORMS` in
+cybertron/temperament.py lists each table with the source to take it from and stays empty; `personality.temperament.norms:
+published` (the default) refuses to draw until `factor_corr`, `facet_r` and `value_corr` are filled (factor-value and
+facet-preference correlations may stay empty: 0). `norms: uncorrelated` draws every dimension independently, with no
+coefficients at all: usable for the pilot, which varies one dimension at a time, and for tests. Filling the tables needs no code
+change; the sampler is tested against a synthetic fixture (tests/test_temperament.py) and reproduces its correlations within 0.04.
+
+**cybertron/temperament.py** (the substance; small hooks elsewhere):
+- Model: the 6 factors and the 10 Schwartz values are one latent multivariate normal (factor block, value block, factor-value
+  block; the off-diagonals shrunk in steps of 0.02 only if the joint matrix is not positive definite, recorded as `Model.shrunk`).
+  A facet = its weights x the factors + unique noise, the weights solved from the facet's correlations with its domain(s)
+  (one for most, H/E/A for Altruism); a preference = weights x the facets or factors named in `pref_r` + its own noise. A
+  dimension's score is its normal CDF: a percentile of the reference population. Levels are that population's quintiles.
+- Values: Schwartz's 10 (not Moral Foundations: the regime worlds' lever is conformity and security against self-direction and
+  universalism, section 3; Moral Foundations would be a second table and renderer).
+- Archetypes: all 11 of archetypes.py are regions (`REGIONS`: conditions on percentiles, a behavioural sentence each), so the
+  sentence never contradicts the traits. `personality.temperament.archetypes: natural` (the default) names an agent's archetype
+  only when its freely drawn profile lies in a region (the deepest, if several), so the population stays the norms'; `drawn`
+  draws one first as before (`personality.archetypes`: prob, weights; two draws per agent) and conditions the profile into it by
+  rejection sampling (clamping after 5,000 tries; a child's inherited profile is clamped, never redrawn). With the base spec's
+  prob 0.5, `drawn` pushes half the population into the regions' corners, away from the norms: use it for archetype sweeps, not
+  as a population model. Assigned archetypes (`archetypes.explicit`, or `archetype` in `personality.explicit.<id>`) condition in
+  either mode; enabled, weights (> 0), exclude and gating say which archetypes a world names in both. Under natural a child is
+  named by its own profile. An explicit dimension that contradicts an explicit archetype is an error.
+- Rendering: 4 sentences per dimension (very low, low, high, very high; the middle quintile says nothing), each a concrete
+  behaviour in the world, none naming a goal, payoff or score (so goalless worlds need no rewording; tested). The archetype's
+  sentence first (the dimensions it is defined by are not repeated), then the most extreme dimensions across the three layers,
+  `budget` sentences in all (5), values at most `values_max` (2). `examples: true` appends a worked example to sincerity,
+  fairness, forgiveness, trust and reciprocity at the extremes (section 3's open question; off by default, to be tested).
+- Streams: `temperament:<seed>:<agent>` per agent (generation and arrivals), `temperament:<seed>:child:<key>` per birth.
+- Spec (schema.EXTRA, frozen per run): `personality.model` legacy|hexaco; `personality.temperament`: norms, archetypes, budget, values_max,
+  examples, shift and spread (per dimension: mean shift in SD units, SD multiplier; a facet's or preference's of its own noise),
+  inherit_sd (0.3). `personality.explicit.<id>` takes any dimension (percentile 0..1; factors and values set the latent before
+  facets and preferences are derived) and `archetype`.
+- Records: `inst.agents[*].temperament` (percentiles by layer, archetype, conditioning, regions, explicit dimensions, the
+  dimensions shown, the latent); `personality` is {} and `archetype_text` "" under hexaco (the archetype's sentence is in
+  `personality_text`). Export: `agents.temperament_json` (schema 2.8).
+- Inheritance: pairs.py (both parents) and life.py (the Maker's parent) blend every latent component, u x a + (1 - u) x b, plus
+  Normal(0, inherit_sd) (0 with `life.mutation.enabled: false`); the child's archetype (inherited or mutated as before) conditions it.
+
+Hooks: generator.py (after the legacy draws and archetypes.assign), events.draw_agent (arrivals and children), pairs._mix and
+life.py's birth (the inherited profile), schema.py (keys, docs, explicit check), export.py (the column), interventions.py
+(`set_temperament`, below). context.py, agents.py and the prompt order are untouched: the text sits where "Your temperament:"
+always has, so section 7's order (identity, temperament, goal) is for the positions merge to settle.
+
+**Pilot (section 5.2).** `cybertron/specs/temperament_pilot.yaml` (village7, 8 rounds, all weak models, hexaco with uncorrelated
+norms) is the base run. The intervention `set_temperament {agent, profile}` sets some of a seat's dimensions (and archetype)
+from a round on, keeping the rest of its latent, and rebuilds its system prompt; `34_temperament_scripts/pilot.py` writes one
+schedule per arm (each listed dimension at each listed percentile, plus a control; every arm drops the seat's archetype unless
+`--keep-archetype`) and prints the fork commands (`cybertron fork RUN --at N --apply ARM.yaml --replicates K`). Checked end to end
+on a dry run; not run with models (model usage). Interviews cannot do this (they rebuild the recorded context, so a profile cannot
+vary). The fixed situations of section 5.2 (a bribe, a dubious warrant, a loan, a wronged partner) are not built: the pilot
+measures what the seat does in the base world's rounds; a situation would be a set of interventions at the fork (an offer by
+`inject_action`, a notice) and is the next step.
+
+**Not done:** the norms (above); the text judge (section 5.3); extending the analysis scripts to `temperament_json` and the
+conditioned measures (section 5.1, for runs made with the model); Moral Foundations.
 
 ## Scripts (34_temperament_scripts/)
 
