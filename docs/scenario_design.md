@@ -64,8 +64,11 @@ belief, procedure, office and succession, an outside patron, exit, numbers.
 
 ## 5. Life and kinship (current engine limits)
 
-- Children take full turns the round after birth (no childhood); there are no households or marriage rules; any two agents can have a
-  child (gaps G-6, G-7). Kinship told in prompts does not constrain behaviour.
+- By default children take a model call every round from the round after birth (minors have 2 actions for 6 rounds); there are no
+  households or marriage rules; any two agents can have a child (gaps G-6, G-7). Kinship told in prompts does not constrain
+  behaviour. 37.1 (`wp/demography`, `cybertron/specs/fragments/growth.yaml`) adds, opt-in: cheap conception with costly raising,
+  children's work for the household, loyalty or estrangement at coming of age by the food given, minors acting every k rounds,
+  households as minimal institutions, inheritance rules, and heads inheriting the seat's model.
 - Office succession by `seniority` is join order among eligible members, not age.
 
 ## 6. Measurement
