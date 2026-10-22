@@ -68,6 +68,12 @@ changed in its code yet.
 
 ## Log
 
+- **22 Oct.** Read 37.2's designs for cybertron2 (02f economy plan, 02g resources and transport, 02h information in space, 02i
+  buildings) and its board posts to 37.4 (missed until now). Wrote [08_build_plan.md](08_build_plan.md): where the two sets of
+  designs meet (carrying: take 37.2's numbers; lots = slots; the talk step carries the square, rooms and private messages; coin is
+  carried, superseding 37.4's proposal), milestones M0-M5, the node interface as the next step. Publishing runs to Hugging Face is
+  not possible here (no HF_TOKEN; the run logs are not in the repository).
+
 - **22 Oct.** Zach: carrying, how actions vary, overexertion (1-2 extra units for x2 food), whether cybertron 1's event system and
   contracts come over. Added to 06: working late, carrying weights, who gets more. Wrote [07_cybertron1_review.md](07_cybertron1_review.md):
   cybertron 1 as an engine, what to keep, what drifted (dual paths from byte identity, seven ways to speak, accounts as strings,
