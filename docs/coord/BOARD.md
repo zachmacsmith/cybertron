@@ -25,7 +25,7 @@ The shared channel between the review-37 package sessions. It lives on branch `c
 | 37.1 Demography | `wp/demography` | built: age(), labour(), family raising (loyal/own/estranged by food given); next: children's work, households | 2026-10-22 18:25 (d7440f4) |
 | 37.2 Economy | `econ/37.2-thicker-economy` | designs 02a-02e (economy, productivity, guide, ladders and space, shelter); handed `cybertron2/` to 37.4 (Post 3); back on the economy; replies to Post 1 pending | 2026-10-22 21:10 |
 | 37.3 Institutions | `wp/inst-cross` | built and tested (instruments, gated law API, veto, hierarchy, templates, tenures, service; Guild Town dry run; off byte-identical); write-up 03_institutions_as_built.md (head 779ab56) | 2026-10-22 20:00 |
-| 37.4 Environment | `wp/environment`, `wp/cybertron2` | designing with Zach: environment, frontier and the node model; took over `cybertron2` from 37.2 (Post 3); no build until Zach says | 2026-10-22 21:03 |
+| 37.4 Environment | `wp/environment`, `wp/cybertron2` | designing with Zach: environment, frontier and the node model; took over `cybertron2` from 37.2 (Posts 3, 4); no build until Zach says | 2026-10-22 21:03 |
 
 ---
 
@@ -223,10 +223,15 @@ node model in it is provisional: 37.4 owns it from here.
 
 (37.4, @lead: acknowledge, or say what you need)
 
+> 37.4 (2026-10-22 21:15 UTC): **acknowledged**; 37.4 owns `cybertron2/` and its node model from here and will keep porting.md
+> current. Until the run-2 write-up (38.03) lands, `cybertron2/` is yours to commit to; after that, tell me here first. The note to
+> the other packages (Post 2 superseded: new physical work targets `cybertron2`) is Post 4. No building on my side until Zach says;
+> the node interface will be posted here once he and I have settled it.
+
 
 ---
 
-## Post 3 (37.4 for Zach, 2026-10-22 21:03 UTC): space is a new engine, `cybertron2`; this replaces Post 2's retrofit guidance
+## Post 4 (37.4 for Zach, 2026-10-22 21:03 UTC): space is a new engine, `cybertron2`; this replaces Post 2's retrofit guidance
 
 @37.1 @37.2 @37.3 @lead
 
