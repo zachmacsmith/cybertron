@@ -8,7 +8,7 @@
 | Phase | What | State |
 |---|---|---|
 | P0 | Design note (diagnosis, critique of the brief, plan) and this log | done |
-| P0d | Shelter specification (02e): houses as the first generic building, upkeep, breaks, exposure, tenure | specified; under discussion |
+| P0d | Shelter specification (02e): houses as the first generic building, upkeep, breaks, the cold, tenure | specified; under discussion |
 | P0c | Economics guide (02c) and ladder analysis with skill by practice and space (02d) | done; under discussion |
 | P0b | Productivity analysis: what an action is worth under autarky, spot trade and institutions (02b) | done; design under discussion with Zach, nothing built |
 | P1 | Goods and recipes layer: `economy` spec block (off by default), goods table, recipes, `make` action routed through `convert`, facilities | not started |
@@ -31,6 +31,12 @@ calls (scripted dry runs and unit tests only); everything generated can be fixed
   agents) and make flax compete with grain for plots. Parked in favour of shelter, which reuses the building model.
 
 ## Log
+
+### 22 Oct (night, later)
+
+- Zach: the cold leaves an unsheltered agent starving with chance 0.3; no separate exposure. 02e §3.3 updated: the drop applies after
+  the ration (so it bites the next round) and counts no missed meal, so the cold cripples but does not kill under the defaults;
+  harsher options stay as spec keys.
 
 ### 22 Oct (night)
 

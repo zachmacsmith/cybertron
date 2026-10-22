@@ -1,4 +1,4 @@
-# 37.2e Shelter: houses, upkeep, exposure
+# 37.2e Shelter: houses, upkeep, the cold
 
 *22 Oct 2026. Specification for discussion; nothing built. Shelter is the first use of the generic building model (02a §3.1, guide
 §6). Clothing is parked (02_economy_worklog.md). Numbers not marked ENGINE are proposals.*
@@ -53,22 +53,24 @@ Each round every agent has one shelter state:
 | **housed** | an occupant of a sound house within its beds, hearth lit in the cold | 1.0 | 1.0 |
 | **cold house** | sound but no fuel in a cold round | 1.0 | 1.3 |
 | **poorly housed** | the house is damaged, or the agent is over its beds | 1.2 | 1.5 |
-| **unsheltered** | no house, or a ruined one | 1.5 | 2.0, and exposure (§3.3) |
+| **unsheltered** | no house, or a ruined one | 1.5 | 2.0, and a 30% chance of falling to starving (§3.3) |
 
 The ration multiplier changes how much an agent must eat to count as fed. It is one hook in `_eat`: ration x `shelter_mult(k, aid)`.
 Everything after it (stages, missed meals, the hazard) stays as it is.
 
-### 3.3 Exposure in the cold
+### 3.3 The cold: a chance of falling straight to starving (Zach, 22 Oct)
 
-An unsheltered agent in a cold round is exposed with chance 0.3 (seeded per agent and round). Exposure counts as a missed meal
-(stage down one, `missed` + 1), whatever it ate.
+An unsheltered agent in a cold round falls straight to starving (hunger stage -2) with chance 0.3, seeded per agent and round. That
+is the only extra effect of the cold beyond the higher ration. There is no separate exposure mechanism.
 
-- Two exposures take a fed agent to starving. Three misses in a row bring the starvation hazard, and death comes through the
-  existing path, cause `exposure`.
-- **Why not instant death by default.** Deaths through the hunger stages leave the agent rounds to respond (find a bed, pay for
-  one, beg) and keep one mortality path that is legible ("you are cold and starving"). A random instant kill wipes out plans and
-  says nothing about the society. Harsher worlds can set `exposure.effect: starving` (straight to stage -2) or `death` (a chance
-  of immediate death).
+- **When it applies:** after the ration step, so it bites the next round. A starving agent has at most 2 actions, and only trade,
+  talk, produce, vote and look-ups. Eating applies first and would otherwise lift it straight back to hungry.
+- **It cripples; hunger kills.** The drop sets the stage but does not count a missed meal, so it does not start the starvation
+  hazard. An unsheltered agent who keeps eating (2 rations in the cold) climbs back one stage per fed round, but each further cold
+  round may knock it down again. Deaths still come only through missed meals and the existing hazard. A cold spell without
+  shelter costs an agent its politics and most of its turn, not usually its life.
+- **Harsher worlds:** `unsheltered_cold.missed: true` also counts a missed meal (so a long spell can kill), or
+  `unsheltered_cold.death` adds a chance of immediate death.
 
 ### 3.4 Cold
 
@@ -137,7 +139,7 @@ old worlds and become a building type under `economy.buildings`.
 
 - Housed: `Home: Aldric's house (sound; 4 of 5 beds); hearth: 6 timber (2 a round in the cold); cold in 3 rounds.`
 - Damaged: `Your house is damaged (a break, round 14): you eat 1.2 a round, 1.5 in the cold. Repair: 4 timber, 2 stone, 3 work.`
-- Unsheltered: `You have no shelter: you eat 1.5 a round, 2 in the cold, and the cold may weaken you as a missed meal does.`
+- Unsheltered: `You have no shelter: you eat 1.5 a round, 2 in the cold, and each cold round may leave you starving.`
 - Owners see their houses summed: `Houses: 3 (2 sound, 1 damaged); 11 occupants; rent due 6 coin a round.`
 
 ## 4. Economics
@@ -159,7 +161,7 @@ itself (timber 0.42, stone 0.63, work 2.0 as a novice). One cold round in four, 
   builder spends about 3.6. Repairs are rare and lumpy and come mostly in the cold, so a builder sells urgency: after a winter storm
   breaks several houses at once there is a queue, and whoever orders the queue has leverage.
 - **Losing shelter is costly but survivable:** unsheltered, an agent needs about 0.2 actions a round more food in a normal round and
-  0.4 more in the cold, plus the exposure risk.
+  0.4 more in the cold, plus the risk of starting a round starving.
 
 **The forest, a warning.** Five houses for 24 people burn and mend about 5.6 timber a round, about 1.9 fells. At today's felling cost
 (each fell shrinks the forest by 1% of its initial capacity) the node's forest falls to its 50% floor in about 27 rounds. That
@@ -178,7 +180,7 @@ economy:
             upkeep: {every: 10, cost: {timber: 1, stone: 1}}, breaks: {p: 0.02, cold: 0.08}}
     ration: {housed: 1.0, poor: 1.2, unsheltered: 1.5}
     cold: {housed_no_fuel: 1.3, poor: 1.5, unsheltered: 2.0}
-    exposure: {p: 0.3, effect: missed_meal}   # missed_meal | starving | death
+    unsheltered_cold: {starving: 0.3, missed: false, death: 0.0}   # chance of falling to starving; harsher options
     fuel: {normal: 0.5, cold: 2.0}            # timber a house a round
     cold_rounds: []                            # without 37.4's calendar
 start:
@@ -187,8 +189,8 @@ start:
 
 ## 6. Dry-run checks
 
-1. Housed vs unsheltered agents: food eaten and hunger stages differ as §3.2 says; exposure deaths happen only to the unsheltered in
-   the cold, and through the hazard.
+1. Housed vs unsheltered agents: food eaten and hunger stages differ as §3.2 says. About 30% of unsheltered agent-rounds in the cold
+   begin the next round starving; no death comes from the cold itself under the defaults.
 2. Upkeep and repairs make a steady timber and stone demand (per round, against §4) and a lumpy builder demand after cold rounds.
 3. A storm in the cold breaks several houses: the builder's queue and the price of repair rise (subscription and spot prices, board
    Post 1).
@@ -202,13 +204,14 @@ start:
   births.
 - **37.3:** grant and seize houses by the same moving primitive as plots; a hearth tax and labour service on building work are
   ordinary powers.
-- **37.4:** the cold phase and its shocks (storms) drive breaks, fuel and exposure; deforestation is a trend; the space interface
+- **37.4:** the cold phase and its shocks (storms) drive breaks, fuel and the fall to starving; deforestation is a trend; the space interface
   places houses on nodes and gives the land unit.
 - **37.6:** generates houses with households, their condition and stock.
 
 ## 8. Open questions (with recommendations)
 
-1. **Exposure: missed meal, straight to starving, or death?** Recommend a missed meal by default, with the harsher two as options.
+1. ~~Exposure: missed meal, straight to starving, or death?~~ **Decided (Zach, 22 Oct):** a 30% chance of falling straight to
+   starving, no separate exposure; the harsher options stay as spec keys.
 2. **Can anyone build a house anywhere?** Recommend a building needs a free lot at the node and the owner's right to the land (a plot
    held, or open land); land rules are laws.
 3. **Beds: hard or soft?** Recommend soft: over the beds is "poorly housed", not refused.
