@@ -68,6 +68,11 @@ changed in its code yet.
 
 ## Log
 
+- **22 Oct.** Zach: how do children, households and death come over (37.1 built them on cybertron 1, `wp/demography`)? Read 37.1's
+  devlog. Wrote [09_life_design.md](09_life_design.md): the design carries over, the code does not; changes for day rounds
+  (seed every age, chapters with time skips), children not agents until old enough, raising as lived memories, life events
+  located, households as houses.
+
 - **22 Oct.** Read 37.2's designs for cybertron2 (02f economy plan, 02g resources and transport, 02h information in space, 02i
   buildings) and its board posts to 37.4 (missed until now). Wrote [08_build_plan.md](08_build_plan.md): where the two sets of
   designs meet (carrying: take 37.2's numbers; lots = slots; the talk step carries the square, rooms and private messages; coin is
