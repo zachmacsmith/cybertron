@@ -76,6 +76,34 @@ retention, a directory listing and an inbox. Every part has a spatial form:
 (a node and site, or "carried"). The selectors' closed vocabulary gains `{"present": node}`; it had `{"camp": ...}`, presence at a
 camp, already.
 
+## 4b. The information ladder: wide reach costs (Zach, 22 Oct)
+
+Zach's long-held view: widespread channels should cost more, so a newspaper has costs and charges. In space this follows from the
+physics. A message reaches more people only with more copies (sheets and copying) and more nodes (carriers' rounds). The rungs:
+
+| Rung | Reach | Cost, and who pays | Reliability | Speed | Who controls it |
+|---|---|---|---|---|---|
+| **rumour** (telling merchants and travellers) | wherever they go | free to start, so nobody pays | low: it changes in every retelling, loses its source, picks up errors | the carriers' pace | nobody, so it can't be stopped either |
+| **a letter** | one reader | the sender: a sheet, writing, and a carrier (a merchant taking it along, or a paid courier) | high, if sealed and delivered | the carrier's pace | the sender; the carrier can read an unsealed one, lose it or keep it |
+| **a notice** | everyone at one node | the poster: a sheet | high, but only for those who pass and can read | it waits to be read | whoever controls the board |
+| **a newsletter or paper** | subscribers at many nodes | **the readers** (subscriptions), **patrons** (a lord's or a guild's gazette), **advertisers** (placements); each copy a sheet plus copying, each node a carrier's trip | as good as its editor | a schedule | **the editor**, the chokepoint (the old engine's papers: the editor publishes or declines letters) |
+| **a post service** (later) | anyone, anywhere on its routes | a fee per letter, or the polity's subsidy | high | scheduled and faster | whoever runs the post, who can open and delay |
+| **a press** (a later era) | thousands | a large fixed cost, almost no cost per copy | as good as its editor | a schedule | the press owner and the censor |
+
+**Rough cost of one edition reaching 50 readers at 5 nodes** (proposals, in actions):
+
+- **Copied by hand:** about 55 for copies (50 copies at about 1 action of scribe's work plus a sheet) plus about 40 for carriage
+  (5 round trips): about **1.9 actions per reader**.
+- **Printed:** about 7 for copies plus 40 for carriage plus the press's share: about **1 action per reader**. The press pays only
+  above a readership threshold, like every batch layer.
+- **Carriage dominates once copies are cheap,** so a paper rides the merchants' and the post's routes. A paper is cheapest where the
+  trade routes already run.
+
+**What the charges buy.** The old engine's media already had subscription fees, paid placements and editors (`media2`:
+`set_subscription_fee`, `buy_placement`). In space they become the real economics of a paper: the editor must cover sheets,
+copying and carriage, so a paper lives on subscribers, patrons or placements. Each of those is someone with influence over what
+it prints. Rumour is free and uncontrolled; a paper is dear and controlled. That trade-off is the politics of information.
+
 ## 5. Laws in space (37.3's to decide)
 
 Today a law is code the engine enforces everywhere at once, and everyone can read it. In a world of places, four questions:
@@ -185,6 +213,8 @@ small scale first (02f E1-E3), then grow the map.
 1. **Parchment from hides and paper from fibre** (rather than timber), with ink and wax tablets?
 2. **Documents as physical objects**, carried, copied, sealed and burned, as in §3?
 3. **Channels as media in places** (§4): gatherings, boards, letters, carried editions, all on the old channel record?
+3b. **The information ladder** (§4b): rumour, letter, notice, paper, post, press, each with its cost, payer, reliability and
+    controller; papers paid by subscriptions, patrons or placements?
 4. **Laws known only by those who learned of them**, and enforced in person outside the engine's automatic effects (§5): for 37.3
    and Zach?
 5. **Large worlds with small settled cores** (§8), after the small-scale economy works?
