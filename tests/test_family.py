@@ -153,3 +153,86 @@ def test_inherit_mode_texts_are_unchanged():
     assert "A goal both parents name" in PR.rules_text(k.spec) and "How a child is raised" not in PR.rules_text(k.spec)
     a, b = adults(k)[:2]
     assert not PR.family_on(k)
+
+
+# ---------------------------------------------------------------------- children's work and turns
+def test_a_minors_surplus_goes_to_its_parents():
+    inst, k, a, b, ch, rec = family_child(["life.labour.surplus=household", "life.labour.keep=2", "life.reproduction.maturity=6"])
+    set_food(k, a, 10)
+    set_food(k, b, 10)
+    set_food(k, ch, 9.0)                                               # eats 1, spoils a little, keeps 2, passes the rest on
+    end_round(k)
+    assert k.bal(ch, "food") == pytest.approx(2.0, abs=1e-6)
+    moved = [e["data"] for e in k.events if e["type"] == "move" and e["data"].get("why") == "household"]
+    assert sorted(d["dst"] for d in moved) == sorted([a, b]) and moved[0]["qty"] == pytest.approx(moved[1]["qty"]) and moved[0]["qty"] > 1.0
+
+
+def test_surplus_off_by_default():
+    inst, k, a, b, ch, rec = family_child(["life.reproduction.maturity=6"])
+    set_food(k, ch, 9.0)
+    end_round(k)
+    assert not [e for e in k.events if e["type"] == "move" and e["data"].get("why") == "household"]
+
+
+def test_minors_rest_between_turns():
+    inst, k, a, b, ch, rec = family_child(["life.reproduction.raising.turn_every=3", "life.reproduction.maturity=9"])
+    born = PR.state(k)["minors"][ch]["born"]
+    seen = {}
+    for _ in range(6):
+        seen[k.r] = PR.rests(k, ch)
+        end_round(k)
+    assert seen == {r: (r - born) % 3 != 0 for r in seen} and not all(seen.values()) and any(seen.values())
+    assert not PR.rests(k, a)
+    assert "You act every 3 rounds" in " ".join(PR.state_lines(k, ch))
+
+
+# ---------------------------------------------------------------------- households
+from cybertron import households as HH  # noqa: E402
+
+HOUSE = ["life.households.enabled=true", "contracts.enabled=true"]
+
+
+def test_households_off_by_default():
+    inst, k, a, b, ch, rec = family_child()
+    assert not HH.on(k) and HH.household_of(k, ch) is None and LF.law_api(k, None)["households"]() == []
+
+
+def test_a_first_birth_founds_a_household():
+    inst, k, a, b, ch, rec = family_child([*HOUSE, "life.reproduction.maturity=6"])
+    iid = HH.household_of(k, a)
+    assert iid and HH.household_of(k, b) == iid and HH.household_of(k, ch) == iid and HH.head_of(k, iid) == a
+    r = LF.law_api(k, None)["households"]()
+    assert [x["id"] for x in r] == [iid] and {m["agent"] for m in r[0]["members"]} == {a, b, ch} and r[0]["head"] == a
+    assert any(e["type"] == "household" and e["data"]["op"] == "founded" for e in k.events)
+    assert f"Your household: {a}'s household ({iid})" in " ".join(LF.state_lines(k, ch))
+
+
+def test_a_second_child_joins_the_same_household():
+    inst, k, a, b, ch, rec = family_child([*HOUSE, "life.reproduction.maturity=6"])
+    iid = HH.household_of(k, a)
+    end_round(k)
+    for x in (a, b):
+        set_food(k, x, 30)
+    conceive(k, a, b)
+    ch2 = born_child(k, "G2")
+    assert HH.household_of(k, ch2) == iid and len(HH.state(k)["ids"]) == 1
+
+
+def test_the_pot_feeds_a_hungry_child():
+    inst, k, a, b, ch, rec = family_child([*HOUSE, "life.reproduction.maturity=6", "life.labour.surplus=household"])
+    iid = HH.household_of(k, a)
+    pot = HH.pot_of(k, ch)
+    assert pot == HH._rec(k, iid)["treasury"]
+    set_food(k, ch, 9.0)
+    end_round(k)
+    assert k.bal(pot, "food") > 1.0                                    # the child's surplus went into the pot
+
+
+def test_the_head_passes_to_the_coparent():
+    from cybertron import mortality as MO
+    inst, k, a, b, ch, rec = family_child([*HOUSE, "life.reproduction.maturity=6"])
+    iid = HH.household_of(k, a)
+    MO.disable(k, a, "old_age")
+    assert HH.head_of(k, iid) == b
+    MO.disable(k, b, "old_age")
+    assert HH.head_of(k, iid) == ch

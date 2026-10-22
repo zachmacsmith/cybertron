@@ -94,8 +94,13 @@ DEFAULTS = {
     "age_sampling": "iid",              # stationary only: iid (independent draws) | systematic (evenly spaced quantiles)
     "max_population": None,             # a model-cost budget guard: the run stops (STOPPED.md) before a round that starts with more living
                                         # agents than this (an int, or "4N": a multiple of the starting agents); births are never refused
-    "labour": {"from_age": 0, "minor": None},   # 37.1 labour(agent): 0 below from_age, a minor's share of an adult's work (None:
+    "labour": {"from_age": 0, "minor": None,    # 37.1 labour(agent): 0 below from_age, a minor's share of an adult's work (None:
                                         # subsistence.minor_yield), 1 for an adult; it scales a minor's forage, hunt and farm yield
+               "surplus": "none",       # none | household: after eating, a minor's food beyond `keep` goes to its household (its pot when
+               "keep": 2.0},            # it has one, else its living parents in equal shares)
+    "households": {"enabled": False,    # 37.1 (cybertron/households.py): families as minimal institutions (needs pairs, contracts)
+                   "keep": 2.0,         # the Household template's KEEP: food each member keeps out of the pot
+                   "name": "{head}'s household"},
     "default_heirs": "reserve",         # where an estate's unbequeathed part goes: reserve (as before) | children (children, unborn
                                         # included, then co-parents, then the reserve)
     "audit_fixes": None,                # review 16 bugs B2-B5, B7; None: on with the absolute or stationary demography, else off
@@ -124,6 +129,7 @@ DEFAULTS = {
                                         # as (1 - x)^2 with the share x of full investment)
             "minor_frailty": None,      # a minor's starvation hazard base (None: its own frailty, as an adult's)
             "tell_parents": False,      # family: parents learn which way the child went (false: only that it came of age)
+            "turn_every": 1,            # a minor takes a turn every k rounds (from its birth round); 1: every round, as before
         },
         "child_goals": {                # review 24: the arm's goal structure for children (defaults: today's draw, unchanged)
             "fixed": None,              # a goal every child holds as primary (e.g. Endure); None: the primary is drawn as today
@@ -418,6 +424,9 @@ def install(k) -> None:
     from cybertron import pairs as PR
     if PR.pairs_spec(k.spec):                                            # review 15 S4: two-parent reproduction (pairs, both)
         PR.install(k)
+        from cybertron import households as HH
+        if HH.spec_on(k.spec):                                           # 37.1: households
+            HH.install(k)
     ensure_maker(k, announce_all=True)
 
 
@@ -622,6 +631,8 @@ def on_death(k, aid) -> dict:
 
 
 def after_death(k, aid) -> None:
+    from cybertron import households as HH
+    HH.after_death(k, aid)                                               # 37.1: a dead head's household (off: nothing)
     for c in sorted(state(k)["commissions"].values(), key=lambda c: c["id"]):
         if c["maker"] == aid and c["status"] == "open":
             _refund(k, c, f"the Maker {aid} has left the game")
@@ -1089,6 +1100,14 @@ def law_api(k, lid) -> dict:
     def labour_of(agent):
         return labour(k, str(agent)) if _on() and str(agent) in k.w["agents"] else None
 
+    def households():
+        from cybertron import households as HH
+        return HH.roster(k) if _on() else []
+
+    def household_of(agent):
+        from cybertron import households as HH
+        return HH.household_of(k, str(agent)) if _on() else None
+
     def gestations():
         from cybertron import pairs as PR
         return PR.gestations_view(k) if _on() else []
@@ -1114,7 +1133,7 @@ def law_api(k, lid) -> dict:
 
     return {"makers": makers, "commissions": commissions, "births": births, "children_of": children_of,
             "lifespan_left": lifespan_left, "parents_of": parents_of, "minors": minors, "gestations": gestations,
-            "age": age_of, "labour": labour_of,
+            "age": age_of, "labour": labour_of, "households": households, "household_of": household_of,
             "set_birth_rules": set_birth_rules,
             "publish_commissions": lambda on=True: _flag("commissions", on), "publish_births": lambda on=True: _flag("births", on)}
 
@@ -1446,6 +1465,8 @@ def state_lines(k, aid) -> list:
         out.append("You have a bequest on record.")
     if pairs:
         out += PR.state_lines(k, aid)
+        from cybertron import households as HH
+        out += HH.state_lines(k, aid)                                    # 37.1 (off: nothing)
     return out
 
 
@@ -1608,7 +1629,12 @@ def truth(k, inst=None) -> dict:
                      "commissions": st["commissions"],
                      **({"uncapped": True} if st.get("uncapped") else {}),
                      **({"parents": st["parents"]} if st.get("parents") else {}),       # review 15 S4: two-parent children
-                     **PR.truth(k)}}
+                     **PR.truth(k), **_hh_truth(k)}}
+
+
+def _hh_truth(k) -> dict:
+    from cybertron import households as HH
+    return HH.truth(k)
 
 
 def _gt_children(gt, aid) -> list:

@@ -94,3 +94,31 @@ Dropped (Zach, 22 Oct): automatic or hazard births (fertility stays a choice), d
     child succeeds exactly when its parent does, which is "another agent working for your goals".
   - The target is the parent who gave more food: the investment decides whose cause it is.
 - **Next:** step 4, children's work (a minor's surplus to the household; minors play every k rounds).
+
+### 2026-10-22 19:05 UTC: steps 4-5, children's work and households
+
+- **Built:**
+  - Children's work:
+    - `life.labour.surplus: household` (default `none`): after eating, a minor's food beyond `life.labour.keep` (2) goes to its
+      household's pot, else to its living parents in equal shares (a move, why `household`).
+    - `life.reproduction.raising.turn_every k`: a minor takes a turn only in rounds born + j*k (runner filters the order after
+      the shuffle, so the order stream is unchanged). The minor's state line says so.
+  - Households (`cybertron/households.py`, `life.households.enabled`, needs pairs and contracts):
+    - a household is an association running the library's Household template (pooled pot, feeds members and their minor
+      children);
+    - it is founded automatically at a birth: the child joins its parents' shared household, else the one a parent heads (the
+      initiator's first), else a new "<initiator>'s household" with both parents and the child;
+    - a parent who moves leaves its old household (a leave request, made good at round end through the template's after_leave);
+    - the head passes at death to a co-parent member, else the eldest adult member;
+    - roster read `households()` [{id, name, head, members [{agent, age}], pot, plots}] and `household_of(agent)`, documented in
+      household worlds;
+    - a state line for members; a `household` monitor event; truth under `life.households`.
+  - Tests: `tests/test_family.py` (22 in all).
+- **Found:** contracts install after life (features.PHASES init order), so the households install checks the spec
+  (`FT.on("contracts", k.spec)`), not `k.w`.
+- **Decided:**
+  - The head is recorded by households.py rather than as an Offices Act office. An office needs institutions.grants and law
+    code per household. Kept minimal, as Zach asked; 37.3 gets "someone who acts for it" from `head`.
+  - Q: should a household head be an office (so 37.3's appoint/remove powers apply to it)? It is cheap to add later.
+- **Next:** step 6, inheritance (`partible | eldest | household`) in `subsistence.on_death`, where stores and plots already pass
+  to `_store_heir`.

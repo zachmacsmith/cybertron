@@ -594,6 +594,7 @@ E("conceived", "life", "primitive", "parties", "event", "life", act="conceive", 
   note="review 15 S4: the two parents learn the conception")
 E("conceived_truth", "life", "truth", "monitor", "silent", None, primitive="conceive", note="the inherited goal and the payments")
 E("maturity", "life", "record", "monitor", "silent", None, note="review 15 S4/S5: a minor comes of age (investment, promotion draw)")
+E("household", "life", "record", "monitor", "silent", None, note="37.1: a household founded or its head passed on (cybertron/households.py)")
 E("store_owner", "subsistence", "summary", "public", "event", "subsistence",
   note="a dead agent's store passes to its heir (living children, a co-parent, else its polity)")
 E("hunt", "subsistence", "primitive", "parties", "event", "subsistence", act="hunt", primitive="hunt",

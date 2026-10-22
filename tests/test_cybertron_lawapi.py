@@ -31,7 +31,7 @@ W6_V2_FNS = {*W6A_FNS, *CO_FNS, *EV_FNS, *W7E_FNS, *PUB_FNS, "send_message", "ch
 CH_FNS = {"send_message", "channel_posts"}                                             # wave 9 C (channels.law_api; law.v2 and channels.v2 worlds)
 SUB_FNS = {n for n, f in LA.LAWFNS.items() if f.module == "subsistence"}   # review 15: subsistence worlds only (subsistence.law_api)
 PAIR_FNS = {"parents_of", "minors", "gestations"}                                             # review 15 S4: pairs worlds only (documented there)
-FAMILY_FNS = {"age", "labour"}                                                                # 37.1: family worlds only (documented there)
+FAMILY_FNS = {"age", "labour", "households", "household_of"}                                                                # 37.1: family worlds only (documented there)
 FORCE_FNS = {"force_rule"}                                             # review 31.06 F1, F2, F13 (conflict.law_api)
 E20_FNS = {"resource_of"}                                              # engine 20: what a camp yields (the harvest leg's items filter)
 CH_FNS = CH_FNS | SUB_FNS | PAIR_FNS | FAMILY_FNS | FORCE_FNS | E20_FNS                      # (excluded from the snapshot comparisons alike)

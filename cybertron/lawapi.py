@@ -287,6 +287,8 @@ LAWFNS = _fns(
         F("lifespan_left", "read", ((0, "agent"),), scope="read", docs="life"),
         F("age", "read", ((0, "agent"),), scope="read", docs="requires"),   # 37.1: documented in family worlds
         F("labour", "read", ((0, "agent"),), scope="read", docs="requires"),
+        F("households", "read", docs="requires"),                       # 37.1: household worlds
+        F("household_of", "read", ((0, "agent"),), scope="read", docs="requires"),
         F("set_birth_rules", "rights", docs="life", primitive="set_birth_rules"),
         F("publish_commissions", "output", docs="life", primitive="set_birth_rules"),
         F("publish_births", "output", docs="life", primitive="set_birth_rules"),

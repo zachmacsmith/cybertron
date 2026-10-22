@@ -592,6 +592,8 @@ def birth(k, g):
 
     born = k.apply("begin_life", agent=aid, how="born", parent=a, record=ag, inst=k.inst, settle=settle)
     lst["jurisdiction"][aid] = born.result["jurisdiction"]
+    from cybertron import households as HH
+    HH.on_birth(k, aid, a, b)                                            # 37.1: the child's household (off: nothing)
     lst["births"].append({"round": k.r, "child": aid, "parent": a, "parents": [a, b], "maker": None, "gestation": gid})
     cls = mx["cls"]
     k.log("birth", aid, {"agent": aid, "parent": a, "parents": [a, b], "maker": None, "cls": cls,
@@ -713,10 +715,48 @@ def scan(k) -> None:
     st["scan"] = len(k.events)
 
 
+def rests(k, aid) -> bool:
+    """37.1: a minor that takes no turn this round (life.reproduction.raising.turn_every k: it plays in the rounds born + j*k)."""
+    if not is_minor(k, aid):
+        return False
+    every = int(cfg(k.spec)["raising"].get("turn_every") or 1)
+    return every > 1 and (k.r - int(state(k)["minors"][aid]["born"])) % every != 0
+
+
+def household_of_minor(k, aid):
+    """Where a minor's surplus goes: its household's pot (37.1 households) or None (its living parents)."""
+    from cybertron import households as HH
+    return HH.pot_of(k, aid)
+
+
+def work_surplus(k) -> None:
+    """37.1 (life.labour.surplus household): after eating, each minor's food beyond `keep` goes to its household's pot, else to its
+    living parents in equal shares (a move, why "household")."""
+    from cybertron import life as LF
+    lc = LF.cfg(k.spec).get("labour") or {}
+    if str(lc.get("surplus") or "none") != "household":
+        return
+    keep = float(lc.get("keep", 2.0))
+    for aid in sorted(state(k)["minors"]):
+        if not is_minor(k, aid) or not MO.alive(k, aid):
+            continue
+        q = round(_food(k, aid) - keep, 6)
+        if q <= 1e-9:
+            continue
+        pot = household_of_minor(k, aid)
+        dsts = [pot] if pot else [p for p in state(k)["minors"][aid]["parents"] if MO.alive(k, p)]
+        if not dsts:
+            continue
+        share = round(q / len(dsts), 6)
+        for d in dsts:
+            k.move(aid, d, FOOD, share, why="household")
+
+
 def end_of_round(k) -> None:
     """life.end_of_round (step 6): the ledger, coming of age (S5), births due, lapsed offers."""
     st = state(k)
     scan(k)
+    work_surplus(k)                                                      # 37.1: a minor's surplus to its household (off: nothing)
     with k.cause("world", "maturity", root=True):
         for aid in sorted(st["minors"]):
             m = st["minors"][aid]
@@ -888,7 +928,9 @@ def state_lines(k, aid) -> list:
         out.append(f"You are a minor until round {m['until'] + 1}: at most {int(c['minor_actions'])} actions; you cannot have "
                    f"children, attack, found, propose or vote. Your parents: {', '.join(m['parents'])}."
                    + (" How they raise you will weigh on whether you take up their cause when you come of age."
-                      if family_on(k) else ""))
+                      if family_on(k) else "")
+                   + (f" You act every {int(c['raising']['turn_every'])} rounds while a minor."
+                      if int(c["raising"].get("turn_every") or 1) > 1 else ""))
     return out
 
 

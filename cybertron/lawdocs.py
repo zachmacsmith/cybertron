@@ -344,6 +344,19 @@ E += [                                                                  # 37.1: 
      "minor, 1 for an adult.", "prompt", "common"),
 ]
 REQUIRES.update({n: _family_on for n in ("age", "labour")})
+
+
+def _households_on(spec) -> bool:
+    from cybertron import households as HH
+    return HH.spec_on(spec)
+
+
+E += [                                                                  # 37.1: households
+    ("households", "life", "Life", "households()", "every household: id, name, head, members [{agent, age}], pot (food in its "
+     "treasury) and plots [{camp, plot}] it holds. A household is an association: laws address it by its id.", "prompt", "common"),
+    ("household_of", "life", "Life", "household_of(agent)", "the id of the household an agent belongs to, or None.", "prompt", "common"),
+]
+REQUIRES.update({n: _households_on for n in ("households", "household_of")})
 # linker (cybertron/linker.py, P3.3): documented only in law.v2 worlds (REQUIRES), so every other world's prompt and codex are unchanged
 E += [
     ("use", "linker", "Meta", "use(ref)", "links another law's exports into this law, as a read-only mapping: at the top level only, "

@@ -439,6 +439,9 @@ def _run(inst, policy, out, sandbox, log, resume, live, notices, dry, instance_s
         order = list(agents)
         k.stream("order", r).shuffle(order)                            # rng_version 2: its own stream per round
         order = H.apply_order(k, order)                                 # places set with a hidden power (hidden.py)
+        if "pairs" in (k.w.get("life") or {}):                          # 37.1: minors that rest this round (raising.turn_every)
+            from cybertron import pairs as PR
+            order = [a for a in order if not PR.rests(k, a)]
         k.log("round_start", None, {"round": r, "order": order}, vis="public")
         k.phase("turns")
         play = CF.begin_order(k, order)                                 # conflict: true order (initiative); `order` stays the published one
