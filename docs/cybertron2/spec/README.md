@@ -1,23 +1,23 @@
-# cybertron2 spec: sections
+# cybertron2 spec
 
-One file per system. Each file uses the same layout: **Summary**; **Decided** (rules with their decision numbers); **Mechanics**
-(how it works, precisely enough to build); **Data** (the state it adds); **Parameters** (value and status: decided, proposed,
-calibrate); **What agents see**; **Open** (links to OPEN.md); **Sources** (the notes it was compiled from).
+The spec is a folder of areas, each a folder of small files, one per topic. Every file uses the same layout: **Summary**;
+**Decided** (rules with their decision numbers, from ../DECISIONS.md); **Mechanics** (precise enough to build); **Data** (the
+state it adds); **Parameters** (value and status: decided, proposed, calibrate); **What agents see**; **Open** (links to
+../OPEN.md); **Sources** (the notes it was compiled from). A file is written when it is compiled; until then it is listed here as
+*to compile*.
 
-| Section | File | Owner | Compiled from | State |
-|---|---|---|---|---|
-| Places and land | places.md | 37.4 | 38.04, 02e §3.9, 02g §1 | to compile |
-| Time and the round | round.md | 37.4 | 38.05, 02k | to compile |
-| Actions and work | actions.md | 37.4 | 38.06 | to compile |
-| Perception and prompts | perception.md | 37.4 | 38.02, 02h §7 | to compile |
-| Goods, items and carrying | goods.md | 37.2 (numbers), 37.4 (mechanism) | 02g §1-3, 38.06 §3 | to compile |
-| Travel and lodging | travel.md | 37.4 (37.2: inns' economics) | 38.05 §2-3, 02g §3-4 | to compile |
-| Communication | communication.md | 37.4 (37.2: writing materials) | 38.05 §5, 02h | to compile |
-| Environment | environment.md | 37.4 | 37.4's notes (wp/environment), 38.04 §3 | to compile |
-| Life and kinship | life.md | 37.4 (until 37.1 joins) | 38.09, 37.1's devlog | to compile |
-| Conflict and defence | conflict.md | 37.4 | cybertron2 combat.py, 02g §5b, 02k | to compile |
-| Production, skills and buildings | economy.md | 37.2 | 02a-02e, 02i, 02j | 37.2 to compile |
-| Transport, money and markets | trade.md | 37.2 | 02f, 02g | 37.2 to compile |
-| Institutions | institutions.md | 37.4 (until 37.3 joins) | 38.07 §4, 02h §5-6b | to compile |
-| Seeding and generation | seeding.md | 37.4 | 38.04 §6, 38.09 §3c, 37.6's brief | to compile |
-| Measurement | measurement.md | 37.4 | 37.4's notes, 02f §5 | to compile |
+| Area | What it covers | Owner |
+|---|---|---|
+| [core/](core/README.md) | The engine itself: how state changes, how a day runs, what is recorded | 37.4 |
+| [world/](world/README.md) | Places, land and the map | 37.4 |
+| [agents/](agents/README.md) | What an agent is and can do | 37.4 |
+| [information/](information/README.md) | What agents know and how it moves | 37.4 (37.2: writing materials, papers' economics) |
+| [environment/](environment/README.md) | The world changing over time | 37.4 |
+| [economy/](economy/README.md) | Goods, production and trade | 37.2 (37.4: carrying and lodging mechanisms) |
+| [conflict/](conflict/README.md) | Force, defence and danger | 37.4 (37.2: the economics of walls and gates) |
+| [life/](life/README.md) | People over their lives | 37.4 (until 37.1 joins) |
+| [institutions/](institutions/README.md) | Institutions from households to states | 37.4 (until 37.3 joins) |
+| [seeding/](seeding/README.md) | Starting worlds | 37.4 |
+| [measurement/](measurement/README.md) | What we measure and how | 37.4 (37.2: economic measures) |
+
+Owners decide what goes in their files (../README.md, rules 2-3). Shared files say which part each session owns.

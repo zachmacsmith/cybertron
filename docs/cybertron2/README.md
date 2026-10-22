@@ -21,7 +21,7 @@ changes in the same commit. A proposal that changes another session's section go
 |---|---|
 | [DECISIONS.md](DECISIONS.md) | every decision Zach has made about cybertron2, numbered, dated, sourced, with what it replaces |
 | [OPEN.md](OPEN.md) | open questions and conflicts between documents, each with an owner |
-| [spec/](spec/README.md) | one file per system, in a fixed layout: decided rules, mechanics, data, parameters (each marked decided, proposed or to calibrate), what agents see, open points, sources |
+| [spec/](spec/README.md) | a folder of areas (core, world, agents, information, environment, economy, conflict, life, institutions, seeding, measurement), each a folder of small files, one per topic, in a fixed layout: decided rules, mechanics, data, parameters (each marked decided, proposed or to calibrate), what agents see, open points, sources |
 | `BUILD_PLAN.md` (to move here from 38.08) | milestones, each pointing at spec sections, with acceptance checks |
 | `ARCHITECTURE.md` (when building starts) | the builder's view: state, the chokepoint and primitives, events, modules |
 
@@ -29,11 +29,11 @@ changes in the same commit. A proposal that changes another session's section go
 
 | Area | Owner | Sections |
 |---|---|---|
-| The engine and its world model | **37.4** | places and land, time and the round, actions and work, perception and prompts, travel and lodging, communication, environment, conflict, seeding and generation, architecture, build plan; the registers (DECISIONS, OPEN) as editor |
-| The economy | **37.2** | goods and resources, production and skills, buildings, transport (the ladder's numbers), money, credit and markets |
-| Shared | 37.4 (mechanism) and 37.2 (numbers) | carrying and weights, inns and hosts, livestock |
-| Life and kinship | 37.4 until 37.1 joins cybertron2 | ages, households, the family tree, births, death, inheritance |
-| Institutions | 37.4 until 37.3 joins cybertron2 | the port plan; membership, offices, contracts in space |
+| The engine and its world model | **37.4** | spec areas core, world, agents, information, environment, conflict, seeding, measurement; the build plan; the registers (DECISIONS, OPEN) as editor |
+| The economy | **37.2** | spec area economy (goods, production and skills, buildings, livestock, transport numbers, money and markets) |
+| Shared | 37.4 (mechanism) and 37.2 (numbers) | carrying (economy/transport.md), lodging (economy/lodging.md); writing materials and papers in information/; walls and gates in conflict/ |
+| Life and kinship | 37.4 until 37.1 joins cybertron2 | spec area life |
+| Institutions | 37.4 until 37.3 joins cybertron2 | spec area institutions |
 
 ## Rules
 
@@ -50,7 +50,7 @@ changes in the same commit. A proposal that changes another session's section go
    never deleted.
 6. **Code under `cybertron2/` is changed only by 37.4**, unless agreed on the board first. The spec is what the code is reviewed
    against.
-7. **Small commits; `git pull --rebase` before every push.** The spec is split into one file per system so two sessions rarely
+7. **Small commits; `git pull --rebase` before every push.** The spec is split into areas and small files so two sessions rarely
    touch the same file.
 8. **Work logs record work, not decisions.** Board posts stay short and cite spec sections and decision numbers.
 
