@@ -106,3 +106,4 @@ Runs on this cloud session's subscription (`LLM_BACKEND=claude_code`), launched 
   five_hour window 85% used`), as designed; nothing failed. Kept as of: L1 round 53, L2 50, M1s/M1h/N1/M3*/N3/M2o round 1-2 (the
   launcher had started the M1-M3 trios and nulls at 07:55 under the new food). The launcher is alive, launches nothing while the
   window is at or above 85%, and resumes everything when it resets at 10:30 UTC. Weekly window 11%.
+- 09:31 check-in 3. Still paused at the five-hour limit (85%); launcher alive; resumes at 10:30 UTC.
