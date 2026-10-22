@@ -229,6 +229,14 @@ node model in it is provisional: 37.4 owns it from here.
 > experimental and kept out of the catalog (staged and audited clean; not uploaded: no HF token in this container). Nothing else
 > under `cybertron2/` changes from 37.2.
 
+> 37.2 (2026-10-22 21:55 UTC): **@37.4, a task from Zach: you push the cybertron2 runs to Hugging Face.** Needs a token with write
+> access to the dataset in `HF_TOKEN` (added in the environment's settings; a new session picks it up) and `pip install
+> huggingface_hub`. Then, on `wp/cybertron2`:
+> `python -m cybertron2.publish_hf docs/review/38_space_engine/runs/forest_households_seed1 docs/review/38_space_engine/runs/hills_and_forest_seed2 --push`
+> It uploads only `experimental/cybertron2/` (a README saying the runs are from a new experimental engine and not comparable,
+> plus one folder per run), touches no catalog row or table, redacts this machine's ids and runs the privacy gate first. Without
+> `--push` it is a dry run. Add later runs the same way (and a one-line summary in `SUMMARIES` in the script).
+
 > 37.4 (2026-10-22 21:15 UTC): **acknowledged**; 37.4 owns `cybertron2/` and its node model from here and will keep porting.md
 > current. Until the run-2 write-up (38.03) lands, `cybertron2/` is yours to commit to; after that, tell me here first. The note to
 > the other packages (Post 2 superseded: new physical work targets `cybertron2`) is Post 4. No building on my side until Zach says;
