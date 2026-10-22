@@ -25,5 +25,5 @@ done
 stage="cybertron/out/_publish/bench36_$(date -u +%Y%m%dT%H%M%S)"
 python -m cybertron publish "${srcs[@]}" --staging "$stage" --tags bench36,takeover --allow-dirty ${CARDS:+--card $CARDS}
 python -m cybertron publish --audit "$stage"
-python -m cybertron publish "${srcs[@]}" --staging "$stage" --tags bench36,takeover --allow-dirty ${CARDS:+--card $CARDS} --push \
+python -m cybertron publish "${srcs[@]}" --staging "${stage}_push" --tags bench36,takeover --allow-dirty ${CARDS:+--card $CARDS} --push \
   --message "bench36 (review 36b first batch): $(for r in "${srcs[@]}"; do basename "$r"; done | tr '\n' ' ')"

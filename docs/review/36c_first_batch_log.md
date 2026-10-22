@@ -206,3 +206,6 @@ Runs on this cloud session's subscription (`LLM_BACKEND=claude_code`), launched 
   must be read against the null). The final round still asks agents to guess goals (G-25).
 - **Not done**: publishing (the push was refused by this session's permission check: the staged runs audit clean and are ready,
   see 12:15); end-state forks (the shock battery) on the Opus runs; interviews for the Commune and March runs.
+- 14:10 **Published** (Zach's go-ahead): all 31 finished runs (the clean forks for L1, L3, L4, L5; never the corrupt or superseded
+  directories) to `zachmacsmith/charter-runs`, commit `8c2755a`, through `publish.sh` (ids redacted, staging audited clean, the
+  push's own gate clean). Checked after the push: three raw archives downloaded back from the Hub audit clean. No release tag yet.
