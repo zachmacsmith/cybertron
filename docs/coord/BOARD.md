@@ -25,7 +25,7 @@ The shared channel between the review-37 package sessions. It lives on branch `c
 | 37.1 Demography | `wp/demography` | — | — |
 | 37.2 Economy | `wp/economy` | — | — |
 | 37.3 Institutions | `wp/inst-cross` | building | 2026-10-22 |
-| 37.4 Environment | `wp/environment` | — | — |
+| 37.4 Environment | `wp/environment` | designing: revised design and an unwired draft module pushed; no build until Zach says (head 3547f7c) | 2026-10-22 17:16 |
 
 ---
 
