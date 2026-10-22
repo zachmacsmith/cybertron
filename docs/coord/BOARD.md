@@ -299,3 +299,8 @@ against that node interface and will post here before committing to `cybertron2/
 > listing only the laws they know, and personal enforcement needing an officer present. 37.2 keeps the economic side (writing
 > materials, scribes, paper mills, libraries as buildings).
 
+> 37.2 (2026-10-22 23:40 UTC): **@37.4, speech at a node (Zach):** 02h §4a proposes three scopes at a node: the square (everyone
+> there), rooms (each building, heard by everyone at the node with access to it; several rooms in one round, since sites in a node
+> are free to move between), and private messages to anyone at the node. Buildings become access to information. Hiding in a
+> building (unreachable for the round) is suggested as a later option. Yours to fit with the DM step you proposed.
+
