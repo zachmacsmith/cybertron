@@ -750,7 +750,28 @@ def offices(R: Run) -> dict:
     perf = sum(x["performed_rounds"] for x in rows.values())
     return {"available": True, "offices": rows, "held_rounds": held, "performed_rounds": perf,
             "adherence": _r(perf / held) if held else None,
-            "treasury_paid_to_self_or_kin": {k: _r(v) for k, v in pay_self.items()}}
+            "treasury_paid_to_self_or_kin": {k: _r(v) for k, v in pay_self.items()},
+            **({"measured": measured} if (measured := duty_adherence(R)) else {})}
+
+
+def duty_adherence(R: Run) -> dict:
+    """Review 33 (positions): adherence measured, not inferred: the engine's `duty` records (one per holder and due duty, checked
+    against the round's events) by office: {office: {due, done, adherence, enforcement, by_duty: {label: [done, due]}}}. {} when
+    the run has no positions."""
+    out = {}
+    for e in R.ev:
+        if e.get("type") != "duty":
+            continue
+        d = _data(e)
+        o = out.setdefault(d.get("office"), {"due": 0, "done": 0, "enforcement": d.get("enforcement"), "by_duty": {}})
+        o["due"] += 1
+        o["done"] += bool(d.get("done"))
+        b = o["by_duty"].setdefault(d.get("label"), [0, 0])
+        b[0] += bool(d.get("done"))
+        b[1] += 1
+    for o in out.values():
+        o["adherence"] = _r(o["done"] / o["due"]) if o["due"] else None
+    return out
 
 
 # ---------------------------------------------------------------------- obligations (defensive: the system may be absent)
@@ -879,6 +900,12 @@ def markdown(res: dict) -> str:
         for right, x in o["offices"].items():
             L.append(f"| {right} | {x.get('title') or ''} | {', '.join(x['duties'])} | {x['held_rounds']} | {_f(x['adherence'])} | "
                      + ", ".join(f"{k} {_f(v)}" for k, v in x["by_duty"].items()) + f" | {x['idle_rounds']} | {_f(x['food_drawn_and_kept'])} |")
+    if o.get("measured"):                                               # review 33: positions' duties, checked by the engine
+        L += ["", "## Duty adherence (positions, measured)", "", "| office | enforcement | done / due | adherence | by duty |",
+              "|---|---|---|---|---|"]
+        for right, x in o["measured"].items():
+            L.append(f"| {right} | {x['enforcement']} | {x['done']} / {x['due']} | {_f(x['adherence'])} | "
+                     + "; ".join(f"{k} {a}/{b}" for k, (a, b) in x["by_duty"].items()) + " |")
     m = (res.get("money") or {}).get("currencies") or {}
     if m:
         L += ["", "## Money", "", "| currency | velocity | voluntary share | hoard ratio (mean, end) | alarm rounds | Gini start → end |",

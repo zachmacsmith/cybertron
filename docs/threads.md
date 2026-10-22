@@ -34,10 +34,12 @@ one full suite per merge batch). Merge order: cleanup and documents last (they t
 
 ## Offered, not started
 
-- **Positions** (docs/review/33_positions.md): replace classes, roles and office cards with one parameterised "position" (identity,
-  purpose, rights, duties compiled to DUE items, reports_to, secrecy, enforcement none | reminder | obligation), prompts generated
-  from it. Fixes every agent being told "You are a Worker ... your labour can be withheld" whatever office it holds. About a day of
-  agent work, opt-in.
+- **Positions** (docs/review/33_positions.md §5, "As built"): **built on `wp/positions`, not merged** (22 Oct). Opt-in, no engine
+  version: positions library and offices that name one, identity and derived leverage in the system prompt, duties as DUE items
+  with `duty` records (measured adherence in `cybertron institutions`), enforcement none | reminder | obligation; papers; failed
+  banner; unread/new counts; the channel-setup check at spec load; `regimes/directorate_positions.yaml` and
+  `regimes/private_positions.yaml` (dry runs only). Goldens and legacy prompts unchanged. Not done: replacing the roles system and
+  the Board and Fixer special cases; live runs of the two variants.
 - **Generalise the hard-coded institution logic** (audit 21 Oct; searches only). The kernel is fairly clean; the drift is a layer up:
   about 11.4k lines of institution modules and about 25 of the 721 spec keys are institutional policy rather than physics. Fixes, in
   order (each opt-in, old runs unchanged):
@@ -56,16 +58,13 @@ one full suite per merge batch). Merge order: cleanup and documents last (they t
   Also: DM capacity as physics capped by any law, instead of the kernel reading the Communications Act by name (kernel.py ~240,
   ~268) and two `dm_step.capacity` modes (this capped every Directorate DM limit at 1 until switched); the Board and Fixer
   special cases go with Positions.
-- **Papers instead of a square** (decided by Zach, 22 Oct; being built by the positions agent, `wp/positions`): the newspaper
-  model (no square; public speech only through papers and their Editor positions: `submit`, then `publish` verbatim under the
-  author's name or `decline`) is the default for the institutions-programme worlds (cybertron/specs/regimes/), not an engine-wide
-  flip. Rule for designing any scenario: its channel setup (square or not, which papers, who edits and reads them, delivery) is a
-  deliberate per-scenario decision, never a silent fallback; spec loading warns when a channels-v2 world does not declare it, and
-  fails for regime and positions worlds.
+- **Papers instead of a square** (33 §3): built on `wp/positions` as the regime worlds' preset (`fragments/papers.yaml`), not an
+  engine default; every channels-v2 world must now declare its channel setup (a warning; an error under `specs/regimes/`). 36
+  existing worlds warn until each declares `channels.square` (a per-scenario decision).
 - **Channel fixes** (from the channel-use analysis of the Private and Directorate runs):
-  - show failed actions at the top of the next turn (Ilse's 9 blocked reports went unnoticed; she believed they were delivered);
-  - show channel duties as due (subsumed by Positions);
-  - pull channels: "X unread, Y new since last round", and a headline from posts other than the automatic round record;
+  - built on `wp/positions` (opt-in, `fragments/positions.yaml`): failed actions at the top of the next turn
+    (`context.failed_banner`); channel duties as DUE (Positions); "X unread, Y new since last round" and record-free headlines
+    for pull channels, "N new since last round" for pushed ones (`channels.unread_new`);
   - rename to avoid collisions: the Board contract vs the market board; contract "notices" vs the notices channel.
 - **Reproduction back on for future runs** (Zach, 21 Oct): future runs will be longer and larger, with Life and reproduction on.
   Today it is off by design: the Private world has Life on but no births (`ensure_maker: false`, no Makers, no pairs mode; its flows
