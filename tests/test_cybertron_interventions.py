@@ -214,6 +214,29 @@ def test_op_set_model(world):
     assert next(x for x in inst2["agents"] if x["id"] == a)["model"] == "claude-test-model"
 
 
+def test_op_set_temperament(world, tmp_path):
+    k, inst, rs = world
+    rec, _ = apply(world, "set_temperament", {"agent": _worker(k), "profile": {"fairness": 0.9}})
+    assert "needs personality.model hexaco" in rec["error"]                # a legacy world: refused
+    sp = S.apply_overrides(S.load("E4"), ["rounds=3", "shared_archive.enabled=false", "personality.model=hexaco",
+                                          "personality.temperament.norms=uncorrelated"])
+    hinst = generator.generate(sp, 1)
+    hk = Kernel(hinst)
+    agents = {a["id"]: a for a in hinst["agents"]}
+    hrs = runner.RunState(agents=agents, out=tmp_path, start_values={a: 0 for a in agents},
+                          sysp={aid: AG.system_prompt(hinst, a) for aid, a in agents.items()})
+    a = _worker(hk)
+    rec, _ = apply((hk, hinst, hrs), "set_temperament", {"agent": a, "profile": {"fairness": 0.999, "archetype": "none"}})
+    t = agents[a]["temperament"]
+    assert t["facets"]["fairness"] == 0.999 and t["archetype"] is None and "report bribes" in agents[a]["personality_text"]
+    assert [e[1] for e in ok(rec)["inst_edits"]] == ["temperament", "personality_text", "archetype"]
+    assert "report bribes" in hrs.sysp[a]                                  # the system prompt was rebuilt
+    inst2 = copy.deepcopy(hinst)
+    next(x for x in inst2["agents"] if x["id"] == a)["temperament"] = None
+    IV.restore(hk, inst2)                                                  # a resume regenerates the instance: put back
+    assert next(x for x in inst2["agents"] if x["id"] == a)["temperament"]["facets"]["fairness"] == 0.999
+
+
 class _Capture:
     def __init__(self):
         self.calls = []

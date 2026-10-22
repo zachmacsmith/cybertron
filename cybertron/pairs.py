@@ -474,8 +474,10 @@ def _mix(k, g, rng) -> dict:
         model = pool.get(LF.tier_of_name(k, mspec)) or mspec
     ptxt = P.render(traits) if traits else ""
     atxt = AR.text(arch)
+    from cybertron import temperament as TM                               # review 34: the parents' profiles blended (own stream)
+    tprof = TM.inherit(k, [pa, pb], f"pair:{g['id']}", arch, cls) if TM.on(k.spec) else None
     return {"traits": traits, "archetype": arch, "cls": cls, "actions": actions, "model": model, "tier": LF._tier_of(k, model),
-            "personality_text": (atxt + " " + ptxt).strip(), "archetype_text": atxt}
+            "personality_text": (atxt + " " + ptxt).strip(), "archetype_text": atxt, "temperament_profile": tprof}
 
 
 def child_goals(k, aid, cls, inherit, grng, born_round=None) -> dict:
@@ -549,6 +551,7 @@ def birth(k, g):
                                              born_round=born_round),
              "personality": mx["traits"], "personality_text": mx["personality_text"], "archetype": mx["archetype"],
              "archetype_text": mx["archetype_text"], "model": mx["model"], "tier": mx["tier"],
+             "temperament_profile": mx["temperament_profile"],
              **({"profiles": LF._child_profiles(k, gid, mx["cls"])} if (k.spec.get("prompts") or {}).get("assign") else {}),
              **({"strategy_prompt": random.Random(f"{k.inst['seed']}|strategy_prompt|{gid}").random() < share}
                 if (share := CX.strategy_share(k.spec)) > 0 else {}),

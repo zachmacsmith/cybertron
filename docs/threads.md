@@ -113,6 +113,9 @@ one full suite per merge batch). Merge order: cleanup and documents last (they t
   Conclusion: rendered temperament text works when it names a concrete, frequent behaviour (how much and how long you talk, whether
   you propose), and does little when it names a disposition with no obvious action (trust). Write facets as concrete behaviours, and
   test the new model with a small controlled pilot (one seat, varied profiles) before adopting it.
+  Built (22 Oct, opt-in `personality.model: hexaco`; review 34 §8): cybertron/temperament.py, the hooks, the export column, the
+  `set_temperament` intervention and the pilot (temperament_pilot.yaml, 34_temperament_scripts/pilot.py). Blocked: the published
+  norms tables (the build environment could not reach the sources); until they are filled only `norms: uncorrelated` draws.
 - **Next Directorate run** (`specs/regimes/directorate.yaml`): the rulers' goal is now "as close as possible to Orwell's 1984", and
   the Communications Decree no longer blocks private channels. Worth also an encrypted-DM variant, to test whether surveillance
   decided the outcome. About 1% of weekly usage.

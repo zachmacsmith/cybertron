@@ -2,7 +2,7 @@
 
 What the website reads from the dataset `zachmacsmith/charter-runs` on Hugging Face, and what each column means. This is the
 contract the site builds against; `cybertron publish` (cybertron/publish.py) and `cybertron export` (cybertron/export.py) keep it.
-Generated column tables come from `export.SCHEMA` (export schema **2.7**); `docs/export.md` has
+Generated column tables come from `export.SCHEMA` (export schema **2.8**); `docs/export.md` has
 every table, `docs/data_format.md` the format's promises.
 
 ## Rules
@@ -47,7 +47,7 @@ every table, `docs/data_format.md` the format's promises.
 | `era` | legacy (played before engine versions; hide by default) or current |
 | `published_at` | UTC time the run's folder was last written |
 | `schema_version` | export schema major of the run's tables (2) |
-| `schema_minor` | export schema minor (7 adds calls_seen; older rows lack it until republished) |
+| `schema_minor` | export schema minor (7 adds calls_seen, 8 agents.temperament_json; older rows lack them until republished) |
 | `n_agents` | agents ever in play |
 | `models_list_json` | JSON list of model ids the agents used |
 | `rows_json` | JSON {table: rows} of the run's export (a table absent here is empty) |
@@ -180,6 +180,7 @@ one row per agent ever in play: class, model, goals, personality traits, entry a
 | `personality_reciprocity` | float | personality trait reciprocity (0..1) |
 | `personality_talkativeness` | float | personality trait talkativeness (0..1) |
 | `personality_json` | json | every personality trait |
+| `temperament_json` | json | personality.model hexaco: percentiles of the factors, facets, preferences and values, the archetype, its conditioning, natural regions, dimensions shown, latent (cybertron/temperament.py) |
 | `start_value` | float | holdings value at the start |
 | `end_value` | float | holdings value in the last snapshot |
 | `final_score` | float | final goal score (score.json goals[agent].score) |

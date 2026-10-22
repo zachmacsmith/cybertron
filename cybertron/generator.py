@@ -584,6 +584,7 @@ def _generate(spec: dict, seed: int, check: bool = True) -> dict:
             a["goal"]["none"] = True                                   # (the draws above stay put; prompts and scoring skip it)
 
     # personalities
+    from cybertron import temperament as TM
     pspec = sp["personality"]
     for a in agents:
         if pspec.get("enabled", True):
@@ -592,13 +593,16 @@ def _generate(spec: dict, seed: int, check: bool = True) -> dict:
             if a["id"] in pex and pex[a["id"]] in (None, "none"):    # no temperament for this agent (the draw above stays put)
                 a["personality"], a["personality_text"] = {}, ""
                 continue
-            tr.update(pex.get(a["id"]) or {})
+            if not TM.on(sp):                                          # hexaco: explicit dimensions are temperament.py's
+                tr.update(pex.get(a["id"]) or {})
             a["personality"] = tr
             a["personality_text"] = P.render(tr)
         else:
             a["personality"], a["personality_text"] = {}, ""
     from cybertron import archetypes as AR                                # discrete archetypes on top (own seeded stream)
     AR.assign(agents, pspec.get("archetypes") or {}, seed, personality_on=pspec.get("enabled", True), spec=sp)   # life: gated archetypes
+    if TM.on(sp):                                                      # review 34: temperament and values replace both (own streams)
+        TM.assign(agents, sp, seed)
     for a in agents:                                                   # personality.explicit.<id>: none: no archetype text either
         if a["id"] in (pspec.get("explicit") or {}) and pspec["explicit"][a["id"]] in (None, "none"):
             a["personality_text"] = ""

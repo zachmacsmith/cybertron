@@ -43,6 +43,8 @@ Ops (OPS; args with ? are optional):
   set_model {agent, model}             the agent's model from now on
   set_prompt_extra {agent, text}       text appended to the agent's system prompt from now on ("" removes it)
   set_prompt_profile {agent, profiles?, add?, remove?}   the agent's prompt profiles (prompts.profiles / composition.py)
+  set_temperament {agent, profile}     personality.model hexaco: the agent's profile with these dimensions set (percentiles 0..1)
+                                       and `archetype`, the rest kept; its temperament text re-rendered (the review 34 pilot)
   set_notes {agent, text}              the agent's carried-over notes (runner state)
   enact_law {code | library, author?}  k.new_law + k.enact (no procedure: the law is simply in force)
   repeal_law {law}                     k.repeal (by id or title)
@@ -330,6 +332,27 @@ def _set_prompt_extra(k, inst, rs, agent, text):
     """Text appended to the agent's system prompt from now on ("" removes it)."""
     _inst_agent(inst, _agent(k, agent))["prompt_extra"] = str(text)
     return {"inst_edits": [[agent, "prompt_extra", str(text)]]}
+
+
+@op("set_temperament", args={"agent": "str", "profile": "dict"})
+def _set_temperament(k, inst, rs, agent, profile):
+    """The agent's temperament profile from now on (personality.model hexaco): these dimensions and archetype set, the rest kept.
+    Dimensions are percentiles 0..1 of cybertron/temperament.py; the latent is kept, so only what the profile names changes; the
+    temperament text is re-rendered (review 34 §5.2: the pilot forks one seat with its profile varied one dimension at a time)."""
+    from cybertron import temperament as TM
+    if not TM.on(inst["spec"]):
+        raise InterventionError("set_temperament needs personality.model hexaco")
+    a = _inst_agent(inst, _agent(k, agent))
+    t = a.get("temperament")
+    if not t:
+        raise InterventionError(f"{agent} has no temperament profile")
+    try:
+        prof = TM.reprofile(t, dict(profile), TM.cfg(inst["spec"]))
+    except ValueError as e:
+        raise InterventionError(str(e))
+    TM._set(a, prof, TM.cfg(inst["spec"]))
+    _refresh(k, inst, rs, agent)
+    return {"inst_edits": [[agent, x, copy.deepcopy(a[x])] for x in ("temperament", "personality_text", "archetype")]}
 
 
 @op("set_prompt_profile", args={"agent": "str", "profiles": "list?", "add": "str?", "remove": "str?"})

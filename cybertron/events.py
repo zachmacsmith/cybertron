@@ -375,6 +375,9 @@ def draw_agent(k, inst, cls=None, sponsor=None, rng=None, endowment=None, child=
             a["personality_text"] = P.render(a["personality"])
         else:
             a["personality"], a["personality_text"] = {}, ""
+    from cybertron import temperament as TM
+    if TM.on(sp):                                                       # review 34: a fresh profile, or the child's inherited one
+        TM.arrive(k, a, child)
     if endowment is None:
         vals = sorted(v.get("start_value", 0.0) for v in k.w["agents"].values())
         med = vals[len(vals) // 2] if vals else 30.0
