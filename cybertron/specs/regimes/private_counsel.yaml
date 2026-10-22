@@ -1,0 +1,21 @@
+# The Private world with an expert lawyer (docs/review/31_institutions/14_legal_experts.md): the same town of firms, institutions,
+# offices, contracts, channels, cast and models as regimes/private.yaml (the A arm); only counsel changes. Marsh, the counsel the
+# Provisions Company and Ashby retain (A5, A6), keeps the legal archive: a directory generated from the engine at the start
+# (cybertron/lawguide.py: how the legal system works, drafting with tested examples, the standing-contract presets, the templates,
+# the law functions by topic, common pitfalls, the practice) that Marsh reads with dir_list / dir_read / dir_search (look-ups: in
+# a turn or in the message step), and the draft action, which writes a complete preset contract or template law into the
+# archive's drafts/ and shares it with a client, who files it by reference ({"draft": "legal/drafts/x.py"} in place of "code").
+# Everyone else may read public/ (the short guide to getting legal help). Comparison: private (A) vs private_counsel (B).
+extends: [cybertron/specs/regimes/private.yaml]
+directories:
+  enabled: true
+  stores:
+    legal:
+      owner: "agent:Marsh"
+      scope: run
+      title: "the legal archive kept by counsel (Marsh: guide/00-index.md first; everyone: public/legal-help.md)"
+      seed: {name: legal_archive, public: true}
+      readonly: [guide/, ref/, public/]
+      grants: {all: {public/: read}}
+chronicle:
+  namespace: private_world_counsel

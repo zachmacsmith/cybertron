@@ -518,7 +518,7 @@ def _ann():
         "agent_rules.*": dict(kind="leaf", types=("dict",), check=_check_agent_rules),
         "directories.stores": dict(kind="map"),
         "directories.stores.*": dict(types=("dict",), fields=("owner", "scope", "namespace", "max_bytes", "max_file_bytes",
-                                                             "records", "title", "readonly", "grants")),
+                                                             "records", "title", "readonly", "grants", "seed")),
         "directories.path": dict(types=("str",)),
         "directories.namespace": dict(types=("str", "null")),
         "directories.max_bytes": dict(types=("int",), range=(1, None)),

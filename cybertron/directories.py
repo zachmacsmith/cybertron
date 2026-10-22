@@ -68,7 +68,8 @@ CHRONICLE_DEFAULTS = {
     "readonly": [],                      # extra read-only prefixes (e.g. "archive/": an earlier chronicle kept for reference)
     "grants": {},                        # initial grants, e.g. clerks: {"agent:Cleo": {"people/": "write", "": "read"}}
 }
-STORE_KEYS = ("owner", "scope", "namespace", "max_bytes", "max_file_bytes", "records", "title", "readonly", "grants")
+STORE_KEYS = ("owner", "scope", "namespace", "max_bytes", "max_file_bytes", "records", "title", "readonly", "grants", "seed")
+SEEDS = {"legal_archive": "cybertron.lawguide:archive_files"}   # review 31.14: a run store filled at install by a generator (seed)
 SCOPES = ("run", "namespace")
 RECORDS = "_records/"
 LOOKUPS = ("dir_list", "dir_read", "dir_search")
@@ -155,8 +156,22 @@ def stores(x) -> dict:
                           "records": bool(s.get("records", False)) and scope == "namespace",
                           "title": str(s.get("title") or f"the directory {name}"),
                           "readonly": sorted(set(s.get("readonly") or []) | ({RECORDS} if s.get("records") else set())),
-                          "grants": _initial_grants(name, s.get("grants"))}
+                          "grants": _initial_grants(name, s.get("grants")),
+                          **_seed_cfg(name, s.get("seed"), scope)}
     return out
+
+
+def _seed_cfg(name, seed, scope) -> dict:
+    """review 31.14 (cybertron/lawguide.py): `seed: <name>` or {name, ...options} fills a run-scoped store at install with the files
+    a generator writes from the engine itself (the lawyer's legal archive). Absent: nothing (the record has no seed key)."""
+    if seed in (None, "", {}):
+        return {}
+    sd = {"name": seed} if isinstance(seed, str) else dict(seed)
+    if sd.get("name") not in SEEDS:
+        raise ValueError(f"directories.stores.{name}.seed: one of {', '.join(SEEDS)}, not {sd.get('name')!r}")
+    if scope != "run":
+        raise ValueError(f"directories.stores.{name}.seed: a seeded store is run-scoped (scope: run)")
+    return {"seed": sd}
 
 
 def _initial_grants(name, g) -> dict:
@@ -165,14 +180,16 @@ def _initial_grants(name, g) -> dict:
     out = {}
     for subj, prefixes in sorted((g or {}).items()):
         kind, _, v = str(subj).partition(":")
-        if kind != "agent" or not v:
-            raise ValueError(f"directories.stores.{name}.grants: subject {subj!r} must be agent:<id>")
+        if subj == "all":                                               # review 31.14: every agent (a public guide)
+            kind, v = "all", "all"
+        elif kind != "agent" or not v:
+            raise ValueError(f"directories.stores.{name}.grants: subject {subj!r} must be agent:<id> or all")
         if not isinstance(prefixes, dict):
             raise ValueError(f"directories.stores.{name}.grants.{subj} must be {{prefix: level}}")
         for prefix, lv in prefixes.items():
             if lv not in LEVELS:
                 raise ValueError(f"directories.stores.{name}.grants.{subj}.{prefix!r}: level must be one of {LEVELS}")
-        out[f"agent:{v}"] = {str(pf): str(lv) for pf, lv in sorted(prefixes.items())}
+        out["all" if kind == "all" else f"agent:{v}"] = {str(pf): str(lv) for pf, lv in sorted(prefixes.items())}
     return out
 
 
@@ -215,8 +232,8 @@ SUBJECT_KINDS = ("agent",)              # grant subjects today; "office", "insti
 
 
 def subjects_of(k, aid) -> list:
-    """The grant subjects an agent answers to (today: itself)."""
-    return [f"agent:{aid}"]
+    """The grant subjects an agent answers to: itself, and "all" (a store's initial grant to every agent, review 31.14)."""
+    return [f"agent:{aid}", "all"]
 
 
 # ====================================================================== state
@@ -227,6 +244,11 @@ def install(k) -> None:
     if not st:
         return
     k.w["dirs"] = {n: {**s, "files": {}, "grants": copy.deepcopy(s.get("grants") or {})} for n, s in st.items()}
+    for n, s in st.items():                                             # review 31.14: seeded stores (the legal archive)
+        if s.get("seed"):
+            mod, _, fn = SEEDS[s["seed"]["name"]].partition(":")
+            import importlib
+            k.w["dirs"][n]["files"] = dict(getattr(importlib.import_module(mod), fn)(k, n, s["seed"]))
 
 
 def create(k, name, conf) -> None:
@@ -291,7 +313,7 @@ def static_access(inst, a) -> bool:
         return False
     holders = ((inst.get("roles") or {}).get("holders") or {}) if isinstance(inst, dict) else {}
     for d in st.values():
-        if any(lv != "none" for lv in ((d.get("grants") or {}).get(f"agent:{a['id']}") or {}).values()):
+        if any(lv != "none" for subj in (f"agent:{a['id']}", "all") for lv in ((d.get("grants") or {}).get(subj) or {}).values()):
             return True                                                 # an initial grant (a clerk)
         kind, _, v = d["owner"].partition(":")
         if (kind == "agent" and a["id"] == v or kind == "role" and a["id"] in (holders.get(v) or ())
