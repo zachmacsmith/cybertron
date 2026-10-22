@@ -77,10 +77,10 @@ RULES = {
     "wind_up": "a list of shareholders, members, parent: the order its companies are wound up in",
     "procedures": "a list of members, two_thirds, founder, custom: the governance forms its companies may use",
     "registration_fee": "{item: qty}: what a founder pays this polity's treasury to found a company under it",
-    "max_laws": "1-10: laws one of its companies may have in force",
+    "max_laws": "1 to contracts.max_laws_rule (50; 10 before engine 20): laws one of its companies may have in force",
     "max_own": "0-10: currencies, rights and offices (each) one of its companies may create",
 }
-BOUNDS = {"max_laws": (1, 10), "max_own": (0, 10)}
+BOUNDS = {"max_laws": (1, 10), "max_own": (0, 10)}              # max_laws: the upper bound is contracts.max_laws_rule
 
 
 # ---------------------------------------------------------------------- the parent link
@@ -212,6 +212,9 @@ def check_rule(k, key, value):
             raise L.LawError("company rule registration_fee is {item: qty} (quantities zero or more)")
         return {str(i): float(q) for i, q in sorted(value.items()) if q > 0}
     lo, hi = BOUNDS[key]
+    if key == "max_laws":                                               # engine 20: contracts.max_laws_rule (10 before)
+        from cybertron import contracts as KC
+        hi = int(KC.cfg(k).get("max_laws_rule") or hi)
     if not _num(value) or value != int(value) or not lo <= int(value) <= hi:
         raise L.LawError(f"company rule {key} is a whole number from {lo} to {hi}")
     return int(value)

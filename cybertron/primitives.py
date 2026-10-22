@@ -181,7 +181,7 @@ _ROWS = [
             "when unset) and the move's events carry"),
     P("harvest", "core", "create", ("agent", "camp", "x", "item", "qty", "via"), "dispatch.changes.economy:do_harvest", routed=True, subject="agent", parties=("agent",),
       agent_params=("agent",), charge=("agent", "item"), event="harvest", causes=("agent",), gates=("set_quota", "set_harvest_limit", "set_fee"),
-      reads=("stock", "camps", "bounty_number"), preview=("camps",), sites=("dispatch.changes.economy:do_harvest", "actions:_harvest", "dispatch.legacy:legacy_hooks",
+      reads=("stock", "camps", "bounty_number", "resource_of"), preview=("camps",), sites=("dispatch.changes.economy:do_harvest", "actions:_harvest", "dispatch.legacy:legacy_hooks",
                                                                                        "camptypes.framework:pay_yield"),
       why={"compel": _LNA}, notes="needs a harvest right (or an open typed camp); limits, quotas and fees are camp rules. via \"typed\": "
                                   "a typed camp's yield (paid at once or at the end of the round; on_harvest runs in either case)"),

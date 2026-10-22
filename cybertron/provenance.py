@@ -54,7 +54,7 @@ LOG_FORMAT = 1
 # run plays under, cybertron/settings.py) record it. ENGINE_FLIPS[v]: the commits that made version v (the first decides, by git
 # ancestry, whether a run's recorded sha has it: settings.infer_version) and the default flips, (settings target, key path, old,
 # new); settings.use sets a flip back to `old` for a run of an earlier version whose frozen snapshot lacks the key.
-ENGINE_VERSION = 18
+ENGINE_VERSION = 20
 # The oldest engine version the current code resumes, replays or forks in place (settings.frozen_run refuses older runs, pointing to
 # `cybertron rerun`): a replay of millbrook (engine 12) at engine 18 diverged at its first prompt, so the default flips of versions
 # before 13 (2, 4, 5, 6, 8, 9: channels.delivery, context.memory_text, dm_delta, history, conflict.model, admission_rounds) are no
@@ -145,6 +145,22 @@ ENGINE_FLIPS = {
          "flips": [("cybertron.context.DEFAULTS", ("world_name",), "Charter", "")],
          "note": "the package is renamed charter -> cybertron; the prompts no longer name the world (the overview's first line was "
                  "\"Charter: N agents, R rounds.\"; the frozen legacy prompt (context off, D-4) keeps its text)"},
+    19: {"commits": ["646cbc0972dfa9a72a2826cd51657eaa3b44f912"],
+         "flips": [("cybertron.contracts.DEFAULTS", ("miss_judged",), "round_end", "turn")],
+         "note": "a missed manual contract leg is judged on what the payer held at the end of its turns this round (could-not "
+                 "unless it held what was late, above its keep, when it could act; simultaneous turns discount what others gave it "
+                 "after the decisions); the miss record carries held, held_turn and held_end (docs/review/31_institutions/10 §8 #3)"},
+    20: {"commits": ["85502faec67caba70d98f5cf6c769640b1be4fbf"],
+         "flips": [("cybertron.contracts.DEFAULTS", ("max_laws",), 3, 50),
+                   ("cybertron.contracts.DEFAULTS", ("max_laws_rule",), 10, 50),
+                   ("cybertron.contracts.DEFAULTS", ("compact_lines",), False, True),
+                   ("cybertron.schema.EXTRA", ("law.effects_detail",), False, True),
+                   ("cybertron.schema.EXTRA", ("actions.bare_names",), False, True)],
+         "note": "engine bugs from the Private world (docs/review/31_institutions/10 §8): institutions may hold many laws (max_laws "
+                 "50, company rule up to 50) and render them compactly; force_rule changes count in law_effect and "
+                 "procedure_restored names its ranks (law.effects_detail); a bare contract action name resolves under "
+                 "actions.forgiving (actions.bare_names); new code: harvest-leg camps/items filters, the Service guard assign "
+                 "action, resource_of(camp); a start contract over the cap fails generation"},
 }
 
 

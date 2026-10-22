@@ -627,7 +627,8 @@ def _render_event(k, e, viewer=None) -> str | None:
         from cybertron import laweffects as LE
         return LE.render(k, e, tag)
     if t == "procedure_restored":
-        return f"{tag} the {d['cls']} procedure set by law {d['law']} applies again, after the repeal of {d['after_repeal_of']}"
+        return (f"{tag} the {d['cls']} procedure set by law {d['law']} applies again"
+                + (f" to {' and '.join(d['ranks'])}-rank drafts" if d.get("ranks") else "") + f", after the repeal of {d['after_repeal_of']}")
     if t == "veto_vote":
         return f"{tag} {who} voted to veto {d['law']}"
     if t == "world_event":                                              # world events (cybertron/events.py), phrased in-world
