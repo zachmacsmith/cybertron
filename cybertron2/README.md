@@ -17,6 +17,9 @@ python -m pytest tests/test_cybertron2.py
   (`LLM_BACKEND=api`). One call per living agent per round, in parallel.
 - `--bots` replaces every model with a scripted bot: a smoke test (determinism, no crash), not evidence about behaviour.
 - `runs/` is git-ignored; copy a run you want to keep under `docs/review/38_space_engine/runs/` (check it for session ids first).
+- Publish runs to the Hugging Face dataset, in their own folder marked experimental (`experimental/cybertron2/`, out of the
+  catalog): `python -m cybertron2.publish_hf RUN_DIR... [--push]`. It redacts this machine's ids, runs the privacy gate, and
+  uploads only with `--push` and a write token in `HF_TOKEN`.
 - Cost seen: about $0.09 a round for 8 agents (2 Opus, 3 Sonnet, 3 Haiku), about $0.19-0.22 for 11 (3 Opus, 4 Sonnet, 4 Haiku).
 
 ## Modules
