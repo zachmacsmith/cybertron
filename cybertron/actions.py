@@ -1469,6 +1469,7 @@ def library_index(inst) -> dict:
     if FT.on("subsistence", inst["spec"]):                              # review 15 S6: the food and family templates whose needs hold
         out.update({e["name"]: e["doc"] for e in LB.food_templates(inst)})
     out.update({e["name"]: e["doc"] for e in LB.established_templates(inst)})   # review 27: only with institutions.office_control
+    out.update({e["name"]: e["doc"] for e in LB.cross_templates(inst)})   # review 37.3: only with institutions.cross
     if LB.settings(inst)["access"] != "none":
         out.update({b: GR.intent(LB.BLOCKS[b]["code"]) or "a building block" for b in LB.BLOCKS})
     return out

@@ -4408,9 +4408,153 @@ def established_templates(x=None) -> list:
     return [e for e in ESTABLISHED.values() if all(test[n]() for n in e["needs"])]
 
 
+# ====================================================================== institutions acting on each other (review 37.3)
+# Law code over the cross-institution API (cybertron/cross.py), listed only where institutions.cross is on (law.v2): a charter, a
+# treaty and a guild levy. Kept apart from every other family, so no other world lists, samples or references them.
+CROSS_TEMPLATES: dict[str, dict] = {}
+
+
+def cross_template(name, topic, src, doc, fires):
+    assert name not in LIB and name not in TOOLKIT and name not in FOOD_TEMPLATES and name not in ESTABLISHED, name
+    src = src.strip() + "\n"
+    tree = L.check(src, v2=True)
+    CROSS_TEMPLATES[name] = {"name": name, "category": "toolkit", "kind": "law", "edition": 2, "family": "cross", "topic": topic,
+                             "rank": L.declared(tree, "rank") or "statute", "doc": " ".join(doc.split()), "fires": fires,
+                             "needs": ("law.v2", "institutions.cross"), "code": src, "sha": _sha(src)}
+
+
+def cross_templates(x=None) -> list:
+    """The cross-institution templates listed in x (every one when x is None): only where institutions.cross is on (law.v2)."""
+    if x is None:
+        return list(CROSS_TEMPLATES.values())
+    from cybertron import cross as CR
+    sp = getattr(x, "spec", None)
+    if sp is None and isinstance(x, dict):
+        sp = x["spec"] if isinstance(x.get("spec"), dict) else x
+    sp = sp or {}
+    return list(CROSS_TEMPLATES.values()) if CR.on_spec(sp) and (sp.get("law") or {}).get("v2") else []
+
+
+cross_template("Charter", "charter", '''
+title = "Charter"
+intent = "A charter between the parent institution PARENT and the child institution CHILD (named NAME). Enacted by the parent, it offers the child the charter: the parent holds POWERS over the child (read its records, levy on its treasury within a limit, appoint and remove its officers, enact laws in its code, veto its acts), and the child holds CHILD_POWERS over the parent. Enacted by the child, it accepts the charter its parent offered (or keeps the one in force). Repealing this law ends the charter: the parent revokes it, or the child renounces it. The charter's id is public."
+PARENT = "J0"
+CHILD = "A1"
+NAME = ""
+POWERS = ["read", {"power": "levy", "item": "penny", "qty": 5, "every": 1}, "appoint", "remove"]
+CHILD_POWERS = []
+
+def mine():
+    for r in instruments():
+        if r["kind"] == "charter" and r["parties"] == [PARENT, CHILD] and r["status"] != "ended":
+            return r
+    return None
+
+def on_enact():
+    r = mine()
+    if jurisdiction() == PARENT:
+        if r == None:
+            label = None
+            if NAME != "":
+                label = NAME
+            public["charter"] = offer_charter(CHILD, POWERS, label, CHILD_POWERS)
+        else:
+            public["charter"] = r["id"]
+    elif jurisdiction() == CHILD and r != None:
+        if r["status"] == "offered":
+            accept_instrument(r["id"])
+        public["charter"] = r["id"]
+
+def on_repeal():
+    if public.get("charter"):
+        end_instrument(public["charter"], "the Charter law was repealed")
+''', doc="""Law of a parent institution (or of its child): offers a child a charter with the powers the parent keeps over it
+and those the child gets; the child's own copy accepts it; repealing either copy ends the charter.""", fires="on_enact")
+
+cross_template("Treaty", "treaty", '''
+title = "Treaty"
+intent = "A treaty between this institution and OTHER (named NAME): OTHER holds GIVE over this institution and this institution holds TAKE over OTHER. The first of the two to enact it offers the treaty; when OTHER enacts its own copy (with GIVE and TAKE swapped) it accepts it. Repealing it withdraws from the treaty. The treaty's id is public."
+OTHER = "A2"
+NAME = ""
+GIVE = ["read"]
+TAKE = ["read"]
+
+def mine():
+    for r in instruments():
+        if r["kind"] == "treaty" and OTHER in r["parties"] and r["status"] != "ended":
+            return r
+    return None
+
+def on_enact():
+    r = mine()
+    if r == None:
+        label = None
+        if NAME != "":
+            label = NAME
+        public["treaty"] = offer_treaty(OTHER, GIVE, TAKE, label)
+    else:
+        if r["status"] == "offered" and jurisdiction() not in r["consented"]:
+            accept_instrument(r["id"])
+        public["treaty"] = r["id"]
+
+def on_repeal():
+    if public.get("treaty"):
+        end_instrument(public["treaty"], "the Treaty law was repealed")
+''', doc="""Law of either party: offers a treaty of named powers each way, or accepts the other's offer; repealing it
+withdraws.""", fires="on_enact")
+
+cross_template("Guild Levy", "levy", '''
+title = "Guild Levy"
+intent = "Every PERIOD rounds, at the end of the round, this institution levies RATE of the ITEM that GUILD holds in its treasury (or in its store STORE, when one is named), at most CAP each time, into this institution's treasury (or its store INTO), under the levy power GUILD's charter (or a treaty) grants it. Without the power nothing is taken. Each levy, and each refusal, is in a public register."
+rank = "statute"
+GUILD = "A1"
+ITEM = "penny"
+RATE = 0.2
+CAP = 5
+PERIOD = 1
+STORE = ""
+INTO = ""
+
+def held():
+    s = state_of(GUILD)
+    if s == None:
+        return CAP
+    if STORE != "":
+        return s["stores"].get(STORE, {}).get(ITEM, 0)
+    return s["treasury"].get(ITEM, 0)
+
+def on_round_end(r):
+    if (r + 1) % PERIOD != 0:
+        return
+    book = public.setdefault("register", [])
+    if "levy" not in powers_over(GUILD):
+        book.append({"round": r + 1, "levied": 0, "why": "no levy power over " + GUILD})
+        return
+    due = min(CAP, RATE * held())
+    if due <= 0.000001:
+        book.append({"round": r + 1, "levied": 0, "why": GUILD + " holds no " + ITEM})
+        return
+    src = None
+    if STORE != "":
+        src = STORE
+    dst = None
+    if INTO != "":
+        dst = INTO
+    got = levy_on(GUILD, ITEM, due, src, dst)
+    if got == False:
+        book.append({"round": r + 1, "levied": 0, "why": "refused"})
+        return
+    book.append({"round": r + 1, "levied": round_to(got, 3)})
+    if got > 0:
+        gazette("Guild Levy: " + str(round_to(got, 3)) + " " + ITEM + " levied from " + GUILD)
+''', doc="""Law of a parent polity: a periodic levy of a share of a chartered guild's treasury or store, within the limit
+its charter grants; it takes nothing once the charter ends.""", fires="on_round_end")
+
+
 def v2_templates() -> dict:
-    """Every law.v2 template by name: the toolkit, the food and family templates and the established-world templates."""
-    return {**TOOLKIT, **FOOD_TEMPLATES, **ESTABLISHED}
+    """Every law.v2 template by name: the toolkit, the food and family templates, the established-world templates and (review
+    37.3) the cross-institution templates."""
+    return {**TOOLKIT, **FOOD_TEMPLATES, **ESTABLISHED, **CROSS_TEMPLATES}
 
 
 # Review 31.04 #5 / 31.08 §2.3 (channels.business): business valid only when posted. The template reads the board with the law
@@ -5106,6 +5250,8 @@ def code(name: str, x=None) -> str:
         return FOOD_TEMPLATES[name]["code"]
     if name in ESTABLISHED:                                             # review 27: established-world templates
         return ESTABLISHED[name]["code"]
+    if name in CROSS_TEMPLATES:                                         # review 37.3: cross-institution templates
+        return CROSS_TEMPLATES[name]["code"]
     return LIB[name]["code"]
 
 
@@ -5211,6 +5357,14 @@ def catalogue_text(x=None) -> str:
                 ps = ", ".join(f"{k}={v!r}" for k, v in params(e["name"]).items())
                 parts.append(f"- {e['name']} ({'contract' if e['kind'] == 'contract' else 'law'}, established/{e['topic']}): "
                              f"{e['doc']} Parameters: {ps or 'none'}.\n```python\n{e['code']}```")
+        crs = cross_templates(x)                                        # review 37.3: only where institutions.cross is on
+        if crs:
+            parts.append("Templates for institutions acting on each other (copy one and change its top-level constants: a law to "
+                         "propose in your institution):")
+            for e in crs:
+                ps = ", ".join(f"{k}={v!r}" for k, v in params(e["name"]).items())
+                parts.append(f"- {e['name']} (law, cross/{e['topic']}): {e['doc']} Parameters: {ps or 'none'}.\n```python\n"
+                             f"{e['code']}```")
     return "\n".join(parts)
 
 
@@ -5230,7 +5384,8 @@ def instantiate(name: str, params: dict | None = None, x=None, rank: str | None 
     """A copy of library law `name` (a toolkit template as it is) with top-level constants replaced: params
     {NAME: value}. Only names assigned a constant at the top level can be set; the result is checked like any law. rank: the copy's
     declared rank (law.v2), replacing or adding its `rank = "..."` line."""
-    return set_constants(code(name, x), params, name, rank, v2=name in TOOLKIT or name in FOOD_TEMPLATES or name in ESTABLISHED)
+    return set_constants(code(name, x), params, name, rank, v2=name in TOOLKIT or name in FOOD_TEMPLATES or name in ESTABLISHED
+                         or name in CROSS_TEMPLATES)
 
 
 def set_constants(src: str, params: dict | None = None, name: str = "the law", rank: str | None = None, v2: bool = False) -> str:

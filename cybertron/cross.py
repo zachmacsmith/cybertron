@@ -561,10 +561,10 @@ def law_api(k, lid) -> dict:
             raise L.LawError(f"no instrument {x}")
         return rec
 
-    def get_grant(power, iid, item=None):
+    def get_grant(power, iid, item=None, fn=None):
         got = holds(k, me(), iid, power, item)
         if got is None:
-            _refuse(k, lid, power, me(), iid, why_not(k, me(), iid, power))
+            _refuse(k, lid, power, me(), iid, why_not(k, me(), iid, power), fn)
         return got
 
     # reads
@@ -578,7 +578,7 @@ def law_api(k, lid) -> dict:
 
     def state_of_(institution):
         iid = str(institution)
-        got = get_grant("read", iid)
+        got = get_grant("read", iid, fn="state_of")
         if got is None:
             return None
         from cybertron import accounts as AC
@@ -595,7 +595,7 @@ def law_api(k, lid) -> dict:
     # money
     def levy(institution, item, qty, store=None, into=None):
         iid, item = str(institution), str(item)
-        got = get_grant("levy", iid, item)
+        got = get_grant("levy", iid, item, "levy_on")
         if got is None:
             return False
         rec, i, g = got
@@ -624,7 +624,7 @@ def law_api(k, lid) -> dict:
 
     def pay_from(institution, to, item, qty):
         iid, item = str(institution), str(item)
-        got = get_grant("pay", iid, item)
+        got = get_grant("pay", iid, item, "pay_out_of")
         if got is None:
             return False
         rec, i, g = got
@@ -659,11 +659,12 @@ def law_api(k, lid) -> dict:
     def _reseat(power, institution, office_, agent):
         iid = str(institution)
         nm = _office_name(iid, office_)
-        if get_grant(power, iid) is None:
+        fn = "appoint_to" if power == "appoint" else "remove_from"
+        if get_grant(power, iid, fn=fn) is None:
             return False
         rec = holds(k, me(), iid, power)[0]
         if IN.office(k, iid, nm) is None:
-            return _refuse(k, lid, power, me(), iid, f"{name(k, iid)} has no office {nm}", power)
+            return _refuse(k, lid, power, me(), iid, f"{name(k, iid)} has no office {nm}", fn)
         cur = IN.holders(k, iid, nm)
         a = str(agent)
         want = cur + [a] if power == "appoint" else [x for x in cur if x != a]
@@ -672,9 +673,9 @@ def law_api(k, lid) -> dict:
         try:
             after = IN.reseat(k, iid, nm, want, by=lid, strict=True)
         except L.LawError as e:
-            return _refuse(k, lid, power, me(), iid, str(e), power)
+            return _refuse(k, lid, power, me(), iid, str(e), fn)
         if (a in after) != (power == "appoint"):
-            return _refuse(k, lid, power, me(), iid, f"{iid}.{nm} is held by {', '.join(after) or 'nobody'} (a law blocked it)", power)
+            return _refuse(k, lid, power, me(), iid, f"{iid}.{nm} is held by {', '.join(after) or 'nobody'} (a law blocked it)", fn)
         _act(k, rec, power, me(), iid, lid, office=nm, agent=a)
         return True
 
@@ -687,7 +688,7 @@ def law_api(k, lid) -> dict:
     # code
     def enact_in(institution, code):
         iid = str(institution)
-        got = get_grant("enact", iid)
+        got = get_grant("enact", iid, fn="enact_in")
         if got is None:
             return False
         rec = got[0]

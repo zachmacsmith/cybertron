@@ -141,7 +141,8 @@ def _templates():
     templates (review 15 S6; regimes.template_code accepts them; docs/review/27 §0 bug 1)."""
     from cybertron import library as LB
     from cybertron import regimes as RG
-    return tuple(LB.TOOLKIT) + tuple(LB.LIB) + tuple(RG.STATUTES) + tuple(LB.FOOD_TEMPLATES) + tuple(LB.ESTABLISHED)
+    return tuple(LB.TOOLKIT) + tuple(LB.LIB) + tuple(RG.STATUTES) + tuple(LB.FOOD_TEMPLATES) + tuple(LB.ESTABLISHED) \
+        + tuple(LB.CROSS_TEMPLATES)
 
 
 def _archetypes():
@@ -1423,7 +1424,7 @@ def _check_law_set(p, x) -> list:
         for n in names:
             if n in bad:
                 continue
-            known = n in LB.TOOLKIT or n in LB.LIB or n in LB.FOOD_TEMPLATES or n in LB.ESTABLISHED
+            known = n in LB.TOOLKIT or n in LB.LIB or n in LB.FOOD_TEMPLATES or n in LB.ESTABLISHED or n in LB.CROSS_TEMPLATES
             if not known:
                 continue
             consts = LB.params(n)
