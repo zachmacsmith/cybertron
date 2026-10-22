@@ -191,6 +191,16 @@ E("channel_read", "channels", "record", "monitor", "silent", None, act="read",
   note="channels.business (review 31.04 #6): a read of a channel (agent, channel, upto, unread_before), for read rates")
 E("message_refused", "channels", "record", "monitor", "silent", None,
   note="channels.v2: a law's send_message that could not be delivered (why)")
+E("duty", "positions", "record", "monitor", "silent", None,
+  note="review 33 (cybertron/positions.py): one due duty of a position's holder, checked against the round's events at its end "
+       "(office, position, duty, label, enforcement, done, evidence): office adherence measured, not guessed")
+E("duty_missed", "positions", "record", "monitor", "silent", None,
+  note="review 33: a missed duty under enforcement obligation (the holder and its superior are notified)")
+E("letter_submitted", "papers", "record", "monitor", "silent", None, act="submit",
+  note="review 33 (cybertron/papers.py): a letter to a paper's inbox (the editor sees it in its state)")
+E("letter_published", "papers", "record", "monitor", "silent", None,
+  note="review 33: a letter published verbatim (the post itself is a channel_post; sha and verified: unaltered)")
+E("letter_declined", "papers", "record", "monitor", "silent", None, act="decline", note="review 33: a letter declined (the author is told)")
 E("anon_truth", "actions", "truth", "monitor", "silent", None, act="anon_post", primitive="post")
 E("forged_dm", "actions", "truth", "monitor", "silent", None, act="forge_dm", aliases=("forgery_truth",),
   note="forgery_truth: the name before the merge with hidden powers' forgeries (old runs)", primitive="dm")

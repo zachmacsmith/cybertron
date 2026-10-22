@@ -1433,7 +1433,9 @@ class Kernel:
             self.w["round"] += 1
             self._reset_effects()
         def succession():                                              # institutions.succession (off: nothing): vacancies, filling
+            from cybertron import positions as PS
             from cybertron import succession as SU
+            PS.end_round(self)                                         # review 33: positions' duties checked (no position: nothing)
             SU.end_round(self)
         return {"close_ballots": close_ballots, "veto_queue": veto_queue, "regrow": regrow, "expire_cases": expire_cases,
                 "succession": succession, "record": record, "advance": advance}

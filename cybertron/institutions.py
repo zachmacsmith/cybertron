@@ -348,7 +348,7 @@ def parse_offices(code, succession=False) -> dict:
             raise L.LawError(f"offices: an office name is 1-24 letters, digits or _ (got {name!r})")
         d = {} if d is None else d
         fields = OFFICE_FIELDS + (("succession",) if succession else ())
-        if not isinstance(d, dict) or any(x not in fields for x in d):
+        if not isinstance(d, dict) or any(x not in fields + ("position",) for x in d):     # position: review 33 (positions.py)
             raise L.LawError(f"offices.{name}: an object with {', '.join(fields)}")
         powers, holders_ = d.get("powers") or [], d.get("holders") or []
         if not isinstance(powers, list) or not all(isinstance(x, (str, dict)) for x in powers):
@@ -369,6 +369,11 @@ def parse_offices(code, succession=False) -> dict:
             out[name]["duties"] = " ".join(d["duties"].split())[:DUTIES_MAX]
         if d.get("controls") is not None:                               # established worlds: resources only this office controls
             out[name]["controls"] = check_controls(name, d["controls"])
+        if d.get("position") is not None:                               # review 33: the position the office holds (positions.py)
+            p = d["position"]
+            if not isinstance(p, dict) or not isinstance(p.get("name"), str) or not isinstance(p.get("params") or {}, dict):
+                raise L.LawError(f"offices.{name}.position: {{\"name\": \"Editor\", \"params\": {{...}}, \"reports_to\": \"J0.chairman\"}}")
+            out[name]["position"] = {x: p[x] for x in ("name", "params", "reports_to") if p.get(x)}
         if d.get("term_calendar"):                                      # established worlds: terms on a fixed calendar (elections
             if d.get("term") is None:                                   # every `term` rounds, whenever a holder was filled)
                 raise L.LawError(f"offices.{name}.term_calendar: needs a term")
@@ -410,7 +415,7 @@ def declare_offices(k, iid, lid) -> list:
                       "term": d["term"], "law": lid, "declared": k.r, "holders": [], "past": []}
         if "succession" in d:                                           # institutions.succession: its clause (None: polity law)
             mine[name]["succession"] = d["succession"]
-        for f in ("duties", "controls", "calendar"):                    # established worlds (only when declared: records unchanged)
+        for f in ("duties", "controls", "calendar", "position"):        # established worlds (only when declared: records unchanged)
             if f in d:
                 mine[name][f] = d[f]
         new.append(name)

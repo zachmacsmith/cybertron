@@ -147,6 +147,8 @@ def _act(k, aid: str, name: str, args: dict) -> str:
     hidden_here |= AR.channel_hidden(k.spec)                           # wave 9 C: channels.v2's verbs (off: unknown, as before)
     from cybertron import counsel as _CN                                # review 31.05/31.07: represent, withdraw_case, read_register
     hidden_here |= _CN.world_hidden(k)                                  # exist only where a world's laws or contracts bring them
+    from cybertron import papers as _PP                                  # review 33: submit and decline only with channels.papers
+    hidden_here |= _PP.hidden(k)
     sub = "subsistence" in k.w
     if not sub:                                                         # review 15: farm, withdraw, build only with subsistence on
         hidden_here |= set(SUBSISTENCE_ACTIONS)
@@ -201,6 +203,9 @@ def _act(k, aid: str, name: str, args: dict) -> str:
             if ref:
                 name, args = "create_agent", {"commission": ref}
     fn = AR.resolve(CH.OVERRIDES[name] if name in CH.OVERRIDES and CH.on(k) else AR.REG[name].handler)   # channels.v2: post ...
+    if name == "publish" and isinstance(args, dict) and ("submission" in args or "letter" in args) and _PP.on(k):
+        fn = AR.resolve("papers:act_publish")                          # review 33: publish {"submission"}: a letter to a paper
+        args = {"submission": args.get("submission") or args.get("letter")}
     forgiving = _forgiving(k)
     if forgiving:
         args = _forgive(k, aid, name, args)

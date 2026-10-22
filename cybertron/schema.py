@@ -1777,6 +1777,50 @@ def _docs(nodes):
 
 
 # ====================================================================== validation
+# Review 33 (cybertron/positions.py, cybertron/papers.py): opt-in keys checked here and not registered in EXTRA or a module's
+# DEFAULTS, so no instance's frozen settings change (as `takeover`). Absent is off; a later default flip would first move them into a
+# registered dict (cybertron/settings.py).
+OPT_IN = {
+    "positions": "review 33: positions (cybertron/positions.py): default, place, library (templates by name)",
+    "context.identity": "review 33: class (default: the class line) | positions (identity and leverage from the positions held)",
+    "context.failed_banner": "review 33: the last turn's failed actions at the top of the next turn (bool)",
+    "channels.papers": "review 33: papers instead of a square: submit, publish {submission}, decline (bool; channels.v2)",
+    "channels.unread_new": "review 33: pull channels show unread and new-since-last-round counts, headlines skip the record (bool)",
+}
+
+
+def _opt_in(spec) -> tuple:
+    """(the spec without the OPT_IN keys, their errors). Also: a world using positions must declare its channel setup."""
+    from cybertron import positions as PS
+    errs = []
+    out = {key: v for key, v in spec.items() if key != "positions"}
+    if "positions" in spec:
+        errs += PS.check(spec)
+    elif PS.in_use(spec):
+        errs += PS.check(spec)
+    for blk, names in (("context", ("identity", "failed_banner")), ("channels", ("papers", "unread_new"))):
+        b = spec.get(blk)
+        if not isinstance(b, dict) or not any(n in b for n in names):
+            continue
+        out[blk] = {key: v for key, v in b.items() if key not in names}
+        for n in names:
+            if n not in b:
+                continue
+            v = b[n]
+            if n == "identity":
+                if v not in ("class", "positions"):
+                    errs.append(f"context.identity: class | positions, got {v!r}")
+            elif not isinstance(v, bool):
+                errs.append(f"{blk}.{n}: expected true or false, got {v!r}")
+    if PS.in_use(spec):
+        why = PS.channel_setup_problem(spec)
+        if why:
+            errs.append("channels: " + why)
+    if (spec.get("channels") or {}).get("papers") and not (spec.get("channels") or {}).get("v2"):
+        errs.append("channels.papers: papers are channels v2 channels, which needs channels.v2: true")
+    return out, errs
+
+
 def validate(spec) -> list[str]:
     """Errors in a spec (merged and overridden, before sampling): unknown keys anywhere (with did-you-mean suggestions), wrong
     types, values outside an enum or a range, malformed distributions. [] means valid."""
@@ -1787,6 +1831,8 @@ def validate(spec) -> list[str]:
         from cybertron import takeover_worlds as TW                    # registered in EXTRA, so no instance's frozen settings change
         errs += TW.check("takeover", spec["takeover"])
         spec = {k: v for k, v in spec.items() if k != "takeover"}
+    spec, more = _opt_in(spec)                                         # review 33: positions, papers and the channel fixes
+    errs += more
     _section(keys()[""], "", spec, errs)
     law = spec.get("law") if isinstance(spec.get("law"), dict) else {}
     lib = law.get("library") if isinstance(law.get("library"), dict) else {}

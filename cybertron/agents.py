@@ -771,6 +771,8 @@ def state_view(k, aid: str) -> str:
         lines += part                                                   # credit, channels, projects ... media2 (features.TAILS order)
     from cybertron import institutions as _IN                              # established worlds: the offices held and their duties
     lines += _IN.office_lines(k, aid)                                    # (institutions.office_control; off: none)
+    from cybertron import papers as _PP, positions as _PS                # review 33: positions' DUE items, papers' letters (each
+    lines += _PS.state_lines(k, aid) + _PP.state_lines(k, aid)           # opt-in; none: nothing)
     return "\n".join(lines)
 
 

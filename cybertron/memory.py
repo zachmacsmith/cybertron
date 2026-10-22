@@ -570,11 +570,12 @@ def turn(k, a: dict, order: list, since: int, n_actions: int, final: bool, simul
         end.append(what_to_do(k, a, n_actions, final))
     block, hrec = history_block(k, aid, k.r)                             # the opening as if the conversation started now
     head = f"# Round {k.r + 1} (now)"
-    restart = "\n\n".join([block, head] + now + end)
+    banner = [b for b in [CX.failed_banner(k, aid)] if b]                # review 33: context.failed_banner (off: none)
+    restart = "\n\n".join([block, head] + banner + now + end)
     if starts:
         text = restart
     else:
-        text = "\n\n".join([f"# Round {k.r + 1}"] + middle + now + end)
+        text = "\n\n".join([f"# Round {k.r + 1}"] + banner + middle + now + end)
         hrec = counts(k, aid, s, k.r)
     hrec.update(message="start" if starts else "continue", tokens=CX.tokens(text), restart_tokens=CX.tokens(restart),
                 round_in_chunk=k.r - s + 1)

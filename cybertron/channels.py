@@ -821,6 +821,11 @@ def act_post(k, aid, text, channel=None, **kw):
         if channel in (None, "") and len(sq) != 1:
             mine = [c for c in sq if can_write(k, aid, k.w["channels"][c])]
             if len(mine) != 1:
+                from cybertron import papers as PP
+                if not sq and PP.on(k):                                 # review 33: no square; letters to the papers
+                    raise _err("there is no square: public speech goes through the papers (" + (", ".join(PP.papers(k)) or "none")
+                               + "): submit {\"paper\": \"<id>\", \"text\": \"...\"}, or post {\"channel\": \"<id>\", \"text\": \"...\"} in a "
+                               "channel you may write in")
                 raise _err("name the square to post in (\"channel\"): " + (", ".join(mine) or "you are at no camp's square"))
             channel = mine[0]
         elif channel in (None, ""):
@@ -1145,6 +1150,31 @@ def unread(k, aid, cid, heads=1) -> tuple:
     return n, latest
 
 
+def unread_new(k) -> bool:
+    """Spec channels.unread_new (review 33 §5, channel fixes; not frozen: absent is off): pull channels show "X unread, Y new since
+    last round" and their headline is the latest post that is not the engine's official record."""
+    return bool((_spec(k).get("channels") or {}).get("unread_new"))
+
+
+def unread_split(k, aid, cid) -> tuple:
+    """(unread, of them posted since the start of last round, the latest unread post that is not an official record or None)."""
+    seqs = _st(k)["log"].get(cid) or []
+    mark = _st(k)["read"].get(aid, {}).get(cid, 0)
+    n = new = 0
+    head = None
+    for s in seqs[bisect.bisect_right(seqs, mark):]:
+        e = k.events[s - 1] if s - 1 < len(k.events) else None
+        if e is None or e.get("agent") == aid or not k.can_see(aid, e):
+            continue
+        n += 1
+        if e.get("round", 0) >= k.r - 1:
+            new += 1
+        d = e.get("data") or {}
+        if not d.get("record") and d.get("as") != RECORD_AS:
+            head = e
+    return n, new, head
+
+
 def editions(k, aid, since) -> list:
     """Edition delivery (review 31.04 §5.2 item 6): for each channel with effective delivery edition that the agent follows, the
     posts of the rounds completed since its last look (rounds from the round of event `since` up to the last one) as one digest
@@ -1194,8 +1224,10 @@ def writable_line(k, aid) -> list:
     def row(ch):
         n = sum(1 for x in others if can_read(k, x, ch))                     # who it reaches (readers by any rule, not only followers)
         return f"{ch['id']} (read by {n} other{'' if n == 1 else 's'}): {ch['purpose'] or 'no purpose given'}"
+    tail = "a post without a channel goes to the square." if squares(k) or not (_spec(k).get("channels") or {}).get("papers") \
+        else "there is no square."                                      # review 33: papers worlds
     return ["You can post in: " + "; ".join(row(ch) for ch in sorted(mine, key=lambda c: c["id"]))
-            + ". Post there with post {\"channel\": \"<id>\", \"text\": \"...\"}; a post without a channel goes to the square."]
+            + ". Post there with post {\"channel\": \"<id>\", \"text\": \"...\"}; " + tail]
 
 
 def state_lines(k, aid) -> list:
@@ -1216,7 +1248,12 @@ def state_lines(k, aid) -> list:
             rows.append((n, ch["id"], latest))
         rows.sort(key=lambda x: (-x[0], x[1]))
         cap = int(cfg(k)["headlines"])
-        if heads == 1:
+        if unread_new(k):                                               # review 33: counts of new posts, headlines not the record
+            parts = []
+            for n, cid, _ in rows[:cap]:
+                tot, new, head = unread_split(k, aid, cid)
+                parts.append(f"{cid} {tot} unread, {new} new since last round" + (f", latest {_headline(head)}" if head is not None else ""))
+        elif heads == 1:
             parts = [f"{cid} {n} unread" + (f", latest {_headline(e)}" if e is not None else "") for n, cid, e in rows[:cap]]
         else:
             parts = [f"{cid} {n} unread" + (", latest " + " | ".join(_headline(e) for e in reversed(es)) if es else "")

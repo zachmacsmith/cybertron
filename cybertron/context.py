@@ -1054,7 +1054,8 @@ def overview(inst) -> str:
                        + (["a Fixer patches broken ones"] if has("fixer") else [])) + ". [manual: Law language, Law library]",
              ("Turns: everyone decides at once, then actions run in a shown order. " if sp.get("turns") == "simultaneous" else
               "Turns: agents act one at a time in a shown order. ")
-             + "Talk: post (public), dm (private, a few per round, delivered first and answerable within the round). [manual: Private messages]"]
+             + (_PAPERS_TALK if _papers(sp) else
+                "Talk: post (public), dm (private, a few per round, delivered first and answerable within the round). [manual: Private messages]")]
     if on("subsistence"):                                               # review 15 (off: no word), after the camps: never clipped first
         from cybertron import subsistence as _SB
         lines.insert(2, "Food: " + _SB.overview_line(inst) + ".")
@@ -1094,6 +1095,16 @@ def overview(inst) -> str:
     if mods:
         lines.append("Also: " + "; ".join(mods) + ".")
     return "\n".join(lines)
+
+
+_PAPERS_TALK = ("Talk: there is no square; public speech goes through the papers: submit a letter (submit {\"paper\", \"text\"}) and the "
+                "paper's editor publishes it under your name or declines it; dm (private, a few per round, delivered first and "
+                "answerable within the round). [manual: Private messages]")
+
+
+def _papers(sp) -> bool:
+    from cybertron import papers as PP
+    return PP.on(sp)
 
 
 def core_prompt(inst, a, k=None) -> str:
@@ -1143,6 +1154,7 @@ def _core(v) -> dict:
 
 # ------------------------------------------------------------------ the core layer's rows (sections.LAYOUTS["core"] order)
 from cybertron import sections as _SC                                    # noqa: E402
+from cybertron import positions as PS                                    # noqa: E402 (review 33)
 
 
 def _agent(inst, a):
@@ -1184,12 +1196,17 @@ def _overview(v):
 @_SC.section("identity", layers=("core",))
 def _identity(v):
     from cybertron import agent_rules as AGR                              # spec agent_rules: a scenario's briefing ("" when unset)
+    if PS.identity_on(v.inst):                                          # review 33: the positions the agent holds
+        return PS.identity_text(v.inst, v.k, v.a) + ((" Your roles: " + ", ".join(v.roles) + ".") if v.roles else "") \
+            + AGR.line(v.inst, v.aid)
     return f"You are {v.aid}. {_class_line(v.inst, v.a)}" + ((" Your roles: " + ", ".join(v.roles) + ".") if v.roles else "") \
         + AGR.line(v.inst, v.aid)
 
 
 @_SC.section("leverage", layers=("core",))
 def _leverage(v):
+    if PS.identity_on(v.inst):                                          # review 33: derived from rights and controls
+        return PS.leverage_text(v.inst, v.k, v.a)
     return leverage_line(v.inst, v.a, v.roles)
 
 
@@ -1549,6 +1566,9 @@ def turn_prompt(k, a: dict, order: list, since: int, n_actions: int, final: bool
                       "carried": len(carry), "fetched": len(got)}
     parts = ["## State\n" + state, "## What changed since your last turn\n" + feed, "## Your last turns (newest first)\n" + recent,
              f"## Your scratchpad ({tokens(pad)} of {scratchpad_size(k, aid)} tokens)\n" + (pad or "(empty)")]
+    banner = failed_banner(k, aid)                                      # review 33: context.failed_banner (off: "")
+    if banner:
+        parts.insert(0, banner)
     if exchange:
         parts.insert(2, f"{EXCHANGE_HEADER} (round {k.r}, every message you received and sent, in order)\n" + exchange)
     if med:
@@ -1692,6 +1712,42 @@ def record_fields(k, aid) -> dict:
 def lookup_records(k, aid) -> list:
     """The free lookups fetched this turn, for the lookup row in reasoning.jsonl (text cut for the log)."""
     return [{**{x: y for x, y in r.items() if x != "text"}, "text": str(r.get("text", ""))[:1500]} for r in _st(k)["fetched"].get(aid, [])]
+
+
+def failed_banner(k, aid) -> str:
+    """Spec context.failed_banner (review 33 §5, channel fixes): the actions of the agent's last turn that failed, at the top of its
+    next turn ("Your post to security FAILED: <reason>"); "" when off or nothing failed."""
+    if not cfg(k).get("failed_banner") or k.r <= 0:
+        return ""
+    rows = _st(k, aid)["recent"].get(aid) or []
+    row = rows[-1] if rows and rows[-1].get("round") == k.r - 1 else None
+    if row is None:
+        return ""
+    acts = []
+    for x in row.get("actions") or ():
+        name, _, raw = str(x).partition(" ")
+        try:
+            args = json.loads(raw) if raw.strip() else {}
+        except ValueError:
+            args = {}
+        acts.append([name, args if isinstance(args, dict) else {}, False])
+    out = []
+    for r in row.get("results") or ():
+        m = re.match(r"^([A-Za-z_][A-Za-z0-9_.]*): ERROR (.*)$", str(r), re.S)
+        if not m:
+            continue
+        name, why = m.group(1), " ".join(m.group(2).split())
+        a = next((x for x in acts if x[0] == name and not x[2]), None)
+        where = ""
+        if a is not None:
+            a[2] = True
+            t = a[1].get("channel") or a[1].get("to") or a[1].get("paper") or a[1].get("agent") or a[1].get("store")
+            where = f" to {t}" if t and name in ("post", "send", "dm", "submit", "transfer", "reply") else f" ({t})" if t else ""
+        out.append(f"Your {name}{where} FAILED: {why[:300]}")
+    if not out:
+        return ""
+    return (f"## FAILED in round {k.r} (these did not happen)\n" + "\n".join(out[:6])
+            + (f"\n(and {len(out) - 6} more)" if len(out) > 6 else ""))
 
 
 def record_turn(k, aid, acts: list, results: list) -> None:

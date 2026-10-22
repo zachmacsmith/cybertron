@@ -68,7 +68,39 @@ def load(name_or_path: str, _seen: tuple = ()) -> dict:
     merged: dict = {}
     for parent in raw.pop("extends", []) or []:
         merged = _merge_file(merged, load(parent, _seen + (str(path),)))
-    return _merge_file(merged, raw)
+    out = _merge_file(merged, raw)
+    if not _seen:
+        check_channel_setup(out, path)
+    return out
+
+
+STRICT_DIRS = ("regimes",)                                              # review 33: specs here must declare their channel setup
+
+
+class ChannelSetupWarning(UserWarning):
+    pass
+
+
+def check_channel_setup(spec: dict, path=None) -> str | None:
+    """Review 33: a channels-v2 world's public channels are a deliberate per-scenario decision, never a silent fallback. When the
+    loaded spec does not declare its setup (cybertron/positions.channel_setup_problem), a warning names what it fell back to; for
+    specs under cybertron/specs/regimes/ (and worlds using positions, also in schema.validate) it is an error."""
+    from cybertron import positions as PS
+    why = PS.channel_setup_problem(spec)
+    if not why:
+        return None
+    strict = PS.in_use(spec)
+    if path is not None:
+        try:
+            rel = Path(path).resolve().relative_to(SPEC_DIR.resolve())
+            strict = strict or (len(rel.parts) > 1 and rel.parts[0] in STRICT_DIRS)
+        except ValueError:
+            pass
+    if strict:
+        raise ValueError(f"{path}: {why}")
+    import warnings
+    warnings.warn(f"{path}: {why}", ChannelSetupWarning, stacklevel=3)
+    return why
 
 
 # Named placements a file clears by setting them to {} (merging {} into an inherited mapping kept every entry: haiku100's
