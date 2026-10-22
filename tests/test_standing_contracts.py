@@ -116,6 +116,50 @@ def test_spec_checks():
         GN.generate(world(contracts=[{"template": "Retainer", "founder": "Ada", "parties": {"Bo": "client", "Cy": "counsel"}}]), 1)
 
 
+
+def test_a_start_contract_over_max_laws_fails_generation():
+    """Review 31.10 §8 #1: a start contract that would take its institution over contracts.max_laws was skipped at round 0 with no
+    word; generation now fails naming the contract, the cap and the setting."""
+    grants = [{"template": "Grant", "in": "A1", "params": {"TERMS": {"recipient": "Bo", "goods": "penny", "qty": 1}}}] * 4
+    sp = world(contracts=world()["start"]["contracts"] + grants)       # A1: offices + Board + Payroll + 4 Grants = 7 laws
+    with pytest.raises(ValueError, match=r"start\.contracts\[4\] \(Grant in A1\): A1 would have 6 laws, over contracts.max_laws 5; "
+                                         r"set contracts.max_laws to at least 7"):
+        GN.generate(sp, 1)
+    GN.generate(S.deep_merge(sp, {"contracts": {"max_laws": 7}}), 1)
+
+
+def test_max_laws_default_is_engine_20_and_old_runs_keep_3():
+    from cybertron import contracts as KC
+    from cybertron import incorporation as INC
+    from cybertron import settings as ST
+    assert KC.DEFAULTS["max_laws"] == 50 and KC.DEFAULTS["max_laws_rule"] == 50 and KC.DEFAULTS["compact_lines"] is True
+    with ST.use({"engine_version": 19, "defaults": {}}):
+        assert KC.DEFAULTS["max_laws"] == 3 and KC.DEFAULTS["max_laws_rule"] == 10 and KC.DEFAULTS["compact_lines"] is False
+    k = type("K", (), {"spec": {}})()
+    assert INC.check_rule(k, "max_laws", 50) == 50
+    with pytest.raises(Exception, match="from 1 to 50"):
+        INC.check_rule(k, "max_laws", 51)
+    with pytest.raises(Exception, match="from 1 to 10"):
+        INC.check_rule(type("K", (), {"spec": {"contracts": {"max_laws_rule": 10}}})(), "max_laws", 11)
+
+
+def test_twenty_laws_render_compactly(tmp_path):
+    """An institution with 19 laws (16 Grants): the member's contract line names 8 law ids, and the officer's obligations sum the
+    Grant legs into one row with one fulfil."""
+    from test_obligations import Script, manual
+    grants = [{"template": "Grant", "in": "A1", "params": {"TERMS": {"recipient": ["Bo", "Di"][i % 2], "goods": "penny", "qty": 1}}}
+              for i in range(16)]
+    sp = manual(S.deep_merge(world(rounds=1, wages=[], contracts=world()["start"]["contracts"] + grants),
+                             {"contracts": {"max_laws": 50}}))
+    pol = Script()
+    run(tmp_path, sp, pol)
+    p = pol.prompts[(0, "Ada")]
+    line = next(l for l in p.split("\n") if l.startswith("Your contract A1"))
+    assert "L10, and 11 more)" in line
+    ob = next(l for l in p.split("\n") if l.startswith("OBLIGATIONS:"))
+    assert "A1 Grant (16 laws) G: 16 penny (8 to Bo, 8 to Di)" in ob and len(ob) < 500
+
+
 def test_zero_attention_three_rounds_board_feeds_and_payrolls_pay(tmp_path):
     """Framework §11 check 2: 3 rounds with no agent action. The Board feeds its subscribers from the shop's store and charges them;
     the shop's Payroll pays its workers; J0 pays the watch (an office, whoever holds it) and Fay out of its reserve."""
@@ -482,6 +526,26 @@ def test_piece_rate_pays_per_unit_of_the_harvest_share(tmp_path):
     assert "W" not in moved                                               # piece basis: no salary
 
 
+@pytest.mark.parametrize("filt,cut", [({}, True), ({"cut_items": ["copper"]}, True), ({"cut_items": ["food"]}, False),
+                                       ({"cut_camps": ["nowhere"]}, False)])
+def test_harvest_leg_camp_and_item_filters(tmp_path, filt, cut):
+    """Review 31.10 §8 #2: the Payroll cut (a harvest leg) takes every harvest unless cut_items / cut_camps narrow it."""
+    sp = world(camp_rights=[{"resource": "copper", "members": "A1", "exclusive": True}],
+               contracts=[{"template": "Payroll", "in": "A1", "roster": {"Bo": {"wage": 2, "basis": "piece", "cut": 0.5, **filt}},
+                           "params": {"OFFICE": "head"}}])
+    k = setup(tmp_path, sp)
+    pay = law(k, "A1", "Payroll")
+    camp = next(c for c, v in k.w["camps"].items() if v.get("resource") == "copper" and f"harvest:{c}" in
+                k.w["agents"]["Bo"]["rights"])
+    c = k.w["camps"][camp]
+    act(k, "Bo", "harvest", camp=camp, x=[1] * c["dials"] if c.get("dials") else [1])
+    step(k)
+    moved = k.w["laws"][pay]["state"]["moved"].get("Bo", {})
+    assert (moved.get("O", [0, 0])[1] > 0) is cut
+    if filt.get("cut_items") == ["food"]:
+        assert "50% of each harvest of food you make goes to" in k.w["laws"][pay]["state"]["terms_lines"]["Bo"]
+
+
 def test_duty_leg_and_indexed_wage(tmp_path):
     sp = world(contracts=[{"template": "Standing Contract", "founder": "Bo", "parties": {"Bo": "crier", "Fay": "patron"},
                            "params": {"LEGS": [{"id": "D", "kind": "duty", "from": "crier", "to": "patron", "check": "act:post"},
@@ -580,6 +644,29 @@ def test_service_preset_fee_in_guard_duty_out_breach_on_a_gap(tmp_path):
     step(k)
     br = since(k, n0, "contract_breach")
     assert br and br[0]["agent"] == "Di" and br[0]["data"]["clause"] == "Service G" and "to Bo" in br[0]["data"]["remedy"]
+
+
+def test_service_guard_is_reassigned_in_play(tmp_path):
+    """Review 31.08 §5 1.3 limit lifted (engine 20): the officer assigns a client's guard (service_guard [client, agent]); the value
+    must be a living agent (or treasury); numbers-only set_term and the other presets are unchanged."""
+    from cybertron import standing as SD
+    sp = world(rounds=2, contracts=[{"template": "Service", "in": "A1", "roster": {"Bo": {"guard": "Di", "fee": 2}},
+                                     "params": {"OFFICE": "head"}, "allowances": {"Bo": {"penny": 2}}}])
+    k = setup(tmp_path, sp)
+    svc = law(k, "A1", "Service")
+    assert "service_guard" in act(k, "Ada", "invoke", action="A1.service_guard", args=["Bo", "Ada"])
+    assert k.w["laws"][svc]["state"]["roster"]["Bo"]["guard"] == "Ada"
+    for bad, why in ((["Bo", "Nobody"], "not a living agent"), (["Fay", "Ada"], "not on the roster")):
+        with pytest.raises(Exception, match=why):
+            act(k, "Ada", "invoke", action="A1.service_guard", args=bad)
+    with pytest.raises(Exception, match="is a number"):
+        act(k, "Ada", "invoke", action="A1.service_fee", args=["Bo", "Ada"])
+    act(k, "Ada", "guard", agent="Bo")
+    step(k)
+    assert not [e for e in k.events if e["type"] == "contract_breach"]        # the new guard performed the duty
+    assert "Ada owes you guard duty" in k.w["laws"][svc]["state"]["terms_lines"]["Bo"]
+    assert all(SD.PRESETS[p]["params"].get("AGENT_TERMS", []) == [] for p in SD.PRESETS if p != "Service")
+    assert SD.BASE["AGENT_TERMS"] == []
 
 
 def test_service_without_a_guard_named_records_the_gap_without_errors(tmp_path):

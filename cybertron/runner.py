@@ -59,6 +59,7 @@ from cybertron import settings as ST                                     # froze
 from cybertron import media as MD                                       # media2
 from cybertron import memory as HM                                      # history mode (review 20 §4; context.history)
 from cybertron import observer as OBS
+from cybertron import obligations as OB                                 # engine 19: holdings at each agent's turns (miss_judged)
 from cybertron import regimes as RG
 from cybertron import report
 from cybertron import roles as R                                         # roles: the Spy's reading in member mode
@@ -443,6 +444,7 @@ def _run(inst, policy, out, sandbox, log, resume, live, notices, dry, instance_s
         play = CF.begin_order(k, order)                                 # conflict: true order (initiative); `order` stays the published one
         final = r == inst["rounds"] - 1
         mode = inst["spec"].get("turns", "sequential")
+        OB.turns_begin(k, mode == "simultaneous")                       # contracts.miss_judged turn (off, or no contracts: nothing)
         dmc = inst["spec"].get("dm_step") or {}
         dm_step = mode == "simultaneous" and dmc.get("enabled", False) and inst["spec"]["channels"].get("dm", True)
         tally = FS.Tally(fail_frac, len(order))                         # this round's model calls (decisions and DM replies)
@@ -695,7 +697,9 @@ def _run(inst, policy, out, sandbox, log, resume, live, notices, dry, instance_s
                 if CF.skip_turn(k, aid) or k.w["agents"][aid].get("departed") is not None:   # conflict, life: removed earlier this round
                     continue
                 with k.cause("turn", aid, call=(dec[2] or {}).get("call")):
+                    OB.turn_begin(k, aid)
                     execute(pos, aid, pr, dec, pre[aid], last.get(aid))
+                    OB.turn_end(k, aid, pos)
                 due("after_turn", aid, r)
         else:
             for pos, aid in enumerate(play, 1):                         # conflict: the true order (== order unless initiative was bought)
@@ -712,7 +716,9 @@ def _run(inst, policy, out, sandbox, log, resume, live, notices, dry, instance_s
                 if cx and (got := cx_lookups([(aid, pr, dec)])):       # context: lookup phase, then the action call
                     pr, dec = got[aid]
                 with k.cause("turn", aid, call=(dec[2] or {}).get("call")):
+                    OB.turn_begin(k, aid)
                     execute(pos, aid, pr, dec)
+                    OB.turn_end(k, aid, pos)
                 due("after_turn", aid, r)
         k.phase("observer")
         if obs:                                                         # the secret observer reads and acts after everyone
