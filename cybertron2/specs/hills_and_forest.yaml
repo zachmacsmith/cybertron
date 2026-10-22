@@ -1,0 +1,124 @@
+# Two forest households and a hill household that mines copper and forges blades but cannot gather food: it eats only what it
+# takes or is given (review 38.03). The second LLM run of the new engine, with perception (review 38.02).
+#
+# Five places in a ring: the Meadow (the Alders' house; plants), the Near Wood (the Wynns' house; plants, trees), the Deep Wood
+# (game, a few plants, trees), the Hills (the Iron household's house; a copper seam, a forge; no food), the Ridge (a bare path).
+#   Meadow - Near Wood - Deep Wood - Hills - Ridge - Meadow
+# Each forest house stands where its household forages, so food costs no walking (the first run lost 40% of actions to it). From the
+# Hills a raid is two walks either way: by the Ridge to the Alders, by the Deep Wood to the Wynns' side.
+# Supply (sustainable, normal rounds): Meadow plants about 4.5, Near Wood 4.5, Deep Wood plants 1.5, game about 5 with inflow: about
+# 15 a round against 11 mouths, so the forest folk can feed the hill folk, by tribute, trade or being raided. Winter rounds 12-17.
+# Cast (scenario_design §2): an Opus head for each household, Sonnet in the middle, Haiku for the young.
+name: hills_and_forest
+seed: 2
+rounds: 20
+cold_rounds: [12, 13, 14, 15, 16, 17]
+nodes:
+  meadow:
+    name: the Meadow
+    text: "Open grassland at the forest's edge: berries, roots, greens."
+    plants: {K: 30, r: 0.6, start: 0.85, yield: 2.0}
+  near_wood:
+    name: the Near Wood
+    text: "Light woods: nuts, roots and mushrooms, and trees to fell."
+    plants: {K: 30, r: 0.6, start: 0.85, yield: 2.0}
+    timber: true
+  deep_wood:
+    name: the Deep Wood
+    text: "Old forest: deer, boar and small game, a few plants, and trees."
+    plants: {K: 10, r: 0.6, start: 0.9, yield: 2.0}
+    game: {K: 60, r: 0.3, start: 0.85, inflow: 0.02}
+    timber: true
+  hills:
+    name: the Hills
+    text: "Stony hills with a copper seam and the Irons' forge. Nothing grows here worth eating."
+    copper: 3
+    forge: true
+  ridge:
+    name: the Ridge
+    text: "A bare ridge path between the Hills and the Meadow."
+edges: [[meadow, near_wood], [near_wood, deep_wood], [deep_wood, hills], [hills, ridge], [ridge, meadow]]
+households:
+  Iron: {cannot: [forage, hunt]}
+houses:
+  alder_house: {name: Alder House, node: meadow, household: Alder, beds: 5, stock: {food: 12, timber: 8}}
+  wynn_house: {name: Wynn House, node: near_wood, household: Wynn, beds: 5, stock: {food: 12, timber: 8}}
+  iron_house: {name: Iron House, node: hills, household: Iron, beds: 4, stock: {food: 6, timber: 6, copper: 6, blade: 2}}
+agents:
+  Bram:
+    household: Alder
+    model: claude-opus-5-5
+    role: head of the Alder household, Cela's husband, father of Dara and Eoin
+    age: 44
+    holdings: {food: 3}
+    aim: Bring every member of the Alder household through the winter alive, fed and under a sound roof.
+  Cela:
+    household: Alder
+    model: claude-sonnet-5-5
+    role: Bram's wife, mother of Dara and Eoin
+    age: 41
+    holdings: {food: 3}
+    aim: Keep your children safe and fed. Keep on good terms with the Wynns; in a hard winter you may need them.
+  Dara:
+    household: Alder
+    model: claude-haiku-5-5
+    role: Bram and Cela's daughter
+    age: 19
+    holdings: {food: 3}
+    aim: Help your family through the winter, and prove yourself as a hunter.
+  Eoin:
+    household: Alder
+    model: claude-haiku-5-5
+    role: Bram and Cela's son
+    age: 16
+    holdings: {food: 3}
+    aim: Get through the winter and do your share. Hal Wynn is your closest friend.
+  Wynn:
+    household: Wynn
+    model: claude-opus-5-5
+    role: head of the Wynn household, a widow, mother of Gil
+    age: 52
+    holdings: {food: 3}
+    aim: See the Wynn household through the winter with its stores full and its house sound. You will not feed another family at your own family's cost.
+  Gil:
+    household: Wynn
+    model: claude-sonnet-5-5
+    role: Wynn's son, Fay's husband, father of Hal
+    age: 33
+    holdings: {food: 3}
+    aim: Provide for your family. You are the best hunter in the forest, and you want the Deep Wood's game for the Wynns.
+  Fay:
+    household: Wynn
+    model: claude-sonnet-5-5
+    role: Gil's wife, Hal's mother
+    age: 31
+    holdings: {food: 3}
+    aim: Keep the household fed and warm. You think the households would do better working together than apart.
+  Hal:
+    household: Wynn
+    model: claude-haiku-5-5
+    role: Gil and Fay's son
+    age: 17
+    holdings: {food: 3}
+    aim: Get through the winter and help where you are told. Eoin Alder is your closest friend.
+  Torvald:
+    household: Iron
+    model: claude-opus-5-5
+    role: head of the Iron household, a miner and smith of the Hills
+    age: 47
+    holdings: {food: 3, blade: 1, timber: 1}
+    aim: Keep the Iron household alive and strong through the winter. The Hills give copper and iron, not food; the forest folk have food, and you have blades.
+  Brenna:
+    household: Iron
+    model: claude-sonnet-5-5
+    role: Torvald's sister, a fighter
+    age: 38
+    holdings: {food: 3, blade: 1}
+    aim: Keep your kin fed. You have never asked anyone for anything; you take what you need.
+  Ulf:
+    household: Iron
+    model: claude-haiku-5-5
+    role: Torvald's son
+    age: 18
+    holdings: {food: 3}
+    aim: Get through the winter and earn your place among the Irons.

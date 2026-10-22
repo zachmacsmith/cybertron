@@ -30,10 +30,10 @@ def summary(run_dir) -> str:
             if r.startswith("Refused"):
                 refused[k] += 1
     total = sum(kinds.values())
-    gather = sum(kinds[k] for k in ("forage", "hunt", "fell"))
-    food_work = sum(kinds[k] for k in ("forage", "hunt", "fell", "store", "take"))
+    gather = sum(kinds[k] for k in ("forage", "hunt", "fell", "mine"))
+    food_work = sum(kinds[k] for k in ("forage", "hunt", "fell", "mine", "store", "take"))
     out.append(f"\n## Actions: {total} taken")
-    out.append(f"- gathering (forage, hunt, fell): {gather} ({100 * gather / max(1, total):.0f}%); with travel {gather + kinds['travel']} "
+    out.append(f"- gathering (forage, hunt, fell, mine): {gather} ({100 * gather / max(1, total):.0f}%); with travel {gather + kinds['travel']} "
                f"({100 * (gather + kinds['travel']) / max(1, total):.0f}%); with storing and taking {food_work + kinds['travel']} "
                f"({100 * (food_work + kinds['travel']) / max(1, total):.0f}%)")
     out.append("- by kind: " + ", ".join(f"{k} {v}" for k, v in kinds.most_common()))
@@ -50,7 +50,8 @@ def summary(run_dir) -> str:
         stages = collections.Counter(a["stage"] for a in r["agents"].values() if a["alive"])
         shelter = collections.Counter(r["shelter"].values())
         line = (f"- round {r['round'] + 1}{' (winter)' if r['cold'] else ''}: fed {stages.get(0, 0)}, hungry {stages.get(-1, 0)}, "
-                f"starving {stages.get(-2, 0)}; missed {len(r['missed'])}; shelter " + ", ".join(f"{k} {v}" for k, v in shelter.items()))
+                f"starving {stages.get(-2, 0)}; missed {len(r['missed'])}, short {len(r.get('short') or [])}; shelter "
+                + ", ".join(f"{k} {v}" for k, v in shelter.items()))
         if r["deaths"]:
             line += f"; died {', '.join(r['deaths'])}"
         if r["cold_falls"]:
@@ -66,8 +67,8 @@ def summary(run_dir) -> str:
     for r in rounds:
         hs = "; ".join(f"{h}: {v['food']:g} / {v['timber']:g} ({['ruined', 'damaged', 'sound'][v['condition']]})" for h, v in r["houses"].items())
         st = r["stocks"]
-        out.append(f"- round {r['round'] + 1}: {hs}; near wood {st.get('near_wood', {}).get('plants')} "
-                   f"(K {st.get('near_wood', {}).get('plants_K')}); deep-wood game {st.get('deep_wood', {}).get('game')}")
+        pl = ", ".join(f"{n} {v['plants']:g}" for n, v in st.items() if v.get("plants") is not None)
+        out.append(f"- round {r['round'] + 1}: {hs}; plants: {pl}; deep-wood game {st.get('deep_wood', {}).get('game')}")
 
     out.append("\n## Hunts")
     parties = collections.Counter()
@@ -77,6 +78,18 @@ def summary(run_dir) -> str:
             parties["mixed households" if mixed else "one household"] += 1
             out.append(f"- round {r['round'] + 1}: party {h['party']!r} ({', '.join(h['caught'])}), effort {h['effort']:g}: "
                        f"caught {sum(h['caught'].values()):g}{' [both households]' if mixed else ''}")
+
+    out.append("\n## Fights (at night)")
+    for r in rounds:
+        for f in r.get("fights") or []:
+            who = f.get("raiders") or f.get("attackers") or []
+            what = f"raid on {f['house']}" if f["kind"] == "raid" else f"attack on {f['target']}"
+            extra = ""
+            if f.get("outcome") not in ("fizzled", None):
+                extra = (f" P {f.get('P')} vs D {f.get('D')}; " + (f"took {f['took']:g} food; " if f.get("took") else "")
+                         + (f"wounded {', '.join(f['wounded'])}; " if f.get("wounded") else "")
+                         + (f"defenders {', '.join(f.get('defenders') or [])}" if f["kind"] == "raid" else ""))
+            out.append(f"- round {r['round'] + 1}: {', '.join(who) or '(nobody present)'}: {what}: {f['outcome']}.{extra}")
 
     gifts = (state or {}).get("gifts") or []
     across = [g for g in gifts if hh[g["from"]] != hh[g["to"]]]
