@@ -405,7 +405,8 @@ def test_withdraw_case_needs_a_law_that_allows_it():
 def test_existing_worlds_have_none_of_it(preset):
     inst = generator.generate(S.apply_overrides(S.load(preset), ["shared_archive.enabled=false"]), 1)
     k = Kernel(inst)
-    assert CN.world_hidden(k) == {"represent", "withdraw_case", "read_register"}
+    assert CN.world_hidden(k) == {"represent", "withdraw_case", "read_register", "wiretap", "dir_history"}   # the last two:
+                                                                        # review 31.11 (the pull wiretap, a store's version log)
     assert "read_register" not in CX.lookup_names(k)
     for a in inst["agents"][:4]:
         assert not {"represent", "withdraw_case", "read_register"} & {x.name for x in AR.available(inst, k, a)}

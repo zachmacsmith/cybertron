@@ -30,12 +30,12 @@ not how agents will play it. Files:*
   of 700 with nobody deciding anything. The zero-attention, scale, inert-law and prompt-budget gates pass; money velocity and
   voluntary share fail by design (a command economy); blight sensitivity fails on survival (Relief backstops the Commissioner's
   price) and passes on distribution. Every role card's decisions were executed once with the card's syntax.
-- **Engine findings (§8)**: 11, of which three are fixed here (role cards naming polity actions `J0.<x>`, which no invoke
-  resolves; `sell_to_window` dividing by zero at P = 0; the opt-in surveillance key) and the most important is unfixed: an
+- **Engine findings (§8)**: 11, of which two are fixed here (`sell_to_window` dividing by zero at P = 0; the unread surveillance key) and one
+  also upstream (role cards naming polity actions `J0.<x>`, which no invoke resolves) and the most important is unfixed: an
   injected dry-run action cannot be refused by a law, so dry runs overstate what gates let through.
 - **Live run (§9, not made)**: ≈ 1,200 calls, ≈ $45-50 per arm at list prices, 3-5 hours.
 
-## 2. What was built (all opt-in: a world without the keys or laws is unchanged; no engine version bump)
+## 2. What was built (all opt-in: a world without the keys or laws is unchanged; no engine version bump: engine 20 after the merge)
 
 ### 2.1 Wiretap as pull (2.9; 04 #10)
 
@@ -207,8 +207,8 @@ a bot had killed him in round 2 (§8 #11); `test_office_owner_version_log_and_hi
    division (`actions._deposit`), not changed here.
 3. **Role cards named a polity's contract actions `J0.<name>`** (`obligations._office_decisions`, the notice line), but a polity's
    contract actions are bare (`set_wage`, `payroll_notice`, `set_quota`): every such card instruction failed ("no such action").
-   Fixed (`obligations._act_name`); an association's stay `A1.<name>`. Affects every world with polity standing contracts and role
-   cards (the Private world's Window).
+   Found here by `test_every_invoke_in_every_state_names_a_defined_action`; fixed independently upstream (`obligations._action_name`,
+   the Private readiness work), whose version this branch keeps after the merge.
 4. **`start.wages` with employer J0 gives the civil list no officer**: no `set_wage`, `hire` or `fire` exists, so "the Treasurer
    sets wages" was unexecutable. Use a `start.contracts` Payroll in J0 with `OFFICE` (done here).
 5. **An association's automatic leg from a member moves only within an allowance**: without `start.allowances` the miners' copper
