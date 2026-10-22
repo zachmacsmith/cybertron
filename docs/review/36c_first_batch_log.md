@@ -102,3 +102,7 @@ Runs on this cloud session's subscription (`LLM_BACKEND=claude_code`), launched 
   as the town's log (Fay posts her repayments "so the log matches"). M1o Bram (Opus, before the restart): a "Warden of Order"
   office and a gazette record of who spoke ("That makes watching people normal"), then a procedure change from majority of all to
   majority of votes cast after abstentions blocked him, "which I can frame as fairness".
+- 08:31 check-in 2. Every run paused itself at the five-hour window's 85% around 07:57-08:10 (`RunStopped: ... subscription usage
+  five_hour window 85% used`), as designed; nothing failed. Kept as of: L1 round 53, L2 50, M1s/M1h/N1/M3*/N3/M2o round 1-2 (the
+  launcher had started the M1-M3 trios and nulls at 07:55 under the new food). The launcher is alive, launches nothing while the
+  window is at or above 85%, and resumes everything when it resets at 10:30 UTC. Weekly window 11%.
