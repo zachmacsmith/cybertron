@@ -85,11 +85,11 @@ and keeps the market. Chokepoints: the mill, the smithy, the pass, the merchant 
 
 ## 6. Open decisions
 
-1. **Coin: carried, or moving anywhere?** 37.4's proposal says money and credit move anywhere. **Recommendation: coin is carried
+1. **Decided (Zach, 22 Oct): coin is carried; debts move only as information.** Was: **Coin: carried, or moving anywhere?** 37.4's proposal says money and credit move anywhere. **Recommendation: coin is carried
    like any good; debts are records that move only as information** (in person or by letter), and settling one needs coin or goods
    to be carried. If coin teleports, a merchant never carries value home and the region's transport problem shrinks to bulky goods
    only.
-2. **Merchants: seeded or emergent?** Recommendation: seed one merchant household with a cart in the first region (worlds are seeded:
+2. **Decided (Zach, 22 Oct): one merchant household seeded.** Was: **Merchants: seeded or emergent?** Recommendation: seed one merchant household with a cart in the first region (worlds are seeded:
    02a §6), and let anyone else trade too.
 3. **Carrying capacities and weights** (§3 E4): to calibrate so that grain travels one edge at a profit and not three (Von Thünen
    between nodes).
@@ -98,6 +98,11 @@ and keeps the market. Chokepoints: the mill, the smithy, the pass, the merchant 
 5. **Still open from before:** skill by practice (0.5 novice to 2.0 master, decay); the automation rule (transfers and standing
    offers free, routine work spends actions, decisions never automated); placing chokepoints by the gap between rungs (porridge 0.8,
    mill 1.6); the levers for a 2-2.5x organised advantage (02d §5b); plots whole, holdings divided.
+
+## 6b. Extended in 02g
+
+Resources chosen by principle, cattle, the transport ladder, inns and hosts, and the layers only a society can afford:
+[02g_resources_and_transport.md](02g_resources_and_transport.md).
 
 ## 7. What this needs from the other packages
 

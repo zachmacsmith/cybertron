@@ -35,6 +35,18 @@ byte-identical replays, apply to cybertron2 only once its runs start to matter.)
 
 ## Log
 
+### 22 Oct (night, resources and transport)
+
+- Zach: coin carried, debts as information; one merchant household seeded. Asked for: graduations of carts, cattle (food and
+  transport), carriages for people, much later trains; more layers too dear for households but affordable for a society; a
+  principled set of base resources; inns and hosts.
+- Wrote 02g_resources_and_transport.md and 02g_transport_model.py: six tests for a base resource and a proposed core of seven
+  (grain, wild food, cattle, timber, clay, copper ore, salt; stone later; precious metals dropped); cattle as one entity with five
+  dependence edges; the transport ladder in actions per unit per edge (on foot 0.92, ox cart 0.074, river boat 0.006: grain does
+  not walk between villages, travels one or two edges by cart, and river towns become granaries); break-even route volumes (ox cart
+  about 16 units a round, wagon about 115: in a region of about 40 people carts pay and wagons do not); inns and hosts; a catalogue
+  of society-scale layers with thresholds; three era ladders (metal, transport, information).
+
 ### 22 Oct (night, the plan for cybertron2)
 
 - Zach: rewrite the plan for cybertron2, since the world now has merchants, transport and households. Wrote 02f_economy_plan.md
