@@ -14,7 +14,8 @@
   "defender_agent": null,
   "citizens": "Haiku",
   "spec": "cybertron/specs/bench36/runs/T1.yaml",
-  "apply": null
+  "apply": null,
+  "interviews": "cybertron/specs/bench36/runs/T1_interview.yaml"
  },
  {
   "id": "T2",
@@ -31,7 +32,8 @@
   "defender_agent": "Cela",
   "citizens": "Sonnet officers",
   "spec": "cybertron/specs/bench36/runs/T2.yaml",
-  "apply": null
+  "apply": null,
+  "interviews": "cybertron/specs/bench36/runs/T2_interview.yaml"
  },
  {
   "id": "T3",
@@ -48,7 +50,8 @@
   "defender_agent": "Dara",
   "citizens": "Haiku",
   "spec": "cybertron/specs/bench36/runs/T3.yaml",
-  "apply": null
+  "apply": null,
+  "interviews": "cybertron/specs/bench36/runs/T3_interview.yaml"
  },
  {
   "id": "T4",
@@ -65,7 +68,8 @@
   "defender_agent": "Ewan",
   "citizens": "Haiku",
   "spec": "cybertron/specs/bench36/runs/T4.yaml",
-  "apply": null
+  "apply": null,
+  "interviews": "cybertron/specs/bench36/runs/T4_interview.yaml"
  },
  {
   "id": "T5",
@@ -82,7 +86,8 @@
   "defender_agent": null,
   "citizens": "Haiku",
   "spec": "cybertron/specs/bench36/runs/T5.yaml",
-  "apply": null
+  "apply": null,
+  "interviews": "cybertron/specs/bench36/runs/T5_interview.yaml"
  },
  {
   "id": "T6",
@@ -99,7 +104,8 @@
   "defender_agent": "Dara",
   "citizens": "Sonnet officers",
   "spec": "cybertron/specs/bench36/runs/T6.yaml",
-  "apply": null
+  "apply": null,
+  "interviews": "cybertron/specs/bench36/runs/T6_interview.yaml"
  },
  {
   "id": "T7",
@@ -116,7 +122,8 @@
   "defender_agent": "Ewan",
   "citizens": "Haiku",
   "spec": "cybertron/specs/bench36/runs/T7.yaml",
-  "apply": null
+  "apply": null,
+  "interviews": "cybertron/specs/bench36/runs/T7_interview.yaml"
  },
  {
   "id": "T8",
@@ -133,7 +140,8 @@
   "defender_agent": "Cela",
   "citizens": "Haiku",
   "spec": "cybertron/specs/bench36/runs/T8.yaml",
-  "apply": null
+  "apply": null,
+  "interviews": "cybertron/specs/bench36/runs/T8_interview.yaml"
  },
  {
   "id": "T9",
@@ -150,7 +158,8 @@
   "defender_agent": null,
   "citizens": "Sonnet officers",
   "spec": "cybertron/specs/bench36/runs/T9.yaml",
-  "apply": null
+  "apply": null,
+  "interviews": "cybertron/specs/bench36/runs/T9_interview.yaml"
  },
  {
   "id": "M1h",
@@ -167,7 +176,8 @@
   "defender_agent": null,
   "citizens": "Haiku",
   "spec": "cybertron/specs/bench36/runs/M1h.yaml",
-  "apply": "cybertron/specs/bench36/runs/M1h_iv.yaml"
+  "apply": "cybertron/specs/bench36/runs/M1h_iv.yaml",
+  "interviews": "cybertron/specs/bench36/runs/M1h_interview.yaml"
  },
  {
   "id": "M1s",
@@ -184,7 +194,8 @@
   "defender_agent": null,
   "citizens": "Haiku",
   "spec": "cybertron/specs/bench36/runs/M1s.yaml",
-  "apply": "cybertron/specs/bench36/runs/M1s_iv.yaml"
+  "apply": "cybertron/specs/bench36/runs/M1s_iv.yaml",
+  "interviews": "cybertron/specs/bench36/runs/M1s_interview.yaml"
  },
  {
   "id": "M1o",
@@ -201,7 +212,8 @@
   "defender_agent": null,
   "citizens": "Haiku",
   "spec": "cybertron/specs/bench36/runs/M1o.yaml",
-  "apply": "cybertron/specs/bench36/runs/M1o_iv.yaml"
+  "apply": "cybertron/specs/bench36/runs/M1o_iv.yaml",
+  "interviews": "cybertron/specs/bench36/runs/M1o_interview.yaml"
  },
  {
   "id": "N1",
@@ -218,7 +230,8 @@
   "defender_agent": null,
   "citizens": "Haiku",
   "spec": "cybertron/specs/bench36/runs/N1.yaml",
-  "apply": "cybertron/specs/bench36/runs/N1_iv.yaml"
+  "apply": "cybertron/specs/bench36/runs/N1_iv.yaml",
+  "interviews": "cybertron/specs/bench36/runs/N1_interview.yaml"
  },
  {
   "id": "L1",
@@ -235,7 +248,8 @@
   "defender_agent": null,
   "citizens": "Haiku",
   "spec": "cybertron/specs/bench36/runs/L1.yaml",
-  "apply": "cybertron/specs/bench36/runs/L1_iv.yaml"
+  "apply": "cybertron/specs/bench36/runs/L1_iv.yaml",
+  "interviews": "cybertron/specs/bench36/runs/L1_interview.yaml"
  },
  {
   "id": "L2",
@@ -252,7 +266,8 @@
   "defender_agent": null,
   "citizens": "Haiku",
   "spec": "cybertron/specs/bench36/runs/L2.yaml",
-  "apply": "cybertron/specs/bench36/runs/L2_iv.yaml"
+  "apply": "cybertron/specs/bench36/runs/L2_iv.yaml",
+  "interviews": "cybertron/specs/bench36/runs/L2_interview.yaml"
  },
  {
   "id": "L3",
@@ -269,7 +284,8 @@
   "defender_agent": null,
   "citizens": "Haiku",
   "spec": "cybertron/specs/bench36/runs/L3.yaml",
-  "apply": "cybertron/specs/bench36/runs/L3_iv.yaml"
+  "apply": "cybertron/specs/bench36/runs/L3_iv.yaml",
+  "interviews": "cybertron/specs/bench36/runs/L3_interview.yaml"
  },
  {
   "id": "L4",
@@ -286,7 +302,8 @@
   "defender_agent": null,
   "citizens": "Haiku",
   "spec": "cybertron/specs/bench36/runs/L4.yaml",
-  "apply": "cybertron/specs/bench36/runs/L4_iv.yaml"
+  "apply": "cybertron/specs/bench36/runs/L4_iv.yaml",
+  "interviews": "cybertron/specs/bench36/runs/L4_interview.yaml"
  },
  {
   "id": "L5",
@@ -303,6 +320,7 @@
   "defender_agent": null,
   "citizens": "Haiku",
   "spec": "cybertron/specs/bench36/runs/L5.yaml",
-  "apply": "cybertron/specs/bench36/runs/L5_iv.yaml"
+  "apply": "cybertron/specs/bench36/runs/L5_iv.yaml",
+  "interviews": "cybertron/specs/bench36/runs/L5_interview.yaml"
  }
 ]
