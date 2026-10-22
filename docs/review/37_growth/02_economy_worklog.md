@@ -37,6 +37,11 @@ byte-identical replays, apply to cybertron2 only once its runs start to matter.)
 
 ### 22 Oct (night, information in space)
 
+- Zach: private messages to anyone at the same node; buildings as access to information (you hear what is said in the buildings you
+  have access to at your node, several in a round); the square is everyone; hiding in a building? Added 02h §4a: three scopes
+  (square, rooms by access, private messages), witnessing by the same scopes, hiding as a later option once there is pressure to
+  escape, room talk capped in the prompt. For 37.4 (speech).
+
 - Zach: widespread channels should cost more (a paper has costs and charges): rumours through merchants first, then letters, then
   centralised papers delivered. Added 02h §4b: the information ladder (rumour, letter, notice, paper, post, press) by reach, cost,
   payer, reliability, speed and controller; one edition to 50 readers at 5 nodes costs about 1.9 actions a reader copied by hand,
