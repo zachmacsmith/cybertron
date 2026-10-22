@@ -65,6 +65,9 @@ changed in its code yet.
 
 ## Log
 
+- **22 Oct.** Round order designed: [05_round_design.md](05_round_design.md) (dawn, look, decide, talk at the node, work with travel
+  last, departures, night, memory; travel and transit; where you sleep; face-to-face offers; letters and errands).
+
 - **22 Oct.** Zach: rivers between nodes, how to generate a landscape, felling and clearing, fertility by land. Added to
   04_places_design.md: land cover and soil (§5), generation physical-first with rivers by drainage (§6).
 
