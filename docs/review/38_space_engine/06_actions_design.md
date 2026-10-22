@@ -72,6 +72,37 @@ on the number of moves. Too few units and routine eats the day (run 1: 88% of ac
 many and plans grow long, each choice matters less, and output per agent rises faster than the land can bear. Six units with
 standing orders for routine (§4) is a starting point to calibrate in the first runs.
 
+### Working late (overexertion)
+
+An agent may work **1 or 2 units beyond its day's budget**, at a cost in food that night: +1 unit eats x1.5, +2 units eats x2 (on
+top of the shelter multiplier). Two overworked days in a row leave it **exhausted**: 2 units fewer the next day. It is the tool for
+a crunch (the harvest window, winter preparation, a raid) and not a way of life, and it sets an exchange rate between food and
+labour that a household or an employer can bargain over.
+
+### Carrying
+
+Only what is carried crosses an edge, so **load** matters (within a node, moving goods between sites is free). Each item has a
+weight; an agent on foot carries up to a capacity; a pack, a pack animal or a cart (on a road) raises it. An agent over capacity
+cannot travel.
+
+| Item | Weight per unit | | Carrier | Capacity |
+|---|---|---|---|---|
+| food | 1 | | on foot | 20 |
+| timber | 2 | | with a pack (a good: hides and timber) | 35 |
+| stone | 3 | | a pack animal | +60 |
+| copper | 1 | | a cart (needs a road) | +150 |
+| blade, club, tool | 1 | | | |
+| letter, document | 0 (no limit) | | | |
+
+Rough guide: a day's food is 1, so on foot a traveller can carry about two weeks' food or about 10 timber. Documents are weightless:
+the limit on letters is who will carry them, not their bulk.
+
+### Who gets more
+
+The baseline is the same for every adult; differences come from the person and their tools, not from a class: age (minors and
+elders fewer), health (ill, hungry, starving), skills (a practised smith forges for fewer units), tools (cheaper or better yield),
+daylight (the season). An institution can still give an office extra standing (an office's powers), but not extra hours.
+
 ## 4. Standing orders
 
 What an agent sets once and the engine carries out until the agent changes it. **The agent decides them** (setting or changing one
@@ -95,10 +126,13 @@ unless someone speaks to me, I am attacked, or a stranger comes". The engine wak
 things that always wake anyone (being spoken to, attacked or robbed; a letter arriving; its routine failing). First measure how
 often a day's plan differs from the routine; if it rarely does, the saving is large and safe.
 
-## 6. Open questions
+## 6. Decisions and open questions
 
-1. Units a day (6?) and the cost table.
-2. Daylight by season: in, or later?
-3. Which reflexes to offer first: attacked, raided, refused; which policies: door, standing offer, house stock.
-4. Does a standing offer let an agent act as a shop while away (its goods in its house, sold by the household)? Proposed: only
-   with someone present to hand them over.
+Zach, 22 Oct:
+1. **Units a day and the cost table: settle by experiment** (small LLM runs comparing budgets).
+2. **Daylight by season: yes.**
+3. **Reflexes, fallbacks and policies: later.** Choosing the day's actions is not hard for the agents; routine first. When they
+   come, they are agent-owned hooks on the chokepoint (07 §5).
+4. **A shop needs a shopkeeper:** goods are sold only by someone present to hand them over.
+
+Open: the carrying weights and capacities above; the overexertion costs (x1.5, x2, exhaustion) to calibrate with the units.

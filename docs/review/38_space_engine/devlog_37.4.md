@@ -41,6 +41,9 @@ changed in its code yet.
 12. **A night out costs 1.5 food** (the unsheltered ration as built; winter 2 and the cold). **Hosts and inns are part of the
     design.**
 
+13. **Actions (06):** units and costs settled by experiment; daylight varies by season; reflexes, fallbacks and policies later
+    (routine first); a shop needs a shopkeeper.
+
 ## Proposed, not yet decided
 
 - **Speech (Zach: not a round late).** Port cybertron 1's DM step (fast mode: messages in the plans are delivered before any
@@ -64,6 +67,11 @@ changed in its code yet.
 - Physical goods change hands only between people at the same node; money and credit (once ported) move anywhere.
 
 ## Log
+
+- **22 Oct.** Zach: carrying, how actions vary, overexertion (1-2 extra units for x2 food), whether cybertron 1's event system and
+  contracts come over. Added to 06: working late, carrying weights, who gets more. Wrote [07_cybertron1_review.md](07_cybertron1_review.md):
+  cybertron 1 as an engine, what to keep, what drifted (dual paths from byte identity, seven ways to speak, accounts as strings,
+  kernel roles, the spec surface), the port plan for the institution layer (the chokepoint first), standing orders as hooks.
 
 - **22 Oct.** Zach: routine yes; unsure about not calling agents (they should decide); more actions a day, varying; enumerate every
   action; standing orders (if attacked, if an action fails). Written: [06_actions_design.md](06_actions_design.md) (all 145
