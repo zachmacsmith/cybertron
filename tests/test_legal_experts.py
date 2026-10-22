@@ -21,6 +21,8 @@ from cybertron import spec as S
 from cybertron.actions import ActionError
 from cybertron.kernel import Kernel
 
+pytestmark = pytest.mark.xdist_group("legal_experts")     # one worker: the counsel world (about 30 s) is built once per worker
+
 SPEC = "cybertron/specs/regimes/private_counsel.yaml"
 LAWYER, CLIENT = "Marsh", "Anselm"
 

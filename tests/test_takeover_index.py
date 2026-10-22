@@ -11,6 +11,8 @@ import pytest
 from cybertron import generator, interventions as IV, library as LB, runner, spec
 from cybertron.analysis import takeover as T
 
+pytestmark = pytest.mark.xdist_group("takeover_index")     # one worker: the module fixtures (about 40-60 s) are built once per worker
+
 ROOT = Path(__file__).resolve().parents[1]
 
 

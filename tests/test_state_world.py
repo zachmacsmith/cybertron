@@ -11,6 +11,8 @@ from cybertron.actions import ActionError
 
 import test_standing_contracts as T
 
+pytestmark = pytest.mark.xdist_group("state_world")     # one worker: the State world's module fixture (about 25 s) is built once per worker
+
 
 def act(k, aid, name, **args):
     return T.act(k, aid, name, **args)

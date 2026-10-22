@@ -4,10 +4,11 @@ A running list of what is in flight, kept up to date as work lands. Newest chang
 
 ## In progress (22 Oct)
 
-- **Suite speed** (full suite 16 min at -n 3 on 22 Oct, 3330 tests; the README's 4-5 min is out of date): the slowest costs are
-  per-test setups that rebuild the same world: test_legal_experts (3 setups of 30-33 s: the archive), test_state_world (3 of
-  22-27 s), test_takeover_index (60 s and 42 s). Make them module-scoped (or session-cached) fixtures: about 4 CPU-minutes. Then the
-  `slow` marker on the 30-60 s calls (history scorer windows, state zero-attention, twenty-laws render, private_positions world).
+- **Suite speed** (full suite 16 min at -n 3 on 22 Oct, 3330 tests; the README's 4-5 min is out of date): the biggest costs were
+  module-level world builds repeated on every xdist worker. Done 22 Oct: test_legal_experts, test_state_world and
+  test_takeover_index each on one worker (`xdist_group`): 7.5 -> 4.8 CPU-min, 3.5 -> 2.7 min wall for the three. Next: the same
+  for any other file whose module fixture costs over ~10 s, then `slow` on the 30-60 s calls (history scorer windows, state
+  zero-attention, twenty-laws render, private_positions world).
 - **Testing tiers** (Zach, 22 Oct: full suites for every merge are too slow): a merge gate `scripts/test_fast.sh BASE` (goldens,
   prompts, schema, settings, every spec loads, plus the tests importing any module changed since BASE: 3-5 min) gates
   `subsistence`; the full suite (~25 min at -n 3) runs in the background daily or before `main` moves and never blocks; mark the
