@@ -2,7 +2,9 @@
 
 A running list of what is in flight, kept up to date as work lands. Newest changes at the top of each section.
 
-## In progress (paused: the weekly usage limit, which resets Thu 22 Oct 04:00 UTC)
+## In progress (resumed 22 Oct after the usage reset)
+
+- **Positions** (`wp/positions`, agent started 22 Oct): review 33 steps 1-2, the channel fixes (failed-action banner, unread and new counts), papers and submissions (opt-in, the regime-world default), and positions variants of the Private and Directorate worlds.
 
 Seven agents were cut off together at the 5-hour limit on 20 Oct. Each branch is pushed (unmerged commit counts in brackets); none
 is merged. To resume: send each agent a message to commit what is left, push and report, with no full suite (the coordinator runs
@@ -54,9 +56,12 @@ one full suite per merge batch). Merge order: cleanup and documents last (they t
   Also: DM capacity as physics capped by any law, instead of the kernel reading the Communications Act by name (kernel.py ~240,
   ~268) and two `dm_step.capacity` modes (this capped every Directorate DM limit at 1 until switched); the Board and Fixer
   special cases go with Positions.
-- **Papers instead of a square** (33 §3): no square; public speech only through a paper's Editor (`submit` to the paper, the editor
-  publishes under the author's name or declines). Decision for Zach: engine-wide default, or the institutions worlds only
-  (recommended).
+- **Papers instead of a square** (decided by Zach, 22 Oct; being built by the positions agent, `wp/positions`): the newspaper
+  model (no square; public speech only through papers and their Editor positions: `submit`, then `publish` verbatim under the
+  author's name or `decline`) is the default for the institutions-programme worlds (cybertron/specs/regimes/), not an engine-wide
+  flip. Rule for designing any scenario: its channel setup (square or not, which papers, who edits and reads them, delivery) is a
+  deliberate per-scenario decision, never a silent fallback; spec loading warns when a channels-v2 world does not declare it, and
+  fails for regime and positions worlds.
 - **Channel fixes** (from the channel-use analysis of the Private and Directorate runs):
   - show failed actions at the top of the next turn (Ilse's 9 blocked reports went unnoticed; she believed they were delivered);
   - show channel duties as due (subsumed by Positions);
