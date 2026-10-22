@@ -18,6 +18,11 @@ nodes are carried) and the places design ([04_places_design.md](04_places_design
 | **7. Night** | The world step, in order: hunts settle; fights and raids against whoever is at the node; regrowth (by kind, season and era); hearths burn fuel; everyone eats where they sleep (§3); the starvation hazard; the cold; spoilage; breaks; the land's slow changes (soil, forest returning on abandoned land); night incidents (fire, flood). Travellers on the road eat from their packs and draw the road's risk. | none |
 | **8. Memory** | Each agent's day moves into memory (the full band, then a one-line summary), as built. | none |
 
+**Everyone plans at once**, as cybertron 1's simultaneous mode: every agent decides from the same state in parallel, and only the
+talk step asks anyone again. No agent waits for another's turn, so a day takes about two model calls of wall-clock time however
+many agents there are. Nodes keep it cheap as worlds grow: talk, witnessing and the prompt's "Here" are all limited to one node,
+so each agent's prompt and message traffic grow with its node (at most about 15-20 people), not with the world.
+
 Cost: one call per agent at a node, plus one per message recipient per wave. Agents on the road cost nothing.
 
 ## 2. Travel
