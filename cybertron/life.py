@@ -100,7 +100,9 @@ DEFAULTS = {
                "keep": 2.0},            # it has one, else its living parents in equal shares)
     "households": {"enabled": False,    # 37.1 (cybertron/households.py): families as minimal institutions (needs pairs, contracts)
                    "keep": 2.0,         # the Household template's KEEP: food each member keeps out of the pot
-                   "name": "{head}'s household"},
+                   "name": "{head}'s household",
+                   "inheritance": "none"},  # plots and stores at death (read with pairs on, households or not): none (as before) |
+                                        # partible (whole plots round the living children, eldest first) | eldest | household
     "default_heirs": "reserve",         # where an estate's unbequeathed part goes: reserve (as before) | children (children, unborn
                                         # included, then co-parents, then the reserve)
     "audit_fixes": None,                # review 16 bugs B2-B5, B7; None: on with the absolute or stationary demography, else off

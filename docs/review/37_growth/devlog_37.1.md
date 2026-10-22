@@ -122,3 +122,17 @@ Dropped (Zach, 22 Oct): automatic or hazard births (fertility stays a choice), d
   - Q: should a household head be an office (so 37.3's appoint/remove powers apply to it)? It is cheap to add later.
 - **Next:** step 6, inheritance (`partible | eldest | household`) in `subsistence.on_death`, where stores and plots already pass
   to `_store_heir`.
+
+### 2026-10-22 19:30 UTC: step 6, inheritance (board loop 2)
+
+- **Built:** `life.households.inheritance: none | partible | eldest | household` (read whenever pairs is on, with or without
+  households), applied in `subsistence.on_death`:
+  - stores go to the first heir (a store is not divided);
+  - plots under `partible` go round the living children, eldest first, as whole plots; under `eldest` all go to the oldest living
+    child; under `household` all go to the household's id (else as `eldest`); `none` is unchanged;
+  - a household's head may withdraw from a store the household owns (`subsistence.can_withdraw`).
+  - Tests: 4 more in `tests/test_family.py` (26).
+- **Found:** today's heir is the first living child by id, not by age (`subsistence._store_heir`); `none` keeps that.
+- **Open (37.2):** partible hands out whole plots; splitting a plot below a minimum viable size waits for 37.2's plot-split
+  primitive (asked on the board).
+- **Next:** step 7, family-aware scripted bots and a growth preset; dry runs for loops 1 and 2.

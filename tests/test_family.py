@@ -236,3 +236,52 @@ def test_the_head_passes_to_the_coparent():
     assert HH.head_of(k, iid) == b
     MO.disable(k, b, "old_age")
     assert HH.head_of(k, iid) == ch
+
+
+# ---------------------------------------------------------------------- inheritance
+def _landed(extra, n_plots=4):
+    """A family with two children (the second younger), the father holding n_plots plots of the first fields camp."""
+    inst, k, a, b, ch, rec = family_child(["subsistence.fields.enabled=true", "life.reproduction.maturity=6", *extra])
+    end_round(k)
+    for x in (a, b):
+        set_food(k, x, 30)
+    conceive(k, a, b)
+    ch2 = born_child(k, "G2")
+    cid = SB.fields_camps(k)[0]
+    plots = k.w["camps"][cid]["plots"][:n_plots]
+    for p in plots:
+        p["holder"] = a
+    return k, a, b, ch, ch2, cid, [p["id"] for p in plots]
+
+
+def _holders(k, cid, ids):
+    return [p["holder"] for p in k.w["camps"][cid]["plots"] if p["id"] in ids]
+
+
+@pytest.mark.parametrize("rule", ["partible", "eldest"])
+def test_inheritance_of_plots(rule):
+    from cybertron import mortality as MO
+    k, a, b, ch, ch2, cid, ids = _landed([f"life.households.inheritance={rule}"])
+    assert LF.age(k, ch) > LF.age(k, ch2)
+    MO.disable(k, a, "old_age")
+    hs = _holders(k, cid, ids)
+    if rule == "partible":
+        assert hs == [ch, ch2, ch, ch2]
+    else:
+        assert hs == [ch] * 4
+
+
+def test_inheritance_to_the_household():
+    from cybertron import mortality as MO
+    k, a, b, ch, ch2, cid, ids = _landed([*HOUSE, "life.households.inheritance=household"])
+    iid = HH.household_of(k, ch)
+    MO.disable(k, a, "old_age")
+    assert _holders(k, cid, ids) == [iid] * 4
+    assert HH.roster(k)[0]["plots"] == [{"camp": cid, "plot": x} for x in ids]
+
+
+def test_inheritance_none_is_as_before():
+    from cybertron import mortality as MO
+    k, a, b, ch, ch2, cid, ids = _landed([])
+    MO.disable(k, a, "old_age")
+    assert len(set(_holders(k, cid, ids))) == 1

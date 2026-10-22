@@ -209,6 +209,39 @@ def after_death(k, aid) -> None:
                     f"{nh} heads it now." if nh else "it has no head."))
 
 
+# ---------------------------------------------------------------------- inheritance (board loop 2)
+def inheritance(spec) -> str:
+    """life.households.inheritance: none (as before: the first living child, else a co-parent, else the polity) | partible | eldest |
+    household. Read whenever pairs reproduction is on, with or without households."""
+    from cybertron import pairs as PR
+    return str(cfg(spec).get("inheritance") or "none") if PR.pairs_spec(spec) else "none"
+
+
+def _eldest_first(k, xs) -> list:
+    from cybertron import life as LF
+    return sorted(xs, key=lambda m: (-(LF.age(k, m) or 0), m))
+
+
+def heirs(k, aid):
+    """Who takes a dead holder's plots under the inheritance rule, eldest first: partible every living child, eldest the oldest,
+    household its household (when it has one; else as eldest). None: the rule is none or nobody fits (the old path decides)."""
+    from cybertron import life as LF
+    rule = inheritance(k.spec)
+    if rule == "none" or "life" not in k.w:
+        return None
+    if rule == "household":
+        iid = household_of(k, aid)
+        if iid is None:                                                  # (the dead are no longer members: the record keeps it)
+            iid = state(k)["of"].get(aid) if on(k) else None
+            iid = iid if iid and _active(k, iid) and members(k, iid) else None
+        if iid:
+            return [iid]
+    kids = _eldest_first(k, [c for c in LF.children(k, aid) if MO.alive(k, c)])
+    if not kids:
+        return None
+    return kids if rule == "partible" else kids[:1]
+
+
 # ---------------------------------------------------------------------- prompts and truth
 def state_lines(k, aid) -> list:
     iid = household_of(k, aid)

@@ -808,9 +808,11 @@ def render_event(k, e, tag, viewer=None) -> str | None:
 def on_death(k, aid) -> dict:
     """The death phase (after life.on_death): a dead agent's stores pass to its living children, else a co-parent, else its polity."""
     out = {}
+    from cybertron import households as HH
+    rule_heirs = HH.heirs(k, aid)                                        # 37.1: life.households.inheritance (none: None)
     for s in sorted(state(k)["stores"].values(), key=lambda s: s["id"]):
         if s["owner"] == aid:
-            s["owner"] = _store_heir(k, aid)
+            s["owner"] = rule_heirs[0] if rule_heirs else _store_heir(k, aid)   # a store is not divided: the first heir
             out[s["id"]] = s["owner"]
             k.log("store_owner", None, {"store": s["id"], "owner": s["owner"], "from": aid,
                                         "text": f"{aid}'s store {s['id']} passes to {s['owner']}."}, vis="public")
@@ -818,6 +820,9 @@ def on_death(k, aid) -> dict:
         c = k.w["camps"][cid]
         mine = [p for p in c.get("plots") or [] if p.get("holder") == aid]
         if not mine:
+            continue
+        if rule_heirs:                                                  # 37.1: partible hands whole plots out, eldest first
+            _divide_plots(k, c, cid, aid, mine, rule_heirs, out)
             continue
         heir = _store_heir(k, aid)
         heir = None if heir == "nobody" else heir
@@ -833,6 +838,25 @@ def on_death(k, aid) -> dict:
                                  "text": f"{aid}'s farm at {cid} (plots {', '.join(str(p['id']) for p in mine)}) passes to "
                                          + (f"{heir}." if heir else "nobody: its plots are open land.")}, vis="public")
     return out
+
+
+def _divide_plots(k, c, cid, aid, mine, heirs, out) -> None:
+    """37.1 inheritance: the dead holder's plots go round the heirs, eldest first (one heir: all of them); each heir's farm keeps
+    the larger shed."""
+    from cybertron.camptypes import fields as FL
+    f = (c.get("farms") or {}).pop(aid, None)
+    got = {}
+    for i, p in enumerate(mine):
+        h = heirs[i % len(heirs)]
+        p["holder"] = h
+        got.setdefault(h, []).append(p["id"])
+    for h in got:
+        nf = FL.farm(k, c, h)
+        nf["shed"] = max(int(nf.get("shed", 0)), int((f or {}).get("shed", 0)))
+    out[f"{cid}:farm"] = sorted(got)
+    k.log("farm_set", None, {"camp": cid, "holder": aid, "key": "give", "value": {"plots": [p["id"] for p in mine], "to": dict(got)},
+                             "text": f"{aid}'s farm at {cid} passes to " + "; ".join(
+                                 f"{h} (plots {', '.join(str(x) for x in ps)})" for h, ps in got.items()) + "."}, vis="public")
 
 
 def on_birth(k, aid, sponsor) -> dict:
@@ -1063,6 +1087,9 @@ def can_withdraw(k, aid, s) -> bool:
         return True
     if s["owner"] in k.w["agents"]:
         return False
+    from cybertron import households as HH
+    if HH.head_of(k, s["owner"]) == aid:                                # 37.1: a household's head acts for it
+        return True
     from cybertron import institutions as I
     ctl = I.controls_for(k, s["owner"], STORE + s["id"], aid)       # institutions.office_control: an office controls this store
     if ctl is not None:
