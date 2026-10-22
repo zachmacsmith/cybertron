@@ -98,13 +98,15 @@ Membership changes by partnership, birth, adoption, leaving and death; a new hou
 4. **Youth learn faster, and it lasts:** a youth is not a weaker model; its learning multiplier is much higher, and what it learns
    while young decays more slowly (a trade learnt as an apprentice stays). This is 37.2's skill by practice (02c §5) with an age
    term.
-5. Open: which model a youth gets (§4.3).
+5. **One agent, one model, for life.** A child gets its model once, when it becomes an agent (the start of its youth), and keeps
+   it through adulthood and old age: the same agent throughout, never switched to another model mid-life (a switch would change the
+   voice the others know). The heir to a pole seat takes the seat's model; other children are drawn so that the population keeps
+   the cast scenario_design §2 asks for (no all-Haiku drift as founders die). There is no cheaper-model phase: the cheap part of a
+   childhood is the non-agent rounds.
 
 ## 4. Open questions
 
 1. How many rounds a youth lasts before adulthood (proposed 10-15), and a lifespan in rounds that gives turnover within a run.
 2. ~~Chapters with time skips~~: no (Zach).
-3. Which model a youth gets. Options: the model of the seat it will inherit (the heir keeps the pole's strength); the household's
-   strongest; or drawn to keep the population's cast balanced (scenario_design §2). Proposed: chosen once when it becomes an agent
-   and kept for life (switching models mid-life breaks the voice the others know), with heirs to pole seats taking the seat's
-   model. A few rounds on a cheaper model first would save little (the cheap phase is already the non-agent childhood).
+3. ~~Which model a youth gets~~: decided (§3b.5): chosen once when it becomes an agent, kept for life; heirs to pole seats take
+   the seat's model.
