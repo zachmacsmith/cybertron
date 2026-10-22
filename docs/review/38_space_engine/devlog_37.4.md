@@ -65,6 +65,10 @@ changed in its code yet.
 
 ## Log
 
+- **22 Oct.** Zach: everyone plans at once, as cybertron 1 (confirmed in 05 §1). Should the round diverge from it? Proposed in 05
+  §7: keep it as the core; add standing orders, calls only when something happens (with a k-day floor), fallbacks, reflexes,
+  works and errands that persist, and later assemblies on set days.
+
 - **22 Oct.** Round order designed: [05_round_design.md](05_round_design.md) (dawn, look, decide, talk at the node, work with travel
   last, departures, night, memory; travel and transit; where you sleep; face-to-face offers; letters and errands).
 

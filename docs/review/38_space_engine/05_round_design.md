@@ -90,10 +90,34 @@ Nothing crosses an edge unless someone carries it:
 - **Dawn** (step 1): what people find or meet in the day: a stray herd, a traveller passing through with news, a sick neighbour.
 - Both are drawn from the seed (the same in every arm), at rates set by the land's kind, the season and the era.
 
-## 7. Open questions
+## 7. Beyond one plan a day (proposed)
+
+The simultaneous plan (everyone decides once from the same state, then the plans run) was built when an agent had talk and one or
+two actions. **Keep it as the core:** it scales (parallel calls, about two calls of wall-clock a day), it is deterministic and
+replayable, every arm has the same decision points (so arms compare), nobody gains from moving first or seeing others' moves, it
+suits models (a plan from a snapshot), and cybertron 1's fixes to it carry over.
+
+What it misses now that a day holds travel, work, trade and building:
+
+| Gap | Example | Proposed layer |
+|---|---|---|
+| **Routine costs a call** | everyone forages, stores and tends the fire every day; a model call to repeat yesterday | **standing orders**: a routine an agent sets once ("forage twice, store the surplus; keep the fire") that runs every day it is not called, or fills a plan's unused actions (the board's Post 1, rule C) |
+| **Everyone is called every day** | 60-day years cost 60 calls per agent per year, most of them unchanged days | **called when something happens**: an agent decides on arrival, on a message, on a salient sight (a stranger, a fight, a death, a sign), when an action of its routine is refused, when an errand or a work is done, and at least every k days; otherwise its standing orders run |
+| **A plan cannot adapt during the day** | the forage runs out mid-plan; the buyer left; three refusals waste the day (run 1: 19 refused) | **fallbacks** inside a plan: an action may name what to do if it is refused |
+| **No reaction to attack** | a raid at night meets whoever happened to plan a guard | **reflexes** as standing orders: "if attacked, fight back"; "if my house is raided, defend it" |
+| **Work longer than a day** | building a house, draining a fen, a journey | **works and errands** that persist across days and show as due lines (as positions did in cybertron 1) |
+| **One kind of decision cadence** | a council meets weekly, a household plans the season, labour is daily | later: **assemblies** on set days (the calendar), where the members present decide together; the institutional layer's ballots close on them |
+
+The second layer is the large one. It decouples **how often the world moves** (a day) from **how often an agent decides** (when
+something warrants it), which is what makes day-length rounds affordable over seasons and years. Risks: an agent called rarely may
+fall behind events (hence the k-day floor and the salience triggers); the triggers decide who notices what, so they must be the
+same in every arm and recorded; and the share of agent-days with a call becomes a quantity to measure.
+
+## 8. Open questions
 
 1. **Talk waves.** One wave (messages and replies, then work) is cheaper; two allow a reply to a reply. cybertron 1 used two.
 2. **Can the talk step reach someone who arrives today?** Proposed: yes; arrivals are present from dawn.
 3. **Should agents in transit be called** when something happens to them (an ambush)? Proposed: no; a world that wants encounters
    on the way uses waypoint nodes.
 4. **Day length in the calendar** (devlog: a world setting of about 16-60 days a year).
+5. **The call triggers and k** (§7): which sights count as salient, and the longest an agent goes without deciding.
