@@ -35,6 +35,17 @@ byte-identical replays, apply to cybertron2 only once its runs start to matter.)
 
 ## Log
 
+### 22 Oct (night, information in space)
+
+- Zach: maps, parchment, writing and information matter most; how do the old engine's generalised channels, laws and libraries work
+  in space; writing from processed timber; large worlds with small settlements? Wrote 02h_information_in_space.md: knowledge crosses
+  space as speech, objects or signals; writing makes knowledge an object (parchment from hides, paper from fibre at a paper mill,
+  ink, wax tablets; literacy as a skill); documents as items (write, read, copy, seal, carry); every channel v2 feature mapped to a
+  spatial form (gatherings, boards at sites, carried letters, carried editions; selectors become presence plus permission plus
+  literacy); laws with a seat, a text, a reach and proclamation, known only to those who learned of them (37.3's call); libraries
+  as buildings and society's memory; maps as written-down knowledge stores; large maps with small settled cores, once growth,
+  depletion and a reason beyond are on.
+
 ### 22 Oct (night, unlocks)
 
 - Zach: could some resources add fundamentally new things, not just more? Added 02g §1d: resources that unlock a capability (writing,
