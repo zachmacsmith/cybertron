@@ -8,7 +8,7 @@
 | Phase | What | State |
 |---|---|---|
 | P0 | Design note (diagnosis, critique of the brief, plan) and this log | done |
-| R0 | New engine phase 0 (`cybertron2/`): households in a forest, first LLM run | built; run in progress |
+| R0 | New engine phase 0 (`cybertron2/`): households in a forest, first LLM run | run done (docs/review/38_space_engine/01_forest_run.md); fixes proposed |
 | P0d | Shelter specification (02e): houses as the first generic building, upkeep, breaks, the cold, tenure | specified; under discussion |
 | P0c | Economics guide (02c) and ladder analysis with skill by practice and space (02d) | done; under discussion |
 | P0b | Productivity analysis: what an action is worth under autarky, spot trade and institutions (02b) | done; design under discussion with Zach, nothing built |
@@ -32,6 +32,14 @@ calls (scripted dry runs and unit tests only); everything generated can be fixed
   agents) and make flax compete with grain for plots. Parked in favour of shelter, which reuses the building model.
 
 ## Log
+
+### 22 Oct (night, run result)
+
+- Forest run, seed 1, 20 rounds, $1.78, no errors (docs/review/38_space_engine/01_forest_run.md; logs committed under
+  docs/review/38_space_engine/runs/). Both households stocked up and came through winter with no misses; one pre-winter death (Dara
+  starved on a three-night hunt carrying nothing); the game was hunted out by round 6 (a porting bug: no inflow); mixed-household
+  hunting parties formed but party names failed to coordinate; the first credit offer (Wynn: food now for timber or game later);
+  subsistence 88% of actions, walking alone 40%. Fixes proposed (inflow, ration rule, walking cost, default parties).
 
 ### 22 Oct (night, run)
 
