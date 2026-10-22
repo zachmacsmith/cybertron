@@ -35,6 +35,16 @@ byte-identical replays, apply to cybertron2 only once its runs start to matter.)
 
 ## Log
 
+### 22 Oct (night, danger, riders, raids)
+
+- Zach: edges differ in danger, worse in winter; a traveller who dies is never announced, maybe found by a later traveller; wild
+  horses on grassland; shared livestock bred over time; horses let raiders arrive and strike before anyone knows, and leave fast;
+  attacks on buildings, and big raids hitting people and buildings at random across a node. Added 02g §2c (wild herds, common
+  herds), §3c (danger by edge terrain and season; the lost traveller found by chance; news by testimony) and §5b (ride and strike
+  as a proposed exception to 37.4's arrive-then-decide; damage and burning of buildings; a node-wide raid drawing targets by
+  exposure; raids also from incidents or scripted outsiders, since agents seldom raid). Travel and combat are 37.4's in
+  cybertron2: posted a pointer on the board.
+
 ### 22 Oct (night, horses and the ladder's other dimensions)
 
 - Zach: carts should lower the danger; the ladder is also about carrying people and resting; horses for fast travel and battle,

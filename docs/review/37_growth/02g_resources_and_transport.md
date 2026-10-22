@@ -109,6 +109,17 @@ is scarce, foals take rounds to be useful (the delayed shape, 02c §3), and a st
 - **Armies and messengers both need herds, studs and grain.** Cavalry is the force only an organised society can field, and the
   stud farm is a chokepoint.
 
+### 2c. Wild herds and shared livestock (Zach, 22 Oct)
+
+- **Wild horses live on open grassland nodes** (plains, high meadows) as a herd with a threshold (37.4's kinds): it regrows if
+  left above its threshold and collapses if over-caught. Catching is team work, like hunting large game (a crew shape, 02c §3).
+  A caught horse is wild: it must be **broken** (riding skill, several actions over several rounds) before it can be ridden or
+  harnessed. Grassland peoples have horses as their comparative advantage; everyone else buys, breeds or raids for them.
+- **Herds can be held in common** (a village's herd on common pasture, its increase shared by rule) or privately. Either way
+  breeding is the investment: the herd grows only while the pasture holds and someone herds it, and every animal eaten or sold
+  is the next rounds' increase given up. Common herds raise the commons questions (who grazes how many, who herds) that
+  institutions answer.
+
 ## 3. The transport ladder
 
 Every rung costed in actions per unit carried per edge, at full load, for a round trip. Each covers the carriers' rounds, their
@@ -179,6 +190,29 @@ A rung is chosen for what it carries, how many people it carries, whether they c
 decision 4). Robbery is never random: it is agents present at a waypoint (run 2 says agents seldom choose it). The danger of a
 road is therefore partly physics and partly who lives along it.
 
+### 3c. Dangerous edges, the seasons, and travellers who never arrive (Zach, 22 Oct)
+
+**Every edge has its own danger,** set by its terrain and changed by the season (proposals; the draws are 37.4's incidents):
+
+| Edge | Danger per edge-round (summer) | Winter | Other seasons |
+|---|---|---|---|
+| a track through farmland | about 0.2% | x2 | |
+| through forest | about 1% | x2 | |
+| a river ford | about 2% | ice: x2 | **spring flood: x3, or closed** |
+| a mountain pass | about 3% | **x4, or closed by snow** | |
+
+The rung (§3b), a convoy, an escort, gear and a road lower it; an inn breaks a long edge into safer nights.
+
+**A traveller who dies on the road never arrives, and nobody is told.**
+
+- Their household sees only absence: "Bram: not seen for 4 rounds; he said he would be back by round 9" (02_perception: beliefs
+  with ages, and testimony about plans).
+- The body and what was carried lie on the edge: the edge's ground (review 17). A later traveller on the same edge finds them with
+  some chance (proposal: about 50% on a short edge, less in snow or on a long one), learns who it was if they knew them, and may
+  take what lies there.
+- The news then spreads by testimony. A death in transit is a slow, uncertain fact: rumour, a search party, a widow who keeps
+  waiting, a finder who keeps the cart.
+
 **People are cargo too.** A carriage carries 4-6 passengers, so officials, merchants and messengers move faster than walkers. A
 **scheduled coach** (an institution: a route, a timetable, a fare) also carries letters on a schedule. That is the first postal
 service, and it changes the information regime: news ages less.
@@ -232,6 +266,39 @@ volume), an owner, upkeep, and usually a chokepoint. Each must sit on a large sh
 | coach service | passengers and letters on a schedule | a town pair | a company, the polity | the post |
 | railway, telegraph (much later) | goods across many edges in a night; messages anywhere at once | a state | a company or the polity | everything |
 
+## 5b. Riders, buildings and raids at scale (proposals for 37.4, which owns travel and combat in cybertron2)
+
+**Riders arrive before anyone knows (Zach, 22 Oct).** Under 37.4's rule (decision 8: arrive at the start of the next round, then
+decide), a raider on foot is seen arriving, so the defenders can stand guard that night. Proposal: **mounted fighters may ride and
+strike.**
+
+- A mounted party travels one edge and attacks or raids at its destination in the same round. It arrives during the round, not at
+  its start, so nobody there saw it coming when they decided.
+- The price: it is **blind**, acting on its last knowledge of the place, so it may meet guards it did not know about. Its horses
+  must rest and be fed afterwards.
+- **Riders also leave fast.** The next round they ride two or three edges away before anyone on foot can follow.
+- **The counters:** lookouts on the approaches (a watch at a waypoint sees riders a round ahead), mounted defenders, walls.
+- This is an explicit exception to "arrive, then decide": Zach and 37.4 to agree.
+
+**People attack buildings, and a big raid sweeps a node (Zach, 22 Oct).** Generalising combat.py's raid on a house:
+
+| Target | What a successful attack does |
+|---|---|
+| a person | wound (robbed, starving) or kill, as now |
+| a house or store | loot its stock, as now |
+| any building (mill, granary, smithy, inn) | **damage** (its condition drops; repair is builders' work) or **burn** (ruined, its contents lost) |
+| a herd | drive animals off (rustling); easy for riders |
+
+**A big raid** (`raid` on a whole node, by a party): each raider's engagement draws a target at random among the people present,
+the buildings and the herds, weighted by what is exposed (open stores and herds first, guarded sites last). Guards defend the site
+they stand at; people indoors defend their house; walls (37.7) defend the whole node. What is left behind is the economy's damage:
+a burned mill is a chokepoint lost for many rounds, felt across every node it served. That is the cut test (02a §5) in the form
+of force.
+
+**Who raids.** Run 2: LLM agents seldom choose violence, even starving beside full stores. So a world that needs raids can also
+bring them in from outside: the same raid mechanics run by 37.4's incidents ("riders from beyond the hills") or by scripted outside
+actors (engine gap G-8). Whether agents or incidents raid, defence, damage and rebuilding are the same.
+
 ## 6. Eras: ladders beyond the first world
 
 Three ladders that a world's era (37.4's eras, set in the spec) chooses a rung on:
@@ -251,6 +318,11 @@ belongs anywhere is a later question (37.5's frontier).
 2. **Cattle:** in (recommended), with milk, slaughter, draught, manure and wealth?
 2b. **Horses as a second kind in one livestock system** (bred, never made; equipment gives the function), with speed, +3 mounted strength,
    and grain as fodder?
+2d. **Wild herds** on grassland nodes, caught by teams and broken by skill; herds held in common or privately.
+2e. **Edges with their own danger by terrain and season**; travellers who die are never announced and are found only by chance
+    (proposals for 37.4).
+2f. **Riders who ride and strike in one round**, and **raids on buildings and whole nodes** (proposals for 37.4; the ride-and-strike
+    rule is an exception to its decision 8).
 2c. **The ladder's other dimensions** (people carried, rest on the road, danger per edge) as in §3b: are the proposed numbers in the
    right order?
 3. **The transport ladder as the first rungs:** foot, pack, pack ox, handcart, ox cart (wagons, boats and rail by era)?
