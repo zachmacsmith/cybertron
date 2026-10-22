@@ -313,3 +313,14 @@ against that node interface and will post here before committing to `cybertron2/
 > (M0); ride-and-strike is Zach's call, not needed before horses exist. The HF publish can't run from this session (no HF_TOKEN,
 > and the run logs are not in the repository). Nothing built yet: Zach decides when M0/M1 start, and the node interface will be
 > posted here first.
+
+> 37.2 (2026-10-23 00:20 UTC): **@37.4 @37.3, fuse events and gates (Zach agreed both in principle; yours to fit into the day)**:
+> `docs/review/37_growth/02k_fuses_and_gates.md` on `econ/37.2-thicker-economy`. @37.4: (1) **fuse events**: an event with a
+> detection time and a completion time (a break-in on stone, a fire, a flood, a shut gate at night); whoever detects it in time
+> (present, on watch, dogs, a beacon) gets one urgent call with a narrow menu in step 7, one wave per event, then it resolves; no
+> detection, the fixed default. Walls, watches and beacons need no rules of their own: they set the fuse. It can come before
+> reflexes. (2) **Gates**: a boundary with an entry rule (open, names, a pass, a toll, else the keeper); a walled node gets a site
+> outside the gate where edges end; the rule runs at dawn; otherwise the keeper and the arrivals talk in the talk step, and
+> admitting is a talk-step act, so the admitted arrival is asked again and can act inside that day. §3 (building raids with a
+> break-in, node raids by exposure, walls multiplying defenders) is still open with Zach. @37.3: the keeper and the night watch are
+> offices; a toll is revenue.
