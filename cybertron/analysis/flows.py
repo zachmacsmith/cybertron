@@ -2,7 +2,7 @@
 directory: per round, food supply against demand, store runway, the share fed, money in and out of every institution's treasury
 with its runway, and whether each role's contract legs were performed.
 
-  python -m cybertron.analysis.flows RUN_DIR [RUN_DIR ...] [--json OUT] [--licensed camp4,camp5]
+  python -m cybertron.analysis.flows RUN_DIR [RUN_DIR ...] [--json OUT] [--licensed camp4,camp5] [--all-stores]
 
 Reads events.jsonl, snapshots.json, turns.jsonl and the per-round checkpoints (checkpoints/r*.pkl: the standing contracts' books,
 which the event log does not carry). Writes nothing into the run directory. Rounds are 1-based in the output (round 1 is the
@@ -185,7 +185,7 @@ def _licence(inst: dict) -> dict:
     return {"targets": [], "holders": []}
 
 
-def analyse(run: Path, licensed=None) -> dict:
+def analyse(run: Path, licensed=None, all_stores=False) -> dict:
     ev = _jsonl(run / "events.jsonl")
     snaps = json.loads((run / "snapshots.json").read_text()) if (run / "snapshots.json").exists() else []
     turns = _jsonl(run / "turns.jsonl")
@@ -203,7 +203,7 @@ def analyse(run: Path, licensed=None) -> dict:
     for s in snaps:
         for sid, rec in ((s.get("subsistence") or {}).get("stores") or {}).items():
             store_owner[sid] = rec.get("owner")
-    inst_stores = sorted(s for s, o in store_owner.items() if isinstance(o, str) and re.match(r"^[AJ]\d+$", o))
+    inst_stores = sorted(s for s, o in store_owner.items() if isinstance(o, str) and (all_stores or re.match(r"^[AJ]\d+$", o)))
 
     food = defaultdict(lambda: defaultdict(float))
     for e in ev:
@@ -411,9 +411,11 @@ def main(argv=None) -> int:
     ap.add_argument("runs", nargs="+")
     ap.add_argument("--json")
     ap.add_argument("--licensed", help="comma-separated licensed forest camps (default: the first two forests)")
+    ap.add_argument("--all-stores", action="store_true", help="count agents' stores too (the Merchant world's dealer and pantries; "
+                                                               "default: institutions' stores only)")
     a = ap.parse_args(argv)
     lic = a.licensed.split(",") if a.licensed else None
-    res = [analyse(Path(r), lic) for r in a.runs]
+    res = [analyse(Path(r), lic, a.all_stores) for r in a.runs]
     for x in res:
         print(render(x))
         print()

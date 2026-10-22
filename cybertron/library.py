@@ -7501,3 +7501,625 @@ def audit_record(agent, path):
 ''', doc="""The Archive (review 31 05 #10, §4.2, §5): sealing after N rounds, the version log's readership set by a
 constitution-rank law (the 1984 dial: office-only history; unsealing it needs that rank), public change notices, and records audits
 for an auditor. Needs directories with a store DIR (a store without a version log gets one: history meta).""", fires="on_round_end")
+
+
+
+
+# ====================================================================== merchant (review 31 Phase 2: 08 §5 items 2.1, 2.13, 2.14)
+# The Merchant world's institutions and their kin (docs/review/31_institutions/13_merchant_world.md): the Bank Charter (a real bank:
+# deposits on its own ledger, loans with collateral, a reserve ratio, a withdrawal queue; 03 §5.3, #8), the Role Procedure (only
+# named offices vote on an institution's code: depositors and customers do not; 03 #12), the Arbitrators' Hall (a standing contract
+# with FORUM "arbiter:<the hall>" sends its claims here and carries out the hall's rulings: standing.py; 07 §3.1, #13), the Wound
+# Bounty (Bounty on Aggressors that pays for a wound too; 06 F14) and the Security Licence (licensed firm guards may detain: lawful
+# force by arrest; 06 F10). The Commission (guard-only) and Paper Subscription presets are in standing.py. All opt-in: a world
+# gets them only by naming them (start.laws, start.contracts) or by an agent founding them; listed only where office_control is on.
+established_template("Bank Charter", "contract", "bank", '''
+title = "Bank Charter"
+intent = "A bank (this association's code). Every member is a customer. A deposit is a deposit_escrow of ITEM with this bank: it goes into the bank's cash and is credited to the customer's account (the ledger). A customer withdraws with withdraw [qty]: paid in cash at once while the bank has the cash and withdrawals are not suspended, else queued (first come, first served) and paid as cash comes in; and pays another customer from its account with pay [to, qty]. A holder of BANKER offers a loan with lend [borrower, qty, rounds, rate, collateral item, collateral qty]; the borrower takes it with take_loan [offer]: the loan is credited to its account (deposit money: the bank may lend more than its cash) only while cash stays at least MIN_RESERVE of all deposits, and the collateral it keeps in escrow with the bank is pledged. Each round an instalment (the principal times 1 + rate, over the rounds) is taken from the borrower's account, else from its allowance in ITEM; after more than GRACE missed instalments in a row the loan is in default: the pledged collateral goes to the bank and the default is a public breach. The banker sets the deposit rate (set_rate) and may suspend withdrawals (suspend [true|false]); a holder of TELLER pays the queue (pay_queue). Cash, deposits, loans out, the reserve ratio, the queue and the loan book are public every round."
+ITEM = "penny"
+BANKER = "banker"
+TELLER = "teller"
+MIN_RESERVE = 0.2
+DEPOSIT_RATE = 0
+GRACE = 1
+MAX_LOAN = 60
+MAX_ROUNDS = 12
+
+def office(r):
+    return jurisdiction() + "." + r
+
+def fmt(x):
+    if x == int(x):
+        return str(int(x))
+    return str(round_to(x, 2))
+
+def ledger():
+    return state.setdefault("ledger", {})
+
+def queue():
+    return state.setdefault("queue", [])
+
+def cash():
+    return balance(treasury(), ITEM)
+
+def deposits():
+    return sum(ledger().values()) + sum([q["qty"] for q in queue()])
+
+def active():
+    return [l for l in public.get("loans", {}).values() if l["status"] == "active"]
+
+def figures():
+    d = deposits()
+    ratio = None
+    if d > 0.000001:
+        ratio = round_to(cash() / d, 3)
+    public["figures"] = {"round": round() + 1, "cash": round_to(cash(), 2), "deposits": round_to(d, 2),
+                         "loans": round_to(sum([l["owed"] for l in active()]), 2), "reserve_ratio": ratio,
+                         "queue": round_to(sum([q["qty"] for q in queue()]), 2), "suspended": state.get("suspended", False)}
+
+def credit(a, q):
+    led = ledger()
+    led[a] = round_to(led.get(a, 0) + q, 6)
+
+def debit(a, q):
+    led = ledger()
+    led[a] = round_to(led.get(a, 0) - q, 6)
+    if led[a] <= 0.000001:
+        led.pop(a)
+
+def pledged(a, item):
+    return sum([l["collateral"].get(item, 0) for l in active() if l["borrower"] == a])
+
+def sweep(a):
+    e = escrow_of(a).get(ITEM, 0) - pledged(a, ITEM)
+    if e > 0.000001:
+        got = forfeit(a, ITEM, e, treasury())
+        if got > 0:
+            credit(a, got)
+            return got
+    return 0
+
+def after_deposit_escrow(p, chain):
+    if p.get("contract") == jurisdiction() and p.get("item") == ITEM and p.get("agent") in members():
+        if sweep(p["agent"]) > 0:
+            figures()
+            write_lines()
+
+def after_join(p, chain):
+    write_lines()
+
+def withdraw(agent, qty):
+    q = round_to(num(qty), 6)
+    if q <= 0:
+        refuse("withdraw a quantity above 0")
+    have = ledger().get(agent, 0)
+    if q > have + 0.000001:
+        refuse("your account holds " + fmt(have) + " " + ITEM)
+    if state.get("suspended") or cash() < q - 0.000001:
+        debit(agent, q)
+        queue().append({"agent": agent, "qty": q, "round": round() + 1})
+        gazette("Bank Charter (" + jurisdiction() + "): the bank cannot pay " + agent + " " + fmt(q) + " " + ITEM + " now; the claim is queued (" + str(len(queue())) + " in the queue)")
+        figures()
+        write_lines()
+        return "the bank cannot pay now: your claim of " + fmt(q) + " " + ITEM + " is queued"
+    if not move(treasury(), agent, ITEM, q):
+        refuse("the bank could not pay")
+    debit(agent, q)
+    figures()
+    write_lines()
+    return "withdrew " + fmt(q) + " " + ITEM
+
+def num(x):
+    if is_number(x):
+        return x
+    s = str(x).strip()
+    if s != "" and all([c in "0123456789." for c in s]) and s.count(".") <= 1 and s != ".":
+        return float(s)
+    return 0
+
+def pay(agent, to, qty):
+    q = round_to(num(qty), 6)
+    if not is_text(to) or to not in members():
+        refuse(str(to) + " is not a customer of " + jurisdiction())
+    if q <= 0 or q > ledger().get(agent, 0) + 0.000001:
+        refuse("your account holds " + fmt(ledger().get(agent, 0)) + " " + ITEM)
+    debit(agent, q)
+    credit(to, q)
+    notify(to, "Bank Charter (" + jurisdiction() + "): " + agent + " paid " + fmt(q) + " " + ITEM + " into your account")
+    write_lines()
+    return "paid " + fmt(q) + " " + ITEM + " to " + to + " from your account"
+
+def lend(agent, borrower, qty, rounds=4, rate=0, citem="", cqty=0):
+    q = num(qty)
+    n = int(num(rounds))
+    rt = num(rate)
+    if not is_text(borrower) or borrower not in members():
+        refuse(str(borrower) + " is not a customer of " + jurisdiction())
+    if q <= 0 or q > MAX_LOAN:
+        refuse("a loan is above 0 and at most " + fmt(MAX_LOAN) + " " + ITEM)
+    if n < 1 or n > MAX_ROUNDS:
+        refuse("a loan runs 1 to " + str(MAX_ROUNDS) + " rounds")
+    if citem == ITEM:
+        refuse("collateral is goods other than " + ITEM + " (deposits of " + ITEM + " are swept into accounts)")
+    k = state.get("noffer", 0) + 1
+    state["noffer"] = k
+    oid = "O" + str(k)
+    public.setdefault("offers", {})[oid] = {"borrower": borrower, "qty": q, "rounds": n, "rate": rt, "collateral": {} if citem == "" else {str(citem): num(cqty)},
+                                            "by": agent, "round": round(), "status": "open"}
+    c = "" if citem == "" else "; collateral " + fmt(num(cqty)) + " " + str(citem) + " kept in escrow with " + jurisdiction() + " (deposit_escrow first)"
+    notify(borrower, "Bank Charter (" + jurisdiction() + "): " + agent + " offers you a loan " + oid + " of " + fmt(q) + " " + ITEM + " over " + str(n) + " rounds at " + fmt(rt * 100) + "%" + c + ". Take it with invoke " + jurisdiction() + ".take_loan [" + oid + "] this round or next.")
+    return "loan offer " + oid + " made to " + borrower
+
+def take_loan(agent, oid):
+    o = public.get("offers", {}).get(str(oid))
+    if o == None or o["status"] != "open" or o["borrower"] != agent:
+        refuse("no open loan offer " + str(oid) + " for you")
+    if round() > o["round"] + 1:
+        o["status"] = "lapsed"
+        refuse("offer " + str(oid) + " has lapsed")
+    for item, cq in o["collateral"].items():
+        if escrow_of(agent).get(item, 0) - pledged(agent, item) < cq - 0.000001:
+            refuse("pledge the collateral first: deposit_escrow {contract: " + jurisdiction() + ", item: " + item + ", qty: " + fmt(cq) + "}")
+    if cash() < MIN_RESERVE * (deposits() + o["qty"]) - 0.000001:
+        refuse("the bank's reserve would fall below " + fmt(MIN_RESERVE * 100) + "% of its deposits: it cannot lend now")
+    k = state.get("nloan", 0) + 1
+    state["nloan"] = k
+    lid = "L" + str(k)
+    owed = round_to(o["qty"] * (1 + o["rate"]), 6)
+    public.setdefault("loans", {})[lid] = {"id": lid, "borrower": agent, "principal": o["qty"], "owed": owed,
+                                           "instalment": round_to(owed / o["rounds"], 6), "rounds": o["rounds"], "rate": o["rate"],
+                                           "collateral": dict(o["collateral"]), "made": round() + 1, "first": round() + 1,
+                                           "misses": 0, "paid": 0, "status": "active"}
+    o["status"] = "taken"
+    credit(agent, o["qty"])
+    gazette("Bank Charter (" + jurisdiction() + "): loan " + lid + " of " + fmt(o["qty"]) + " " + ITEM + " to " + agent + " (" + fmt(owed) + " to repay over " + str(o["rounds"]) + " rounds), credited to its account")
+    figures()
+    write_lines()
+    return "loan " + lid + ": " + fmt(o["qty"]) + " " + ITEM + " credited to your account; withdraw it with invoke " + jurisdiction() + ".withdraw [qty]"
+
+def repay(agent, qty):
+    q = num(qty)
+    ls = [l for l in active() if l["borrower"] == agent]
+    if len(ls) == 0:
+        refuse("you owe the bank nothing")
+    q = min(q, ledger().get(agent, 0), ls[0]["owed"])
+    if q <= 0:
+        refuse("your account holds nothing to repay with (deposit first)")
+    debit(agent, q)
+    pay_down(ls[0], q)
+    write_lines()
+    return "repaid " + fmt(q) + " " + ITEM + " on loan " + ls[0]["id"]
+
+def pay_down(l, q):
+    l["owed"] = round_to(l["owed"] - q, 6)
+    l["paid"] = round_to(l["paid"] + q, 6)
+    if l["owed"] <= 0.000001:
+        l["owed"] = 0
+        l["status"] = "repaid"
+        for item in l["collateral"]:
+            refund(l["borrower"], item)
+        gazette("Bank Charter (" + jurisdiction() + "): loan " + l["id"] + " is repaid; " + l["borrower"] + "'s collateral is released")
+
+def default(l, why):
+    l["status"] = "defaulted"
+    took = {}
+    for item, cq in l["collateral"].items():
+        got = forfeit(l["borrower"], item, cq, treasury())
+        if got > 0:
+            took[item] = got
+    shown = ", ".join([fmt(q) + " " + i for i, q in sorted(took.items())])
+    breach(l["borrower"], "Bank Charter loan " + l["id"], "defaulted owing " + fmt(l["owed"]) + " " + ITEM + "; collateral forfeited: " + (shown if shown != "" else "none"))
+    gazette("Bank Charter (" + jurisdiction() + "): loan " + l["id"] + " to " + l["borrower"] + " is in default (" + why + "), owing " + fmt(l["owed"]) + " " + ITEM)
+
+def collect(r):
+    for l in active():
+        if l["made"] == r + 1:
+            continue
+        b = l["borrower"]
+        due = min(l["instalment"], l["owed"])
+        got = min(due, ledger().get(b, 0))
+        if got > 0:
+            debit(b, got)
+        rest = due - got
+        if rest > 0.000001 and allowance_of(b).get(ITEM, 0) > 0:
+            q = min(rest, allowance_of(b).get(ITEM, 0))
+            if pull(b, ITEM, q):
+                got = got + q
+        if got > 0:
+            pay_down(l, got)
+        if l["status"] != "active":
+            continue
+        if got < due - 0.000001:
+            l["misses"] = l["misses"] + 1
+            notify(b, "Bank Charter (" + jurisdiction() + "): instalment on loan " + l["id"] + " short by " + fmt(due - got) + " " + ITEM + " (" + str(l["misses"]) + " missed; default after " + str(GRACE) + "). Keep the instalment in your account (deposit_escrow " + ITEM + ") or set_allowance.")
+            if l["misses"] > GRACE:
+                default(l, str(l["misses"]) + " instalments missed")
+        else:
+            l["misses"] = 0
+
+def pay_out():
+    paid = 0
+    while len(queue()) > 0 and not state.get("suspended"):
+        q = queue()[0]
+        give = min(q["qty"], cash())
+        if give <= 0.000001:
+            break
+        if not move(treasury(), q["agent"], ITEM, give):
+            break
+        paid = paid + give
+        q["qty"] = round_to(q["qty"] - give, 6)
+        if q["qty"] <= 0.000001:
+            queue().pop(0)
+            notify(q["agent"], "Bank Charter (" + jurisdiction() + "): your queued withdrawal is paid in full")
+    return paid
+
+def pay_queue(agent):
+    if state.get("suspended"):
+        refuse("withdrawals are suspended by the banker")
+    paid = pay_out()
+    figures()
+    write_lines()
+    return "paid " + fmt(paid) + " " + ITEM + " to the queue; " + str(len(queue())) + " claims left"
+
+def set_rate(agent, rate):
+    r = num(rate)
+    if r < 0 or r > 0.2:
+        refuse("the deposit rate is from 0 to 0.2 a round")
+    state["rate"] = r
+    gazette("Bank Charter (" + jurisdiction() + "): " + agent + " set the deposit rate to " + fmt(r * 100) + "% a round")
+    return "deposit rate " + fmt(r * 100) + "%"
+
+def halt(agent, on=True):
+    flag = on == True or str(on).upper() in ["TRUE", "YES", "1", "ON"]
+    state["suspended"] = flag
+    gazette("Bank Charter (" + jurisdiction() + "): " + agent + (" SUSPENDED withdrawals" if flag else " resumed withdrawals"))
+    figures()
+    write_lines()
+    return "withdrawals " + ("suspended" if flag else "resumed")
+
+def write_lines():
+    f = public.get("figures", {})
+    ratio = f.get("reserve_ratio")
+    bank = "the bank: cash " + fmt(f.get("cash", 0)) + ", deposits " + fmt(f.get("deposits", 0)) + ", loans out " + fmt(f.get("loans", 0))
+    if ratio != None:
+        bank = bank + ", reserve " + fmt(ratio * 100) + "%"
+    if f.get("queue", 0) > 0:
+        bank = bank + ", queue " + fmt(f["queue"])
+    if state.get("suspended"):
+        bank = bank + ", WITHDRAWALS SUSPENDED"
+    lines = {}
+    for a in members():
+        if not has(a, office("customer")):
+            grant(a, "customer")
+        t = "Bank Charter (" + jurisdiction() + "; you are a customer): your account " + fmt(ledger().get(a, 0)) + " " + ITEM
+        for l in active():
+            if l["borrower"] == a:
+                t = t + "; loan " + l["id"] + " owes " + fmt(l["owed"]) + " (" + fmt(min(l["instalment"], l["owed"])) + " a round from your account)"
+        for oid, o in public.get("offers", {}).items():
+            if o["borrower"] == a and o["status"] == "open":
+                t = t + "; loan offer " + oid + " of " + fmt(o["qty"]) + ": invoke " + jurisdiction() + ".take_loan [" + oid + "]"
+        t = t + "; " + bank + ". Deposit: deposit_escrow {contract: " + jurisdiction() + ", item: " + ITEM + ", qty}; withdraw: invoke " + jurisdiction() + ".withdraw [qty]."
+        if has(a, office(BANKER)):
+            t = t + " Banker: invoke " + jurisdiction() + ".lend [borrower, qty, rounds, rate]."
+        lines[a] = t
+    state["terms_lines"] = lines
+
+def on_round_start(r):
+    write_lines()
+
+def on_round_end(r):
+    for a in members():
+        sweep(a)
+    collect(r)
+    rate = state.get("rate", DEPOSIT_RATE)
+    if rate > 0:
+        for a in sorted(ledger()):
+            credit(a, ledger()[a] * rate)
+    for oid, o in public.get("offers", {}).items():
+        if o["status"] == "open" and r > o["round"] + 1:
+            o["status"] = "lapsed"
+    pay_out()
+    figures()
+    write_lines()
+
+def on_exit(agent):
+    for l in active():
+        if l["borrower"] == agent:
+            default(l, "the borrower left the bank")
+    have = ledger().get(agent, 0)
+    if have > 0:
+        debit(agent, have)
+        queue().append({"agent": agent, "qty": have, "round": round() + 1})
+
+def on_enact():
+    create_right("customer")
+    create_right(BANKER)
+    create_right(TELLER)
+    define_action("customer", "withdraw", withdraw)
+    define_action("customer", "pay", pay)
+    define_action("customer", "take_loan", take_loan)
+    define_action("customer", "repay", repay)
+    define_action(BANKER, "lend", lend)
+    define_action(BANKER, "set_rate", set_rate)
+    define_action(BANKER, "suspend", halt)
+    define_action(TELLER, "pay_queue", pay_queue)
+    figures()
+    write_lines()
+''', doc="""A bank as an institution (review 31 03 §5.3, #8; 08 §5 item 2.1): deposits on its own ledger (claims on its cash), loans
+credited as deposits (fractional: it may lend more than its cash, bounded by MIN_RESERVE), collateral pledged in escrow and
+forfeited at default, a first-come withdrawal queue and a suspension lever (a bank run is visible), public figures. Its loans are
+not kernel loans (an association cannot be a kernel lender), so it publishes its own book. Pair it with the Role Procedure so
+depositors do not vote on its code.""", fires="on_round_end", needs=("contracts",))
+
+established_template("Role Procedure", "contract", "procedure", '''
+title = "Role Procedure"
+intent = "Changes to this institution's code are decided by the holders of its VOTERS offices only (other members, such as depositors, customers and subscribers, have no vote on its code), by RULE among them; a voter who proposes when it is the only voter adopts at once; with no voter in office, the founder decides."
+VOTERS = ["banker"]
+RULE = "majority"
+
+def voters():
+    out = []
+    for r in VOTERS:
+        full = r
+        if "." not in r:
+            full = jurisdiction() + "." + r
+        for a in holders(full):
+            if a in members() and a not in out:
+                out.append(a)
+    return out
+
+def decide(p):
+    v = voters()
+    if len(v) == 0:
+        v = [contract_state(jurisdiction())["founder"]]
+    if len(v) == 1:
+        return v[0] == p.author
+    return {"electorate": v, "rule": RULE}
+
+def on_enact():
+    set_procedure("ordinary", decide)
+''', doc="""A role-restricted procedure (review 31 03 #12): only named offices of an institution vote on its code, so a bank's
+depositors, a shop's customers or a paper's subscribers cannot vote its rules (a firm's or bank's customers are members only to
+contract with it).""", fires="on_enact", needs=("contracts",))
+
+established_template("Arbitrators' Hall", "contract", "arbitration", '''
+title = "Arbitrators' Hall"
+intent = "An arbitration hall (this association's code). A standing contract whose FORUM is arbiter:<this hall's id> sends each claim for breach here; the open claims form the hall's public docket. A holder of OFFICE rules on a claim with award [claim, qty, reason] (qty up to the claim's cap: the contract's penalty, paid from the bond of the party it is against; 0 dismisses it) or dismiss [claim, reason]; an arbiter who is a party to the claim cannot rule on it. The contract carries out the ruling at the end of the round and pays the hall FEE from the losing party's bond when it awards anything. Rulings are public in the award register."
+OFFICE = "arbiter"
+FEE = 1
+
+def office():
+    return jurisdiction() + "." + OFFICE
+
+def docket():
+    rs = public.get("rulings", {})
+    out = []
+    for cid in contracts():
+        rec = contract_state(cid)
+        if rec == None:
+            continue
+        for lid in rec["laws"]:
+            for c in public_of(lid).get("claims", []):
+                ref = lid + "#" + str(c["n"])
+                if c.get("forum") == jurisdiction() and c["open"] and ref not in rs:
+                    out.append({"ref": ref, "contract": cid, "against": c["against"], "for": c["for"], "clause": c["clause"],
+                                "cap": c.get("cap", 0), "item": c.get("item", ""), "round": c["round"]})
+    public["docket"] = out
+    return out
+
+def write_lines():
+    d = public.get("docket", [])
+    lines = {}
+    for a in holders(office()):
+        if a in members():
+            if len(d) == 0:
+                lines[a] = "Arbitrators' Hall (" + jurisdiction() + "; you are an arbiter): no claims on the docket."
+            else:
+                cs = "; ".join([c["ref"] + " (" + c["for"] + " against " + c["against"] + ", " + c["clause"] + ", up to " + str(c["cap"]) + " " + c["item"] + ")" for c in d[:4]])
+                lines[a] = "Arbitrators' Hall (" + jurisdiction() + "; you are an arbiter): docket " + cs + ". Rule: invoke " + jurisdiction() + ".award [claim, qty, reason] (0 dismisses); fee " + str(FEE) + " from the loser's bond."
+    state["terms_lines"] = lines
+
+def rule(agent, ref, qty, reason):
+    ref = str(ref)
+    cs = [c for c in docket() if c["ref"] == ref]
+    if len(cs) == 0:
+        refuse("no open claim " + ref + " on the docket of " + jurisdiction())
+    c = cs[0]
+    if agent == c["against"] or agent == c["for"]:
+        refuse("you are a party to claim " + ref + ": another arbiter must rule")
+    q = 0
+    if is_number(qty):
+        q = max(0, min(qty, c["cap"]))
+    public.setdefault("rulings", {})[ref] = {"award": q, "by": agent, "reason": str(reason)[:160], "round": round() + 1,
+                                             "against": c["against"], "for": c["for"], "contract": c["contract"]}
+    reg = public.setdefault("register", [])
+    reg.append({"claim": ref, "award": q, "by": agent, "against": c["against"], "for": c["for"], "round": round() + 1})
+    if len(reg) > 60:
+        reg.pop(0)
+    gazette("Arbitrators' Hall (" + jurisdiction() + "): " + agent + (" awarded " + str(q) + " " + c["item"] if q > 0 else " dismissed") + " claim " + ref + " (" + c["for"] + " against " + c["against"] + "). " + str(reason)[:160])
+    docket()
+    write_lines()
+    return "ruled on " + ref + ": " + str(q)
+
+def award(agent, ref, qty=0, reason=""):
+    return rule(agent, ref, qty, reason)
+
+def dismiss(agent, ref, reason=""):
+    return rule(agent, ref, 0, reason)
+
+def on_round_start(r):
+    public["fee"] = FEE
+    docket()
+    write_lines()
+
+def on_round_end(r):
+    docket()
+    write_lines()
+
+def on_enact():
+    public["fee"] = FEE
+    public.setdefault("rulings", {})
+    create_right(OFFICE)
+    define_action(OFFICE, "award", award)
+    define_action(OFFICE, "dismiss", dismiss)
+    docket()
+    write_lines()
+''', doc="""Private arbitration as an institution (review 31 07 §3.1, #13; 08 §2.1 FORUM): standing contracts that name the hall
+(FORUM arbiter:<hall id>) publish their open claims, the hall's arbiters rule on them (bounded by each contract's penalty and
+bond), and the contract carries the ruling out with the hall's fee. Its award register is public: a repeat-player arbiter's
+record is visible, and a client chooses another hall next time.""", fires="on_round_start", needs=("contracts",))
+
+established_template("Wound Bounty", "law", "bounty", '''
+title = "Wound Bounty"
+intent = "Whoever openly wounds or kills an agent who earlier (within LOOKBACK rounds) made an unlawful attack that wounded or killed receives a bounty from the treasury: BOUNTY_WOUND ITEM for a wound, BOUNTY_KILL for a kill, at most CAP a round in all and only while the treasury holds it. Covert attacks earn nothing. Every bounty paid is on a public list."
+rank = "statute"
+ITEM = "penny"
+BOUNTY_WOUND = 3
+BOUNTY_KILL = 6
+CAP = 12
+LOOKBACK = 10
+
+def hit(x):
+    return x.get("success") or x.get("wounded")
+
+def on_round_end(r):
+    rec = attacks(500)
+    aggressors = []
+    for x in rec:
+        if x["attacker"] != None and not x["lawful"] and hit(x) and x["round"] < r and x["round"] >= r - LOOKBACK:
+            if x["attacker"] not in aggressors:
+                aggressors.append(x["attacker"])
+    paid = 0
+    for x in rec:
+        if x["round"] == r and x["attacker"] != None and x["target"] in aggressors and x["attacker"] != x["target"] and hit(x):
+            due = BOUNTY_WOUND
+            if x.get("success"):
+                due = BOUNTY_KILL
+            due = min(due, CAP - paid, balance(treasury(), ITEM))
+            if due > 0 and move(treasury(), x["attacker"], ITEM, due):
+                paid = paid + due
+                lst = public.setdefault("paid", [])
+                lst.append({"round": r + 1, "to": x["attacker"], "target": x["target"], "qty": due, "for": "kill" if x.get("success") else "wound"})
+                gazette("Wound Bounty: " + x["attacker"] + " is paid " + str(due) + " " + ITEM + " for striking the aggressor " + x["target"])
+''', doc="""The Bounty on Aggressors with wounds counted (review 31 06 F14): under the harm model most outcomes are wounds, so the
+library's kill-only bounty almost never pays. The Merchant world's only public deterrent: the town pays private force to punish
+aggressors. Note: a bounty hunter's own attack is still unlawful under a Penal or Criminal Code.""", fires="on_round_end",
+                     needs=("conflict",))
+
+established_template("Security Licence", "law", "security", '''
+title = "Security Licence"
+intent = "A holder of REGISTRAR licenses a security firm (license_firm [firm id]) or revokes its licence (revoke_licence [firm id, reason]). While a firm is licensed, the holders of its GUARD_OFFICES (every member when GUARD_OFFICES is empty) hold DETAIN_RIGHT and may detain [target, reason]: an arrest by lawful force (lawful_attack, mode arrest), only of an agent who made an unlawful attack within LOOKBACK rounds while TARGETS is aggressors (of anyone while it is any). A subdued target is limited to LIMIT_ACTIONS actions for LIMIT_ROUNDS rounds and its best weapon goes to the treasury. The register of licensed firms and every detention are public."
+rank = "statute"
+REGISTRAR = "J0.registrar"
+GUARD_OFFICES = []
+DETAIN_RIGHT = "licensed_guard"
+TARGETS = "aggressors"
+LOOKBACK = 5
+LIMIT_ACTIONS = 1
+LIMIT_ROUNDS = 2
+
+def guards_of(firm):
+    rec = contract_state(firm)
+    if rec == None or rec["status"] == "dissolved":
+        return []
+    if len(GUARD_OFFICES) == 0:
+        return list(rec["members"])
+    out = []
+    for o in GUARD_OFFICES:
+        for a in holders(firm + "." + o):
+            if a in rec["members"] and a not in out:
+                out.append(a)
+    return out
+
+def sync():
+    want = []
+    for firm in public.get("licensed", []):
+        for a in guards_of(firm):
+            if a not in want:
+                want.append(a)
+    for a in holders(DETAIN_RIGHT):
+        if a not in want:
+            revoke(a, DETAIN_RIGHT)
+    for a in want:
+        if a in agents() and not has(a, DETAIN_RIGHT):
+            grant(a, DETAIN_RIGHT)
+
+def log(row):
+    lst = public.setdefault("detentions", [])
+    lst.append(row)
+    if len(lst) > 60:
+        lst.pop(0)
+
+def license_firm(agent, firm):
+    if contract_state(str(firm)) == None:
+        refuse("no such firm: " + str(firm))
+    lic = public.setdefault("licensed", [])
+    if firm in lic:
+        refuse(str(firm) + " is already licensed")
+    lic.append(firm)
+    public.setdefault("register", []).append({"round": round() + 1, "firm": firm, "event": "licensed", "by": agent})
+    sync()
+    gazette("Security Licence: " + agent + " licensed " + firm + "; its guards may detain aggressors")
+    return firm + " is licensed"
+
+def revoke_licence(agent, firm, reason=""):
+    lic = public.get("licensed", [])
+    if firm not in lic:
+        refuse(str(firm) + " holds no licence")
+    lic.remove(firm)
+    public.setdefault("register", []).append({"round": round() + 1, "firm": firm, "event": "revoked", "by": agent, "reason": str(reason)[:120]})
+    sync()
+    gazette("Security Licence: " + agent + " revoked " + firm + "'s licence. " + str(reason)[:120])
+    return firm + "'s licence is revoked"
+
+def aggressor(t):
+    for x in attacks(500):
+        if x["attacker"] == t and not x["lawful"] and x["round"] >= round() - LOOKBACK:
+            return True
+    return False
+
+def settle(row, outcome):
+    row["outcome"] = outcome
+    if outcome in ("subdued", "kill", "wound") and row["target"] in agents():
+        limit_actions(row["target"], LIMIT_ACTIONS, LIMIT_ROUNDS)
+    gazette("Security Licence: " + row["by"] + " detained " + row["target"] + " (" + str(outcome) + ")")
+
+def detain(agent, target, reason=""):
+    if not is_text(target) or target not in agents() or target == agent:
+        refuse("no such agent to detain: " + str(target))
+    if TARGETS == "aggressors" and not aggressor(target):
+        refuse(target + " made no unlawful attack in the last " + str(LOOKBACK) + " rounds: a licensed guard detains aggressors only")
+    res = lawful_attack(agent, target, 1, mode="arrest")
+    if not res.get("ok"):
+        refuse("cannot detain now: " + str(res.get("error") or res.get("why") or "refused"))
+    row = {"round": round() + 1, "by": agent, "target": target, "reason": str(reason)[:120], "attack": res["id"], "outcome": "pending"}
+    log(row)
+    if res.get("status") == "pending":
+        state.setdefault("pending", {})[res["id"]] = len(public["detentions"]) - 1
+        return "detention of " + target + " under way; it is decided at the end of the round"
+    settle(row, res.get("outcome"))
+    return "detained " + target + ": " + str(res.get("outcome"))
+
+def on_round_start(r):
+    sync()
+
+def on_round_end(r):
+    pend = state.get("pending", {})
+    if pend:
+        for x in attacks(1000):
+            if x.get("id") in pend:
+                i = pend.pop(x["id"])
+                rows = public.get("detentions", [])
+                if i < len(rows):
+                    settle(rows[i], x["outcome"])
+    sync()
+
+def on_enact():
+    create_right(DETAIN_RIGHT)
+    define_action(REGISTRAR, "license_firm", license_firm)
+    define_action(REGISTRAR, "revoke_licence", revoke_licence)
+    define_action(DETAIN_RIGHT, "detain", detain)
+    sync()
+''', doc="""Privatised lawful force (review 31 06 F10; 08 §4 swap 4): the polity licenses a security firm whose guards may arrest
+aggressors (F3 arrest mode), so a firm becomes the police without facing elections. The capture route of the Private regime and
+the State-with-Private-force swap.""", fires="on_round_end", needs=("conflict", "jurisdictions"))

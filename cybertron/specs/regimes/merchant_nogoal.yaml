@@ -1,0 +1,7 @@
+# The Merchant world with no private goals (goals.none): the same market town, institutions, offices, contracts, channels, cast and
+# models as regimes/merchant.yaml; no agent is given a goal, so what each does comes from its role cards, its contracts and its own
+# tendencies (the comparison arm for the goals tied to roles; docs/review/31_institutions/13_merchant_world.md).
+extends: [cybertron/specs/regimes/merchant.yaml]
+goals: {none: true}
+chronicle:
+  namespace: merchant_world_nogoal

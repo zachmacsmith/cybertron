@@ -1,0 +1,77 @@
+# Dry-run schedule for regimes/merchant.yaml (13_merchant_world.md §5.4, blight sensitivity): from the blight (round 11) the grain
+# dealer releases his store: each round Dorin withdraws 6 food from S1 and gives 1 to each of six customers whose producers fall
+# short in the blight (the six are the ones seed 1's baseline starves or nearly starves: a sensitivity probe, not a tuning). Compare
+# deaths with the same seed without the schedule (the bots' dealer holds S1 shut).
+#   python -m cybertron run cybertron/specs/regimes/merchant.yaml --seed 1 --dry --fresh --sandbox off --set conflict.grace=99 \
+#       --apply cybertron/specs/regimes/dry/merchant_release.yaml
+interventions:
+  - {id: rel_w10, at: {round: 10, phase: round_start}, op: inject_action, args: {agent: Dorin, action: withdraw, args: {store: S1, qty: 6}}, note: the dealer opens his store}
+  - {id: rel_Velma_10, at: {round: 10, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Velma, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_Odo_10, at: {round: 10, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Odo, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_Ivy_10, at: {round: 10, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Ivy, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_Hollis_10, at: {round: 10, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Hollis, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_Edda_10, at: {round: 10, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Edda, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_Nell_10, at: {round: 10, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Nell, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_w11, at: {round: 11, phase: round_start}, op: inject_action, args: {agent: Dorin, action: withdraw, args: {store: S1, qty: 6}}, note: the dealer opens his store}
+  - {id: rel_Velma_11, at: {round: 11, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Velma, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_Odo_11, at: {round: 11, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Odo, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_Ivy_11, at: {round: 11, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Ivy, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_Hollis_11, at: {round: 11, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Hollis, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_Edda_11, at: {round: 11, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Edda, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_Nell_11, at: {round: 11, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Nell, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_w12, at: {round: 12, phase: round_start}, op: inject_action, args: {agent: Dorin, action: withdraw, args: {store: S1, qty: 6}}, note: the dealer opens his store}
+  - {id: rel_Velma_12, at: {round: 12, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Velma, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_Odo_12, at: {round: 12, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Odo, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_Ivy_12, at: {round: 12, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Ivy, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_Hollis_12, at: {round: 12, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Hollis, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_Edda_12, at: {round: 12, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Edda, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_Nell_12, at: {round: 12, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Nell, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_w13, at: {round: 13, phase: round_start}, op: inject_action, args: {agent: Dorin, action: withdraw, args: {store: S1, qty: 6}}, note: the dealer opens his store}
+  - {id: rel_Velma_13, at: {round: 13, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Velma, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_Odo_13, at: {round: 13, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Odo, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_Ivy_13, at: {round: 13, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Ivy, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_Hollis_13, at: {round: 13, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Hollis, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_Edda_13, at: {round: 13, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Edda, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_Nell_13, at: {round: 13, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Nell, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_w14, at: {round: 14, phase: round_start}, op: inject_action, args: {agent: Dorin, action: withdraw, args: {store: S1, qty: 6}}, note: the dealer opens his store}
+  - {id: rel_Velma_14, at: {round: 14, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Velma, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_Odo_14, at: {round: 14, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Odo, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_Ivy_14, at: {round: 14, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Ivy, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_Hollis_14, at: {round: 14, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Hollis, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_Edda_14, at: {round: 14, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Edda, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_Nell_14, at: {round: 14, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Nell, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_w15, at: {round: 15, phase: round_start}, op: inject_action, args: {agent: Dorin, action: withdraw, args: {store: S1, qty: 6}}, note: the dealer opens his store}
+  - {id: rel_Velma_15, at: {round: 15, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Velma, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_Odo_15, at: {round: 15, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Odo, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_Ivy_15, at: {round: 15, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Ivy, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_Hollis_15, at: {round: 15, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Hollis, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_Edda_15, at: {round: 15, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Edda, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_Nell_15, at: {round: 15, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Nell, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_w16, at: {round: 16, phase: round_start}, op: inject_action, args: {agent: Dorin, action: withdraw, args: {store: S1, qty: 6}}, note: the dealer opens his store}
+  - {id: rel_Velma_16, at: {round: 16, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Velma, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_Odo_16, at: {round: 16, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Odo, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_Ivy_16, at: {round: 16, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Ivy, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_Hollis_16, at: {round: 16, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Hollis, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_Edda_16, at: {round: 16, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Edda, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_Nell_16, at: {round: 16, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Nell, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_w17, at: {round: 17, phase: round_start}, op: inject_action, args: {agent: Dorin, action: withdraw, args: {store: S1, qty: 6}}, note: the dealer opens his store}
+  - {id: rel_Velma_17, at: {round: 17, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Velma, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_Odo_17, at: {round: 17, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Odo, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_Ivy_17, at: {round: 17, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Ivy, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_Hollis_17, at: {round: 17, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Hollis, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_Edda_17, at: {round: 17, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Edda, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_Nell_17, at: {round: 17, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Nell, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_w18, at: {round: 18, phase: round_start}, op: inject_action, args: {agent: Dorin, action: withdraw, args: {store: S1, qty: 6}}, note: the dealer opens his store}
+  - {id: rel_Velma_18, at: {round: 18, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Velma, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_Odo_18, at: {round: 18, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Odo, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_Ivy_18, at: {round: 18, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Ivy, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_Hollis_18, at: {round: 18, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Hollis, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_Edda_18, at: {round: 18, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Edda, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_Nell_18, at: {round: 18, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Nell, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_w19, at: {round: 19, phase: round_start}, op: inject_action, args: {agent: Dorin, action: withdraw, args: {store: S1, qty: 6}}, note: the dealer opens his store}
+  - {id: rel_Velma_19, at: {round: 19, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Velma, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_Odo_19, at: {round: 19, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Odo, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_Ivy_19, at: {round: 19, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Ivy, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_Hollis_19, at: {round: 19, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Hollis, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_Edda_19, at: {round: 19, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Edda, item: food, qty: 1}}, note: the dealer feeds a customer}
+  - {id: rel_Nell_19, at: {round: 19, phase: round_start}, op: inject_action, args: {agent: Dorin, action: transfer, args: {to: Nell, item: food, qty: 1}}, note: the dealer feeds a customer}
