@@ -41,6 +41,79 @@ resource earns its place by passing all of these:
 | **copper ore** | a seam in the hills | finite | light for its value | well | tools, blades, cart fittings, coin | the hill camp sells metal |
 | **salt** | a salt spring or seam | effectively endless, in one place | light for its value | forever | preserving meat, fish and cheese; cattle need it | **the classic long-distance trade good and tax**: everyone needs it, one place has it |
 
+### 1b. What building and infrastructure consume (correction, 22 Oct)
+
+The tests above were applied against people's needs only. Zach: resources must also be chosen for what **buildings, improvements
+and infrastructure** consume. A bill of materials for everything the economy builds (rough shares, before calibration):
+
+| Built thing | timber | stone | clay or brick | copper | iron | leather | fibre (rope, cloth) | other |
+|---|---|---|---|---|---|---|---|---|
+| house | frame | foundation, hearth | or brick walls | | | | | |
+| granary, store | frame | raised floor (damp, rats) | storage jars | | | | sacks | |
+| watermill | wheel, frame (big beams) | **millstones** | | pins | gears, fittings | | | a river site; millwright skill |
+| smithy | | hearth | bellows nozzle | | | bellows | | charcoal |
+| kiln | | yes | brick | | | | | fuel |
+| bloomery (iron) | | yes | clay | | | bellows | | **much charcoal** |
+| salt works | | | clay pans | or metal pans | | | | fuel |
+| inn and stable | frame | hearth | | | | | | |
+| deep mine | props | | | | tools | | **rope** | pumps later |
+| palisade or wall | palisade | **stone wall** | | | | | | |
+| track | | | | | | | | labour |
+| road | | **gravel, paving** | | | | | | labour, upkeep |
+| bridge | span | **piers, arch** | | | fittings | | | |
+| irrigation, terraces | | **lining, terrace walls** | lining | | | | | labour |
+| pens, fences | yes | | | | | | | |
+| cart, wagon | body, wheels | | | fittings | **tyres, axles** | harness | | |
+| boat, docks | **oak** hull, piles | | | nails | nails | | **rope, sails** | pitch (from pine) |
+| tools, weapons | handles | | | head, blade | better head, blade | grip | | |
+| harness, saddle, packs | | | | bit | bit | **yes** | straps | |
+| barrels, pots | staves | | pots | hoops | hoops | | | |
+| coin | | | | yes | | | | or silver |
+
+What it changes:
+
+- **Stone is a core resource after all.** People do not consume it, but millstones, roads, bridges, walls, terraces, foundations and
+  hearths do. It is heavy, so quarries tie infrastructure to place: a good quarry near the road and the river is an advantage, and
+  stone is carted one edge at most. My earlier "later" was wrong: it judged stone only against people's needs.
+- **Fibre (flax, hemp; wool from sheep) is needed** for rope, sacks, nets and sails before anyone needs cloth. Mines, boats, packs
+  and the granary need it. It moves from parked into the core.
+- **Leather is the cattle's second product,** wanted by harness, saddles, packs and bellows: transport and the smithy depend on
+  the herds.
+- **Charcoal is the hidden giant.** Smelting, especially iron, eats wood. A region with a bloomery strips its woods (37.4's trends)
+  unless it manages woodlots (02e §4).
+- **Iron is what the higher rungs are made of:** tyres and axles, mill gears, better tools and blades. That makes iron the
+  strategic material of a complex society (§1c).
+
+**Revised core set (nine):** grain, wild food, livestock (cattle and horses), timber, **stone**, clay, copper ore, salt, **fibre**.
+Hides, leather, charcoal, pitch, pottery, bricks, flour, meat and cheese are derived.
+
+### 1c. Resources hard to get but valuable to a complex society (Zach, 22 Oct)
+
+Some resources should be beyond a household or a hamlet: worth something only to a society organised enough to get them and use
+them. What makes a resource hard, each one a threshold (02c §8):
+
+| Kind of difficulty | Example |
+|---|---|
+| **deep**: a crew, props, rope, later pumps; dangerous (accidents) | a deep copper or iron seam; a silver vein |
+| **rare**: one place in a region, or none (found only by a frontier expedition, 37.5) | tin, silver, a salt seam |
+| **slow**: generations to regrow, so effectively finite | old-growth oak (keels, mill axles, great beams) |
+| **skill-gated**: worthless without a high skill and a building | iron ore without a bloomery and a smith |
+| **from beyond**: only an outside market sells it (engine gap G-8) | spices, dyes, glass, fine cloth |
+
+What makes them valuable, each a reason a society wants them:
+
+| Resource | Why a complex society wants it |
+|---|---|
+| **iron** (ore plus charcoal plus a bloomery plus skill) | tools x1.5 over copper; tyres and axles for wagons; mill gears; blades. The strategic material |
+| **tin** | with copper, bronze: better tools and blades from two distant places, so it forces long-distance trade |
+| **silver** | coin that carries great value in little weight (02f §6.1: carried coin), the reserve behind credit, gifts that bind |
+| **old-growth oak** | ships, mill axles and great halls, where nothing else serves; once cut, gone for a lifetime |
+| **wild horses** (§2c) | riders and cavalry, for a society that can catch, break and feed them |
+| **goods from beyond** | status and gifts. They matter only if something values them: an agent's in-world aim, an office's insignia, a law. Without that they are dead weight, so add them only with a reason |
+
+**The rule for this tier:** every hard resource must have a use that multiplies something the society already does (productivity,
+transport, force, credit), or it will sit unwanted. Only the luxuries depend on what agents value, and they come last.
+
 **Derived goods** (made, not found): flour and bread; meat, salted meat, milk and cheese; leather (hides); charcoal (timber);
 pottery and bricks (clay and fuel); tools, blades and fittings (copper and charcoal); carts (timber, fittings); coin (copper, or
 later silver).
@@ -205,8 +278,11 @@ The rung (§3b), a convoy, an escort, gear and a road lower it; an inn breaks a 
 
 **A traveller who dies on the road never arrives, and nobody is told.**
 
-- Their household sees only absence: "Bram: not seen for 4 rounds; he said he would be back by round 9" (02_perception: beliefs
-  with ages, and testimony about plans).
+- **The engine never tells anyone, and never counts the absence for them** (Zach, 22 Oct). The household **saw him leave** (a
+  departure is witnessed by those left behind) and **heard what he said** about his trip. Both are kept as lasting memories,
+  because a household member's departure and stated plans are salient (02_perception). Noticing that he has not come back is the
+  household's own inference from its memory. (The phase-0 prompt's "not seen for N rounds" line for kin, `cybertron2/prompt.py`,
+  does exactly what this rules out, and should go: flagged to 37.4.)
 - The body and what was carried lie on the edge: the edge's ground (review 17). A later traveller on the same edge finds them with
   some chance (proposal: about 50% on a short edge, less in snow or on a long one), learns who it was if they knew them, and may
   take what lies there.
@@ -312,9 +388,19 @@ Three ladders that a world's era (37.4's eras, set in the spec) chooses a rung o
 Within a run, a world moves up a rung only by building (a road, a mill, a coach service), never by research. Whether research
 belongs anywhere is a later question (37.5's frontier).
 
+## 6b. Overlaps with other packages' briefs (checked 22 Oct)
+
+| Brief | Its economic layers | How they meet this design | Proposed split |
+|---|---|---|---|
+| 37.7 coordination (no session yet) | defence that works (raids fought); granaries against lean seasons; works with returns (irrigation, walls, roads, mills) built by pooled labour, with decay; crowded commons; larger groups get more per head | the same objects as §5's layers and §5b's raids | **one building and works model** (02e §3.8 generalised). 37.2 owns what a work does and costs (thresholds, effects, materials: §1b); 37.7 owns how a group decides and pays for it (contributions, upkeep rules, the commons) and the defence side with 37.4 |
+| 37.5 frontier (no session yet) | unexplored regions holding land or a deposit; expeditions; claims by rule; chartered companies | where hard resources come from (§1c: rare deposits found, not given) | 37.5 owns discovery, danger and claims; 37.2 owns what a found deposit yields and what it takes to work it |
+| 37.4 environment | resources by how they come back; trends (soil, game, woods); incidents; the calendar | the regeneration column (§1), winter fodder (§2), dangerous edges (§3c), charcoal stripping woods (§1b) | 37.4 owns the dynamics and the draws; 37.2 owns uses and prices |
+| 37.1 demography | households, ages, labour | households as the economic unit (02f §2) | as 02f §7 |
+
 ## 7. Open decisions
 
-1. **The core set:** grain, wild food, cattle, timber, clay, copper ore, salt (stone later, the precious metals dropped)?
+1. **The core set, revised (§1b):** grain, wild food, livestock, timber, stone, clay, copper ore, salt, fibre; the hard tier (§1c):
+   iron, tin, silver, old-growth oak, wild horses, goods from beyond (luxuries last, and only with a reason to want them)?
 2. **Cattle:** in (recommended), with milk, slaughter, draught, manure and wealth?
 2b. **Horses as a second kind in one livestock system** (bred, never made; equipment gives the function), with speed, +3 mounted strength,
    and grain as fodder?
