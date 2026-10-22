@@ -667,6 +667,12 @@ def _render_event(k, e, viewer=None) -> str | None:
         return f"{tag} #{d['channel']} {who}: {d['text']}"
     if t in ("channel_opened", "channel_set", "channel_subscribed", "channel_resealed"):   # channels.v2: opened, set, joined/left, resealed
         return CH.render_event(k, e, tag)
+    if t == "dir_changed":                                             # review 31.05 #4: an announced file changed
+        return f"{tag} {who} {d['op']} {d['dir']}/{d['path']}" + (f" -> {d['to']}" if d.get("to") else "")
+    if t == "dir_sealed":
+        return f"{tag} {d['dir']}/{d['path']} was sealed by law {d.get('law') or ''}".rstrip()
+    if t == "dir_policy":
+        return f"{tag} law {d.get('law') or ''} set {d['dir']}'s {d['key']} to {d['value']}"
     return FT.render_event(k, e, tag, viewer)                          # the feature modules' renderers (features.TAILS order)
 
 

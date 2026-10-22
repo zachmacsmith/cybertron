@@ -54,7 +54,8 @@ def test_every_action_row_is_complete():
             assert set(act.aliases.values()) <= named, (name, act.aliases)   # a synonym maps to a real argument
         assert set(act.emits) <= set(ET.REG), (name, act.emits)
         assert all(ET.REG[e].act == name for e in act.emits), (name, act.emits)
-        assert act.module in AR.MODULES and act.legacy == (act.module != "context"), name
+        assert act.module in AR.MODULES and (act.module != "context" or not act.legacy), name   # context's actions never reach
+        # the legacy prompt; later opt-in actions (dir_history, submit, decline) stay out of it too (legacy=False), so it stays frozen
     for t in ET.REG.values():                                           # every event an action logs as its own is declared on it
         if t.act is not None:
             assert t.name in AR.REG[t.act].emits, (t.name, t.act)
@@ -87,6 +88,9 @@ def test_unknown_action_error_lists_actions_in_the_old_order():
     hidden.add("conceive")                                              # review 15 S4: conceive only with two-parent reproduction
     hidden |= {"craft", "watch"}                                        # the harm combat model only (subsistence worlds)
     hidden.add("draft")                                                 # review 31.14: only where a legal archive exists
+    hidden.add("dir_history")                                           # review 31.05 #3: only where a store keeps a version log
+    from cybertron import papers as PP
+    hidden |= PP.hidden(k)                                              # review 33: submit and decline only with channels.papers
     assert str(e.value) == "unknown action 'no_such_action'. Actions: " + ", ".join(x for x in A.ACTIONS if x not in hidden)
 
 

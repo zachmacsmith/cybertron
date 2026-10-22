@@ -1265,7 +1265,7 @@ def _k_wiretap(inst, k, a, r):
 
 R("wiretap", "read a tapped agent's private messages (surveil)", "INFORMATION", pre=True, needs=("mod:context", "right:surveil"),
   when=_k_wiretap, args='{"agent": "Name"}', handler="surveillance:act_wiretap", module="context", category="productive",
-  legacy=False, aliases={"target": "agent", "name": "agent", "who": "agent"},
+  legacy=False, emits=("wiretap",), aliases={"target": "agent", "name": "agent", "who": "agent"},
   doc='wiretap {"agent": "Name"}: as a holder of surveil, read that agent\'s unencrypted private messages (sent and received) of '
       'the last round and this one; a few agents a round at most (the world\'s limit); the agent is not told, and a message you '
       'have read this way stays readable to you (you may cite it as evidence)')
@@ -1277,7 +1277,7 @@ def _k_dir_history(inst, k, a, r):
 
 
 R("dir_history", "the version log of a directory's files", "directories", pre=True, needs=("dir:any",), when=_k_dir_history,
-  args='{"dir": "minutes", "path": "r03.md"}', handler="directories:act_dir_history", module="directories",
+  args='{"dir": "minutes", "path": "r03.md"}', handler="directories:act_dir_history", module="context",
   category="productive", legacy=False, aliases={"file": "path", "directory": "dir"},
   doc='dir_history {"dir": "minutes", "path": "r03.md"}: where a directory keeps a version log and you may read it, every change '
       'of a file (round, who, write/edit/move/delete, size and hashes; the earlier texts where the log keeps them); without a '

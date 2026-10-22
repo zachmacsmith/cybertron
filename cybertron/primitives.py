@@ -957,6 +957,8 @@ ACTION_PRIMITIVES = {
     "read_register": LOOKUP,                                           # review 31.05 #1
     "wiretap": LOOKUP,                                                 # review 31.04 #10 (channels.surveillance pull)
     "dir_history": LOOKUP,                                             # review 31.05 #3 (a store's version log)
+    "draft": ("dir_write",),                                           # review 31.14: a draft written into the lawyer's archive
+    "submit": OUTPUT, "decline": OUTPUT,                               # review 33: a letter to a paper; the editor declines it
     # force, more
     "guard": ("guard_bind", "guard_release", "move"), "join_attack": ("attack", "end_life"), "contract": ("hire_assassin", "move"),
     "buy_initiative": ("set_initiative", "destroy"),
@@ -1016,7 +1018,9 @@ TIER_OF = {
           "eat", "hunger", "spoil", "provision",   # review 15 S1: the ration, hunger and spoilage; a child's food
           "farm_upkeep"),                          # engine 14: improvements wear out
     "E": ("write_note", "use_power"),
-    "X": ("set_role", "set_goal", "suspend_law", "request_fix"),
+    "X": ("set_role", "set_goal", "suspend_law", "request_fix",
+          "set_record"),                                               # review 31.05: a law seals a file or sets a record policy
+                                                                       # (records metadata, public, not hookable by design)
     "L": ("move", "harvest", "mint", "burn", "create_currency", "convert", "destroy", "grant_right", "revoke_right",
           "suspend_right", "limit_actions", "create_right", "set_dm_limit", "appoint", "attack", "fortify", "guard_bind",
           "guard_release", "post", "dm", "hide_post", "subscribe", "set_outlet_rule", "set_media_rule", "join", "leave", "admit",

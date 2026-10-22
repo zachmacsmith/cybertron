@@ -34,13 +34,14 @@ def test_every_primitive_row_has_a_tier(p):
 
 
 def test_the_unrouted_primitives_are_review_12_s_list():
-    """§2.14: 38 unrouted primitives: 31 L-route, 1 P, 2 E, 4 X. W8b (WP1) routed the 31 L-route rows: 7 remain."""
+    """§2.14: 38 unrouted primitives: 31 L-route, 1 P, 2 E, 4 X. W8b (WP1) routed the 31 L-route rows: 7 remain; review 31.05 added
+    set_record (X: records metadata a law sets, not hookable by design)."""
     unrouted = [p for p in PR.PRIMITIVES.values() if not p.routed]
     by = {t: sorted(p.name for p in unrouted if p.tier == t) for t in T.PRIMITIVE_TIERS}
-    assert len(unrouted) == 7 and {t: len(v) for t, v in by.items() if v} == {"P": 1, "E": 2, "X": 4}
+    assert len(unrouted) == 8 and {t: len(v) for t, v in by.items() if v} == {"P": 1, "E": 2, "X": 5}
     assert not PR.TIER_OF["L-route"]
     assert by["P"] == ["demand_tribute"] and by["E"] == ["use_power", "write_note"]
-    assert by["X"] == ["request_fix", "set_goal", "set_role", "suspend_law"]
+    assert by["X"] == ["request_fix", "set_goal", "set_record", "set_role", "suspend_law"]
 
 
 def test_tier_table_names_real_primitives_once():
