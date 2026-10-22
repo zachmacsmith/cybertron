@@ -130,3 +130,21 @@ the run, nobody present could see it, and three rounds later she was dead.
 2. The prompt sections of §4, replacing the leaks of §1.
 3. Witnessing and visible condition and load.
 4. Rerun the forest (same seed) with the fixes from 01 §4. Compare what agents did with what they could see, round by round.
+
+## 9. As built (22 Oct, `cybertron2/perceive.py`, `prompt.py`, `run.py`)
+
+- **Knowledge store** per agent (perceive.py): places, people and the agent's own house as last seen, with the round; the previous
+  sight of each kept for "changed since"; witnessed acts; testimony; a summary band (one line a round, 8 rounds), a full band (the
+  last 2 rounds: what it did, saw and heard), and lasting memories (deaths, fights, what was done to it, the cold; at most 14).
+- **Witnessing:** every action returns what others see; everyone else at the place at that step sees it; a departure is seen by
+  those left behind and an arrival by those at the destination; night fights and deaths by everyone at the place at night.
+- **Visible condition and load:** "Brenna (starving; empty-handed)", "Torvald (hungry; timber)".
+- **Beliefs with ages:** your house exact only when you are there, otherwise "as you last saw it N rounds ago"; people and places
+  as last seen, dropped from the prompt after 6 rounds; other households' stocks only in words, only when you are at their house.
+- **From the old context module:** the memory gradient (full band, summary band, lasting memories: review 20's history mode,
+  simplified), and a field in the reply that says why the agent chose its actions. Not ported yet: token budgets with
+  deterministic trimming (sections are capped by line counts instead), look-ups and `recall`.
+- **The field is called `why`, not `reasoning`.** With the hills-and-forest system prompt, a required `reasoning` field described
+  as "your thinking" was refused by the Sonnet 5.5 safeguard every time (3 of 3 calls for Cela's prompt; 3 of 4 Sonnet agents in
+  the first live round). Either part alone passed; renaming it "why you chose these actions, in a few sentences" passed for all
+  three. The 5.5 models through `claude -p` return no thinking text, so this field is the only view of their intentions.

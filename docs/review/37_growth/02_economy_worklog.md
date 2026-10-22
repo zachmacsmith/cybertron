@@ -33,6 +33,20 @@ calls (scripted dry runs and unit tests only); everything generated can be fixed
 
 ## Log
 
+### 22 Oct (night, perception built; second run)
+
+- Zach: implement the perception design and the old context module's machinery in cybertron2, then a larger run: more places, two
+  households and one with a copper mine and weapons that can get food only by raiding.
+- Built: perceive.py (knowledge store, witnessing, beliefs with ages, memory bands, lasting memories), combat.py (raids on house
+  stocks and attacks, a simplified port of the harm model, settled at night against whoever is present), mining, forging, clubs,
+  guard; run-1 fixes (game inflow, partial meals, everyone hunting at a place is one party unless named); the world
+  hills_and_forest.yaml (a ring of five places: Meadow, Near Wood, Deep Wood, Hills, Ridge; houses where each household gathers;
+  the Iron household cannot forage or hunt). 9 tests pass. Design change: hungry agents may fight (only starving ones may not),
+  else one failed raid starves the raiders.
+- Found: the Sonnet 5.5 safeguard refuses a reply field named "reasoning" asking for "your thinking" (with this system prompt);
+  renamed `why`. Failed calls are now recorded and shown to the agent.
+- Second LLM run launched: runs/cybertron2/hills_and_forest_seed2 (11 agents, 20 rounds).
+
 ### 22 Oct (night, perception)
 
 - Zach: the most important thing is what agents see and how it changes. Wrote docs/review/38_space_engine/02_perception.md: perceive
