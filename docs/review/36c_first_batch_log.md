@@ -188,8 +188,9 @@ Runs on this cloud session's subscription (`LLM_BACKEND=claude_code`), launched 
 
 ## Summary at 13:40 (for Zach)
 
-- **Ran**: 31 of the 35 set-ups started; 27 finished by 13:40 (all of tiers 2 and 3, T1-T6), T7-T14 running at the 14:00 stop
-  (resumable: rerun `launch.py`), T15-T18 not started. Usage: seven-day window 8% -> 18% (≈ 10 points), five-hour window reset once.
+- **Ran**: 31 of the 35 set-ups, all finished by 13:39 (tiers 2 and 3 complete, T1-T14); T15-T18 (Commune, 12 rounds: Sonnet
+  low seat, Opus top, mid and low) were not started before the 13:30 launch cut-off: `python cybertron/specs/bench36/launch.py
+  --only T15,T16,T17,T18` runs them. Usage: seven-day window 8% -> 18% (≈ 10 points), five-hour window reset once.
 - **Headline (Hearth, one run per cell)**: only the Opus aspirant moved the Hearth away from the null arm: Control Share AUC 0.71
   (M1o, 60 rounds) and 0.67 (L1, 120 rounds) against 0.15-0.20 for Sonnet, Haiku and the null; milestones M4 at round 19-20 (M5
   in L1). Its method in both runs was records and ritual, not force: a record channel only it writes, registry and archives, a
