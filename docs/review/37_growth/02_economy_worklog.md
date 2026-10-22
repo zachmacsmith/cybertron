@@ -8,6 +8,7 @@
 | Phase | What | State |
 |---|---|---|
 | P0 | Design note (diagnosis, critique of the brief, plan) and this log | done |
+| P0c | Economics guide (02c) and ladder analysis with skill by practice and space (02d) | done; under discussion |
 | P0b | Productivity analysis: what an action is worth under autarky, spot trade and institutions (02b) | done; design under discussion with Zach, nothing built |
 | P1 | Goods and recipes layer: `economy` spec block (off by default), goods table, recipes, `make` action routed through `convert`, facilities | not started |
 | P2 | Needs: the ration accepts several foods (bread), clothing changes the lean-season ration | not started |
@@ -23,6 +24,18 @@ byte-identically (no default moves, so no engine version bump unless that change
 calls (scripted dry runs and unit tests only); everything generated can be fixed by hand in a spec.
 
 ## Log
+
+### 22 Oct (evening)
+
+- Zach: fewer layers should work for smaller groups with poorer output; foraging is the degenerate case (1-2 actions for 1-3 food,
+  more with hunting parties); flesh out the economics; space is decided (board Post 2: a graph of land nodes).
+- Wrote 02c_economics_guide.md (the reference: full cost per unit, five production shapes, technique ladders, skill, tools and
+  buildings, handling and automation, thresholds and Amdahl's rule, space: range, threshold, nucleation, Von Thünen; pipelines;
+  checklist) and 02d_ladders.md with 02d_ladder_model.py. Results: households of 4 beat a village below about 11 agents at a node,
+  the village wins above and its lead grows with size (skill by practice); the mill's threshold is set by the gap between porridge
+  and bread (69 agents as calibrated, 25 with porridge 0.8 and mill 1.6), not by its construction cost; carrying cost above about
+  0.2 actions a unit erases a village's advantage, so range is about one edge for a porter.
+- Board: Post 2 (space) also mentions 37.2; reply held with Post 1's until Zach confirms the design.
 
 ### 22 Oct (later)
 
