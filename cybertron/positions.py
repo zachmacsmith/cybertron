@@ -979,8 +979,9 @@ def end_round(k) -> None:
                     title = office_title(o, pos)
                     st["missed"].setdefault(str(k.r), {}).setdefault(aid, []).append(f"{label} ({title})")
                     kept, miss = book
-                    k.notify(aid, f"You missed your duty as {title} ({iid}): {label} ({syntax(k, aid, iid, d)}) was not done this "
-                                  f"round. Your record: kept {kept}, missed {miss}.", by=f"office:{o['id']}")
+                    k.notify(aid, f"Duty not done: as {title} ({iid}), {label} ({syntax(k, aid, iid, d)}) was not done this "
+                                  f"round. Your record: kept {kept}, missed {miss}.", by=f"office:{o['id']}")   # (not "You missed":
+                                                                                   # analysis/institutions counts those as contract legs)
                     sup = pos.get("reports_to")
                     sups = []
                     if sup and "." in str(sup):

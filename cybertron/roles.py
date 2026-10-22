@@ -281,7 +281,7 @@ def prompt_section(inst: dict, a: dict) -> str:
                       + tuple(x for x in OPTIONAL if x in h))
     out = [f"Known roles in this world (public): {known}. Roles are separate from classes; their holders keep their class."]
     from cybertron import positions as PS                                # review 33: context.identity positions has no classes
-    if PS.identity_on(inst):
+    if PS.identity_on(inst) and not all(p.get("legacy") for _, _, p in PS.held(None, a["id"], inst)):
         out[0] = out[0].replace("separate from classes; their holders keep their class", "separate from positions; their holders keep "
                                 "their positions")
     for x in ROLES:
