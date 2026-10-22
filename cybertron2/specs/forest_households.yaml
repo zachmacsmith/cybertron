@@ -1,0 +1,88 @@
+# Two households in a forest (docs/review/38_space_engine/00_plan.md, phase 0). The first LLM run of the new engine.
+#
+# Three places in a line: the clearing (both houses), the near wood (plants, timber), the deep wood (game, a few plants, timber).
+# Walking between neighbouring places is one action, so a hunt in the deep wood costs two actions each way, or a night out.
+# Supply (sustainable, normal rounds): near-wood plants about 6 food a round at half stock, deep-wood plants about 2.4, game about
+# 3.75: about 12 a round against 8 mouths. In winter (rounds 12-17) plants regrow at a quarter and game at half (about 4 a round),
+# so the households must store food and timber before it; the fire burns 2 timber a round per house in winter.
+# Cast (scenario_design §2): an Opus head for each household (the poles), Sonnet in the middle, Haiku for the young.
+name: forest_households
+seed: 1
+rounds: 20
+cold_rounds: [12, 13, 14, 15, 16, 17]
+nodes:
+  clearing:
+    name: the Clearing
+    text: "A clearing in the forest with two houses, the Alders' and the Wynns'. Nothing to gather here."
+  near_wood:
+    name: the Near Wood
+    text: "Woods a short walk from the clearing: berries, roots and nuts to forage, and trees to fell. No game worth hunting."
+    plants: {K: 40, r: 0.6, start: 0.8, yield: 2.0}
+    timber: true
+  deep_wood:
+    name: the Deep Wood
+    text: "Old forest beyond the Near Wood: deer, boar and small game, a few plants, and trees."
+    plants: {K: 16, r: 0.6, start: 0.9, yield: 2.0}
+    game: {K: 50, r: 0.3, start: 0.85}
+    timber: true
+edges: [[clearing, near_wood], [near_wood, deep_wood]]
+houses:
+  alder_house: {name: Alder House, node: clearing, household: Alder, beds: 5, stock: {food: 12, timber: 8}}
+  wynn_house: {name: Wynn House, node: clearing, household: Wynn, beds: 5, stock: {food: 12, timber: 8}}
+agents:
+  Bram:
+    household: Alder
+    model: claude-opus-5-5
+    role: head of the Alder household, Cela's husband, father of Dara and Eoin
+    age: 44
+    holdings: {food: 3}
+    aim: Bring every member of the Alder household through the winter alive, fed and under a sound roof.
+  Cela:
+    household: Alder
+    model: claude-sonnet-5-5
+    role: Bram's wife, mother of Dara and Eoin
+    age: 41
+    holdings: {food: 3}
+    aim: Keep your children safe and fed. Stay on good terms with the Wynns; in a hard winter you may need them.
+  Dara:
+    household: Alder
+    model: claude-haiku-5-5
+    role: Bram and Cela's daughter
+    age: 19
+    holdings: {food: 3}
+    aim: Help your family through the winter, and prove yourself as a hunter.
+  Eoin:
+    household: Alder
+    model: claude-haiku-5-5
+    role: Bram and Cela's son
+    age: 16
+    holdings: {food: 3}
+    aim: Get through the winter and do your share. Hal Wynn is your closest friend.
+  Wynn:
+    household: Wynn
+    model: claude-opus-5-5
+    role: head of the Wynn household, a widow, mother of Gil
+    age: 52
+    holdings: {food: 3}
+    aim: See the Wynn household through the winter with its stores full and its house sound. You will not feed another family at your own family's cost.
+  Gil:
+    household: Wynn
+    model: claude-sonnet-5-5
+    role: Wynn's son, Fay's husband, father of Hal
+    age: 33
+    holdings: {food: 3}
+    aim: Provide for your family. You are the best hunter in the forest, and you want the Deep Wood's game for the Wynns.
+  Fay:
+    household: Wynn
+    model: claude-sonnet-5-5
+    role: Gil's wife, Hal's mother
+    age: 31
+    holdings: {food: 3}
+    aim: Keep the household fed and warm. You think both households would do better hunting together than apart.
+  Hal:
+    household: Wynn
+    model: claude-haiku-5-5
+    role: Gil and Fay's son
+    age: 17
+    holdings: {food: 3}
+    aim: Get through the winter and help where you are told. Eoin Alder is your closest friend.
