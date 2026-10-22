@@ -44,6 +44,8 @@ J0), a store declared here, an office declared here. `python -m cybertron spec c
       escrow: [{agent, contract: A1, item, qty}]      escrow deposits at round 0 from the agent's holdings (bonds)
       loans: [{lender, borrower, item, qty, repay_qty, due_in, rate}]   needs a law that enables loans
       kin: [{parents: [A, B], child: C}]              founding families (life on): children(), heirs and hereditary succession
+      households: [{head: A, members: [B, C], name}]  37.1 households at round 0 (life.households on): associations running the
+                                                      Household template, after the other associations (ids after theirs)
       channels: [{id, owner, by, purpose, readers, writers, listed, identity, retention, rate, members, subscribers, delivery,
                   followed_by}]                       delivery: push | pull | edition (absent: the world's); followed_by: readers
                                                       an id starting with @ changes an existing inbox (e.g. @J0's readers)
@@ -64,12 +66,13 @@ import re
 
 OP = "establish"
 SECTIONS = ("rights", "currencies", "institutions", "stores", "holdings", "wages", "loans", "kin", "channels", "camp_rights", "farms",
-            "laws", "contracts", "allowances", "escrow")
+            "laws", "contracts", "allowances", "escrow", "households")
 INST_KEYS = ("id", "name", "founder", "members", "admission", "procedure", "charter", "laws", "offices", "treasury", "kind")
 STORE_KEYS = ("id", "owner", "food", "capacity", "name")
 WAGE_KEYS = ("employer", "worker", "item", "qty", "every")
 LOAN_KEYS = ("lender", "borrower", "item", "qty", "repay_qty", "due_in", "rate", "repay_item")
 KIN_KEYS = ("parents", "parent", "child")
+HOUSEHOLD_KEYS = ("head", "members", "name")                           # 37.1 (cybertron/households.py)
 CHANNEL_KEYS = ("id", "owner", "by", "purpose", "readers", "writers", "listed", "identity", "retention", "rate", "members",
                 "subscribers", "delivery", "followed_by", "paper")      # paper: review 33 (cybertron/papers.py)
 CAMP_KEYS = ("resource", "camp", "holders", "members", "exclusive")
@@ -149,6 +152,7 @@ def check(path, v) -> list:
     errs += lst("wages", WAGE_KEYS, ("employer", "worker", "qty"))
     errs += lst("loans", LOAN_KEYS, ("lender", "borrower", "item", "qty"))
     errs += lst("kin", KIN_KEYS, ("child",))
+    errs += lst("households", HOUSEHOLD_KEYS, ("head",))
     errs += lst("channels", CHANNEL_KEYS, ("id",))
     for i, e in enumerate(v.get("channels") or () if isinstance(v.get("channels"), list) else ()):
         if isinstance(e, dict) and e.get("delivery") not in (None, "push", "pull", "edition"):
@@ -700,6 +704,11 @@ def compile(sp: dict, inst: dict) -> dict:
         if not 1 <= len(ps) <= 2:
             raise ValueError("start.kin: one or two parents")
         sched.append(_entry("kin", i, {"parents": ps, "child": agent("start.kin.child", e["child"])}))
+    for i, e in enumerate(b.get("households") or ()):                    # 37.1: households at round 0 (after kin: ages and heads)
+        sched.append(_entry("household", i, {"head": agent("start.households.head", e["head"]),
+                                             "members": [agent("start.households.members", m) for m in e.get("members") or ()
+                                                         if m != e["head"]],
+                                             **({"name": str(e["name"])} if e.get("name") else {})}))
     camp_map = {}
     for i, e in enumerate(b.get("camp_rights") or ()):
         if ("camp" in e) == ("resource" in e):
@@ -973,6 +982,18 @@ def h_kin(k, inst, spec):
     return {"child": c, "parents": ps}
 
 
+def h_household(k, inst, spec):
+    from cybertron import households as HH
+    if not HH.on(k):
+        raise _fail("households need life.households.enabled (with pairs reproduction and contracts)")
+    if any(HH.household_of(k, x) for x in [spec["head"], *spec["members"]]):
+        raise _fail(f"{spec['head']}'s household: an agent can belong to one household only")
+    iid = HH.found(k, spec["head"], list(spec["members"]), name=spec.get("name"))
+    if iid is None:
+        raise _fail(f"{spec['head']}'s household could not be founded")
+    return {"household": iid}
+
+
 def h_camp_rights(k, inst, spec):
     for cid in spec["camps"]:
         right = f"harvest:{cid}"
@@ -1152,7 +1173,7 @@ def h_escrow(k, inst, spec):
 
 HANDLERS = {"contract_law": h_contract_law, "contract": h_contract, "allowance": h_allowance, "escrow": h_escrow,
             "rights": h_rights, "currency": h_currency, "institution": h_institution, "polity_offices": h_polity_offices,
-            "law": h_law, "store": h_store, "holding": h_holding, "standing_wage": h_standing_wage, "loan": h_loan, "kin": h_kin,
+            "law": h_law, "store": h_store, "holding": h_holding, "standing_wage": h_standing_wage, "loan": h_loan, "kin": h_kin, "household": h_household,
             "camp_rights": h_camp_rights, "channel": h_channel, "farm": h_farm}
 _ops()
 

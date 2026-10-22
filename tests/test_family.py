@@ -299,3 +299,21 @@ def test_a_new_head_takes_the_dead_heads_stronger_model():
     ag[a]["model"], ag[b]["model"] = "claude-opus-5-5", "claude-haiku-5-5"
     MO.disable(k, a, "old_age")
     assert ag[b]["model"] == "claude-haiku-5-5"                         # keep (default)
+
+
+def test_start_households_are_set_by_hand():
+    """start.households compiles to a round-0 entry; its handler founds the household (the runner applies the schedule)."""
+    from cybertron import generator, spec as S
+    from cybertron import start as ST
+    from cybertron.kernel import Kernel
+    sp = S.apply_overrides(S.load("nature_pairs"), ["rounds=5", "shared_archive.enabled=false",
+                                                    "agents={worker: 4, scientist: 0, legislator: 0, media: 0, board: 0, fixer: 0, "
+                                                    "names: [Ada, Bo, Cy, Di]}", *HOUSE,
+                                                    "start={households: [{head: Ada, members: [Bo, Cy], name: House Ada}]}"])
+    inst = generator.generate(sp, 1)
+    k = Kernel(inst)
+    e = next(x for x in inst["start"]["schedule"] if x["args"]["kind"] == "household")
+    assert e["args"]["spec"] == {"head": "Ada", "members": ["Bo", "Cy"], "name": "House Ada"}
+    iid = ST.h_household(k, inst, e["args"]["spec"])["household"]
+    assert HH.household_of(k, "Bo") == iid and HH.head_of(k, iid) == "Ada" and HH._rec(k, iid)["name"] == "House Ada"
+    assert HH.household_of(k, "Di") is None

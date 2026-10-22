@@ -119,12 +119,13 @@ def _code(k) -> str:
     return LB.instantiate("Household", {"KEEP": float(c["keep"])})
 
 
-def found(k, head, others) -> str | None:
-    """A new household headed by `head`, with `others` as members (a world founding: the founder's contract limit does not apply)."""
+def found(k, head, others, name=None) -> str | None:
+    """A new household headed by `head`, with `others` as members (a world founding: the founder's contract limit does not apply;
+    name: start.households may set one)."""
     from cybertron import contracts as KC
     st = state(k)
     iid = f"A{k.w['contracts']['seq'] + 1}"
-    name = str(cfg(k.spec)["name"]).format(head=head)[:60]
+    name = str(name or str(cfg(k.spec)["name"]).format(head=head))[:60]
     with k.cause("world", "household", root=False):
         out = k.apply("create_contract", agent=head, contract=iid, name=name, template=None, code=[_code(k)], params={},
                       admission="closed")
