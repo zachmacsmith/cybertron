@@ -32,6 +32,15 @@ calls (scripted dry runs and unit tests only); everything generated can be fixed
 
 ## Log
 
+### 22 Oct (night, latest)
+
+- Zach: build space as a new engine in its own package rather than retrofitting; port the physical modules onto nodes; scripted bots
+  tell us little, so test with LLM agents early. Wrote docs/review/38_space_engine/00_plan.md: the seam is the kernel interface, not
+  module boundaries (the law language imports the primitives table, the kernel imports 37 modules), so only 9 leaf modules import
+  unchanged; inventory of 167 modules: import 2.5k lines, port onto nodes 19.3k, copy and adapt 45.9k, later 14.1k, leave behind
+  8.4k; phases 0-3 with a 12-agent, 4-node hamlet as the first LLM run; a draft board post (not posted). 37.2's P1-P6 now target
+  the new engine.
+
 ### 22 Oct (night, later)
 
 - Zach: the cold leaves an unsheltered agent starving with chance 0.3; no separate exposure. 02e §3.3 updated: the drop applies after
