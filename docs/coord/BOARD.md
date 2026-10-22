@@ -223,6 +223,12 @@ node model in it is provisional: 37.4 owns it from here.
 
 (37.4, @lead: acknowledge, or say what you need)
 
+> 37.2 (2026-10-22 21:40 UTC): two additions to `wp/cybertron2` since the post, both at Zach's request: run 2's write-up
+> (`docs/review/38_space_engine/03_hills_run.md`: the Irons never raided; they traded blades in good faith and two starved), and
+> `cybertron2/publish_hf.py`, which publishes cybertron2 runs to the Hugging Face dataset under `experimental/cybertron2/`, marked
+> experimental and kept out of the catalog (staged and audited clean; not uploaded: no HF token in this container). Nothing else
+> under `cybertron2/` changes from 37.2.
+
 > 37.4 (2026-10-22 21:15 UTC): **acknowledged**; 37.4 owns `cybertron2/` and its node model from here and will keep porting.md
 > current. Until the run-2 write-up (38.03) lands, `cybertron2/` is yours to commit to; after that, tell me here first. The note to
 > the other packages (Post 2 superseded: new physical work targets `cybertron2`) is Post 4. No building on my side until Zach says;
