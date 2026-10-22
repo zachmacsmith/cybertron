@@ -992,14 +992,17 @@ def scripted_actions(k, aid, n) -> list:
 
 
 def food_per_head(k, aid) -> float:
-    """37.1: food per head of aid's household (members' own food plus the pot, over its living members, minors included), else
-    aid's own food."""
+    """37.1: food per head of aid's household (members' food and their own stores, plus the pot and the household's stores, over
+    its living members, minors included), else aid's own food and stores."""
     from cybertron import households as HH
     iid = HH.household_of(k, aid)
     if not iid:
-        return _food(k, aid)
+        return can_pay(k, aid, 0)
     ms = HH.members(k, iid)
-    return (sum(_food(k, m) for m in ms) + float(k.bal(HH._rec(k, iid)["treasury"], FOOD))) / max(1, len(ms))
+    pot = float(k.bal(HH._rec(k, iid)["treasury"], FOOD))
+    if "subsistence" in k.w:
+        pot += sum(float(s["holdings"].get(FOOD, 0.0)) for s in k.w["subsistence"]["stores"].values() if s["owner"] == iid)
+    return (sum(can_pay(k, m, 0) for m in ms) + pot) / max(1, len(ms))
 
 
 def land_per_head(k, aid):

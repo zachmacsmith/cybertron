@@ -179,3 +179,24 @@ Dropped (Zach, 22 Oct): automatic or hazard births (fertility stays a choice), d
     - model calls per agent-round by age group;
     - whether agents mention their children or ask them for help (interviews at the end).
   - Cost: about 2 x 12 x 40 adult turns plus minors' turns every 3 rounds, about 1,100 turns, a quarter of them Opus.
+
+### 2026-10-22 18:01 UTC: first growth dry runs did not meet the checks; fixes
+
+- **Found** (growth_probe, seed 1, 150 rounds; eldest and partible came out identical):
+  - 16 -> 10; 19 births, 33 deaths (18 attack, 13 old age, 2 starvation).
+  - Coming of age: 9 loyal, 4 own, 0 estranged.
+  - 9 households founded.
+  - Minors took 0.385 turns per agent-round (about 1/3, as set), adults 1.0.
+- **Why:**
+  - The state-of-nature regime forces `conflict.enabled` (cybertron/regimes.py:541), so `conflict: {enabled: false}` in the probe
+    did nothing.
+  - Food is not scarce: forests stayed at about 105 of 112 and stores held 70-80 food. The family bot read only food in hand,
+    which bots keep near 1-3 (spoilage pushes food into stores), so its chance to conceive stayed near 0. 102 offers, 19 accepted.
+  - No plot was ever held (bots sow open plots), so inheritance had nothing to pass and the two rules gave identical runs.
+- **Fixed:**
+  - the bot's food per head counts the agent's stores, the household pot and the household's stores;
+  - the probe uses `conflict.grace` past the run;
+  - four founders hold three plots each from round 0.
+- **Lesson for the live test:** with the bot's rule fixed, loop 1 in dry runs measures the bot rule. What matters is whether
+  models respond to the same incentives, which only the live test can show.
+- **Doing:** re-running eldest, partible and the baseline.
