@@ -4,7 +4,10 @@ A running list of what is in flight, kept up to date as work lands. Newest chang
 
 ## In progress (22 Oct)
 
-- **Full suite on subsistence 9938395** (engine 22, batch 2 merged) gates `main`; `--durations=40` recorded to cut the slow tests.
+- **Suite speed** (full suite 16 min at -n 3 on 22 Oct, 3330 tests; the README's 4-5 min is out of date): the slowest costs are
+  per-test setups that rebuild the same world: test_legal_experts (3 setups of 30-33 s: the archive), test_state_world (3 of
+  22-27 s), test_takeover_index (60 s and 42 s). Make them module-scoped (or session-cached) fixtures: about 4 CPU-minutes. Then the
+  `slow` marker on the 30-60 s calls (history scorer windows, state zero-attention, twenty-laws render, private_positions world).
 - **Testing tiers** (Zach, 22 Oct: full suites for every merge are too slow): a merge gate `scripts/test_fast.sh BASE` (goldens,
   prompts, schema, settings, every spec loads, plus the tests importing any module changed since BASE: 3-5 min) gates
   `subsistence`; the full suite (~25 min at -n 3) runs in the background daily or before `main` moves and never blocks; mark the
@@ -149,7 +152,7 @@ A running list of what is in flight, kept up to date as work lands. Newest chang
 ## Recently done
 
 - 2026-10-22:
-  - **Batch 2 integrated, engine 22, on `subsistence` (9938395)**: State, Cooperative and Merchant worlds; documents; lawyer expert and
+  - **Batch 2 integrated, engine 22, on `main` and `subsistence` (351b00a; full suite clean)**: State, Cooperative and Merchant worlds; documents; lawyer expert and
     law imports (`use("L12")`, pinned versions, library blocks); old-code cleanup (MIN_ENGINE 13, library edition 2 removed);
     temperament redesign (review 34, opt-in); positions and papers (review 33 §5 "As built": identity and derived leverage in the
     system prompt, duties as DUE with none/reminder/obligation, failed-action banner, unread/new counts, submit/publish/decline,
