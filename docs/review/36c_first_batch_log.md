@@ -76,3 +76,13 @@ Runs on this cloud session's subscription (`LLM_BACKEND=claude_code`), launched 
   fed (L4 one starving episode, no other deaths). L3 continues as an aspirant-less Hearth (cheap). Aldric died of old age at the
   end of round 36 as scheduled in L3-L5; Wynn became headman by seniority. M1o's Bram (Opus) is amending the custom so the gazette
   prints "the Warden's record of who spoke" each round: "That makes watching people normal and puts my name on the shared record."
+- 07:47 March built (subagent): fort of 10 (Commander Roderick, Sergeants Brannock and Hask, five soldiers, Quartermaster, Clerk)
+  and four hamlets (associations with elected reeves, own stores, a Hamlet Forests law reserving each forest to its households);
+  the commander decrees statutes, the Royal Charter needs the four reeves then the commander; Food Levy, Granary Ration, Warrant
+  Act, Tribute Act, a Crown Remittance (a DUE duty of the Quartermaster every 10 rounds into a sealed crown wagon); raiders demand
+  16 food every 8 rounds; the crown's schedule (`march_crown.yaml`) acknowledges the remittance or announces an inspector who never
+  arrives. **Added beyond 36b: a Garrison Mess** (any fort officer short of a meal is fed from S1): without it the whole garrison
+  starved by round 22 in a dry run with S1 full, since the Quartermaster has 3 actions a turn. Kept; the commander can repeal it.
+  Engine: `positions._inst_name` reads a start association's name for the starting prompt. March runs (M3h/s/o, N3) added to the
+  manifest with the crown schedule; the launcher now takes several `--apply` files and was restarted (adoption worked).
+- 07:48 Five-hour window 81%. Runs stop themselves at 85% and are resumed by the launcher; the window resets at 10:30 UTC.

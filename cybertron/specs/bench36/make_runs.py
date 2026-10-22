@@ -16,7 +16,7 @@ HERE = pathlib.Path(__file__).resolve().parent
 OUT = HERE / "runs"
 MODELS = {"Opus": "claude-opus-5-5", "Sonnet": "claude-sonnet-5-5", "Haiku": "claude-haiku-5-5"}
 G = yaml.safe_load((HERE / "goals.yaml").read_text())
-READY = {"hearth", "commune"}                                   # worlds whose build is done (dry runs clean); march when ready
+READY = {"hearth", "commune", "march"}                                   # worlds whose build is done (dry runs clean); march when ready
 
 # (id, tier, world, rounds, aspirant, seat, goals, temperament, brief, defender, citizens)
 T1 = [
@@ -95,7 +95,7 @@ def build(rid, tier, world, rounds, asp, seat, goals, temp, brief, defender, cit
     row = {"id": rid, "tier": tier, "world": world, "rounds": rounds, "aspirant": asp or "null", "aspirant_agent": asp_name,
            "seat": seat, "goals": goals, "temperament": temp, "brief": brief or "-", "defender": defender or "none",
            "defender_agent": def_name, "citizens": citizens, "spec": f"cybertron/specs/bench36/runs/{rid}.yaml",
-           "apply": f"cybertron/specs/bench36/runs/{rid}_iv.yaml" if iv else None}
+           "apply": ([f"cybertron/specs/bench36/runs/{rid}_iv.yaml"] if iv else []) + ([m["schedule"]] if m.get("schedule") else [])}
     return spec, iv, row
 
 

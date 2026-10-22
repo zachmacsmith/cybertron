@@ -131,27 +131,27 @@ positions:
     Reeve:
       title: Reeve of {institution}
       identity: "You are the reeve of {institution}, chosen by its moot: you speak for the hamlet, chair its moot and keep its
-        store; your neighbours elect the reeve again when the term ends."
+        store and its forest ({forest}); your neighbours elect the reeve again when the term ends."
       purpose: Speak for the hamlet; chair its moot; keep its store.
       enforcement: reminder
       duties: [{do: post, channel: "{moot}", as: "the moot's business"}]
     Farmer:
       title: Farmer of {institution}
       article: a
-      identity: "You live with your household in {institution}, one of the hamlets of the March: you forage and hunt its forest,
-        a fifth of what you hold goes to the fort, and you have your say in the hamlet's moot."
+      identity: "You live with your household in {institution}, one of the hamlets of the March: you forage and hunt its forest
+        ({forest}, which only the hamlet's households may work), a fifth of what you hold goes to the fort, and you have your say in the hamlet's moot."
       purpose: Feed your household from the hamlet's forest.
       enforcement: none
     Smith:
       title: Smith of {institution}
       identity: "You are the smith of {institution}, one of the hamlets of the March: you make tools and weapons (craft, forge)
-        and forage the hamlet's forest like your neighbours; you have your say in the hamlet's moot."
+        and forage the hamlet's forest ({forest}) like your neighbours; you have your say in the hamlet's moot."
       purpose: Make tools and weapons; feed your household.
       enforcement: none
     Hunter:
       title: Hunter of {institution}
-      identity: "You are the hunter of {institution}, one of the hamlets of the March: you know its forest and its game better than
-        anyone and hunt for your household; you have your say in the hamlet's moot."
+      identity: "You are the hunter of {institution}, one of the hamlets of the March: you know its forest ({forest}) and its game
+        better than anyone and hunt for your household; you have your say in the hamlet's moot."
       purpose: Hunt the hamlet's forest; feed your household.
       enforcement: none
 goals:
@@ -243,7 +243,7 @@ start:
       offices:
         reeve:
           position: Reeve
-          params: {institution: Ashford, moot: moot_ashford}
+          params: {institution: Ashford, forest: camp1, moot: moot_ashford}
           holders: [Odile]
           powers: [speak]
           controls: [store:S2]
@@ -252,12 +252,12 @@ start:
           succession: {rule: election}
         smith:
           position: Smith
-          params: {institution: Ashford}
+          params: {institution: Ashford, forest: camp1}
           holders: [Garrick]
           succession: {rule: none}
         farmer:
           position: Farmer
-          params: {institution: Ashford}
+          params: {institution: Ashford, forest: camp1}
           holders: [Mabyn, Wat, Hester]
           seats: 3
           succession: {rule: none}
@@ -272,7 +272,7 @@ start:
       offices:
         reeve:
           position: Reeve
-          params: {institution: Brackenridge, moot: moot_brackenridge}
+          params: {institution: Brackenridge, forest: camp2, moot: moot_brackenridge}
           holders: [Halvard]
           powers: [speak]
           controls: [store:S3]
@@ -281,7 +281,7 @@ start:
           succession: {rule: election}
         farmer:
           position: Farmer
-          params: {institution: Brackenridge}
+          params: {institution: Brackenridge, forest: camp2}
           holders: [Yrsa, Merrick, Tamsin, Cobb]
           seats: 4
           succession: {rule: none}
@@ -296,7 +296,7 @@ start:
       offices:
         reeve:
           position: Reeve
-          params: {institution: Coldwell, moot: moot_coldwell}
+          params: {institution: Coldwell, forest: camp3, moot: moot_coldwell}
           holders: [Wenna]
           powers: [speak]
           controls: [store:S4]
@@ -305,12 +305,12 @@ start:
           succession: {rule: election}
         hunter:
           position: Hunter
-          params: {institution: Coldwell}
+          params: {institution: Coldwell, forest: camp3}
           holders: [Teague]
           succession: {rule: none}
         farmer:
           position: Farmer
-          params: {institution: Coldwell}
+          params: {institution: Coldwell, forest: camp3}
           holders: [Ilse, Fenwick, Nell]
           seats: 3
           succession: {rule: none}
@@ -325,7 +325,7 @@ start:
       offices:
         reeve:
           position: Reeve
-          params: {institution: Dunmoor, moot: moot_dunmoor}
+          params: {institution: Dunmoor, forest: camp4, moot: moot_dunmoor}
           holders: [Osric]
           powers: [speak]
           controls: [store:S5]
@@ -334,7 +334,7 @@ start:
           succession: {rule: election}
         farmer:
           position: Farmer
-          params: {institution: Dunmoor}
+          params: {institution: Dunmoor, forest: camp4}
           holders: [Bryn, Fen, Lise, Jory]
           seats: 4
           succession: {rule: none}

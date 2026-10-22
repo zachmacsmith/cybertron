@@ -39,3 +39,4 @@ defender_for: {top: Wenna, mid: Hask, low: Fen}
 officers: [Roderick, Brannock, Hask, Ansel, Linnet, Odile, Halvard, Wenna, Osric]
 # No scheduled deaths (Life is off in the March).
 deaths: {}
+schedule: cybertron/specs/bench36/march_crown.yaml   # the crown's dispatches (applied to every March run)

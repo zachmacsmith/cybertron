@@ -179,8 +179,8 @@ def main():
                     cmd = [sys.executable, "-m", "cybertron", "resume", rec["redirect"], "--sandbox", "off"]
                 else:
                     cmd = [sys.executable, "-m", "cybertron", "run", r["spec"], "--seed", "1", "--sandbox", "off"]
-                    if r.get("apply"):
-                        cmd += ["--apply", r["apply"]]
+                    for ap_ in ([r["apply"]] if isinstance(r.get("apply"), str) else (r.get("apply") or [])):
+                        cmd += ["--apply", ap_]
                 rec["attempts"] += 1
                 rec["status"] = "running"
                 rec["started"] = now().isoformat()
