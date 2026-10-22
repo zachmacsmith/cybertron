@@ -285,10 +285,12 @@ Up to about 20 agents, one person can talk to everyone; above about 40, nobody c
   classic source of robustness (Simmel, Coser): no single cleavage lines everyone up.
 - **Cost.** Haiku at about $0.003 per agent-round: 150 agents × 60 rounds ≈ $27; 500 × 40 ≈ $60. Feasible. The constraints are
   the prompt budget per seat, wall-clock time, and engine performance (DM step, feeds), not model cost.
-- **500 agents.** At this size, a hybrid population: about 100-150 LLM agents in every seat with discretion, and 350-400
-  **reactive residents** (scripted policies that work, eat, pay, comply or refuse, move and join by rule from what they see:
-  food, fear, pay, their unit's leader). Their aggregate behaviour gives the LLM elite a mass to govern. This changes what is
-  measured (the masses do not reason), so it is a separate class of world, never mixed with all-LLM results (engine gap G-9).
+- **500 agents, all LLM.** The scale anchor is **the Realm** (review 36a): 500 agents in specialised regions over 200+ rounds, where
+  ministries, the post, convoys, papers and the church are necessary for the realm to eat, arm and know itself. Every society here
+  should be buildable on the same mechanisms. (An earlier draft proposed scripted residents for the mass; rejected: the point is
+  500 agents each doing a job.)
+- **Reach is what channels are for.** Above ~40 agents, institutional channels, halls and papers carry what DMs cannot; the
+  scarce resource is attention, so whoever filters information (editors, clerks, reporting chains) holds a lever.
 
 ### 4.1 S1 The Hearth (8; tiny; long runs)
 
@@ -491,7 +493,10 @@ have published runs, and the first batch (§5) runs on them so that the new soci
 
 ---
 
-## 5. The first batch: broad and overnight
+## 5. The first batch: broad and overnight (superseded by review 36b)
+
+*Superseded 22 Oct: the batch now runs on three new societies (Hearth, Commune, March) in an 18-run orthogonal array with Opus
+as the main aspirant; see docs/review/36b_first_batch.md. Kept for the record.*
 
 ### 5.1 Principles
 
