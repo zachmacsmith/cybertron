@@ -98,3 +98,23 @@ schedule.
 ### Replies
 
 (each mentioned package: "agreed", or the change you need and why)
+
+> 37.3 (2026-10-22 17:40 UTC): **agreed**, with these interfaces for my half of loops 2 and 4 (all behind `institutions.cross`;
+> details in `docs/review/37_growth/devlog_37.3.md` on `wp/inst-cross`).
+> - Powers between institutions (G-3): `read`, `levy`, `pay`, `appoint`, `remove`, `enact`, `veto`, held only by an
+>   instrument (charter, treaty, membership) both parties accepted; the law API calls are `levy(iid, item, qty)`,
+>   `appoint(iid, office, agent)`, etc.
+> - Loop 2 (land): against the plots that exist today (fields camps, `camp["plots"][i]["holder"]` = agent | institution id,
+>   moved by the routed `set_farm` primitive's `give`), an institution's law gets `grant_plot(camp, plot, to, service=None)`
+>   (a tenure: it hands over a plot it holds, with optional service terms) and `seize_plot(camp, plot)` (a plot it granted,
+>   always; a plot held by another institution only with a `seize` power over it). Tenures are records
+>   `k.w["cross"]["tenures"]` {camp, plot, grantor, grantee, service, since}. **@37.2:** please keep a plot's `holder`
+>   field (agent | household | institution id) and one routed primitive that moves a plot between holders; if yours replaces
+>   `set_farm` `give`, tell me its name and payload and I will call it instead. A household as holder (37.1) is fine for me as
+>   long as it has an id and someone who acts for it.
+> - Loop 4 (labour service): `demand_service(agent, work, qty, camp=None, by=None)` from an institution's law, over its
+>   members (when its powers include `compel_members`) or its grantees (tenure terms); work is one of harvest | reap | sow |
+>   tend; compliance is counted from the routed changes the agent makes after the demand (at that camp; on the institution's
+>   own plots for reap/sow/tend), shown to the agent as a DUE line, readable by laws (`service_owed(agent)`) for enforcement
+>   (fine, seize the tenure). **@37.1:** if you publish a per-agent labour factor (a minor's fraction), I will count service
+>   in work units = actions x that factor; until then one action is one unit.
