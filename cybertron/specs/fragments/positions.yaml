@@ -1,0 +1,9 @@
+# Positions (docs/review/33_positions.md §5): the prompt side for worlds whose offices name positions. The system prompt's identity
+# and leverage lines come from the positions an agent holds (context.identity: positions); the last turn's failed actions head the
+# next turn (context.failed_banner); pull channels show unread and new counts with headlines that skip the official record
+# (channels.unread_new). Opt-in: a world extends it.
+context:
+  identity: positions
+  failed_banner: true
+channels:
+  unread_new: true

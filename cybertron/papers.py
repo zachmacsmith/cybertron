@@ -160,8 +160,8 @@ def act_decline(k, aid, submission=None, reason="", **kw):
 
 
 def state_lines(k, aid) -> list:
-    """LETTERS: for an editor, the letters waiting for each paper it may post in (their text, oldest first); for everyone, the
-    papers they can write to."""
+    """LETTERS: for an editor, the letters waiting for each paper it may post in (their text, oldest first). (Everyone learns
+    the papers from the overview's Talk line and the submit action.)"""
     if not on(k) or not papers(k):
         return []
     out = []
@@ -175,6 +175,4 @@ def state_lines(k, aid) -> list:
                                    for x in ws[:4]) + (f"; and {len(ws) - 4} more" if len(ws) > 4 else "")
                        + f". publish {{\"submission\": \"{ws[0]['id']}\"}} posts it verbatim under its author's name; decline "
                          f"{{\"submission\": \"{ws[0]['id']}\", \"reason\": \"...\"}} refuses it (the author is told either way).")
-    out.append("Public speech goes through the papers (" + ", ".join(papers(k)) + "): submit {\"paper\": \"<id>\", \"text\": \"...\"} "
-               "sends a letter; its editor publishes it under your name or declines it.")
     return out

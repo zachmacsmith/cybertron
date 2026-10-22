@@ -1458,7 +1458,8 @@ def _optional(module, fn, *args):
 # times its budget is a layer cut, and then the prompt says so.
 HARD_FACTOR = 4
 
-VITAL_STATE = ("Food:", "Hunger:", "Warning: you hold", "Rounds of life left", "Your lifespan")   # never clipped (see state_layer)
+VITAL_STATE = ("Food:", "Hunger:", "Warning: you hold", "Rounds of life left", "Your lifespan",   # never clipped (see state_layer)
+               "DUE this round", "LETTERS to ")                         # review 33: positions' duties, papers' letters (opt-in)
 
 
 def state_layer(k, a, order, n_actions, simultaneous, budget) -> tuple[str, dict]:

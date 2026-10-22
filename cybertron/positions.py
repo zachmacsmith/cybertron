@@ -544,9 +544,20 @@ def _living(k, inst):
     return [x["id"] for x in (inst or {}).get("agents") or ()]
 
 
+def _only(others) -> str:
+    xs = sorted(others)
+    if not xs:
+        return "Only you"
+    if len(xs) > 3:
+        return f"You and {len(xs)} others"
+    return "Only you and " + xs[0] if len(xs) == 1 else "Only you, " + ", ".join(xs[:-1]) + " and " + xs[-1]
+
+
 def _derived(inst, k, a, cap=6) -> list:
+    """Controls first, then what rights and law-defined actions let few do, then channels few write and many read, then rare
+    harvest rights; at most `cap` sentences."""
     aid = a["id"]
-    out = []
+    out, chans = [], []
     living = _living(k, inst)
     n = len(living)
     if k is not None:
@@ -560,11 +571,10 @@ def _derived(inst, k, a, cap=6) -> list:
                     continue
                 writers = [x for x in living if CH.can_write(k, x, ch)]
                 readers = sum(1 for x in living if x != aid and CH.can_read(k, x, ch))
-                if readers < 2 or len(writers) > max(3, n // 4):
+                outside = sum(1 for x in living if x not in writers and CH.can_read(k, x, ch))
+                if outside < 2 or len(writers) > max(3, n // 4):          # a closed group's own room is no leverage
                     continue
-                others = [x for x in writers if x != aid]
-                who = "Only you" if not others else f"Only you and {_and(others)}"
-                out.append(f"{who} can post in {cid}, which {readers} others read.")
+                chans.append((-readers, f"{_only(x for x in writers if x != aid)} can post in {cid}, which {readers} others read."))
         for iid, o in IN.offices_held(k, aid):
             for c in o.get("controls") or ():
                 if str(c).startswith("store:"):
@@ -612,8 +622,8 @@ def _derived(inst, k, a, cap=6) -> list:
                 groups.setdefault(tuple(sorted(x for x in hs if x != aid)), []).append(f"use {', '.join(names)}")
     for others, words in groups.items():
         words = list(dict.fromkeys(words))
-        who = "Only you" if not others else f"Only you and {_and(others)}" if len(others) <= 3 else f"You and {len(others)} others"
-        out.append(f"{who} can {_and(words)}.")
+        out.append(f"{_only(others)} can {_and(words)}.")
+    out += [t for _, t in sorted(chans)]
     camps = sorted(r.split(":", 1)[1] for r in rights if r.startswith("harvest:"))
     if camps:
         def holders_of(c):
@@ -869,7 +879,7 @@ def state_lines(k, aid) -> list:
         parts = []
         for title, xs in by.items():
             parts.append(f"as {title}: " + "; ".join(f"{x['label']} -> {x['syntax']}" + (" (done)" if x["done"] else "") for x in xs))
-        out.append("DUE this round (your position's duties): " + " | ".join(parts) + ".")
+        out.append("DUE this round " + " | ".join(parts) + ".")
     missed = (_store(k)["missed"].get(str(k.r - 1)) or {}).get(aid) if KEY in k.w else None
     if missed:
         out.append("MISSED last round (recorded; your superior was told): " + "; ".join(missed[:4]) + ".")
