@@ -5,8 +5,9 @@ Branch `wp/environment`. The brief is [04_environment.md](04_environment.md); th
 
 ## Status
 
-Step 2 done: revised design in [04_environment_design.md](04_environment_design.md). Next: step 3, the feature skeleton, the
-schedule, pairing across arms and the record.
+Paused at Zach's question, waiting on whether to go on with the engine wiring or settle the design first. Step 3 in progress:
+`cybertron/environment.py` drafted (committed as work in progress; registered only in settings.TARGETS, not yet in features,
+schema, event types, the generator or the subsistence hooks, so nothing calls it and every world is unchanged).
 
 ## Plan
 
@@ -41,6 +42,12 @@ schedule, pairing across arms and the record.
 - **Acceptance** should test that the variation matters (a suited scripted strategy beats a myopic one), not only that it occurs.
 
 ## Log
+
+- **22 Oct.** Draft of `cybertron/environment.py`: the schedule drawn at generation (year severities, micro-events with a rank
+  draw `u`, a hash of the paired part), the calendar (12-round year, timing known, severity announced in autumn; winter ration
+  x1.25, spoilage x0.6, no sowing in autumn or winter), five micro-events (illness, store_loss, bumper_crop, stray_herd, flood),
+  the foresight right, the almanac state line and law reads, the climate trend (off by default). Not wired or tested yet. Open
+  choices it fixes for now: a 12-round year; the calendar replaces the random lean/plentiful season.
 
 - **22 Oct.** Revised design written ([04_environment_design.md](04_environment_design.md)). Main decisions: one module
   `environment.py` behind its own feature row, off by default; the whole schedule drawn at generation from streams that read

@@ -36,7 +36,7 @@ TARGETS = (
     "cybertron.media.DEFAULTS", "cybertron.observer.DEFAULTS", "cybertron.outside.DEFAULTS", "cybertron.projects.DEFAULTS",
     "cybertron.resources.UPKEEP_DEFAULTS", "cybertron.roles.DEFAULTS", "cybertron.subsistence.DEFAULTS",
     "cybertron.camptypes.framework.DEFAULTS", "cybertron.camptypes.leases.DEFAULTS", "cybertron.camptypes.modifiers.DEFAULTS",
-    "cybertron.schema.EXTRA", "cybertron.goals.SCORING_DEFAULTS",
+    "cybertron.schema.EXTRA", "cybertron.goals.SCORING_DEFAULTS", "cybertron.environment.DEFAULTS",
 )
 EVENTS = "cybertron.events.REGISTRY"          # each event type's defaults: "cybertron.events.REGISTRY.<name>"
 
