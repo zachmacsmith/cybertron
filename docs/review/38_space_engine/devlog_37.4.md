@@ -29,12 +29,26 @@ changed in its code yet.
 
 ## Proposed, not yet decided
 
+- **Speech (Zach: not a round late).** Port cybertron 1's DM step (fast mode: messages in the plans are delivered before any
+  action runs; recipients are asked again and may reply and change their plan, up to `exchanges` waves), limited to the people at
+  the agent's node at the start of the round.
+- **Time and travel, revised:** a round is a work period (actions are stints of work); an edge costs actions by its length;
+  a short hop is done inside the round (the agent acts at the destination without having seen it, since plans are decided once);
+  a trip longer than the round's actions continues next round; ending a round on the road means sleeping out (unsheltered
+  unless carrying gear). Revises decision 3's "arrive next round" for short hops; Zach to confirm.
+- **Node size:** a hamlet or neighbourhood (2-5 households, up to about 15-20 people, a handful of buildings); a village is a
+  cluster of such nodes joined by short edges.
+- **Node kinds set comparative advantage**; no kind self-sufficient.
+
 - **Messages between nodes** as a world setting: `instant` (as now in cybertron 1), `post` (delayed by the travel time),
   `carried` (a letter is an item someone carries; couriers, traders and children carry mail). cybertron2 today has no messages
   between places at all.
 - Physical goods change hands only between people at the same node; money and credit (once ported) move anywhere.
 
 ## Log
+
+- **22 Oct.** Zach: speech must not lag a round (keep a DM step, limited to people present); how time and space interact; node
+  size (neighbourhood or village); travel gear (packs, camping gear); node kinds as comparative advantage. Proposals above.
 
 - **22 Oct.** Took over `cybertron2` (Posts 3 and 4 on the board). Read the code: world, act, perceive, prompt, run, the two specs.
   Recorded Zach's decisions above.
