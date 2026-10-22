@@ -7,9 +7,10 @@ and 4). Earlier 37.4 work on the old engine (the environment review, revised des
 ## Status
 
 Design only: Zach designs with this session and says when to build. `cybertron2` as handed over is the starting point; nothing
-changed in its code yet.
+changed in its code yet. **From 22 Oct the decisions are kept in [docs/cybertron2/DECISIONS.md](../../cybertron2/DECISIONS.md)**
+(this log's list below became D4-1 to D4-21 there); this log records work only.
 
-## Decisions (Zach, 22 Oct)
+## Decisions (Zach, 22 Oct; now in docs/cybertron2/DECISIONS.md)
 
 1. **Start from what 37.2 built** and extend it; the parts that do not match the plans below are redesigned, not patched.
 2. **A node is a village, a valley or a camp**: a few buildings and the land around them, not a single field or wood. Places people
@@ -81,6 +82,12 @@ changed in its code yet.
 - Physical goods change hands only between people at the same node; money and credit (once ported) move anywhere.
 
 ## Log
+
+- **22 Oct.** Zach: one central, current description of cybertron2, with design notes per session and the board for talk. Set up
+  [docs/cybertron2/](../../cybertron2/README.md): the three layers, file list, ownership, rules; DECISIONS.md compiled from every
+  source (H-1..7, D4-1..22, D2-1..5, directions); OPEN.md with 9 conflicts and 10 open questions; spec/README.md with the sections
+  to compile and their owners. Merged `econ/37.2-thicker-economy` into `wp/cybertron2` so 37.2's notes for cybertron2 (02e-02k)
+  are on one branch. Posted the structure to 37.2 on the board.
 
 - **22 Oct.** Zach's decisions on life (14, 15, 16); seeded worlds with a past (17).
 

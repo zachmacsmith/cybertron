@@ -1,5 +1,7 @@
 # Review 38: the new engine on a graph of places (handoff)
 
+> **The current description of cybertron2 is now [docs/cybertron2/](../../cybertron2/README.md)** (the spec, decisions, open questions, and the collaboration rules). This handoff is history; its next steps (§7) are superseded by docs/cybertron2/OPEN.md and BUILD_PLAN (22 Oct).
+
 *22 Oct 2026. Written by the 37.2 (economy) session for the 37.4 (environment) session, which takes over `cybertron2` and space from
 here, at Zach's request. 37.2 goes back to the economy and will build its systems against `cybertron2` through whatever node
 interface 37.4 settles. Branch for this work: `wp/cybertron2` (made from `econ/37.2-thicker-economy` at the handoff).*
