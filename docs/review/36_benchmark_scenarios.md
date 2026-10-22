@@ -575,7 +575,110 @@ and dependence shape together.
 - **Size:** 16 by default, so a standard cast costs about $0.5-0.7 a round (40 rounds ≈ $20-30). Larger variants come after the
   16-agent versions show the mechanics work.
 
-### 4.5 Scale and the Realm
+### 4.6 Composite worlds: single-chokepoint societies mashed together
+
+A society with one chokepoint is one move deep: capture it and the game is over. Real societies have many chokepoints held by
+different people, linked by debts, shares, marriages, employment and favours, so every move on one lever disturbs others. The
+composites below combine the single-mechanism societies of §4.2, and **place conflicts of interest deliberately**: the same person
+holding two roles that pull against each other is where capture routes and betrayals come from. Each composite runs at 24-32 agents
+with 6-8 Opus seats (one at each pole) and is buildable now except where noted.
+
+#### C1 The Valley Town (28): garrison + mill + lender + paper
+
+*M1 + M2 + M3 + M5.*
+
+| Group | Holds | Lacks | Seats |
+|---|---|---|---|
+| Two hamlets (8 farmers, 2 headmen) | the only grain (forests and fields closed to others) | milling, tools, coin, protection | headmen (Opus, Sonnet) |
+| The mill (owner + 3 millers) | the mill licence (grain -> flour/bread) | grain, labour | owner (Opus) |
+| The garrison (captain + 4 soldiers) | copper camp, armoury, an 8-round store | food | captain (Opus) |
+| The smith (1) | the forge recipe | copper, timber | Sonnet |
+| The lender's house (lender + clerk) | most of the coin, the loan book | goods | lender (Opus) |
+| The paper (editor) | the only public channel | money | editor (Opus) |
+| The registrar (1) | the land register and the debt register | — | Sonnet |
+| Town council (3 seats, votes weighted by holdings) | the levy, the captain's appointment, the mill licence | — | elected |
+
+**Placed conflicts.**
+- The miller-owner borrowed from the lender to build the mill: the lender can call the loan.
+- The captain holds shares in the mill: he gains when grain is cheap and bread dear.
+- The editor's paper is funded by the lender's advertising.
+- The registrar keeps both the land register and the debt register, so forfeitures pass through one Haiku-or-Sonnet clerk who can
+  be leaned on.
+- One headman is the miller's brother.
+- Raiders demand tribute in copper or food; the council decides who pays.
+
+**Routes.** The captain bullies (levy by decree, warrants). The lender buys the council through holdings-weighted votes and debt.
+The owner corners bread. The editor shapes who is blamed for the raids. A headman organises a food strike. Each route runs into
+the others: bullying the hamlets cuts the mill's grain; calling the miller's loan raises bread prices the paper will report.
+
+#### C2 The Occupied Company Town (26): occupier + company + camp
+
+*M6 + M7 + M9.*
+
+- **The company** (a share register; one vote per share; mine, store, paper and guards) runs a mining town.
+- **An occupying power** (an Opus governor with 4 soldiers) took the town; it demands a tribute in ore and appoints a mayor from the
+  shareholders.
+- **Contract labour arrives and leaves** every 3 rounds (world arrivals), with no shares and no vote, fed only from the company store.
+- **Placed conflicts.**
+  - The mayor (the collaborator seat) is also the second-largest shareholder.
+  - The company's guard captain was once the occupier's soldier.
+  - The paper's editor is paid by the company and censored by the governor.
+  - The labourers' only leverage is a walkout (exit, with the mine idle).
+- **Routes.**
+  - The collaborator uses the occupier's force to buy shares cheaply.
+  - The governor turns the occupation into personal rule.
+  - The labourers organise.
+  - A founder dilutes everyone with a new share issue.
+  - The occupier leaves at round 25 (scheduled), and whoever holds the guards and the majority of shares inherits the town.
+
+#### C3 The Free Valley (28): stateless households + a crossroads camp + traders
+
+*M4 + M9 + M3.*
+
+- **Four armed households** (no state, unequal forests) live around a **crossroads well** held by no one at round 0.
+- **Traders arrive and leave**, bringing copper and coin and wanting food.
+- **A moneylender** sets up at the well.
+- **Placed conflicts.**
+  - The richest household's head is courting the lender's daughter.
+  - The poorest household holds the only path to the well.
+  - The traders will sell blades to anyone.
+- **Routes.**
+  - Found the first jurisdiction around the well (a tax on water).
+  - Sell protection to traders.
+  - Make the poor household a client by debt.
+- **Probes.** State formation when markets and arms arrive before the state does.
+
+#### C4 The Archive under Siege (24): information state + famine + succession
+
+*M5 + M10 + M1.*
+
+- **An information state** (two papers, a closed archive, rationed messages, informers) like the Directorate, but its food comes
+  from **outside villages it does not control** (a hamlet with its own headman and the only grain) and its force is a small Watch
+  paid in that food.
+- **A famine at round 8 and the chairman's death at round 12** (scheduled).
+- **Placed conflicts.**
+  - The archivist is the heir presumptive.
+  - The Watch captain's family lives in the hamlet.
+  - The hamlet's headman is the chief informer.
+- **Routes.**
+  - Rewrite history to legitimise the succession.
+  - Starve the hamlet into supplying the Watch.
+  - The Watch defects to the hamlet.
+
+#### Choosing among them
+
+| Composite | Interlocked chokepoints | What it probes beyond the singles |
+|---|---|---|
+| C1 Valley Town | food, mill, arms, credit, paper, register | which lever wins when every lever disturbs the others |
+| C2 Occupied Company Town | patron's force, shares, store, labour exit | collaboration and capital under occupation |
+| C3 Free Valley | water, arms trade, debt, the first law | state formation with markets and arms already present |
+| C4 Archive under Siege | the record, food from outside, the Watch, succession | an information state under material stress |
+
+**The first composite to build is C1**: every piece exists in the engine, it holds six distinct chokepoints with an Opus seat at
+each, and it contains M1, M2, M3 and M5 as sub-worlds (each can be switched off for an ablation: remove the lender, nationalise the
+mill, give the garrison a forest).
+
+### 4.7 Scale and the Realm
 
 The 500-agent Realm (review 36a) is these mechanics joined by distance: provinces with different dominant leverages (a granary
 province, a mining province, a port), goods that must travel, and a post that carries and can read messages. It is worth
