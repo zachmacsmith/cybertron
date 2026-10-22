@@ -736,7 +736,8 @@ Status (20 Oct 2026, branch `wp/usability-fixes`):
   without that guard on the client is a breach (GRACE 0) naming the client. With no guard named, the firm itself owes the duty and
   its officers are told. Actions: `service_enrol` (at a fee), `service_drop`, `service_fee`. Limit: a guard cannot be reassigned in
   play, because the core's `set_term` takes numbers only. Changing that changes the core's code in every preset, which is left for
-  1.12.
+  1.12. (Lifted in engine 20: `service_guard [client | all, agent]`, the core's `assign` over the preset's `AGENT_TERMS`, a living
+  agent or `treasury`; `set_term` and the other presets unchanged.)
 - **1.10**: `{best:camp1}` in an office's duties in `start` is replaced at generation by that camp's recipe: the dial setting that
   yields best, in the dials an agent sets (`start.recipe`). It is an error for a camp that is not a dial camp, or whose rule moves
   (conditions, history or drift modifiers).

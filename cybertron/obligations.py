@@ -36,7 +36,8 @@ What the engine does by itself is the accountability layer, here:
 
 The scripted bots perform their obligations (contracts.bot_obligations perform), or neglect them (neglect: a collapse test).
 
-All of it is off by default (engine 18 unchanged: no default flips): a spec turns it on with contracts {legs_default: manual,
+Engine 19 (contracts.miss_judged turn): a miss is judged on what the payer held at the end of its turns this round, not at the
+round's end (holdings at turns, below). The rest is off by default: a spec turns it on with contracts {legs_default: manual,
 obligations: true, role_cards: true}, actions.forgiving and institutions.petition_public_after (cybertron/specs/usability/v2/*).
 """
 from __future__ import annotations
@@ -312,22 +313,91 @@ def open_for(k, aid) -> list:
     return out
 
 
+# ---------------------------------------------------------------------- holdings at the payer's turns (engine 19)
+# A manual leg is met by acting, so a miss is judged on what the payer held when it could act: at the end of each of its turns
+# this round (contracts.miss_judged turn). Holdings change after a turn by harvests and production resolved at the round's end
+# (camps.end_of_round runs before the laws' on_round_end), by other agents' transfers on later turns, and by laws' hooks; none of
+# that could have been delivered. Under simultaneous turns every agent decided from the view before the first action ran, so what
+# others gave it between then and the end of its turn is taken off too (its own actions in the turn, a harvest, count). k.w
+# "turn_held" = {"round": r, "simultaneous": bool, "start": {aid: holdings}, "begin": {aid: holdings}, "agents": {aid: {"turns":
+# [position], "held": {item: max}, "at": {item: position}}}}; written only with the setting on and contracts present.
+def at_turn(k) -> bool:
+    return "contracts" in k.w and cfg(k).get("miss_judged") == "turn"
+
+
+def turns_begin(k, simultaneous: bool) -> None:
+    """The round's turns start (runner, before any decision): a fresh record; the decision view for simultaneous turns."""
+    if not at_turn(k):
+        return
+    start = {aid: dict(a["holdings"]) for aid, a in sorted(k.w["agents"].items())} if simultaneous else {}
+    k.w["turn_held"] = {"round": k.r, "simultaneous": bool(simultaneous), "start": start, "begin": {}, "agents": {}}
+
+
+def _record(k):
+    th = k.w.get("turn_held")
+    return th if at_turn(k) and th and th.get("round") == k.r else None
+
+
+def turn_begin(k, aid) -> None:
+    th = _record(k)
+    a = k.w["agents"].get(aid)
+    if th is not None and a is not None:
+        th["begin"][aid] = dict(a["holdings"])
+
+
+def turn_end(k, aid, pos) -> None:
+    """After aid's turn: the most it held of each item at the end of a turn this round (less, under simultaneous turns, what
+    others gave it since the decisions), and the turn (round position) it held that at."""
+    th = _record(k)
+    a = k.w["agents"].get(aid)
+    if th is None or a is None:
+        return
+    end = a["holdings"]
+    rec = th["agents"].setdefault(aid, {"turns": [], "held": {}, "at": {}})
+    rec["turns"].append(pos)
+    b, s = th["begin"].pop(aid, {}), th["start"].get(aid)
+    for item in sorted(set(end) | set(rec["held"])):
+        q = float(end.get(item, 0.0))
+        if s is not None:                                              # simultaneous: others' gifts before its turn ran
+            q -= max(0.0, float(b.get(item, 0.0)) - float(s.get(item, 0.0)))
+        q = round(max(0.0, q), 6)
+        if item not in rec["held"] or q > rec["held"][item] + EPS:
+            rec["held"][item], rec["at"][item] = q, pos
+
+
+def held_at_turn(k, aid, item):
+    """(most held at the end of a turn this round, its position or None) for an agent, or None when not judged at turns (setting
+    off, or no turns were played this round: a law driven without the runner)."""
+    th = _record(k)
+    if th is None:
+        return None
+    rec = th["agents"].get(aid) or {}
+    return float((rec.get("held") or {}).get(item, 0.0)), (rec.get("at") or {}).get(item, (rec.get("turns") or [None])[-1])
+
+
 # ---------------------------------------------------------------------- round end
 def settle(k) -> None:
-    """Before the laws' on_round_end: each manual law's state["paid"] = what this round's payments credited, per binding and leg."""
+    """Before the laws' on_round_end: each manual law's state["paid"] = what this round's payments credited, per binding and leg;
+    with contracts.miss_judged turn, also state["turn_held"] = what each agent payer held at its turns ({key: {leg: {held, turn}}})."""
     if "contracts" not in k.w:
         return
     obs = obligations(k)
     if not obs:
         return
     led = ledger(k, obs)
-    paid = {}
+    paid, held = {}, {}
+    judged = _record(k) is not None
     for ob in obs:
         q = led[ob["id"]][1]
         if q > EPS:
             paid.setdefault(ob["lid"], {}).setdefault(ob["key"], {})[ob["leg"]] = round(q, 6)
+        h = held_at_turn(k, ob["src"], ob["item"]) if judged and ob["kind"] != "duty" and ob["src"] in k.w["agents"] else None
+        if h is not None:
+            held.setdefault(ob["lid"], {}).setdefault(ob["key"], {})[ob["leg"]] = {"held": round(h[0], 6), "turn": h[1]}
     for law in laws(k):
         law["state"]["paid"] = paid.get(law["id"], {})
+        if judged:
+            law["state"]["turn_held"] = held.get(law["id"], {})
 
 
 def _escalation(c, rec, src_agent, polity) -> str:
@@ -342,15 +412,16 @@ def _escalation(c, rec, src_agent, polity) -> str:
         return f"That is a breach: penalty {what}{tail}."
     if not src_agent:
         return "It stays owed (arrears) until paid."
+    turn = "held_turn" in rec                                           # engine 19: judged on what it held at its turns
     if rec.get("why") == "could":
-        return "You lacked it (a could-not miss): no penalty, but it stays overdue."
+        return ("You lacked it at your turn" if turn else "You lacked it") + " (a could-not miss): no penalty, but it stays overdue."
     if polity:
         return "It stays overdue" + (" and you are fined" if c.get("FINE") else "") + "."
     if rec.get("misses"):
         n = grace + 1 - int(rec["misses"])
         pen = c.get("PENALTY") or {}
         what = f"a penalty of {_fmt(pen['qty'])} {pen['item']} from your bond" if pen.get("item") and pen.get("qty") else "a breach"
-        head = "" if rec.get("duty") else "You held it and did not act: "
+        head = "" if rec.get("duty") else ("You held it at your turn and did not act: " if turn else "You held it and did not act: ")
         return f"{head}{what[0].upper() if not head else what[0]}{what[1:]} after {n} more miss{'es' if n != 1 else ''} like this."
     return "It stays overdue."
 
@@ -572,15 +643,33 @@ def due_lines(k, aid) -> list:
         return []
     led = ledger(k, obs)
     mine, owed = {}, []
+    compact = bool(cfg(k).get("compact_lines"))                        # engine 20: laws with the same label and leg summed
+    owed_sum = {}
     for ob in obs:
         due, paid = led[ob["id"]]
         ob["due_now"], ob["paid"] = due, paid
         if aid in payers_of(k, ob["src"]):
-            mine.setdefault((ob["iid"], ob["label"], ob["leg"], ob["lid"]), []).append(ob)
+            mine.setdefault((ob["iid"], ob["label"], ob["leg"], None if compact else ob["lid"]), []).append(ob)
         elif ob["dst"] == aid and ob["kind"] != "duty" and due - paid > EPS:
-            owed.append(f"{_fmt(due - paid)} {ob['item']} from {party_name(k, ob['src'])} ({ob['iid']} {ob['leg']})")
+            if compact:
+                g = (party_name(k, ob["src"]), ob["iid"], ob["leg"], ob["item"])
+                owed_sum[g] = owed_sum.get(g, 0.0) + due - paid
+            else:
+                owed.append(f"{_fmt(due - paid)} {ob['item']} from {party_name(k, ob['src'])} ({ob['iid']} {ob['leg']})")
+    for (src, iid, leg, item), q in owed_sum.items():
+        owed.append(f"{_fmt(q)} {item} from {src} ({iid} {leg})")
     parts = []
     for (iid, label, leg, lid), xs in mine.items():
+        if compact and len({x["lid"] for x in xs}) > 1:                # one row per destination, summed over the laws
+            by = {}
+            for x in xs:
+                y = by.setdefault((x["dst"], x["src"], x["item"]), dict(x, due_now=0.0, paid=0.0, overdue=0.0))
+                y["due_now"] += x["due_now"]
+                y["paid"] += x["paid"]
+                y["overdue"] = float(y.get("overdue") or 0) + float(x.get("overdue") or 0)
+            n = len({x["lid"] for x in xs})
+            label = f"{label} ({n} laws)"
+            xs = list(by.values())
         if xs[0]["kind"] == "duty":
             if any(x.get("on") for x in xs):
                 parts.append(f"{iid} {label} {leg}: {xs[0]['check']} duty to {shown(k, xs[0]['dst'])} this round (done by acting)")
@@ -722,8 +811,8 @@ def petition_lines(k, aid) -> list:
 # ---------------------------------------------------------------------- role cards
 CARD_BUDGET = 1800                                                      # characters for the whole ROLE block (the essentials first)
 ACTION_ARGS = {"enrol": '["<agent>", <{term}>]', "drop": '["<agent>", <severance>]', "set": '["<agent> or all", <{term}>]',
-               "post": '["<job text>", <wage>]'}
-ACTION_WHAT = {"enrol": "take on", "drop": "remove", "set": "set {term}", "post": "post a job"}
+               "post": '["<job text>", <wage>]', "assign": '["<agent> or all", "<{term}>"]'}
+ACTION_WHAT = {"enrol": "take on", "drop": "remove", "set": "set {term}", "post": "post a job", "assign": "assign the {term}"}
 
 
 def _standing_laws(k, iid) -> list:
@@ -736,12 +825,15 @@ def _standing_laws(k, iid) -> list:
     return out
 
 
-def _act_name(k, iid, name) -> str:
-    """The name an action a contract defines is invoked by: an association's own actions are "<iid>.<name>" (contracts.scope_api),
-    a polity's (J0's Quota, Board, Payroll) are bare (11_state_world.md §8: the role cards named them "J0.<name>", which no
-    invoke resolves)."""
-    from cybertron import jurisdictions as J
-    return f"{iid}.{name}" if J.association(k, iid) is not None else str(name)
+def _action_name(k, aid, iid, name):
+    """The name an invoke of a standing contract's action takes for aid: "<iid>.<name>" in an association's code, the bare name in
+    a polity's law (review 31.10: the J0 cards said "J0.window_price", which does not exist); None when no such action exists or
+    aid lacks its right."""
+    for n in (f"{iid}.{name}", str(name)):
+        a = (k.w.get("actions") or {}).get(n)
+        if isinstance(a, dict) and not a.get("secret"):
+            return n if k.has(aid, a.get("right")) else None
+    return None
 
 
 def _office_decisions(k, aid, iid, law) -> list:
@@ -754,14 +846,17 @@ def _office_decisions(k, aid, iid, law) -> list:
     if aid not in IN.holders(k, iid, short):
         return []
     out = []
-    term = {"enrol": c.get("ENROL_TERM") or "value", "set": c.get("SET_TERM") or "value"}
+    term = {"enrol": c.get("ENROL_TERM") or "value", "set": c.get("SET_TERM") or "value",
+            "assign": (list(c.get("AGENT_TERMS") or ()) or ["agent"])[0]}
     label = str(c.get("LABEL") or law.get("title") or law["id"])
-    for verb in ("set", "enrol", "drop", "post"):
+    for verb in ("set", "enrol", "drop", "post", "assign"):
         name = (c.get("ACTIONS") or {}).get(verb)
         if name:
             args = ACTION_ARGS[verb].format(term=term.get(verb, "value"))
             what = ACTION_WHAT[verb].format(term=term.get(verb, "value"))
-            out.append(f"{what} ({label}): invoke {{\"action\": \"{_act_name(k, iid, name)}\", \"args\": {args}}}")
+            full = _action_name(k, aid, iid, name)
+            if full:
+                out.append(f"{what} ({label}): invoke {{\"action\": \"{full}\", \"args\": {args}}}")
     return out
 
 
@@ -909,8 +1004,9 @@ def _enrol_calls(k, aid, iid) -> list:
         c = consts(law)
         name = (c.get("ACTIONS") or {}).get("enrol")
         office = str(c.get("OFFICE") or "").split(".")[-1]
-        if name and office and aid in IN.holders(k, iid, office) and f"{iid}.{name}" not in out:
-            out.append(f"{iid}.{name}")
+        full = _action_name(k, aid, iid, name) if name and office and aid in IN.holders(k, iid, office) else None
+        if full and full not in out:
+            out.append(full)
     return out
 
 
@@ -1014,6 +1110,17 @@ def _offer_text(k, aid, law, iid, rec) -> str:
             + f". To take it up: {', then '.join(steps)}.")
 
 
+def _party_in(k, aid, iid) -> bool:
+    """aid is on the roster (or a named party) of some standing contract of institution iid."""
+    from cybertron import jurisdictions as J
+    for lid in k.w.get("law_order") or ():
+        law = k.w["laws"].get(lid)
+        if law and law.get("status") == "active" and J.law_jur(k, lid) == iid \
+                and aid in (((law.get("state") or {}).get("terms_lines")) or {}):
+            return True
+    return False
+
+
 def offer_lines(k, aid) -> list:
     """OFFER: open standing contracts (a Board open to its members) the agent is not on, whose institution it may join (or is a
     member of): what they give and cost, and the exact steps to take them up (role cards on; at most two)."""
@@ -1035,6 +1142,8 @@ def offer_lines(k, aid) -> list:
             continue
         if aid in IN.officers(k, iid) or (aid not in (rec.get("members") or ()) and rec.get("admission") == "closed"):
             continue
+        if cfg(k).get("brief_lines") and _party_in(k, aid, iid):          # review 31.10: a party of the institution (its supplier)
+            continue                                                    # knows it; the offer stays in the directory
         t = _offer_text(k, aid, law, iid, rec)
         if t:
             out.append(t)
@@ -1117,8 +1226,8 @@ def role_lines(k, aid) -> list:
         if ps:
             nums.append(f"{len(ps)} petition(s) unanswered")
         dec = []
-        if due:
-            dec.append(f"pay what {iid} owes: fulfil {{\"contract\": \"{iid}\"}}")
+        if due and any("treasury" in (o.get("controls") or ()) for o in offs):   # review 31.10: only an office that holds the
+            dec.append(f"pay what {iid} owes: fulfil {{\"contract\": \"{iid}\"}}")    # treasury can pay (not the Judge)
         if ps:
             dec.append(f"answer {ps[0]['by']}'s petition: send {{\"to\": \"{ps[0]['by']}\", \"text\": \"...\"}}")
         for law in _standing_laws(k, iid):
@@ -1164,13 +1273,16 @@ def role_lines(k, aid) -> list:
         dec = []
         if d:
             dec.append(f"meet it: fulfil {{\"contract\": \"{iid}\"}}")
-        if c.get("NOTICE", 0) or c.get("PARTIES"):
-            dec.append(f"give notice: invoke {{\"action\": \"{_act_name(k, iid, str(c.get('TAG', 'sc')) + '_notice')}\"}}")
+        notice = _action_name(k, aid, iid, f"{c.get('TAG', 'sc')}_notice") if (c.get("NOTICE", 0) or c.get("PARTIES")) else None
+        if notice:
+            dec.append(f"give notice: invoke {{\"action\": \"{notice}\"}}")
         dec.append(f"raise terms with the office: send {{\"to\": \"{iid}\", \"text\": \"...\"}}")
         if J.association(k, iid) is not None:
             dec.append(f"leave: leave_contract {{\"contract\": \"{iid}\"}}")
         if not nums and not mine and not toward and len(dec) <= 1:          # nothing to do or to watch (an automatic leg's party)
             continue
+        if cfg(k).get("brief_lines"):                                    # review 31.10: a party's two own decisions (the generic
+            dec = dec[:2]                                                # send-to-office and leave are in the manual)
         cards.append([f"ROLE: {role} in {label} ({iid}). " + "".join(x + ". " for x in about) + "Now: "
                       + ("; ".join(nums) if nums else "nothing open") + ".", dec])
     offers = offer_lines(k, aid)

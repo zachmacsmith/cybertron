@@ -67,6 +67,9 @@ DEFAULTS = {
     "free_scratchpad_writes": 1,      # write_scratchpad actions per turn that use no action
     "memory_text": "v2",              # review 20 §6.1: v2 says accurately what the agent will remember and asks for a planning notebook;
                                       # v1: the text before review 20 (byte-identical, to reproduce older runs)
+    "setup_feed": True,               # review 31.10: round 1's feed carries the world's setup record (rights granted, laws enacted,
+                                      # contracts joined: hundreds of lines in an established world); false: the feed starts after
+                                      # setup (the state and role cards already show what setup made)
     "dm_delta": True,                 # review 20 §4.5: a DM reply continues the agent's decide conversation (a short "since you acted"
                                       # message) instead of resending the whole turn prompt; false: the full DM prompt, as before
     "history": {                      # review 20 §4 (cybertron/memory.py): one conversation per agent, restarted every `chunk` rounds,
@@ -1332,6 +1335,11 @@ def _priority(k, aid, e) -> int:
     return ET.PRIORITY[feed]
 
 
+def _setup_event(e) -> bool:
+    """An event the world's setup made (cause phase init or setup), before round 1 began."""
+    return any(isinstance(x, dict) and x.get("phase") in ("init", "setup") for x in e.get("cause") or ())
+
+
 def feed_layer(k, aid, since, budget, exclude=()) -> tuple[str, int, dict]:
     """The Feed layer: (text, cursor, record). Items over budget are dropped deterministically by priority, newest kept first.
     exclude: ids of events shown elsewhere in the prompt (last round's private messages, round_exchange)."""
@@ -1347,8 +1355,11 @@ def feed_layer(k, aid, since, budget, exclude=()) -> tuple[str, int, dict]:
     from cybertron import channels as CH
     chan = CH.active(k)                                                 # channels.v2: pull and edition channels' posts are not pushed
     biz = CH.business(k)                                                # channels.business: a cut channel post points at read
+    no_setup = not c.get("setup_feed", True)
     for i, e in enumerate(k.events[since:], since):
         if not k.can_see(aid, e):
+            continue
+        if no_setup and e.get("round") == 0 and _setup_event(e):
             continue
         if chan and CH.pulled(k, aid, e):
             continue

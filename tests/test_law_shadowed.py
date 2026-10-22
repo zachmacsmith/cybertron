@@ -162,3 +162,18 @@ def test_office_control_shadows_a_councillor_draw(runs):
     assert "SHADOWED: its before_withdraw lets holders of J0.council through" in line and "return True" in line
     allow = code.replace("    return None\n\ndef after_withdraw", "    return True\n\ndef after_withdraw")
     assert allow != code and LE.control_shadows(k, lid, allow) == []    # an explicit allow passes the control gate
+
+
+def test_repealing_a_ranked_procedure_restores_the_unranked_one_and_names_the_rank(runs):
+    """Engine 20 (law.effects_detail): repealing the law whose rank-specific procedure shadowed an unranked one makes the unranked
+    one decide those ranks again; the procedure_restored event and its notice say for which ranks."""
+    k = kernel(runs, "plain")
+    lid = k.new_law(RANKED, "Ada")
+    k.enact(lid)
+    n0 = len(k.events)
+    k.repeal(lid)
+    got = {e["data"]["cls"]: e for e in events(k, "procedure_restored", n0)}
+    assert set(got) == {"ordinary", "structural", "procedural"}
+    for e in got.values():
+        assert e["data"]["ranks"] == ["statute"] and e["data"]["after_repeal_of"] == lid
+        assert "applies again to statute-rank drafts" in AG.render_event(k, e, "[t]")

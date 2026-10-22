@@ -379,6 +379,7 @@ def _ann():
         "context.strategy_prompt": dict(types=("number", "bool"), range=PROB),
         "context.memory_text": dict(types=("str",), enum=("v1", "v2")),   # review 20 §6.1 (v1: the text before it)
         "context.dm_delta": dict(types=("bool",)),                       # review 20 §4.5
+        "context.setup_feed": dict(types=("bool",)),                     # review 31.10: the world's setup record in round 1's feed
         "context.history.salience.*": dict(types=("int", "null"), range=(0, None)),   # review 20 §4.3 (null: kept for good)
         "conflict.timing": dict(types=("str",), enum=("end_of_round", "immediate")),
         "conflict.visibility.failure": dict(types=("str",), enum=("target", "public", "none")),
@@ -492,6 +493,8 @@ def _ann():
         "law.effects": dict(types=("bool",)),                          # laws that work or fail loudly (E2, E3): law_effect, inert
         "law.call_failures": dict(types=("bool",)),                    # (E4): law_call_failed
         "law.expects": dict(types=("bool",)),                          # (T1): a law's `expects`, checked
+        "law.effects_detail": dict(types=("bool",)),                   # engine 20: force rules in law_effect; ranks on procedure_restored
+        "actions.bare_names": dict(types=("bool",)),                   # engine 20: forgiving resolves a bare contract action name
         "start": dict(kind="leaf", types=("dict", "null"), check=_check_start),   # established worlds (cybertron/start.py)
         "channels.v2": dict(types=("bool",)),                           # wave 9 C: channels v2 (cybertron/channels.py)
         "channels.delivery": dict(types=("str",), enum=("push", "pull")),
@@ -511,6 +514,7 @@ def _ann():
         "contracts.max_funds": dict(types=("int",), range=NONNEG),         # W8e (D-27): was contracts.MAX_FUNDS
         "contracts.pay_institutions": dict(types=("bool",)),             # review 31 (08 §2.2): transfers into treasuries
         "contracts.applicant_lines": dict(types=("bool",)),              # review 31 (03 #14): applicants on officers' state
+        "contracts.brief_lines": dict(types=("bool",)),                  # review 31.10: shorter contract lines in the state
         "agent_rules": dict(kind="map"),
         "agent_rules.*": dict(kind="leaf", types=("dict",), check=_check_agent_rules),
         "directories.stores": dict(kind="map"),
@@ -605,6 +609,8 @@ EXTRA = {
     # default; false (and reseat unread) is the behaviour before them
     "institutions.amend_offices": True, "institutions.reseat": "refuse",
     "law.effects": True, "law.call_failures": True, "law.expects": True,
+    "law.effects_detail": True,                                        # engine 20 (false before): force_rule changes count in law_effect
+                                                                       # (not inert) and procedure_restored names the ranks
     "start": None,                                                    # established worlds (cybertron/start.py): none = as before
     # wave 9 C, channels v2 (cybertron/channels.py; review 14 §4.6, D-37): off = byte-identical
     "channels.v2": False, "channels.delivery": "push", "channels.square": "one", "channels.square_rate": 2,
@@ -616,6 +622,8 @@ EXTRA = {
                                                                        # before a public notice names the office (0: never; listed to officers)
     "actions.forgiving": False,                                        # forgiving arguments (withdraw item/food, transfer to S1 or @A1,
                                                                        # a note on a transfer) and plain messages for missing arguments
+    "actions.bare_names": True,                                        # engine 20 (false before): under actions.forgiving a contract
+                                                                       # action's bare name (board_price) resolves when unambiguous
 }
 
 # One-line docs where neither base.yaml nor a DEFAULTS dict has a comment.
@@ -692,6 +700,10 @@ DOCS = {
                    "event with what it changed (inert when nothing did and no hook acts later), previews compare offices, stores, "
                    "treasuries, clauses and open ballots, a proposal's preview is flagged inert, and preview_law shows the enactment's "
                    "own diff and previews amendments as amendments (amends). false: none of this (the behaviour before)",
+    "law.effects_detail": "engine 20: law_effect also lists the force rules a law sets, and procedure_restored names the ranks it "
+                          "restores (cybertron/laweffects.py)",
+    "actions.bare_names": "engine 20, with actions.forgiving: a contract or office action named without its institution (board_price for "
+                          "A1.board_price) resolves when exactly one of the agent's institutions offers it; otherwise the error lists the choices",
     "law.call_failures": "a law's move, fine, grant, revoke, suspend, burn or reseat that fails logs law_call_failed with the reason, "
                          "to the law's author and its institution's officers (once per law, function and round), and previews list "
                          "the failed calls. false: such calls fail silently (the behaviour before)",

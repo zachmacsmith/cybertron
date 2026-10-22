@@ -103,6 +103,8 @@ for _n, _s in [("agents", "agents(cls=None)"), ("holders", "holders(right)"), ("
                ("rights_of", "rights_of(agent)")]:
     E.append((_n, "reads", "Read", _s, "", "prompt", "prompt"))
 E += [
+    ("resource_of", "reads", "Read", "resource_of(camp)", "what a camp yields (its resource, e.g. \"food\"); None for a camp not "
+     "disclosed. Engine 20.", "rare", "rare"),
     ("rng", "chance", "Read", "rng()", "a float in [0, 1) from the law stream, seeded per world. Every law shares one stream, so a law that "
      "draws in on_round_start shifts every later draw that round (a Chair or Council draw included); dry runs restore the stream, "
      "so a preview never shows what the real draw will be.", "rare", "rare"),
@@ -261,6 +263,9 @@ def _gated_off(spec: dict) -> set:
 # life: entries that exist only in worlds with a module on (spec <module>.enabled); elsewhere they are left out of the mapping, so the
 # prompt and the codex are unchanged. mortality: Life or Conflict.
 REQUIRES = {"set_succession_public": lambda spec: bool((spec.get("life") or {}).get("enabled") or (spec.get("conflict") or {}).get("enabled"))}
+# engine 20: resource_of (the harvest leg's items filter in standing contracts) is documented where contracts and subsistence are both
+# on (established economies); elsewhere it works undocumented, so other worlds' prompts and codex are unchanged
+REQUIRES["resource_of"] = lambda spec: bool((spec.get("contracts") or {}).get("enabled") and (spec.get("subsistence") or {}).get("enabled"))
 
 # media2 (media.py): documented only in worlds with media2 on (REQUIRES); compel_subscription is article-only, in a rare article
 E += [
