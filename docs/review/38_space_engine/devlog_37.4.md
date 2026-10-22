@@ -44,6 +44,12 @@ changed in its code yet.
 13. **Actions (06):** units and costs settled by experiment; daylight varies by season; reflexes, fallbacks and policies later
     (routine first); a shop needs a shopkeeper.
 
+14. **Institutions grow from households** to villages, specialised institutions within them, then companies and a state; an
+    institution can be a member of another from the start (09 §3b).
+15. **Short childhoods counted in rounds:** 1-3 rounds cared for, 3-4 rounds of menial tasks (no model call either way), then a
+    youth as an agent; prompts name stages, not ages in years. Runs start with all ages and families; no time skips. Youth learn
+    faster and keep it longer (09 §3b).
+
 ## Proposed, not yet decided
 
 - **Speech (Zach: not a round late).** Port cybertron 1's DM step (fast mode: messages in the plans are delivered before any
@@ -67,6 +73,8 @@ changed in its code yet.
 - Physical goods change hands only between people at the same node; money and credit (once ported) move anywhere.
 
 ## Log
+
+- **22 Oct.** Zach's decisions on life (14, 15); open: which model a youth gets.
 
 - **22 Oct.** Zach: how do children, households and death come over (37.1 built them on cybertron 1, `wp/demography`)? Read 37.1's
   devlog. Wrote [09_life_design.md](09_life_design.md): the design carries over, the code does not; changes for day rounds

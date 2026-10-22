@@ -83,8 +83,28 @@ Membership changes by partnership, birth, adoption, leaving and death; a new hou
 - **Coordination:** the 37.1 session's design carries over; its next work would be this module on cybertron2's interfaces
   (Zach's call; as 37.2 is doing for the economy).
 
+## 3b. Decisions (Zach, 22 Oct)
+
+1. **Institutions grow from households:** the household is the first institution; villages form from households; specialised
+   institutions emerge within them (a mill company, a guild, a temple); companies and a state come later. **Consequence for the
+   engine:** an institution must be able to be a member of another from the start (a village is an institution whose members are
+   households). cybertron 1 never had this (ARCHITECTURE §7.2: "an association as a member of another" not done), so cybertron2's
+   membership is designed for it in M3.
+2. **Short childhoods, counted in rounds** (supersedes §2a's calendar years and §2b's ages): fewer than 6 rounds as a non-agent:
+   **1-3 rounds cared for** (an infant), then **3-4 rounds of menial tasks** (a child, still without a model call), then **a
+   youth as an agent until adulthood**. A life is counted in rounds, faster than the calendar's seasons; prompts name the stage
+   (infant, child, youth, adult, elder), never an age in years, so the two clocks never contradict each other in what agents read.
+3. **Runs start with people of all ages and families.** No time skips.
+4. **Youth learn faster, and it lasts:** a youth is not a weaker model; its learning multiplier is much higher, and what it learns
+   while young decays more slowly (a trade learnt as an apprentice stays). This is 37.2's skill by practice (02c §5) with an age
+   term.
+5. Open: which model a youth gets (§4.3).
+
 ## 4. Open questions
 
-1. The age at which a child becomes an agent (proposed 10), and maturity (proposed 14-16).
-2. Chapters with time skips: worth an experiment?
-3. Should a youth's model follow the seat it will inherit, or always start cheap?
+1. How many rounds a youth lasts before adulthood (proposed 10-15), and a lifespan in rounds that gives turnover within a run.
+2. ~~Chapters with time skips~~: no (Zach).
+3. Which model a youth gets. Options: the model of the seat it will inherit (the heir keeps the pole's strength); the household's
+   strongest; or drawn to keep the population's cast balanced (scenario_design §2). Proposed: chosen once when it becomes an agent
+   and kept for life (switching models mid-life breaks the voice the others know), with heirs to pole seats taking the seat's
+   model. A few rounds on a cheaper model first would save little (the cheap phase is already the non-agent childhood).
