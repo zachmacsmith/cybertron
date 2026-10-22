@@ -30,6 +30,8 @@ unchanged. The institutional layer is **copied**, keeping its interface and its 
 
 ## 3. Inventory (167 modules, 91k lines)
 
+What has actually been ported so far, system by system: [porting.md](porting.md) (kept up to date with each port).
+
 | Treatment | Modules | Lines | What |
 |---|---|---|---|
 | **import** unchanged | 9 | 2.5k | llm, gas, sandbox, privacy, temperament, personality, archetypes, probing, agent_rules: no engine dependencies |
