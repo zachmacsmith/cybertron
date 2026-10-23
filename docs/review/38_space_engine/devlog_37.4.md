@@ -83,6 +83,12 @@ changed in its code yet. **From 22 Oct the decisions are kept in [docs/cybertron
 
 ## Log
 
+- **23 Oct.** Zach: rebuild everything (D4-34); every event in a place (D4-35); moving is general (D4-36). 37.4's decisions
+  compiled into spec files (core, world, environment, signs, agents, life, seeding, institutions). `cybertron2/engine/` written on
+  the designed core (38.17): place, containers, the chokepoint, Here and Mind, verbs from data, households, claims, hosting,
+  building, farming, offers and agreements; 18 tests (scope canary, conservation, source check); `cybertron2/m1/` removed. Valley
+  rerun (runs/v2) started.
+
 - **23 Oct.** Generality audit at Zach's request: every spec file, 37.4's design notes 04-09 and all of M1. M1 skipped 38.08's
   core (chokepoint, containers with a place, records); most systems are narrow cases of designed general ones. Rebuild proposed.
   [16_generality_audit.md](16_generality_audit.md).
