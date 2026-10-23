@@ -56,9 +56,10 @@ def schema_for(w, name) -> dict:
     targets = people + houses + parcels + [h["name"] for h in w.s["herds"].values()] + ["the sky", "the place in general"]
     s = copy.deepcopy(SCHEMA)
     a = s["properties"]["actions"]["items"]["properties"]
-    a["do"]["enum"] = list(VERBS)
+    from cybertron2.m1 import act as _AC
+    a["do"]["enum"] = [v for v in VERBS if _AC.verb_here(w, name, v)]
     a["item"]["enum"] = list(_ITEMS)
-    a["what"]["enum"] = techs
+    a["what"]["enum"] = [t for t in techs if KN.level(w, name, t) is not None] or techs   # only what it knows of (D4-24)
     a["at"]["enum"] = parcels + houses + [f["name"] for f in w.s["fittings"]]
     a["to"]["enum"] = ["house", "hands"] + people + sorted(n["name"] for n in w.s["nodes"].values())
     a["from"]["enum"] = people + houses
@@ -76,22 +77,41 @@ def schema_for(w, name) -> dict:
     return s
 
 
-VERB_LINES = """- travel {"to": a place}                              the day's last act: you leave at nightfall and arrive on a later morning
-- welcome {"person"}                                  let a visitor sleep in your house tonight (free)
-- gather {"what": forage | hunt | fell | mine, "at": place}  hunting needs a weapon; felling a tool (bare hands do little); mining a tool
-- make {"what": grind | bread | crude weapon | smelt | copper tool | coin, "qty"?}  grind and bake at your house; smelt, tools
-                                                      and coin at a smithy
-- work {"what": reap | milk | repair, "at"?: place}    reap a ripe field (a tool helps); milk a cow in milk; repair your house
-- move {"item", "qty", "to": house | hands}            "house" puts it in your house's store; "hands" takes it out (free)
-- give {"to": person, "item", "qty"}                    (free)
-- accept {"offer": id}                                  an open offer made to you or to anyone: both sides at once, or nothing (free)
-- set {"thing": door, "to": open | barred}              your house's door (free)
-- watch {"person"}                                      spend the day working beside them: you see how they do things (4 units)
-- teach {"to", "what"} / learn {"from", "what"}         one session, if both set aside the time the same day (2 units each)
-- attack {"target": person | house, "aim": rob | hurt}  settled tonight (3 units)
-- guard                                                 stand guard tonight over your house and anyone set upon (1 unit)
-- steal {"from": house, "item", "qty"}                  from a house whose door is not barred; you may be seen (1 unit)
-- rest"""
+def _craft_note(w, tech) -> str:
+    """A craft as the verb list names it: where it is done, what tool helps (from the data)."""
+    from cybertron2.m1.data import TOOL_MULT
+    t = TECHNIQUES[tech]
+    bits = []
+    at = [x for x in (t["needs"].get("at") or []) if x != "house"]
+    if "house" in (t["needs"].get("at") or []):
+        bits.append("at your house")
+    elif at and t["verb"] != "gather":
+        bits.append("at a " + " or ".join(at))
+    m = TOOL_MULT.get(tech)
+    if m:
+        bits.append("bare hands cannot" if m["bare"] == 0 else f"bare hands x{m['bare']:g}")
+        bits.append(f"a copper tool x{m['copper tool']:g}")
+    if tech == "hunt":
+        bits.append("a weapon helps")
+    return tech + (f" ({', '.join(bits)})" if bits else "")
+
+
+def verb_lines(w, name) -> str:
+    """The verb list, generated from the registry (act.VERB), the techniques data and what this agent knows of."""
+    from cybertron2.m1 import act as AC
+    out = []
+    for v, d in AC.VERB.items():
+        if not AC.verb_here(w, name, v):
+            continue
+        crafts = [_craft_note(w, t) for t in TECHNIQUES if TECHNIQUES[t]["verb"] == v and KN.level(w, name, t) is not None]
+        if d["cost"] == "craft" and not crafts:
+            continue
+        doc = d["doc"].replace("{crafts}", "; ".join(crafts))
+        n = AC.verb_units(w, v)
+        cost = "the craft's units" if n is None else ("free" if n == 0 else f"{n} unit{'s' if n > 1 else ''}")
+        out.append(f"- {v} {d['args']}".rstrip() + f": {doc}".rstrip(": ") + f" ({cost})")
+    return "\n".join(out)
+
 
 REPLY_LINES = """Reply with JSON:
 - "why": a sentence or two on what you mean to do today and why.
@@ -205,9 +225,12 @@ def system_prompt(w, name) -> str:
               "hungry or hurt. Any units you do not use are wasted.",
               f"- Each night everyone eats {p['ration']:g} food, from what they carry first, then from their house's store. Without a "
               "sound, warm house you need more. Missed meals make you hungry, then starving; starving people work less and can die.",
-              f"- Food: grain is a meal as porridge at your hearth; bread (from flour) is a little more and keeps, and is eaten "
-              f"anywhere; wild food is a meal; meat is a meal and a half but spoils fast; milk is half a meal and spoils within the "
-              f"day. A house's store keeps food better than your hands. A house's fire burns {p['fuel']['normal']:g} timber "
+              "- Food, in meals a unit: " + "; ".join(f"{i} {v['food']:g}" + (" (as porridge at your hearth)" if i == "grain" else "")
+                                                      for i, v in ITEMS.items() if v["food"] > 0)
+              + ". Spoils fastest in your hands: " + ", ".join(i for i, v in sorted(ITEMS.items(), key=lambda kv: -kv[1]["spoil"])
+                                                           if v["food"] > 0 and v["spoil"] >= 0.15)
+              + f"; a house's store keeps food {1 / p['house_spoil']:.0f} times better. "
+              f"A house's fire burns {p['fuel']['normal']:g} timber "
               f"a night ({p['fuel']['cold']:g} on a cold one), taken from its store; a cold night without a fire is hard.",
               "- Houses fall into disrepair; repair takes timber. Goods lie in your hands or in your house's store; anything you carry "
               "you can give, and anything in a store with an open door can be taken.",
@@ -219,10 +242,11 @@ def system_prompt(w, name) -> str:
               "closely each day, whatever you chose to attend to; the rest you only glimpse.",
               "", f"The place, {hn['name']}:"] + _place_lines(w, home_node(w, name))
     if len(w.s["nodes"]) > 1:
-        lines += ["", "Other places (only what is carried goes between them; a night on the road costs about one and a half "
-                  "meals, more in the cold, unless someone takes you in):"] + _map_lines(w, name)
+        lines += ["", f"Other places (only what is carried goes between them; a night out costs {p['shelter']['unsheltered']:g} "
+                  f"meals, {p['shelter_cold']['unsheltered']:g} in the cold, unless someone takes you in; on foot you carry at most "
+                  f"{p['carry']['foot']:g} weight):"] + _map_lines(w, name)
     lines += ["", "What you know how to do:"] + KN.crafts_lines(w, name)
-    lines += ["", "What you can do (each action is a verb and what it acts on):", VERB_LINES, "", REPLY_LINES]
+    lines += ["", "What you can do (each action is a verb and what it acts on):", verb_lines(w, name), "", REPLY_LINES]
     return "\n".join(lines)
 
 

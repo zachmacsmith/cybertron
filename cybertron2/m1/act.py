@@ -21,9 +21,51 @@ from cybertron2.m1 import knowledge as KN
 from cybertron2.m1.data import EDIBLE, ITEMS, TECHNIQUES, TOOL_MULT, TOOLS, TRY, WEAPONS
 from cybertron2.m1.world import World, show
 
-VERBS = ("travel", "welcome", "gather", "make", "work", "move", "give", "accept", "set", "attack", "guard", "steal", "watch", "teach", "learn",
-         "rest")
-FREE = ("move", "give", "accept", "set", "rest", "travel", "welcome")
+# The verb registry (cybertron 1's action_registry): each verb's arguments, its cost and its line in the manual, declared once.
+# The prompt's verb list (prompt.verb_lines), the schema's verbs and cost() come from here. cost: a number of units, a physics
+# key path (a list), or "craft" (the technique's units, times qty for make). doc may name {crafts}: the techniques of this verb
+# the agent knows of (D4-24: what it has not heard of is not listed).
+VERB = {
+    "travel": {"args": '{"to": a place}', "cost": 0, "when": "roads",
+               "doc": "the day's last act: you leave at nightfall and arrive on a later morning"},
+    "welcome": {"args": '{"person"}', "cost": 0, "when": "roads", "doc": "let a visitor sleep in your house tonight"},
+    "gather": {"args": '{"what", "at": place}', "cost": "craft", "doc": "take from the land: {crafts}"},
+    "make": {"args": '{"what", "qty"?: how many times}', "cost": "craft", "doc": "a recipe: {crafts}"},
+    "work": {"args": '{"what", "at"?: place}', "cost": "craft", "doc": "{crafts}"},
+    "move": {"args": '{"item", "qty", "to": house | hands}', "cost": 0,
+             "doc": '"house" puts it in your house\'s store, "hands" takes it out (at home)'},
+    "give": {"args": '{"to": person, "item", "qty"}', "cost": 0, "doc": "to someone here"},
+    "accept": {"args": '{"offer": id}', "cost": 0, "doc": "an open offer made to you or to anyone here: both sides at once, or nothing"},
+    "set": {"args": '{"thing": door, "to": open | barred}', "cost": 0, "doc": "your house's door"},
+    "watch": {"args": '{"person"}', "cost": ["watch", "units"], "doc": "spend the day working beside them: you see how they do things"},
+    "teach": {"args": '{"to", "what"}', "cost": ["teach", "units_teacher"], "doc": "one session, if they set aside time to learn the same day"},
+    "learn": {"args": '{"from", "what"}', "cost": ["teach", "units_learner"], "doc": "one session, if they set aside time to teach the same day"},
+    "attack": {"args": '{"target": person | house, "aim": rob | hurt}', "cost": ["combat", "units"], "doc": "settled tonight"},
+    "guard": {"args": "", "cost": 1, "doc": "stand guard tonight over your house and anyone set upon"},
+    "steal": {"args": '{"from": house, "item", "qty"}', "cost": 1, "doc": "from a house whose door is not barred; you may be seen"},
+    "rest": {"args": "", "cost": 0, "doc": ""},
+}
+VERBS = tuple(VERB)
+FREE = tuple(v for v, d in VERB.items() if d["cost"] == 0)
+
+
+def verb_here(w, name, verb) -> bool:
+    """Whether a verb exists for this agent in this world (cybertron 1's `when`): travel and welcome only where there are roads."""
+    when = VERB[verb].get("when")
+    return not when or (when == "roads" and bool(w.s["edges"].get(w.at(name)) or len(w.s["nodes"]) > 1))
+
+
+def verb_units(w, verb):
+    """A verb's fixed cost in units, or None when it depends on the craft."""
+    c = VERB[verb]["cost"]
+    if c == "craft":
+        return None
+    if isinstance(c, list):
+        x = w.p
+        for k in c:
+            x = x[k]
+        return int(x)
+    return int(c)
 
 
 class Refused(Exception):
@@ -53,24 +95,26 @@ def _item(x) -> str:
 
 def cost(w: World, name, a) -> int:
     v = str((a or {}).get("do", "")).lower().strip()
-    if v in FREE:
+    if v not in VERB:
         return 0
-    if v in ("gather", "make", "build", "work"):
-        tech = KN.resolve(a.get("what"))
-        if tech is None:
-            return 1
-        n = int(TECHNIQUES[tech]["units"])
-        if v == "make":
-            n *= max(1, int(_qty(a.get("qty"), 1)))
+    n = verb_units(w, v)
+    if n is not None:
         return n
-    return {"attack": int(w.p["combat"]["units"]), "guard": 1, "steal": 1, "watch": int(w.p["watch"]["units"]),
-            "teach": int(w.p["teach"]["units_teacher"]), "learn": int(w.p["teach"]["units_learner"])}.get(v, 1)
+    tech = KN.resolve(a.get("what"))
+    if tech is None:
+        return 1
+    n = int(TECHNIQUES[tech]["units"])
+    if v == "make":
+        n *= max(1, int(_qty(a.get("qty"), 1)))
+    return n
 
 
 def do(w: World, name: str, a: dict, today: dict) -> str:
     """Carry out one action; returns the agent's result line. Happenings are logged with w.happen."""
     v = str((a or {}).get("do", "")).lower().strip()
     try:
+        if v in VERB and not verb_here(w, name, v):
+            raise Refused(f"there is no {v} in this world")
         if v not in VERBS:
             raise Refused(f"unknown verb {v!r}; the verbs are {', '.join(VERBS)}")
         return globals()["_" + v](w, name, a, today)
