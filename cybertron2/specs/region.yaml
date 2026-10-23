@@ -146,7 +146,8 @@ customs:
 - {text: "The Bell at Millford gives travellers a bed and a meal for a price.", nodes: all}
 - {text: "Barley sown after the middle of autumn will not ripen before the frost; rye will stand the winter.", nodes: all}
 - {text: "Travellers carry bread or dried meat: grain is no use without a fire to boil it.", nodes: all}
-- {text: "Nobody goes up the sheep track above the Pass or the deer path out of Ashwood: nobody knows what is up there.", nodes: [the_pass, ashwood, coppergate]}
+- {text: "Old people say there was fine stone up the sheep track above the Pass, past the grey crags, but nobody living has been.", nodes: [the_pass, coppergate, millford]}
+- {text: "Hunters say deer come down in winter from open moor somewhere north of the wood, along a deer path nobody follows.", nodes: [ashwood]}
 incidents: []
 signs:
 - {day: 7, node: all, about: sky, sense: touch, text: "a white frost on the grass at dawn, weeks before its time", salience: 0.6, tags: [season, farming]}

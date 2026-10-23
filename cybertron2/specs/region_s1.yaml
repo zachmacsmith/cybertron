@@ -725,11 +725,14 @@ customs:
   nodes: all
 - text: 'Travellers carry bread or dried meat: grain is no use without a fire to boil it.'
   nodes: all
-- text: 'Nobody goes up the sheep track above the Pass or the deer path out of Ashwood: nobody knows what is up there.'
+- text: Old people say there was fine stone up the sheep track above the Pass, past the grey crags, but nobody living has been.
   nodes:
   - the_pass
-  - ashwood
   - coppergate
+  - millford
+- text: Hunters say deer come down in winter from open moor somewhere north of the wood, along a deer path nobody follows.
+  nodes:
+  - ashwood
 incidents: []
 signs:
 - day: 7
