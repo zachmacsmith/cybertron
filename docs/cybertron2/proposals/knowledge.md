@@ -83,6 +83,54 @@ out" arises only for what is **new to them**:
 **Near misses** help planning: the turn prompt may add, within its budget, what an agent could make here if it had one more input
 ("you could make a blade with 4 more copper").
 
+### 4c. The mechanics, concretely (all numbers proposed, to calibrate)
+
+**What the engine stores.** A *technique* is any recipe, blueprint or method (make a blade, fire a pot, plough with oxen, build a
+hearth). For each agent and each technique it knows anything of, one record:
+
+| Field | Meaning |
+|---|---|
+| `aware` | it knows the technique exists (and, if it saw or heard, who does it and where) |
+| `k` (know-how, 0 to 1) | how fully it knows the method. **1 = knows it** (makes it normally); **0.1-0.9 = a rough idea** (may attempt, §below); 0 = aware only |
+| `skill` | how well it does it (37.2's practice curve, 02c §5: about 0.5 novice to 2 master; it decays without use) |
+| `source`, `since`, `seen`, `tries`, `successes` | where the knowledge came from, and the counts the rules below use |
+
+Know-how, once at 1, is not forgotten; skill is what fades without practice.
+
+**Each path as an action or an event:**
+
+| Path | What happens in the engine | Gain in `k` | Cost |
+|---|---|---|---|
+| **Doing** | every successful `make` or `build` of a technique | +0.25 up to 1 (a rough idea becomes known after a few successes); skill grows by practice | the work and inputs |
+| **Seeing, in passing** | an agent present at the site (or in the room) when someone makes or builds something **witnesses** it (perception already records this) | awareness at once, plus +0.05 a time, **up to 0.3** (watching alone gives only a rough idea) | nothing |
+| **Watching on purpose** | `watch {person}` for the day: the agent works beside them, and every act they do of a technique counts | +0.1 a time, up to 0.5 | the watcher's units for the day; the person watched can refuse to be watched in a closed workshop (room access) |
+| **Being told** | `explain {to, technique}` in the talk step: a rough account in words | awareness, +0.1, up to 0.3 | free, but needs someone who knows (`k` = 1) and is willing |
+| **Being taught** | `teach {to, technique}` by a teacher who knows it, and `learn {from, technique}` by the learner, the same day, both present | +0.3 a day (x2 for a youth, D4-19) until 1 | teacher about 2 units, learner about 4; teaching is a service that can be paid (offer and accept) or given within a household |
+| **Apprenticeship** | repeated teaching plus working the same craft at the same site as the master | `k` as teaching; skill at twice the practice rate (02c §5) | an arrangement (a contract once institutions exist) |
+| **Reading** | `read {document}`: a written method (made with `write` by someone who knows it, on paper, by a literate writer) | up to 0.6 (the words, without the hands) | 1-2 units; literacy; the document is an object that can be copied, sold, stolen |
+| **Trying** | `make` or `build` a technique the agent has a rough idea of (`k` at least 0.1) | success: the product (at novice skill) and +0.25; failure: +0.1 (you learn from failing) | inputs x (2 - `k`) (a rough idea wastes materials); success chance 0.2 + 0.8 `k`; on failure the inputs are lost |
+
+So a technique can be had for nothing (born to it), learnt cheaply but slowly (watching), learnt quickly but at someone's price
+(teaching), learnt from a book (if you can read and the book exists), or tried at a cost and a risk. Each is a choice, and the ones
+that need another person put that person in a position of leverage.
+
+**What the agent sees** (in world terms, within the budget):
+
+> Your crafts: smithing (skilled): blades, knives, hoes, ploughshares; carpentry (novice): stools, handles.
+> You have a rough idea of: firing pots (you watched Mora three times; you could try, about half the time it works, and it takes
+> more clay).
+> You know of: ploughs (Torvald makes them at the Hills); millstones (the miller at Millford).
+> Today you could make: a knife (you have the copper); a blade, with 4 more copper.
+
+**Two worked examples.**
+
+- *Watching.* Cela lives next to the potter. Over a season she sees Mora fire pots six times (+0.05 each): `k` = 0.3. She tries a
+  pot: chance 0.44, and it takes 1.7 times the clay. It cracks (+0.1: `k` = 0.4). She tries again (chance 0.52) and it holds
+  (+0.25: `k` = 0.65). Two more successes and she knows it. She never paid anyone; it cost her clay, fuel and days.
+- *Teaching.* Eoin (a youth) is taught smithing by Torvald, who wants a forge-hand. Each day of teaching gives him +0.6 (0.3 x2 for
+  a youth): known in two days. Torvald spent 4 units and gained an apprentice whose skill grows twice as fast while he works at
+  Torvald's forge. Torvald could have refused, or charged Eoin's household.
+
 ### 5. The manual: only common knowledge
 
 A short, free look-up of what everyone in the world knows: how meals, hunger, the cold, travel, the day and the seasons work, how
@@ -117,7 +165,8 @@ and materials, works out a new recipe within their trade) is a later option, tie
 3. Whether written recipes need literacy (02h says yes) and how a recipe document looks.
 4. How awareness shows in the prompt (a line "you know of: ploughs (the smith at Millford)").
 5. Invention: later, or never?
-6. Attempting the seen-but-untaught: how much worse (materials, failure chance), and how many successes to learn it.
+6. The numbers in §4c (gains per path, caps, the cost and chance of trying), to calibrate in the first runs.
+7. Whether a technique has prerequisites (pottery before a kiln) or tiers within a trade.
 
 ## History
 
@@ -127,6 +176,9 @@ and materials, works out a new recipe within their trade) is a later option, tie
 - 23 Oct: Zach: remembering what you once built, and being told automatically what you can build, are good; how would a farmer
   ever know how to farm? Added §4b: farming is known from upbringing and said in the system prompt; for new things, doing,
   seeing, teaching, reading and attempting what you have seen at novice skill; near misses in the turn prompt.
+
+- 23 Oct: Zach asked how each path works materially. Added §4c: the per-agent technique record (aware, know-how `k`, skill),
+  each path as an action or event with its gain and cost, what the agent sees, and two worked examples.
 
 ## Sources
 
