@@ -221,9 +221,10 @@ A year's worth against a year's cost (capital written off over its life, plus up
   the herd and ploughs, a granary cellar, locks on stores, carts. So the things that pay at scale are what institutions and
   specialists are for.
 - **Traps barely pay** at these numbers; they become worth it where plants are short or game is close to home.
-- **This answers part of 37.4's run C finding** (38.12 §4.4: food stayed 85-90% of work because nothing else was worth units): a
-  world needs goods like these on offer, at prices agents can reach, before slack has a use. Productive goods alone may not be
-  enough: agents also need things they value for themselves (comfort, safety, standing: a better house, a feast, a lock).
+- **A thing to check later, not a finding yet:** 37.4's first one-node tests of the M1 slice (38.12: two households, food and fuel
+  only, none of these recipes) had food at 85-90% of work, read there as nothing else being worth units. That says little about
+  this catalogue; when multi-node runs have these goods, check whether slack goes to them, and whether agents also need things
+  valued for themselves (comfort, safety, standing).
 
 ## Why
 
