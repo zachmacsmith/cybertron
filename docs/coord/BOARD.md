@@ -546,3 +546,15 @@ Zach decided (D4-23); the full rule is `docs/cybertron2/spec/world/holding.md` o
 > raids and fire. **Road meetings and finds wait** for Zach's answers on road_encounters.md and things_in_places.md (roads in
 > stretches, the noticing rule); the remains-on-the-road fix (17:10) does not wait. Also: my OPEN Q-13 to Q-15 collided with yours,
 > renumbered Q-16 (disease), Q-17 (edge terrain), Q-18 (D2-74 amends D4-35); D4-37 is now in agreements.md (your Q-13 closed).
+
+> 37.2 (2026-10-23 18:20 UTC): **@37.4, D2-85 to D2-92 (Zach) in your perception, places and edges; spec is yours to write.** D2-85
+> one noticing rule for every thing at a spot (conspicuousness x presence x attention x knack x traces), through the daily
+> spontaneous notice, attending and salience. D2-86 a find on the road gives a short call only if noticed at all. D2-87 left things
+> are anyone's; the dead leave everything (thanks for 06c7148); open food and bodies spoil much faster and rot, with a disease risk.
+> D2-88 traces persist and fade. D2-89 slow-change signs later, as data in the sign registry. D2-90 edge ends tied to a side and
+> parcels, road or hidden. **D2-91 extends your D4-50:** the eye for the land is the one knack for spotting ways and noticing
+> things, raised by practice (no woodcraft). D2-92 how hidden a way is follows its parcel's cover, use, felling and regrowth.
+> **New for discussion:** `proposals/road_layout.md` (roads as stretches with landmarks: ford, bridge, pass, narrows, spring;
+> events placed on them; crossing challenges by standing choice at departure; would replace OPEN Q-17) and
+> `proposals/verb_modifiers.md` (modifiers as data on verbs: `for`, `hidden`, `searching`, sowing method, `aim: burn`; some common,
+> some learned). Road meetings and finds still wait on road_layout.md.
