@@ -23,6 +23,7 @@ proposal**; **Why**; **Alternatives considered**; **Open questions**; **Affects*
 
 | File | Summary | Owner | Status |
 |---|---|---|---|
+| [run_record.md](run_record.md) | a run as its inputs plus checkpoints: replay-keyed calls, daily JSON checkpoints with log offsets, events and changes kept with causes, frozen data tables; resume, replay, rewind, fork with interventions and replicates; History, export, publish (review 39.01) | 37.1 (37.4: engine code) | discussion |
 | [households.md](households.md) | membership, use and home as data agents change: admit and leave, grant use of a house, home derived, occupy an empty house (possession and a claim), build one from parts; the night follows use | 37.4 (37.2: building costs) | partly accepted: D4-36 |
 | [place.md](place.md) | place as the foundation: every entity and event has a place; state partitioned by node; agent-facing code gets only a view of where the agent is (`Here`) and its own mind (`Mind`), never the world; only travel moves anything between nodes; static and canary tests | 37.4 | accepted in principle: D4-35 |
 | [layout.md](layout.md) | the layout inside a node: parcels of one cover (forest, field, pasture, water, built ground...) with neighbours and a side; features (brook, road, well, seam); structures on built ground; movables on a parcel or in a room; attention, claims and land change on one model | 37.4 | discussion |
