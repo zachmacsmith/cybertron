@@ -58,7 +58,7 @@ class Tree:
         return x["born"] <= year and (x["died"] is None or x["died"] > year) and (x["left"] is None or x["left"] > year)
 
 
-def simulate(lines: dict, rng, start=-62) -> tuple[Tree, list]:
+def simulate(lines: dict, rng, start=-62, fertility=0.28, leave=0.3) -> tuple[Tree, list]:
     """Forward from a founding couple per line, year by year to now (year 0). Returns the tree and the history."""
     T = Tree(rng)
     hist = []
@@ -74,7 +74,7 @@ def simulate(lines: dict, rng, start=-62) -> tuple[Tree, list]:
             hist.append({"year": y, "text": "a hard winter: the frost came early and the stores ran out", "kind": "winter", "who": []})
         for n in [n for n in T.p if T.alive(n, y)]:
             a = T.age(n, y)
-            risk = 0.002 if a < 50 else 0.03 if a < 65 else 0.10
+            risk = 0.002 if a < 50 else 0.03 if a < 65 else 0.10 if a < 72 else 0.25
             risk = 0.02 if a < 5 else risk
             if winter:
                 risk = risk * 4 + (0.02 if a > 55 else 0)
@@ -84,7 +84,7 @@ def simulate(lines: dict, rng, start=-62) -> tuple[Tree, list]:
                 hist.append({"year": y, "text": f"{n} died ({T.p[n]['cause']})", "kind": "death", "who": [n]})
         for n in [n for n in T.p if T.alive(n, y) and T.p[n]["sex"] == "f"]:
             m = T.p[n]["partner"]
-            if m and T.alive(m, y) and 19 <= T.age(n, y) <= 42 and rng.random() < 0.28:
+            if m and T.alive(m, y) and 19 <= T.age(n, y) <= 42 and rng.random() < fertility:
                 last = max([T.p[c]["born"] for c in T.p[n]["children"]] or [-999])
                 if y - last >= 2:
                     T.person(rng.choice("mf"), y, T.p[m]["line"], (m, n))
@@ -99,7 +99,7 @@ def simulate(lines: dict, rng, start=-62) -> tuple[Tree, list]:
                 x = other[0]
             elif rng.random() < 0.3 and T.p[n]["sex"] == "m":
                 x = T.person("f", y - T.age(n, y) + rng.randint(-3, 2), T.p[n]["line"], origin=OUTSIDE)
-            elif rng.random() < 0.3:
+            elif rng.random() < leave:
                 T.p[n]["left"] = y
                 hist.append({"year": y, "text": f"{n} married into {OUTSIDE} and left Millbrook", "kind": "left", "who": [n]})
                 continue
@@ -162,17 +162,20 @@ def kin(T, a, b, deep=True) -> str | None:
 
 
 # ---------------------------------------------------------------------- the spec
-def build(base: dict, seed: int, tries=200) -> dict:
+def build(base: dict, seed: int, tries=600) -> dict:
     lines = base["lines"]
     for k in range(tries):
         rng = random.Random(f"{seed}|tree|{k}")
-        T, hist = simulate(lines, rng)
+        T, hist = simulate(lines, rng, **(base.get("sim") or {}))
         living = [n for n in T.p if T.alive(n)]
         acting = [n for n in living if T.age(n) >= 12]
         heads = {l: [n for n in acting if T.p[n]["line"] == l and T.age(n) >= 18] for l in lines}
         per = [sum(1 for n in acting if T.p[n]["line"] == l) for l in lines]
-        if (6 <= len(acting) <= 9 and len(living) - len(acting) <= 3 and all(heads.values()) and any(stage(T.age(n)) == "youth" for n in acting)
-                and min(per) >= 2 and max(per) - min(per) <= 3):
+        bd = base.get("bounds") or {}
+        lo, hi = bd.get("acting", [6, 9])
+        if (lo <= len(acting) <= hi and len(living) - len(acting) <= bd.get("children_max", 3) and all(heads.values())
+                and sum(stage(T.age(n)) == "youth" for n in acting) >= bd.get("youths_min", 1)
+                and min(per) >= bd.get("per_min", 2) and max(per) - min(per) <= bd.get("per_spread", 3)):
             break
     else:
         raise RuntimeError("no tree fits; widen the bounds")
@@ -222,8 +225,10 @@ def build(base: dict, seed: int, tries=200) -> dict:
                 agents[a]["memories"].insert(0, f"Your line's founders: {h['text']}.")
     # ties: a feud between the lines, debts, friendships, an old love
     ls = list(lines)
-    if len(ls) >= 2:
-        a, b = head[ls[0]], head[ls[1]]
+    pairs = [(head[x], head[y]) for i, x in enumerate(ls) for y in ls[i + 1:]]
+    pairs = [p for p in pairs if kin(T, *p) is None] or pairs                 # a feud between strangers if there are any
+    if pairs:
+        a, b = pairs[rng.randrange(len(pairs))]
         yrs = rng.randint(4, 12)
         why = rng.choice([f"who has the right to Long Field", f"a boundary stone moved on Long Field", f"a pig that went missing"])
         for x, y in ((a, b), (b, a)):
@@ -280,9 +285,16 @@ def build(base: dict, seed: int, tries=200) -> dict:
         for c in a["knows"]:
             a["concerns"] += [t for t in TECHNIQUES[c]["tags"] if t not in a["concerns"]]
         a["concerns"] = a["concerns"][:4]
-        a["model"] = None if a["stage"] == "child" else ("claude-opus-5-5" if a.get("role") == "head" else
-                                                        "claude-haiku-5-5" if a["stage"] == "youth" else "claude-sonnet-5-5")
+        cast = base.get("cast") or {}
+        a["model"] = None if a["stage"] == "child" else (cast.get("head", "claude-opus-5-5") if a.get("role") == "head" else
+                                                        cast.get("youth", "claude-haiku-5-5") if a["stage"] == "youth" else
+                                                        cast.get("rest", "claude-sonnet-5-5"))
         a["trade"] = " and ".join(TECHNIQUES[c]["label"].split(" (")[0] for c in own[:2]) if a["stage"] in ("adult", "elder") else ""
+    extra = int((base.get("cast") or {}).get("opus_extra", 0))               # more strong players: the adults who know the most
+    pool = sorted([n for n, a in agents.items() if a["stage"] == "adult" and a.get("role") != "head"],
+                  key=lambda n: (-len([v for v in agents[n]["knows"].values() if not isinstance(v, str)]), T.p[n]["born"]))
+    for n in pool[:extra]:
+        agents[n]["model"] = (base.get("cast") or {}).get("head", "claude-opus-5-5")
     for l, d in lines.items():
         for tool in d.get("tools", []):
             agents[head[l]]["holdings"][tool] = 1
@@ -303,7 +315,10 @@ def build(base: dict, seed: int, tries=200) -> dict:
             c, l = rng.choice(other_crafts) if other_crafts else (None, None)
             a["aim"] = "Prove yourself to your family" + (f", and learn {TECHNIQUES[c]['label'].split(' (')[0]} as the {l}s do it." if c else ".")
         elif a["stage"] == "elder":
-            a["aim"] = "Pass on what you know before your strength goes, and keep the family from foolish quarrels."
+            a["aim"] = rng.choice(["Pass on what you know before your strength goes.",
+                                   "See your grandchildren settled and provided for before you die.",
+                                   "Keep the family's good name, and see that what is owed to it is paid.",
+                                   "Live through one more winter, and be a burden to nobody."])
         else:
             debt = next((b for b in rel if "you owe" in rel[b]), None)
             a["aim"] = "Keep your household fed and its house sound" + (f"; pay back {debt} what you owe, if you can." if debt else ".")

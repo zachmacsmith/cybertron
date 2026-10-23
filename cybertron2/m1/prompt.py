@@ -35,11 +35,44 @@ SCHEMA = {
     "required": ["why", "actions"],
 }
 
+def schema_for(w, name) -> dict:
+    """The reply schema with the closed arguments as enums, so a reply can only name verbs, goods, crafts, places and people that
+    exist (the CLI enforces the schema). Free text stays free: why, say, tell text, notes."""
+    import copy
+    from cybertron2.m1.act import VERBS
+    from cybertron2.m1.data import ITEMS as _ITEMS
+    people = sorted(x for x in w.s["agents"] if x != name and w.s["agents"][x]["alive"])
+    houses = sorted(h["name"] for h in w.s["houses"].values())
+    parcels = sorted(p["name"] for p in w.parcels().values())
+    holds = sorted({a["household"] for a in w.s["agents"].values()})
+    techs = sorted(TECHNIQUES)
+    targets = people + houses + parcels + [h["name"] for h in w.s["herds"].values()] + ["the sky", "the place in general"]
+    s = copy.deepcopy(SCHEMA)
+    a = s["properties"]["actions"]["items"]["properties"]
+    a["do"]["enum"] = list(VERBS)
+    a["item"]["enum"] = list(_ITEMS)
+    a["what"]["enum"] = techs
+    a["at"]["enum"] = parcels + houses
+    a["to"]["enum"] = ["house", "hands"] + people
+    a["from"]["enum"] = people + houses
+    a["target"]["enum"] = people + houses
+    a["person"]["enum"] = people
+    a["aim"]["enum"] = ["rob", "hurt"]
+    a["thing"]["enum"] = ["door"]
+    s["properties"]["tell"]["items"]["properties"]["to"]["enum"] = people + [f"the {h}s" for h in holds]
+    s["properties"]["explain"]["items"]["properties"]["to"]["enum"] = people
+    s["properties"]["explain"]["items"]["properties"]["what"]["enum"] = techs
+    s["properties"]["offers"]["items"]["properties"]["to"]["enum"] = ["anyone"] + people
+    s["properties"]["attend"]["enum"] = targets
+    s["properties"]["look_up"]["items"]["enum"] = techs
+    return s
+
+
 VERB_LINES = """- gather {"what": forage | cut withies | dig clay | glean | hunt | fell | fish, "at": place}
 - make {"what": a recipe, "qty"?: how many times}
 - build {"what": firing pit, "at": place}
 - work {"what": reap | repair, "at"?: place}           reap a ripe field; repair your own house
-- move {"item", "qty", "to": house | hands}            between your hands and your house's store (free)
+- move {"item", "qty", "to": house | hands}            "house" puts it in your house's store; "hands" takes it out (free)
 - give {"to": person, "item", "qty"}                    (free)
 - accept {"offer": id}                                  an open offer made to you or to anyone: both sides at once, or nothing (free)
 - set {"thing": door, "to": open | barred}              your house's door (free)

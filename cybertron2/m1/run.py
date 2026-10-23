@@ -89,7 +89,7 @@ def decide(w, name, system, user, backend, talk=None) -> tuple[dict, dict]:
     from cybertron import llm
     t0 = time.monotonic()
     attempts = []
-    out, reasoning, usage = llm.call(backend, model, system, user, PR.SCHEMA, attempts=attempts)
+    out, reasoning, usage = llm.call(backend, model, system, user, PR.schema_for(w, name), attempts=attempts)
     return out or {}, {"model": model, "usage": usage, "seconds": round(time.monotonic() - t0, 1), "thinking": reasoning}
 
 
