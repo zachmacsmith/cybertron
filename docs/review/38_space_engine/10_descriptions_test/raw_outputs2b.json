@@ -1,0 +1,52 @@
+{
+ "building": {
+  "opus": {
+   "text": "The low evening sun on the west wall shows you the ridge beam over the miller's door, rotten at one end, and the whole worn two-storey frame on its stone: work, this late in autumn, if he pays sooner than last time. But his chimney is cold while the rest of the lane smells of woodsmoke. The door is locked, the shutters closed, and there's no sound inside, while dead leaves lie undisturbed against the step and only old grey chips lie round the chopping block. There's nobody else in the lane to ask.",
+   "cost_usd": 0.027607999999999997,
+   "wall_s": 14.03,
+   "api_ms": 7354,
+   "in_tokens": 1952,
+   "out_tokens": 600
+  }
+ },
+ "person": {
+  "opus": {
+   "text": "Gil comes in from the deep wood at midday, alone and breathing hard under a load of fresh-split pine, thin in the face and as hungry as you are. His left forearm is bound in a rag that's still seeping, and he walks slowly to spare it, mud to the knee and resin on his hands, smelling of sweat and cut pine.",
+   "cost_usd": 0.017456,
+   "wall_s": 8.23,
+   "api_ms": 1955,
+   "in_tokens": 1908,
+   "out_tokens": 110
+  }
+ },
+ "field": {
+  "opus": {
+   "text": "Your barley lies trampled flat along the eastern edge, cattle hoof prints and dung pressed into it, rooks already picking at the spilled grain, and beside it one hurdle is down, leaving a gap in the fence toward the pasture where the cattle are lowing. The rest stands only half ripe, the heads still green at the tips, with thistle and dock grown thick along the rows.",
+   "cost_usd": 0.021064,
+   "wall_s": 9.79,
+   "api_ms": 3921,
+   "in_tokens": 1934,
+   "out_tokens": 280
+  }
+ },
+ "land": {
+  "opus": {
+   "text": "The geese are going south already, early, calling over a clear pale sky, and the north wind has frost in it: white on the grass where the shade lies, beech leaves turning, the stream run low. It is only early autumn and only morning, yet to your reading every sign points to a winter come soon, the first without him, and you think of whether the stores will last it. A thick column of smoke stands over the next valley north, its woodsmoke faint on the wind, while a herder drives the cattle down from the high pasture.",
+   "cost_usd": 0.026248,
+   "wall_s": 13.78,
+   "api_ms": 7338,
+   "in_tokens": 1907,
+   "out_tokens": 550
+  }
+ },
+ "tracks": {
+  "opus": {
+   "text": "Someone's gone into your wood ahead of you: one set of big boot prints pressed into the soft mud since last night's rain, a hazel twig snapped at head height where they entered, and no prints coming back out. But the deer prints are fresher still and lead the other way, out toward the field, and fresh droppings lie by the gate. In the grey dawn, with mist in the hollows and the village below still quiet, there's only the drip from the branches and a woodpecker drumming somewhere deeper in.",
+   "cost_usd": 0.018736,
+   "wall_s": 9.5,
+   "api_ms": 2714,
+   "in_tokens": 1943,
+   "out_tokens": 160
+  }
+ }
+}
