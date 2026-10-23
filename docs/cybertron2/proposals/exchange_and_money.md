@@ -1,6 +1,6 @@
 # Proposal: exchange and money
 
-**Status:** partly accepted: D2-1, D2-2, D4-17 (a shop needs a shopkeeper); the rest discussion (23 Oct). **Owner:** 37.2 (the
+**Status:** accepted: D2-1, D2-2, D2-25 to D2-30, D4-17 (23 Oct); hiring moves to hiring.md. **Owner:** 37.2 (the
 economics); the `offer` and `accept` verbs are shared with 37.4 (agents/actions, verbs.md). **Affects:**
 spec/economy/money_and_markets.md; agents/actions.md (with 37.4); information/ (what agents see of prices, with 37.4);
 institutions/ (tolls, market rights, courts for debts, with 37.3).
@@ -143,6 +143,9 @@ tenancy) wait for institutions (37.4's M3).
 6. Markets as seeded custom (a place and a day), with no engine mechanic of their own?
 7. Next: hiring (an offer whose terms are work: whose is the output, D4-23), a separate proposal.
 
+**Zach's answers (23 Oct):** 1-6 yes (D2-25 to D2-30): "place makes this work a lot better than cybertron 1"; 7 yes: next, hiring,
+contracts and subscriptions (agreements.md, hiring.md).
+
 ## Measures (with spec/measurement)
 
 Settlements per agent-day; the share of food and of tools obtained by trade; price dispersion within a node over time and between
@@ -160,6 +163,8 @@ nodes; merchants' margins; promises kept and broken; all against a null arm with
   review and its failures; offers to a person or to anyone, in lots, settling at once, free of work units; promises as a leg
   (credit from exchange); prices only as witnessed or told; copper coin seeded and struck by smiths; markets as custom; trade's
   cost moved to meeting, carrying and trust.
+
+- 23 Oct: Zach accepted all six (D2-25 to D2-30) and asked for hiring, contracts and subscriptions next.
 
 ## Sources
 

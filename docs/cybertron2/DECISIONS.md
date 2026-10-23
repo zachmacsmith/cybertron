@@ -66,6 +66,12 @@ and correct them in place.**
 | D2-22 | 22 Oct | **Any party may raid a node:** no minimum size; a small party usually fails and the outcome depends on the defences; a single rider may attack, at greater risk | 02k §3 | 02k's proposal (riders and large parties only) |
 | D2-23 | 23 Oct | **The tool set:** hand tools as one good with grades (crude, then metal); the plough (needs an ox); carts; weapons (fighting, and hunting); **traps** (catch game overnight while the trapper is elsewhere); **harness** (an ox pulls) and **saddle** (a horse carries a rider). Armour, nets, boats and the seed drill wait (proposals/economy_later.md) | 02j §3; conversation | 02g's single "tools and blades" good |
 | D2-24 | 23 Oct | **The first-world goods include copper, salt, documents, hides and timber** (with grain, wild food, livestock, stone, coin and the tool set already decided) | proposals/resources_and_goods.md; conversation | |
+| D2-25 | 23 Oct | **Offers settle both sides at once when accepted; offering and accepting cost no work units** (calibrate later) | proposals/exchange_and_money.md §1 | cybertron 1's escrowed Exchange (2-3 actions, a round) |
+| D2-26 | 23 Oct | **Offers to anyone at the node, open while the offerer stays, in lots**, are the default stall | exchange_and_money.md §1 | |
+| D2-27 | 23 Oct | **A promise can be one leg of an offer**; accepting it creates a debt that exists only as information (and as a document if written) | exchange_and_money.md §3 | |
+| D2-28 | 23 Oct | **Copper coin**, seeded with some households and the merchant; any smith can strike it, so its value follows copper's; an institution's stamp later | exchange_and_money.md §5 | |
+| D2-29 | 23 Oct | **Prices are only what agents witnessed or were told**; every settlement is witnessed by those present; no computed price is shown | exchange_and_money.md §4 | |
+| D2-30 | 23 Oct | **Markets are seeded custom** (a known place and day at a node), with no engine mechanic of their own; whoever holds the site may charge for stalls | exchange_and_money.md §6 | cybertron 1's Market Board as the market |
 
 ## Directions (Zach's stated aims recorded in the notes; designs follow them; checked by 37.2, 22 Oct)
 

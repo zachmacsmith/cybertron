@@ -37,8 +37,9 @@ proposal**; **Why**; **Alternatives considered**; **Open questions**; **Affects*
 | [resources_and_goods.md](resources_and_goods.md) | the base resources, the lean first-world set and the pruning rule, unlocks, end uses | 37.2 | discussion (D2-10, D2-19, D2-23 accepted) |
 | [economy_later.md](economy_later.md) | options kept out of the first worlds (armour, nets, boats, seed drill, irrigation, clay, iron, the press, ...) | 37.2 | deferred |
 | [transport_and_lodging.md](transport_and_lodging.md) | the transport ladder, capacities, danger by edge and season, inns and hosts | 37.2 (37.4 the mechanism) | partly accepted: D4-9, D4-12, D2-4 |
+| [hiring.md](hiring.md) | work for someone: `for` on work actions puts output into the employer's container; day labour, piece rate, wages, sharecropping, tenancy, apprenticeship, shopkeepers, guards, carriers | 37.2 (37.4, 37.3) | discussion |
 | [agreements.md](agreements.md) | one system of agreements made of legs (cybertron 1's Standing Contract): trade, credit, subscriptions, wages, rent, dues; paid where there is a path, else arrears; ledgers; currency wanted, not required | 37.2 (37.4, 37.3) | discussion |
-| [exchange_and_money.md](exchange_and_money.md) | exchange at a node, coin, debts, credit, tolls | 37.2 | partly accepted: D2-1, D2-2, D4-17 |
+| [exchange_and_money.md](exchange_and_money.md) | exchange at a node, coin, debts, credit, tolls | 37.2 | accepted: D2-1, D2-2, D2-25 to D2-30, D4-17 |
 | [information_economics.md](information_economics.md) | writing materials, documents, the information ladder, libraries, archives, maps | 37.2 (37.4 owns information/) | partly accepted: D2-7, D2-8 |
 | [economy_plan.md](economy_plan.md) | the economy plan for cybertron2 (E1-E6, the first region) and society-scale layers | 37.2 | discussion |
 | [fuse_events.md](fuse_events.md) | events with a detection time and a completion time; urgent calls for those who notice in time | 37.2 (37.4 owns conflict/, core/) | accepted in principle: D2-5 |
@@ -63,8 +64,10 @@ Newest first. Ideas decided or rejected in conversation before 23 Oct are backfi
 | 23 Oct | The verbs (a lean set of 24) and what each agent is shown; force always shown | ready for a decision | [verbs.md](verbs.md) |
 | 23 Oct | Detecting what was told by reading the meaning of free speech | rejected in the proposal: name mentions, an `about` field and explicit `explain`/`teach` instead | [knowledge.md](knowledge.md) §4e |
 | 23 Oct | Know-how as a continuous score (0-1) | replaced in the proposal by four levels moved by counts (Zach) | [knowledge.md](knowledge.md) §4c |
+| 23 Oct | Hiring as agreements with a work leg; `for` on work actions sends output to the employer's container | discussion | [hiring.md](hiring.md) |
+| 23 Oct | Offers free of work units; stalls as offers to anyone; promise legs; copper coin struck by smiths; prices only as witnessed; markets as custom | accepted: D2-25 to D2-30 | spec/economy/money_and_markets.md |
 | 23 Oct | Agreements made of legs, with one settlement rule (pay where there is a path: same node, same ledger, a carrier; else arrears); ledgers for distance; currency wanted, not required | discussion | [agreements.md](agreements.md) |
-| 23 Oct | Exchange for cybertron2: offers to a person or to anyone, settling at once, free of work units; promises as a leg; prices only as witnessed; copper coin struck by smiths; markets as custom | discussion | [exchange_and_money.md](exchange_and_money.md) |
+| 23 Oct | Exchange for cybertron2: offers to a person or to anyone, settling at once, free of work units; promises as a leg; prices only as witnessed; copper coin struck by smiths; markets as custom | accepted: D2-25 to D2-30 | [exchange_and_money.md](exchange_and_money.md) |
 | 23 Oct | Trades that cost actions (cybertron 1's escrowed Exchange, 2-3 actions and a round) | rejected in the proposal: specialisation lost to self-supply | [exchange_and_money.md](exchange_and_money.md) |
 | 23 Oct | The lean first-world set: copper, salt, documents, hides and timber with the goods already decided | accepted: D2-24 | spec/economy/goods.md |
 | 23 Oct | Private notes with one pinned, the rest opened by choice; memory, not documents | discussion | [notes.md](notes.md) |
