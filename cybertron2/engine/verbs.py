@@ -148,7 +148,8 @@ def _out(here, party) -> str:
     if cid is None:
         raise Refused(f"{party} has nothing here to put it into")
     if cid != here.hands and not here.may_take(cid) and cid.startswith("stock:"):
-        raise Refused(f"you may not use {party}'s store")
+        raise Refused(f"you may not use {party}'s store (you are not of that household): do it for yourself, then give it to one of "
+                      f"them or leave it at their house")
     return cid
 
 

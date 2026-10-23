@@ -38,7 +38,7 @@ def next_day(w):
 # ---------------------------------------------------------------------- the core
 def test_agent_facing_modules_never_read_the_world():
     """D4-35: verbs, prompts and the knowledge views see only Here and Mind (engine-side functions are listed)."""
-    engine_side = {KN: {"seed", "_set"}, AG: {"settle", "_due", "_person_for", "_present_for"}, V: set(), PR: set()}
+    engine_side = {KN: {"seed", "_set"}, AG: {"settle", "_due", "_person_for", "_present_for", "install", "_credit"}, V: set(), PR: set()}
     for mod, allowed in engine_side.items():
         tree = ast.parse(inspect.getsource(mod))
         for fn in [n for n in ast.walk(tree) if isinstance(n, ast.FunctionDef) and n.name not in allowed]:
@@ -275,3 +275,15 @@ def test_a_tool_in_the_store_is_named_when_refused():
     w.s["containers"]["stock:smith_house"]["goods"]["crude tool"] = 1
     r = do(w, "Osric", do="gather", what="mine")
     assert "Smith House's store" in r
+
+
+def test_giving_or_leaving_goods_pays_a_debt():
+    w = world()
+    w.s["people"]["Simkin"]["at"] = "coppergate"
+    aid = w.apply("agree", None, node="coppergate", rec={"parties": ["Simkin", "Elena"], "status": "open",
+                  "legs": [{"from": "Simkin", "to": "Elena", "item": "wild food", "qty": 8, "when": {"by": 3}, "paid": 0, "arrears": 0.0}]})
+    w.s["containers"][w.hands("Simkin")]["goods"]["wild food"] = 10
+    assert do(w, "Simkin", do="leave", item="wild food", qty=5, at="Smith House").startswith("You left")
+    assert w.s["agreements"][aid]["legs"][0]["prepaid"] == 5
+    assert do(w, "Simkin", do="give", to="Elena", item="wild food", qty=3).startswith("You gave")
+    assert w.s["agreements"][aid]["status"] == "done"

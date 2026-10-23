@@ -257,6 +257,51 @@ def settle(w) -> list:
     return out
 
 
+def install(w) -> None:
+    """Paying a debt is a give (money_and_markets.md): a hook on the chokepoint credits goods given or left by a debtor to its
+    creditor (the person, or a store its household holds) against their open legs, oldest first."""
+    w.hook("after", "transfer", _credit)
+
+
+def _credit(w, call, out):
+    cause = call.get("cause") or {}
+    if cause.get("verb") not in ("give", "leave"):
+        return
+    kw = call["kw"]
+    payer = cause.get("for") or cause.get("actor")
+    payers = {payer, w.household_of(payer)} if payer in w.s["people"] else {payer}
+    c = w.s["containers"][kw["dst"]]
+    if c["kind"] == "hands":
+        payees = {c["of"], w.household_of(c["of"])}
+    elif c["kind"] == "stock":
+        payees = {cl["claimant"] for cl in w.claims_on(("building", c["of"])) if cl["grounds"] != "granted"}
+        payees |= {m for x in list(payees) if x in w.s["institutions"] for m in w.members(x)}     # its household's members
+    else:
+        return
+    left = float(kw["qty"])
+    for aid, ag in sorted(w.s["agreements"].items(), key=lambda kv: kv[1].get("day", 0)):
+        if ag["status"] != "open" or left <= 1e-9:
+            continue
+        for i, leg in enumerate(ag["legs"]):
+            if "item" not in leg or leg["item"] != kw["item"] or leg["from"] not in payers or leg["to"] not in payees or _met(leg):
+                continue
+            arrears = float(leg.get("arrears", 0.0))
+            if arrears > 1e-9:
+                q = min(arrears, left)
+                w.apply("leg", None, agreement=aid, leg=i, arrears=round(arrears - q, 6))
+                left -= q
+            elif leg["when"].get("by") is not None and not leg["paid"]:
+                owed = leg["qty"] - float(leg.get("prepaid", 0.0))
+                q = min(owed, left)
+                fields = {"prepaid": round(float(leg.get("prepaid", 0.0)) + q, 6)}
+                if fields["prepaid"] >= leg["qty"] - 1e-9:
+                    fields.update(paid=1)
+                w.apply("leg", None, agreement=aid, leg=i, **fields)
+                left -= q
+        if all(_met(l) for l in ag["legs"]):
+            w.apply("close_agreement", None, agreement=aid, status="done")
+
+
 def _due(w, leg):
     """(what is owed on a leg today, whether an instalment falls due today): a promise on its day, a payment on each of its days,
     and arrears from before."""
@@ -266,7 +311,7 @@ def _due(w, leg):
         return (0.0 if leg["paid"] else leg["qty"]), False
     if wh.get("by") is not None:
         inst = not leg["paid"] and w.d >= wh["by"]
-        return arrears + (leg["qty"] if inst else 0.0), inst
+        return arrears + (leg["qty"] - float(leg.get("prepaid", 0.0)) if inst else 0.0), inst
     if wh.get("every"):
         inst = leg["paid"] < wh["times"] and w.d >= wh["next"]
         return arrears + (leg["qty"] if inst else 0.0), inst

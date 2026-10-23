@@ -141,7 +141,8 @@ class World:
                 h["offices"]["head"] = self._eldest(h["members"])
         for ag in spec.get("agreements") or []:                               # seeded debts (D4-21): open legs in arrears
             p_agree(self, None, {k: v for k, v in ag.items() if k != "status"})
-        from cybertron2.engine import knowledge as KN, perceive as PC
+        from cybertron2.engine import agreements as AG, knowledge as KN, perceive as PC
+        AG.install(self)
         for name, a in spec["agents"].items():
             KN.seed(self, name, a)
             PC.seed(self, name, a)
