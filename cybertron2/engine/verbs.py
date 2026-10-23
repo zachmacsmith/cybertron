@@ -247,6 +247,8 @@ def _site(here, mind, tech, at):
         if cid is None:
             raise Refused(f"there is no body to bury here called {at!r}" if at else "there is no body here to bury")
         return "thing", cid, next(s[2] for s in sites if s[1] == cid)
+    if not sites and (TECHNIQUES[tech].get("at") or {}).get("things"):
+        raise Refused("there is no one lying unburied here")
     if at:
         key = here.parcel(at) or here.building(at)
         if key is None:
@@ -605,8 +607,14 @@ def _give(here, mind, a, party):
                    tags=["food"] if ITEMS[item]["food"] else [], concerns=[to])
         here.record("give", None, party, to=to, item=item, qty=q)
         return f"You gave {q:g} {item} to {to}."
-    if here.carried().get(item, 0.0) + 1e-9 < q:
-        raise Refused(f"you carry only {show(here.carried().get(item, 0.0))} {item}")
+    if party and party != here.name and party != here.household() and not here.works_for(party):
+        raise Refused(f"'for' gives from that household's store, which is not yours")
+    src = here.hands if not party or party == here.name else _out(here, party)      # from one's household's store (D2-37)
+    have = here.carried().get(item, 0.0) if src == here.hands else here.stock(src[len("stock:"):]).get(item, 0.0)
+    if have + 1e-9 < q:
+        raise Refused(f"you carry only {show(have)} {item}" if src == here.hands else f"there is only {show(have)} {item} in the store")
+    if src != here.hands:                                                     # into one's hands first, then given on
+        here.apply("transfer", src=src, dst=here.hands, item=item, qty=q)
     pid = here.parcel(to_raw)
     bid = here.building(to_raw)
     if pid is not None and bid is None:

@@ -268,7 +268,7 @@ TECHNIQUES.update({
                        "changes": {"yield": {"seed": 2.0, "worth": 1.67}, "word": "dibbled"}, "units": 0, "gives": "",
                        "tags": ["farming"], "trade": "farmer"},                                      # D2-54, D2-94: 3x the work, 0.6x the seed
     "method: cairn": {"verb": "modifier", "label": "raising a cairn of stones over the dead", "aliases": ["cairn"], "basic": True,
-                      "modifies": ["work:bury"], "key": "method", "value": "cairn", "changes": {"inputs": {"stone": 3}, "units": 2},
+                      "modifies": ["work:bury"], "key": "method", "value": "cairn", "changes": {"inputs": {"stone": 3}},
                       "units": 2, "gives": "", "tags": ["death"]},                                    # D2-96
     "bury": {"verb": "work", "label": "burying the dead", "aliases": ["burial", "bury the dead", "bury the body"], "basic": True,
              "at": {"things": "body"}, "yield": {"kind": "bury"}, "units": 2, "units_by": "bury", "gives": "", "tags": ["death"]},   # D2-96

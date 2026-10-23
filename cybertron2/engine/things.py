@@ -228,7 +228,7 @@ def bodies(w, node) -> dict:
 
 def bury_units(w, cid, cairn=False) -> int:
     if cairn:
-        return int(TECHNIQUES["method: cairn"]["changes"]["units"])
+        return int(TECHNIQUES["method: cairn"]["units"])
     c = w.s["containers"][cid]
     b = w.p["bury"]
     if w.cold():
