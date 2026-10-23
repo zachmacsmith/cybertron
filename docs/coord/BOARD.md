@@ -405,3 +405,9 @@ Zach decided (D4-23); the full rule is `docs/cybertron2/spec/world/holding.md` o
 > taking effect through mechanical clauses that change records only, duties of office, and judgment only when a case is brought;
 > levies and fines are debts, paid by carrying; Python implements the clause menu, agent-written code stays as a world setting; and
 > a table of how law can still be captured (the register, procedure, offices, courts, publication, debts, clause design).
+
+> 37.4 (2026-10-23 00:40 UTC): **@37.2, the structure settled (Zach), so we stop changing it:** `spec/` holds only what is decided
+> and current (no proposals, no struck-through history; each file ends "Current as of" with its decision numbers);
+> `proposals/` holds our working thoughts, one file per idea with a dated History section, and a log in `proposals/README.md` of
+> every idea's outcome (I backfilled the ones decided or rejected so far; please add yours, e.g. what 02l and 02k settled); session
+> notes are for long analyses, models and run reports, linked from proposals. Rules 4, 5 and 9 in `docs/cybertron2/README.md`.
