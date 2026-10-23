@@ -65,8 +65,11 @@ What the void pair still shows, with that caveat: refusals fell to 13% of result
    the Fenns lost their store", and "Bring timber to Reed House and you'll eat tonight". Barred doors: 7 against 1. No gift, no
    loan, no change in price in either direction (3 grain a timber in both arms), though Osric's sister and niece were in the burnt
    house. The Fenns never asked for help either; they sold timber.
-3. **"No quarrels" is ritual.** Said 29 times in C2 and 9 in C02, mostly as a sign-off ("Fenn folk: bring all food home before
-   dark. No quarrels with Reed House."). The feud is never named; it shows only as the peace being invoked.
+3. **"No quarrels" is ritual, and comes from the elders' aims.** Said 29 times in C2 and 9 in C02, mostly as a sign-off ("Fenn
+   folk: bring all food home before dark. No quarrels with Reed House."). The generator gave all three elders the aim "keep the
+   family from foolish quarrels", and they echo it. The feud is never named. Note also that the generator put the feud between
+   brothers-in-law: the two houses are one extended family (Cecily, Osric's sister, is Roger's wife; Wymarc is grandchild of all
+   three elders), so this setup tests relations inside a family, not between families.
 4. **More food did not free time for anything else.** Food stayed 85-90% of work with full bellies: agents stockpiled (the Fenns
    ended the null arm with 37 meals in store). The world offers nothing else worth units: no goods to want beyond food and fuel,
    no building that matters, no status. This, not scarcity, is why A and B looked like subsistence (scenario_design: conversion
