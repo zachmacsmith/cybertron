@@ -342,6 +342,9 @@ class World:
             if not a["alive"] or a["at"] is None:
                 continue
             days = self.s["edges"][a["at"]][to]
+            h = self.home(name)
+            if h is not None and self.node_of(h["parcel"]) == a["at"]:          # leaving home: the house as it was last seen
+                a["home_seen"] = {"day": self.d, "stock": dict(h["stock"]), "condition": h["condition"], "door": h["door"]}
             a["transit"] = {"from": a["at"], "to": to, "left": self.d, "arrive": self.d + days}
             a["at"] = None
             out.append({"agent": name, "from": a["transit"]["from"], "to": to, "arrive": self.d + days})

@@ -313,7 +313,14 @@ def _house_lines(w, name) -> list:
     if h is None:
         return ["You have no house."]
     hid = w.s["agents"][name]["house"]
-    who = [x for x in w.living() if w.s["agents"][x]["house"] == hid and x != name]
+    a = w.s["agents"][name]
+    if w.node_of(h["parcel"]) != w.at(name):                              # away: the house as last seen, and tonight's rule
+        seen = a.get("home_seen") or {"day": 0, "stock": h["stock"], "condition": h["condition"], "door": h["door"]}
+        stock = ", ".join(f"{show(q)} {i}" for i, q in sorted(seen["stock"].items()) if q > 0.05) or "empty"
+        return [f"You are away from {h['name']} (at {w.s['nodes'][w.node_of(h['parcel'])]['name']}). When you left it on "
+                f"{PC._day(w, seen['day'])} it was {CONDITION[seen['condition']]}, door {seen['door']}, its store: {stock}.",
+                "Away from home you eat only what you carry: your house's store is not here."]
+    who = [x for x in w.living() if w.s["agents"][x]["house"] == hid and x != name and w.at(x) == w.at(name)]
     stock = ", ".join(f"{show(q)} {i}" for i, q in sorted(h["stock"].items()) if q > 0.05) or "empty"
     food = w.food_value(h["stock"])
     need = len(who) + 1
