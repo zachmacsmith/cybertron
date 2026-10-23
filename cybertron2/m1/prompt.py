@@ -144,10 +144,14 @@ def _kin(w, name) -> list:
         if rel or same:
             dead = "" if b["alive"] else " (dead)"
             st = {"child": " (a child)", "youth": " (a youth)", "elder": " (an elder)"}.get(b.get("stage"), "")
-            out.append(f"- {x}{st}: {rel or 'of your household'}{dead}" + (f"; {b['trade']}" if b.get("trade") else ""))
+            where = "" if not b["house"] or b["household"] == a["household"] else \
+                f" (of {w.s['houses'][b['house']]['name']}, {w.s['nodes'][w.node_of(w.s['houses'][b['house']]['parcel'])]['name']})"
+            out.append(f"- {x}{st}: {rel or 'of your household'}{where}{dead}" + (f"; {b['trade']}" if b.get("trade") else ""))
     for x, b in w.s["agents"].items():
         if x != name and x not in a["relations"] and b["household"] != a["household"]:
-            out.append(f"- {x}: of {w.s['houses'][b['house']]['name'] if b['house'] else 'no house'}" + (f"; {b['trade']}" if b.get("trade") else ""))
+            out.append(f"- {x}: of {w.s['houses'][b['house']]['name'] if b['house'] else 'no house'}"
+                       + (f", {w.s['nodes'][w.node_of(w.s['houses'][b['house']]['parcel'])]['name']}" if b["house"] and len(w.s["nodes"]) > 1 else "")
+                       + (f"; {b['trade']}" if b.get("trade") else ""))
     return out
 
 

@@ -66,7 +66,8 @@ def simulate(lines: dict, rng, start=-62, fertility=0.28, leave=0.3) -> tuple[Tr
         h = T.person("m", start - rng.randint(20, 26), line)
         wf = T.person("f", start - rng.randint(18, 24), line, origin=OUTSIDE)
         T.p[h]["partner"], T.p[wf]["partner"] = wf, h
-        hist.append({"year": start, "text": f"{h} and {wf} {line} came to Millbrook and built the first {line} house", "who": [h, wf]})
+        place = (lines[line] or {}).get("place", "Millbrook")
+        hist.append({"year": start, "text": f"{h} and {wf} {line} came to {place} and built the first {line} house", "who": [h, wf]})
     hard = sorted(rng.sample(range(start + 5, -1), 3)) + [-2]
     for y in range(start, 1):
         winter = y in hard
@@ -101,7 +102,8 @@ def simulate(lines: dict, rng, start=-62, fertility=0.28, leave=0.3) -> tuple[Tr
                 x = T.person("f", y - T.age(n, y) + rng.randint(-3, 2), T.p[n]["line"], origin=OUTSIDE)
             elif rng.random() < leave:
                 T.p[n]["left"] = y
-                hist.append({"year": y, "text": f"{n} married into {OUTSIDE} and left Millbrook", "kind": "left", "who": [n]})
+                hist.append({"year": y, "text": f"{n} married into {OUTSIDE} and left {(lines[T.p[n]['line']] or {}).get('place', 'Millbrook')}",
+                             "kind": "left", "who": [n]})
                 continue
             else:
                 continue
@@ -164,6 +166,11 @@ def kin(T, a, b, deep=True) -> str | None:
 # ---------------------------------------------------------------------- the spec
 def build(base: dict, seed: int, tries=600) -> dict:
     lines = base["lines"]
+    nodes = base.get("nodes") or {"home": base.get("node", {})}
+    for line, d in lines.items():                                          # each line's place: the node of its house
+        hid = next((k for k, h in base["houses"].items() if h["household"] == line), None)
+        pid = base["houses"][hid]["parcel"] if hid else None
+        d["place"] = next((n["name"] for n in nodes.values() if pid in (n.get("parcels") or {})), "Millbrook")
     for k in range(tries):
         rng = random.Random(f"{seed}|tree|{k}")
         T, hist = simulate(lines, rng, **(base.get("sim") or {}))

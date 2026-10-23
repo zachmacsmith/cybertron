@@ -144,3 +144,22 @@ def test_private_message_ration_and_say_cost():
     assert sent == lim and any(x.startswith("Refused: tell: you have sent your") for x in res["Osric"])
     R.talk(w, names, {**{n: {} for n in names}, "Osric": {"say": [{"to": "everyone", "text": "a"}, {"to": "Reed House", "text": "b"}]}}, res)
     assert sum(1 for x in res["Osric"] if x.startswith("You said (")) == 2   # each takes a unit, deducted before work
+
+
+def test_travel_is_the_last_act_and_arrives_next_morning():
+    from cybertron2.m1 import act as AC, run as R
+    w = World(load_spec("cybertron2/specs/m2_valley_s5.yaml"))
+    w.s["today"] = today = R._blank_today()
+    who = next(n for n, a in w.s["agents"].items() if w.at(n) == "millbrook" and a["stage"] == "adult")
+    assert AC.do(w, who, {"do": "travel", "to": "Coppergate"}, today).startswith("You set off")      # 2 days
+    assert AC.do(w, who, {"do": "travel", "to": "Nowhere"}, today).startswith("Refused")
+    w.night()
+    assert w.at(who) is None and w.s["agents"][who]["transit"]["arrive"] == 2
+    assert who not in w.agents_acting()
+    w.s["day"] = 1; w.s["today"] = R._blank_today(); w.arrive(); w.night()
+    assert w.at(who) is None                                                   # still on the road
+    w.s["day"] = 2; w.s["today"] = R._blank_today(); w.arrive()
+    assert w.at(who) == "coppergate" and who in w.agents_acting()
+    host = next(n for n in w.agents_acting() if w.s["agents"][n]["household"] == "Smith" and n != who)
+    assert AC.do(w, host, {"do": "welcome", "person": who}, w.s["today"]).startswith("You welcome")
+    assert w.sleeps(who) == ("smith_house", False)

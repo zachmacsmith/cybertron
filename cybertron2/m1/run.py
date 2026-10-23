@@ -74,6 +74,9 @@ def bot_plan(w, name, talk=None) -> dict:
         acts.append({"do": "make", "what": "grind"})
     for item in ("wild food", "grain", "timber", "meat", "bread"):
         acts.append({"do": "move", "item": item, "qty": 1, "to": "house"})
+    ways = sorted(w.s["edges"].get(w.at(name), {}))
+    if ways and w.d % 4 == 1 and len(name) % 2 == 0:
+        acts = acts[:2] + [{"do": "travel", "to": w.s["nodes"][ways[0]]["name"]}]
     out = {"why": "bot", "actions": acts, "attend": attend,
            "say": [{"to": "everyone", "text": f"{name} is out foraging today."}] if w.d % 2 == 0 else []}
     if w.d % 3 == 2 and youth:
@@ -148,7 +151,10 @@ def talk(w, names, replies, results) -> tuple[dict, dict]:
             if bid and not w.has_access(n, bid):
                 results[n].append(f"Refused: say: you have no access to {w.buildings()[bid]['name']}")
                 continue
-            hearers = [m for m in names if m != n and (not bid or w.has_access(m, bid))]
+            if bid and w.node_of(w.buildings()[bid]["parcel"]) != w.at(n):
+                results[n].append(f"Refused: say: {w.buildings()[bid]['name']} is not here")
+                continue
+            hearers = [m for m in names if m != n and w.at(m) == w.at(n) and (not bid or w.has_access(m, bid))]
             where = f"in {w.buildings()[bid]['name']}" if bid else "to everyone"
             for m in hearers:
                 box[m]["also"].append(f"{n} said ({where}): {text}")
@@ -159,7 +165,7 @@ def talk(w, names, replies, results) -> tuple[dict, dict]:
             w.happen("speech", f"{n} spoke {where}", actor=n, salience=0.1, sense="sound")
         for t in [t for t in (r.get("tell") or []) if isinstance(t, dict)][:MAX_SAY]:
             text, to = str(t.get("text", ""))[:600], w.person(t.get("to"))
-            if not to or to not in names or to == n:
+            if not to or to not in names or to == n or w.at(to) != w.at(n):
                 results[n].append(f"Refused: tell: nobody called {t.get('to')!r} is here to hear you")
                 continue
             lim = w.s["agents"][n]["messages"]
@@ -174,7 +180,7 @@ def talk(w, names, replies, results) -> tuple[dict, dict]:
             results[n].append(f"You told {to}: {text}" + (" (That was your last private message today.)" if sent + 1 >= lim else ""))
         for x in [x for x in (r.get("explain") or []) if isinstance(x, dict)][:2]:
             to, tech = w.person(x.get("to")), KN.resolve(x.get("what"))
-            if not to or to not in names or tech is None:
+            if not to or to not in names or tech is None or w.at(to) != w.at(n):
                 results[n].append(f"Refused: explain: {x.get('to')!r} or {x.get('what')!r} not found")
                 continue
             why = KN.explained(w, n, to, tech)
@@ -189,11 +195,15 @@ def talk(w, names, replies, results) -> tuple[dict, dict]:
             give, get = _goods(o.get("give")), _goods(o.get("get"))
             to_raw = str(o.get("to") or "anyone")
             to = None if to_raw.lower() in ("anyone", "all", "everyone", "") else w.person(to_raw)
+            if to and w.at(to) != w.at(n):
+                results[n].append(f"Refused: offer: {to} is not here; an offer is made face to face")
+                continue
             if not give or not get or (to is None and to_raw.lower() not in ("anyone", "all", "everyone", "")):
                 results[n].append(f"Refused: offer: could not read {o!r} (write goods as '2 bread, 1 timber')")
                 continue
             hold = w.s["agents"][n]["holdings"]
-            store = (w.home(n) or {}).get("stock", {})
+            hn = w.home(n)
+            store = hn["stock"] if hn is not None and w.node_of(hn["parcel"]) == w.at(n) else {}
             short = [i for i, q in give.items() if hold.get(i, 0) + store.get(i, 0) + 1e-9 < q]
             if short:
                 results[n].append(f"Refused: offer: you and your house's store do not have enough {', '.join(short)}")
@@ -216,7 +226,7 @@ def talk(w, names, replies, results) -> tuple[dict, dict]:
                 results[n].append("You offered " + PR._offer_text(w, oid, w.s["offers"][oid]) + " (open today and tomorrow, while you "
                                   "still have the goods)")
                 for m in names:
-                    if m != n:
+                    if m != n and w.at(m) == w.at(n):
                         box[m]["also"].append(PR._offer_text(w, oid, w.s["offers"][oid]))
         a = w.s["agents"][n]
         for title in (r.get("open") or [])[:int(w.p["notes"]["open"])]:
@@ -254,6 +264,7 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False) -> 
         dawn(w)
         PC.dawn(w)
         names = w.agents_acting()
+        at_day = {n: w.at(n) for n in names}
         systems = {n: PR.system_prompt(w, n) for n in names}                  # used when a conversation starts
         openings = {n: PR.turn_prompt(w, n, opening=True) for n in names}
         users = {n: PR.turn_prompt(w, n, opening=False) for n in names}
@@ -300,8 +311,8 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False) -> 
         rep = {n: {} for n in names}
         for i in range(max((len(p) for p in plans.values()), default=0)):
             for n in order:
-                if i >= len(plans[n]) or not w.s["agents"][n]["alive"]:
-                    continue
+                if i >= len(plans[n]) or not w.s["agents"][n]["alive"] or n in today.get("travel", {}):
+                    continue                                             # nothing after travel: the day's last act (D4-8)
                 a = plans[n][i]
                 c = AC.cost(w, n, a)
                 if used[n] + c > budget[n]:
@@ -331,7 +342,7 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False) -> 
             for u in [m.get("usage") or {}] + [x["usage"] or {} for x in talk_log[n]]:
                 cost += float(u.get("cc_equiv_usd") or 0.0)
             files["turns"].write(json.dumps({
-                "day": day, "agent": n, "model": w.s["agents"][n]["model"], "units": budget[n], "used": used[n],
+                "day": day, "agent": n, "model": w.s["agents"][n]["model"], "units": budget[n], "used": used[n], "at": at_day[n],
                 "prompt": m.get("sent", users[n]), "opening": m.get("opening"), "reply": first[n], "thinking": m.get("thinking"),
                 "talk": talk_log[n], "talk_prompt": talk_log[n][0]["prompt"] if talk_log[n] else None,
                 "talk_reply": talk_log[n][-1]["reply"] if talk_log[n] else None, "plan": plans[n], "attend": attend.get(n),
@@ -401,10 +412,14 @@ def dawn(w) -> None:
             w.happen("fire", f"fire broke out in {h['name']} in the night: the store is burnt, most of its food is gone and the roof "
                      f"is damaged", parcel=h["parcel"], salience=0.95, tags=["danger", "food", "shelter"], concerns=live,
                      extra={"dawn": True, "about": f"h:{hid}", "house": hid})
+    for x in w.arrive():                                                   # travellers whose journey ends this morning
+        w.s["agents"][x["agent"]]["arrived"] = w.d
+        w.happen("arrive", f"{x['agent']} arrived from {w.s['nodes'][x['from']]['name']}", actor=x["agent"], salience=0.7,
+                 tags=["travel"], extra={"dawn": True, "about": f"a:{x['agent']}", "node": x["to"]})
     for sg in w.spec.get("signs") or []:
         if int(sg["day"]) - 1 == w.d:
             w.happen("sign", sg["text"], salience=float(sg.get("salience", 0.3)), tags=sg.get("tags", ["season"]),
-                     sense=sg.get("sense", "sight"), extra={"dawn": True, "about": sg.get("about", "sky")})
+                     sense=sg.get("sense", "sight"), extra={"dawn": True, "about": sg.get("about", "sky"), "node": sg.get("node")})
     for hd in w.s["herds"].values():                                      # a stray herd wanders home after a day
         if hd["parcel"] != hd["home"] and not any(int(i["day"]) - 1 == w.d for i in w.spec.get("incidents") or []):
             hd["parcel"] = hd["home"]
@@ -414,6 +429,11 @@ def night_lines(w, rec) -> dict:
     out = {}
     for n in w.s["agents"]:
         L = []
+        slept = rec.get("slept", {}).get(n)
+        if slept == "out":
+            L.append("You slept out" + (" on the road." if w.s["agents"][n]["transit"] else ", with no roof over you."))
+        elif slept and w.s["agents"][n]["house"] and slept != w.s["houses"][w.s["agents"][n]["house"]]["name"]:
+            L.append(f"You slept at {slept} as a guest.")
         if n in rec["missed"]:
             L.append("You went to bed without enough to eat: a missed meal.")
         elif n in rec["short"]:
