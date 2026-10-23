@@ -128,6 +128,68 @@ HERD = [
 ]
 
 
+# ---------------------------------------------------------------------- a building
+def _amt(q) -> str:
+    return "none" if q < 0.05 else ("a little" if q < 1.5 else ("some" if q < 4 else ("plenty" if q < 10 else "a great deal")))
+
+
+BUILDING = [
+    dict(when=lambda x: x.b["condition"] == 2 and not x.camp, sense="sight", p=0.06, tags=["building"],
+         text=lambda x: f"{x.nm} is sound"),
+    dict(when=lambda x: x.b["condition"] == 1, sense="sight", p=0.35, tags=["building", "shelter"],
+         text=lambda x: f"{x.nm} is in poor repair: the thatch slipping, a wall cracked"),
+    dict(when=lambda x: x.b["condition"] == 1 and x.cold, sense="touch", p=0.3, tags=["shelter"],
+         text=lambda x: f"a cold draught cuts through {x.nm}"),
+    dict(when=lambda x: x.b["condition"] == 0, sense="sight", p=0.5, tags=["building", "shelter"], text=lambda x: f"{x.nm} is a ruin"),
+    dict(when=lambda x: x.camp, sense="sight", p=0.2, tags=["shelter", "travel"],
+         text=lambda x: f"{x.nm}: a lean-to of branches round a fire ring"),
+    dict(when=lambda x: x.camp and x.b.get("lasts_until") is not None and x.b["lasts_until"] - x.day <= 2, sense="sight", p=0.3,
+         tags=["shelter"], text=lambda x: f"{x.nm} is sagging: it will not stand many more nights"),
+    dict(when=lambda x: x.fire_place and x.b["fire"], sense="sight", p=0.06, tags=["shelter"],
+         text=lambda x: f"smoke from {x.nm}'s roof at dawn"),
+    dict(when=lambda x: x.fire_place and x.b["fire"] and x.cold, sense="smell", p=0.1, tags=["shelter"],
+         text=lambda x: f"wood smoke from {x.nm} on the cold air"),
+    dict(when=lambda x: x.fire_place and not x.b["fire"] and x.was_cold and x.live, sense="sight", p=0.5, tags=["shelter", "danger"],
+         text=lambda x: f"no smoke from {x.nm}'s roof after a cold night"),
+    dict(when=lambda x: x.timber < 2 and x.live, sense="sight", p=0.3, tags=["timber", "shelter"],
+         text=lambda x: f"the woodpile by {x.nm} is nearly gone"),
+    dict(when=lambda x: x.timber >= 2, sense="sight", p=0.05, tags=["timber", "shelter"],
+         text=lambda x: f"the woodpile by {x.nm}: {_amt(x.timber)}"),
+    dict(when=lambda x: "bread" in x.made or "oven bread" in x.made, sense="smell", p=0.4, tags=["food"],
+         text=lambda x: f"the smell of baking bread from {x.nm}"),
+    dict(when=lambda x: {"grind", "mill", "water mill"} & x.made, sense="sound", p=0.3, tags=["food"],
+         text=lambda x: f"the grinding of stones from {x.nm}"),
+    dict(when=lambda x: {"smelt", "copper tool", "coin"} & x.made, sense="sound", p=0.45, tags=["craft", "smithing"],
+         text=lambda x: f"hammering from {x.nm}"),
+    dict(when=lambda x: {"smelt"} & x.made, sense="smell", p=0.3, tags=["craft", "mining"],
+         text=lambda x: f"sharp fumes from {x.nm}: someone is smelting"),
+    dict(when=lambda x: x.fits, sense="sight", p=0.05, tags=["building"], text=lambda x: f"{x.nm} has " + ", ".join(x.fits)),
+    dict(when=lambda x: x.b["door"] == "barred", sense="sight", p=0.3, tags=["danger"], text=lambda x: f"{x.nm}'s door is barred"),
+    dict(when=lambda x: x.b["door"] != "barred", sense="sight", p=0.05, tags=["food"], peek=True,
+         text=lambda x: f"through {x.nm}'s open door: " + (", ".join(f"{_amt(q)} {i}" for i, q in sorted(x.stock.items())
+                                                                    if q >= 0.5 and i != "timber") or "nothing much")),
+    dict(when=lambda x: x.food_left < x.live_n and x.live, sense="sight", p=0.2, tags=["food"], knack=None,
+         text=lambda x: f"the bins in {x.nm} look near empty"),
+]
+
+# ---------------------------------------------------------------------- a person
+PERSON = [
+    dict(when=lambda x: x.a["hunger"] == 0, sense="sight", p=0.08, tags=[], text=lambda x: f"{x.who} looks well enough fed"),
+    dict(when=lambda x: x.a["hunger"] == -1, sense="sight", p=0.35, tags=["food"], text=lambda x: f"{x.who} looks drawn and hungry"),
+    dict(when=lambda x: x.a["hunger"] == -1, sense="sound", p=0.15, tags=["food"], text=lambda x: f"{x.who} is short with everyone today"),
+    dict(when=lambda x: x.a["hunger"] == -2, sense="sight", p=0.6, tags=["food", "danger"],
+         text=lambda x: f"{x.who} is gaunt and unsteady on their feet"),
+    dict(when=lambda x: x.a["hunger"] == -2, sense="sight", p=0.3, tags=["food"], text=lambda x: f"{x.who} sat down twice in the day's work"),
+    dict(when=lambda x: x.a["wounded"], sense="sight", p=0.5, tags=["danger"], text=lambda x: f"{x.who} moves stiffly, bruised about the face"),
+    dict(when=lambda x: x.gear, sense="sight", p=0.08, tags=["craft"],
+         text=lambda x: f"{x.who} carries " + " and ".join(f"a {i}" for i in x.gear)),
+    dict(when=lambda x: x.load, sense="sight", p=0.12, tags=["food"],
+         text=lambda x: f"{x.who} has a load: " + ", ".join(f"{_amt(q)} {i}" for i, q in x.load)),
+    dict(when=lambda x: x.travel_gear, sense="sight", p=0.25, tags=["travel"],
+         text=lambda x: f"{x.who} has a {x.travel_gear} rolled on their back, as if for a journey"),
+]
+
+
 def context(here, pid, h=None):
     p = here.parcels()[pid]
     c = p.get("crop")
@@ -164,17 +226,47 @@ def context(here, pid, h=None):
     return x
 
 
+def building_context(here, bid):
+    from cybertron2.engine.data import FITTINGS
+    b = here.buildings()[bid]
+    st = here.stock(bid)
+    live = [x for x in here.people() if bid in here.homes_here(x)]
+    made = {e.get("tech") for e in here.events() if e.get("kind") == "make" and f"building:{bid}" in (e.get("about") or [])}
+    x = SimpleNamespace(here=here, b=b, nm=b["name"], day=here.day, cold=here.cold(), stock=st, timber=st.get("timber", 0.0),
+                        live=live, live_n=len(live), made=made, camp=b["structure"] == "camp",
+                        was_cold=here.cold(here.day - 1 if here.day else 0),
+                        fire_place=any(b["fittings"].get(f) for f in ("hearth", "fire ring")),
+                        fits=[FITTINGS[f]["label"] for f in b["fittings"] if f in FITTINGS and f not in ("beds",)])
+    from cybertron2.engine.data import ITEMS
+    x.food_left = sum(q * ITEMS[i]["food"] for i, q in st.items() if i in ITEMS)
+    return x
+
+
+def person_context(here, who):
+    from cybertron2.engine.data import ITEMS
+    a = here.body(who)
+    x = SimpleNamespace(who=who, a=a)
+    x.gear = [i for i, q in a["carried"].items() if q >= 1 and ITEMS[i].get("seen") and not ITEMS[i].get("camp")]
+    x.load = [(i, q) for i, q in a["carried"].items() if q >= 2 and ITEMS[i]["weight"] > 0]
+    x.travel_gear = next((i for i, q in a["carried"].items() if q >= 1 and ITEMS[i].get("camp")), None)
+    return x
+
+
 def facts(here, add) -> None:
     """Add every sign whose condition holds, at its base chance, for each field, pasture and herd here."""
-    def emit(rows, x, about):
+    names = {id(CROP): "crop", id(FIELD): "field", id(PASTURE): "pasture", id(HERD): "herd", id(BUILDING): "building", id(PERSON): "person"}
+
+    def emit(rows, x, about, concerns=()):
         for i, row in enumerate(rows):
             try:
                 ok = row["when"](x)
             except (KeyError, TypeError, ZeroDivisionError):
                 ok = False
             if ok:
-                add(about, row["text"](x), row["p"], row.get("tags", []), row.get("sense", "sight"), knack=row.get("knack"),
-                    sign=f"{about[0]}#{rows is CROP and 'crop' or rows is FIELD and 'field' or rows is PASTURE and 'pasture' or 'herd'}{i}")
+                kw = {"knack": row.get("knack"), "sign": f"{about[0]}#{names[id(rows)]}{i}"}
+                if row.get("peek"):
+                    kw["peek"] = True
+                add(about, row["text"](x), row["p"], row.get("tags", []), row.get("sense", "sight"), concerns=list(concerns), **kw)
     for pid, p in here.parcels().items():
         x = context(here, pid)
         if p["cover"] == "field":
@@ -186,3 +278,11 @@ def facts(here, add) -> None:
     for hid, h in here.herds().items():
         if FM.head(h) > 0:
             emit(HERD, context(here, h["parcel"], h), [f"herd:{hid}", f"parcel:{h['parcel']}"])
+    for bid, b in here.buildings().items():
+        if b.get("unfinished"):
+            add([f"building:{bid}"], f"{b['name']} is half built", 0.3, ["building"])
+            continue
+        x = building_context(here, bid)
+        emit(BUILDING, x, [f"building:{bid}"], concerns=x.live)
+    for who in here.people():
+        emit(PERSON, person_context(here, who), [f"person:{who}"], concerns=[who])

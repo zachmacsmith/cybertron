@@ -273,3 +273,15 @@ def test_an_unexplored_place_is_a_way_until_someone_goes_there():
     assert "grey_crag" in Mind(w, "Warin").places()
     R._mentions(w, Here(w, "Warin"), "Warin", ["Osric"], "I found Grey Crag: good stone up there.")
     assert "grey_crag" in Mind(w, "Osric").places()
+
+
+def test_signs_come_in_bundles_and_practised_hands_read_more():
+    from cybertron2.engine import perceive as PC2
+    w = world()
+    w.s["day"] = 3
+    F = PC2.facts(Here(w, "Edric"))
+    crop = [f for f in F if f.get("sign", "").startswith("parcel:long_field#crop")]
+    assert len(crop) >= 3 and len({f["sense"] for f in crop}) >= 2           # several signs, several senses, for one state
+    reap = next(f for f in crop if f.get("knack") == "reap")
+    w.s["know"]["Edric"]["reap"] = {"level": "known", "skill": 1.3, "seen": 0, "wins": 0, "fails": 0, "source": "", "since": -1}
+    assert PC2.knack(Mind(w, "Edric"), reap) == 2.0 and PC2.knack(Mind(w, "Sibyl"), reap) == 1.0

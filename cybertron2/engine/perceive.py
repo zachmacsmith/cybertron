@@ -168,47 +168,9 @@ def facts(here) -> list:
                 add([sub], words["high"].format(name=nm), 0.05, [key])
     from cybertron2.engine import signs as SG                                  # fields, pastures and herds: bundles of signs
     SG.facts(here, add)
-    for bid, b in here.buildings().items():
-        nm, sub = b["name"], f"building:{bid}"
-        live = [x for x in here.people() if bid in here.homes_here(x)]
-        if b.get("unfinished"):
-            add([sub], f"{nm} is half built", 0.3, ["building"])
-            continue
-        add([sub], f"{nm} is " + {2: "sound", 1: "in poor repair: the thatch slipping, a wall cracked", 0: "a ruin"}[b["condition"]],
-            0.1 if b["condition"] == 2 else 0.4, ["building", "shelter"], concerns=live)
-        if b["structure"] == "camp":
-            add([sub], f"{nm}: a lean-to of branches round a fire ring" + (", sagging now" if b.get("lasts_until") is not None
-                and b["lasts_until"] - here.day <= 2 else ""), 0.2, ["shelter", "travel"])
-        if any(b["fittings"].get(f_) for f_ in ("hearth", "fire ring")):
-            if b["fire"]:
-                add([sub], f"smoke from {nm}'s roof at dawn", 0.08, ["shelter"], sense="smell")
-            elif here.cold(here.day - 1 if here.day else 0) and live:
-                add([sub], f"no smoke from {nm}'s roof after a cold night", 0.5, ["shelter", "danger"], concerns=live)
-        st = here.stock(bid)
-        add([sub], f"the woodpile by {nm}: {_amount(st.get('timber', 0.0))}", 0.06, ["timber", "shelter"])
-        fits = [FITTINGS[f]["label"] for f in b["fittings"] if f in FITTINGS and f not in ("beds",)]
-        if fits:
-            add([sub], f"{nm} has " + ", ".join(fits), 0.05, ["building"])
-        if b["door"] == "barred":
-            add([sub], f"{nm}'s door is barred", 0.3, ["danger"])
-        else:
-            goods = ", ".join(f"{_amount(q)} {i}" for i, q in sorted(st.items()) if q >= 0.5 and i != "timber") or "nothing much"
-            add([sub], f"through {nm}'s open door: {goods}", 0.05, ["food"] if any(i in EDIBLE for i in st) else [], peek=True)
     for cid, c in here.remains().items():
         goods = ", ".join(f"{_amount(q)} {i}" for i, q in c["goods"].items() if q > 0.05)
         add(["sky"], f"what {c['of']} carried lies where they died: {goods}", 0.7, ["death", "food"])
-    for x in here.people():
-        a = here.body(x)
-        sub = f"person:{x}"
-        add([sub], f"{x} {WORDS_STAGE[a['hunger']]}", 0.1 if a["hunger"] == 0 else 0.35, ["food"] if a["hunger"] else [], concerns=[x])
-        if a["wounded"]:
-            add([sub], f"{x} moves stiffly, bruised about the face", 0.5, ["danger"], concerns=[x])
-        seen = [i for i, q in a["carried"].items() if q >= 1 and ITEMS[i].get("seen")]
-        if seen:
-            add([sub], f"{x} carries " + " and ".join(f"a {i}" for i in seen), 0.08, ["craft"] + (["danger"] if any(ITEMS[i].get("weapon") for i in seen) else []))
-        load = [(i, q) for i, q in a["carried"].items() if q >= 2 and ITEMS[i]["weight"] > 0]
-        if load:
-            add([sub], f"{x} has a load: " + ", ".join(f"{_amount(q)} {i}" for i, q in load), 0.12, ["food"] if any(i in EDIBLE for i, _ in load) else [])
     for e in here.events():
         if e["kind"] == "speech":
             continue
