@@ -212,6 +212,39 @@ Agents would learn little from blind trials and would waste actions on them; the
 where our recipes differ. So: an agent can only make what it knows how to make. **Invention** (a skilled practitioner, given time
 and materials, works out a new recipe within their trade) is a later option, tied to the frontier and eras (37.5).
 
+### 7. Knowledge beyond techniques: what the engine keeps, and what the agent keeps
+
+**The line proposed:** the engine keeps **facts about things in the world** (what exists, where, who, whose, what is owed, what the
+rule is, how to do it) as **dated beliefs with a source**; the agent keeps **its own interpretations, plans and opinions** in its
+notes. Gating action is one reason for the engine to keep something, but not the only one:
+
+| Reason the engine keeps it | Why the agent's own memory is not enough |
+|---|---|
+| **It gates action** | a technique to make, a destination to name, a law or power to invoke, a claim to assert |
+| **It must not drift** | an agent's memory is short (2 days in full, 8 as lines, 8 notes) and a model's recollection can be wrong; where the Hills are, who its kin are, what Wynn owes must stay true over a long run |
+| **It is how information spreads** | testimony (the mention rule, §4e) moves beliefs from one agent to another, with a source; free text cannot be followed |
+| **It is measured** | who knew what, when, and from whom (information chokepoints, the frontier's lag, rumour) is a main object of study |
+| **The prompt needs it** | the engine chooses what to show by relevance and age within the budget |
+
+**What the engine keeps** (each item: the belief, its source (saw, told by, read, from upbringing), its date, and, hidden, whether
+it is true):
+
+| Kind | Examples | Gates |
+|---|---|---|
+| techniques | levels and skill (§4c) | make, build, work, gather |
+| places and routes | places known, their last-seen state, edges and where they lead | naming a destination beyond the next node; finding things |
+| people | who they are to you (kin from the family tree, D4-21), last seen where and how, reputation heard | |
+| claims, debts and obligations | whose land, who owes whom, what was promised | claim, transfer, invoke (a court) |
+| laws and powers | the laws it knows, the offices it knows of | invoke; what binds it in practice |
+| events | what it witnessed (lasting memories), what it was told happened, with source | |
+| prices and terms | what goods fetched where, and when | |
+
+Beliefs can be **wrong**: a rumour, an old sighting, a lie. The engine records what the agent believes and, apart, the truth, so
+false beliefs spread and are measured like true ones.
+
+**What the agent keeps** (its notes, and what it says): what it makes of things, what it intends, whom it trusts, its plans, its
+version of a quarrel. The engine never writes these and never checks them.
+
 ## Why
 
 - Prompts stay small however large the recipe list grows.
@@ -269,6 +302,11 @@ and materials, works out a new recipe within their trade) is a later option, tie
 - 23 Oct: Zach: teaching should pass some skill from a master; agents should know how learning works; the world should grow
   richer by data while agents explore and learn it (D4-24). Added: teaching closes 0.3 of the skill gap (x2 for a youth); the
   manual explains how people learn.
+
+- 23 Oct: Zach: should the engine manage other knowledge (places, past events, people), or only what gates action, the rest in the
+  agent's memories? Added §7: the engine keeps facts about things in the world as dated beliefs with a source (because they gate
+  action, must not drift, spread by testimony, are measured, and feed the prompt); the agent keeps interpretations, plans and
+  opinions in its notes.
 
 ## Sources
 
