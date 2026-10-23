@@ -302,7 +302,10 @@ def test_a_hired_worker_puts_the_work_into_the_employers_store():
     give(w, "Simkin", crude_tool=1)
     w.s["people"]["Simkin"]["at"] = "millbrook"
     w.s["day"] = w.s["parcels"]["long_field"]["crop"]["ripe_day"]
-    assert "you may not use" in do(w, "Simkin", do="work", what="reap", at="Long Field", **{"for": "the Reeds"})
+    assert "into Reed House" in do(w, "Simkin", do="work", what="reap", at="Long Field", **{"for": "the Reeds"})   # a gift of work
+    w.s["parcels"]["brook_field"]["crop"] = None
+    w.s["containers"][w.s["buildings"]["reed_house"]["stock"]]["goods"]["grain"] = 20.0
+    assert "no grain to sow" in do(w, "Simkin", do="work", what="sow", at="Brook Field", item="grain", **{"for": "the Reeds"})  # not their seed
     w.s["agreements"]["A1"] = {"node": "millbrook", "day": w.d, "status": "open", "parties": ["Fenn", "Reed"],
                                "legs": [{"work": 1, "done": 0, "by": None, "from": "Fenn", "to": "Reed", "when": {}}]}
     r = do(w, "Simkin", do="work", what="reap", at="Long Field", **{"for": "the Reeds"})
@@ -333,3 +336,10 @@ def test_the_turn_prompt_lists_the_roads_from_here_and_names_an_unexplored_way()
     p = PR.turn_prompt(Here(w, "Warin"), Mind(w, "Warin"))
     line = next(l for l in p.split("\n") if l.startswith("Roads from here"))
     assert "a goat path up into the crags" in line and "nobody you know has followed" in line and "Ashwood" in line
+
+
+def test_working_for_ones_household_away_from_home_carries_it_oneself():
+    w = world()
+    w.s["people"]["Simkin"]["at"] = "millbrook"
+    r = do(w, "Simkin", do="gather", what="forage", at="Brook Meadow", **{"for": "my household"})
+    assert r.startswith("You took") and "into" not in r, r

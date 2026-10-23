@@ -194,7 +194,8 @@ def _works(here, mind, tech, key, place_name, out, mult, a, y):
     stone = float(y.get("stone", 0.0)) / float(y["units"]) * mult
     if stone > 0:
         from cybertron2.engine.verbs import _consume
-        _consume(here, {"stone": round(stone, 3)}, extra=out if out != here.hands else None)
+        from cybertron2.engine.verbs import _src
+        _consume(here, {"stone": round(stone, 3)}, extra=_src(here, a.get("for") and here.household(), out))
     if wk["done"] >= size - 1e-6:                                              # finished: this is upkeep (mending)
         wk["kept"] = round(wk.get("kept", 0.0) + mult, 3)
         here.apply("set", ref=("parcel", key), field="works", value=wk)
@@ -230,7 +231,8 @@ def _sow(here, mind, tech, key, place_name, out, m, a, f):
     worth = float(y["worth"])
     sown = c["seed"] if c else 0.0                                         # in plot-seed equivalents
     room = float(par["size"]) * float(f["plot_seed"]) - sown
-    extra = out if out != here.hands else None
+    from cybertron2.engine.verbs import _party, _src
+    extra = _src(here, _party(here, a["for"]) if a.get("for") else None, out)
     have = KN.available(here, seed_good, extra=extra)
     seed = round(min(float(y["seed"]) * m, room / worth, have), 2)
     if seed <= 1e-9:

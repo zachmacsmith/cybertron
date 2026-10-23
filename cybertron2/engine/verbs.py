@@ -153,11 +153,17 @@ def _out(here, party) -> str:
         return here.hands
     cid = here.party_container(party)
     if cid is None:
+        if party == here.household():                                       # away from home: one carries it back oneself
+            return here.hands
         raise Refused(f"{party} has nothing here to put it into")
-    if cid != here.hands and not here.may_take(cid) and cid.startswith("stock:") and not here.works_for(party):
-        raise Refused(f"you may not use {party}'s store (you are not of that household): do it for yourself, then give it to one of "
-                      f"them or leave it at their house")
-    return cid
+    return cid                                                              # putting into another's store is a gift (D4-23)
+
+
+def _src(here, party, out):
+    """A party's store as a source of inputs: only if one may take from it, or works for the party (D2-37, D2-38)."""
+    if out == here.hands or not out.startswith("stock:"):
+        return None
+    return out if (here.may_take(out) or here.works_for(party)) else None
 
 
 def _level(mind, tech) -> str:
@@ -323,7 +329,7 @@ def _make(here, mind, a, party):
     lvl = _level(mind, tech)
     t = TECHNIQUES[tech]
     out = _out(here, party)
-    extra = out if out != here.hands else None
+    extra = _src(here, party, out)
     qty = max(1, int(_qty(a.get("qty"), 1)))
     res = []
     for i in range(qty):
