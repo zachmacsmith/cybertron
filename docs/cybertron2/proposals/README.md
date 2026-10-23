@@ -23,6 +23,7 @@ proposal**; **Why**; **Alternatives considered**; **Open questions**; **Affects*
 
 | File | Summary | Owner | Status |
 |---|---|---|---|
+| [place.md](place.md) | place as the foundation: every entity and event has a place; state partitioned by node; agent-facing code gets only a view of where the agent is (`Here`) and its own mind (`Mind`), never the world; only travel moves anything between nodes; static and canary tests | 37.4 | discussion |
 | [layout.md](layout.md) | the layout inside a node: parcels of one cover (forest, field, pasture, water, built ground...) with neighbours and a side; features (brook, road, well, seam); structures on built ground; movables on a parcel or in a room; attention, claims and land change on one model | 37.4 | discussion |
 | [seeing.md](seeing.md) | everything an agent is shown each round and how it changes; attention (concerns you, salient, a glimpse, one thing attended to in detail), feeling watched, observations from the state; templates first, an optional narrator per node and day; what is missing and what should go | 37.4 | discussion |
 | [verbs.md](verbs.md) | the closed list of about 25 verbs always in the system prompt (force always shown), objects shown by knowledge and place, office verbs to holders; the possible space against the shown space; gaps (steal, damage, flee, yield, tend, bury, scout) | 37.4 | ready for a decision |
@@ -53,6 +54,9 @@ Newest first. Ideas decided or rejected in conversation before 23 Oct are backfi
 
 | Date | Idea | Outcome | Where |
 |---|---|---|---|
+| 23 Oct | Place as the engine's foundation (Here and Mind views, state by node, every event placed) | discussion | proposals/place.md |
+| 23 Oct | A traveller too heavy to set off chooses what to leave, with a person or at a house | accepted: D4-32 | spec/economy/transport.md |
+| 23 Oct | Seeded knowledge of other lines' crafts as awareness; repute from the lines born there | accepted: D4-33 | spec/seeding/README.md |
 | 23 Oct | Port cybertron 1's private-message ration; make speaking aloud cost a unit of work | accepted: D4-31 | spec/information/speech.md |
 | 23 Oct | Speech in one's own house only (M1) | replaced: any building one has access to, access as data | D4-30 |
 | 23 Oct | Re-ask everyone who heard anything in the talk step (M1) | rejected (Zach): only direct speech wakes | D4-25 |
