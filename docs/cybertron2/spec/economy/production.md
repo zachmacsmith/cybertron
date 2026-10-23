@@ -22,7 +22,7 @@ is in proposals.
 - D2-19: first worlds have a short metal ladder.
 - D2-23: the tool set below.
 - D2-43: the basic techniques and the ten trades below.
-- D2-44: bread. D2-46: weapons wear, with a small chance of breaking.
+- D2-44: bread. D2-46: weapons wear, with a small chance of breaking. D2-47: cheese. D2-48: specialised tools.
 
 ## Mechanics
 
@@ -60,6 +60,24 @@ is in proposals.
 - Flour: grain ground by hand at a quern, or at a mill (millstones turned by hand, faster with a water wheel).
 - Bread: flour, fuel and work at a hearth make a little more bread than the grain put in (11 from 10); bread is eaten without a
   hearth and keeps longer than other carried food. A mill's holder may charge for milling.
+
+### Specialised tools (D2-48)
+
+| Tool | Better at | What it alone can do |
+|---|---|---|
+| felling axe | felling | fells great trees (the great beams a hall for more than 25 needs) |
+| miner's pick | mining | works a deep seam |
+| scythe | cutting hay | one person cuts a pasture's hay inside the summer window |
+| mason's chisels | quarrying | dressed stone: millstones, arches, a third storey |
+| reaping hook | reaping | loses less grain at the harvest |
+
+Each is a master smith's recipe (knowledge.md: not basic), made at a smithy with more copper than a hand tool; better and
+longer-lived at its method; no better than a crude tool at other work.
+
+### Cheese (D2-47)
+
+Milk, a little salt and work make cheese, which must age in a cool room or a cellar; it keeps about as well as salted meat and is
+worth carrying.
 
 ### Wear (D2-46)
 
@@ -107,4 +125,4 @@ the soil in words ("tired", "good"), their seed in store, their tools and whethe
 [02l_farming.md](../../../review/37_growth/02l_farming.md), [02j_end_uses.md](../../../review/37_growth/02j_end_uses.md),
 [02d_ladders.md](../../../review/37_growth/02d_ladders.md); proposals/farming.md, proposals/tools.md.
 
-*Current as of 23 Oct 2026: H-6, D2-11 to D2-19, D2-23, D2-42, D2-43, D2-44, D2-46.*
+*Current as of 23 Oct 2026: H-6, D2-11 to D2-19, D2-23, D2-42, D2-43, D2-44, D2-46, D2-47, D2-48.*

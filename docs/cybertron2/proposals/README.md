@@ -66,7 +66,7 @@ Newest first. Ideas decided or rejected in conversation before 23 Oct are backfi
 | 23 Oct | Detecting what was told by reading the meaning of free speech | rejected in the proposal: name mentions, an `about` field and explicit `explain`/`teach` instead | [knowledge.md](knowledge.md) §4e |
 | 23 Oct | Know-how as a continuous score (0-1) | replaced in the proposal by four levels moved by counts (Zach) | [knowledge.md](knowledge.md) §4c |
 | 23 Oct | Bread (flour by quern or mill; eaten without a hearth; keeps), cellar and stalls, weapon wear with a small chance of breaking | accepted: D2-44 to D2-46 | [recipes.md](recipes.md) |
-| 23 Oct | Specialised tools (felling axe, miner's pick, scythe, mason's chisels, reaping hook) from master smiths' recipes; cheese | discussion | [recipes.md](recipes.md) §14-15 |
+| 23 Oct | Specialised tools (felling axe, miner's pick, scythe, mason's chisels, reaping hook) from master smiths' recipes; cheese | accepted: D2-47, D2-48 | [recipes.md](recipes.md) §14-15 |
 | 23 Oct | Meat (dense, spoils fast), milk as a learned technique, the basic set and ten trades | accepted: D2-41 to D2-43 | [recipes.md](recipes.md) |
 | 23 Oct | Separate tools per method (axe, pick, sickle) | rejected in the proposal: wear is per use, so they add only up-front cost; effects differ by method as data | [recipes.md](recipes.md) §8 |
 | 23 Oct | Recipes for the first worlds in work units (about 40 techniques, ten trades; a coin about a food; smelting at the seam; copper tools as the step up) | discussion | [recipes.md](recipes.md) |

@@ -271,6 +271,14 @@ it is no better than a crude tool.
 - **It gives smithing depth:** a novice smith makes hand tools; a master makes these (knowledge.md's levels), so a master's
   know-how is worth teaching and paying for.
 
+**Great trees: where they are and how agents see them (proposal, with 37.4, who owns land).** A forest site holds two stocks:
+ordinary timber, and **a few great trees** (old growth: old oaks in a woodland, very slow to come back, so effectively finite in a
+run). They appear in the forest's description ("the Deep Wood: thick, with a stand of old oaks"), as everything at a site does.
+Felling one takes the felling axe and two or three people for a day, and gives **a great beam**: very heavy (a cart and oxen to
+move it), used for a hall's span. Clearing or felling the stand ends it for generations (D4-4: an internal consequence). So
+the great hall depends on a woodland that still has old oaks, a woodsman with a felling axe, a master smith who made it, and oxen
+to haul the beam.
+
 **What it costs the design:** five more goods, each with one use, against the pruning rule (02g §1f). They pass it on one test
 only, but the important one: each creates a dependence (specialist on master smith) and an ability nobody else has. Five is enough;
 more (a dozen tool kinds) would add goods without adding new dependences.
@@ -290,13 +298,19 @@ more (a dozen tool kinds) would add goods without adding new dependences.
 
 ## Open questions (for Zach)
 
-Answered 23 Oct: meat (D2-41); milk as a technique (D2-42); the basic set and ten trades (D2-43); bread as in §10 (D2-44); cellar
-and stalls (D2-45); weapons wear on the one scale with a small chance of breaking (D2-46).
+Answered 23 Oct: meat (D2-41); milk (D2-42); the basic set and trades (D2-43); bread (D2-44); cellar and stalls (D2-45); weapon wear
+(D2-46); cheese (D2-47); specialised tools (D2-48).
 
-1. **Cheese** now (§14)?
-2. **Specialised tools** (§15): the five, as master smiths' recipes with one qualitative ability each?
-3. Tool effects by method (§8) as data on one hand tool, as the base below the specialised tools?
-4. Food's share of work: the open calibration.
+**Reading the payback columns:** "2.7 years" means a household felling as much as it usually does (about 12 fells a year) would
+need 2.7 of the world's years of that felling before the work the axe saves covered what it cost. The model's year is 40 days (a
+world setting, 16-60 days: D4-13), so 2.7 years is about 108 days, longer than a run of 20-30 days: for a household it never pays
+within a run. A full-time woodsman's 14 days is within one.
+
+1. **Tool effects by method** (§8) as the base level: the one hand tool good helps different kinds of work by different amounts
+   (felling x2, quarrying, mining, reaping and hay x1.5, foraging not at all), with the specialised tools above it?
+2. **Great trees and great beams** (§15): a separate small stock in woodland, seen in the forest's description, felled only with a
+   felling axe and a small crew, giving one very heavy beam (37.4: land and sites)?
+3. Food's share of work: the open calibration.
 
 ## History
 
@@ -312,6 +326,9 @@ and stalls (D2-45); weapons wear on the one scale with a small chance of breakin
   weapons wear, with a smaller chance of breaking (D2-46); could specialised versions of tools be crafted from known recipes, at a
   forge, lasting longer and doing better at one thing, with a qualitative bonus? Added §14 (milk and cheese) and §15 (specialised
   tools, with when each pays back).
+
+- 23 Oct (d): Zach: cheese yes (D2-47); specialised tools yes (D2-48); how agents see great trees; what "2.7 years" means.
+  Added great trees and beams to §15 and the reading of the payback columns.
 
 ## Sources
 
