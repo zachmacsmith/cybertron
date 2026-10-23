@@ -48,6 +48,7 @@ Newest first. Ideas decided or rejected in conversation before 23 Oct are backfi
 | Date | Idea | Outcome | Where |
 |---|---|---|---|
 | 23 Oct | Opening a note shown only the next round | rejected (Zach): opening is a talk-step action, shown at once | [notes.md](notes.md) |
+| 23 Oct | Detecting what was told by reading the meaning of free speech | rejected in the proposal: name mentions, an `about` field and explicit `explain`/`teach` instead | [knowledge.md](knowledge.md) §4e |
 | 23 Oct | Know-how as a continuous score (0-1) | replaced in the proposal by four levels moved by counts (Zach) | [knowledge.md](knowledge.md) §4c |
 | 23 Oct | Private notes with one pinned, the rest opened by choice; memory, not documents | discussion | [notes.md](notes.md) |
 | 23 Oct | Knowing what you can do: few verbs, options computed from place and knowledge, know-how as personal knowledge | discussion | [knowledge.md](knowledge.md) |

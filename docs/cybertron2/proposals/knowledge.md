@@ -147,6 +147,43 @@ So a rough idea tells the agent what to gather and where to go, and a refusal te
   days. Torvald spent 4 units and gained an apprentice whose skill grows twice as fast while he works at Torvald's forge. Torvald
   could have refused, or charged Eoin's household.
 
+### 4d. Where an agent's knowledge shows
+
+Knowledge is written by the engine (not the agent's notes, which are its own words). Three places, by how often it changes and how
+much it matters today:
+
+| Where | What | Size |
+|---|---|---|
+| **System prompt** ("What you know how to do") | every technique the agent **knows**, as names grouped by trade with a skill word; then its **rough ideas** and what it **knows of**, as names with their source in brackets. Rebuilt when its knowledge changes (rare: a few times a run), as cybertron 1 rebuilt system prompts on a change | names only; past a budget, the least used and oldest awareness drop out of the prompt (they stay in the store) |
+| **Turn prompt** ("Today you could") | what it can do **here and now**, with the choices it has, plus a few **near misses** ("a blade, with 4 more copper"; "pots, at Mora's kiln at the Hollow") | budgeted, most useful first |
+| **Look-up** (in the talk step, like opening a note) | the full card of any technique it knows anything of: inputs and amounts, tools, workplace, season, work, its level, how it learned it | on request, shown at once |
+
+So a smith away from the forge still sees "smithing (skilled): blades, knives, hoes, ploughshares" in its system prompt, and today's
+options show where it can use it ("at your forge, at the Hills"). Nothing is listed in full unless asked for.
+
+### 4e. How telling is detected
+
+Free speech cannot be parsed for meaning reliably, so the engine uses two cheap, deterministic rules and two explicit actions:
+
+1. **Mentions make awareness.** Every technique, place, person, building and law has a canonical name and a few aliases. When an
+   agent's message (said or told, in the talk step) **mentions a name the speaker knows of**, every hearer who did not know of it
+   becomes **aware** of it, with the source "told by <speaker>". String matching, no model call. A passing mention ("we could use a
+   mill") is enough, as in life; a speaker cannot spread what it does not know of itself.
+2. **Messages can carry what they are about.** The message schema has an optional `about` field listing names (the speaker's
+   prompt shows the names it may use), for agents that want to be sure; it gives the same awareness.
+3. **A rough idea needs `explain`.** Knowing what goes into a thing and where it is done is passed only by `explain {to, technique}`
+   (talk step, free, the speaker must know it). The explanation's words are the speaker's own; the engine records the level.
+4. **Capability needs teaching, reading or practice** (§4c), all explicit actions.
+
+**If agents do not bother:** a technique mentioned only loosely in words is still in the hearer's memory of what it heard (the
+recent rounds), so the model knows of it for a while even if the engine did not record it; rule 1 catches most mentions anyway,
+because names are what people use. **Asking:** a hearer can ask in words ("will you teach me to fire pots?"), and `learn {from,
+technique}` in its plan is a visible request: the other's prompt shows "Eoin wants to learn smithing from you"; teaching happens
+only if the teacher also chooses `teach` that day.
+
+The same two rules (mentions and `about`) carry testimony about places, people, claims and laws (02_perception's testimony), so
+one mechanism spreads every kind of awareness.
+
 ### 5. The manual: only common knowledge
 
 A short, free look-up of what everyone in the world knows: how meals, hunger, the cold, travel, the day and the seasons work, how
@@ -204,6 +241,11 @@ and materials, works out a new recipe within their trade) is a later option, tie
   exactly what is short; does it cover enough kinds of action? §4c rewritten: techniques cover recipes, blueprints, gathering and
   working methods, animal handling and literacy; four levels (aware, rough idea, capable, known) moved by counts; the source of
   awareness in brackets; refusals name the shortfall ("you have no mill here").
+
+- 23 Oct: Zach: where should what an agent knows but cannot do here show (system prompt, a note, a list)? how would the engine
+  detect that telling happened? Added §4d (system prompt lists known crafts and awareness by name, rebuilt on change; the turn prompt
+  shows today's options and near misses; full cards by look-up in the talk step) and §4e (mentions of known names make hearers aware,
+  an optional `about` field, `explain` for a rough idea, `learn` as a visible request; the same rule carries all testimony).
 
 ## Sources
 
