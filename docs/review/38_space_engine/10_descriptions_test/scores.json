@@ -1,0 +1,8 @@
+{
+ "_note": "Judged by hand from raw_outputs.json. Coverage = visible facts conveyed (32 in all). Inventions are details not in visible_facts. Leaks = hidden facts shown. Comprehension: 10 questions per source; strict = answers2 not used (reader told to say 'Cannot tell' unless stated); lenient = reader told to draw sensible conclusions.",
+ "coverage": {"template": "32/32", "haiku": "29/32 (field: season; land: season; tracks: time)", "sonnet": "29/32 (person: time; field: season; tracks: time)", "haiku_with_hidden_facts": "26/32 (person: deep wood; field: season; land: season, time; tracks: none; building: none) approx"},
+ "inventions": {"template": [], "haiku": ["land: 'early morning' (fact was morning; early autumn dropped)", "tracks: deer and boot prints 'beside' each other"], "sonnet": ["land: 'beyond the ridge' (no ridge in the facts)", "tracks: boot prints 'beside' the deer prints"], "haiku_with_hidden_facts": ["tracks: 'beside them'", "person: 'came up through the trees' replaces 'the deep wood'"]},
+ "leaks": {"template": 0, "haiku": 0, "sonnet": 0, "haiku_with_hidden_facts": 0},
+ "comprehension_strict": {"template": "7/10", "haiku": "6/10", "raw_json": "7/10", "_misses": "all three said 'Cannot tell' to 'fit to work?' and 'ready to reap?'; Haiku-text and raw also to 'anyone at home?'"},
+ "comprehension_lenient": {"template": "10/10", "haiku": "10/10", "raw_json": "10/10"}
+}

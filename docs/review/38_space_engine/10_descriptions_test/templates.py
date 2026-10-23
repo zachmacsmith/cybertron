@@ -15,7 +15,7 @@ POOLS = {
     "carrying": ["he carries {v}", "he is bent under {v}"],
     "came_from": ["he has come from {v}", "he is back from {v}"],
     "gait": ["he is {v}", "you see him {v}"],
-    "crop": ["{t} is in {v}", "{t} is sown with {v}"],
+    "crop": ["{t} is sown with {v}", "{t} stands in {v}"],
     "ripeness": ["the grain is {v}", "it stands {v}"],
     "weeds": ["{v}", "the rows are choked with {v}"],
     "damage": ["the crop is {v}", "part of it lies {v}"],
@@ -30,7 +30,7 @@ POOLS = {
     "ground": ["in the {v}", "pressed into {v}"],
 }
 # Facts that set the scene rather than describe the target.
-SCENE = {"season": ["It is {v}", "In the {v}"], "time": ["{v}", "this {v}"]}
+SCENE = {"season": ["{v}", "It is {v}"], "time": ["{v}", "{v} now"]}
 # Facts that only make sense attached to another fact (appended to it).
 ATTACH = {"material": "storeys", "condition": "storeys", "tracks_in_damage": "damage", "ground": "boot_tracks"}
 
@@ -39,8 +39,9 @@ def render(state, seed):
     rnd = random.Random(seed)
     t = state["target"]
     facts = dict(state["visible_facts"])
+    words = {1: "one", 2: "two", 3: "three", 4: "four"}
     def ph(k, v):
-        return rnd.choice(POOLS[k]).format(v=v, t=t)
+        return rnd.choice(POOLS[k]).format(v=words.get(v, v), t=t)
     clauses = {}
     for k, v in facts.items():
         if k in SCENE or k in ATTACH:
