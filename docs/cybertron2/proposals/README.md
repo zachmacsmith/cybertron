@@ -183,3 +183,4 @@ Newest first. Ideas decided or rejected in conversation before 23 Oct are backfi
 | 23 Oct | Smelting by charcoal or timber; unexplored places reached by following an unexplored way | accepted: D4-46, D4-47 | conversation (spec: world/places.md, edges.md; recipes: 37.2) |
 | 23 Oct | Each state shows a bundle of signs, each with a sense, a chance, conditions and a knack; observers roll on their own | accepted: D4-48 | spec/information/perception.md |
 | 23 Oct | The senses across every system: what the observer brings, and coverage by system (Zach's worklist) | discussion | [senses.md](senses.md) |
+| 23 Oct | Life: partners, children by choice, growing up in rounds, death of old age, inheritance | discussion | [life.md](life.md) |
