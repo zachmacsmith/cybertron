@@ -294,3 +294,16 @@ def test_sowing_names_its_seed_and_the_unsown_rest_can_still_be_broken():
     assert "say which seed" in do(w, "Edric", do="work", what="sow", at="Long Field")
     do(w, "Edric", do="work", what="sow", at="Long Field", item="grain")
     assert do(w, "Edric", do="work", what="hoe", at="Long Field").startswith("You hoed")    # the rest of the field
+
+
+def test_a_hired_worker_puts_the_work_into_the_employers_store():
+    from cybertron2.engine import agreements as AG
+    w = world()
+    give(w, "Simkin", crude_tool=1)
+    w.s["people"]["Simkin"]["at"] = "millbrook"
+    w.s["day"] = w.s["parcels"]["long_field"]["crop"]["ripe_day"]
+    assert "you may not use" in do(w, "Simkin", do="work", what="reap", at="Long Field", **{"for": "the Reeds"})
+    w.s["agreements"]["A1"] = {"node": "millbrook", "day": w.d, "status": "open", "parties": ["Fenn", "Reed"],
+                               "legs": [{"work": 1, "done": 0, "by": None, "from": "Fenn", "to": "Reed", "when": {}}]}
+    r = do(w, "Simkin", do="work", what="reap", at="Long Field", **{"for": "the Reeds"})
+    assert "into Reed House" in r, r                                           # D2-37: for the employer, into its store

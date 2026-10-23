@@ -153,7 +153,7 @@ def _out(here, party) -> str:
     cid = here.party_container(party)
     if cid is None:
         raise Refused(f"{party} has nothing here to put it into")
-    if cid != here.hands and not here.may_take(cid) and cid.startswith("stock:"):
+    if cid != here.hands and not here.may_take(cid) and cid.startswith("stock:") and not here.works_for(party):
         raise Refused(f"you may not use {party}'s store (you are not of that household): do it for yourself, then give it to one of "
                       f"them or leave it at their house")
     return cid

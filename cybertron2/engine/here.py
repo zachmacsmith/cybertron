@@ -247,6 +247,13 @@ class Here:
         hh = self._w.household_of(who)
         return {aid: a for aid, a in self._w.s["agreements"].items() if who in a["parties"] or hh in a["parties"]}
 
+    def works_for(self, party) -> bool:
+        """An open agreement in which I (or my household) owe work to this party (D2-36 to D2-38: the worker acts for the employer)."""
+        mine = {self.name, self._w.household_of(self.name)}
+        theirs = {party, self._w.household_of(party) if party in self._w.s["people"] else party}
+        return any(a["status"] == "open" and "work" in l and l["done"] < l["work"] and l["from"] in mine and l["to"] in theirs
+                   for a in self.agreements().values() for l in a["legs"])
+
     # ------------------------------------------------------------------ acting, at this node only
     def apply(self, prim, **kw):
         return self._w.apply(prim, self.node, **kw)
