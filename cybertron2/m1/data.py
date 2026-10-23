@@ -91,6 +91,7 @@ SKILL_WORDS = ((1.6, "master"), (1.2, "skilled"), (0.8, "competent"), (0.0, "nov
 PHYSICS = {
     "units": {"summer": 7, "autumn": 6, "winter": 5, "spring": 6},
     "youth_units": 4,
+    "elder_units": 5,
     "ration": 1.0,
     "shelter": {"housed": 1.0, "damaged": 1.2, "unsheltered": 1.5},
     "shelter_cold": {"housed": 1.0, "no_fuel": 1.3, "damaged": 1.5, "unsheltered": 2.0},

@@ -1,0 +1,9 @@
+# M1 run B: the same node as run A (m1_founders.yaml: Millbrook, its parcels, houses, herd, incidents and signs), peopled by the
+# generator (cybertron2.m1.generate): a family tree from two founding couples about three generations back, the living sorted into
+# the two lines' households, kin derived from the tree, a feud, debts, friendships, an old love, hard winters remembered, each
+# line's crafts handed down. The lines hold the same leverage as in run A: the Reeds the sickle and the reaping, the Fenns the axe,
+# the felling and the hunting, and the pottery (the firing pit is not yet built).
+node_from: m1_founders.yaml
+lines:
+  Reed: {crafts: [reap, bread, pottage], tools: [sickle], holdings: {grain: 1}}
+  Fenn: {crafts: [fell, hunt, pot, firing pit, line], tools: [axe], holdings: {meat: 1, clay: 2}}

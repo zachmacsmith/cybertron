@@ -73,7 +73,8 @@ def _kin(w, name) -> list:
         same = b["household"] == a["household"]
         if rel or same:
             dead = "" if b["alive"] else " (dead)"
-            out.append(f"- {x}: {rel or 'of your household'}{dead}" + (f"; {b['trade']}" if b.get("trade") else ""))
+            st = {"child": " (a child)", "youth": " (a youth)", "elder": " (an elder)"}.get(b.get("stage"), "")
+            out.append(f"- {x}{st}: {rel or 'of your household'}{dead}" + (f"; {b['trade']}" if b.get("trade") else ""))
     for x, b in w.s["agents"].items():
         if x != name and x not in a["relations"] and b["household"] != a["household"]:
             out.append(f"- {x}: of {w.s['houses'][b['house']]['name'] if b['house'] else 'no house'}" + (f"; {b['trade']}" if b.get("trade") else ""))
@@ -119,7 +120,8 @@ def system_prompt(w, name) -> str:
     p = w.p
     lines += ["", "How life works here:",
               f"- A day: you plan in the morning, may talk before work, then work. Work is counted in units: {p['units']['summer']} in "
-              f"summer, {p['units']['autumn']} in autumn, {p['units']['winter']} in winter ({p['youth_units']} for a youth); fewer when "
+              f"summer, {p['units']['autumn']} in autumn, {p['units']['winter']} in winter (at most {p['youth_units']} for a youth, "
+              f"{p['elder_units']} for an elder); fewer when "
               "hungry or hurt. Any units you do not use are wasted.",
               f"- Each night everyone eats {p['ration']:g} food, from what they carry first, then from their house's store. Without a "
               "sound, warm house you need more. Missed meals make you hungry, then starving; starving people work less and can die.",

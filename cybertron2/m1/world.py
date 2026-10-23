@@ -159,7 +159,9 @@ class World:
 
     def units_for(self, name) -> int:
         a = self.s["agents"][name]
-        base = int(self.p["youth_units"]) if a["stage"] == "youth" else int(self.p["units"][self.calendar()["season"]])
+        base = int(self.p["units"][self.calendar()["season"]])
+        if a["stage"] in ("youth", "elder"):
+            base = min(base, int(self.p[f"{a['stage']}_units"]))
         if a["hunger"] == -1:
             base = max(2, base - 1)
         elif a["hunger"] == -2:
