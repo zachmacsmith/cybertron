@@ -178,3 +178,47 @@ def era_contrast(seeds=range(40)):
 if __name__ == "__main__":
     report()
     era_contrast()
+
+
+# ---------------------------------------------------------------- 23 Oct (b): shared hidden state and a cascade
+# A node's low ground has a water table; its latrines sit on it; its well draws from it. Each variable relaxes toward a baseline
+# and is pushed by the day's spell; hazards read the variables. Effects propagate one step a day (no loops within a day).
+def cascade(seed, weather_days, people=18, latrine_near_well=True):
+    table, well, sick, immune, flooded_days, log = 0.3, 1.0, 0, 0, 0, []    # water table 0..1; well quality 0..1 (1 clean)
+    for day, w in enumerate(weather_days):
+        push = {"wet": 0.08, "dry": -0.05, "normal": -0.01, "cold snap": 0.0}[w]
+        table = min(1.0, max(0.0, table + push - 0.05 * (table - 0.3)))         # relax toward 0.3
+        flooded = table > 0.8
+        flooded_days += flooded
+        # latrines overflow into the well when the table is high; the well clears slowly
+        seep = (0.25 if latrine_near_well else 0.05) * max(0.0, table - 0.6)
+        well = min(1.0, max(0.0, well - seep + 0.08 * (1 - well)))
+        # flux: each healthy, non-immune drinker falls ill with a chance from the well's dirt; and from the sick (contact)
+        dirt = 1 - well
+        new = 0
+        for i in range(people - sick - immune):
+            p = 0.03 * dirt + 0.01 * sick / people
+            if rng(seed, "flux", i, day).random() < p:
+                new += 1
+        rec = sum(1 for i in range(sick) if rng(seed, "flux-rec", i, day).random() < 0.15)
+        sick, immune = sick + new - rec, immune + rec
+        log.append((day, w, round(table, 2), round(well, 2), sick))
+    return log, flooded_days
+
+
+def cascade_report(seed=3):
+    print("\n## A cascade from shared hidden state: wet spell -> water table -> latrines into the well -> flux\n")
+    wet = ["normal"] * 5 + ["wet"] * 10 + ["normal"] * 15
+    dry = ["normal"] * 5 + ["dry"] * 10 + ["normal"] * 15
+    for name, days, near in (("a wet spell, latrine near the well", wet, True), ("a wet spell, latrine away from the well", wet, False),
+                             ("a dry spell", dry, True)):
+        log, fd = cascade(seed, days, latrine_near_well=near)
+        peak = max(x[4] for x in log)
+        worst_well = min(x[3] for x in log)
+        total = sum(1 for i in range(1, len(log)) if log[i][4] > log[i - 1][4])
+        print(f"- {name}: water table peaks at {max(x[2] for x in log):.2f}, flooded {fd} days, the well falls to {worst_well:.2f} "
+              f"clean, flux peaks at {peak} sick of 18")
+
+
+if __name__ == "__main__":
+    cascade_report()
