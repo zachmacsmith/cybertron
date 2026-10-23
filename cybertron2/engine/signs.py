@@ -157,8 +157,10 @@ HERD = [
          text=lambda x: f"a bull kept on his own on {x.nm}"),
     dict(when=lambda x: x.h.get("in_milk", 0) >= 0.5, sense="sight", p=0.1, tags=["animals", "food"], knack="milk",
          text=lambda x: f"{max(1, round(x.h['in_milk']))} cow{'s' if round(x.h['in_milk']) > 1 else ''} of {x.h['name']} heavy with milk"),
-    dict(when=lambda x: x.h.get("watched") != x.day and x.adj_crop, sense="sight", p=0.2, tags=["animals", "farming"],
-         text=lambda x: f"nobody is watching {x.h['name']}, and only a broken hedge stands between them and {x.adj_crop}"),
+    dict(when=lambda x: x.h.get("watched") != x.day and x.adj_crop and not x.fenced, sense="sight", p=0.2, tags=["animals", "farming"],
+         text=lambda x: f"nobody is watching {x.h['name']}, and only open ground lies between them and {x.adj_crop}"),
+    dict(when=lambda x: x.h.get("watched") != x.day and x.adj_crop and x.fenced == "gappy", sense="sight", p=0.25, tags=["animals", "farming"],
+         text=lambda x: f"nobody is watching {x.h['name']}, and the fence between them and {x.adj_crop} has gaps in it"),
 ]
 
 
@@ -446,6 +448,9 @@ def context(here, pid, h=None):
     x.herds_on = lambda q: [k for k, g in here.herds().items() if g["parcel"] == q and FM.head(g) > 0]
     standing = [here.parcels()[q]["name"] for q in p["adj"] if (here.parcels()[q].get("crop") or {}).get("area_left", 0) > 1e-6]
     x.adj_crop = standing[0] if standing else None
+    fc = p.get("fence") or {}                                                  # the parcel's own fence (livestock.md, D2-130)
+    x.fenced = None if not fc.get("built") or int(fc.get("level", 0)) <= 0 or fc.get("gate") == "open" else (
+        "whole" if int(fc["level"]) >= 2 else "gappy")
     plural = bool(c) and str(c.get("kind", "")).endswith("s")
     x.be, x.stands = ("are", "stand") if plural else ("is", "stands")
     if c:
