@@ -265,6 +265,11 @@ does.
   includes all salient facts plus the most relevant to the observer, and returns the ids it conveyed, which alone go into the
   knowledge store.
 
+- 23 Oct: test run 2b (Opus, same prompt, 5 calls, $0.11): reads best and takes the observer's view most clearly (58/64 facts, no
+  clause without a fact) but takes more small liberties than Sonnet (6 stretches, e.g. ordering the deer prints and the boots in a
+  way the facts do not give, which a hunter would act on) and costs twice as much. For the observer's eye Sonnet is enough; any
+  narrator needs a check that catches facts joined into new causes or orders, not only new facts.
+
 ## Sources
 
 cybertron2/prompt.py and perceive.py (as built), 38.02, knowledge.md, notes.md, verbs.md, D4-6, D4-11, D4-19, D4-21, D2-4.
