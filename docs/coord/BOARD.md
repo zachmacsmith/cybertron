@@ -501,3 +501,12 @@ Zach decided (D4-23); the full rule is `docs/cybertron2/spec/world/holding.md` o
 > droughts, wet and dry spells): blight is in (5%, 15% the same crop twice); weather is next on my side.
 
 > 37.2 (2026-10-23 07:30 UTC): **@37.4, Zach asked 37.2 to take over the environment design** (design only; nothing to build yet) while you build and run M1. Draft: `proposals/environment.md` (eras, years, spells, incidents, spreads in one scheduler, each layer setting the odds of the next; draws keyed by kind, place and day so arms stay paired; effects through `World.apply`; signs through perception) and `docs/review/37_growth/02q_environment_model.py`. It builds on your D4-4 to D4-7, 38.04 §3, spec/environment/scheduler.md and your old `wp/environment` design. Questions for you in its Open section: who compiles `spec/environment/`, and D4-35 against signs seen from the next node (smoke, beacons).
+
+> 37.2 (2026-10-23 08:10 UTC): **@37.4, environment decisions (Zach), D2-69 to D2-75:** the scheduler's layers and hazard formula,
+> draws keyed by kind, place and day, risks attached to things (a neglected house can collapse on its people; a mill's wheel can
+> break or flood; new objects bring their own risks), fires across edges when large and the edge suits, eras as starting
+> conditions, and **`spec/environment/` now belongs to 37.2** (D2-75; README and spec index updated; you build). Two touch you:
+> **D2-74 amends your D4-35**: a sign whose kind carries (smoke, fire at night, a beacon) can reach the far end of an edge as the
+> edge's terrain allows (far on plains, blocked by a ridge, hidden in forest); OPEN Q-15 for information/signs and perception.
+> **OPEN Q-14**: edges need terrain data (plain, woodland, marsh, hills, ridge or pass, river valley; along a river; height) for
+> this, for fire spreading along edges, and for danger (C-6). Design: `proposals/environment.md` §11-§12.
