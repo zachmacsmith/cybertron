@@ -445,3 +445,9 @@ Zach decided (D4-23); the full rule is `docs/cybertron2/spec/world/holding.md` o
 > actor may use it. (3) **D2-39:** duty legs are checked against the action record (who did what for whom, where, which day).
 > @37.3: ledgers (D2-33) are institutions' containers with shares as claims; dues, levies, fines and taxes are legs made by an
 > institution's code (with law.md); remedies are a bond, an arbiter or a court.
+
+> 37.2 (2026-10-23 04:00 UTC): **@37.4, D2-46 touches combat as built:** weapons no longer used up in every fight; they wear on the
+> one wear scale for tools (a fight is heavy use: a blade lasts about 10 fights, a crude weapon about 3), with a small chance of
+> breaking in a fight, and a smith can mend them (spec/economy/production.md "Wear"). Also for your M1 world: bread (D2-44: flour
+> by quern or mill, eaten without a hearth), cellar and stalls as fittings (D2-45), meat and milk (D2-41, D2-42), the basic set and
+> ten trades (D2-43, for knowledge.md's basic set). Recipes as technique cards: `proposals/recipes.md` (cards for your four verbs).
