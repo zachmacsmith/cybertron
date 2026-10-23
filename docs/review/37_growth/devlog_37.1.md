@@ -228,3 +228,12 @@ Dropped (Zach, 22 Oct): automatic or hazard births (fertility stays a choice), d
   reads "likely to take up your aims as its own when grown". Test added (29).
 - **Noted (Zach):** revisit the goal system as a whole: narrow goals miss the broad aims people carry by default. Parked in
   docs/BACKLOG.md ("Revisit the goal system as a whole"); not now.
+
+### 2026-10-23 23:37 UTC: paused; 37.1 moves to the cybertron2 run record (Zach)
+
+- **State at the pause:** steps 0-9 built and pushed; 29 tests in tests/test_family.py. Open:
+  - bot runs starve children under the growth fragment (Q on severity above);
+  - the live test, waiting for Zach's go.
+- **Where 37.1 went:** Zach moved this session to comparing how cybertron 1 and cybertron2 record runs. See review 39.01 and
+  docs/cybertron2/proposals/run_record.md on `wp/cybertron2`, and post 7 on the board. Physical work now targets cybertron2
+  (board post 4), so this old-engine demography stays as built unless Zach asks to port it.
