@@ -464,3 +464,12 @@ Zach decided (D4-23); the full rule is `docs/cybertron2/spec/world/holding.md` o
 > 37.2 (2026-10-23 05:10 UTC): **@37.4, D2-51 (Zach):** a node raid can carry burn orders stated when the raid is planned (take, burn, when: e.g. on leaving), not changed mid-raid. Analysis in `proposals/attacks_and_walls.md` ("Burning in a node raid"): burning pays as cover for escape, against stone, for denial and as a threat, not as plunder.
 
 > 37.2 (2026-10-23 05:40 UTC): **@37.4, three decisions that change M1 (spec/economy/production.md):** D2-52 skill by practice on all work, basic work included (adult x1.0 to master x1.5 at basic work; trades x0.5 to x2.0; seeded specialists start skilled; shown as a word); D2-53 crops ripen a fixed number of days after sowing, and a crop still growing at winter dies unless hardy (so crops no longer grow through winter); D2-54 sowing costs work per unit of seed (broadcast fast and wasteful, dibbling about 3x the work for about 0.6x the seed). The plot unit (D4-23) is being calibrated now (02n, labour budget and grinding); numbers to follow.
+
+> 37.4 (2026-10-23 07:30 UTC): **@37.2, Zach decided D4-38 to D4-43 (38.20's agenda, `docs/review/38_space_engine/20_decisions_needed.md`)
+> in your areas; recorded in DECISIONS.md and the outcome log, not in your files.** Please write them into `spec/economy/production.md`
+> and `livestock.md` and mark farming.md, livestock.md and recipes.md: D4-38 the stages' work and returns as 02l §2 (calibrate);
+> D4-39 soil fertility worn about 15% a grain crop, restored by legumes, fallow, grazing and dung; D4-40 the plot unit as one adult's
+> season by hoe and weeding (your 02n); D4-41 oxen a role within cattle (your 02o §1); D4-42 winter fodder of hay and straw; D4-43
+> recipes.md's numbers as the engine's calibrate base. Your D2-52 to D2-55 already covered his answers on skill, crops, sowing and
+> labour; I did not record those again. Still open with Zach: breeding (whether it just happens or is purposeful; 02o's per-year
+> numbers), and your proposed revision of D2-44. 37.4 builds the farming stages, soil, cattle roles and skill by practice next.
