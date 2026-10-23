@@ -43,6 +43,24 @@ with about 30% less work per person than a household alone.
    wastes seed) or **dibbling** (about three times the work, about 40% less seed for the same harvest), which matters after a bad
    harvest when seed is short (D2-17). The ox plough raises plots per adult; a seed drill comes much later (economy_later.md).
 
+### Raising what a plot can produce (23 Oct, discussion)
+
+Zach: skill should raise some production, not only cut work; and something (infrastructure or skill) should raise a plot's total
+capacity. What already does: weeding raises the harvest; manure and a grazed fallow lift fertility above the soil's natural level
+(to about 1.15). What is missing is anything **permanent**. Proposed for the first worlds:
+
+| Lever | What it does to a plot | Cost | Who it belongs to |
+|---|---|---|---|
+| **a master farmer's skill** (D2-52) | yield x1.2 at mastery, and the work x0.7 | a season's practice | the farmer |
+| **ditches and banks** (field works) | the plot's natural fertility rises from 1.0 to about 1.2; less loss to wet years and straying animals | about 20 units of a crew's work a plot, and upkeep each season | **the plot**: it stays with the land when it changes hands |
+| **terraces** (hill land) | a hill plot yields like a valley plot | about 30 units a plot, stone | the plot |
+| **seed selection** (a technique, learned by practice) | the sower's crops ripen about 15% sooner, so more harvests fit in a season | practice over several harvests | the farmer |
+| irrigation (later: D2-14) | a much larger rise on river land | a crew, a channel, an institution to share the water | the plot and the channel |
+
+Together these lift the ceiling by about x1.7 on top of the methods, mill and bread (food ladder, recipes.md §16). **Works that
+belong to the plot make tenure matter:** who pays for the ditches, and who gains if the land is let or inherited (D4-23; a lease's
+terms in agreements). That is the old engine's lesson (review 15 §2.7) carried over.
+
 ## Why
 
 - Optional stages let the cheap path exist without making it the best path everywhere: the choice follows land and labour, so
@@ -99,6 +117,9 @@ with about 30% less work per person than a household alone.
   without weeding (weeding and reaping dominate). At the engine's rates a net ration costs about 0.5 units (the critique's 8% holds);
   food reaches 25-30% only with grinding (0.2-0.25 a ration), grain costing about 0.85 units a ration (a lower return than the
   engine's 5x), and a real dependency ratio. Recommended for Zach: the plot unit, grain's cost, grain spoiling about 1% a day.
+
+- 23 Oct: Zach: skill should raise some production; something should raise a plot's total capacity. Proposed: master skill x1.2
+  yield and x0.7 work; ditches and banks, terraces (works that belong to the plot); seed selection; irrigation later.
 
 ## Sources
 
