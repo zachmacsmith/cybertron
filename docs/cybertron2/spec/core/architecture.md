@@ -8,6 +8,10 @@ form.
 
 ## Decided
 
+- H-1: cybertron2 is a new engine in its own package, `cybertron2/`; the old engine is frozen for the bench batches and
+  published runs.
+- H-2: the physical systems are ported onto nodes; the institutional layer is copied keeping its interface and fixes; only leaf
+  modules are imported unchanged.
 - D4-1: start from what 37.2 built and extend it; what does not match the plans is redesigned, not patched.
 - D4-34: the engine is rebuilt on the designed general core: state by place, containers as records, buildings from fittings, one
   chokepoint of primitives with hooks and causes, placed events, agent-facing code that sees only `Here` and `Mind`, and households,
@@ -40,4 +44,4 @@ The tables of the state and the primitives are listed in the engine reference, r
 
 38.07 §2-§5, 38.08 M1, 38.16, 38.17; proposals/place.md.
 
-*Current as of 23 Oct 2026: D4-1, D4-24, D4-34, D4-35.*
+*Current as of 23 Oct 2026: H-1, H-2, D4-1, D4-24, D4-34, D4-35.*

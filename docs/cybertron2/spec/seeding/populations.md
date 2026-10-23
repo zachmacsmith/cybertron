@@ -8,6 +8,7 @@ knowledge from that person's own position.
 
 ## Decided
 
+- H-4: worlds are almost always seeded with an existing society.
 - D4-21: worlds are seeded as a society with a past, with a full family tree of the whole population (living and dead, back to the
   founders; every kin tie derived from it), relationships, debts, holdings, standing, institutions and a short history, written
   into each agent's knowledge from its own position.
@@ -33,4 +34,4 @@ The tree (every person, living and dead), the history, and each person's seeded 
 
 38.09 §3c; cybertron2/m1/generate.py (moving to the rebuilt engine).
 
-*Current as of 23 Oct 2026: D4-19, D4-21, D4-33.*
+*Current as of 23 Oct 2026: H-4, D4-19, D4-21, D4-33.*

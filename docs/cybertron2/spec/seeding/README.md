@@ -9,6 +9,7 @@ Starting worlds. Owner: 37.4.
 
 ## Decided so far
 
+- H-4: worlds are almost always seeded with an existing society.
 - D4-21: worlds are seeded as a society with a past, with a full family tree.
 - D4-33: a seeded person's knowledge of other lines' crafts is awareness, not skill; a village's repute is the crafts of the lines
   born there.
