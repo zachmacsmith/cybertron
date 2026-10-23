@@ -53,6 +53,7 @@ Newest first. Ideas decided or rejected in conversation before 23 Oct are backfi
 
 | Date | Idea | Outcome | Where |
 |---|---|---|---|
+| 23 Oct | Port cybertron 1's private-message ration; make speaking aloud cost a unit of work | accepted: D4-31 | spec/information/speech.md |
 | 23 Oct | Speech in one's own house only (M1) | replaced: any building one has access to, access as data | D4-30 |
 | 23 Oct | Re-ask everyone who heard anything in the talk step (M1) | rejected (Zach): only direct speech wakes | D4-25 |
 | 23 Oct | Speech in a building reaches those with access on the node that day, not those inside at talk time | accepted: D4-25 | spec/information/speech.md |

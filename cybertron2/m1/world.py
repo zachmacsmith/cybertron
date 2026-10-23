@@ -97,12 +97,20 @@ class World:
                 "frailty": round(random.Random(f"{self.seed}|frailty|{name}").uniform(lo, hi), 4),
                 "attack": round(random.Random(f"{self.seed}|attack|{name}").uniform(blo, bhi), 4),
                 "defence": round(random.Random(f"{self.seed}|defence|{name}").uniform(blo, bhi), 4),
-                "relations": dict(a.get("relations") or {}), "notes": {}, "pinned": None}
+                "relations": dict(a.get("relations") or {}), "notes": {}, "pinned": None,
+                "messages": self._message_limit(name)}
         self.s = s
         from cybertron2.m1 import knowledge as KN, perceive as PC
         for name, a in spec["agents"].items():
             KN.seed(self, name, a)
             PC.seed(self, name, a)
+
+    def _message_limit(self, name) -> int:
+        """Private messages a day: the base plus a personal jitter drawn once, capped (cybertron 1's dms_per_round, D4-31)."""
+        m = self.p["messages"]
+        w = {int(k): float(v) for k, v in m["jitter"].items()}
+        extra = random.Random(f"{self.seed}|messages|{name}").choices(list(w), weights=list(w.values()))[0]
+        return min(int(m["max"]), int(m["per_day"]) + extra)
 
     # ------------------------------------------------------------------ reads
     @property

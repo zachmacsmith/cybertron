@@ -13,6 +13,7 @@ without interrupting them.
 - D4-15: speech is not a round late: a talk step among the people at the node, before work.
 - D4-25: who hears and who is woken (below).
 - D4-30: speaking in a building is one action for any building one has access to; access is data on each building.
+- D4-31: private messages rationed a day (cybertron 1's limit); speaking aloud takes one unit of work.
 
 ## Mechanics
 
@@ -21,6 +22,11 @@ without interrupting them.
 | to one person | that person, at the node | yes: asked again before work; may answer or change plans |
 | in a building (any one the speaker has access to) | everyone with access to it who is at the node that day, wherever they are | no |
 | to the town | everyone at the node | no |
+
+| Speech | Costs |
+|---|---|
+| to one person | one of the day's private messages (answers count too); none left: refused |
+| in a building, or to the town | one unit of the day's work |
 
 - Answers to a message go back the same way and wake their recipient, for a few waves (cybertron 1's DM step).
 - An offer made to one person wakes them, as a message does.
@@ -34,5 +40,7 @@ without interrupting them.
 |---|---|---|
 | waves of answers in one talk step | 2 | calibrate |
 | messages an agent may send in one step | 3 of each kind | calibrate |
+| private messages a day | 3 plus a jitter drawn once per person (weights 37, 37, 18, 8 for +0 to +3), at most 10 | decided (D4-31: cybertron 1's) |
+| work for speaking aloud | 1 unit a say | decided (D4-31) |
 
-*Current as of 23 Oct 2026: D2-7, D4-15, D4-25, D4-30.*
+*Current as of 23 Oct 2026: D2-7, D4-15, D4-25, D4-30, D4-31.*

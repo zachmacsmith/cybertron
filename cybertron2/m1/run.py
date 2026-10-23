@@ -140,6 +140,10 @@ def talk(w, names, replies, results) -> tuple[dict, dict]:
         r = replies[n]
         for x in [x for x in (r.get("say") or []) if isinstance(x, dict) and str(x.get("text", "")).strip()][:MAX_SAY]:
             text, to = str(x["text"])[:600], str(x.get("to") or "everyone")
+            said = sum(1 for y in results[n] if y.startswith("You said ("))
+            if (said + 1) * int(w.p["say_units"]) > w.units_for(n):
+                results[n].append("Refused: say: speaking takes a unit of work, and you have none left for it today")
+                continue
             bid = w.building_by_name(to)
             if bid and not w.has_access(n, bid):
                 results[n].append(f"Refused: say: you have no access to {w.buildings()[bid]['name']}")
@@ -158,10 +162,16 @@ def talk(w, names, replies, results) -> tuple[dict, dict]:
             if not to or to not in names or to == n:
                 results[n].append(f"Refused: tell: nobody called {t.get('to')!r} is here to hear you")
                 continue
+            lim = w.s["agents"][n]["messages"]
+            sent = sum(1 for y in results[n] if y.startswith("You told "))
+            if sent >= lim:
+                results[n].append(f"Refused: tell: you have sent your {lim} private messages for today: 0 left, so every further "
+                                  "tell today will fail too; the count resets tomorrow")
+                continue
             box[to]["heard"].append(f"{n}: {text}")
             PC.store(w, to)["today"]["heard"].append(f"{PC.DIRECT}{n} told you: {text}")
             KN.mentions(w, n, [to], text)
-            results[n].append(f"You told {to}: {text}")
+            results[n].append(f"You told {to}: {text}" + (" (That was your last private message today.)" if sent + 1 >= lim else ""))
         for x in [x for x in (r.get("explain") or []) if isinstance(x, dict)][:2]:
             to, tech = w.person(x.get("to")), KN.resolve(x.get("what"))
             if not to or to not in names or tech is None:
@@ -259,7 +269,8 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False) -> 
         for wave in range(WAVES):                                       # only those spoken or offered to directly are asked again
             if not woken:
                 break
-            texts = {n: PR.talk_prompt(w, n, b["heard"], b["also"], b["offers"], b["opened"], b["cards"]) for n, b in woken.items()}
+            texts = {n: PR.talk_prompt(w, n, b["heard"], b["also"], b["offers"], b["opened"], b["cards"], results[n])
+                     for n, b in woken.items()}
             rr, mm, ee = _parallel(lambda n: decide(w, n, texts[n], openings[n] + "\n\n" + texts[n], systems[n], backend, conv, woken[n]),
                                    {n: (n,) for n in woken}, workers)
             late = {}
@@ -283,7 +294,8 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False) -> 
         plans = {n: [x for x in (replies[n].get("actions") or []) if isinstance(x, dict)][:MAX_ACTIONS] for n in names}
         order = list(names)
         w.rng("order", day).shuffle(order)
-        budget = {n: w.units_for(n) for n in names}
+        spoke = {n: sum(1 for y in results[n] if y.startswith("You said (")) * int(w.p["say_units"]) for n in names}
+        budget = {n: max(0, w.units_for(n) - spoke[n]) for n in names}           # speaking aloud took units (D4-31)
         used = {n: 0 for n in names}
         rep = {n: {} for n in names}
         for i in range(max((len(p) for p in plans.values()), default=0)):

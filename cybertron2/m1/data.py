@@ -103,4 +103,6 @@ PHYSICS = {
     "notes": {"max": 8, "words": 150, "open": 2},
     "felt_watched": 0.3,
     "glimpse": 3,
+    "messages": {"per_day": 3, "jitter": {0: 37, 1: 37, 2: 18, 3: 8}, "max": 10},   # private messages a day (cybertron 1's DM limit)
+    "say_units": 1,                                                                     # a say (public or in a building) takes 1 unit
 }

@@ -94,10 +94,10 @@ REPLY_LINES = """Reply with JSON:
 - "why": a sentence or two on what you mean to do today and why.
 - "actions": today's plan, in order, each {"do": verb, ...}. Actions beyond your units are not done.
 - "tell": [{"to": a person, "text"}] said to that person alone. They hear it before the day's work and may answer or change
-  their plans.
+  their plans. You have a set number of private messages a day (answers count too); shown each morning.
 - "say": [{"to": "everyone" or a building you have access to, "text"}] said to the whole village, or in a building (everyone who
   has access to it and is here today hears it, wherever they are). They hear it, but it does not call them away from their day:
-  they take it in when they next have a moment.
+  they take it in when they next have a moment. Each thing you say aloud takes one unit of your day's work.
 - "explain": [{"to", "what": the craft's name}] explain a craft you know well to someone (they get a rough idea of it; free).
 - "offers": [{"to": a person or "anyone", "give": "2 bread", "get": "1 timber"}] an exchange anyone named may accept today. What
   you offer comes from your hands, then your house's store; it is set aside until taken, or returned to your hands at nightfall.
@@ -244,7 +244,8 @@ def turn_prompt(w, name, opening=True) -> str:
         if own:
             L.append("## Your own memory of recent days (written by you)\n" + "\n".join(f"- {x['span']}: {x['text']}" for x in own))
     L.append(f"## Now\n{cal['season'].capitalize()}, day {cal['day']} of {w.season_len} ({cal['left']} left in the season)"
-             + (", and cold" if w.cold() else "") + f". You have {w.units_for(name)} units of work today.")
+             + (", and cold" if w.cold() else "") + f". You have {w.units_for(name)} units of work today (saying something aloud "
+             f"takes one) and {a['messages']} private messages.")
     rec = _yesterday_record(w, name, opening)
     if rec:
         L.append("## What happened yesterday\n" + "\n".join(rec))
@@ -292,7 +293,7 @@ def turn_prompt(w, name, opening=True) -> str:
     return "\n\n".join(L)
 
 
-def talk_prompt(w, name, heard: list, also: list, offers: list, opened: list, cards: list) -> str:
+def talk_prompt(w, name, heard: list, also: list, offers: list, opened: list, cards: list, results_so_far=None) -> str:
     """Asked again before work, in the same conversation: what was said to it, offers made to it, what else it heard this morning,
     notes it opened, crafts it looked up."""
     L = ["## Before the day's work"]
@@ -306,8 +307,9 @@ def talk_prompt(w, name, heard: list, also: list, offers: list, opened: list, ca
         L.append("Your notes:\n" + "\n".join(f"- \u201c{k}\u201d: {v}" for k, v in opened))
     if cards:
         L.append("What you know of:\n" + "\n".join(f"- {c}" for c in cards))
-    L.append("You may answer (tell, say) and change your plan: give your whole plan for the day again (it replaces the one before). "
-             "Reply with JSON only.")
+    sent = sum(1 for x in results_so_far if x.startswith("You told ")) if results_so_far is not None else 0
+    L.append(f"You have {max(0, w.s['agents'][name]['messages'] - sent)} private messages left today. You may answer (tell, say) and "
+             "change your plan: give your whole plan for the day again (it replaces the one before). Reply with JSON only.")
     return "\n\n".join(L)
 
 

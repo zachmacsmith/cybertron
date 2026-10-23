@@ -127,3 +127,20 @@ def test_milking_needs_a_cow_in_milk_and_the_craft():
     assert "milk" in " ".join(KN.options(w, "Maud")[0])
     assert AC.do(w, "Maud", {"do": "work", "what": "milk"}, today).startswith("You milked")
     assert AC.do(w, "Osric", {"do": "work", "what": "milk"}, today).startswith("Refused")      # does not know it
+
+
+def test_private_message_ration_and_say_cost():
+    from cybertron2.m1 import run as R
+    w = World(load_spec(SPEC))
+    w.s["today"] = R._blank_today()
+    names = w.agents_acting()
+    lim = w.s["agents"]["Osric"]["messages"]
+    assert 3 <= lim <= 6
+    res = {n: [] for n in names}
+    tells = [{"to": "Agnes", "text": f"m{i}"} for i in range(3)]
+    for _ in range(3):                                                         # three replies of 3 tells each
+        R.talk(w, names, {**{n: {} for n in names}, "Osric": {"tell": tells}}, res)
+    sent = sum(1 for x in res["Osric"] if x.startswith("You told "))
+    assert sent == lim and any(x.startswith("Refused: tell: you have sent your") for x in res["Osric"])
+    R.talk(w, names, {**{n: {} for n in names}, "Osric": {"say": [{"to": "everyone", "text": "a"}, {"to": "Reed House", "text": "b"}]}}, res)
+    assert sum(1 for x in res["Osric"] if x.startswith("You said (")) == 2   # each takes a unit, deducted before work
