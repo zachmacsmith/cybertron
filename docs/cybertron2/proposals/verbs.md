@@ -1,6 +1,6 @@
 # Proposal: the verbs, and what each agent is shown
 
-**Status:** discussion (23 Oct). **Owner:** 37.4. **Affects:** spec/agents/actions.md, information/prompts.md, conflict/,
+**Status:** ready for a decision (23 Oct; Zach likes the verb system; its principle is D4-24). **Owner:** 37.4. **Affects:** spec/agents/actions.md, information/prompts.md, conflict/,
 institutions/, life/. Builds on [knowledge.md](knowledge.md) and 38.06 (every action of cybertron 1 and its fate).
 
 ## Summary

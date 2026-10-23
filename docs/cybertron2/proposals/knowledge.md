@@ -114,6 +114,11 @@ Skill (how well and how cheaply) stays 37.2's continuous practice curve in the e
 | **Reading a method** | `read {document}`, literate, a written method made by someone who knows it | to **capable** |
 | **Trying** | `make` or `build` with a rough idea or capable | success: the result, and a step toward the next level (2 successes from rough idea to capable, 2 more to known); failure: the inputs are lost, and 2 failures count as one success |
 
+**Teaching also passes skill.** Besides the level, a session closes part of the gap between the teacher's skill and the
+learner's: learner's skill += 0.3 x (teacher's skill - learner's skill), x2 for a youth, and only if the teacher's skill is higher. A
+master's apprentice therefore starts well above a novice, and a poor teacher passes the method but little craft; a master's
+teaching is worth more, and can be priced so.
+
 Trying costs more at lower levels: with a rough idea, inputs x1.7 and success about 1 in 2; capable, inputs x1.3 and about 3 in 4;
 known, normal inputs and no failure (skill then sets yield and time).
 
@@ -195,7 +200,9 @@ one mechanism spreads every kind of awareness.
 ### 5. The manual: only common knowledge
 
 A short, free look-up of what everyone in the world knows: how meals, hunger, the cold, travel, the day and the seasons work, how
-to talk and trade. Not recipes or blueprints the agent has not learned. (cybertron 1's manual and look-ups, ported with their
+to talk and trade, **and how people come to know things**: that you learn a craft by being taught, by working beside someone who
+knows it, by reading a written method, or by trying what you have seen at the cost of spoiled materials; that skill grows with
+practice and fades without it; that a master teaches more than a novice. Not recipes or blueprints the agent has not learned. (cybertron 1's manual and look-ups, ported with their
 budget and trimming.)
 
 ### 6. No blind crafting
@@ -258,6 +265,10 @@ and materials, works out a new recipe within their trade) is a later option, tie
 - 23 Oct: Zach: is teaching economically viable, would agents do it, should it take fewer rounds? Teaching became one session (to
   capable; a youth to known), the learner accepting; added when teaching pays (household, apprentice, payment, duty) and when it
   does not (a competitor), as behaviour to measure.
+
+- 23 Oct: Zach: teaching should pass some skill from a master; agents should know how learning works; the world should grow
+  richer by data while agents explore and learn it (D4-24). Added: teaching closes 0.3 of the skill gap (x2 for a youth); the
+  manual explains how people learn.
 
 ## Sources
 
