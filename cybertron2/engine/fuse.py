@@ -158,17 +158,16 @@ def _detect_raid(w, today, e) -> dict:
         if n == e["by"] or w.s["people"][n]["stage"] == "child" or n in (today.get("travel") or {}):
             continue
         if (today.get("guards") or {}).get(n) == bid:
-            p, sign = float(d["watcher"]), f"from your watch at {b['name']}: a shape at the door in the dark, someone trying the bar"
+            p, role = float(d["watcher"]), "watcher"
         elif where.get(n) == bid:
-            p = float(d["dog"]) if b["fittings"].get("dog") else float(d["inside"].get(b["structure"], 0.3))
-            sign = f"a crash at the door of {b['name']}, where you sleep; someone is breaking in"
+            p, role = (float(d["dog"]) if b["fittings"].get("dog") else float(d["inside"].get(b["structure"], 0.3))), "inside"
         elif where.get(n) and w.s["buildings"][where[n]]["node"] == node:
-            p = float(d["neighbour"]) * sound
-            sign = f"a noise in the night from {b['name']}: wood splitting, a muffled voice"
+            p, role = float(d["neighbour"]) * sound, "neighbour"
         else:
             continue
-        if w.rng("fuse-detect", w.d, e["id"], n).random() < min(1.0, p * riders):
-            out[n] = sign
+        if w.rng("fuse-detect", w.d, e["id"], n).random() < min(1.0, p * riders):    # what it senses: signs.NIGHT (D4-48)
+            from cybertron2.engine import signs as SG
+            out[n] = "; ".join(SG.roll(SG.NIGHT, SG.night_context(w, e, role), w.rng("fuse-sign", w.d, e["id"], n), least=True))
     return out
 
 

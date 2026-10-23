@@ -194,3 +194,17 @@ def test_the_urgent_call_is_appended_to_the_agents_conversation(tmp_path, monkey
     R.run(str(p), str(tmp_path / "out"), backend="api", workers=2)
     night = [x for x in sent if "## In the night" in x]
     assert night and "Plan your day" in night[0]                               # the day's turn is before it, in one conversation
+
+
+def test_a_thing_is_a_bundle_of_signs_a_glimpse_from_afar_and_its_contents_only_close(monkeypatch):
+    from cybertron2.engine import signs as SG
+    w = world(weather={1: "clear"})
+    w.s["containers"]["pile:x"] = {"kind": "pile", "node": "millbrook", "parcel": "alder_copse", "goods": {"coin": 5.0, "hide": 1.0},
+                                   "wear": {}, "hidden": "under brush", "day": 0}
+    x = SG.thing_context(w, w.s["containers"]["pile:x"])
+    rng = w.rng("t")
+    far = SG.roll(SG.THING, x, rng, mult=1.0, near=False)
+    close = SG.roll(SG.THING, x, rng, mult=1.0, near=True)
+    assert far and not any("coin" in t for t in far)                    # a glimpse: heaped brush, no contents
+    assert any("coin" in t for t in close)                               # a close look names what is there
+    assert SG.readable({"knows": "hunt"}, set()) is False and SG.readable({"lay": "hunt"}, set()) is True

@@ -11,6 +11,8 @@ Positions are counted from the road's `a` end: a party on its k-th stretch from 
 """
 from __future__ import annotations
 
+from types import SimpleNamespace
+
 from cybertron2.engine import environment as EV, fuse as FU, things as TH
 from cybertron2.engine.data import ITEMS, LANDMARKS, ROADS, TERRAIN, WEATHER
 from cybertron2.engine.world import Refused
@@ -156,14 +158,6 @@ def leave_traces(w, members, t, pos):
     w.s["traces"] = [x for x in w.s["traces"] if w.d - x["day"] <= int(ROADS["trace_days"][x["kind"]])]
 
 
-def trace_words(w, x) -> str:
-    age = w.d - x["day"]
-    when = "fresh" if age <= 0 else ("a day old" if age == 1 else f"{age} days old")
-    many = "a party's" if x["n"] > 2 else "a traveller's" if x["n"] == 1 else "two travellers'"
-    return {"tracks": f"{many} tracks going toward {x['toward']}, {when}", "ruts": f"cart ruts going toward {x['toward']}, {when}",
-            "ashes": f"the ashes of a fire by the road, {when}"}[x["kind"]]
-
-
 def _landmark(w, today, rec, members, t, pos, lm):
     d = LANDMARKS[lm["kind"]]
     road_id = t["road"]
@@ -296,33 +290,37 @@ def travel_with(w, name, other):
 
 # ---------------------------------------------------------------------- daily notices (D2-97)
 def _notices(w, members, t, pos, ps):
+    """What each traveller notices on its stretch tonight, from the bundles in signs.py (ROAD, THING, TRACE, TRAVELLER; D2-97)."""
+    from cybertron2.engine import perceive as PC, signs as SG
     road_id = t["road"]
-    st = stretch(w, road_id, pos)
-    cover = st["terrain"] or "plain"
+    cover = stretch(w, road_id, pos)["terrain"] or "plain"
     sight = EV.visibility(w, None, sense="sight", cover=cover)
-    wx = EV.weather(w)
     for n in members:
-        if wx != "clear":
-            _note(w, n, WEATHER[wx]["words"])
+        know = PC.practised(PC.Mind(w, n))
+        eye = TH.eye(w, n)
+        rng = w.rng("road-notice", w.d, n)
+        for text in SG.roll(SG.ROAD, SG.road_context(w, n, t, pos), rng, know=know):
+            _note(w, n, text)
         for c in things_on(w, road_id, pos).values():
-            x = TH.own(w, c) * sight * TH.eye(w, n)
-            if w.rng("road-thing", w.d, n, id(c) % 997).random() < min(1.0, x):
-                _note(w, n, TH.describe(w, c).replace(" at the road", " by the road"))
+            for text in SG.roll(SG.THING, SG.thing_context(w, c), rng, mult=TH.own(w, c) * sight * eye, know=know, at_node=False):
+                _note(w, n, text)
         for x in w.s.get("traces", []):                                 # traces of others who passed (D2-88): fading
             if x["road"] != road_id or x["pos"] != pos or n in x["by"] or w.d - x["day"] < 1:
                 continue
             fade = 1 - (w.d - x["day"]) / float(ROADS["trace_days"][x["kind"]])
             snow = 3.0 if EV.snow_lying(w) and x["kind"] == "tracks" else 1.0
-            if w.rng("road-trace", w.d, n, x["day"], x["kind"]).random() < min(1.0, 0.3 * fade * snow * sight * TH.eye(w, n)):
-                _note(w, n, trace_words(w, x))
+            for text in SG.roll(SG.TRACE, SG.trace_context(w, x), rng, mult=0.3 * fade * snow * sight * eye, know=know):
+                _note(w, n, text)
         for key, others in ps.items():                                  # other travellers seen far off on the same stretch
             if others == members or key[0] != road_id:
                 continue
             o = w.s["people"][others[0]]["transit"]
-            if position(w, o) == pos and (o["from"], o["to"]) == (t["from"], t["to"]):
+            if position(w, o) != pos or (o["from"], o["to"]) == (t["from"], t["to"]):
                 continue
-            if position(w, o) == pos and w.rng("road-far", w.d, n, others[0]).random() < sight:
-                _note(w, n, f"{len(others)} traveller{'s' if len(others) > 1 else ''} on the road")
+            far = SimpleNamespace(n=len(others), cart=any(w.goods(w.hands(m)).get("handcart", 0) >= 1 for m in others),
+                                  armed=any(w.weapon(m) for m in others), toward=w.s["nodes"][o["to"]]["name"], weather=EV.weather(w))
+            for text in SG.roll(SG.TRAVELLER, far, rng, mult=sight, know=know):
+                _note(w, n, text)
 
 
 def things_on(w, road_id, pos) -> dict:
@@ -342,8 +340,10 @@ def _finds(w, today, rec, members, t, pos):
             continue
         finder = next((n for n in members if w.rng("road-find", w.d, n, cid).random() < min(1.0, TH.own(w, c) * sight * TH.eye(w, n))), None)
         if finder:
+            from cybertron2.engine import signs as SG
+            look = SG.roll(SG.THING, SG.thing_context(w, c), w.rng("road-find-look", w.d, finder, cid), near=True, at_node=False, least=True)
             today["road"]["finds"].append({"id": f"find:{cid}:{finder}:{w.d}", "kind": "find", "road": road_id, "pos": pos, "thing": cid,
-                                           "members": members, "finder": finder, "label": TH.describe(w, c)})
+                                           "members": members, "finder": finder, "label": "; ".join(look) or TH.describe(w, c)})
             rec["finds"].append({"by": finder, "thing": cid})
 
 

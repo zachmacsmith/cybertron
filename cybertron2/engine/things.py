@@ -122,11 +122,6 @@ def describe(w, c) -> str:
     return (f"a heap of {g} lies at {where}" if qty >= float(THINGS["heap_min"]) else f"a pack lies at {where}, with {g} in it")
 
 
-def rot_words(w, c) -> str:
-    where = parcel_name(w, c)
-    return (f"the stink of rot comes from {where}" if not c.get("body") else f"the smell of a body rotting at {where} hangs about the place")
-
-
 # ---------------------------------------------------------------------- the eye for the land (D4-50, D2-91)
 def eye_level(w, name) -> str:
     """none, ordinary or keen: drawn once, raised a step by enough roaming work (hunting, foraging) and finds."""
@@ -175,6 +170,16 @@ def attention(w, name, parcel, target) -> float:
     return float(NOTICING["attention"]["search" if worked else "place"])
 
 
+def close(w, name, c, target=None) -> bool:
+    """A close look: one worked at the spot today, searched it, or it lies in one's own house."""
+    if c.get("in") and c["in"] in w.homes(name):
+        return True
+    pid = c.get("parcel")
+    if pid not in w.s["parcels"]:
+        return False
+    return presence(w, name, pid, 1.0) >= 0.5 and spot_of(w, name) == pid or attention(w, name, pid, target) > 1.0
+
+
 def chance(w, name, c, target=None) -> float:
     """One person's chance today of noticing a thing at its spot (information/noticing.md)."""
     x = own(w, c)
@@ -195,11 +200,15 @@ def known(mind) -> dict:
     return mind.store.setdefault("things", {})
 
 
-def remember(w, name, cid, how) -> None:
-    """One knows a thing is there: it put it there, or noticed it (with the day and the words it saw)."""
+def remember(w, name, cid, how, text=None) -> None:
+    """One knows a thing is there: it put it there, or noticed it (with the day and the words it saw: a glimpse or a close look)."""
     c = w.s["containers"][cid]
     k = w.s["mind"][name].setdefault("things", {})
-    k[cid] = {"day": w.d, "how": how, "node": c.get("node"), "parcel": c.get("parcel"), "text": describe(w, c)}
+    r = k.get(cid) or {"texts": []}
+    text = text or describe(w, c)
+    r.update(day=w.d, how=how, node=c.get("node"), parcel=c.get("parcel"), text=text)
+    r["texts"] = list(dict.fromkeys(r.get("texts", []) + [text]))[-6:]
+    k[cid] = r
 
 
 def known_here(w, name, node) -> dict:

@@ -364,3 +364,178 @@ def facts(here, add) -> None:
         emit(BUILDING, x, [f"building:{bid}"], concerns=x.live)
     for who in here.people():
         emit(PERSON, person_context(here, who), [f"person:{who}"], concerns=[who])
+
+
+# =====================================================================================================================================
+# Things at a spot, the road, traces, travellers far off, and the night (information/noticing.md; D2-85, D2-88, D2-97, D2-81).
+# The same row shape, with two more fields:
+#   reach: how the row is reached. "rule" (default): its p times the noticing rule's chance (things.chance: the thing's own
+#          conspicuousness x the place's sight x presence x attention x the eye); "near": its p, only for one who worked at the spot
+#          or searched it (a close look: what is in a pack, whose body it is); "node": its p, for anyone at the node (a smell).
+#   knows: a technique; the row is read only by one who knows it (an expert's reading); `lay: tech` rows only by one who does not.
+# A thing is known once any of its rows is noticed; what one remembers is the text one noticed (a glimpse or a close look).
+# =====================================================================================================================================
+
+THING = [
+    # a body, fresh (the day of death)
+    dict(when=lambda x: x.body == "fresh", sense="sight", p=1.0, tags=["death"], text=lambda x: f"someone lies still at {x.where}"),
+    dict(when=lambda x: x.body == "fresh", sense="sight", p=1.0, reach="near", tags=["death"],
+         text=lambda x: f"the body of {x.of} lies at {x.where}" + (f", with {x.goods_words} beside it" if x.goods_words else "")),
+    # dead some days
+    dict(when=lambda x: x.body == "days", sense="sight", p=1.0, tags=["death"], text=lambda x: f"a body lies at {x.where}, dead some days"),
+    dict(when=lambda x: x.body == "days", sense="sight", p=1.0, reach="near", tags=["death"],
+         text=lambda x: f"the body of {x.of}, dead some days, lies at {x.where}"),
+    dict(when=lambda x: x.rot and x.body, sense="smell", p=0.3, reach="node", tags=["death", "danger"],
+         text=lambda x: f"the smell of something dead hangs about the place"),
+    dict(when=lambda x: x.rot and x.body, sense="smell", p=1.0, reach="near", tags=["death", "danger"],
+         text=lambda x: f"the stink of a body rotting at {x.where}"),
+    # bones
+    dict(when=lambda x: x.body == "bones", sense="sight", p=1.0, tags=["death"], text=lambda x: f"bones lie at {x.where}"),
+    # a grave
+    dict(when=lambda x: x.grave, sense="sight", p=0.6, tags=["death"],
+         text=lambda x: (f"a cairn of stones at {x.where}" if x.cairn else f"a fresh grave at {x.where}")),
+    # goods in the open
+    dict(when=lambda x: x.heap and not x.hidden and not x.body, sense="sight", p=1.0, tags=["food"],
+         text=lambda x: f"a heap of something at {x.where}"),
+    dict(when=lambda x: x.heap and not x.hidden and not x.body, sense="sight", p=1.0, reach="near", tags=["food"],
+         text=lambda x: f"a heap of {x.goods_words} lies at {x.where}"),
+    dict(when=lambda x: x.pack and not x.hidden and not x.body, sense="sight", p=1.0, tags=["food"],
+         text=lambda x: f"a pack lies at {x.where}"),
+    dict(when=lambda x: x.pack and not x.hidden and not x.body, sense="sight", p=1.0, reach="near", tags=["food"],
+         text=lambda x: f"a pack lies at {x.where}, with {x.goods_words} in it"),
+    dict(when=lambda x: x.at_door, sense="sight", p=0.8, reach="node", tags=["food"],
+         text=lambda x: f"something has been left at the door of {x.door_name}"),
+    dict(when=lambda x: x.rotting_food and not x.body, sense="smell", p=1.0, reach="near", tags=["food"],
+         text=lambda x: f"the stink of meat gone bad at {x.where}"),
+    # hidden
+    dict(when=lambda x: x.hidden == "under brush", sense="sight", p=1.0, tags=["food"],
+         text=lambda x: f"the brush at {x.where} looks heaped up, as if over something"),
+    dict(when=lambda x: x.hidden == "under brush", sense="sight", p=1.0, reach="near", tags=["food"],
+         text=lambda x: f"something hidden under brush at {x.where}: {x.goods_words}"),
+    dict(when=lambda x: x.hidden == "buried" and not x.body, sense="sight", p=1.0, tags=["food"],
+         text=lambda x: f"a patch of turned earth at {x.where}, as if something were buried there"),
+]
+
+ROAD = [
+    # the day's weather on the road
+    dict(when=lambda x: x.weather != "clear", sense="sight", p=0.9, tags=["season"], text=lambda x: x.weather_words),
+    # landmarks, by their state
+    dict(when=lambda x: "ford" in x.lm and not x.state.get("ford"), sense="sight", p=1.0, tags=["travel"], text=lambda x: "you passed a ford"),
+    dict(when=lambda x: "bridge" in x.lm and not x.state.get("bridge"), sense="sight", p=1.0, tags=["travel"], text=lambda x: "you crossed a bridge"),
+    dict(when=lambda x: "pass" in x.lm and not x.state.get("pass"), sense="sight", p=1.0, tags=["travel"], text=lambda x: "you went over a pass"),
+    dict(when=lambda x: "narrows" in x.lm, sense="sight", p=1.0, tags=["travel"], text=lambda x: "the road ran through a narrows"),
+    dict(when=lambda x: "spring" in x.lm, sense="sight", p=0.9, tags=["travel"], text=lambda x: "you drank at a spring by the road"),
+]
+
+TRACE = [
+    dict(when=lambda x: x.kind == "tracks", sense="sight", p=1.0, tags=["travel"],
+         text=lambda x: f"{x.many} tracks going toward {x.toward}, {x.when}"),
+    dict(when=lambda x: x.kind == "ruts", sense="sight", p=1.0, tags=["travel"], text=lambda x: f"cart ruts going toward {x.toward}, {x.when}"),
+    dict(when=lambda x: x.kind == "ashes", sense="sight", p=1.0, tags=["travel"], text=lambda x: f"the ashes of a fire by the road, {x.when}"),
+]
+
+TRAVELLER = [
+    dict(when=lambda x: True, sense="sight", p=1.0, tags=["travel"],
+         text=lambda x: f"{x.n} traveller{'s' if x.n > 1 else ''} on the road" + (" with a cart" if x.cart else "")),
+]
+
+NIGHT = [
+    dict(when=lambda x: x.role == "watcher", sense="sight", p=1.0, tags=["danger"],
+         text=lambda x: f"from your watch at {x.house}: a shape at the door in the dark, someone trying the bar"),
+    dict(when=lambda x: x.role == "inside", sense="sound", p=1.0, tags=["danger"],
+         text=lambda x: f"a crash at the door of {x.house}, where you sleep; someone is breaking in"),
+    dict(when=lambda x: x.role == "neighbour", sense="sound", p=1.0, tags=["danger"],
+         text=lambda x: f"a noise in the night from {x.house}: wood splitting, a muffled voice"),
+]
+
+
+# ---------------------------------------------------------------------- contexts (engine side: things, roads and nights)
+def thing_context(w, c):
+    from cybertron2.engine import environment as EV, things as TH
+    from cybertron2.engine.data import ITEMS, THINGS
+    st = TH.body_state(w, c)
+    qty = sum(q * max(1, ITEMS.get(i, {}).get("weight", 1)) for i, q in c["goods"].items() if q > 1e-9)
+    door = c.get("door")
+    x = SimpleNamespace(c=c, kind=c["kind"], of=c.get("of"), where=TH.parcel_name(w, c), body=st,
+                        grave=bool(c.get("body")) and c.get("buried") is not None, cairn=bool(c.get("cairn")),
+                        hidden=c.get("hidden"), untaught=bool(c.get("untaught")), goods=dict(c["goods"]),
+                        goods_words=TH.goods_words(c["goods"]), qty=qty, heap=qty >= float(THINGS["heap_min"]),
+                        pack=0 < qty < float(THINGS["heap_min"]), rot=TH.rotting(w, c),
+                        rotting_food=any(ITEMS.get(i, {}).get("rot") and q > 0.2 for i, q in c["goods"].items()),
+                        at_door=bool(door) and qty > 0, door_name=w.s["buildings"][door]["name"] if door in w.s["buildings"] else "",
+                        age=w.d - int(c.get("died", c.get("day", w.d))), on_road=c.get("node") not in w.s["nodes"],
+                        weather=EV.weather(w), snow=EV.snow_lying(w), season=w.calendar()["season"], cold=w.cold(), day=w.d)
+    return x
+
+
+def road_context(w, name, t, pos):
+    from cybertron2.engine import environment as EV, roads as RD
+    from cybertron2.engine.data import WEATHER
+    st = RD.stretch(w, t["road"], pos)
+    lm = [l["kind"] for l in st["landmarks"]]
+    state = {l["kind"]: RD.challenge(w, t["road"], pos, l) for l in st["landmarks"]}
+    wx = EV.weather(w)
+    return SimpleNamespace(name=name, terrain=st["terrain"] or "plain", lm=lm, state=state, weather=wx, weather_words=WEATHER[wx]["words"],
+                           snow=EV.snow_lying(w), season=w.calendar()["season"], cold=w.cold(), day=w.d, toward=w.s["nodes"][t["to"]]["name"],
+                           first_night=w.d == t["left"], cart=w.goods(w.hands(name)).get("handcart", 0) >= 1)
+
+
+def trace_context(w, x):
+    from cybertron2.engine import environment as EV
+    age = w.d - x["day"]
+    many = "a party's" if x["n"] > 2 else "a traveller's" if x["n"] == 1 else "two travellers'"
+    return SimpleNamespace(kind=x["kind"], age=age, n=x["n"], toward=x["toward"], many=many, snow=EV.snow_lying(w), weather=EV.weather(w),
+                           when="fresh" if age <= 0 else ("a day old" if age == 1 else f"{age} days old"))
+
+
+def night_context(w, e, role):
+    from cybertron2.engine import environment as EV
+    b = w.s["buildings"][e["building"]]
+    return SimpleNamespace(role=role, house=b["name"], structure=b["structure"], dog=bool(b["fittings"].get("dog")),
+                           riders=bool(e.get("riders")), weather=EV.weather(w), cold=w.cold(), season=w.calendar()["season"])
+
+
+# ---------------------------------------------------------------------- rolling a bundle for one observer
+def readable(row, know) -> bool:
+    """`knows`: only one who knows the technique reads the row; `lay`: only one who does not."""
+    if row.get("knows") and row["knows"] not in know:
+        return False
+    if row.get("lay") and row["lay"] in know:
+        return False
+    return True
+
+
+def true_rows(rows, x) -> list:
+    out = []
+    for i, row in enumerate(rows):
+        try:
+            ok = row["when"](x)
+        except (KeyError, TypeError, ZeroDivisionError, AttributeError):
+            ok = False
+        if ok:
+            out.append((i, row))
+    return out
+
+
+def roll(rows, x, rng, mult=1.0, know=(), near=False, at_node=True, least=False) -> list:
+    """The texts of a bundle one observer notices: each true row it can read, by its reach, at its p times `mult` (the noticing rule's
+    chance for "rule" rows), rolled on its own. With `least`, the likeliest true row if none came up (an event already detected)."""
+    got, best = [], None
+    for i, row in true_rows(rows, x):
+        if not readable(row, know):
+            continue
+        reach = row.get("reach", "rule")
+        p = row["p"](x) if callable(row["p"]) else row["p"]
+        if reach == "near":
+            p = p if near else 0.0
+        elif reach == "rule":
+            p = p * mult
+        elif reach == "node" and not at_node:
+            p = 0.0
+        if best is None or p > best[0]:
+            best = (p, row)
+        if p > 0 and rng.random() < min(1.0, p):
+            got.append(row["text"](x))
+    if least and not got and best is not None:
+        got.append(best[1]["text"](x))
+    return list(dict.fromkeys(got))

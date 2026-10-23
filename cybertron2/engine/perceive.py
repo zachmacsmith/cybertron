@@ -11,7 +11,7 @@ places {node: {name, days, text, seen}}.
 """
 from __future__ import annotations
 
-from cybertron2.engine import knowledge as KN
+from cybertron2.engine import knowledge as KN, signs as SG
 from cybertron2.engine.data import COVERS, EDIBLE, FITTINGS, ITEMS, RESOURCES, TECHNIQUES
 from cybertron2.engine.here import Here, Mind
 
@@ -145,13 +145,14 @@ def facts(here) -> list:
             add([sub], tpl.format(name=nm), sal, ["place"], sense, ambient=True)
     from cybertron2.engine import signs as SG                                  # fields, pastures and herds: bundles of signs
     SG.facts(here, add)
-    from cybertron2.engine import things as TH                                 # things at a spot: one noticing rule (D2-85)
+    from cybertron2.engine import things as TH                                 # things at a spot: their bundles (D2-85, D4-48)
     for cid, c in TH.at_node(here._w, here.node).items():
         about = ([f"parcel:{c['parcel']}"] if c.get("parcel") else []) + [f"thing:{cid}"]
-        tags = ["death"] if c.get("body") else ["food"] if any(ITEMS.get(i, {}).get("food") for i in c["goods"]) else []
-        add(about, TH.describe(here._w, c), TH.own(here._w, c), tags, "sight", thing=cid)
-        if TH.rotting(here._w, c):
-            add(about, TH.rot_words(here._w, c), 0.6, ["death", "danger"] if c.get("body") else ["food"], "smell", thing=cid, rot=True)
+        x = SG.thing_context(here._w, c)
+        for i, row in SG.true_rows(SG.THING, x):
+            p = row["p"](x) if callable(row["p"]) else row["p"]
+            add(about, row["text"](x), p, row.get("tags", []), row.get("sense", "sight"), thing=cid, reach=row.get("reach", "rule"),
+                knows=row.get("knows"), lay=row.get("lay"), sign=f"thing:{cid}#{i}")
     for e in here.events():
         if e["kind"] == "speech":
             continue
@@ -194,6 +195,17 @@ def knack(mind, f) -> float:
     if r and (r.get("level") == "known" and (not KN.basic(k) or float(r.get("skill", lo)) >= lo + 0.05)):
         return 2.0
     return 1.0 if KN.basic(k) else 0.5                                        # ordinary hands read basic work's signs as usual
+
+
+def practised(mind) -> set:
+    """The techniques one reads signs by (a row's `knows`): trades one knows, and basic work long practised."""
+    out = set()
+    for t, r in mind.know.items():
+        if t not in TECHNIQUES or r.get("level") != "known":
+            continue
+        if not KN.basic(t) or float(r.get("skill", KN.curve(t)[0])) >= KN.curve(t)[0] + 0.1:
+            out.add(t)
+    return out
 
 
 def eye(here, name) -> float:
@@ -264,12 +276,19 @@ def evening(w, attend: dict, today: dict) -> dict:
         knows = TH.known_here(w, name, here.node)
         for f in F:
             if f.get("thing"):                                                 # the noticing rule (D2-85): not the salience formula
-                if f["thing"] in knows and knows[f["thing"]].get("text") == f["text"] and not f.get("rot"):
+                if f["text"] in (knows.get(f["thing"]) or {}).get("texts", []):
                     continue                                                    # already known as it is
+                if not SG.readable(f, practised(mind)):
+                    continue
                 c = w.s["containers"][f["thing"]]
-                p = 1.0 if f.get("rot") and TH.presence(w, name, c.get("parcel"), 1.0) >= 0.5 else (
-                    0.3 if f.get("rot") else TH.chance(w, name, c, tgt_raw))
-                if rng.random() < p:
+                reach = f.get("reach", "rule")
+                if reach == "rule":
+                    p = f["salience"] * TH.chance(w, name, c, tgt_raw)
+                elif reach == "near":
+                    p = f["salience"] if TH.close(w, name, c, tgt_raw) else 0.0
+                else:
+                    p = f["salience"]
+                if rng.random() < min(1.0, p):
                     cand.append((1.0 + f["salience"], f))
                 continue
             if f["id"] in seen or f.get("actor") == name or f.get("peek") or f.get("ambient") or not _can_read(mind, f):
@@ -349,8 +368,8 @@ def evening(w, attend: dict, today: dict) -> dict:
             if rose:
                 t["learned"].append(f"From watching {actor} you now have a rough idea of {KN.label(tech)}.")
         for f in notice + att:
-            if f.get("thing") and not f.get("rot"):
-                TH.remember(w, name, f["thing"], "saw")
+            if f.get("thing") and f.get("sense") != "smell":
+                TH.remember(w, name, f["thing"], "saw", text=f["text"])
         for f in con + notice + att:
             if f.get("land"):
                 for sub in f["about"]:
