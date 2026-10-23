@@ -64,6 +64,25 @@ Seeded worlds (D4-21) give every person what their life would have taught them: 
 cook, mend, build a hut), their household's trade (the smiths know smithing), a few things from elsewhere (an elder who once saw a
 mill), and awareness of what their village has. A child learns from its household and from what it sees growing up (09 §2c).
 
+### 4b. How a farmer knows how to farm
+
+Nobody in a seeded world works out farming from nothing: they were raised in it. A farming household's members **know how** to sow,
+tend, reap, thresh, keep and yoke oxen and plough, because that is their seeded upbringing (D4-21), and their **system prompt says
+so in world terms**, from their knowledge record: "You know how to sow and tend barley and beans, reap and thresh, keep and yoke
+oxen, and plough." The turn prompt then shows which of these can be done today (§2). The question "how would they ever figure it
+out" arises only for what is **new to them**:
+
+| Path | How it works |
+|---|---|
+| **Doing it** | making or building something once makes the agent remember how; practice raises the skill (02c §5) |
+| **Seeing it** | watching a neighbour plough with oxen gives awareness; with enough watching, a rough know-how |
+| **Being taught** | someone who knows teaches them, present, over days; youth learn fast and keep it (D4-19) |
+| **Reading** | a written recipe or method, with literacy (02h) |
+| **Trying what you have seen** | an agent may **attempt** something it is aware of but has not been taught, at novice skill: more materials, a chance of failure (the materials spoiled), and success teaches it. This is the bounded form of trial and error: you can only try what you know exists |
+
+**Near misses** help planning: the turn prompt may add, within its budget, what an agent could make here if it had one more input
+("you could make a blade with 4 more copper").
+
 ### 5. The manual: only common knowledge
 
 A short, free look-up of what everyone in the world knows: how meals, hunger, the cold, travel, the day and the seasons work, how
@@ -98,11 +117,16 @@ and materials, works out a new recipe within their trade) is a later option, tie
 3. Whether written recipes need literacy (02h says yes) and how a recipe document looks.
 4. How awareness shows in the prompt (a line "you know of: ploughs (the smith at Millford)").
 5. Invention: later, or never?
+6. Attempting the seen-but-untaught: how much worse (materials, failure chance), and how many successes to learn it.
 
 ## History
 
 - 23 Oct: proposed (37.4, with Zach), after Zach asked how agents can know what they can do and build in a world with many
   possible tools and buildings, and whether to use manuals or Minecraft-style discovery.
+
+- 23 Oct: Zach: remembering what you once built, and being told automatically what you can build, are good; how would a farmer
+  ever know how to farm? Added §4b: farming is known from upbringing and said in the system prompt; for new things, doing,
+  seeing, teaching, reading and attempting what you have seen at novice skill; near misses in the turn prompt.
 
 ## Sources
 

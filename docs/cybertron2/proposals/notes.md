@@ -18,7 +18,7 @@ document; they die with the agent. This is cybertron 1's scratchpad and files (`
 | How many | up to **8 notes** per agent (calibrate) |
 | How long | up to about **150 words** each (calibrate) |
 | Pinned | **one**, shown in full in every turn prompt |
-| The rest | **titles always shown** (one line each, so the agent knows what it has); the agent **opens** up to 2 a round, shown in full in its next turn prompt, or at once if it is asked again in the talk step |
+| The rest | **titles always shown** (one line each, so the agent knows what it has); **opening a note is a talk-step action**: an agent that opens notes in its plan is asked again in the talk step with them shown in full, and may change its plan (cybertron 1's look-ups in the DM step) |
 | Writing | `note {title, text}` (new or replacing), `pin {title}`, `forget {title}`; free (no work units) |
 | Who can read | only the agent |
 | Death | lost, except what was told or written down |
@@ -36,8 +36,8 @@ document; they die with the agent. This is cybertron 1's scratchpad and files (`
 
 - **Memory is short** (2 rounds in full, 8 as one-line summaries, 14 lasting memories), so an agent needs a place for what it wants
   to keep: a plan, a debt someone owes it, a price at Millford, what it thinks of a neighbour, a recipe it was taught.
-- **Opening notes costs attention, not a call:** titles keep the agent aware of what it has; opening one shows it next round,
-  so no extra model call is needed.
+- **Opening a note is useful only if it is shown at once,** so it is part of the talk step: one more call, only for agents who
+  opened something (or received a message), in the same wave.
 - **Keeping notes private keeps documents meaningful.** A document is valuable because it can be carried, copied, stolen and
   outlive its writer; notes cannot. Writing a note down as a document (paper, ink, literacy) is the bridge from one to the other,
   and death without having taught or written is how knowledge is lost.
@@ -54,19 +54,20 @@ knowledge has to reach someone else or outlast the writer, which is where instit
 2. **Many files, all shown**: the prompt budget fills with the agent's own notes.
 3. **Notes as documents** (physical from the start): every reminder would need paper and literacy, and illiterate agents would have
    no memory beyond the engine's.
-4. **A look-up step to read notes before deciding** (cybertron 1's pre-actions): an extra model call each time; the open-for-next-
-   round rule avoids it.
+4. **Opening for the next round** (no extra call): rejected by Zach: a note seen a day later is not worth opening.
 
 ## Open questions
 
 1. How many notes and how long (8 and 150 words as a start).
-2. Whether opening is free and unlimited, or limited to a couple a round (attention).
+2. How many notes may be opened in one talk step (attention).
 3. Whether old notes fade (a memory that is never opened blurs), or stay exact.
 
 ## History
 
 - 23 Oct: proposed (37.4, with Zach): Zach suggested a limited private directory with one pinned note and the rest read by choice,
   never passed on except by telling, and asked whether it is too similar to documents.
+
+- 23 Oct: opening a note became a talk-step action shown at once (Zach: a note shown a day later is not worth opening).
 
 ## Sources
 
