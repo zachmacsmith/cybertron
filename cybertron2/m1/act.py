@@ -293,8 +293,16 @@ def _move(w, name, a, today):
     if h is None:
         raise Refused("you have no house")
     item = _item(a.get("item"))
-    to = str(a.get("to", "house")).lower()
-    src, dst, verb = (me["holdings"], h["stock"], "put") if to.startswith("house") or to == "store" else (h["stock"], me["holdings"], "took")
+    to = str(a.get("to") or "house").strip().lower().removeprefix("the ").removeprefix("my ").removeprefix("your ")
+    hid = w.house_by_name(to)
+    if to in ("hands", "hand", "me", "myself", "self", "pack", "carried", "carry"):
+        src, dst, verb = h["stock"], me["holdings"], "took"
+    elif to in ("house", "store", "home", "the store", "house store", "stock") or hid == w.s["agents"][name]["house"]:
+        src, dst, verb = me["holdings"], h["stock"], "put"
+    elif hid:
+        raise Refused(f"you can store only in your own house ({h['name']}); to hand goods to someone, use give")
+    else:
+        raise Refused('move {"item", "qty", "to": "house"} to store, or "to": "hands" to take from your store')
     have = src.get(item, 0.0)
     q = _qty(a.get("qty"), have)
     if have <= 1e-9:

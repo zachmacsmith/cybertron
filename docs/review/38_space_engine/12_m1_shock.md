@@ -27,3 +27,14 @@ listed in 11 §5, so the pair also checks them live. Nothing here is decided.*
 7. **Slack:** what agents do with units not needed for food (crafts, teaching, repair, weapons, rest).
 
 Read C against C0 for every measure; a difference within what C0 itself shows day to day is not a finding.
+
+## 3. First pair void: a fault in `move`
+
+The first C and C0 (`runs/m1_C`, `runs/m1_C0`, $4.47 and $4.40) are void for the comparison. In C, Letice (Reed, elder) starved on
+day 7 in an empty house while her son Osric carried about 18 meals: his `move {"to": "Reed House"}` was read as taking from the
+store (15 times in C, 3 in C0). The fault is fixed (own house by name stores; another house is refused; a test covers it), and
+offers now draw on the offerer's own store after its hands (23 offers in the pair were refused for goods in the store; a member can
+already take them, so this adds no power). The pair is rerun as `runs/m1_C2` and `runs/m1_C02` with the same specs and seed.
+
+What the void pair still shows, with that caveat: refusals fell to 13% of results (A and B: 24-32%) and units used rose to 84%
+(73-78%), so the fixes of 11 §5 work; no theft, raid, attack or guard in either arm.

@@ -51,3 +51,15 @@ def test_offer_goods_set_aside_and_returned():
     assert w.s["agents"]["Agnes"]["holdings"]["grain"] == 2
     w.night()
     assert w.s["agents"]["Agnes"]["holdings"]["grain"] > 3                  # returned at nightfall (less what she ate)
+
+
+def test_move_to_named_own_house_stores():
+    from cybertron2.m1 import act as AC, run as R
+    w = World(load_spec(SPEC))
+    today = R._blank_today()
+    w.s["agents"]["Osric"]["holdings"]["bread"] = 3
+    before = w.s["houses"]["reed_house"]["stock"].get("bread", 0)
+    assert AC.do(w, "Osric", {"do": "move", "item": "bread", "qty": 3, "to": "Reed House"}, today).startswith("You put")
+    assert w.s["houses"]["reed_house"]["stock"]["bread"] == before + 3
+    assert AC.do(w, "Osric", {"do": "move", "item": "bread", "qty": 1, "to": "hands"}, today).startswith("You took")
+    assert AC.do(w, "Osric", {"do": "move", "item": "bread", "qty": 1, "to": "Fenn House"}, today).startswith("Refused")

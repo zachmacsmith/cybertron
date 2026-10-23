@@ -166,15 +166,19 @@ def talk(w, names, replies, results) -> dict:
             if not give or not get or (to is None and to_raw.lower() not in ("anyone", "all", "everyone", "")):
                 results[n].append(f"Refused: offer: could not read {o!r} (write goods as '2 bread, 1 timber')")
                 continue
-            short = [i for i, q in give.items() if w.s["agents"][n]["holdings"].get(i, 0) + 1e-9 < q]
+            hold = w.s["agents"][n]["holdings"]
+            store = (w.home(n) or {}).get("stock", {})
+            short = [i for i, q in give.items() if hold.get(i, 0) + store.get(i, 0) + 1e-9 < q]
             if short:
-                results[n].append(f"Refused: offer: you do not carry enough {', '.join(short)} (goods in your house's store must be "
-                                  "taken into your hands first, with move)")
+                results[n].append(f"Refused: offer: you and your house's store do not have enough {', '.join(short)}")
                 continue
             w.s["seq"] += 1
             oid = f"O{w.s['seq']}"
-            for i, q in give.items():                                    # set aside until taken or nightfall
-                w.s["agents"][n]["holdings"][i] = round(w.s["agents"][n]["holdings"][i] - q, 6)
+            for i, q in give.items():                                    # set aside until taken or nightfall: from hand, then store
+                a_ = min(q, hold.get(i, 0.0))
+                hold[i] = round(hold.get(i, 0.0) - a_, 6)
+                if q - a_ > 1e-9:
+                    store[i] = round(store[i] - (q - a_), 6)
             w.s["offers"][oid] = {"by": n, "to": to, "give": give, "get": get, "day": w.d, "open": True, "held": True}
             results[n].append("You offered " + PR._offer_text(w, oid, w.s["offers"][oid]))
             for m in ([to] if to else [m for m in names if m != n]):

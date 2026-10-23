@@ -6,6 +6,11 @@ ties"). Code: `cybertron2/m1/`. Specs: `cybertron2/specs/m1_founders.yaml` (run 
 `m1_society_s4.yaml` (run B). Runs: `runs/m1_A`, `runs/m1_B` (local, not committed). Nothing here is decided; findings feed the
 proposals named in §6.*
 
+> **Correction (23 Oct, after runs C and C0, [12_m1_shock.md](12_m1_shock.md)):** `move` with `"to": "Reed House"` (the agent's own
+> house by name) was read as *take from* the house; only the word "house" stored. It happened 8 times in A and 23 in B, almost
+> all Osric's. So in B the Reed elders' hunger beside Osric's bread, and "never did" give Wymarc bread, are partly this fault,
+> not hoarding: his attempts to store food did nothing or took more out. Fixed; the readings of Osric below should be held loosely.
+
 ## 1. What was built
 
 | File | What it does | From |
