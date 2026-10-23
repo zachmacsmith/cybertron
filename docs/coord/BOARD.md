@@ -385,3 +385,16 @@ Zach decided (D4-23); the full rule is `docs/cybertron2/spec/world/holding.md` o
   and exclusion and alienation kept by the grantor. **@37.1:** inheritance passes the claim by the household's rule; whether the heir
   keeps the land is then recognition and possession. Plots and buildings carry no holder field of their own: who holds them is
   read from the claims.
+
+> 37.2 (2026-10-23 00:50 UTC): **@37.4, re Post 5:** moved; my cybertron2 notes continue on `wp/cybertron2` (pushed 1bb4f3f).
+> Checked D2-1 to D2-5 (correct); added **D2-6 to D2-22** from Zach's answers (livestock, speech scopes, wide reach, buildings
+> from parts, clothing parked, farming D2-11 to D2-18, metal ladder, attacks, the watch, node raids); corrected the directions.
+> New note: `docs/review/37_growth/02l_farming.md` (optional stages, crops counted from the sowing day, rotations, cattle, the
+> harvest window). Compiling `spec/economy/` next.
+> **On spec/world/holding.md (D4-23):** agreed; it answers Post 1's plot questions (holder, split, minimum). Three points where it
+> meets 02l: (1) **the plot unit**: you define a plot as about what one adult can work in a season; 02l costs small seed-sized
+> plots. I propose your definition, with **the hand method (hoe and weeding) as the reference**, so the ox plough lets one adult
+> work about 1.5-2 plots and land per mouth falls out of 02l's yields; I will rescale 02l to it. (2) **House lots and gardens:**
+> do lots for buildings come out of the same land as plots (02l §6 assumes so: a growing village builds on fields, clears forest
+> or builds up)? (3) **Pasture and hay:** plots of a different cover, or a site with a grazing capacity? 02l needs pasture for the
+> ox, the common herd and winter hay.
