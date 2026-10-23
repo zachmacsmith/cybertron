@@ -142,7 +142,7 @@ indirectly (a well draws on the groundwater; clearing a slope speeds the runoff)
 |---|---|---|---|---|
 | **the sky** | the region (eras, years, spells: environment.md) | moisture, temperature, wind, storminess | never | rain feeds the soil, the groundwater and the river; dry spells dry the fuel |
 | **groundwater** | each node (one aquifer; parcels sit higher or lower on it) | water table, recharge, cleanness | wells (drawing), latrines and graves (fouling it), drainage ditches (lowering it) | feeds springs, wells and the river's low flow; floods low parcels when high; carries a latrine's filth into a well |
-| **the river** | a reach for each node it runs through, joined downstream along edges (generation's drainage, D4-22) | level and flow, silt, cleanness | mills, weirs and leats (taking flow), waste and carcasses thrown in, fords and bridges | its level floods the low parcels; its flow turns mills; what goes in upstream arrives downstream a day later (D2-78: flow) |
+| **the river** | **its water parcels** in each node it runs through (a river takes land; a brook is a feature along parcels: layout.md), the same river continuing downstream node to node (generation's drainage, D4-22) | level and flow, silt, cleanness | mills, weirs and leats (taking flow), waste and carcasses thrown in, fords and bridges | its level floods the low parcels; its flow turns mills; what goes in upstream arrives downstream a day later (D2-78: flow) |
 | **wetland** (fen, marsh) | its parcels | how wet, how far it holds water back | drainage (a works project) | holds flood water back (a drained fen floods the land below); breeds fen fever while wet |
 | **soil** | each parcel | moisture, fertility, depth on slopes, salt (after a sea flood), spores and taint | ploughing, manure, rotation, terraces, burning | moisture from rain and groundwater; erosion when cover is lost; silt to the river |
 | **living things** | parcels and nodes | vegetation (biomass, fuel dryness), game, predators (wolves as a moving population), pests per crop kind, pathogens and their reservoirs | felling, grazing, hunting, burning, rotation, killing wolves | fuel to fire; game to hunting; pests to crops; reservoirs to disease |
@@ -150,6 +150,13 @@ indirectly (a well draws on the groundwater; clearing a slope speeds the runoff)
 | **animals** | herds | condition, sickness, restlessness | herding, feeding, keeping apart, slaughter | sickness from contact and wet pasture; some sicknesses reach people (anthrax from carcasses, fever from sick cows' milk) |
 | **people** | persons | health and immunity per disease, nutrition (how varied their food is), hunger, exhaustion, wounds, exposure | eating, resting, nursing, keeping apart | disease from water, air, contact, vermin and animals |
 | **the node** | each node | crowding, waste, contact with outsiders | building houses, clearing waste, gates | sums of the above |
+
+**Rivers take land (Zach, 23 Oct).** A river is **water parcels** in each node it crosses (layout.md's "water" cover): land that
+cannot be farmed or built on, where people fish, draw water and set a mill, ford or bridge. A small brook is a **feature** running
+along or across parcels, taking little land. The river's hidden state (level, flow, silt, cleanness) lives on its water parcels;
+**floods spread from them by adjacency**, lowest neighbours first (the meadow, then the fields, then the houses on the bank), which
+is why the meadow by the water is pasture and hay rather than a field. The same river continues downstream from node to node
+(layout.md's open question 3: proposed yes), so what goes in upstream arrives below.
 
 **Causal paths that cross layers** (none needs a special rule):
 - rain, then the soil, then the groundwater, then **springs and wells**, then the river's low flow; in a drought the chain runs
@@ -247,6 +254,9 @@ About sixteen in all, chosen because each has a hazard that reads it and a sign:
 - 23 Oct: Zach: which hidden variables and which carriers (nodes, parcels); layers people cannot touch (groundwater, rivers) that
   still drive causes; wells, latrines and middens; no one needs water, an oversight? Added §7 (layers and cross-layer paths), §8
   (water as a need through sources), §9 (latrines and middens), §10 (the first sixteen variables).
+
+- 23 Oct: Zach: rivers should use up parcels within a node. Yes: a river is water parcels (a brook a feature); floods spread from
+  them by adjacency; the same river continues downstream.
 
 ## Sources
 
