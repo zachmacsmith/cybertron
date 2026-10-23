@@ -206,6 +206,13 @@ in prose, given only the facts each agent may see, recorded with the run and rep
 against the facts it was given (no new names, numbers or events). The narrator never decides what an agent learns: the engine
 does.
 
+**Slight misreadings are acceptable** (Zach, 23 Oct): people mis-see things a little all the time, so a narrator's small
+stretches ("the north wind has frost in it") need not be caught. The check catches only what would mislead an agent into a wrong
+act or a wrong belief about something that matters: a new object, place or person; a new cause or order it would act on ("the deer
+prints are fresher still"); a hidden fact. Misperception as a mechanic (a mistaken count, a misjudged freshness, more often for the
+unskilled or the glancing) belongs in the engine, drawn from the seed, so it is the same in every arm and recorded as a false
+belief (knowledge §7), not left to the narrator.
+
 ## 5. What is missing, and what should go
 
 **Missing:**
@@ -316,6 +323,10 @@ does.
   low ones noticed only by the relevant (a fowler sees the geese); distant events seen as signs (a city's fires) by those who know
   of the place. Added §3c: two channels, relevance from trade, experience, state, the day's place, knowledge and ties; signs for
   shifts with salience and relevance tags.
+
+- 23 Oct: Zach: a very slight misinterpretation is fine; people mis-see things subtly all the time. Added to §4: the check catches
+  only misleading inventions (new objects, causes or orders an agent would act on, hidden facts); misperception as a mechanic lives
+  in the engine (seeded, recorded as false beliefs).
 
 ## Sources
 
