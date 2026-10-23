@@ -66,6 +66,8 @@ Newest first. Ideas decided or rejected in conversation before 23 Oct are backfi
 
 | Date | Idea | Outcome | Where |
 |---|---|---|---|
+| 24 Oct | Build choices confirmed or changed (Q-20); herds wandering, lost on roads, driven, split by size; fences wood then stone on borders; searching as a modifier | accepted: D2-118 to D2-128 | livestock.md, fences.md, OPEN Q-20 |
+| 24 Oct | Road-meeting offers as their own goods-for-goods system | rejected: the same agreement system as at a node (D2-120) | road_encounters.md |
 | 24 Oct | The parcel graph from the land, with sides and heights; sensing along the way; the village as a whole; herds wandering far; fire, raiders as outside agents, and water and the land's hidden state flagged for later | accepted: D2-114 to D2-117; OPEN L-21 to L-23 | parcel_graph.md, livestock.md, OPEN.md |
 | 24 Oct | Parcels as a plain list, or with coordinates | rejected: D2-114 | parcel_graph.md |
 | 23 Oct | Meetings on the road with a short conversation and a choice of direction; `leave` folded into `give`; modifiers as techniques; waiting out a block; good places on the way change one's state, stopping only if known and chosen in advance | accepted: D2-109 to D2-113 | road_layout.md, road_encounters.md, verb_modifiers.md |

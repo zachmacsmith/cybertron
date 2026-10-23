@@ -185,6 +185,17 @@ and correct them in place.**
 | D2-115 | 24 Oct | **Acting senses along the way:** whoever acts on a parcel senses the parcels it is in, those next to them, and those it must pass through to get there, without choosing a route | parcel_graph.md §2 | sensing only the parcel acted on |
 | D2-116 | 24 Oct | **The village as a whole:** an agent can attend to the village to learn how it fits together (which parcels lie next to which, where the roads leave); on arriving somewhere it gets a concise overview of what is noticeable there, not relative positions | parcel_graph.md §3 | |
 | D2-117 | 24 Oct | **Herds can wander far:** an unherded herd can cross much of a village in a day, not only two parcels | livestock.md | about two steps a day |
+| D2-118 | 24 Oct | **Build choices confirmed (OPEN Q-20 1, 3, 4):** a raid's fuse by structure (wattle none, timber 1 act, stone 3); one who dies at home lies in the house, found at once by its household; warm and frozen decay apply indoors too | review 38.24; conversation | |
+| D2-119 | 24 Oct | **Dibbling** stays learned and cannot be tried untaught, but **by default at least one farmer in each farming village knows it** (seeding) | Q-20 (2) | nobody knowing it |
+| D2-120 | 24 Oct | **Offers in a meeting on the road go through the same agreement system as at a node** (promises, payments over time and all), not a special case | Q-20 (5) | goods for goods only on the road |
+| D2-121 | 24 Oct | **Where parties crossing on a road meet varies:** drawn between the stretches they cross on, likelier at a landmark | Q-20 (6) | always the first-node party's stretch |
+| D2-122 | 24 Oct | **Every road has a terrain by default** (from the land it crosses, else a farm track), so meetings, notices and traces happen on every road; a road made bare is only a switch for a comparison arm | Q-20 (7) | a road with no terrain holding nothing |
+| D2-123 | 24 Oct | **Herds wander on the node:** a fed herd on good pasture 0 to 1 steps a day, a hungry or drawn one up to about 8; each head eats and tramples about 1% of a field's crop a day; from a parcel where a road leaves, about 0.1 a step of taking the road | livestock.md | |
+| D2-124 | 24 Oct | **A herd lost on a road** drifts a stretch a day; it can die or be gone for good (0.2 and 0.15 a day as proposed; whether deaths are by head or by group: open); it comes home or reaches the far node by drifting off an end; it is found by the noticing rule, a searcher noticing x5 on its stretch | livestock.md | fixed finding odds for travellers and searchers |
+| D2-125 | 24 Oct | **`searching` is a travel modifier known to all** (for a herd or a person) | verb_modifiers.md | |
+| D2-126 | 24 Oct | **Fences are built with herd wandering:** wood first, then stone, on the borders between parcels | fences.md; livestock.md | herding only |
+| D2-127 | 24 Oct | **Driving a found herd:** a finder can drive it a stretch (on or back) or accompany it all the way, following it automatically; a further fuse call only if a sizeable group splits off and the drover notices | livestock.md | |
+| D2-128 | 24 Oct | **Herd size and splitting:** one person can hold only so many head; beyond that a group is likelier to split off and wander in its own direction; with enough people a herd almost always stays together | livestock.md | |
 
 ## Directions (Zach's stated aims recorded in the notes; designs follow them; checked by 37.2, 22 Oct)
 

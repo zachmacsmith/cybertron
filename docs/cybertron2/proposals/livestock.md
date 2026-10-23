@@ -103,6 +103,29 @@ at the level of parcels, which the engine already has (a herd is on a parcel in 
 - **The same walk serves wild animals:** deer coming out of the wood into the next field, a wolf pack's track (D2-78).
 - Cost: small: a handful of herds a node, a few steps each a day, at parcel resolution (no paths within a parcel).
 
+### Wandering, driving and splitting (24 Oct: D2-123 to D2-128)
+
+Revises the odds above. Proposed numbers, to confirm or calibrate:
+
+- **On the node (D2-123):** a fed herd on good pasture moves 0 to 1 steps a day; hungry, or drawn by a ripe crop or water, up to about
+  8 (enough to cross a village of 15 parcels). Each step picks the most attractive neighbour and crosses the border at its fence's
+  odds. In a field each head eats and tramples about 1% of the crop a day. From a parcel where a road leaves, about 0.1 a step of
+  taking the road.
+- **On the road (D2-124):** a lost herd drifts a stretch a day (a keyed random direction). It comes home or becomes a stray at the
+  far node by drifting off an end. Anyone on its stretch notices it by the noticing rule; a searcher (`travel {searching}`, D2-125)
+  notices x5, so the hard part of a search is guessing the direction. Losses each day, proposed **by head** (each head 0.15, winter
+  0.3), with the group as a whole gone for good at 0.15 a day.
+- **Fences (D2-126):** on the border between two parcels; a gate in each. Wood first (a wattle or post-and-rail fence: 4 timber and
+  10 units a border; a herd crosses x0.3; it loses a level each season unmended, mending a quarter of the build), then stone (a dry
+  wall: 8 stone and 20 units, led by a mason; x0.05; little upkeep). A gate left open is open (x1), and a sign others can notice.
+  Hedges, folds and wolves later.
+- **Driving (D2-127):** in the find call, or at a node, `drive` it a stretch (on or back) and leave it, or **accompany** it to an end:
+  the drovers then travel with it automatically, a stretch a day. Another call comes only if a group splits off (below), it is a
+  quarter of the herd or 3 head or more, and a drover notices.
+- **Size and splitting (D2-128):** each person holds about 10 head on the road, 30 on pasture (herding), and an unherded herd holds
+  together loosely (about 6 head). Under that: a split almost never (0.01 a day). Over it, each day a split with chance 0.1 x (head
+  / capacity - 1), at most 0.6; a quarter to a half of the head breaks off and wanders its own way as a herd of its own.
+
 ## Why
 
 - One entity creates many dependence edges at once (food, transport, farming, fighting, credit), which is what the scenario design
