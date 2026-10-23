@@ -57,6 +57,32 @@ capacity. What already does: weeding raises the harvest; manure and a grazed fal
 | **seed selection** (a technique, learned by practice) | the sower's crops ripen about 15% sooner, so more harvests fit in a season | practice over several harvests | the farmer |
 | irrigation (later: D2-14) | a much larger rise on river land | a crew, a channel, an institution to share the water | the plot and the channel |
 
+**Decided:** master skill (D2-64), seed selection (D2-65). **Field works, worked out (23 Oct):**
+
+*How they work.* A field work is a **project on a plot** (like a building: a total of work, done over days by one or several
+people with `work {what: "ditch and bank", at: "<plot>"}`), and when done it is **part of the plot** (it stays with the land when
+the plot changes hands: claims, D4-23). It needs **upkeep** each season or it decays a level. A crew needs **one person who knows
+the technique** (field works: a farmer's technique, D2-43); the others can be anyone working for the plot's holder (D2-37).
+
+*What agents see.* On the plot: "the Long Field, plot 3: wet ground; ditched and banked (the banks need mending: about half a
+day's work)". On a project: "the ditches round plot 3 are about half dug". The soil word improves ("well drained").
+
+| Work | Where it pays | Labour (units) | Materials | Tools | Upkeep a year | Gain a year (food) | Pays back, land plentiful | land short |
+|---|---|---|---|---|---|---|---|---|
+| **ditches and banks** | **wet land** (valley floors, fen edges): yield +35%, less flood loss | 40 (a crew of 4: under 2 days) | none (optional hedge stakes) | hand tools (digging wears them: factor 1.5) | 6 | about 56 | about 40-66 days | about 19-32 days |
+| ditches and banks | ordinary land: +10% | 40 | none | hand tools | 6 | about 16 | about a year to 600 days: **does not pay** | about 96-160 days |
+| **terraces** | **hill land** (yields x0.6 untreated): brought to a valley plot's yield, erosion stopped | 60 | about 6 stone (fieldstone) | hand tools | 6 | about 64 | about 55-92 days | about 27-45 days |
+
+So ditches are for wet ground and terraces for hills, and neither is worth it on ordinary land unless land is short. Both pay back
+over more days than one run, so they test whether agents invest for their heirs; seeded worlds start with some plots improved.
+
+**Irrigation (later, D2-14; what it would look like).** A river node only. Parts: a **weir and headgate** at the river (about 10
+stone, 6 timber and 20 units, built by a mason and a carpenter), a **main channel** (about 120 units: a crew of 6 for three or four
+days), and a **field channel** to each plot it serves (about 15 units each); about 8 plots on the river side. Upkeep: clearing silt
+each season (about 30 units, shared). Gain: irrigated plots yield about +50%, lose half the blight and keep growing in dry spells:
+each plot's share pays back in about 11-35 days. It needs an institution: **water shares and turns**, upkeep shared as dues in work
+(agreements), and it competes with a mill's leat for the same water, upstream against downstream.
+
 Together these lift the ceiling by about x1.7 on top of the methods, mill and bread (food ladder, recipes.md §16). **Works that
 belong to the plot make tenure matter:** who pays for the ditches, and who gains if the land is let or inherited (D4-23; a lease's
 terms in agreements). That is the old engine's lesson (review 15 §2.7) carried over.
@@ -120,6 +146,10 @@ terms in agreements). That is the old engine's lesson (review 15 §2.7) carried 
 
 - 23 Oct: Zach: skill should raise some production; something should raise a plot's total capacity. Proposed: master skill x1.2
   yield and x0.7 work; ditches and banks, terraces (works that belong to the plot); seed selection; irrigation later.
+
+- 23 Oct: Zach: master skill yes (D2-64); seed selection yes (D2-65); how would field works and irrigation actually work? Worked
+  out: field works as projects on a plot with upkeep, led by someone who knows the technique; ditches pay only on wet land, terraces
+  on hills; irrigation's parts, costs and the institution it needs.
 
 ## Sources
 

@@ -105,7 +105,8 @@ worn metal tool or blade.
 
 - Every kind of work, basic work included, has a skill per agent that rises with practice (days spent at that work) and fades
   slowly without it; skill multiplies the yield of gathering and farming and cuts the work of making.
-- An ordinary adult is about x1.0 at basic work, a master about x1.5. A learned trade (knowledge.md's levels: once "known") runs
+- An ordinary adult is about x1.0 at basic work, a master about x1.5. In farming a master's skill raises yield about x1.2 and
+  cuts the work about x0.7 (D2-64). Seed selection, a learned technique, makes the sower's crops ripen about 15% sooner (D2-65). A learned trade (knowledge.md's levels: once "known") runs
   from about x0.5 for a novice to x2.0 for a master. Youth learn faster (D4-19). Seeded specialists start skilled (D4-21).
 - Agents see their skill as a word (novice, competent, skilled, master), never a number.
 
@@ -152,4 +153,4 @@ the soil in words ("tired", "good"), their seed in store, their tools and whethe
 [02l_farming.md](../../../review/37_growth/02l_farming.md), [02j_end_uses.md](../../../review/37_growth/02j_end_uses.md),
 [02d_ladders.md](../../../review/37_growth/02d_ladders.md); proposals/farming.md, proposals/tools.md.
 
-*Current as of 23 Oct 2026: H-6, D2-11 to D2-19, D2-23, D2-42, D2-43, D2-46, D2-47, D2-48, D2-52, D2-53, D2-54, D2-58, D2-59, D2-60, D2-61, D2-62.*
+*Current as of 23 Oct 2026: H-6, D2-11 to D2-19, D2-23, D2-42, D2-43, D2-46, D2-47, D2-48, D2-52, D2-53, D2-54, D2-58, D2-59, D2-60, D2-61, D2-62, D2-64, D2-65.*

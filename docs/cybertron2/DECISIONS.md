@@ -126,6 +126,8 @@ and correct them in place.**
 | D2-61 | 23 Oct | **A mill ladder built by adding parts:** a hand mill (cheap, any room); an ox mill (dressed millstones by a mason, an ox to turn them) by upgrading it; a water mill needs a river site, so it is usually a new building, which can reuse the dressed millstones (carried by cart) | recipes.md §16; conversation | one expensive mill |
 | D2-62 | 23 Oct | **Dried meat** is a good: meat dried to about half its weight, keeping and travelling well | recipes.md §16 | |
 | D2-63 | 23 Oct | **Cattle are one kind with three roles:** cows (milk, calves), oxen (trained steers that pull) and bulls (needed for breeding; whoever holds the bull controls a herd's breeding); they share feeding, herding and slaughter rules; young are not a separate kind within a run | 02o; conversation | four kinds (cows, bulls, oxen, calves) as separate goods |
+| D2-64 | 23 Oct | **A master farmer's skill raises yield as well as cutting work:** yield about x1.2 and work about x0.7 at mastery | proposals/farming.md; conversation | skill only cutting work |
+| D2-65 | 23 Oct | **Seed selection** is a farming technique, learned by practice over several harvests: the sower's crops ripen about 15% sooner | farming.md | |
 
 ## Directions (Zach's stated aims recorded in the notes; designs follow them; checked by 37.2, 22 Oct)
 
