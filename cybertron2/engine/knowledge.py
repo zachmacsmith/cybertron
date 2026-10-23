@@ -176,6 +176,21 @@ def available(here, item, who=None, extra=None) -> float:
     return sum(here.contents(cid).get(item, 0.0) for cid in cids)          # whose ever they are: hands of `who`, or stores
 
 
+def pick_inputs(here, needs: dict, mult=1.0, extra=None) -> dict:
+    """The inputs as goods: an entry whose value is a table means one of these (the first one at hand in full: D4-46's fuel)."""
+    out = {}
+    for item, q in (needs or {}).items():
+        if isinstance(q, dict):
+            item, q = next(((i, n) for i, n in q.items() if available(here, i, extra=extra) + 1e-9 >= n * mult), next(iter(q.items())))
+        out[item] = out.get(item, 0.0) + q
+    return out
+
+
+def inputs_words(needs: dict) -> str:
+    return ", ".join(" or ".join(f"{n:g} {i}" for i, n in q.items()) if isinstance(q, dict) else f"{q:g} {item}"
+                     for item, q in (needs or {}).items())
+
+
 def shortfall(here, mind, tech, mult=1.0, at=None, extra=None) -> str:
     """'' if the technique can be done here now, else what is short."""
     t = TECHNIQUES[tech]
@@ -201,10 +216,12 @@ def shortfall(here, mind, tech, mult=1.0, at=None, extra=None) -> str:
         if why:
             return why
     for item, q in (t.get("inputs") or {}).items():
-        need = round(q * mult, 2)
-        have = available(here, item, extra=extra)
-        if have + 1e-9 < need:
-            return f"it needs {need:g} {item}; you have {have:.1f} to hand"
+        alts = q if isinstance(q, dict) else {item: q}
+        if not any(available(here, i, extra=extra) + 1e-9 >= round(n * mult, 2) for i, n in alts.items()):
+            i, n = next(iter(alts.items()))
+            more = "".join(f" or {round(n2 * mult, 2):g} {i2}" for i2, n2 in list(alts.items())[1:])
+            return f"it needs {round(n * mult, 2):g} {i}{more}; you have " + " and ".join(
+                f"{available(here, i2, extra=extra):.1f} {i2}" if len(alts) > 1 else f"{available(here, i2, extra=extra):.1f}" for i2 in alts) + " to hand"
     if sites[0][0] != "anywhere":
         why = [ready(here, tech, k, key) for k, key, _ in sites]
         if all(why):
@@ -223,7 +240,7 @@ def card(here, mind, tech) -> str:
     places = ", ".join(sorted({x[2] for x in where(here, tech)})) or "nowhere here"
     if lvl == "aware":
         return f"{t['label']}: you know of it{src}, but not how it is done"
-    ins = ", ".join(f"{q:g} {i}" for i, q in (t.get("inputs") or {}).items()) or "no materials"
+    ins = inputs_words(t.get("inputs")) or "no materials"
     if lvl == "rough":
         return f"{t['label']}: you have a rough idea{src}: {ins}, done at {places}. You could try (about half the time it works, and it takes more)"
     gives = t["gives"] if isinstance(t["gives"], str) else ", ".join(f"{q:g} {i}" for i, q in t["gives"].items())

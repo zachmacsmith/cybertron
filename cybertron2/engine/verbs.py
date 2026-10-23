@@ -171,6 +171,7 @@ def _level(mind, tech) -> str:
 def _consume(here, needs: dict, mult=1.0, extra=None):
     """Take inputs from what one carries, then from stores here one may take from (or a party's, acting for it)."""
     order = [here.hands] + ([extra] if extra and extra != here.hands else []) + [c for c in here.takeable() if c not in (here.hands, extra)]
+    needs = KN.pick_inputs(here, needs, mult, extra)
     for item, q in needs.items():                                            # all or nothing: check before taking any
         have = KN.available(here, item, extra=extra)
         if have + 1e-9 < q * mult:

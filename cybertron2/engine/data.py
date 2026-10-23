@@ -211,7 +211,8 @@ TECHNIQUES = {
     "crude weapon": {"verb": "make", "label": "making a crude weapon", "aliases": ["club", "spear", "weapon"], "basic": True,
                      "inputs": {"timber": 1}, "units": 1, "gives": {"crude weapon": 1}, "tags": ["weapons"]},
     "smelt": {"verb": "make", "label": "smelting copper", "aliases": ["smelting"], "at": {"fittings": ["anvil"]},
-              "inputs": {"copper ore": 3, "charcoal": 1}, "units": 3, "gives": {"copper": 1}, "tags": ["mining", "craft"], "trade": "smelter"},
+              "inputs": {"copper ore": 3, "fuel": {"charcoal": 1, "timber": 4}}, "units": 3, "gives": {"copper": 1}, "tags": ["mining", "craft"],
+              "trade": "smelter"},                                  # one of the fuels (D4-46): charcoal, or timber as before
     "copper tool": {"verb": "make", "label": "making a copper hand tool", "aliases": ["hand tool", "metal tool"], "at": {"fittings": ["anvil"]},
                     "inputs": {"copper": 1, "timber": 0.5}, "units": 3, "gives": {"copper tool": 1}, "tags": ["craft", "smithing"], "trade": "smith"},
     "coin": {"verb": "make", "label": "striking coin", "aliases": ["strike coin", "minting"], "at": {"fittings": ["anvil"]},
