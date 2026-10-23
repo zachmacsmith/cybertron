@@ -166,6 +166,10 @@ and correct them in place.**
 | D2-96 | 23 Oct | **Rot and burial:** a rotting body or rotting food lies at a spot and, once disease exists (OPEN Q-16), carries a risk that can reach water, food and people acting nearby; a death in a settlement is highly salient; **burying is work on the body**, an option shown only where there is a body, its labour by the ground and the cold (frozen ground is harder) | things_in_places.md §6 | |
 | D2-97 | 23 Oct | **Daily notices on the road**, drawn as at home, remembered on arrival ("On the way: ...") | journeys.md §2 | |
 | D2-98 | 23 Oct | **Hidden ways are found by the noticing rule** (D2-85), with hidden_ways.md §2's factors (numbers to calibrate); felling is one case of a place's visibility changing (visibility.md) | hidden_ways.md §2 | |
+| D2-99 | 23 Oct | **Visibility per place and sense** (sight and sound) multiplies every sign: set by the land's cover, changed by its state (felling, crops, snow, smoke) and by rain, snow and fog; light matters only for what happens at night (fuse events, the watch, working late), as the day's notices are taken by day; visibility.md's numbers are the starting values (calibrate) | proposals/visibility.md | cover tuned separately in each system |
+| D2-100 | 23 Oct | **Loud things mask quieter ones:** a waterfall, a horn, a fight, a mill or smithy at work covers quieter sounds near it, and itself carries further | visibility.md §4 | |
+| D2-101 | 23 Oct | **Smell later, and simple:** smell signs carry their own salience and a short reach (the spot, the parcel, perhaps the next), not multiplied by visibility; no wind direction for now; some are very salient (the stench of a corpse, a midden, livestock) | visibility.md §5 | wind direction now |
+| D2-102 | 23 Oct | **A thing's conspicuousness is its own** (size, kind, how hidden) **x the place's sight**, not a cover column per table | things_in_places.md §1, visibility.md | |
 
 ## Directions (Zach's stated aims recorded in the notes; designs follow them; checked by 37.2, 22 Oct)
 

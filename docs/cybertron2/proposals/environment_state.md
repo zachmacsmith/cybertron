@@ -258,6 +258,9 @@ About sixteen in all, chosen because each has a hazard that reads it and a sign:
 - 23 Oct: Zach: rivers should use up parcels within a node. Yes: a river is water parcels (a brook a feature); floods spread from
   them by adjacency; the same river continues downstream.
 
+- 23 Oct: visibility (proposals/visibility.md, D2-99) is read each day from these variables (vegetation, a standing crop, snow,
+  smoke) and the region's wind and weather, not stored; smoke joins as a short-lived state near fires.
+
 ## Sources
 
 [environment.md](environment.md) (D2-69 to D2-75), [environment_catalogue.md](environment_catalogue.md), [seeing.md](seeing.md),

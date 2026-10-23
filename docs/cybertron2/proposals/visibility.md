@@ -1,6 +1,6 @@
 # Proposal: visibility (what a place and the day let the senses reach)
 
-**Status:** discussion (23 Oct). Design only. **Owner:** 37.2 (author; the environment, D2-75, sets the land and the weather);
+**Status:** accepted: D2-99 to D2-102 (23 Oct); numbers to calibrate; smell later. Design only. **Owner:** 37.2 (author; the environment, D2-75, sets the land and the weather);
 perception and the senses are 37.4's (perception.md, senses.md, seeing.md, D4-48, D4-50), which apply it. **Affects:**
 spec/information/perception.md, signs.md; spec/environment/scheduler.md (weather, light); spec/world/places.md, edges.md;
 things_in_places.md, hidden_ways.md, road_layout.md, road_encounters.md, fuse_events.md (detection).
@@ -44,20 +44,43 @@ D2-91). Visibility is the other side: **how much the place and the day let throu
 | snow lying | things on the ground hidden (x0.5), tracks in it very plain (x3) |
 | a building raised, a wall built | built ground; behind a wall nothing is seen |
 
-### 4. Changed by the day (the scheduler: light and weather)
+### 4. Changed by the weather, and by night (D2-99, D2-100)
+
+Agents act once a day, and the day's notices are taken **by day**, so light does not enter them. It matters only for what happens
+at night: fuse events (a raid, a fire), the watch, and working late.
 
 | Condition | Sight | Sound |
 |---|---|---|
-| day, clear | x1 | x1 |
-| dusk, dawn | x0.5 | x1 |
-| night | x0.1 (x0.25 under a full moon; near a fire, its light) | x1.2 (night is quiet) |
+| clear | x1 | x1 |
 | fog | x0.3 | x1 |
 | heavy rain | x0.6 | x0.5 |
 | falling snow | x0.5 | x0.7 |
-| strong wind | x1 | x0.5 |
+| strong wind (the region's wind, environment_state.md §10) | x1 | x0.5 |
+| **at night only** | x0.1 (x0.25 under a full moon; near a fire, its light) | x1.2 (night is quiet) |
 
-Sound has its own base by land (forest dampens, x0.7; open land carries, x1), and smell (smoke, rot, a midden) depends on the wind
-(later). A sign declares its sense (D4-48), so each takes the right column.
+**Sound** has its own base by land (forest dampens, x0.7; open land carries, x1). **Loud things mask quieter ones (D2-100):** each
+place has an ambient loudness from what is there (a waterfall or a weir, a mill or a smithy at work, a crowd at market, a fight, a
+horn, wind and rain), and a quieter sound there is heard less (proposed: x0.3 near something very loud, x0.6 near something loud).
+A very loud sound also carries further: a horn or a fight is heard across the node, a horn at the far end of an edge if the edge
+carries sound (D2-74).
+
+### 4a. How the three senses differ
+
+| | Sight | Sound | Smell (later, D2-101) |
+|---|---|---|---|
+| blocked by | cover, walls, dark, fog, rain, snow | little: dampened by forest and walls | nothing much |
+| masked by | | louder sounds, wind, rain | (stronger smells, later) |
+| at night | almost nothing | better | the same |
+| how fast | at once | at once | builds up over days (a body from the second or third day) and lingers after the source is gone |
+| tells | detail: who, how many, what they carry | that something is happening and roughly where; little detail | that a kind of thing is there (rot, smoke, beasts, bread), no detail |
+| reach | the parcel and open neighbours | by loudness: the parcel to the whole node | the spot and the parcel; very strong ones the next parcel |
+
+### 5. Smell, later and simple (D2-101)
+
+Smell signs carry only their own salience and reach, with no visibility multipliers and no wind direction for now: the stench of a
+corpse (very salient after a few days, within the parcel and the next), a midden or latrine, a tannery, livestock in a byre, smoke,
+bread baking, grain rotting in a store (a warning before the loss shows). Wind direction would come with fire spreading by the wind
+(D2-72), if that is ever wanted; then smell could follow it too.
 
 ### 5. What it changes
 
@@ -91,17 +114,30 @@ light and weather (scheduler.md). Per sign: its sense (D4-48). Nothing per thing
 - **Range in distance** (metres or parcels): more precise, but the world has no coordinates inside a parcel; a multiplier per place
   is enough.
 
+### 7. Visibility is read from the land's hidden state, not stored
+
+Visibility fits the hidden parameters of the land (environment_state.md), but as a **reading of them, computed each day**, not a
+variable of its own: sight from the parcel's cover and vegetation (felling and regrowth move it), a standing crop, snow lying, and
+**smoke** (a fire, a burning, charcoal burners, a smithy: a short-lived state that lowers sight nearby and gives a smell); sound from
+the ambient loudness of what is there and the weather. Computing it rather than storing it means it can never drift from the land
+it describes.
+
 ## Open questions (for Zach, and 37.4)
 
-1. Visibility per place and sense, from its cover, changed by the land's state and by light and weather, multiplying every sign?
-2. Sight and sound now; smell (with wind) later?
-3. The numbers above?
-4. Split conspicuousness into the thing's own and the place's sight (things_in_places.md §1)?
+1. ~~Visibility per place and sense~~ decided: D2-99. 2. ~~Sight and sound now, smell later~~ decided: D2-99 to D2-101.
+3. ~~The numbers~~ starting values (D2-99; calibrate). 4. ~~Split conspicuousness~~ decided: D2-102.
+5. Visibility computed each day from the land's state (smoke included) rather than stored (§7)?
+6. The masking factors (x0.3, x0.6) and what counts as very loud.
 
 ## History
 
 - 23 Oct: Zach: felling the woods should be one case of something broader; should visibility be a thing that affects the senses,
   depends on the kind of land, can be changed by conditions (trees felled) and weather, and changes how things are seen? Written.
+
+- 23 Oct: Zach decided D2-99 (visibility for sight and sound; rain and snow; and asked how anything is noticed at dusk or night when
+  agents act once a day: it is not, so light only matters for night events, the watch and working late), D2-100 (very loud things
+  mask others), D2-101 (smell later, simple: own salience, no wind for now; corpses, animals), D2-102 (split conspicuousness).
+  Asked whether visibility fits the land's hidden parameters, with smoke from fires: §7.
 
 ## Sources
 

@@ -20,6 +20,8 @@ something gives a choice (take it, leave it, bury, tell), and a left thing is wh
 - **Spots:** a parcel at a node (layout.md), a room, or a **stretch of road**: an edge is split into one stretch for each day of
   its length (`Road(edge, stretch)`), so a 3-day road has 3 stretches, and a traveller on its second day is on stretch 2 (or on
   the stretch from the other end in the opposite direction).
+- **Conspicuousness is the thing's own x the spot's sight (D2-102, visibility.md):** the cover columns below are that product
+  for open ground and woodland, kept as a guide.
 - **Things:** a pile of goods (a container with a place: D4-34), remains (a body and what it carried), a herd, a camp, a trace (ashes,
   ruts, tracks), a hidden way's end (hidden_ways.md). Each has a **conspicuousness** from its size and kind, the cover of the spot,
   and any work spent hiding it.
@@ -166,6 +168,8 @@ run (38.23) people died on the road, some carrying grain. Until roads hold thing
 - 23 Oct: Zach decided D2-95 (scavengers later, with wild animals) and D2-96 (rot near water, food and people; a death in a
   settlement highly salient; burying as work on the body, shown only where one lies, by ground and cold). Putting down and hiding
   become `give` to a place with the `hidden` modifier (verb_modifiers.md §5); cover as the place's visibility (visibility.md).
+
+- 23 Oct: D2-102: conspicuousness is the thing's own x the place's sight (visibility.md).
 
 ## Sources
 
