@@ -76,12 +76,15 @@ at the level of parcels, which the engine already has (a herd is on a parcel in 
 
   | Outcome | Odds a day | Raised by |
   |---|---|---|
-  | **it dies** (a fall, the cold, wolves, no water) | about 0.1 | winter (about 0.25), a wolf-heavy era, a long or harsh edge (a ridge, a marsh) |
-  | **it finds its own way home** | about 0.1 | a short edge, cows in milk |
-  | **it reaches the far node** and is a stray there, seen by whoever is about | about 0.03 | a short edge |
-  | **it is found by a traveller** on that edge | about 0.2 for each day a traveller is on it | |
-  | **it is found by a searcher** | about 0.6 for each day of searching | |
+  | **it dies** (a fall, the cold, wolves, no water) | about 0.2 | winter (about 0.35), a wolf-heavy era, a long or harsh edge (a ridge, a marsh) |
+  | **it is gone for good** (wandered off beyond finding) | about 0.15 | a long edge, wild country |
+  | **it finds its own way home** | about 0.05 | a short edge, cows in milk |
+  | **it reaches the far node** and is a stray there, seen by whoever is about | about 0.02 | a short edge |
+  | **it is found by a traveller** on that edge | about 0.15 for each day a traveller is on it | |
+  | **it is found by a searcher** | about 0.5 for each day of searching | |
   | it stays lost | the rest | |
+
+  So a herd that goes onto the road is usually lost within two or three days; only a quick search, or luck, gets it back.
 
 - **Being found is a fuse event on the road** (D2-5): a traveller in transit normally makes no call (D4-10), but coming on the herd
   gives it one urgent call: drive the beasts along (they arrive with it, at its destination, and slow a party on foot), drive them
@@ -136,6 +139,8 @@ at the level of parcels, which the engine already has (a herd is on a parcel in 
   grain each working day, milk 0.8 food a day for 0.6 of the year, slaughter 40-50 meat and 2 hides, herding at least 1 unit a
   day, prices (cow 40-60 coin, ox 50-100, horse 90-150). 02l's and 02m's ox costs need a team of two.
 
+- 23 Oct: Zach: much likelier to die or be gone for good once away. Odds raised (dies 0.2, gone 0.15, home 0.05, far node 0.02,
+  found 0.15 by a traveller, 0.5 by a searcher). Meetings on the road generalised in road_encounters.md.
 - 23 Oct: Zach: a herd that wanders off rarely goes onto an edge: it may die, be found by a traveller (a fuse event), reach the next
   node, or come home; more than two parcels a day, but often noticed; people can set out along an edge to search, and are much more
   likely to find it. Added, with odds a day.
