@@ -26,6 +26,9 @@ HAND_MILL, WATER_MILL = 8, 40                        # grain ground a unit
 PLOT_SEED = 16
 CHARCOAL = 5                                         # timber a charcoal (2 units)
 SMELT = {"ore": 3, "charcoal": 1}                    # a copper: 3 ore and 1 charcoal (or 4 timber), 3 units
+LIFE = {"crude": 10, "copper": 40}                   # a tool's life in wear
+WEAR = {"fell": 1.0, "reap": 0.25, "hoe": 0.5, "mine": 2.0}   # wear a use (fell: 2 units, 3 timber; reap, hoe: 1 unit; mine: 2 units)
+HOE_UNITS = 16                                       # a plot broken by hoe
 
 # ---------------------------------------------------------------------------------------------------------------- calendar
 DAYS = 24
@@ -50,16 +53,18 @@ HEARTH_FUEL = sum(FUEL["cold" if season(d) == "winter" else "normal"] for d in r
 VILLAGES = {
     "Barleyfield": dict(kind="farms", people={"Reed": (3, 1, 1), "Barrow": (3, 0, 1), "Hale": (2, 1, 1), "Lowe": (2, 1, 0)},
                         hearths=4, stores={"grain": 150, "beans": 20}, crop=760, plots=16, sow=10, wild=0.5, wood=12, woodpile=24,
-                        herds=[("Reed", 10, 3), ("Barrow", 5, 1)], tools="crude", mill="hand"),
+                        herds=[("Reed", 10, 3), ("Barrow", 5, 1)], tools="crude", mill="hand",
+                        kit={"crude": 7, "copper": 0}, hoe_plots=4),
     "Ashwood": dict(kind="wood", people={"Fenn": (3, 1, 1), "Ash": (3, 0, 1)}, hearths=2,
                     stores={"grain": 25, "dried meat": 10}, crop=0, plots=0, sow=0, wild=2.4, wood=400, woodpile=20,
-                    herds=[], tools="crude", mill="hand"),
+                    herds=[], tools="crude", mill="hand", kit={"crude": 4, "copper": 0}, hoe_plots=0),
     "Coppergate": dict(kind="ore", people={"Moor": (3, 1, 1), "Cole": (2, 0, 1)}, hearths=2,
                        stores={"grain": 120, "dried meat": 12}, crop=0, plots=0, sow=0, wild=0.4, wood=20, woodpile=10,
-                       herds=[], tools="copper", mill="hand", smelt=6),
+                       herds=[], tools="copper", mill="hand", smelt=6, kit={"crude": 3, "copper": 2}, hoe_plots=0),
     "Millford": dict(kind="market", people={"Miller": (2, 1, 1), "Merchant": (3, 0, 1), "Bell": (2, 1, 0), "Smith": (2, 0, 1)},
                      hearths=4, stores={"grain": 60, "flour": 16, "bread": 50, "dried meat": 4}, crop=170, plots=5, sow=3,
-                     wild=0.3, wood=10, woodpile=20, herds=[], tools="crude", mill="water", handcarts=2),
+                     wild=0.3, wood=10, woodpile=20, herds=[], tools="crude", mill="water", handcarts=2,
+                     kit={"crude": 5, "copper": 1}, hoe_plots=3),
 }
 # roads: (a, b, days, track, landmarks)
 ROADS = [
@@ -227,6 +232,15 @@ def flows(plan_rows):
     return total
 
 
+def tool_wear(v, felled=0.0) -> dict:
+    """Wear over the run from the work that uses tools: felling (what is felled there), reaping every plot, breaking by hoe the
+    plots not ploughed, mining the ore smelting needs; against the tool lives the village starts with."""
+    wear = felled / 3 * WEAR["fell"] + v["plots"] * REAP_UNITS * WEAR["reap"] + v["hoe_plots"] * HOE_UNITS * WEAR["hoe"]
+    wear += v.get("smelt", 0) * SMELT["ore"] / 2 * WEAR["mine"]
+    have = v["kit"]["crude"] * LIFE["crude"] + v["kit"]["copper"] * LIFE["copper"]
+    return dict(wear=wear, have=have, short_crude=max(0.0, wear - have) / LIFE["crude"])
+
+
 if __name__ == "__main__":
     need = needs(VILLAGES, "Arm 1: villages that need each other")
 
@@ -259,6 +273,12 @@ if __name__ == "__main__":
     for g in ("crude", "copper"):
         print(f"Ashwood fells {felled:.0f} timber (its own, what it sends, and the charcoal's): {felled / FELL[g]:.0f} units with {g} "
               f"tools, {felled / FELL[g] / units_total(aw):.0%} of its {units_total(aw):.0f}.")
+    print("\nTools (wear over the run against the lives of the tools each village starts with):\n")
+    row(["Village", "Wear from work", "Tool life held", "Short, in crude tools"])
+    row(["---"] * 4)
+    for k, v in VILLAGES.items():
+        tw = tool_wear(v, felled if k == "Ashwood" else min(v["wood"], fuel_demand(v)))
+        row([k, f"{tw['wear']:.0f}", f"{tw['have']:.0f}", f"{tw['short_crude']:.1f}"])
     print(f"Barleyfield's surplus over its own eating and its spring seed: {need['Barleyfield']['surplus']:.0f} grain; the others need "
           f"{sum(need[k]['food'] for k in need):.0f}.")
 
