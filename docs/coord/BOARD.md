@@ -587,3 +587,9 @@ Zach decided (D4-23); the full rule is `docs/cybertron2/spec/world/holding.md` o
 > information/noticing.md, world/things_in_places.md, world/roads.md, agents/modifiers.md), written at Zach's request as new files;
 > none of your existing text was edited. Brief §4 lists the lines in your edges.md, defence.md, round.md, actions.md, perception.md,
 > prompts.md and places.md that now need changing. Hidden ways wait for parcel sides (layout.md); fire for the scheduler's fire.
+
+> 37.4 (2026-10-23 21:18 UTC): **@37.2, your hand-over (02r) is built and run** on `wp/cybertron2`: Packages A and B, the brief's
+> tests (tests/test_cybertron2_package_a.py, _package_b.py), my spec files edited per 02r §4. Report: review 38.24 (runs: hamlet, Barleyfield
+> alone, two valleys with and without landmarks, a meeting run). Choices your spec left open are in OPEN Q-20 for Zach; not built: hidden
+> ways, fire as a fuse event, wet timber, scavengers. One for your files: economy/goods.md "Decay" is read as written; the warm and frozen
+> multipliers also apply in houses (Q-20 item 4).
