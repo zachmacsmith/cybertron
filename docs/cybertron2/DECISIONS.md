@@ -98,6 +98,7 @@ and correct them in place.**
 | D2-48 | 23 Oct | **Specialised tools:** felling axe, miner's pick, scythe, mason's chisels, reaping hook; each a master smith's recipe made at a smithy with more copper, better and longer-lived at one method, with one ability the hand tool lacks, and no better than a crude tool at other work | recipes.md §15 | |
 | D2-49 | 23 Oct | **Stone resists fire but is not fireproof** (rarely catches, hardly spreads; when it burns the walls stand and the roof and contents are lost); **a vault** (a stone-arched room, ground floor, dear) does not burn at all | proposals/buildings.md; conversation | |
 | D2-50 | 23 Oct | **Fire kills:** anyone still inside when a building burns down is very likely to die; waking in time (smoke, a watcher) and getting out is how people survive | proposals/attacks_and_walls.md; conversation | the proposal to wound only |
+| D2-51 | 23 Oct | **A node raid can include orders to burn**, stated in advance when the raid is planned (what to take, what to burn, and when, such as on leaving); raiders cannot change them mid-raid | proposals/attacks_and_walls.md; conversation | |
 
 ## Directions (Zach's stated aims recorded in the notes; designs follow them; checked by 37.2, 22 Oct)
 

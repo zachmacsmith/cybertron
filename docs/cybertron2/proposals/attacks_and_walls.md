@@ -83,6 +83,36 @@ roof is reached), a vault 0; higher in a dry season, about half in rain (the sea
 - **The counters:** a watch, dogs, stone, a vault for what must not burn, space between buildings, water near at hand, and a fire
   crew (neighbours, or an office).
 
+### Burning in a node raid: orders given in advance, and whether it pays
+
+**Orders in advance (D2-51).** A raid resolves at night, after everyone has planned, so a raiding party states its aims when it
+plans: what to take, what to burn, and when. For example "take food from the houses; burn the Fenn barn; on leaving, set fire to
+any wattle house". The party cannot change them mid-raid (only the defenders get an urgent call, fuse_events.md rule 1).
+
+**Rough numbers** (a party of 6 against a village of 5 wattle houses, a stone house and a mill; looting succeeds about 6 times in
+10 and takes 60% of a house's 20 food):
+
+| Aim | What the raiders gain | What the village loses |
+|---|---|---|
+| loot 3 houses | about 22 food | about 22 food |
+| burn 2 wattle houses on leaving | nothing | about 15 units of buildings and stores on average (more in winter: the cold follows) |
+| burn the mill | nothing | about 9 units on average, and every household's milling until it is rebuilt |
+
+**So burning does not pay as plunder: it destroys what could have been taken.** It pays for four other ends:
+
+1. **Cover for the escape.** Flames on leaving split the village: people must choose between saving houses and the people in
+   them, and chasing the raiders. Burning on the way out is the strongest use.
+2. **Smoking out a stone house** (above): the only way to beat walls that multiply defenders by 2 without a long siege.
+3. **Denial and punishment:** a rival's mill, granary or hall; an exemplary burning after a refused tribute.
+4. **The threat:** once a village has seen one burning, the threat makes tribute credible. Burning often kills the goose: a raider
+   who wants to come back every season burns rarely.
+
+**What it costs the raiders:** fire lights the whole node, so burning early in a raid wakes everyone (the fuse shortens for all);
+fire spreads, so it can take the granary they meant to loot; and it makes enemies who remember (memories, feuds).
+
+**Raid fires kill fewer than stealthy fires:** in a raid people are already awake and out; a fire set quietly at night, with no
+raid, is the deadly one (D2-50), and the watch is its counter.
+
 ## Why
 
 - Stone needed a value beyond density: per night of shelter it does not pay (02j), but as defence it does, for those with stock.
@@ -128,6 +158,10 @@ agents/actions.md (raid kinds, watch).
   fuse event with a bucket line, smoking defenders out of stone houses.
 
 - 23 Oct: Zach: people must be able to die; if a house burns down with you inside you should be very likely to die (D2-50).
+
+- 23 Oct: Zach: when raiding a node, raiders should be able to decide in advance to burn places (D2-51); would it be effective?
+  Added "Burning in a node raid": orders stated when the raid is planned; rough expected values; burning pays as cover, against
+  stone, for denial and as a threat, not as plunder.
 
 ## Sources
 

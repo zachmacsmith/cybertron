@@ -71,6 +71,7 @@ Newest first. Ideas decided or rejected in conversation before 23 Oct are backfi
 | 23 Oct | The verbs (a lean set of 24) and what each agent is shown; force always shown | ready for a decision | [verbs.md](verbs.md) |
 | 23 Oct | Detecting what was told by reading the meaning of free speech | rejected in the proposal: name mentions, an `about` field and explicit `explain`/`teach` instead | [knowledge.md](knowledge.md) §4e |
 | 23 Oct | Know-how as a continuous score (0-1) | replaced in the proposal by four levels moved by counts (Zach) | [knowledge.md](knowledge.md) §4c |
+| 23 Oct | Burn orders in a node raid, given in advance | accepted: D2-51 | [attacks_and_walls.md](attacks_and_walls.md) |
 | 23 Oct | Fire kills those still inside when a building burns down | accepted: D2-50 | [attacks_and_walls.md](attacks_and_walls.md) |
 | 23 Oct | Sleepers in a burning house only wounded | rejected: they should be very likely to die | D2-50 |
 | 23 Oct | Stone resists fire, walls stand; a vault does not burn | accepted: D2-49 | spec/economy/buildings.md |
