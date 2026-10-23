@@ -60,6 +60,21 @@ Travel decides itself most of the time; decisions are needed only where somethin
 
 Even minor trouble keeps a small chance (proposed 0.1) of a call, so travel is not wholly mechanical.
 
+**Where the line falls between automatic and a call is open (Zach, 23 Oct: not yet sure).** Candidate factors, to explore:
+
+| Side | Factor | Pushes toward a call when |
+|---|---|---|
+| the event | stakes | a life, most of the load or herd, a large debt at risk |
+| | whether the departure choice covers it | the situation is not one the choice names (two challenges at once) |
+| | other people | someone else is deciding too (a meeting, a party at the block): their choice cannot be decided in advance |
+| the agent | noticing in time | it saw the trouble coming (sight, the eye for the land); unnoticed trouble just happens |
+| | experience of that road or landmark | it is new to the agent; a carrier who has forded it ten times handles it as routine |
+| | what it carries and who is with it | children, a herd, goods held for others |
+| the run | the cap | at most one call a day (D2-80) |
+
+One shape: a call happens when the stakes are high, the departure choice does not cover it, and the agent noticed in time;
+experience raises the bar, and other people always lower it.
+
 **Choices at departure:** a short, fixed set given with `travel` (a modifier, D2-93): `on trouble: push on | wait up to N days |
 turn back | go round`. The departure prompt shows the landmarks the traveller knows on that road (known by having travelled it or
 been told); on an unknown road they meet them as they come.
@@ -109,7 +124,8 @@ landmarks in all.
 
 1. ~~Stretches and landmarks~~ decided: D2-104 (very simple; no landmarks behaves as now).
 2. Which landmarks in the first worlds (proposed: ford, bridge, pass, narrows, spring)?
-3. ~~How challenges are decided~~ decided: D2-105. Open: the escalation thresholds and the 0.1 chance of a call (§3).
+3. ~~How challenges are decided~~ decided: D2-105. Open: where the line falls between automatic and a call (§3: the event,
+   the agent, or both), and the 0.1 chance.
 4. Building on landmarks (a bridge, a hut, a toll) in the first worlds, or later?
 5. ~~OPEN Q-17~~ the edge's terrain is its stretches' default (D2-104).
 6. Waiting it out at a block, as a departure choice and in a fuse call (§3)?
