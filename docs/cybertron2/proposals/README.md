@@ -52,7 +52,7 @@ proposal**; **Why**; **Alternatives considered**; **Open questions**; **Affects*
 | [exchange_and_money.md](exchange_and_money.md) | exchange at a node, coin, debts, credit, tolls | 37.2 | accepted: D2-1, D2-2, D2-25 to D2-30, D4-17 |
 | [information_economics.md](information_economics.md) | writing materials, documents, the information ladder, libraries, archives, maps | 37.2 (37.4 owns information/) | partly accepted: D2-7, D2-8 |
 | [economy_plan.md](economy_plan.md) | the economy plan for cybertron2 (E1-E6, the first region) and society-scale layers | 37.2 | discussion |
-| [fuse_events.md](fuse_events.md) | events with a detection time and a completion time; urgent calls for those who notice in time | 37.2 (37.4 owns conflict/, core/) | accepted in principle: D2-5 |
+| [fuse_events.md](fuse_events.md) | events with a detection time and a completion time; urgent calls for those who notice in time | 37.2 (37.4 owns conflict/, core/) | accepted: D2-5, D2-80 to D2-84 |
 | [gates.md](gates.md) | boundaries with entry rules: names, passes, tolls, a keeper; admission in the talk step | 37.2 (37.4 owns conflict/) | accepted: D2-5 (details open) |
 | [attacks_and_walls.md](attacks_and_walls.md) | attacks on people, buildings and nodes; walls multiplying defenders; the watch | 37.2 (37.4 owns conflict/) | partly accepted: D2-20 to D2-22 |
 
@@ -62,6 +62,8 @@ Newest first. Ideas decided or rejected in conversation before 23 Oct are backfi
 
 | Date | Idea | Outcome | Where |
 |---|---|---|---|
+| 23 Oct | Fuse events' details: rare (one call a night); raids only sometimes; fire, meetings and finds on the road; acts by fuse length; a simple overlap rule to revisit; riders a small fuse; the call continues the agent's conversation | accepted: D2-80 to D2-84 | [fuse_events.md](fuse_events.md) |
+| 23 Oct | Arrivals at a shut gate at night as a fuse event (37.2's list) | rejected: the gate's rule at dawn, then the talk step (D2-5) | [gates.md](gates.md) |
 | 23 Oct | Things left in places (goods, caches, bodies, herds, ways) noticed by one rule; roads in stretches; the dead on the road leave remains | discussion | [things_in_places.md](things_in_places.md) |
 | 23 Oct | Everything happens in a place; nothing seen across nodes by accident | accepted: D4-35 | spec/core/architecture.md |
 | 23 Oct | Moving is general: join a household, take up an empty house, build one | accepted: D4-36 | spec/institutions/membership.md |

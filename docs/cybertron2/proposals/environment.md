@@ -256,7 +256,7 @@ than from the weather. So risks are **data on kinds of things**, not only on the
 Zach: fires, and some things people experience, should cross between nodes, depending on the edge: a mountain ridge, a forest
 path and a long plain carry different things.
 
-**What the engine needs on an edge** (world/edges.md, 37.4: OPEN Q-14): its **terrain** along the way (open plain, farmland,
+**What the engine needs on an edge** (world/edges.md, 37.4: OPEN Q-17): its **terrain** along the way (open plain, farmland,
 woodland, marsh, hills, a ridge or pass, a river valley), its **length** (days, as now), whether it follows a **river**, and its
 **height change**. Generation already derives edges from terrain (D4-22), so these come from the same layers.
 
@@ -281,7 +281,7 @@ woodland, marsh, hills, a ridge or pass, a river valley), its **length** (days, 
 
 1-2. The layers, the hazard and paired draws: accepted (D2-69, D2-70). 3. The catalogue: wider than §6 (environment_catalogue.md),
 and risks attach to things (D2-71, §11); fires cross edges (D2-72). 4. Eras as starting conditions (D2-73). 5. Signs carry between
-nodes as the edge's terrain allows (D2-74, §12). 6. Disease: to flesh out (OPEN Q-13). 7. The environment area moves to 37.2 (D2-75).
+nodes as the edge's terrain allows (D2-74, §12). 6. Disease: to flesh out (OPEN Q-16). 7. The environment area moves to 37.2 (D2-75).
 
 ## Why
 

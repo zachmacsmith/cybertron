@@ -29,7 +29,7 @@ In a test run, families kept passing each other: one left to trade at the other'
 | **a searcher and a lost herd** | the searcher travels with the aim of searching | about 0.5 a day |
 | **a traveller and someone waiting on the road** (a camp, a toll, an ambush) | the waiter is on the edge | by terrain and by who sees whom first (§4) |
 
-**Meeting odds by the edge's terrain** (proposed; edges need terrain data: OPEN Q-14):
+**Meeting odds by the edge's terrain** (proposed; edges need terrain data: OPEN Q-17):
 
 | Terrain | Chance two parties going opposite ways meet | Why |
 |---|---|---|

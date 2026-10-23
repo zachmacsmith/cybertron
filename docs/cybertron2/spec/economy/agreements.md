@@ -19,6 +19,7 @@ institution whose container it may use. Work can be a leg, checked by the engine
 - D2-38: a worker uses the employer's tools there.
 - D2-39: duties checked by the engine.
 - D2-40: the presets below.
+- D4-37: whoever is owed may count a debt paid or forgive it; goods given or left by the debtor to the creditor are credited.
 - D2-25, D2-27: offers cost no work units; a promise leg makes a debt that is only information.
 
 ## Mechanics
@@ -54,6 +55,9 @@ At the end of each day's work step, every leg that is due, or in arrears, is pai
 - **No path:** the leg accrues as arrears, shown to both; arrears are paid first when a path appears.
 - **A miss:** the source does not hold enough. **A breach:** the payer held enough at the node but not in the named source, or
   moved it away, for more than the grace; the remedy applies (the bond pays; an arbiter or court rules).
+- **Release** (D4-37): the person owed, or a member of the household owed, can release what is owing on an agreement when they
+  judge it paid (to their household, in kind) or to forgive it. Goods the debtor gives or leaves to the creditor are credited to
+  the debt automatically.
 - Deposits into and withdrawals from a ledger are physical, at its seat; orders to pay from a share come in person or by sealed
   letter.
 
@@ -124,4 +128,4 @@ known.
 [proposals/agreements.md](../../proposals/agreements.md), [proposals/hiring.md](../../proposals/hiring.md),
 [31.03 §2, §4, §5](../../../review/31_institutions/03_money_labour.md); `cybertron/standing.py`, `cybertron/credit.py`.
 
-*Current as of 23 Oct 2026: D2-25, D2-27, D2-31 to D2-40.*
+*Current as of 23 Oct 2026: D2-25, D2-27, D2-31 to D2-40, D4-37.*

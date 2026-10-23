@@ -1,6 +1,6 @@
 # Proposal: what can happen (eras, weather, hazards that spread, and how people meet them)
 
-**Status:** partly accepted: D2-76 to D2-79 (23 Oct); disease deferred (OPEN Q-13). Design only. **Owner:** 37.2 (at Zach's request). A companion to
+**Status:** partly accepted: D2-76 to D2-79 (23 Oct); disease deferred (OPEN Q-16). Design only. **Owner:** 37.2 (at Zach's request). A companion to
 [environment.md](environment.md), which holds the scheduler that runs these. **Affects:** as environment.md.
 
 ## Summary
@@ -143,7 +143,7 @@ conditioned on the incident ("if your house burns, the members owe you 10 timber
    scripted dangers can be herds of dangerous beasts (D2-76).
 2. The first-world set (§6), every kind as data, the rest kept as expansions (D2-77).
 3. The six spreading patterns (D2-78).
-4. Disease: put off (OPEN Q-13).
+4. Disease: put off (OPEN Q-16).
 5. **Windfalls** (good-luck incidents: a bumper harvest, a stray herd, storm-felled oaks, a fish run) need no rule: whoever finds
    one can take it, and custom and law decide claims (D2-79).
 

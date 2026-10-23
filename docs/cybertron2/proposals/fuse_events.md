@@ -1,6 +1,7 @@
 # Proposal: fuse events (time to respond)
 
-**Status:** accepted in principle: D2-5 (the mechanism); its details are discussion. **Owner:** 37.2 (author); the mechanism is
+**Status:** accepted: D2-5 (the mechanism), D2-80 to D2-84 (the details, 23 Oct); the first numbers are to calibrate, and
+overlapping events are to review (OPEN Q-19). **Owner:** 37.2 (author); the mechanism is
 37.4's (the day, the night, the scheduler, combat), the economics of what buys time are 37.2's.
 
 ## Summary
@@ -63,13 +64,47 @@ woken.
 3. **A combat-only interrupt phase:** rejected as too narrow; the same structure carries fire, flood, theft and illness.
 4. **Multi-wave exchanges** (defenders respond, attackers answer, and so on): becomes a turn-based combat game; rejected.
 
+## Decided details (23 Oct: D2-80 to D2-84)
+
+For 37.4 to write into conflict/defence.md, core/round.md (step 7), information/prompts.md and world/edges.md, and to build.
+
+1. **Rare (D2-80):** at most one urgent call per agent per night, and one per day on the road.
+2. **Events with a fuse in the first worlds (D2-81):**
+
+   | Event | Fuse | Who can be woken |
+   |---|---|---|
+   | a raid on a building | **only sometimes:** a chance anyone detects it at all | a watcher (at once, D2-21), those inside, neighbours who hear |
+   | fire | smoke and light | those inside the burning building, neighbours, a watcher |
+   | a meeting on the road | the parties see each other (road_encounters.md) | both parties |
+   | a find on the road worth taking | goods, a body, a herd once herds wander (things_in_places.md) | the finder |
+
+   Arrivals at a shut gate are not a fuse event: the gate's rule at dawn, then the keeper and the arrivals in the talk step (D2-5).
+   A traveller on the road gets these calls (an exception to D4-10).
+3. **The fuse's length sets how much the woken can do (D2-81):** still one call and one wave, but a short fuse allows one act and
+   a long one several (wake the others, then go and defend).
+4. **Overlaps, a simple rule for now (D2-82):** every event detected at one node or one stretch of road in one night shares one
+   wave; each woken agent sees every event it detected; events resolve by start time, ties by a keyed draw. To review: OPEN Q-19.
+5. **Riders (D2-83):** a lower chance of any fuse, and a very short one if there is.
+6. **The call continues the agent's own conversation (D2-84):** appended to its context as it stands (that day's turn and what it
+   carries from the days before, D4-27), so the same agent decides. It shows what the agent sees of the event, what it holds, who is
+   with it, the acts its fuse allows, and the event's menu.
+
+**First numbers (proposed, to calibrate):**
+
+| | Value |
+|---|---|
+| a raid detected at all: no watcher, no dog | 0.15 per house within earshot, plus 0.3 for those inside a timber house, 0.5 inside stone |
+| with a dog | 0.6 |
+| with a watcher | 0.9 (D2-21) |
+| riders | detection chances halved |
+| acts allowed | a hut: none (in before anyone wakes); timber: 1; stone: up to 3; riders: at most 1 |
+| fire: those inside wake | 0.6 (a watcher 0.9); neighbours 0.4 |
+
 ## Open questions
 
-1. The cap on urgent calls per agent per night.
-2. Which events have a fuse in the first worlds (proposed: raids on stone buildings, fire, arrivals at a shut gate).
-3. The order of overlapping events beyond the rule above, and its tie-breaks.
-4. OPEN C-5: riders who travel and strike in one round. Proposed: no exception to D4-8; riders simply leave almost no fuse.
-5. The urgent call's prompt: what it shows, within the budget.
+1. ~~The cap~~ decided: D2-80. 2. ~~Which events~~ decided: D2-81. 3. Overlapping events: a simple rule (D2-82), to review in
+   depth (OPEN Q-19). 4. ~~Riders~~ decided: D2-83. 5. ~~The call's prompt~~ decided: D2-84.
+6. The first numbers above.
 
 ## Affects
 
@@ -85,6 +120,11 @@ economy/buildings.md (what structures add to a fuse).
 - 22 Oct: generalised by 37.2 beyond violence to fire, flood, theft, births, wolves, shut gates and urgent messages (02k §1).
 - 22 Oct: Zach agreed: rare, and only a subset woken, so it should not cost much (D2-5).
 - 23 Oct: 37.4 proposed in OPEN C-5 that fuse events make ride-and-strike's exception to D4-8 unnecessary; Zach to confirm.
+- 23 Oct: Zach decided the details (D2-80 to D2-84): fuse events not common, one call a night; raids give a fuse only sometimes,
+  by chance; the number of acts can vary; arrivals at a shut gate stay automatic at dawn and then the talk step (corrected from
+  37.2's list); finds on the road include bodies and herds; overlapping events by a simple rule, flagged to revisit; riders a
+  lower chance of any fuse and a very short one; the call appended to the agent's own conversation ("otherwise it's not really the
+  same agent"). To spec and build now.
 
 ## Sources
 
