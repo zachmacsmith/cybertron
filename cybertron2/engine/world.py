@@ -181,6 +181,9 @@ class World:
                 node = s["parcels"][t["parcel"]]["node"]
                 cid = p_new_thing(self, node, t["parcel"], t.get("kind", "pile"), by=t.get("by"), hidden=t.get("hidden"),
                                   untaught=bool(t.get("untaught")))
+            for k in ("of", "body", "died", "cause"):                         # a body lying there (seeded remains)
+                if k in t:
+                    self.s["containers"][cid][k] = t[k] if k != "died" else -int(t[k])
             self.s["containers"][cid]["goods"] = {k: float(v) for k, v in (t.get("goods") or {}).items()}
             self.s["containers"][cid]["day"] = -int(t.get("age", 1))
             for who in t.get("known_by") or []:

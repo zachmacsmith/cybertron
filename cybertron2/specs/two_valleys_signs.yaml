@@ -1,0 +1,21 @@
+# A live test of the sign bundles (signs.py: THING, ROAD, TRACE, TRAVELLER, NIGHT, SKY): the two valleys over 5 days with a stranger's
+# body on the Sheepwalk, a cache under brush in the Alders, an elder's death at home, a pack on the road, two travellers sent across
+# a ford on day 1, heavy rain and fog, and one break-in at a stone house on day 3. Everything else is the agents' own.
+base: cybertron2/specs/two_valleys_s1.yaml
+name: The two valleys, a test of what people sense
+days: 5
+weather: {2: heavy rain, 4: fog}
+roads:
+  - [wetham, highcombe, 1, track, {terrain: river valley, stretches: {1: {landmarks: [ford]}}}]
+  - [highcombe, old_wood, 1, {way: a forest path over the scarp that nobody uses, terrain: woodland}]
+incidents:
+  - {day: 2, kind: death, node: wetham, person: Godiva}
+things:
+  - {parcel: sheepwalk, kind: remains, of: a stranger, body: true, died: 3, cause: hunger, goods: {coin: 4, crude weapon: 1}}
+  - {parcel: w_alders, kind: pile, goods: {coin: 10, dried meat: 2}, hidden: under brush, by: Wat, known_by: [Wat], age: 6}
+  - {road: [wetham, highcombe], stretch: 1, kind: pile, goods: {grain: 6, hide: 1}, age: 2}
+script:
+  - {day: 1, who: Simkin, do: {do: travel, to: Highcombe}}
+  - {day: 1, who: Joyce, do: {do: move, item: timber, qty: 3, to: hands}}
+  - {day: 1, who: Joyce, do: {do: travel, to: Wetham}}
+  - {day: 3, who: Hob, do: {do: attack, target: Cragg House, aim: rob}}
