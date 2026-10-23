@@ -153,3 +153,21 @@ long runs' public posts collapsed from 30-120 per 40 rounds to 0-6 (36c_first_ba
 cached prefix, 72% of a run's cost in cache writes never read (20_memory_and_prompts.md:32) — the fault M1's sessions now avoid.
 No review reports agents hitting the DM limit; halving the reply waves (cutting about 30% of calls) was considered and not done
 (36b_first_batch.md:292).
+
+## 9. Run G: the ration and the cost of speaking (D4-31)
+
+`runs/m1_G`, the same village and seed as run F. $3.54 (F $3.83).
+
+| | F | G |
+|---|---|---|
+| says a person a day; public share of messages | 1.74; 0.40 | 0.08; **0.04** |
+| says to everyone / in a building | 117 / 74 | 9 / 0 |
+| tells a person a day; within own house | 2.64; 62% | 2.13; 71% |
+| person-days that used their last private message | 0 | 17 (none refused) |
+| woken a day; talk calls a decision | 9.8; 1.33 | 9.5; 1.31 |
+| words spoken a person a day | 126 | 67 |
+| morning message, days 2 / 5 / 9 | 2.9k / 5.6k / 9.0k | 2.3k / 4.2k / 4.4k |
+| milkings (the fix after F) | 0 | 22 |
+
+A unit of work for each say all but ended public speech (DM share 0.96 against cybertron 1's 0.84 and its own ≤ 0.7 target); the
+ration bound on 17 person-days but refused nothing; waking did not fall, because 71% of tells go to one's own household.
