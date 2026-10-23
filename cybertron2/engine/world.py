@@ -593,6 +593,7 @@ def p_die(w, person, cause, to=None):
     a = w.s["people"][person]
     place = w.place_of(("person", person))
     spot = TH.spot_of(w, person) if a["at"] is not None else None
+    house = TH.house_at_death(w, person, spot)
     a["alive"], a["died"], a["cause"] = False, w.d, cause
     hands = w.goods(a["hands"])
     left = {i: q for i, q in hands.items() if q > 1e-9}
@@ -604,7 +605,7 @@ def p_die(w, person, cause, to=None):
         w.s["seq"] += 1
         cid = f"remains:{w.s['seq']}"
         w.s["containers"][cid] = {"kind": "remains", "of": person, "node": place, "parcel": spot, "goods": dict(left), "wear": {},
-                                  "on_road": place not in w.s["nodes"], "body": True, "died": w.d}
+                                  "on_road": place not in w.s["nodes"], "body": True, "died": w.d, "in": house}
     for i in list(hands):
         hands[i] = 0.0
     for iid, h in w.s["institutions"].items():

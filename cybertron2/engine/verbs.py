@@ -117,8 +117,11 @@ def _thing_site(here, at):
     """A body here by its person's name or its place's name (for burying)."""
     low = str(at or "").strip().lower()
     for cid, c in here.bodies().items():
-        pname = here.spot_name(c).lower()
-        if not low or low in (c["of"].lower(), pname, pname.removeprefix("the ")) or c["of"].lower() in low:
+        names = {c["of"].lower(), here.spot_name(c).lower(), here.spot_name(c).lower().removeprefix("the ")}
+        pid = c.get("parcel")
+        if pid in here.parcels():                                             # the ground it lies on, or a building on that ground
+            names |= {here.parcels()[pid]["name"].lower()} | {b["name"].lower() for b in here.buildings().values() if b["parcel"] == pid}
+        if not low or low in names or c["of"].lower() in low:
             return cid
     return None
 

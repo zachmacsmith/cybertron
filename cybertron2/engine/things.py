@@ -33,6 +33,15 @@ def spot_of(w, name):
     return built[0] if built else next((pid for pid, p in w.s["parcels"].items() if p["node"] == node), None)
 
 
+def house_at_death(w, name, spot):
+    """The house one died in, if one died at home or abed (no work yet today): its household finds the body there."""
+    a = w.s["people"][name]
+    if a["at"] is None or (w.s.get("today") or {}).get("worked", {}).get(name):
+        return None
+    homes = [b for b in w.homes(name) if w.s["buildings"][b]["node"] == a["at"] and w.s["buildings"][b]["parcel"] == spot]
+    return homes[0] if homes else None
+
+
 def at_node(w, node) -> dict:
     """Things lying at a node: piles with goods, bodies (buried or not), remains with goods."""
     out = {}
@@ -43,6 +52,8 @@ def at_node(w, node) -> dict:
 
 
 def parcel_name(w, c) -> str:
+    if c.get("in") in w.s["buildings"]:
+        return w.s["buildings"][c["in"]]["name"]
     pid = c.get("parcel")
     return w.s["parcels"][pid]["name"] if pid in w.s["parcels"] else w.s["nodes"].get(c.get("node"), {}).get("name", "the road")
 
@@ -146,6 +157,9 @@ def presence(w, name, parcel, own_x=1.0) -> float:
         return best
     if spot_of(w, name) == parcel:
         return float(pr["about"])
+    a = w.s["people"][name]
+    if any(w.s["buildings"][b]["parcel"] == parcel for b in w.homes(name) if w.s["buildings"][b]["node"] == a["at"]):
+        return float(pr["crossing"])                                       # one's own ground is crossed every day
     return float(pr["elsewhere"]) if own_x >= float(NOTICING["elsewhere_min"]) else 0.0
 
 
@@ -164,6 +178,8 @@ def chance(w, name, c, target=None) -> float:
     x = own(w, c)
     if x <= 0:
         return 0.0
+    if c.get("in") and c["in"] in w.homes(name):                          # in one's own house: found at once
+        return 1.0
     pid = c.get("parcel")
     vis = EV.visibility(w, c.get("node"), pid, "sight") if pid in w.s["parcels"] else 1.0
     if not c.get("body") or c.get("buried") is not None:
@@ -196,7 +212,8 @@ def find(w, name, where, item=None):
         if not c or c.get("node") != w.at(name):
             continue
         pname = w.s["parcels"].get(c.get("parcel"), {}).get("name", "").lower()
-        if low and low not in (pname, pname.removeprefix("the ")) and (c.get("of") or "").lower() not in low:
+        names = {pname, pname.removeprefix("the "), w.s["buildings"].get(c.get("in"), {}).get("name", "").lower()} - {""}
+        if low and low not in names and (c.get("of") or "").lower() not in low:
             continue
         if item and c["goods"].get(item, 0.0) <= 1e-9:
             continue
