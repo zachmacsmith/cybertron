@@ -36,7 +36,7 @@ building grow large or tall.
 
 First worlds: **beds, hearth, bins, benches, shelves, lock, anvil-and-bellows, millstones** (with a water wheel by a river). Each
 has a cost, a capacity, upkeep, prerequisites and one hook in the rules. Oven, cellar, stalls, copy desks, loom, kiln and press come
-with the goods that need them.
+with the goods that need them. Beds are one fitting for any number of beds up to the room's size (2 timber and a hide each), so a hall for 25 sleeps 25 and keeps its other slots (recipes.md §3, 23 Oct).
 
 ### Rooms as channels (02i §4; D2-9)
 
@@ -82,6 +82,9 @@ per fitting and per room.
 - 22 Oct: Zach: building up costs more and needs stone; larger buildings must have stone. 02i §2c; D2-3.
 - 22 Oct: the pruning rule cut the fittings to eight (02g §1f). D2-9 recorded buildings from parts as decided (23 Oct check).
 - 23 Oct: stone's defence role (D2-20, 02k §3).
+
+- 23 Oct: Zach asked whether a room for 25 has 25 beds. It did not: each bed counted as a fitting, so a hall slept 6. Fixed: beds
+  are one fitting for any number up to the room's size; a room seats its size by day and sleeps it by night.
 
 ## Sources
 

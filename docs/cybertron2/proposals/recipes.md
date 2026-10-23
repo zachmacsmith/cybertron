@@ -64,7 +64,7 @@ Livestock (D2-6): **slaughter** an ox or cow (`work`, 2 units): about 15 meat an
 | medium room, timber on stone | 15 timber, 4 stone | 15 | 4.8 | a lot | a roof for 10 |
 | hall, timber on stone | 30 timber, 10 stone | 30 | 10 | a lot; a carpenter | a roof for 25 |
 | medium room, stone | 30 stone, 5 timber | 36 | 11.6 | a lot; a mason | a roof for 10; x2 defence (D2-20); can carry a storey (D2-3) |
-| beds (each) | 2 timber, 1 hide | 1 | 0.6 | a room | housed when sleeping here |
+| beds (one fitting, any number up to the room's size) | 2 timber, 1 hide a bed | 1 a bed | 0.6 a bed | a room | housed when sleeping here |
 | hearth | 4 stone | 3 | 1.2 | a room | warmth (burns fuel); cooking |
 | bins | 3 timber | 1 | 0.5 | a room | about 20 food at the house rate |
 | benches and a table | 3 timber | 1 | 0.5 | a room | the room holds its full size for a meeting |
@@ -77,6 +77,11 @@ Livestock (D2-6): **slaughter** an ox or cow (`work`, 2 units): about 15 meat an
 | stalls (each) | 3 timber | 1 | 0.5 | a ground-floor room | stabling an animal (Open 4) |
 
 Larger rooms cost less per person (D2-9; 02i §2b's curve); storeys cost more and need stone (D2-3).
+
+**Beds and room size (fixed 23 Oct):** a room's size is how many people it holds, sleeping or sitting. Beds are **one fitting**
+(one slot), however many: a hall for 25 can have 25 beds, each costing 2 timber and a hide, and still has its other slots for a
+hearth, benches and shelves. The same room seats its size by day and sleeps its size by night (as great halls did), so a hall can be
+a meeting place and a dormitory. Earlier text counted each bed as a fitting, which would have let a hall sleep only 6.
 
 ### 4. Working methods (`work {what, at}`)
 
