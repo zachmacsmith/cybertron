@@ -376,9 +376,19 @@ THINGS = {
     "body_days": 10,                                                # "dead some days", then bones to the season's end
     "rot_after": 2,                                                 # a body unburied this many days smells of rot
 }
+# The parcel graph (world/parcel_graph.md; D2-114 to D2-116): heights in words; the fittings that strike an arriving eye; the overview's
+# length.
+LAYOUT = {
+    "height": ("down by the water", "on the valley floor", "on the slope", "up on the hilltop"),
+    "seen": {"water wheel": "a water mill", "millstones": "a mill", "anvil": "a smithy", "oven": "a bake oven", "granary": "a granary"},
+    "overview": (3, 5),
+}
+
 NOTICING = {
-    # presence: where the observer was and what it did, by what its work draws on (D2-85)
-    "presence": {"game": 1.0, "plants": 0.7, "herd": 0.5, "work": 0.5, "about": 0.5, "crossing": 0.3, "elsewhere": 0.05, "road": 1.0},
+    # presence: where the observer was and what it did, by what its work draws on (D2-85); passing through 0.3, next door 0.1 (D2-115)
+    "presence": {"game": 1.0, "plants": 0.7, "herd": 0.5, "work": 0.5, "about": 0.5, "crossing": 0.3, "next door": 0.1,
+                 "elsewhere": 0.05, "road": 1.0},
+    "next_door_min": 0.5,                                           # only things this conspicuous are seen from next door
     "elsewhere_min": 0.8,                                           # only things this conspicuous are seen from elsewhere at the node
     "attention": {"place": 3.0, "search": 5.0},
     "eye": {"none": 0.5, "ordinary": 1.0, "keen": 3.0},             # D2-91 on things

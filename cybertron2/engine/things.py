@@ -157,6 +157,11 @@ def presence(w, name, parcel, own_x=1.0) -> float:
     a = w.s["people"][name]
     if any(w.s["buildings"][b]["parcel"] == parcel for b in w.homes(name) if w.s["buildings"][b]["node"] == a["at"]):
         return float(pr["crossing"])                                       # one's own ground is crossed every day
+    from cybertron2.engine import layout as LY
+    if parcel in LY.passed(w, name):                                       # on the way to where one worked, and back (D2-115)
+        return float(pr["crossing"])
+    if parcel in LY.next_door(w, name) and own_x >= float(NOTICING["next_door_min"]):
+        return float(pr["next door"])
     return float(pr["elsewhere"]) if own_x >= float(NOTICING["elsewhere_min"]) else 0.0
 
 

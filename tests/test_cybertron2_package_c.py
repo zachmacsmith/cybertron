@@ -109,3 +109,63 @@ def test_exactly_one_person_in_a_seeded_world_knows_dibbling_and_teaching_spread
     do(w, other, do="learn", **{"from": t, "what": "dibble"})
     ST.settle_teaching(w, w.s["today"])
     assert w.s["know"][other]["method: dibble"]["level"] in ("capable", "known")
+
+
+# ---------------------------------------------------------------------- C2: the parcel graph (D2-114 to D2-116)
+BF = load_spec("cybertron2/specs/barleyfield_a.yaml")
+
+
+def barleyfield(**patch):
+    s = copy.deepcopy(BF)
+    s.update(patch)
+    w = World(s)
+    w.s["today"] = R.blank_today()
+    return w
+
+
+def test_a_farmer_working_a_far_field_passes_through_the_parcels_between_and_notices_from_next_door():
+    from cybertron2.engine import layout as LY, things as TH
+    w = barleyfield()
+    name = next(n for n in w.living() if LY.slept_at(w, n) == "bf_green")
+    assert LY.path(w, "bf_green", "south_field") == ["bf_green", "north_field", "east_field", "south_field"]
+    w.s["today"]["worked"][name] = ["south_field"]
+    assert {"north_field", "east_field"} <= LY.passed(w, name) and "south_field" not in LY.passed(w, name)
+    assert TH.presence(w, name, "east_field", 0.4) == 0.3                                  # a pack on the way (D2-115)
+    assert TH.presence(w, name, "brook_field", 0.95) == 0.1                                # a herd next door
+    assert TH.presence(w, name, "brook_field", 0.4) == 0.0                                 # a pack next door: not seen from there
+    assert TH.presence(w, name, "barley_wood", 0.4) == 0.0
+
+
+def test_ties_between_shortest_ways_are_broken_by_a_keyed_draw():
+    from cybertron2.engine import layout as LY
+    w = barleyfield()
+    w.s["parcels"]["bf_green"]["adj"].append("east_field")                                # two ways of 2 steps to south_field? no:
+    w.s["parcels"]["east_field"]["adj"].append("bf_green")                                # green-east-south is now the only shortest
+    assert LY.path(w, "bf_green", "south_field") == ["bf_green", "east_field", "south_field"]
+    w.s["parcels"]["north_field"]["adj"].append("south_field")
+    w.s["parcels"]["south_field"]["adj"].append("north_field")
+    ways = {tuple(LY.path(w, "bf_green", "south_field", (k,))) for k in range(40)}
+    assert ways == {("bf_green", "east_field", "south_field"), ("bf_green", "north_field", "south_field")}
+    assert LY.path(w, "bf_green", "south_field", ("x",)) == LY.path(w, "bf_green", "south_field", ("x",))
+
+
+def test_attending_to_the_village_lists_neighbours_sides_and_road_ends_and_an_arrival_gets_an_overview():
+    from cybertron2.engine import perceive as PC
+    s = copy.deepcopy(SPEC)
+    s["roads"] = [["millbrook", "ashwood", 1, {"ends": {"millbrook": {"side": "east"}}}]]
+    w = World(s)
+    w.s["today"] = R.blank_today()
+    name = next(n for n in w.living() if w.at(n) == "millbrook")
+    pid = next(p for p in w.s["parcels"] if w.s["parcels"][p]["node"] == "millbrook" and w.s["parcels"][p]["adj"])
+    w.s["parcels"][pid].update(side="north", height=2)
+    here = Here(w, name)
+    assert PC.resolve_target(here, "the village")[0] == "village"
+    lines = here.layout()
+    p = w.s["parcels"][pid]
+    assert any(x.startswith(p["name"]) and "on the north side" in x and "on the slope" in x and "next to" in x for x in lines)
+    assert any("leaves from" in x and "on the east side" in x for x in lines)
+    PC.evening(w, {name: "the village"}, w.s["today"])
+    att = w.s["mind"][name]["today"]["attended"]
+    assert att["target"].startswith("how") and any("next to" in x for x in att["lines"])
+    ov = here.overview()
+    assert 3 <= len(ov) <= 5

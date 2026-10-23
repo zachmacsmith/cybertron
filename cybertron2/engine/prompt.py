@@ -87,7 +87,7 @@ def schema_for(here, mind) -> dict:
     s["properties"]["say"]["items"]["properties"]["to"]["enum"] = ["everyone"] + buildings
     s["properties"]["offers"]["items"]["properties"]["to"]["enum"] = ["anyone"] + people
     s["properties"]["offers"]["items"]["properties"]["for"]["enum"] = ["my household"] + holds
-    s["properties"]["attend"]["enum"] = people + buildings + parcels + herds + ["the sky", "the place in general"]
+    s["properties"]["attend"]["enum"] = people + buildings + parcels + herds + ["the sky", "the place in general", "the village"]
     s["properties"]["look_up"]["items"]["enum"] = techs
     return s
 
@@ -142,6 +142,7 @@ REPLY_LINES = """Reply with JSON:
   when accepted, both ways or not at all; the rest is owed, and paid wherever both are at one place on its day, or falls into
   arrears. An offer to one person lasts the day; to anyone, while you stay here.
 - "attend": the one thing you pay close attention to today. You will see it in detail tomorrow morning. It costs nothing.
+  "the village": how the place fits together, what lies next to what and where the ways out leave.
 - "note": [{"title", "text"}] write or replace a private note (up to 8, about 150 words each); "pin": a title to show every morning;
   "forget": [titles].
 - "open": [note titles] and "look_up": [crafts]: shown to you before the day's work, when you may change your plan.
@@ -365,6 +366,9 @@ def turn_prompt(here, mind, opening=True) -> str:
         way = mind.store.get("on_the_way") or {}
         if way.get("day") == here.day and way.get("lines"):
             hl.append("On the way: " + "; ".join(way["lines"]) + ".")       # D2-97
+        ov = here.overview()
+        if ov:
+            hl.append("Arriving, what you see first: " + "; ".join(ov) + ".")   # D2-116
     hl += _place_lines(here, mind)
     ways = []                                                                # the roads from here, known or not (D4-47)
     for nid, name, days, track in here.roads():

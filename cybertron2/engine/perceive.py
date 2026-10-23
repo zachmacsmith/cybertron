@@ -320,6 +320,8 @@ def evening(w, attend: dict, today: dict) -> dict:
             amb = [f for f in F if f.get("ambient")]
             rng.shuffle(amb)
             att = amb[:4]
+        elif subject == "village":
+            att = [{"id": f"layout:{i}", "text": x, "about": ["village"]} for i, x in enumerate(here.layout())]
         elif subject:
             pool = [f for f in F if subject in f["about"] and f["id"] not in seen and f.get("actor") != name and _can_read(mind, f)
                     and not f.get("thing")                                    # things: by the noticing rule, attention x3 (D2-85)
@@ -423,7 +425,10 @@ def resolve_target(here, x):
         return None, None
     s = str(x).strip()
     low = s.lower()
-    if low in ("place", "the place", "the place in general", "everything", "general", "around", "the village", "the hamlet"):
+    if low in ("the village", "village", "the hamlet", "the layout", "how the village fits together", "the lie of the land",
+               here.node_name.lower()):
+        return "village", f"how {here.node_name} fits together"                    # D2-116
+    if low in ("place", "the place", "the place in general", "everything", "general", "around"):
         return "place", "the place in general"
     if low in ("sky", "the sky", "weather", "the weather", "the land and sky", "the land", "the sky and the weather"):
         return "sky", "the land and sky"

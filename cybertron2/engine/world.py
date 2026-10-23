@@ -106,7 +106,7 @@ class World:
                        "adj": list(p.get("adj") or []), "text": p.get("text", ""), "res": res, "crop": None,
                        "fertility": float(p.get("fertility", 1.0)), "broken": float(st.get("broken", 0.0)),
                        "last_crop": st.get("last_crop"), "last_kind": st.get("last_kind"), "ground": p.get("ground"),
-                       "works": None}
+                       "works": None, "side": p.get("side", "centre"), "height": int(p.get("height", 1))}   # D2-114
                 if st.get("works"):                                                  # seeded field works (D2-66): {done: plots}
                     gw = st["works"]
                     tech_y = 40.0 if p.get("ground") == "wet" else 60.0
@@ -127,6 +127,8 @@ class World:
             s["roads"][f"road:{a}-{b}"] = {"a": a, "b": b, "days": k, "track": "track" in e[3:],     # a track lets carts pass
                                            "way": extra.get("way", "an unexplored way"),             # seen from the known end (D4-47)
                                            **RD.build(extra, k)}                                    # terrain, stretches (D2-104)
+            from cybertron2.engine import layout as LY
+            s["roads"][f"road:{a}-{b}"]["ends"] = LY.build_ends(self, extra, a, b)                   # a side and parcels (D2-90)
         for bid, b in (spec.get("buildings") or {}).items():
             self._new_building(bid, b)
         for hid, h in (spec.get("herds") or {}).items():                       # cattle by role (D2-63); a bare count is cows

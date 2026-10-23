@@ -244,6 +244,16 @@ class Here:
                 return b["stock"]
         return None
 
+    def layout(self) -> list:
+        """How the village fits together, in words (D2-116): parcels with neighbours, side and height; where the roads leave."""
+        from cybertron2.engine import layout as LY
+        return LY.layout_lines(self._w, self.name)
+
+    def overview(self) -> list:
+        """What strikes one first here: 3 to 5 lines (D2-116)."""
+        from cybertron2.engine import layout as LY
+        return LY.overview(self._w, self.node)
+
     def landmarks_known(self, nid) -> list:
         """The landmarks one knows on the road from here to `nid` (world/roads.md)."""
         r = next((rid for rid, x in self._w.s["roads"].items() if {x["a"], x["b"]} == {self.node, nid}), None)
