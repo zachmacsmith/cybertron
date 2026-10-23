@@ -186,3 +186,10 @@ changed in its code yet. **From 22 Oct the decisions are kept in [docs/cybertron
 
 - **22 Oct.** Took over `cybertron2` (Posts 3 and 4 on the board). Read the code: world, act, perceive, prompt, run, the two specs.
   Recorded Zach's decisions above.
+- 24 Oct, 38.24: built 37.2's hand-over (02r). Package A: environment.py (weather by spell, snow, visibility), things.py (things at
+  a spot, one noticing rule, the eye by levels), modifiers.py (modifiers as techniques), give to a place and burying, decay by
+  condition, fuse.py (a registry of event kinds; raids; the call in the agent's own conversation). Package B: roads.py (stretches,
+  landmarks, trouble and choices, notices and "On the way", meetings with talk and trades, finds, traces). variants.py (one village
+  from a region, bare roads); specs can extend a base. Runs: a hamlet dry run, hamlet 6 days, Barleyfield 10 days, two valleys 8
+  days in two arms, a 3-day meeting run ($20.24 in all). Faults found by the runs fixed (bodies at home, burial by a building's
+  name, giving from a household store, a traveller's call schema, the meeting in "On the way"). Open choices in OPEN Q-20.
