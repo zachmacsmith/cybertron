@@ -1,16 +1,14 @@
-# Later: goods, tools and methods not in the world yet
+# Proposal: options kept for later (goods, tools, methods)
+
+**Status:** deferred (23 Oct): kept out of the first worlds by D2-10, D2-14, D2-19 and D2-23. **Owner:** 37.2; entries for other
+areas are noted and pass to their owners when they come in. **Affects:** spec/economy/goods.md, production.md, transport.md when an
+entry is adopted.
 
 ## Summary
 
 A catalogue of options considered and **kept out of the first worlds**, so they are not lost and not built by accident. Nothing
-here exists in the engine or in any spec. Each entry says what it would add, what it would need, its rough cost where known, and
-why it waits. An entry moves into a spec file only when Zach decides it (DECISIONS.md). Owner: 37.2 (economy); entries for other
-areas are noted and belong to their owners when they come in.
-
-## Decided
-
-- D2-10: clothing parked. D2-14: first worlds farm with the hoe and ox plough only. D2-19: a short metal ladder first. D2-23: traps,
-  harness and saddle are in the tool set; armour, nets, boats and the seed drill wait.
+here exists in the engine or in the spec. Each entry says what it would add, what it would need, its rough cost where known, and
+why it waits. An entry moves into the spec only when Zach decides it.
 
 ## Tools and equipment
 
@@ -63,6 +61,15 @@ First worlds' shortlist (not in this file): writing, seals, locks and keys, dogs
 Later rungs: wagon (needs roads; pays above about 115 units a day on a route), river boat, rail. First worlds: foot, pack, pack
 ox, handcart, ox cart.
 
+## History
+
+- 22 Oct: deferred goods listed by the pruning rule (02g §1f) and the eras (02g §6); clothing parked (D2-10).
+- 22 Oct: the hoe and ox plough only in first worlds (D2-14); a short metal ladder (D2-19).
+- 23 Oct: Zach asked for a place for tools that could be good later. Traps, harness and saddle went into the world (D2-23); hide
+  armour, metal armour, nets, boats, the seed drill and metal-jawed traps came here. First written as spec/economy/later.md, moved
+  here the same day when the spec became decided-only (README rule 4).
+
 ## Sources
 
-02g §1d, §1f, §3, §6; 02j; 02l; the 23 Oct conversation (tools).
+[02g §1d, §1f, §3, §6](../../review/37_growth/02g_resources_and_transport.md); [02j](../../review/37_growth/02j_end_uses.md) (costs);
+[02l](../../review/37_growth/02l_farming.md); the 23 Oct conversation (tools).

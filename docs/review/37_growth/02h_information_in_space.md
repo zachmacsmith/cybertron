@@ -1,5 +1,7 @@
 # 37.2h Writing, channels, laws, libraries and maps in a world of places
 
+> **Status (23 Oct):** the current state of these ideas is in `docs/cybertron2/proposals/` (information_economics.md (law: law.md)); decided rules are in `docs/cybertron2/spec/economy/`. This note keeps the analysis.
+
 *22 Oct 2026. Design for discussion; nothing built. Zach: maps, parchment, writing and information matter most of the unlocks
 (02g §1d). How do the old engine's generalised channels, its laws and its libraries work when the world is a graph of places?
 Information crosses nodes only by being carried (37.4 decision 9), so this note is mostly about turning knowledge into objects. The

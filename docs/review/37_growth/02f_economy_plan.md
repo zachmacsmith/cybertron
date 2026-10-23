@@ -1,5 +1,7 @@
 # 37.2f The economy plan for cybertron2
 
+> **Status (23 Oct):** the current state of these ideas is in `docs/cybertron2/proposals/` (economy_plan.md, exchange_and_money.md); decided rules are in `docs/cybertron2/spec/economy/`. This note keeps the analysis.
+
 *22 Oct 2026. Replaces the build plan in [02a_economy_design.md](02a_economy_design.md) §3 and the work log's phases P1-P6, which
 assumed the old engine (an opt-in `economy` block, byte-identical replays). The economy is now built in `cybertron2` (owned by
 37.4; handoff: docs/review/38_space_engine/README.md), on 37.4's node model. The analyses (02b, 02d) and the guide (02c) still

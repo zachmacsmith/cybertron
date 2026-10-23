@@ -1,5 +1,7 @@
 # 37.2i Buildings from parts: structures, rooms and fittings
 
+> **Status (23 Oct):** the current state of these ideas is in `docs/cybertron2/proposals/` (buildings.md); decided rules are in `docs/cybertron2/spec/economy/`. This note keeps the analysis.
+
 *22 Oct 2026. Design for discussion; nothing built. Zach: rather than template buildings, let rooms, capacities and fittings each
 cost resources, so people can build a room just to sleep in or just to talk in, add a hearth, attach a room to a forge or a
 library, keep an archive; and channels become rooms a group can book. This note replaces the fixed building list of 02e §3.8 and

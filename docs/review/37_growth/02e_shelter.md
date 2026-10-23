@@ -1,5 +1,7 @@
 # 37.2e Shelter: houses, upkeep, the cold
 
+> **Status (23 Oct):** the current state of these ideas is in `docs/cybertron2/proposals/` (shelter.md); decided rules are in `docs/cybertron2/spec/economy/`. This note keeps the analysis.
+
 *22 Oct 2026. Specification for discussion; nothing built. Shelter is the first use of the generic building model (02a §3.1, guide
 §6). Clothing is parked (02_economy_worklog.md). Numbers not marked ENGINE are proposals.*
 

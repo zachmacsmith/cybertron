@@ -35,6 +35,16 @@ byte-identical replays, apply to cybertron2 only once its runs start to matter.)
 
 ## Log
 
+### 23 Oct (spec and proposals)
+
+- Zach and 37.4: the spec holds only decided, current rules (each citing its decision, each file ending "Current as of");
+  working thoughts go to `docs/cybertron2/proposals/` with dated histories and an outcome log; session notes keep the long analysis.
+- Wrote `spec/economy/` (goods, production, buildings, livestock, transport, lodging, money and markets) from decided rules only.
+- Wrote 14 proposals for 37.2's areas (farming, tools, livestock, shelter, buildings, resources and goods, later options, transport
+  and lodging, exchange and money, information economics, the economy plan, fuse events, gates, attacks and walls) and 35 log rows;
+  moved `spec/economy/later.md` to `proposals/economy_later.md` (deferred). Each 02e-02l note now points to its proposals.
+- Traps, harness, saddle costed in 02j (D2-23).
+
 ### 23 Oct (farming; move to wp/cybertron2)
 
 - Post 5 (37.4 for Zach): cybertron2 notes now continue on `wp/cybertron2`; the spec is `docs/cybertron2/spec/`, decisions in

@@ -1,5 +1,7 @@
 # 37.2g Resources, livestock, transport, inns and the layers only a society can afford
 
+> **Status (23 Oct):** the current state of these ideas is in `docs/cybertron2/proposals/` (resources_and_goods.md, livestock.md, transport_and_lodging.md, attacks_and_walls.md, economy_later.md); decided rules are in `docs/cybertron2/spec/economy/`. This note keeps the analysis.
+
 *22 Oct 2026. Design for discussion; nothing built. Extends the economy plan for cybertron2 ([02f_economy_plan.md](02f_economy_plan.md))
 with a principled set of base resources, cattle, a transport ladder, hospitality, and the catalogue of things too dear for a
 household but affordable for a society. Transport numbers from [02g_transport_model.py](02g_transport_model.py) (deterministic;

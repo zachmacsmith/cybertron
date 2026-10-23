@@ -1,5 +1,7 @@
 # 37.2l Farming: optional stages, crops and rotations, cattle, and the harvest peak
 
+> **Status (23 Oct):** the current state of these ideas is in `docs/cybertron2/proposals/` (farming.md); decided rules are in `docs/cybertron2/spec/economy/`. This note keeps the analysis.
+
 *22 Oct 2026, with Zach. Design for cybertron2 (economy area, production). Numbers from [02l_farm_model.py](02l_farm_model.py): all
 proposals; only the ratios between methods matter, and the absolute level is calibrated to food's share of work. Units are 38.06's
 work units (6 a day for an adult; forage 1).*

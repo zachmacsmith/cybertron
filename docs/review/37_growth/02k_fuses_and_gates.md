@@ -1,5 +1,7 @@
 # 37.2k Fuse events and gates: time to respond, and entry to a place
 
+> **Status (23 Oct):** the current state of these ideas is in `docs/cybertron2/proposals/` (fuse_events.md, gates.md, attacks_and_walls.md); decided rules are in `docs/cybertron2/spec/economy/`. This note keeps the analysis.
+
 *22 Oct 2026, with Zach. Design for cybertron2. Most of it is 37.4's (the day's order, the night, the scheduler, combat); 37.2's part
 is the economics (what walls, gates and stone buy, tolls) and the information (passes and seals as documents). Posted on the board
 for 37.4. Nothing built.*

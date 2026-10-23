@@ -1,5 +1,7 @@
 # 37.2j From roots to end uses: every path costed in actions
 
+> **Status (23 Oct):** the current state of these ideas is in `docs/cybertron2/proposals/` (resources_and_goods.md, tools.md); decided rules are in `docs/cybertron2/spec/economy/`. This note keeps the analysis.
+
 *22 Oct 2026. Zach: start from the end uses, the possible roots and the ways things could be processed, and bridge them, with an
 economic analysis of the actions going into each; ladders where the much better rungs need qualitative jumps in resources or long
 supply chains. Numbers from [02j_end_uses_model.py](02j_end_uses_model.py): proposals (historically plausible orders of magnitude),
