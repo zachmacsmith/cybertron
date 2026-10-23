@@ -88,6 +88,53 @@ imply given facts.
 Observations are how information that is otherwise not obvious enters the world: a store that looks too full after a lean
 season, a neighbour's ox that is not theirs, tracks where nobody should have walked, a house that has been empty three nights.
 
+## 3b. How facts are produced, chosen and tracked
+
+**Produced on demand, not stored.** The engine never keeps a list of every possible fact. Each round it computes, for each node,
+the facts its current state gives off, from two sources:
+
+1. **Things, by rule.** Each kind of thing (the node, a site or plot, a building and its rooms, a fitting, a person, a herd, an
+   edge, the weather) has a small set of fact rules: `(state) -> facts`. A **sense table** (data) says what each fitting, animal,
+   process and weather gives off to each sense: a byre with cattle gives lowing and dung; a forge in use, hammering and smoke; an
+   oven, the smell of bread; rain, mud and dripping eaves.
+2. **Happenings, from the event log.** Every change on the chokepoint (a fight, a cart arriving, a door forced, a fall) and every
+   incident or fuse event (02k) gives off **momentary facts**: shouting, hooves on the road, a crash, smoke rising.
+
+Each fact carries: its subject, the sense, its **salience** (how much it stands out), its **range** (a room, a site, the whole node,
+or carried along an edge toward neighbouring nodes), the **skill** needed to notice or read it (a builder reads rot, a hunter reads
+tracks), whether it lasts or is momentary, and, hidden, whether it is true (signs can mislead).
+
+**Chosen per agent, by how it spends the day:**
+
+| How the agent relates to the thing | What it gets |
+|---|---|
+| **Just being present** at the node | every high-salience fact in range (the weather, loud sounds, smoke, bells, a fight), plus a few lower-salience ones drawn at random, weighted by salience (the seed decides; the same in every arm) |
+| **Working at it** (it spent units at that site, building or animal) | the facts about that thing that bear on the work (the field's state when sowing it, the forge's fire when using it) |
+| **Attending to it** (one target a day) | all its facts above a low salience threshold, plus the facts its skill lets it read |
+| **Standing watch** (`guard`, or a watch office) | a better chance of catching momentary facts at the node's edges: **hooves on the road at dusk** is how a raid is heard coming (the detection of a fuse event, 02k) |
+| **Being watched** | a chance of the fact "someone was watching you" |
+
+**What attending gives, by kind of target:**
+
+| Target | Facts |
+|---|---|
+| a person | condition (fed, hungry, wounded, ill, tired), what they carry and wear, what they did today and with whom, where they went when they left |
+| a building | structure, material, condition, fittings visible, smoke and sounds and smells from inside, who went in and out today, how full the store looks |
+| a site or plot | crop and soil, weeds, water level, animals on it, traces of trespass or work |
+| a herd | about how many, their condition, whose marks they carry, unrest before weather |
+| an edge or road | who came along it today, tracks, its condition; at dusk, anything approaching |
+| the land and sky | weather, the season's signs (D4-6), distant smoke, birds |
+| a gathering or room | who is there, who stands with whom, the mood |
+
+**Tracked: only what was perceived.** What an agent perceived goes into its knowledge store as dated beliefs (knowledge §7); what
+it was not given is never stored. So the record shows exactly who noticed what, when, and why (present, working, attending,
+watching), which is what information studies need.
+
+**Is it easy?** The machinery is: a node holds tens to a couple of hundred candidate facts a round, computed from state, filtered
+by range, salience, skill and the agent's day, with seeded draws; the event log already has places and causes. The work is in the
+content: the fact rules per kind of thing, the sense table, salience and skill thresholds, and the phrasing pools (§4). That grows
+with the world, as data (D4-24), and can start small: a dozen kinds of thing, a few facts each.
+
 ## 4. Generating descriptions: templates or a model?
 
 | | Templates from the engine's facts | A model drafting from the state |
@@ -181,6 +228,11 @@ does.
   given facts, seen through the observer's eyes (who they are, their skill, their state, what they care about). Added the paragraph
   on how much there is to see (derived sensory and ambient facts); a second test round is running with richer facts and an
   observer's-eye prompt.
+
+- 23 Oct: Zach: how attending varies by target; just being present should give clear things about the place (sounds) and chance
+  noticing; environmental events such as an approaching raid heard; how facts are tracked and whether it is easy. Added §3b: facts
+  produced on demand by rules and a sense table, and from happenings; each with sense, salience, range, skill; chosen by presence,
+  work, attention, watch; only what was perceived is stored.
 
 ## Sources
 
