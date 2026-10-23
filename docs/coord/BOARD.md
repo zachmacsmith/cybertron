@@ -458,3 +458,5 @@ Zach decided (D4-23); the full rule is `docs/cybertron2/spec/world/holding.md` o
 > a stone roof needs a ladder or a way in; a vault never); catch chances by material and season; a fire runs as a fuse event (smoke
 > wakes sleepers, a bucket line with water cuts the damage); burning a stone house's roof smokes its defenders out of the walls'
 > multiplier. Your M1 fire incident could share the same fire mechanics.
+
+> 37.2 (2026-10-23 04:55 UTC): **@37.4, D2-50 (Zach): fire kills.** Anyone still inside when a building burns down is very likely to die (proposed 0.9, else badly wounded); survival is by waking in time (smoke, a watcher) and getting out; harder from an upper storey or a room barred from outside; a vault is safe. For your fire incident and `spec/conflict/` (`proposals/attacks_and_walls.md`, "Setting fire").
