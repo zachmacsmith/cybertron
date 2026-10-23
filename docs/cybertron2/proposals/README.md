@@ -39,6 +39,7 @@ proposal**; **Why**; **Alternatives considered**; **Open questions**; **Affects*
 | [resources_and_goods.md](resources_and_goods.md) | the base resources, the lean first-world set and the pruning rule, unlocks, end uses | 37.2 | discussion (D2-10, D2-19, D2-23 accepted) |
 | [economy_later.md](economy_later.md) | options kept out of the first worlds (armour, nets, boats, seed drill, irrigation, clay, iron, the press, ...) | 37.2 | deferred |
 | [transport_and_lodging.md](transport_and_lodging.md) | the transport ladder, capacities, danger by edge and season, inns and hosts | 37.2 (37.4 the mechanism) | partly accepted: D4-9, D4-12, D2-4 |
+| [environment_catalogue.md](environment_catalogue.md) | what can happen: eras (climate, disease, ecology, outside pressure), weather by land kind, hazards that spread (fire, crop, livestock and human disease) in six patterns; how people prepare, respond and recover | 37.2 | discussion |
 | [environment.md](environment.md) | one scheduler for eras, years, spells, incidents and spreads; each layer sets the odds of the next; paired draws; consequences and signs read by presence, salience, skill and concern | 37.2 (at Zach's request; 37.4 owns spec/environment) | discussion |
 | [recipes.md](recipes.md) | the first worlds' recipes as technique cards: gathering, making, building, working; basics and ten trades; tool wear; what travels; price anchors | 37.2 (37.4: verbs, knowledge) | discussion |
 | [hiring.md](hiring.md) | work for someone: `for` on work actions puts output into the employer's container; day labour, piece rate, wages, sharecropping, tenancy, apprenticeship, shopkeepers, guards, carriers | 37.2 (37.4, 37.3) | accepted: D2-36 to D2-40 |
@@ -82,6 +83,7 @@ Newest first. Ideas decided or rejected in conversation before 23 Oct are backfi
 | 23 Oct | The verbs (a lean set of 24) and what each agent is shown; force always shown | ready for a decision | [verbs.md](verbs.md) |
 | 23 Oct | Detecting what was told by reading the meaning of free speech | rejected in the proposal: name mentions, an `about` field and explicit `explain`/`teach` instead | [knowledge.md](knowledge.md) §4e |
 | 23 Oct | Know-how as a continuous score (0-1) | replaced in the proposal by four levels moved by counts (Zach) | [knowledge.md](knowledge.md) §4c |
+| 23 Oct | The catalogue of eras, weather and spreading hazards, with responses | discussion | [environment_catalogue.md](environment_catalogue.md) |
 | 23 Oct | The environment over time: eras, years, spells, incidents, spreads; one scheduler; signs and experience | discussion | [environment.md](environment.md) |
 | 23 Oct | Field works now with fixed wet and hill penalties; irrigation later; bedroll, tent and camp | accepted: D2-66 to D2-68 | spec/economy/production.md, lodging.md |
 | 23 Oct | Irrigation's effects through a plot's water each day; floods, droughts and blight noted as missing (need 37.4's incidents) | discussion | [farming.md](farming.md) |

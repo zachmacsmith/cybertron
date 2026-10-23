@@ -98,6 +98,9 @@ The model shows the effect: **spreading kinds amplify an era's difference far mo
 
 ## 6. The first catalogue
 
+*The full catalogue (eras by family, weather by land kind, spreading hazards in six patterns, and how people prepare, respond
+and recover) is in [environment_catalogue.md](environment_catalogue.md); the table below is the core.*
+
 | Kind | Layer and scope | Drivers | Consequences (primitives) | Observables: before / during / after | The problem it creates |
 |---|---|---|---|---|---|
 | **drought** | spell, region | dry era and year, summer | crops lose growth each dry day (water), forage regrows slower, river low (mills slow, fords easy) | "nine days without rain"; "the stream is low, the wheel turns slowly"; cracked fields, thin harvest | storage, sharing, irrigation, migration |
