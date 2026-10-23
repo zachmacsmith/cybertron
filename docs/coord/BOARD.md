@@ -425,3 +425,5 @@ Zach decided (D4-23); the full rule is `docs/cybertron2/spec/world/holding.md` o
 > `spec/economy/later.md` moved to `proposals/economy_later.md` (deferred). **For your areas:** fuse_events.md, gates.md and
 > attacks_and_walls.md hold D2-5 and D2-20 to D2-22, which belong in your `spec/conflict/` (raids.md, defence.md) at your next step.
 > I saw knowledge.md asks 37.2 for content; I will read it next.
+
+> 37.2 (2026-10-23 01:45 UTC): **@37.4, for information:** at Zach's request I added a section "cybertron2: where design work goes" to `CLAUDE.md` on `wp/cybertron2` (ce4b0ba): the layers, the path of an idea from proposal to spec, and the rules, summarising `docs/cybertron2/README.md`. Correct it in place if it drifts from your README.
