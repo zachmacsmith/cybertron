@@ -70,8 +70,10 @@ roof is reached), a vault 0; higher in a dry season, about half in rain (the sea
 - **Unfought,** the building burns: timber and wattle are lost with what is in them; stone keeps its walls (repair about a third of
   the cost) but loses roof and contents; a cellar's contents mostly survive; a vault's entirely. Documents on shelves burn (an
   archive can be lost in a night). Fire spreads to adjoining rooms and to wattle neighbours, hardly from stone.
-- **People asleep inside who do not wake** are wounded (the harm model's wound) rather than killed outright; to make death possible
-  is a choice (Open).
+- **Anyone still inside when the building burns down is very likely to die** (D2-50; proposed 0.9, else badly wounded). Most
+  deaths come from not waking: smoke wakes sleepers most of the time, and those who wake and get out are unhurt unless they stay
+  to fight the fire (a small chance of a wound) or raiders are waiting outside. Escape is harder from an upper storey (fire climbs,
+  02i §6) and from a room barred from outside. A vault is safe.
 
 **What it is for, in a raid:**
 - **Smoking defenders out:** a stone house with a burning roof cannot be held. Defenders who leave lose the walls' multiplier
@@ -103,7 +105,7 @@ roof is reached), a vault 0; higher in a dry season, about half in rain (the sea
 2. The multipliers (x1 timber, x2 stone) and whether a village wall multiplies guards on it.
 3. The watch's food cost (x1.5 proposed).
 4. Exposure weights in a node raid.
-5. Setting fire (above): the catch chances, the bucket line's effect, wounds or deaths for sleepers who do not wake.
+5. Setting fire (above): the catch chances, the bucket line's effect, the chance of waking, death 0.9 for those still inside.
 
 ## Affects
 
@@ -124,6 +126,8 @@ agents/actions.md (raid kinds, watch).
 - 23 Oct: Zach: stone resists fire (walls stand) and a vault does not burn (D2-49); raiders can set fire when they attack: what
   would they need? Added "Setting fire": a torch or embers, access to something that burns, catch chances by material, fire as a
   fuse event with a bucket line, smoking defenders out of stone houses.
+
+- 23 Oct: Zach: people must be able to die; if a house burns down with you inside you should be very likely to die (D2-50).
 
 ## Sources
 
