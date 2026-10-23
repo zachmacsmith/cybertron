@@ -253,6 +253,9 @@ def night_lines(w, rec) -> dict:
             L.append(f"You slept at {slept}.")
         if n in rec["missed"]:
             L.append("You went to bed without enough to eat: a missed meal.")
+            raw = rec.get("uncooked", {}).get(n)
+            if raw:
+                L.append(f"You had {' and '.join(raw)} but no lit fire to boil it, so it did not feed you.")
         elif n in rec["short"]:
             L.append(f"You ate {rec['ate'][n]:g}, less than a cold night asks.")
         if n in rec["cold_falls"]:

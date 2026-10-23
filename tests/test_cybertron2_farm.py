@@ -345,7 +345,7 @@ def test_working_for_ones_household_away_from_home_carries_it_oneself():
     assert r.startswith("You took") and "into" not in r, r
 
 
-def test_a_missed_meal_with_grain_but_no_fire_is_recorded_and_the_carry_refusal_is_exact():
+def test_a_missed_meal_with_grain_but_no_fire_says_why_and_the_carry_refusal_is_exact():
     w = world()
     for k in list(w.s["containers"][w.hands("Edric")]["goods"]):
         w.s["containers"][w.hands("Edric")]["goods"][k] = 0.0
@@ -353,6 +353,8 @@ def test_a_missed_meal_with_grain_but_no_fire_is_recorded_and_the_carry_refusal_
     w.s["people"]["Edric"]["at"] = "grey_crag"                                     # nowhere to sleep but the open
     rec = N.night(w)
     assert rec["slept"]["Edric"] == "out" and "Edric" in rec["missed"] and rec["uncooked"]["Edric"] == ["grain"]
+    if True:
+        assert any("no lit fire" in x for x in R.night_lines(w, rec)["Edric"])
     give(w, "Warin", stone=20)
     r = do(w, "Warin", do="travel", to="the goat path up into the crags")
     assert "set down at least" in r
