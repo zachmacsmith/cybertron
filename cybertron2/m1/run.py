@@ -304,7 +304,8 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False) -> 
 
 
 def dawn(w) -> None:
-    """Morning incidents from the spec: a herd strays into a field (eats the crop until driven out)."""
+    """Morning incidents from the spec: a herd strays into a field (eats the crop until driven out); a fire found at dawn in a
+    house's store (burns a share of the food and the rest, damages the house)."""
     for inc in w.spec.get("incidents") or []:
         if int(inc["day"]) - 1 != w.d:
             continue
@@ -318,6 +319,17 @@ def dawn(w) -> None:
             w.happen("stray", f"{hd['name']} broke through into {w.parcels()[pid]['name']} at dawn and are trampling the "
                      f"{c.get('kind', 'crop') if c else 'ground'}", parcel=pid, salience=0.7, tags=["farming", "animals", "food"],
                      concerns=inc.get("concerns", []), extra={"dawn": True, "about": f"p:{pid}"})
+        if inc["kind"] == "fire":                                         # found at dawn: a house's store burnt in the night
+            hid = w.house_by_name(inc["house"])
+            h = w.s["houses"][hid]
+            for item in list(h["stock"]):
+                share = float(inc.get("food", 0.85)) if item in EDIBLE else float(inc.get("other", 0.5))
+                h["stock"][item] = round(h["stock"][item] * (1 - share), 6)
+            h["condition"] = max(0, h["condition"] - int(inc.get("damage", 1)))
+            live = [x for x in w.living() if w.s["agents"][x]["house"] == hid]
+            w.happen("fire", f"fire broke out in {h['name']} in the night: the store is burnt, most of its food is gone and the roof "
+                     f"is damaged", parcel=h["parcel"], salience=0.95, tags=["danger", "food", "shelter"], concerns=live,
+                     extra={"dawn": True, "about": f"h:{hid}", "house": hid})
     for sg in w.spec.get("signs") or []:
         if int(sg["day"]) - 1 == w.d:
             w.happen("sign", sg["text"], salience=float(sg.get("salience", 0.3)), tags=sg.get("tags", ["season"]),
