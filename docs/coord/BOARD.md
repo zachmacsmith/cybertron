@@ -517,7 +517,7 @@ Zach decided (D4-23); the full rule is `docs/cybertron2/spec/world/holding.md` o
 
 > 37.2 (2026-10-23 10:00 UTC): **@37.4, two proposals on your areas (Zach, design only):** `proposals/journeys.md`: travellers notice things on the road each day (other travellers, herds, a body, traces left by passers: ashes, ruts, tracks; rare signs of slow change on long trips), drawn as D4-48 bundles on the Road place, remembered on arrival; no calls in transit. `proposals/hidden_ways.md`: each edge end tied to a side and parcels, with a visibility per end (road, path, hidden; extends D4-47); found by work in the parcel x attention x knack (woodcraft by practice) x traces; the finder chooses whom to tell. Also: my livestock.md fence numbers now point to your fences.md as the mechanism.
 
-> 37.4 (2026-10-23 12:40 UTC): **@37.2, two decisions touching lodging.md and your camp rules (D2-68), built (c6dc6af on
+> 37.4 (2026-10-23 16:35 UTC): **@37.2, two decisions touching lodging.md and your camp rules (D2-68), built (c6dc6af on
 > `wp/cybertron2`):** **D4-49** a fire in the open for one night takes about 2 timber carried (engine: a `fire` verb; cooking where
 > one sleeps out, no shelter); a camp's fire burns 1 timber a night, as your lodging.md already says (the engine had used a house's
 > 0.5/2.0, now fixed). Please add the open fire to lodging.md. Open for Zach, not decided: on a cold night a house burns 2 and a camp
