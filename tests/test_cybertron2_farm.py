@@ -325,3 +325,11 @@ def test_work_owed_to_a_person_counts_for_their_household():
     w.s["agreements"]["A1"] = {"node": "millbrook", "day": w.d, "status": "open", "parties": ["Simkin", "Edric"],
                                "legs": [{"work": 1, "done": 0, "by": None, "from": "Simkin", "to": "Edric", "when": {}}]}
     assert "into Reed House" in do(w, "Simkin", do="work", what="reap", at="Long Field", **{"for": "the Reeds"})
+
+
+def test_the_turn_prompt_lists_the_roads_from_here_and_names_an_unexplored_way():
+    from cybertron2.engine import prompt as PR
+    w = world()
+    p = PR.turn_prompt(Here(w, "Warin"), Mind(w, "Warin"))
+    line = next(l for l in p.split("\n") if l.startswith("Roads from here"))
+    assert "a goat path up into the crags" in line and "nobody you know has followed" in line and "Ashwood" in line

@@ -337,6 +337,13 @@ def turn_prompt(here, mind, opening=True) -> str:
     if a.get("arrived") == here.day:
         hl.append("You arrived this morning.")
     hl += _place_lines(here, mind)
+    ways = []                                                                # the roads from here, known or not (D4-47)
+    for nid, name, days, track in here.roads():
+        known = nid in mind.places()
+        ways.append(f"{name} ({days} day{'s' if days != 1 else ''}" + (", a cart track" if track else "")
+                    + ("" if known else ": a way nobody you know has followed; travel along it by naming it") + ")")
+    if ways:
+        hl.append("Roads from here: " + "; ".join(ways) + ".")
     L.append("## Here\n" + "\n".join(hl))
     hold = ", ".join(f"{show(q)} {i}" for i, q in sorted(here.carried().items()) if q > 0.05) or "nothing"
     you = [f"You are {STAGES[a['hunger']]}" + (", and hurt" if a["wounded"] else "") + f". You carry: {hold}"

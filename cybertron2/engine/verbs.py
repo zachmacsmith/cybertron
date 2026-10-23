@@ -47,7 +47,7 @@ VERB = {
               "when": "herds", "doc": "move beasts to another place here (a bull kept apart from the cows does not breed)"},
     "sleep": {"args": '{"at": building}', "cost": 0, "doc": "sleep there tonight, if you can get in and a bed is free"},
     "set": {"args": '{"thing": door, "to": open | barred, "at"?: building}', "cost": 0, "doc": "the door of a building you manage"},
-    "travel": {"args": '{"to": a place}', "cost": 0, "when": "roads", "doc": "the day's last act: you leave at nightfall and arrive on a later morning"},
+    "travel": {"args": '{"to": a place, or a way from here as the roads name it}', "cost": 0, "when": "roads", "doc": "the day's last act: you leave at nightfall and arrive on a later morning"},
     "watch": {"args": '{"person"}', "cost": ["watch", "units"], "doc": "spend the day working beside them: you see how they do things"},
     "teach": {"args": '{"to", "what"}', "cost": ["teach", "units_teacher"], "doc": "one session, if they set aside time to learn the same day"},
     "learn": {"args": '{"from", "what"}', "cost": ["teach", "units_learner"], "doc": "one session, if they set aside time to teach the same day"},
