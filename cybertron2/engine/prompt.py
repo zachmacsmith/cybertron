@@ -7,7 +7,7 @@ from __future__ import annotations
 import copy
 import math
 
-from cybertron2.engine import agreements as AG, knowledge as KN, modifiers as MOD, perceive as PC, verbs as V
+from cybertron2.engine import agreements as AG, farm as FM, knowledge as KN, modifiers as MOD, perceive as PC, verbs as V
 from cybertron2.engine.data import BLUEPRINTS, FITTINGS, FUSE, ITEMS, MODIFIERS, TECHNIQUES
 from cybertron2.engine.here import CONDITION, STAGES, show
 
@@ -167,9 +167,11 @@ def _place_lines(here, mind=None) -> list:
         what = sorted({t for t, d in TECHNIQUES.items() if p["cover"] in (d.get("at") or {}).get("covers", [])
                        and (d.get("draws") in (None, "plot", "crop") or d.get("draws") in p["res"] or (d.get("draws") == "herd" and herds))
                        and (d.get("yield") or {}).get("ground", p.get("ground")) == p.get("ground")
-                       and (mind is None or d.get("crew") or KN.level(mind, t) in ("rough", "capable", "known"))})
+                       and (mind is None or d.get("crew") or KN.level(mind, t) in ("rough", "capable", "known"))
+                       and ((d.get("yield") or {}).get("kind") != "gate" or not FM.ready(here, t, pid))})   # a gate only where one is
         held = _holders(here, ("parcel", pid))
-        bits = [f"{p['cover']}"] + ([f"held by {held}"] if held else []) + (["here one can " + ", ".join(what)] if what else [])
+        bits = [f"{p['cover']}"] + ([f"held by {held}"] if held else []) + ([_fence_words(p["fence"])] if p.get("fence") else []) \
+            + (["here one can " + ", ".join(what)] if what else [])
         bs = [b["name"] + (" (half built)" if b.get("unfinished") else "") for b in here.buildings().values() if b["parcel"] == pid]
         if bs:
             bits.append("buildings: " + ", ".join(bs))
@@ -186,6 +188,15 @@ def _place_lines(here, mind=None) -> list:
         held = _holders(here, ("building", bid))
         out.append(f"- {b['name']}: {b['structure']}, for {b['size']}" + (f"; {fits}" if fits else "; no fittings") + (f"; held by {held}" if held else ""))
     return out
+
+
+def _fence_words(fc) -> str:
+    """A parcel's fence as its holders and passers-by see it (livestock.md "What agents see")."""
+    word = {"wood": "a wattle fence", "stone": "a dry-stone wall"}.get(fc.get("kind"), "a fence")
+    if not fc.get("built"):
+        return f"{word} going up round it"
+    state = {2: "whole", 1: "with gaps in it"}.get(int(fc.get("level", 0)), "down in places")
+    return f"{word} round it, {state}" + ("; the gate standing open" if fc.get("gate") == "open" and int(fc.get("level", 0)) > 0 else "")
 
 
 def _land_words(what, v) -> str:
