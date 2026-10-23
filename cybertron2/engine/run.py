@@ -320,7 +320,8 @@ def fuse_calls(w, today, woke, results, talk_log, openings, systems, backend, co
             said, offers = RD.meeting_talk(w, e, {n: replies.get(n) or {} for n in members})
             if not said and not offers:
                 break
-            texts = {n: PR.meeting_wave_prompt(Here(w, n, transit=True), Mind(w, n), said, offers, woke[n]["acts"]) for n in members}
+            texts = {n: PR.meeting_wave_prompt(Here(w, n, transit=True), Mind(w, n), [x for x in said if not x.startswith(f"{n}: ")],
+                                               offers, woke[n]["acts"]) for n in members}           # not one's own words back
             replies.update(ask(texts))
     for n, x in woke.items():
         lines = FU.answer(w, today, n, x, replies.get(n) or {})
