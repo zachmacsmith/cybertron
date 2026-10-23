@@ -126,6 +126,12 @@ tracks), whether it lasts or is momentary, and, hidden, whether it is true (sign
 | the land and sky | weather, the season's signs (D4-6), distant smoke, birds |
 | a gathering or room | who is there, who stands with whom, the mood |
 
+**Noticing is selection, done by the engine.** An agent need not take in every fact in range: the engine's draw (salience,
+attention, skill, chance) already chooses the handful it notices, and the description then conveys those. If the renderer chose
+instead (a model dropping some of the facts it was given), the agent's knowledge store would hold facts its text never mentioned,
+or the engine would have to read back what the text conveyed. So the engine picks fewer facts, and the renderer is judged on
+conveying all of the ones it was given.
+
 **Tracked: only what was perceived.** What an agent perceived goes into its knowledge store as dated beliefs (knowledge §7); what
 it was not given is never stored. So the record shows exactly who noticed what, when, and why (present, working, attending,
 watching), which is what information studies need.
@@ -241,6 +247,9 @@ does.
   Only Sonnet writes through the observer's eyes (about 15 times Haiku's cost). Recommendation unchanged: templates for facts in
   the engine; an observer's-eye Sonnet narrator only as a later experiment, with a checker that knows which beliefs an observer
   may form.
+
+- 23 Oct: Zach: descriptions need not convey every fact; people notice some. Added: noticing is the engine's draw, so the engine
+  picks fewer facts and the renderer conveys all it is given (else the store and the text disagree).
 
 ## Sources
 
