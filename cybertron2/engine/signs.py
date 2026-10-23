@@ -30,6 +30,16 @@ CROP = [
          tags=["farming"], knack="weed", text=lambda x: f"thistle and dock are coming up among the {x.c['kind']} in {x.nm}"),
     dict(when=lambda x: x.growing and not x.failed and not x.weeds, sense="sight", p=0.08, tags=["farming"],
          text=lambda x: f"{x.nm} is clean of weeds"),
+    dict(when=lambda x: x.growing and not x.failed and x.progress < 0.25, sense="sight", p=0.08, tags=["farming"],
+         text=lambda x: f"the {x.c['kind']} in {x.nm} {x.be} just through, a green haze on the soil"),
+    dict(when=lambda x: x.growing and not x.failed and x.c.get("crop") == "legumes" and 0.35 <= x.progress < 0.75 and not x.cold,
+         sense="sight", p=0.1, tags=["farming"], text=lambda x: f"the {x.c['kind']} in {x.nm} {x.be} in flower, bees working along the rows"),
+    dict(when=lambda x: x.growing and not x.failed and x.c.get("crop") != "legumes" and x.progress >= 0.6, sense="sight", p=0.1,
+         tags=["farming"], text=lambda x: f"the {x.c['kind']} in {x.nm} {x.stands} high, the ears filling"),
+    dict(when=lambda x: x.growing and not x.failed and x.c.get("hardy") and x.cold, sense="sight", p=0.12, tags=["farming", "season"],
+         text=lambda x: f"the {x.c['kind']} in {x.nm} {x.stands} green through the frost"),
+    dict(when=lambda x: x.growing and x.c.get("crop") == x.p.get("last_crop"), sense="sight", p=0.1, tags=["farming"], knack="sow",
+         text=lambda x: f"the {x.c['kind']} in {x.nm} follows the same crop last year: the ground tires of it, and it fails more often"),
     dict(when=lambda x: x.growing and not x.failed and x.c["broken"] >= 0.5 * x.c["area"], sense="sight", p=0.08,
          tags=["farming"], knack="sow", text=lambda x: f"the {x.c['kind']} in {x.nm} {x.stands} thick and even"),
     dict(when=lambda x: x.growing and not x.failed and not x.c.get("hardy") and x.frost_first, sense="sight", p=0.3,
@@ -45,14 +55,19 @@ CROP = [
     dict(when=lambda x: x.ripe and not x.rotting and x.pid not in x.worked, sense="sound", p=0.3, tags=["farming", "harvest"],
          text=lambda x: f"rooks and pigeons are at the ripe {x.c['kind']} in {x.nm}, with nobody there to drive them off"),
     dict(when=lambda x: x.ripe and not x.rotting, sense="touch", p=0.2, tags=["farming", "harvest"], knack="reap",
-         text=lambda x: f"the ears in {x.nm} rub out hard in the hand: the {x.c['kind']} {x.be} ready"),
+         text=lambda x: (f"the pods in {x.nm} rattle dry in the hand: the {x.c['kind']} {x.be} ready" if x.c.get("crop") == "legumes"
+                         else f"the ears in {x.nm} rub out hard in the hand: the {x.c['kind']} {x.be} ready")),
+    dict(when=lambda x: x.ripe and not x.rotting and x.weather in ("rain", "heavy rain", "gale"), sense="sound", p=0.25,
+         tags=["farming", "harvest"], text=lambda x: f"{'wind' if x.weather == 'gale' else 'rain'} beating on the ripe {x.c['kind']} in {x.nm}: "
+                                                      "it wants cutting"),
     dict(when=lambda x: x.ripe and not x.rotting and x.window_left <= 0, sense="sight", p=0.5, tags=["farming", "harvest", "food"],
          knack="reap", text=lambda x: f"the {x.c['kind']} in {x.nm} cannot stand much longer: it must be cut tomorrow or lost"),
     dict(when=lambda x: x.c is not None and x.c.get("reaped") and x.c["area_left"] > 1e-6, sense="sight", p=0.25,
          tags=["farming", "harvest"], text=lambda x: f"sheaves stooked in {x.nm}, the rest of the {x.c['kind']} still standing"),
     # rotting
     dict(when=lambda x: x.rotting, sense="sight", p=0.6, tags=["farming", "harvest", "food"],
-         text=lambda x: f"the {x.c['kind']} in {x.nm} {x.be} going over: ears shedding and rotting in the field"),
+         text=lambda x: f"the {x.c['kind']} in {x.nm} {x.be} going over: "
+                        + ("pods splitting" if x.c.get("crop") == "legumes" else "ears shedding") + " and rotting in the field"),
     dict(when=lambda x: x.rotting and not x.cold, sense="smell", p=0.3, tags=["farming", "food"],
          text=lambda x: f"a smell of wet rot from {x.nm}"),
     dict(when=lambda x: x.rotting, sense="sight", p=0.25, tags=["farming"],
@@ -77,6 +92,10 @@ FIELD = [
          text=lambda x: f"the soil of {x.nm} is worn out: last year's crop came up sparse and yellow"),
     dict(when=lambda x: x.p.get("ground") == "wet" and x.works_done < 0.5, sense="sight", p=0.25, tags=["farming"],
          text=lambda x: f"water stands in the low corners of {x.nm}"),
+    dict(when=lambda x: x.p.get("ground") == "wet" and x.works_done < 0.5 and x.weather == "heavy rain", sense="sight", p=0.35,
+         tags=["farming"], text=lambda x: f"{x.nm} is flooded in its low parts after the rain"),
+    dict(when=lambda x: x.p.get("ground") == "hill" and x.works_done < 0.5 and x.weather == "heavy rain", sense="sight", p=0.3,
+         tags=["farming"], text=lambda x: f"the rain is carrying the soil of {x.nm} down the slope in brown runnels"),
     dict(when=lambda x: x.p.get("ground") == "wet" and x.works_done < 0.5 and x.season in ("autumn", "spring"), sense="touch",
          p=0.3, tags=["farming"], knack="sow", text=lambda x: f"the ground of {x.nm} is sodden underfoot: it wants draining"),
     dict(when=lambda x: x.p.get("ground") == "wet" and x.works_done >= 0.5, sense="sight", p=0.1, tags=["farming"],
@@ -101,6 +120,13 @@ PASTURE = [
          text=lambda x: f"good grass on {x.nm}"),
     dict(when=lambda x: x.grass is not None and x.grass > 0.7 and x.season == "summer", sense="sight", p=0.15, tags=["animals"],
          knack="hay", text=lambda x: f"the grass on {x.nm} is long enough to cut for hay"),
+    dict(when=lambda x: x.grass is not None and x.grass < 0.6 and x.season == "winter", sense="sight", p=0.15,
+         tags=["animals", "food", "season"], knack="herd",
+         text=lambda x: f"the grass on {x.nm} hardly grows in winter: what is eaten now comes back slowly till spring"),
+    dict(when=lambda x: x.grass is not None and x.grass > 0.6 and x.season == "spring" and not x.cold, sense="sight", p=0.08,
+         tags=["animals"], text=lambda x: f"the grass on {x.nm} is coming on fast"),
+    dict(when=lambda x: x.grass is not None and x.snow, sense="sight", p=0.1, tags=["animals", "season"],
+         text=lambda x: f"snow lies on {x.nm}, trodden and dirtied where the beasts have been"),
     dict(when=lambda x: x.dung > 5, sense="sight", p=0.12, tags=["animals", "farming"],
          text=lambda x: f"dung lies thick where the beasts have been on {x.nm}"),
     dict(when=lambda x: x.dung > 5 and not x.cold, sense="smell", p=0.1, tags=["animals"],
@@ -114,9 +140,17 @@ HERD = [
     dict(when=lambda x: x.h.get("last_calf") is not None and x.day - x.h["last_calf"] <= 1, sense="sight", p=0.45, tags=["animals"],
          text=lambda x: f"a new calf on unsteady legs among {x.h['name']}"),
     dict(when=lambda x: x.h.get("hungry", 0) >= 1, sense="sound", p=0.3, tags=["animals", "food"],
-         text=lambda x: f"{x.h['name']} lowing and restless"),
+         text=lambda x: f"{x.h['name']} lowing and restless: they want feeding"),
     dict(when=lambda x: x.h.get("hungry", 0) >= 2, sense="sight", p=0.45, tags=["animals", "food"], knack="herd",
          text=lambda x: f"ribs showing on {x.h['name']}: they are not getting enough to eat"),
+    dict(when=lambda x: x.h.get("hungry", 0) >= 3, sense="sight", p=0.5, tags=["animals", "food", "danger"], knack="herd",
+         text=lambda x: f"{x.h['name']} are failing: one will die soon if they are not fed"),
+    dict(when=lambda x: x.h.get("bulls", 0) > 0 and x.h.get("cows", 0) > 0 and float(x.h.get("births", 0.0)) >= 0.75, sense="sight",
+         p=0.2, tags=["animals"], knack="herd", text=lambda x: f"one of the cows of {x.h['name']} is heavy in calf and near her time"),
+    dict(when=lambda x: x.h.get("young", 0) > 0 and x.season in ("spring", "summer") and not x.h.get("hungry"), sense="sight", p=0.06,
+         tags=["animals"], text=lambda x: f"calves kicking up their heels among {x.h['name']}"),
+    dict(when=lambda x: x.weather in ("gale", "heavy rain", "snow"), sense="sight", p=0.1, tags=["animals", "season"],
+         text=lambda x: f"{x.h['name']} stand bunched with their backs to the weather"),
     dict(when=lambda x: x.h.get("bulls", 0) > 0 and x.h.get("cows", 0) > 0, sense="sight", p=0.12, tags=["animals"], knack="herd",
          text=lambda x: f"the bull is running with the cows on {x.nm}"),
     dict(when=lambda x: x.h.get("bulls", 0) > 0 and x.h.get("cows", 0) == 0, sense="sight", p=0.15, tags=["animals"],
@@ -137,9 +171,39 @@ SKY = [
     dict(when=lambda x: x.cold and not x.first_cold, sense="touch", p=0.5, tags=["season", "shelter"], text=lambda x: "it stayed bitterly cold"),
     dict(when=lambda x: x.cold and not x.first_cold, sense="sight", p=0.2, tags=["season", "timber"],
          text=lambda x: "everyone is burning more wood against the cold"),
-    dict(when=lambda x: not x.cold, sense="sight", p=0.05, tags=["season"],
-         text=lambda x: {"spring": "a mild day, showers on the wind", "summer": "a warm, settled day",
-                         "autumn": "a cool day, the nights drawing in", "winter": "a grey, raw day"}[x.season]),
+    dict(when=lambda x: not x.cold and x.weather == "clear", sense="sight", p=0.05, tags=["season"],
+         text=lambda x: {"spring": "a mild, bright day", "summer": "a warm, settled day",
+                         "autumn": "a cool, bright day, the nights drawing in", "winter": "a still, grey day"}[x.season]),
+    # the day's weather and the days before it (environment.py)
+    dict(when=lambda x: x.weather == "heavy rain" and x.water, sense="sight", p=0.3, tags=["season", "travel"],
+         text=lambda x: f"{x.water} is up and running brown"),
+    dict(when=lambda x: x.since_heavy == 1 and x.weather != "heavy rain" and x.water, sense="sight", p=0.2, tags=["season", "travel"],
+         text=lambda x: f"{x.water} is still high from yesterday's rain"),
+    dict(when=lambda x: x.weather == "rain" and x.season == "summer", sense="smell", p=0.08, tags=["season"],
+         text=lambda x: "warm rain, and the smell of wet earth everywhere"),
+    dict(when=lambda x: x.weather in ("rain", "heavy rain") and x.dry_before >= 5, sense="sight", p=0.3, tags=["season", "farming"],
+         text=lambda x: "rain at last, after the dry days"),
+    dict(when=lambda x: x.weather == "clear" and x.dry_before >= 6 and x.season in ("spring", "summer"), sense="touch", p=0.15,
+         tags=["season", "farming"], text=lambda x: "no rain for days: the ground is hard and the dust rises"),
+    dict(when=lambda x: x.weather in ("rain", "heavy rain") and x.wet_days >= 4, sense="touch", p=0.2, tags=["season"],
+         text=lambda x: "it has rained for days: everything is damp, the paths are mud"),
+    dict(when=lambda x: x.weather == "gale", sense="sound", p=0.2, tags=["season", "shelter"],
+         text=lambda x: "the wind is loud in the thatch all day, and the smoke blows flat"),
+    dict(when=lambda x: x.weather == "fog", sense="sight", p=0.15, tags=["season"],
+         text=lambda x: "fog so thick the far houses are only shapes"),
+    dict(when=lambda x: x.weather == "snow", sense="sight", p=0.2, tags=["season"], text=lambda x: "snow falling, the roofs whitening"),
+    dict(when=lambda x: x.snow and x.weather != "snow" and x.cold, sense="sight", p=0.15, tags=["season"],
+         text=lambda x: "snow lies over everything, trodden grey about the doors"),
+    dict(when=lambda x: x.snow and not x.cold, sense="touch", p=0.25, tags=["season"], text=lambda x: "the snow is going to slush underfoot"),
+    # tomorrow's weather, for one who reads the sky (it is drawn ahead: environment.weather)
+    dict(when=lambda x: x.tomorrow in ("rain", "heavy rain") and x.weather not in ("rain", "heavy rain"), sense="sight", p=0.12,
+         tags=["season", "farming"], knack="sow", text=lambda x: "the wind has backed and the cloud is thickening: rain tomorrow, likely"),
+    dict(when=lambda x: x.tomorrow == "snow" and x.weather != "snow", sense="sight", p=0.12, tags=["season", "farming"], knack="sow",
+         text=lambda x: "a heavy, yellow-grey sky: snow before long"),
+    dict(when=lambda x: x.tomorrow == "gale" and x.weather != "gale", sense="sight", p=0.12, tags=["season", "shelter"], knack="sow",
+         text=lambda x: "high cloud streaming fast and the wind getting up: a gale coming"),
+    dict(when=lambda x: x.tomorrow == "clear" and x.weather in ("rain", "heavy rain", "fog", "snow"), sense="sight", p=0.08,
+         tags=["season"], knack="sow", text=lambda x: "the cloud is breaking in the west: it should clear tomorrow"),
     dict(when=lambda x: x.left == 0, sense="sight", p=0.1, tags=["season"], text=lambda x: f"the last days of {x.season}: the light is changing"),
     dict(when=lambda x: x.left <= 1 and x.season == "autumn", sense="touch", p=0.3, tags=["season", "farming"], knack="sow",
          text=lambda x: "the nights are sharp: frost is not far off, and anything still growing will not see it through"),
@@ -173,7 +237,11 @@ WILD = [
          tags=["food"], knack="forage", eye=True, land=("wild food", "thin"),
          text=lambda x: f"bare stems where the berries were in {x.nm}: it will take days to come back"),
     dict(when=lambda x: x.r("plants") is not None and x.r("plants") > 0.75, sense="sight", p=0.08, tags=["food"], land=("wild food", "good"),
-         text=lambda x: f"{x.nm} is thick with berries, nuts and greens"),
+         text=lambda x: {"spring": f"new greens and shoots thick in {x.nm}", "summer": f"{x.nm} is thick with greens, the berries ripening",
+                         "autumn": f"{x.nm} is thick with nuts and blackberries",
+                         "winter": f"roots and late greens still to be had in {x.nm}"}[x.season]),
+    dict(when=lambda x: x.r("plants") is not None and x.r("plants") < 0.35 and x.season == "winter", sense="sight", p=0.15, tags=["food"],
+         knack="forage", land=("wild food", "thin"), text=lambda x: f"what has been picked in {x.nm} will come back slowly till spring"),
     dict(when=lambda x: x.r("game") is not None and x.r("game") < 0.35, sense="sight", p=lambda x: _thin(x.r("game")),
          tags=["food", "hunting"], knack="hunt", eye=True, land=("game", "thin"),
          text=lambda x: f"few fresh tracks in {x.nm}: the game is thin"),
@@ -184,6 +252,14 @@ WILD = [
          land=("game", "good"), text=lambda x: f"fresh deer slots and droppings along the rides of {x.nm}"),
     dict(when=lambda x: x.r("game") is not None and x.r("game") > 0.75, sense="sight", p=0.06, tags=["food", "hunting"],
          text=lambda x: f"a hare starts from the bracken in {x.nm}"),
+    dict(when=lambda x: x.r("game") is not None and x.r("game") > 0.5 and x.snow, sense="sight", p=0.15, tags=["food", "hunting"],
+         knack="hunt", land=("game", "good"), text=lambda x: f"deer slots plain in the snow along the rides of {x.nm}"),
+    dict(when=lambda x: x.r("game") is not None and x.r("game") < 0.2 and x.snow, sense="sight", p=0.3, tags=["food", "hunting"], eye=True,
+         land=("game", "thin"), text=lambda x: f"the snow in {x.nm} lies unmarked: nothing has moved there"),
+    dict(when=lambda x: x.r("game") is not None and x.r("game") < 0.15, sense="sight", p=0.2, tags=["food", "hunting"], knack="hunt",
+         eye=True, land=("game", "thin"), text=lambda x: f"{x.nm} is hunted out: what game is left there will not breed back"),
+    dict(when=lambda x: x.r("game") is not None and x.r("game") > 0.75, sense="sound", p=0.06, tags=["food", "hunting"],
+         text=lambda x: f"something heavy moving in the undergrowth of {x.nm} at dusk"),
     dict(when=lambda x: _bare(x, "wood"), sense="sight", p=0.6, tags=["timber"], eye=True, land=("timber", "bare"),
          text=lambda x: f"no standing timber left in {x.nm}: stumps and brush only"),
     dict(when=lambda x: x.r("wood") is not None and x.r("wood") < 0.35 and not _bare(x, "wood"), sense="sight", p=lambda x: _thin(x.r("wood")),
@@ -191,6 +267,10 @@ WILD = [
          text=lambda x: f"{x.nm} is thinned out: stumps where the big trees stood"),
     dict(when=lambda x: x.r("wood") is not None and x.r("wood") < 0.5 and not _bare(x, "wood"), sense="sight", p=0.15, tags=["timber"],
          knack="fell", land=("timber", "thin"), text=lambda x: f"the good straight trees in {x.nm} are gone; what is left is crooked and small"),
+    dict(when=lambda x: x.r("wood") is not None and x.r("wood") > 0.75, sense="sight", p=0.06, tags=["timber"], knack="fell",
+         land=("timber", "good"), text=lambda x: f"tall, straight timber standing in {x.nm}"),
+    dict(when=lambda x: x.r("wood") is not None and x.r("wood") > 0.3 and x.weather == "gale", sense="sound", p=0.15, tags=["timber"],
+         text=lambda x: f"the trees of {x.nm} roar and creak in the gale"),
     dict(when=lambda x: x.r("seam") is not None and 0 < x.r("seam") < 0.35, sense="sight", p=0.25, tags=["mining"], knack="mine",
          text=lambda x: f"the seam at {x.nm} is nearly worked out"),
     dict(when=lambda x: x.r("seam") is not None and x.r("seam") >= 0.35, sense="sight", p=0.05, tags=["mining"],
@@ -211,13 +291,23 @@ BUILDING = [
          text=lambda x: f"{x.nm} is in poor repair: the thatch slipping, a wall cracked"),
     dict(when=lambda x: x.b["condition"] == 1 and x.cold, sense="touch", p=0.3, tags=["shelter"],
          text=lambda x: f"a cold draught cuts through {x.nm}"),
+    dict(when=lambda x: x.b["condition"] == 1 and not x.camp and x.weather in ("rain", "heavy rain"), sense="sight", p=0.35,
+         tags=["shelter", "building"], text=lambda x: f"rain coming in through {x.nm}'s roof, puddles on the floor"),
+    dict(when=lambda x: x.b["condition"] == 1 and not x.camp and x.weather == "gale", sense="sound", p=0.35, tags=["shelter", "building"],
+         text=lambda x: f"the gale tearing at {x.nm}'s loose thatch"),
     dict(when=lambda x: x.b["condition"] == 0, sense="sight", p=0.5, tags=["building", "shelter"], text=lambda x: f"{x.nm} is a ruin"),
+    dict(when=lambda x: x.b["condition"] == 0 and x.snow, sense="sight", p=0.3, tags=["building", "shelter"],
+         text=lambda x: f"snow drifted in through {x.nm}'s broken walls"),
+    dict(when=lambda x: x.mended, sense="sight", p=0.3, tags=["building"],
+         text=lambda x: f"fresh timber in {x.nm}'s walls: someone has been mending it"),
     dict(when=lambda x: x.camp, sense="sight", p=0.2, tags=["shelter", "travel"],
          text=lambda x: f"{x.nm}: a lean-to of branches round a fire ring"),
     dict(when=lambda x: x.camp and x.b.get("lasts_until") is not None and x.b["lasts_until"] - x.day <= 2, sense="sight", p=0.3,
          tags=["shelter"], text=lambda x: f"{x.nm} is sagging: it will not stand many more nights"),
     dict(when=lambda x: x.fire_place and x.b["fire"], sense="sight", p=0.06, tags=["shelter"],
          text=lambda x: f"smoke from {x.nm}'s roof at dawn"),
+    dict(when=lambda x: x.fire_place and x.b["fire"] and x.weather == "fog", sense="sight", p=0.1, tags=["shelter"],
+         text=lambda x: f"smoke from {x.nm} hangs low in the fog"),
     dict(when=lambda x: x.fire_place and x.b["fire"] and x.cold, sense="smell", p=0.1, tags=["shelter"],
          text=lambda x: f"wood smoke from {x.nm} on the cold air"),
     dict(when=lambda x: x.fire_place and not x.b["fire"] and x.was_cold and x.live, sense="sight", p=0.5, tags=["shelter", "danger"],
@@ -232,6 +322,10 @@ BUILDING = [
          text=lambda x: f"the grinding of stones from {x.nm}"),
     dict(when=lambda x: {"smelt", "copper tool", "coin"} & x.made, sense="sound", p=0.45, tags=["craft", "smithing"],
          text=lambda x: f"hammering from {x.nm}"),
+    dict(when=lambda x: "water mill" in x.made, sense="sound", p=0.4, tags=["food"], text=lambda x: f"the creak and splash of the wheel at {x.nm}"),
+    dict(when=lambda x: "dry meat" in x.made, sense="smell", p=0.3, tags=["food"], text=lambda x: f"the smell of meat drying in smoke at {x.nm}"),
+    dict(when=lambda x: "cheese" in x.made, sense="smell", p=0.25, tags=["food", "animals"],
+         text=lambda x: f"the sour smell of cheese-making from {x.nm}"),
     dict(when=lambda x: {"smelt"} & x.made, sense="smell", p=0.3, tags=["craft", "mining"],
          text=lambda x: f"sharp fumes from {x.nm}: someone is smelting"),
     dict(when=lambda x: x.fits, sense="sight", p=0.05, tags=["building"], text=lambda x: f"{x.nm} has " + ", ".join(x.fits)),
@@ -252,6 +346,13 @@ PERSON = [
          text=lambda x: f"{x.who} is gaunt and unsteady on their feet"),
     dict(when=lambda x: x.a["hunger"] == -2, sense="sight", p=0.3, tags=["food"], text=lambda x: f"{x.who} sat down twice in the day's work"),
     dict(when=lambda x: x.a["wounded"], sense="sight", p=0.5, tags=["danger"], text=lambda x: f"{x.who} moves stiffly, bruised about the face"),
+    dict(when=lambda x: x.a["wounded"], sense="sight", p=0.2, tags=["danger"], text=lambda x: f"{x.who} winces at every lift and bend"),
+    dict(when=lambda x: x.bereaved, sense="sight", p=0.2, tags=["death"],
+         text=lambda x: f"{x.who} goes about grey-faced and silent since the death in their house"),
+    dict(when=lambda x: x.bereaved, sense="sound", p=0.15, tags=["death"], text=lambda x: f"{x.who} was heard weeping"),
+    dict(when=lambda x: x.stage == "elder" and x.cold, sense="sight", p=0.1, tags=["season"],
+         text=lambda x: f"{x.who} is slow and stiff in the cold"),
+    dict(when=lambda x: x.weapon, sense="sight", p=0.06, tags=["danger", "weapons"], text=lambda x: f"{x.who} goes about with a club or a spear"),
     dict(when=lambda x: x.gear, sense="sight", p=0.08, tags=["craft"],
          text=lambda x: f"{x.who} carries " + " and ".join(f"a {i}" for i in x.gear)),
     dict(when=lambda x: x.load, sense="sight", p=0.12, tags=["food"],
@@ -267,7 +368,9 @@ def context(here, pid, h=None):
     f = here.p["farming"]
     cal = here.calendar()
     seasons = ("spring", "summer", "autumn", "winter")
-    x = SimpleNamespace(here=here, pid=pid, p=p, c=c, h=h, nm=p["name"], day=here.day, season=cal["season"], cold=here.cold())
+    from cybertron2.engine import environment as EV
+    x = SimpleNamespace(here=here, pid=pid, p=p, c=c, h=h, nm=p["name"], day=here.day, season=cal["season"], cold=here.cold(),
+                        weather=EV.weather(here._w), snow=EV.snow_lying(here._w))
     x.worked = {s.split(":", 1)[1] for e in here.events() if e.get("kind") == "work" for s in e.get("about") or [] if s.startswith("parcel:")}
     x.herds_on = lambda q: [k for k, g in here.herds().items() if g["parcel"] == q and FM.head(g) > 0]
     standing = [here.parcels()[q]["name"] for q in p["adj"] if (here.parcels()[q].get("crop") or {}).get("area_left", 0) > 1e-6]
@@ -284,9 +387,11 @@ def context(here, pid, h=None):
         left_in_season = cal["left"]
         winter_next = seasons[(seasons.index(cal["season"]) + 1) % 4] == "winter"
         x.frost_first = winter_next and int(c["ripe_day"]) - here.day > left_in_season
+        x.progress = (here.day - int(c.get("sown", here.day))) / max(1, int(c["ripe_day"]) - int(c.get("sown", here.day)))
     else:
         x.growing = x.ripe = x.rotting = x.failed = x.weeds = x.frost_first = False
         x.window_left = 0
+        x.progress = 0.0
     wk = p.get("works") or {}
     x.works_done = min(1.0, float(wk.get("done", 0.0)) / max(1.0, float(p["size"]))) if wk.get("ground") == p.get("ground") else 0.0
     x.works_unkept = bool(wk) and x.works_done > 0 and cal["left"] <= 1 and wk.get("kept", 0.0) < 1.0
@@ -304,7 +409,10 @@ def building_context(here, bid):
     st = here.stock(bid)
     live = [x for x in here.people() if bid in here.homes_here(x)]
     made = {e.get("tech") for e in here.events() if e.get("kind") == "make" and f"building:{bid}" in (e.get("about") or [])}
+    from cybertron2.engine import environment as EV
+    mended = any(e.get("kind") == "work" and e.get("tech") == "repair" and f"building:{bid}" in (e.get("about") or []) for e in here.events())
     x = SimpleNamespace(here=here, b=b, nm=b["name"], day=here.day, cold=here.cold(), stock=st, timber=st.get("timber", 0.0),
+                        weather=EV.weather(here._w), snow=EV.snow_lying(here._w), mended=mended,
                         live=live, live_n=len(live), made=made, camp=b["structure"] == "camp",
                         was_cold=here.cold(here.day - 1 if here.day else 0),
                         fire_place=any(b["fittings"].get(f) for f in ("hearth", "fire ring")),
@@ -317,11 +425,34 @@ def building_context(here, bid):
 def person_context(here, who):
     from cybertron2.engine.data import ITEMS
     a = here.body(who)
-    x = SimpleNamespace(who=who, a=a)
+    w = here._w
+    hh = w.household_of(who)
+    bereaved = bool(hh) and any(not q["alive"] and q.get("died") is not None and here.day - int(q["died"]) <= 5 and n != who
+                                and n in w.s["institutions"][hh]["members"] for n, q in w.s["people"].items())
+    x = SimpleNamespace(who=who, a=a, stage=w.s["people"][who].get("stage", "adult"), cold=here.cold(), bereaved=bereaved,
+                        weapon=bool(w.weapon(who)))
     x.gear = [i for i, q in a["carried"].items() if q >= 1 and ITEMS[i].get("seen") and not ITEMS[i].get("camp")]
     x.load = [(i, q) for i, q in a["carried"].items() if q >= 2 and ITEMS[i]["weight"] > 0]
     x.travel_gear = next((i for i, q in a["carried"].items() if q >= 1 and ITEMS[i].get("camp")), None)
     return x
+
+
+def sky_context(here):
+    """The sky over a node: the cold and the season, today's weather and the days before it, tomorrow's (for one who reads the sky),
+    and the water and wood here that show it."""
+    from cybertron2.engine import environment as EV
+    w, d = here._w, here.day
+    cal = here.calendar()
+    dry = 0
+    for k in range(d - 1, max(-1, d - 11), -1):
+        if EV.wet(w, k):
+            break
+        dry += 1
+    names = lambda cover: next((p["name"] for p in here.parcels().values() if p["cover"] == cover), None)   # noqa: E731
+    return SimpleNamespace(cold=here.cold(), first_cold=here.cold() and (d == 0 or not here.cold(d - 1)), season=cal["season"], left=cal["left"],
+                           weather=EV.weather(w), snow=EV.snow_lying(w), since_heavy=EV.since_heavy_rain(w), tomorrow=EV.weather(w, d + 1),
+                           dry_before=dry if d >= 5 else 0, wet_days=sum(1 for k in range(max(0, d - 4), d + 1) if EV.wet(w, k)),
+                           water=names("water"), wood=names("forest"))
 
 
 def facts(here, add) -> None:
@@ -341,9 +472,7 @@ def facts(here, add) -> None:
                         kw[k] = row[k]
                 p = row["p"](x) if callable(row["p"]) else row["p"]
                 add(about, row["text"](x), p, row.get("tags", []), row.get("sense", "sight"), concerns=list(concerns), **kw)
-    cal = here.calendar()
-    emit(SKY, SimpleNamespace(cold=here.cold(), first_cold=here.cold() and (here.day == 0 or not here.cold(here.day - 1)),
-                              season=cal["season"], left=cal["left"]), ["sky"])
+    emit(SKY, sky_context(here), ["sky"])
     for pid, p in here.parcels().items():
         x = context(here, pid)
         emit(WILD, x, [f"parcel:{pid}"])
@@ -403,7 +532,7 @@ THING = [
          text=lambda x: f"someone lies still {x.at}, the ground about them trampled and dark with blood"),
     dict(when=lambda x: x.body == "fresh", sense="sight", p=1.0, reach="near", tags=["death"],
          text=lambda x: f"the body of {x.of} lies {x.at}" + (f", with {x.goods_words} beside it" if x.goods_words else "")),
-    dict(when=lambda x: x.body == "fresh" and not x.cold, sense="touch", p=0.6, reach="near", tags=["death"],
+    dict(when=lambda x: x.body == "fresh" and x.cause == "attack" and not x.cold, sense="touch", p=0.6, reach="near", tags=["death"],
          text=lambda x: f"{x.of}'s body {x.at} is not yet cold"),
     # ---- dead some days
     dict(when=lambda x: x.body == "days", sense="sight", p=1.0, tags=["death"], text=lambda x: f"a body lies {x.at}, dead some days"),
@@ -427,7 +556,7 @@ THING = [
     # ---- rot: in the warm it smells and draws flies; in the frost it keeps
     dict(when=lambda x: x.rot and x.body and (x.warm or x.indoors), sense="smell", p=0.3, reach="node", tags=["death", "danger"],
          text=lambda x: "the smell of something dead hangs about the place"),
-    dict(when=lambda x: x.rot and x.body and (x.warm or x.indoors), sense="smell", p=1.0, reach="near", tags=["death", "danger"],
+    dict(when=lambda x: x.rot and x.body and (x.warm or x.indoors), sense="smell", p=0.6, reach="near", tags=["death", "danger"],
          text=lambda x: f"the stink of a body rotting {x.at}"),
     dict(when=lambda x: x.rot and x.body and x.warm and x.outside, sense="sound", p=0.4, tags=["death"],
          text=lambda x: f"a hum of flies {x.at}"),
