@@ -84,6 +84,7 @@ Newest first. Ideas decided or rejected in conversation before 23 Oct are backfi
 | 23 Oct | The verbs (a lean set of 24) and what each agent is shown; force always shown | ready for a decision | [verbs.md](verbs.md) |
 | 23 Oct | Detecting what was told by reading the meaning of free speech | rejected in the proposal: name mentions, an `about` field and explicit `explain`/`teach` instead | [knowledge.md](knowledge.md) §4e |
 | 23 Oct | Know-how as a continuous score (0-1) | replaced in the proposal by four levels moved by counts (Zach) | [knowledge.md](knowledge.md) §4c |
+| 23 Oct | Fences, hedges, walls and folds for herds (for later) | discussion | [livestock.md](livestock.md) |
 | 23 Oct | Eras in four families; outside raiders as new agents with goals; the first-world set as data; six spreading patterns; windfalls follow possession and claims | accepted: D2-76 to D2-79 | spec/environment/scheduler.md |
 | 23 Oct | Outside raiders as scripted incidents | rejected: they arrive as agents with goals | D2-76 |
 | 23 Oct | Shared hidden state of places and things, with cascades | discussion | [environment_state.md](environment_state.md) |

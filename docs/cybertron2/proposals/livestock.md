@@ -33,6 +33,31 @@ answer.
 | wild herds | on grassland, a herd with a threshold; catching is crew work; a caught horse must be broken (riding skill) |
 | raids | herds can be driven off; riders make it easy (02k §3) |
 
+## Fences, hedges and walls (23 Oct, discussion; for later)
+
+Zach: are herds kept in by fences or by herding? Both, proposed: **a herd stays put if it is herded or enclosed**. Unherded and
+unenclosed, it wanders: strays into crops (the M1 stray incident), gets lost, and is easy prey and easy to steal.
+
+| Enclosure | Made from | Cost for a 10-plot pasture (about 20 head) | Upkeep a year | Strays and escapes | Wolves at night | Pays back (herding saved) |
+|---|---|---|---|---|---|---|
+| none, herded | a herder's day (1 unit; less for a common herd, 02l §5) | | | low while herded | as the herder's watch | |
+| **hurdles** (wattle) | timber | about 42 units | about 17 (they rot) | x0.3 | x0.7 | about 2.8 years |
+| **post and rail** | timber | about 63 | about 13 | x0.2 | x0.7 | about 3.3 years |
+| **hedge** | planting (a year to grow before it holds) | about 38 | about 4 (laying) | x0.15 once grown | x0.6 | about 1.3 years, after it grows |
+| **dry-stone wall** | fieldstone (D2-56), a waller | about 150 | about 5 | x0.05 | x0.5 | about 5.5 years, but it lasts generations |
+| **a fold** (a small stone pen by the houses, for nights) | stone | small | small | | **x0.2** | with a watch (D2-21) and dogs (later) |
+
+- **A fence is a structure on a parcel's boundary** (layout.md lists fences and walls as structures), with a **condition** that
+  decays without upkeep and drops in a gale (D2-71's risks of things): gaps let beasts out ("the fence by the Long Field is down in
+  two places", salience 0.4).
+- **What it saves is herding work:** a fenced pasture needs a check and a move (about 0.2 units a day) instead of a herder (1). So
+  fences pay where labour is dear or herds are large, and hardly where a child can mind the herd (D4-19); that is the historical
+  pattern too.
+- **Fence the beasts in, or the crops off:** a hedge round a field keeps the herd and the deer out of the crop instead.
+- **Enclosure is politics:** fencing part of a common pasture takes it from everyone else's use. That is a claim (D4-23), and a
+  village's quarrel, which the engine leaves to people.
+- Seeded worlds start with old hedges and walls where the land has long been farmed.
+
 ## Why
 
 - One entity creates many dependence edges at once (food, transport, farming, fighting, credit), which is what the scenario design
@@ -71,6 +96,10 @@ answer.
   3 years), herds not growing up within a run (seeding sets them), about 1.2-1.3 plots of land a head, horses eating a ration of
   grain each working day, milk 0.8 food a day for 0.6 of the year, slaughter 40-50 meat and 2 hides, herding at least 1 unit a
   day, prices (cow 40-60 coin, ox 50-100, horse 90-150). 02l's and 02m's ox costs need a team of two.
+
+- 23 Oct: Zach: are herds kept by fences or herding; timber fences round plots, upgraded to stone for fewer escapes and wolves.
+  Added: herded or enclosed; hurdles, post and rail, hedge, dry-stone wall, a fold; costs, upkeep, effects, paybacks; enclosure as a
+  claim. For later.
 
 ## Sources
 
