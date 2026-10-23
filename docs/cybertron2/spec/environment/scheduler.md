@@ -39,6 +39,19 @@ edges, as the edge's terrain allows.
   year), disease (quiet, pestilence), ecology (mast and bust) and outside pressure (raiding, trade, migration). Outside pressure
   arrives as **new agents** with their own goals (raiders, traders, migrants: seeding/), not as scripted events; a scripted danger,
   where a world wants one, is a thing such as a herd of dangerous beasts.
+- **The day's weather** (D2-69, D2-99): within the spell, each day's weather for the region is drawn (keyed: weather, region,
+  day), and read by visibility (environment/visibility.md), crossing (world/roads.md: a high ford) and the kinds' hazards.
+
+  | Spell | clear | rain | heavy rain | fog | snow | gale |
+  |---|---|---|---|---|---|---|
+  | normal | 0.55 | 0.25 | 0.05 | 0.10 | | 0.05 |
+  | wet | 0.20 | 0.45 | 0.20 | 0.15 | | |
+  | dry | 0.85 | 0.03 | | 0.07 | | 0.05 |
+  | cold snap | 0.50 | | | 0.15 | 0.30 | 0.05 |
+  | storm | 0.05 | 0.25 | 0.40 | | | 0.30 |
+
+  In winter, and on hills in a cold snap, rain falls as snow. **Snow lies** after a snow day until three days without frost.
+  A ford is **high** for 2 days after heavy rain, and through a wet spell's second week or a flood.
 - **Kinds** (D2-77): every weather event, hazard and windfall is a data entry. The first worlds use drought, river flood, gale,
   hail, late frost, blizzard (hills), lightning; house fire, wildfire, blight, smut in seed, rats in stores, murrain and wolves (with
   cattle), fen fever, winter cough, one rare contagious disease; and the windfalls bumper harvest, flood silt, storm-felled oaks and
@@ -70,14 +83,15 @@ its risks. Per incident: day, place, kind, parameters, cause. Per edge: what it 
 | Parameter | Value | Status |
 |---|---|---|
 | eras, dwell times, the year's spread, spell odds and lengths, every kind's base and drivers | proposals/environment.md; 02q | calibrate |
+| the day's weather by spell; snow lying; a ford high | above | proposed (D2-99); calibrate |
 
 ## Open
 
-- Edge terrain data (world/edges.md, 37.4) for fires and signs across edges.
+- Edge terrain: each road's terrain and its stretches (world/roads.md, D2-104).
 - Disease: mortality, units of the sick, immunity, nursing (with 37.1): to flesh out.
 
 ## Sources
 
 38.04 §3; devlog 37.4 #4-#6; proposals/environment.md, environment_catalogue.md; 02q_environment_model.py.
 
-*Current as of 23 Oct 2026: D4-4 to D4-6, D2-69 to D2-74, D2-76 to D2-79.*
+*Current as of 23 Oct 2026: D4-4 to D4-6, D2-69 to D2-74, D2-76 to D2-79, D2-99, D2-104.*

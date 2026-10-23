@@ -34,10 +34,11 @@ bridge), which makes roads places to invest in and to hold.
 | **a ruin, an old camp** | shelter for a night | | cover | possible | |
 | **an overlook** | none | | sees far along the road: parties ahead and behind | | a beacon |
 
-- **Stopping points (D2-107):** a spring, a meadow, wild fruit trees, a sheltered hollow. Passing one, a traveller can gather on
-  the way (proposed: 1 to 3 food in season, without losing the day, if the departure choice says so) or sleep better there (the
-  night out costs as in a camp, D2-68: 1.2 food instead of 1.5, and no fall from the cold in mild weather), and arrives more rested.
-  Knowing the place makes both likelier (proposed x2 to find it and use it); a stranger may pass it by.
+- **Good places on the way (D2-109, amending D2-107):** a spring, a meadow, wild fruit trees, a sheltered hollow. They are not
+  stopping points: passing one is still a trip with nothing to decide, but the traveller arrives changed: fed on the way (in season
+  the night out costs 1.0 food instead of 1.5) or with a little food gathered (1 to 2), more likely if it knows the place (x2). It
+  can choose to **stop** at one only at departure, and only if it knows it (has passed it before or been told): it stays there up
+  to N days, gathering as at a wild site and sleeping as in a camp (1.2 food a night).
 - A stretch with no landmark is plain road: travellers pass, meet by the terrain's odds, and nothing else happens.
 
 ### 2. What happens where
@@ -88,7 +89,7 @@ it and can react.
 turn back | go round`. The departure prompt shows the landmarks the traveller knows on that road (known by having travelled it or
 been told); on an unknown road they meet them as they come.
 
-**Waiting it out (37.2 proposes yes):** a traveller can wait at a block (a flooded ford, a snowed pass) for up to N days, sleeping
+**Waiting it out (D2-113):** a traveller can wait at a block (a flooded ford, a snowed pass) for up to N days, sleeping
 out (D4-12: 1.5 food a night, the cold), better with a bedroll, tent or camp (D2-68). It is the same act as road_encounters.md
 §4's `wait` on a road, brought forward for this one use. The risk is real: in the region run (38.23) people starved on the road,
 so waiting with little food should show in the departure prompt as a cost.
@@ -137,7 +138,7 @@ landmarks in all.
    the agent, or both), and the 0.1 chance.
 4. ~~Building on landmarks~~ later, flagged (D2-108, OPEN L-5).
 5. ~~OPEN Q-17~~ the edge's terrain is its stretches' default (D2-104).
-6. Waiting it out at a block, as a departure choice and in a fuse call (§3)?
+6. ~~Waiting it out~~ decided: D2-113.
 
 ## History
 
@@ -153,6 +154,9 @@ landmarks in all.
 - 23 Oct: Zach decided D2-106 (experience lowers the chance of trouble; an experienced traveller is woken only when the risk is
   still high, unusual for them), D2-107 (the five landmarks, plus stopping points for gathering and rest, more if known), D2-108
   (building on landmarks later, flagged).
+
+- 23 Oct: Zach: meadows and the like are not stopping points; passing them changes the traveller's state on arrival; stopping
+  only by choice in advance, and only if known (D2-109). Waiting out a block: yes (D2-113). Spec written: spec/world/roads.md.
 
 ## Sources
 

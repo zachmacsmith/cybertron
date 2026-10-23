@@ -1,6 +1,7 @@
 # Proposal: meetings on the road (travellers, lost herds, ambushes)
 
-**Status:** discussion (23 Oct). Design only. **Owner:** 37.2 (author); travel, transit and combat are 37.4's (world/edges.md,
+**Status:** accepted: D2-81, D2-110 (23 Oct); odds by stretch and landmark (D2-104); waiting on a road later (OPEN L-7); searching
+with wandering herds (OPEN L-8). Design only. **Owner:** 37.2 (author); travel, transit and combat are 37.4's (world/edges.md,
 agents/, conflict/), so this goes to them on the board. **Affects:** world/edges.md, spec/core (the day), agents/actions.md
 (`travel` with an aim; `wait` on a road), conflict/ (ambush), economy/money_and_markets.md (offers on the road), livestock.
 
@@ -94,6 +95,9 @@ day, and a searcher can turn back at any point.
 
 - 23 Oct: Zach: herds lost on the road; people travelling the same road in opposite directions should be able to meet as fuse
   events (in a test, families kept passing each other); later, bandits who hide in wait and attack travellers. Written.
+
+- 23 Oct: Zach decided D2-110: a meeting is a fuse event with a few waves of talk, giving and offers, then each party chooses to
+  go on, turn back, change where it is going, travel together, attack or flee. Spec written: spec/world/roads.md §Meetings.
 
 ## Sources
 

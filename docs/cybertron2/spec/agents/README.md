@@ -9,3 +9,4 @@ What an agent is and can do. Owner: 37.4.
 | [standing_orders.md](standing_orders.md) | routine, later reflexes, fallbacks and policies | 38.06 §4 | **written** (D4-16) |
 | [models.md](models.md) | which model plays whom; one agent, one model, for life; casts | 38.09 §3b, scenario_design §2 | **written** (D4-20) |
 | aims.md | no aims for now | D4-29 | **written** |
+| [modifiers.md](modifiers.md) | modifiers on verbs as techniques: the record, the first modifiers, showing and trying untaught | verb_modifiers.md (written by 37.2 at Zach's request) | **written** (D2-93, D2-94, D2-111, D2-112) |

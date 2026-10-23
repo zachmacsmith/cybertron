@@ -48,6 +48,24 @@ rule) is still a proposal; this file lists only what decisions have fixed.
 Every good is an item with a quantity, held by someone or stored in a container at a place, with a weight for carrying
 (transport.md) and, where it decays, a spoilage rate.
 
+## Decay (D2-87)
+
+Every item says how it decays under each condition, as data. The rate in a house is multiplied by every condition that applies.
+
+| Item | In a house a day | Open, dry | Open, wet | Buried | Warm season | Frozen | Becomes |
+|---|---|---|---|---|---|---|---|
+| grain | 0.5% (D2-58; bins, cellar, granary lower) | x4 | x10 | x2 | x1.2 | x0.5 | nothing |
+| bread | about 2% | x3 | x8 | x3 | x1.5 | x0.2 | nothing |
+| fresh meat | about 15% | x2 | x2.5 | x1 | x1.5 | x0.1 | rotting meat |
+| dried or salted meat | about 1% | x2 | x6 | x2 | x1.2 | x0.5 | nothing |
+| cheese | about 1% | x3 | x5 | x1 | x1.5 | x0.3 | nothing |
+| hides | none | 1% a day | 3% a day | 2% a day | | | nothing |
+| timber, charcoal | none | none | wet: no use as fuel until dried (a dry day under a roof) | | | | |
+| tools, coin, ore, stone | none | none | | | | | |
+
+Rotting meat and rotting food are things with a disease risk where they lie (world/things_in_places.md, D2-96). "Open, wet" is a
+day of rain, heavy rain or snow (environment/scheduler.md), or a flooded parcel.
+
 ## Data
 
 Items in holdings and containers: kind, quantity, wear (for tools), and the container's place.
@@ -57,6 +75,7 @@ Items in holdings and containers: kind, quantity, wear (for tools), and the cont
 | Parameter | Value | Status |
 |---|---|---|
 | weights, spoilage rates, costs to make | 02g §1, 02j model | calibrate |
+| decay by condition | the Decay table | proposed (D2-87); calibrate |
 
 ## What agents see
 

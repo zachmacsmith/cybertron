@@ -1,7 +1,7 @@
 # Proposal: modifiers on verbs (ways of doing an act that people know or learn)
 
-**Status:** partly accepted: D2-93, D2-94 (23 Oct); one verb for putting things down (§5), searching, and whether modifiers are
-techniques (§4) still open. Design only. **Owner:** 37.2 (author); verbs and knowledge are 37.4's (verbs.md, knowledge.md,
+**Status:** accepted: D2-93, D2-94, D2-111, D2-112 (23 Oct); `searching` and `aim: burn` as modifiers still open. Spec written:
+spec/agents/modifiers.md. Design only. **Owner:** 37.2 (author); verbs and knowledge are 37.4's (verbs.md, knowledge.md,
 D4-24), so this goes to them. **Affects:** spec/agents/actions.md; verbs.md; knowledge.md; information/prompts.md; things in
 places (hiding), road_encounters.md (searching), attacks_and_walls.md (burning), farming (sowing methods).
 
@@ -104,10 +104,9 @@ on the way (road_encounters.md §3). It is a modifier on `travel`, known to all.
 ## Open questions (for Zach, and 37.4)
 
 1. ~~Modifiers as data~~ decided: D2-93.
-2. One verb `give` for putting things anywhere, with `leave` and `hide` as its variants, and a give that cannot reach its recipient
-   left at the door (§5)?
+2. ~~One verb `give`~~ decided: D2-111.
 3. ~~`for`, the sowing method~~ decided: D2-94. `searching` on travel (§6) and `aim: burn` on attack: modifiers too?
-4. Modifiers as techniques with one more field (§4)?
+4. ~~Modifiers as techniques~~ decided: D2-112.
 
 ## History
 
@@ -119,6 +118,8 @@ on the way (road_encounters.md §3). It is a modifier on `travel`, known to all.
   and explained like techniques) and D2-94 (`for`, sowing method). Asked whether modifiers differ from techniques (§4: 37.2's view,
   no), whether `leave` can fold into `give` with leave and hide as variants and a give in the departure prompt left outside the
   house (§5), and what searching meant (§6).
+
+- 23 Oct: Zach decided D2-111 (`leave` folds into `give`) and D2-112 (modifiers are techniques). Spec written.
 
 ## Sources
 
