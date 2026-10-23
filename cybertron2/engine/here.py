@@ -249,8 +249,11 @@ class Here:
 
     def works_for(self, party) -> bool:
         """An open agreement in which I (or my household) owe work to this party (D2-36 to D2-38: the worker acts for the employer)."""
-        mine = {self.name, self._w.household_of(self.name)}
-        theirs = {party, self._w.household_of(party) if party in self._w.s["people"] else party}
+        def circle(x):                                                        # a person and their household, or a household and its members
+            if x in self._w.s["people"]:
+                return {x, self._w.household_of(x)}
+            return {x} | set((self._w.s["institutions"].get(x) or {}).get("members", []))
+        mine, theirs = circle(self.name), circle(party)
         return any(a["status"] == "open" and "work" in l and l["done"] < l["work"] and l["from"] in mine and l["to"] in theirs
                    for a in self.agreements().values() for l in a["legs"])
 

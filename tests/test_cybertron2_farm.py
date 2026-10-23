@@ -315,3 +315,13 @@ def test_anyone_can_give_to_a_household_and_leave_goods_anywhere():
     r = do(w, "Edric", do="give", to="the Hales", item="grain", qty=2)
     assert "Hale House" in r, r
     assert do(w, "Edric", do="leave", item="grain", qty=1, at="Hale House").startswith("You left")
+
+
+def test_work_owed_to_a_person_counts_for_their_household():
+    w = world()
+    give(w, "Simkin", crude_tool=1)
+    w.s["people"]["Simkin"]["at"] = "millbrook"
+    w.s["day"] = w.s["parcels"]["long_field"]["crop"]["ripe_day"]
+    w.s["agreements"]["A1"] = {"node": "millbrook", "day": w.d, "status": "open", "parties": ["Simkin", "Edric"],
+                               "legs": [{"work": 1, "done": 0, "by": None, "from": "Simkin", "to": "Edric", "when": {}}]}
+    assert "into Reed House" in do(w, "Simkin", do="work", what="reap", at="Long Field", **{"for": "the Reeds"})
