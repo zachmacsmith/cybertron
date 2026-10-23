@@ -1,21 +1,28 @@
 # cybertron2: the shared, current description
 
-This folder is **the one place that says what cybertron2 is and will be**. Everything else (design notes, run reports, work logs,
-the coordination board) is how we got here; this is where we are. Owned jointly by the sessions working on cybertron2; edited
+This folder holds **what cybertron2 is (decided), what we are still thinking over, and how each idea was decided or rejected**.
+Where to look:
+
+- **The current world, decided and never stale:** [spec/](spec/README.md).
+- **Our working thoughts, and how ideas progressed:** [proposals/](proposals/README.md) (one file per idea, each with its dated
+  history, and a log of every idea's outcome).
+- **Every decision, with what it replaced:** [DECISIONS.md](DECISIONS.md). Owned jointly by the sessions working on cybertron2; edited
 under the rules below. Set up 22 Oct 2026 by the 37.4 session at Zach's request.
 
-## Three layers
+## Four layers
 
 | Layer | What it holds | Where | Who writes |
 |---|---|---|---|
-| **The spec** (here) | what cybertron2 is: every decided rule, its data, its parameters, what agents see, and what is still open | `docs/cybertron2/spec/` on `wp/cybertron2` | each session in the sections it owns |
-| **Proposals** | designs under discussion, not yet decided: one file each, with a status | `docs/cybertron2/proposals/` | any session; accepted parts move into the spec |
-| **Design notes** | the reasoning: analyses, options weighed, models, run reports, work logs | each session's own folder: `docs/review/38_space_engine/` (37.4), `docs/review/37_growth/02*` (37.2), and later any other session's | that session only |
+| **The spec** | what is **decided** about how the world works: only current rules, their data, parameters and what agents see | `docs/cybertron2/spec/` on `wp/cybertron2` | each session in the areas it owns |
+| **Proposals** | our **working thoughts**: every idea about how the world should work while it is being considered, with its status and dated history; kept after it is decided or rejected | `docs/cybertron2/proposals/` | any session |
+| **Session notes** | long supporting material only: analyses, cost models, run reports, work logs (linked from the proposals that use them) | `docs/review/38_space_engine/` (37.4), `docs/review/37_growth/02*` (37.2), others later | that session only |
 | **The board** | conversation between sessions: proposals, questions, replies, status | `docs/coord/BOARD.md` on branch `coord` | everyone, append only |
 
-A design note is where an idea is worked out with Zach; a design ready to be weighed goes into `proposals/`; when Zach decides, the
-decision is recorded in DECISIONS.md and the spec changes in the same commit, and the proposal is marked accepted. A proposal that
-changes another session's section is announced on the board.
+**The path of an idea:** it is written up in `proposals/` (status: discussion), revised there with each round of thought (a dated
+history entry each time), then Zach decides. Accepted: the rule goes into the spec and DECISIONS.md in the same commit, and the
+proposal is marked accepted with the decision's number. Rejected: the proposal is marked rejected with why. Either way the file
+stays, and the log in `proposals/README.md` records the outcome. A proposal that touches another session's area is announced on the
+board.
 
 ## Files
 
@@ -47,15 +54,19 @@ changes another session's section is announced on the board.
    commit. If the decision touches another owner's section, it posts on the board (`@owner`, citing the decision's number); the
    owner updates its section at its next step.
 3. **Never edit another owner's section.** Propose on the board, or add the point to [OPEN.md](OPEN.md) under that owner.
-4. **The spec says what, not why.** Each rule carries its status (`decided D4-12`, `proposed`, `calibrate`, `open`) and links to
-   the note that explains it. Reasoning stays in the notes.
-5. **A note the spec replaces** gets one line at its top: "Superseded by docs/cybertron2/spec/<file>.md §x (date)". Notes are
-   never deleted.
+4. **The spec says what, not why, and only what is current.** It holds decided rules (each with its decision number) and
+   parameters marked `decided` or `calibrate`; anything undecided lives in `proposals/` or OPEN.md, not in the spec. When a
+   decision replaces an older one, the spec text is rewritten to the new rule (no struck-through history: that lives in DECISIONS.md
+   and the proposals). Each spec file ends with "Current as of" and the decision numbers it reflects.
+5. **Nothing is deleted.** A session note or proposal the spec replaces gets one line at its top pointing to the spec file. Design
+   thinking from now on goes into `proposals/`, not session notes.
 6. **Code under `cybertron2/` is changed only by 37.4**, unless agreed on the board first. The spec is what the code is reviewed
    against.
 7. **Small commits; `git pull --rebase` before every push.** The spec is split into areas and small files so two sessions rarely
    touch the same file.
 8. **Work logs record work, not decisions.** Board posts stay short and cite spec sections and decision numbers.
+9. **Staleness check:** every decision in DECISIONS.md must appear in a spec file, and every spec rule must cite a decision (to be a
+   small script once the spec is compiled).
 
 ## Status (22 Oct)
 

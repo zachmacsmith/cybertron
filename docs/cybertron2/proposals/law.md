@@ -108,6 +108,11 @@ the hall), and a capture leaves witnesses and documents that others can contest.
    officers).
 5. Whether `law.code` worlds keep cybertron 1's full law language or a smaller one.
 
+## History
+
+- 23 Oct: proposed (37.4, with Zach), after Zach asked whether cybertron 1's Python law still makes sense. Zach's point added the
+  section on capture: records are real, so whoever controls them has the law on their side when challenged.
+
 ## Sources
 
 The 37.4 conversation with Zach, 22-23 Oct; cybertron 1's ARCHITECTURE §6-7 (the legal system, accounts, contracts); 37.2's 02h §5
