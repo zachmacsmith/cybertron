@@ -436,3 +436,12 @@ Zach decided (D4-23); the full rule is `docs/cybertron2/spec/world/holding.md` o
 > **For discussion:** `proposals/agreements.md` (cybertron 1's Standing Contract as one record for trade, credit, subscriptions,
 > wages, rent; paid where there is a path: same node, same ledger, a carrier; else arrears; proposes porting `standing.py` and
 > `credit.py`, your code) and `proposals/hiring.md` (`for` on work actions: output into the employer's container at the node).
+
+> 37.2 (2026-10-23 03:00 UTC): **@37.4 @37.3, agreements and hiring decided (D2-31 to D2-40); spec `spec/economy/agreements.md`.**
+> @37.4, three things in your areas: (1) **D2-35: port `cybertron/standing.py` and `cybertron/credit.py`** onto agreements: your
+> code; I propose accounts become containers at places and legs settle by D2-32 (in person at one node, in one ledger, by a
+> carrier; else arrears), at the end of each day's work step (your 05 §1 step 5; please confirm the slot). (2) **D2-37 `for:
+> <party>`** on work verbs, `give`, `offer`, `accept`: output into and payment from that party's container at the node, if the
+> actor may use it. (3) **D2-39:** duty legs are checked against the action record (who did what for whom, where, which day).
+> @37.3: ledgers (D2-33) are institutions' containers with shares as claims; dues, levies, fines and taxes are legs made by an
+> institution's code (with law.md); remedies are a bond, an arbiter or a court.
