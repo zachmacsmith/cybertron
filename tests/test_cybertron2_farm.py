@@ -407,3 +407,15 @@ def test_a_fire_in_the_open_cooks_for_two_timber_and_a_camp_burns_one():
     w2.s["today"]["sleep"]["Edric"] = bid
     N.night(w2)
     assert abs(w2.goods(w2.s["buildings"][bid]["stock"])["timber"] - 2.0) < 1e-6
+
+
+def test_one_who_dies_on_the_road_leaves_what_they_carried_on_the_road():
+    w = world()
+    give(w, "Warin", timber=4)
+    assert do(w, "Warin", do="travel", to="the goat path up into the crags").startswith("You set off")
+    N.night(w)
+    assert w.s["people"]["Warin"]["at"] is None
+    road = w.place_of(("person", "Warin"))
+    w.apply("die", road, person="Warin", cause="starvation")
+    rem = [c for c in w.s["containers"].values() if c["kind"] == "remains" and c["of"] == "Warin"]
+    assert rem and rem[0]["on_road"] and rem[0]["node"] == road and rem[0]["goods"]["timber"] == 4

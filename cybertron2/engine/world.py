@@ -577,10 +577,11 @@ def p_die(w, person, cause, to=None):
         if to:
             for i, q in left.items():
                 _add(w.goods(w.hands(to)), i, q)
-        elif place in w.s["nodes"]:
+        elif place is not None:                                                 # at a node, or on the road where one fell
             w.s["seq"] += 1
             cid = f"remains:{w.s['seq']}"
-            w.s["containers"][cid] = {"kind": "remains", "of": person, "node": place, "goods": dict(left), "wear": {}}
+            w.s["containers"][cid] = {"kind": "remains", "of": person, "node": place, "goods": dict(left), "wear": {},
+                                      "on_road": place not in w.s["nodes"]}
         for i in left:
             hands[i] = 0.0
     for iid, h in w.s["institutions"].items():
