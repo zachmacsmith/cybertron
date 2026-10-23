@@ -83,6 +83,9 @@ changed in its code yet. **From 22 Oct the decisions are kept in [docs/cybertron
 
 ## Log
 
+- **23 Oct.** Zach: teaching passes skill; agents should know how learning works; the world grows by data (D4-24); a deep dive on
+  what agents see, attention and descriptions. Updated knowledge.md; wrote proposals/seeing.md.
+
 - **23 Oct.** Zach: the whole possible action space against what an agent is shown; force and defence. Wrote proposals/verbs.md.
 
 - **23 Oct.** Zach: a limited private notes directory, one pinned. Wrote proposals/notes.md.

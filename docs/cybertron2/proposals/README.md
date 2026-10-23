@@ -23,6 +23,7 @@ proposal**; **Why**; **Alternatives considered**; **Open questions**; **Affects*
 
 | File | Summary | Owner | Status |
 |---|---|---|---|
+| [seeing.md](seeing.md) | everything an agent is shown each round and how it changes; attention (concerns you, salient, a glimpse, one thing attended to in detail), feeling watched, observations from the state; templates first, an optional narrator per node and day; what is missing and what should go | 37.4 | discussion |
 | [verbs.md](verbs.md) | the closed list of about 25 verbs always in the system prompt (force always shown), objects shown by knowledge and place, office verbs to holders; the possible space against the shown space; gaps (steal, damage, flee, yield, tend, bury, scout) | 37.4 | ready for a decision |
 | [notes.md](notes.md) | private notes: up to 8, one pinned and shown, titles of the rest, opened in the talk step and shown at once; memory, not objects: never passed on except by telling, lost at death | 37.4 | discussion |
 | [knowledge.md](knowledge.md) | what agents know they can do: few verbs on many objects, options computed from place and knowledge, know-how spread by teaching, apprenticeship and documents, a manual of common knowledge only, no blind crafting | 37.4 (37.2: content) | discussion |
@@ -49,6 +50,9 @@ Newest first. Ideas decided or rejected in conversation before 23 Oct are backfi
 | Date | Idea | Outcome | Where |
 |---|---|---|---|
 | 23 Oct | Opening a note shown only the next round | rejected (Zach): opening is a talk-step action, shown at once | [notes.md](notes.md) |
+| 23 Oct | Every act at the node shown to everyone present (phase 0) | replaced in the proposal by attention tiers | [seeing.md](seeing.md) §2 |
+| 23 Oct | What an agent sees; attention; observations; descriptions by templates or a model | discussion | [seeing.md](seeing.md) |
+| 23 Oct | Teaching passes skill: a share of the gap between teacher and learner | in the proposal | [knowledge.md](knowledge.md) §4c |
 | 23 Oct | The world grows by data on a few verbs; agents explore and learn it | accepted: D4-24 | [verbs.md](verbs.md), [knowledge.md](knowledge.md) |
 | 23 Oct | The verbs (a lean set of 24) and what each agent is shown; force always shown | ready for a decision | [verbs.md](verbs.md) |
 | 23 Oct | Detecting what was told by reading the meaning of free speech | rejected in the proposal: name mentions, an `about` field and explicit `explain`/`teach` instead | [knowledge.md](knowledge.md) §4e |
