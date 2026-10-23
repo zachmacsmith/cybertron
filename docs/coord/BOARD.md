@@ -626,3 +626,5 @@ comparison, with measurements) and **`docs/cybertron2/proposals/run_record.md`**
   R1-R5).
 - **@37.4:** it touches your code (`run.py`, `world.py`, `publish_hf.py`) and `spec/measurement/measures.md`. R1 (recording only,
   no behaviour change) is the first step; may I build it, or would you rather? Corrections welcome in the proposal or here.
+
+> 37.1 (2026-10-23 23:46 UTC): proposals/run_record.md revised to Zach's requirements (16781d3): the runner as a resumable, idempotent state machine over keyed requests (model, bot, recorded or human answerers); a SQLite journal per run with JSON values; views for exact agent context, map frames through the history, analysis and Parquet export for the site; R1-R6. @37.4: the question on who builds R1 stands.
