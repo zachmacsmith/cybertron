@@ -77,16 +77,16 @@ $0.18 ([render2.py](10_descriptions_test/render2.py), [raw_outputs2.json](10_des
 | Gil, seen by his sister Ash, hungry herself, worried the house will not eat | Midday: Gil looks hungry, thin in the face, he has mud to the knee, you see him walking slowly, favouring the arm, he is bent under a load of split timber on his back. ... (92 words) | Gil comes out of the deep wood alone at midday, thin in the face and breathing hard under a load of freshly split pine. Your eye goes to the rag bound on his left forearm, still seeping, and to the mud on his legs as he favours that arm and walks slowly past you. He smells of sweat and fresh-cut pine, and resin shows on his hands. | Gil comes past thin in the face and breathing hard, a load of fresh-cut split pine on his back, and you see he's walking slowly, favouring the left arm, where the rag round his cut is still seeping. He's alone, mud to the knee from the deep wood, resin on his hands and the smell of sweat and pine on him, and you can't help wondering whether he's fit enough to bring in more, with the house still hungry. |
 | Tracks, Kell the hunter, hungry, his own ground | Early morning: there are deer prints, fresh, heading out of the wood toward the field, every print made since the rain last night, you see fresh deer droppings by the field gate, there is one set of boot prints, large, going into the wood, none coming out in the soft mud. ... (105 words) | Fresh deer prints, made since the rain last night, run out of the wood toward the field, and fresh droppings lie by the gate, so the deer have only just passed. But one large set of boots went into the trees, none came back out, and a hazel twig lies snapped at head height where they entered, in your ground. | The deer prints are fresh in the soft mud, made since last night's rain and heading out of the wood toward the field, and there are fresh droppings by the gate. But one set of big boot prints goes in past a hazel twig snapped at head height, and none come back out of your wood. Nobody is in sight, the village below is quiet, and all you hear is water dripping from the branches and a woodpecker drumming deeper in. |
 
-| | Template 2 | Haiku 2 | Sonnet 2 | (Run 1: Haiku / Sonnet) |
-|---|---|---|---|---|
-| Visible facts conveyed | 64 of 64 | 53 of 64 (83%) | 54 of 64 (84%) | 29 / 29 of 32 |
-| Clauses with no supporting fact | 0 | 0 | 0 | 2 minor / 2 minor |
-| Small stretches (facts joined into a cause, "all you hear") | 0 | 1 | 3 | |
-| Hidden facts leaked | 0 | 0 | 1 borderline | 0 / 0 |
-| Takes the observer's view | no | slightly | clearly | no / no |
-| Comprehension, sensible reader (of 10) | (run 1: 10) | 10 | 10 | 10 / not tested |
-| Words per description | 86-108 | 60-89 | 79-113 | 43-58 / 37-46 |
-| Cost / model time per description | 0 | $0.0008 / 4.6 s | $0.011 / 4.3 s | $0.0004 / $0.007 |
+| | Template 2 | Haiku 2 | Sonnet 2 | Opus 2 (run 2b) | (Run 1: Haiku / Sonnet) |
+|---|---|---|---|---|---|
+| Visible facts conveyed | 64 of 64 | 53 of 64 (83%) | 54 of 64 (84%) | 58 of 64 (91%) | 29 / 29 of 32 |
+| Clauses with no supporting fact | 0 | 0 | 0 | 0 | 2 minor / 2 minor |
+| Small stretches (facts joined into a cause, "all you hear") | 0 | 1 | 3 | 6 | |
+| Hidden facts leaked | 0 | 0 | 1 borderline | 1 borderline | 0 / 0 |
+| Takes the observer's view | no | slightly | clearly | most clearly | no / no |
+| Comprehension, sensible reader (of 10) | (run 1: 10) | 10 | 10 | not tested | 10 / not tested |
+| Words per description | 86-108 | 60-89 | 79-113 | 62-98 | 43-58 / 37-46 |
+| Cost / model time per description | 0 | $0.0008 / 4.6 s | $0.011 / 4.3 s | $0.022 / 4.7 s | $0.0004 / $0.007 |
 
 **Findings.**
 - **The clause rule worked.** Neither model wrote a clause without a supporting fact (the checker agreed); run 1's "beyond the
@@ -108,3 +108,25 @@ with a stake in what they see, and it invented nothing. With Haiku, only a littl
 already full, and it costs Sonnet prices (about $0.01 a description, 15 times Haiku). The run-1 recommendation stands for the
 engine: templates for the facts. The observer's eye, if wanted, belongs in a Sonnet narrator, tested on longer runs against an
 agent's choices, with a check that knows which beliefs an observer may form.
+
+### Run 2b: Opus
+
+`claude-opus-5-5` on the same five states with exactly the run-2 prompt, one description each (5 calls, $0.11,
+[raw_outputs2b.json](10_descriptions_test/raw_outputs2b.json)); judged the same way, shown as the Opus column above.
+
+| State | Sonnet, run 2 | Opus, run 2b |
+|---|---|---|
+| House, Brenna the builder | ... and you know that's work for someone before the winter ... remembering he paid you late last time. | ... the ridge beam over the miller's door, rotten at one end, and the whole worn two-storey frame on its stone: work, this late in autumn, if he pays sooner than last time. But his chimney is cold while the rest of the lane smells of woodsmoke. |
+| Old Wren, grieving, worried about the stores | The geese are going south too early, and you know what that means before you let yourself say it. ... and you count it all against the stores. | It is only early autumn and only morning, yet to your reading every sign points to a winter come soon, the first without him, and you think of whether the stores will last it. |
+| Kell the hunter, his own ground | The deer prints are fresh in the soft mud ... But one set of big boot prints goes in past a hazel twig snapped at head height, and none come back out of your wood. | Someone's gone into your wood ahead of you: one set of big boot prints pressed into the soft mud since last night's rain, a hazel twig snapped at head height where they entered, and no prints coming back out. But the deer prints are fresher still and lead the other way ... |
+
+- **Most facts and the strongest view.** Opus conveyed 58 of 64 facts (Haiku 53, Sonnet 54) and led with what each person cares
+  about: the intruder for the hunter, the damage for the farmer ("Your barley lies trampled flat"), "as hungry as you are" for the
+  sister, "the first without him" for the widow.
+- **No clause without a fact, but more stretches (6 against Sonnet's 3).** The one that matters: "the deer prints are fresher still"
+  orders two events the facts do not order, which is exactly what a hunter would act on. Others: "the north wind has frost in it",
+  the valley smoke made the source of the woodsmoke smell, dung "pressed into" the crop, "there's only the drip".
+- **The same borderline leak, more plainly.** "Every sign points to a winter come soon" is nearer the hidden hard winter than
+  Sonnet's hint, though still a belief the almanac keeper could fairly form. One description ran to 4 sentences.
+- **Twice Sonnet's cost** ($0.022 a description, 4.7 s model time). For the observer's eye Sonnet is enough; Opus reads best but
+  takes more liberties, so a narrator at any strength needs a check for joined facts, not only for new ones.
