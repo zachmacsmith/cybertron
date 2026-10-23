@@ -70,6 +70,11 @@ with about 30% less work per person than a household alone.
 4. How lots, plots and pasture share a node's land (asked of 37.4 on the board, 23 Oct).
 5. Sowing per unit of seed, and broadcasting against dibbling.
 
+## Decided since (23 Oct)
+
+- D2-53: crops from the sowing day, the cold as the limit (proposal 2 above). D2-54: sowing work per unit of seed; broadcast or
+  dibble (proposal 5). The plot unit (3) is being rescaled in 02n; the garden (4) is still open.
+
 ## History
 
 - 22 Oct: 02d proposed technique ladders with foraging as the degenerate rung (Zach: foraging 1-2 actions for 1-3 food, H-6).
@@ -86,6 +91,8 @@ with about 30% less work per person than a household alone.
 - 23 Oct: 37.4's D4-23 answered the plot questions (plots whole, holdings divided, viability as land per mouth); 37.2 proposed
   adopting its plot unit with the hand method as reference.
 - 23 Oct: Zach asked that sowing take finite work per agent, improved by tools; proposal 5 added.
+
+- 23 Oct: Zach moved crops and the cold (D2-53) and sowing per seed (D2-54) from proposal to spec.
 
 ## Sources
 

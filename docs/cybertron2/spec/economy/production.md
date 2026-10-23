@@ -4,7 +4,7 @@
 
 Food comes from foraging (the bottom rung) and from fields. Farming has a short minimum (sow, reap) and optional stages that cost
 work and raise the return. Crops ripen into a harvest window. Seed is kept back. Cattle pull the plough and dung the soil. Tools are
-a small set chosen by what each depends on. The rest of production (recipes, the production shapes, skill by practice, workshops)
+a small set chosen by what each depends on. The rest of production (recipes, the production shapes, workshops)
 is in proposals.
 
 ## Decided
@@ -22,6 +22,8 @@ is in proposals.
 - D2-19: first worlds have a short metal ladder.
 - D2-23: the tool set below.
 - D2-43: the basic techniques and the ten trades below.
+- D2-52: skill by practice on all work. D2-53: crops from the sowing day; the cold kills what is not hardy. D2-54: sowing work per
+  unit of seed; broadcast or dibble.
 - D2-44: bread. D2-46: weapons wear, with a small chance of breaking. D2-47: cheese. D2-48: specialised tools.
 
 ## Mechanics
@@ -37,6 +39,11 @@ is in proposals.
 | choose the next crop, graze the fallow | no | restores fertility; varying the crop lowers the chance it fails | seed of another crop; cattle to graze |
 | reap | yes | the crop becomes grain carried by the reaper (D4-23: a crop belongs to nobody until reaped) | the crop ripe and within its window |
 
+- **Crops** (D2-53): grain, winter grain (hardy), legumes (restore the soil; less food), a garden (fast; spoils) and hay (fodder).
+  A crop ripens a fixed number of days after the day it is sown; one still growing when winter comes dies unless it is hardy.
+  The same crop sown twice running on a plot is likelier to fail.
+- **Sowing** (D2-54) costs work per unit of seed, so a day sows only so much. **Broadcasting** is fast and wastes seed;
+  **dibbling** takes about three times the work and about 40% less seed for the same harvest.
 - Each plot has a **fertility** that multiplies its harvest; cropping lowers it; the optional stages restore it.
 - A crop that is ripe and not reaped within the window loses part of what is left each day.
 - A harvest returns several times the seed; keeping seed for the next sowing is the holder's choice (D2-17), and a household that
@@ -85,6 +92,14 @@ Tools and weapons wear by use on one scale: each method has a wear factor (reapi
 use, so a blade lasts about 10 fights and a crude weapon about 3, with a small chance of breaking in any fight. A smith can mend a
 worn metal tool or blade.
 
+### Skill by practice (D2-52)
+
+- Every kind of work, basic work included, has a skill per agent that rises with practice (days spent at that work) and fades
+  slowly without it; skill multiplies the yield of gathering and farming and cuts the work of making.
+- An ordinary adult is about x1.0 at basic work, a master about x1.5. A learned trade (knowledge.md's levels: once "known") runs
+  from about x0.5 for a novice to x2.0 for a master. Youth learn faster (D4-19). Seeded specialists start skilled (D4-21).
+- Agents see their skill as a word (novice, competent, skilled, master), never a number.
+
 ### Basic techniques and trades (D2-43)
 
 - **Basic** (everyone knows): forage, hunt, fell, cut hay, sow, hoe, weed, reap, manure, herd, slaughter; make a crude tool, a crude
@@ -105,6 +120,9 @@ Per plot: fertility, the crop growing (kind, day sown), the last crop grown. Too
 |---|---|---|
 | seed a plot, harvest per seed, work per stage, fertility changes, the weeding curve | 02l model's values as the starting point | calibrate |
 | the harvest window and the loss a day after it | 2 days; a quarter of what is left a day | calibrate |
+| crop cycles (days from sowing to ripe) | about a quarter of the year for grain, a third for winter grain, a sixth for legumes, a tenth for a garden | calibrate |
+| sowing work and seed: broadcast against dibbling | dibbling about 3x the work, about 0.6x the seed | calibrate |
+| the skill curve: practice to mastery; fading | 02c §5 (multiplier 0.5 + 1.5(1 - exp(-p/tau))); tau so mastery takes about a season of full-time work | calibrate |
 | tools' effect, wear and cost | 02j model | calibrate |
 | the share of work food takes | binding, at most 30% (scenario_design) | calibrate |
 
@@ -115,8 +133,6 @@ the soil in words ("tired", "good"), their seed in store, their tools and whethe
 
 ## Open
 
-- Crops, their cycles, and growth from the day sown: proposals/farming.md.
-- Sowing work per unit of seed; broadcasting or dibbling: proposals/farming.md.
 - The plot unit against D4-23's definition: board, 23 Oct.
 - Recipes, production shapes, skills, workshops: proposals/resources_and_goods.md, proposals/economy_plan.md.
 
@@ -125,4 +141,4 @@ the soil in words ("tired", "good"), their seed in store, their tools and whethe
 [02l_farming.md](../../../review/37_growth/02l_farming.md), [02j_end_uses.md](../../../review/37_growth/02j_end_uses.md),
 [02d_ladders.md](../../../review/37_growth/02d_ladders.md); proposals/farming.md, proposals/tools.md.
 
-*Current as of 23 Oct 2026: H-6, D2-11 to D2-19, D2-23, D2-42, D2-43, D2-44, D2-46, D2-47, D2-48.*
+*Current as of 23 Oct 2026: H-6, D2-11 to D2-19, D2-23, D2-42, D2-43, D2-44, D2-46, D2-47, D2-48, D2-52, D2-53, D2-54.*
