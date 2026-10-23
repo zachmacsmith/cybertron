@@ -38,6 +38,43 @@ Moving within a node stays free; the layout is for **where things are relative t
 | **Attention** | every target is a thing in a state at a place: attend to a parcel (and whatever is on it), a feature, a structure or room, or a movable (a person, a herd, a cart), or the sky |
 | **Claims** | a claim is on a parcel, a plot, a lot or a structure (world/holding.md) |
 
+## Cover types: what a parcel is, as data
+
+Each parcel has a **cover type**, and a cover type is a data row (D4-24: the world grows by data) that says everything about that
+kind of land:
+
+| Attribute | Meaning |
+|---|---|
+| **what can be done there** | the gathering and working methods it allows (forage, hunt, fell, graze, sow and reap, quarry, mine, fish, draw water) and the techniques they need |
+| **what it gives** | its resources and how they come back (D4-7): plants and game renewable, timber slow, stone and ore finite, fish periodic |
+| **building** | whether it can be built on, how many lots per unit of size, and what it costs to build there (rock is a good footing; marsh needs piles; a slope needs terracing) |
+| **risks** | the incidents it is prone to and their base rates: flood (water, meadow, marsh), fire (forest, built ground, dry pasture), rockfall (quarry, rock), wolves (forest edge), fever (marsh) |
+| **how it changes** | what it can become and how (fell and clear forest to field; drain marsh to field; abandoned field to scrub, then forest; a worked-out quarry to waste) |
+| **what it gives off** | its fact rules and sense entries (seeing.md §3b): the wood's birdsong and the smell of leaf mould, the meadow's insects, the quarry's dust |
+
+**First rows** (to be filled with numbers):
+
+| Cover | Can be done | Builds on | Risks | Becomes |
+|---|---|---|---|---|
+| forest | forage, hunt, fell | no (clear first) | fire, wolves | field (felled and cleared), scrub |
+| field | sow, tend, reap, glean | yes, at the cost of its plots | flood if low | scrub (abandoned), built ground |
+| pasture | graze, gather | yes | drought, fire when dry | field (ploughed), scrub |
+| meadow (by water) | mow hay, graze | poorly (floods) | flood | field |
+| water (brook, river) | fish, draw water, power a mill | a mill on a feature, a bridge | flood, ice | |
+| marsh | gather reeds, fowl, fish | piles only | fever, flood | field (drained) |
+| rock and quarry | quarry stone; mine a seam | yes, good footing | rockfall | waste when worked out |
+| built ground | live, work, store, meet | yes (its lots) | fire | |
+| scrub and waste | forage a little | yes | fire | forest (left), field (cleared) |
+
+**The node's land kind (38.04 §2) is a distribution over cover types and features.** A river valley draws mostly field, meadow and
+water with a little forest; hills draw rock, pasture and scrub, and perhaps a seam; a woodland draws mostly forest. A hand-made
+world sets its parcels directly.
+
+**Land is fixed per node, so uses compete.** A quarry takes parcels that could be pasture; houses take field; clearing forest
+gives fields and loses the game and timber; draining the marsh gives the best fields and loses the fowl and reeds. Who decides what a
+parcel becomes is a question of claims and institutions (world/holding.md), which is where land disputes and commons rules come
+from.
+
 ## People are not placed on parcels (Zach, 23 Oct)
 
 An agent is at the node, not on a parcel. Its **actions** say where its day was spent (sowing the Long Field, felling in Alder
@@ -80,6 +117,11 @@ None of it costs a model call.
 - 23 Oct: Zach: agents should be able to attend to everything in general (less subtle things spread around, ambience); senses not
   restricted much (sounds across most of the node); no tracking of agents' parcels, since actions say where they happen. Added:
   people are not placed; senses broad, adjacency only for quiet sounds; "the place in general" as an attention target.
+
+- 23 Oct: Zach: parcels should say what can be done there, whether they can be built on, and their risks; a node's environmental
+  type sets the chances of each kind of parcel; a quarry takes parcels that could hold buildings. Added cover types as data rows
+  (methods, resources, building, risks, changes, what they give off), first rows, the node's land kind as a distribution over
+  covers, and competing land uses.
 
 ## Sources
 
