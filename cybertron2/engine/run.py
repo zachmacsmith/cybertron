@@ -203,6 +203,17 @@ def _mentions(w, here, speaker, hearers, text):
                     PC.store(w, h)["places"][nid] = {**{k: v for k, v in pl.items() if k != "seen"}, "seen": None, "days": None,
                                                      "told": speaker}
                     PC.store(w, h)["today"]["heard"].append(f"(You had not heard of {pl['name']} before: {speaker} knows the way there.)")
+    from cybertron2.engine import layout as LY                                 # a hidden way told (D2-98: the finder chooses whom)
+    if any(x in low for x in (" way", " path", " trail", " track")) and here.node is not None:
+        for key in (w.s["mind"][speaker].get("ways") or {}):
+            rid, node = key.rsplit("@", 1)
+            if node != here.node:
+                continue
+            end = w.s["roads"][rid]["ends"][node]
+            if any(w.s["parcels"][p]["name"].lower().removeprefix("the ") in low for p in end.get("parcels") or []):
+                for h in hearers:
+                    if LY.learn_way(w, h, rid, node, f"told by {speaker}"):
+                        PC.store(w, h)["today"]["heard"].append(f"(You did not know of a way out from there: {speaker} has found one.)")
     for tech in KN.mentions(text):
         if KN.basic(tech):
             continue
@@ -256,8 +267,10 @@ def dawn(w) -> None:
             RD.arrived(w, name, t)                                          # its notices on the way, remembered (D2-97)
             w.apply("arrive", t["to"], person=name)
             w.s["people"][name]["arrived"] = w.d
-            from cybertron2.engine import herds as HD
+            from cybertron2.engine import herds as HD, layout as LY
             HD.arrive_with(w, name, t["to"])                                # beasts it accompanied come in with it (D2-127)
+            LY.learn_way(w, name, t["road"], t["to"], "came")                # one knows the end one came in by (D2-90)
+            LY.wear_way(w, t["road"], t["to"])
             w.event(t["to"], "arrive", f"{name} arrived from {w.s['nodes'][t['from']]['name']}", actor=name, salience=0.7, tags=["travel"], dawn=True)
     for sg in w.spec.get("signs") or []:
         if int(sg["day"]) - 1 == w.d:

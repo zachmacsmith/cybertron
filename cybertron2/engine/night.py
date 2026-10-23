@@ -158,6 +158,8 @@ def departures(w, today) -> list:
                 a["home_seen"] = {"day": w.d, "building": h, "stock": dict(w.goods(s["buildings"][h]["stock"])),
                                   "condition": s["buildings"][h]["condition"], "door": s["buildings"][h]["door"]}
             w.apply("depart", here, person=name, road=road, to=to)
+            from cybertron2.engine import layout as LY
+            LY.wear_way(w, road, here)                                       # a hidden end worn by use (D2-92)
             a["transit"]["choices"] = dict((today.get("travel_choices") or {}).get(name) or {})
             out.append({"agent": name, "from": here, "to": to})
     today["_departed"] = out

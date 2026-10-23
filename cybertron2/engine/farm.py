@@ -543,6 +543,8 @@ def night(w) -> dict:
     _crops(w, rec)
     from cybertron2.engine import herds as HD
     HD.night(w, rec)                                                         # fences, splitting, wandering, roads (D2-117 to D2-131)
+    from cybertron2.engine import layout as LY
+    LY.regrow(w)                                                             # hidden ways grow back unused (D2-92)
     _herds(w, rec)
     return rec
 

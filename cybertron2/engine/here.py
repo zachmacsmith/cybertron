@@ -56,8 +56,9 @@ class Here:
     def roads(self) -> list:
         """[(node id, name, days, track)] from here; a place one does not know is named by its way (D4-47)."""
         out = []
-        for r in self._w.s["roads"].values():
-            if self.node in (r["a"], r["b"]):
+        from cybertron2.engine import layout as LY
+        for rid, r in self._w.s["roads"].items():
+            if self.node in (r["a"], r["b"]) and LY.way_known(self._w, self.name, rid, self.node):   # a hidden end: only if known (D2-90)
                 other = r["b"] if r["a"] == self.node else r["a"]
                 nm = self._w.s["nodes"][other]["name"] if self._w.knows_place(self.name, other) else r.get("way", "an unexplored way")
                 out.append((other, nm, r["days"], r.get("track", False)))

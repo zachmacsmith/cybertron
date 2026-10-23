@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from collections import deque
 
-from cybertron2.engine.data import COVERS, LAYOUT
+from cybertron2.engine.data import COVERS, LAYOUT, ROADS
 
 SIDES = ("centre", "north", "east", "south", "west")
 
@@ -132,6 +132,77 @@ def build_ends(w, extra, a, b) -> dict:
     return out
 
 
+# ---------------------------------------------------------------------- hidden ways (D2-90, D2-92, D2-98)
+def opened(w, pid) -> bool:
+    """Whether a parcel's land shows a way: its cover lets sight through (more than `hides`), or its wood is felled."""
+    from cybertron2.engine import environment as EV
+    par = w.s["parcels"][pid]
+    return float(COVERS.get(par["cover"], {}).get("sight", 1.0)) > float(ROADS["hidden"]["hides"]) or EV.felled(w, pid)
+
+
+def way_own(w, rid, node) -> float:
+    """A hidden end's own conspicuousness: a game trail, worn by each party passing; shown at once where the land is opened."""
+    end = (w.s["roads"][rid].get("ends") or {}).get(node) or {}
+    hd = ROADS["hidden"]
+    if any(opened(w, p) for p in end.get("parcels") or []):
+        return float(hd["exposed"])
+    return min(float(hd["exposed"]), float(hd["own"]) + float(end.get("worn", 0.0)))
+
+
+def way_known(w, name, rid, node) -> bool:
+    """A road end is known to everyone at the node unless hidden; a hidden one only to those who found it, came by it, or were
+    told; one worn to a path is known to all (one only shown by felling must still be noticed)."""
+    end = (w.s["roads"][rid].get("ends") or {}).get(node) or {}
+    hd = ROADS["hidden"]
+    if not end.get("hidden") or float(hd["own"]) + float(end.get("worn", 0.0)) >= float(hd["exposed"]) - 1e-9:
+        return True                                                            # worn to a path by use: everyone knows it
+    return f"{rid}@{node}" in ((w.s["mind"].get(name) or {}).get("ways") or {})
+
+
+def learn_way(w, name, rid, node, how) -> bool:
+    ways = w.s["mind"][name].setdefault("ways", {})
+    key = f"{rid}@{node}"
+    if key in ways:
+        return False
+    ways[key] = {"day": w.d, "how": how}
+    return True
+
+
+def wear_way(w, rid, node) -> None:
+    """A party passing wears a hidden end toward a path (D2-92)."""
+    end = (w.s["roads"][rid].get("ends") or {}).get(node)
+    if end and end.get("hidden"):
+        end["worn"] = round(float(end.get("worn", 0.0)) + float(ROADS["hidden"]["wear"]), 4)
+        end["used"] = w.d
+
+
+def regrow(w) -> None:
+    """Unused, a worn hidden end grows back toward a game trail over about a season where the land regrows (D2-92)."""
+    k = 1.0 / max(1, int(w.season_len))
+    for rid, r in w.s["roads"].items():
+        for node, end in (r.get("ends") or {}).items():
+            if end.get("hidden") and float(end.get("worn", 0.0)) > 0 and end.get("used") != w.d and any(
+                    w.s["parcels"][p]["cover"] in ROADS["hidden"]["regrows"] for p in end.get("parcels") or []):
+                end["worn"] = round(max(0.0, float(end["worn"]) - k * float(end["worn"]) * 3), 4)
+
+
+def find_ways(w, name, rng, target=None) -> list:
+    """The noticing rule on the hidden ends at one's node (D2-98): found, one learns that a way leaves there, as an unexplored way."""
+    from cybertron2.engine import things as TH
+    node = w.at(name)
+    out = []
+    for rid, other, end in road_ends(w, node):
+        if not end.get("hidden") or way_known(w, name, rid, node):
+            continue
+        own = way_own(w, rid, node)
+        for pid in end.get("parcels") or []:
+            if rng.random() < TH.spot_chance(w, name, node, pid, own, target):
+                learn_way(w, name, rid, node, "found")
+                out.append((rid, other, pid, end))
+                break
+    return out
+
+
 # ---------------------------------------------------------------------- words (D2-116)
 def side_words(s) -> str:
     return "in the middle" if s == "centre" else f"on the {s} side"
@@ -155,7 +226,7 @@ def layout_lines(w, name) -> list:
         out.append(f"{names[pid]} ({what})" + (" lies " + ", ".join(where) if where else "")
                    + (f"; next to {_and(nb)}" if nb else "; set apart from the rest"))
     for rid, other, end in road_ends(w, node):
-        if end.get("hidden") and rid not in ((w.s["mind"].get(name) or {}).get("ways") or {}):
+        if not way_known(w, name, rid, node):
             continue
         where = _and([names.get(p, p) for p in end["parcels"]]) or "the village"
         to = w.s["nodes"][other]["name"] if w.knows_place(name, other) else w.s["roads"][rid].get("way", "an unexplored way")
@@ -185,6 +256,11 @@ def overview(w, node) -> list:
             cands.append((1.0 + 0.2 * p["size"] + (1.0 if stage == "ripe" else 0.0), f"{c.get('kind', 'a crop')} {stage} on {p['name']}"))
         elif p["cover"] in ("forest", "water", "rock") and p["size"] >= 2:
             cands.append((0.8 + 0.1 * p["size"], f"{COVERS[p['cover']]['words']}: {p['name']}"))
+        elif p["cover"] != "built":
+            cands.append((0.3 + 0.05 * p["size"], f"{COVERS.get(p['cover'], {}).get('words', p['cover'])}: {p['name']}"))
+    people = [n for n in w.present(node) if w.s["people"][n]["stage"] != "child"]
+    if people:
+        cands.append((0.9, f"{_count(len(people), 'person')} about the place" if len(people) > 1 else "one person about the place"))
     for hid, h in w.s["herds"].items():
         if h["node"] == node and h.get("parcel") and int(h.get("count", 0)) > 0:
             cands.append((1.2 + 0.05 * int(h["count"]), f"{_count(int(h['count']), h.get('kind', 'cattle'))} on {w.s['parcels'][h['parcel']]['name']}"))
@@ -194,10 +270,16 @@ def overview(w, node) -> list:
     return lines[:hi] if len(lines) >= lo else lines
 
 
+NUMBERS = ("no", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve")
+
+
 def _count(n, word) -> str:
+    num = NUMBERS[n] if 0 <= n < len(NUMBERS) else str(n)
     if word == "cattle":
-        return f"{n} head of cattle"
-    return f"{n} {word}{'s' if n != 1 and not word.endswith('s') else ''}"
+        return f"{num} head of cattle"
+    if word == "person":
+        return f"{num} {'person' if n == 1 else 'people'}"
+    return f"{num} {word}{'s' if n != 1 and not word.endswith('s') else ''}"
 
 
 def _and(xs) -> str:

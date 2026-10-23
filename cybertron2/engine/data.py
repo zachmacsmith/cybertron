@@ -375,6 +375,7 @@ ENV = {
     "crop_high": 0.5,                                               # a grain crop standing high: that field's sight
     "crop_high_from": 0.6,                                          # ... from this share of its growing time until reaped
     "smoke": 0.7,                                                   # a parcel with smoke that day
+    "felled": {"below": 0.3, "sight": 0.8},                         # a wood felled below this share of its timber is open ground
     "smoke_tags": ["smithing"], "smoke_techs": ["charcoal", "smelt", "dry meat"],
     "mask": {"very": 0.3, "loud": 0.6},                             # D2-100: quieter sounds near something very loud, or loud
     "loud_kinds": {"fight": "very", "raid": "very", "threat": "very"},
@@ -481,6 +482,10 @@ ROADS = {
     "waves": 3,                             # a meeting's conversation (D2-110)
     "notices": 5,                           # "On the way" lines on arrival (D2-97)
     "trace_days": {"tracks": 3, "ashes": 10, "ruts": 60},   # D2-88
+    # hidden ways (D2-90, D2-92, D2-98): a hidden end shows only while its parcel's sight is this or less; its own conspicuousness, and
+    # how much each party passing wears it; open land (or a wood felled below `felled` of its standing timber) shows it at `exposed`;
+    # unused it grows back over about a season in forest or scrub; worn to `exposed` it is a path everyone at the node knows
+    "hidden": {"hides": 0.5, "own": 0.03, "wear": 0.05, "exposed": 0.8, "regrows": ["forest", "scrub"]},
     "meet_landmark": 3.0,                   # crossing parties meet three times likelier on a stretch with a landmark (D2-121)
     "terrain": "farmland",                  # every road's terrain unless its world gives one (D2-122: a farm track)
 }

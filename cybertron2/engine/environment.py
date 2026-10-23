@@ -117,6 +117,8 @@ def visibility(w, node, parcel=None, sense="sight", night=False, moon=False, qui
         return 1.0                                                          # smell: its own salience, no multipliers (D2-101)
     cov = cover or (w.s["parcels"][parcel]["cover"] if parcel else "built")
     base = float((COVERS.get(cov) or TERRAIN.get(cov) or {}).get(sense, 1.0))
+    if sense == "sight" and parcel and not cover and felled(w, parcel):
+        base = max(base, float(ENV["felled"]["sight"]))
     wx = WEATHER[weather(w)]
     v = base * float(wx[sense])
     if sense == "sight" and parcel and not cover:
@@ -131,6 +133,12 @@ def visibility(w, node, parcel=None, sense="sight", night=False, moon=False, qui
         if m:
             v *= float(ENV["mask"][m])
     return round(v, 4)
+
+
+def felled(w, parcel) -> bool:
+    """A wood cut down below a share of its timber is open ground: one sees through it (D2-92)."""
+    wood = w.s["parcels"][parcel]["res"].get("wood")
+    return bool(wood and wood["K"] > 0 and wood["S"] / wood["K"] < float(ENV["felled"]["below"]))
 
 
 def ground_factor(w) -> float:

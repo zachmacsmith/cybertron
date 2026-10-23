@@ -219,6 +219,20 @@ FENCE = [
 ]
 
 
+# A hidden way found (D2-98; world/roads.md): the finder learns only that a way leaves there (D4-47). Context in perceive.evening:
+# x.nm (the parcel), x.side, x.opened (the land felled or cleared), x.worn (others have used it), x.way (the road's own words).
+WAY = [
+    dict(when=lambda x: not x.opened and not x.worn, sense="sight", p=0.6, tags=["travel"],
+         text=lambda x: f"a game trail leaves {x.nm} {x.side}, under the trees, going somewhere: {x.way}"),
+    dict(when=lambda x: not x.opened and not x.worn, sense="sight", p=0.4, tags=["travel"],
+         text=lambda x: f"broken twigs and an old blaze on a trunk at the edge of {x.nm}: a way out {x.side} that nobody here uses"),
+    dict(when=lambda x: not x.opened and x.worn, sense="sight", p=0.8, tags=["travel"],
+         text=lambda x: f"a path trodden through {x.nm} {x.side}, fresh footprints on it: someone has been using a way out of here"),
+    dict(when=lambda x: x.opened, sense="sight", p=1.0, tags=["travel"],
+         text=lambda x: f"with the cover gone from {x.nm}, an old way shows plain, leading off {x.side}: {x.way}"),
+]
+
+
 # ---------------------------------------------------------------------- the sky and the season
 SKY = [
     dict(when=lambda x: x.cold and x.first_cold, sense="touch", p=0.85, tags=["season", "shelter", "farming"],

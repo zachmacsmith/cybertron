@@ -11,6 +11,8 @@ places {node: {name, days, text, seen}}.
 """
 from __future__ import annotations
 
+from types import SimpleNamespace
+
 from cybertron2.engine import knowledge as KN, signs as SG
 from cybertron2.engine.data import COVERS, EDIBLE, FITTINGS, ITEMS, RESOURCES, TECHNIQUES
 from cybertron2.engine.here import Here, Mind
@@ -324,6 +326,11 @@ def evening(w, attend: dict, today: dict) -> dict:
         cand.sort(key=lambda x: -x[0])
         notice = [f for _, f in cand[:NOTICE_MAX + (2 if place else 0)]]
         t["notice"] = list(dict.fromkeys(f["text"] for f in notice))
+        from cybertron2.engine import layout as LY                             # hidden ways, by the noticing rule (D2-98)
+        for rid, other, pid, end in LY.find_ways(w, name, rng, tgt_raw):
+            x = SimpleNamespace(nm=w.s["parcels"][pid]["name"], side=LY.side_words(end["side"]), opened=LY.opened(w, pid),
+                                worn=float(end.get("worn", 0.0)) >= 0.1, way=w.s["roads"][rid].get("way", "an unexplored way"))
+            t["notice"] += SG.roll(SG.WAY, x, rng, least=True)[:1]
         for f in notice:                                                       # one of the holding household shuts an open gate (D2-132)
             if f.get("gate") and _shut_gate(w, name, f["gate"]):
                 t["notice"].append(f"you shut the gate of {w.s['parcels'][f['gate']]['name']}")

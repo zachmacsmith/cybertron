@@ -326,3 +326,61 @@ def test_twenty_head_split_about_a_tenth_a_day_with_one_drover_almost_never_with
         w.s["herds"] = {"cattle": dict(h)}
         splits += bool(HD.split(w, "cattle", {"herds": []}, drove=1))
     assert 0.06 < splits / 300 < 0.15
+
+
+# ---------------------------------------------------------------------- C7: hidden ways (D2-90, D2-92, D2-98)
+def test_a_hidden_way_in_a_wood_is_found_by_hunters_over_weeks_and_felling_the_wood_exposes_it():
+    from cybertron2.engine import layout as LY
+    roads = [["millbrook", "ashwood", 1, {"ends": {"millbrook": {"parcels": ["alder_copse"], "side": "north", "hidden": True}}}]]
+    w = world(roads=roads, weather={d: "clear" for d in range(1, 400)})
+    rid = "road:millbrook-ashwood"
+    hunters = ["Edric", "Hamo", "Odo"]
+    assert all(not any(r[0] == "ashwood" for r in Here(w, n).roads()) for n in hunters)   # not in "Roads from here" (D2-90)
+    first = None
+    for d in range(1, 300):
+        w.s["day"] = d
+        w.s["events"] = [{"actor": n, "kind": "work", "day": d, "about": ["parcel:alder_copse"], "tech": "hunt"} for n in hunters]
+        found = [n for n in hunters if LY.find_ways(w, n, w.rng("test-way", d, n))]
+        if found:
+            first = d
+            break
+    assert first is not None and first > 5                                         # weeks, not days (own 0.03 x the wood's sight)
+    assert any(r[0] == "ashwood" for r in Here(w, found[0]).roads())
+    assert not any(r[0] == "ashwood" for r in Here(w, "Sibyl").roads())             # the others do not know it
+    w2 = world(roads=roads, weather={d: "clear" for d in range(1, 400)})
+    w2.s["parcels"]["alder_copse"]["res"]["wood"]["S"] = 0.1 * w2.s["parcels"]["alder_copse"]["res"]["wood"]["K"]
+    assert LY.way_own(w2, rid, "millbrook") == 0.8 and LY.opened(w2, "alder_copse")
+    days = []
+    for n in hunters:
+        for d in range(1, 30):
+            w2.s["day"] = d
+            w2.s["events"] = [{"actor": n, "kind": "work", "day": d, "about": ["parcel:alder_copse"], "tech": "fell"}]
+            if LY.find_ways(w2, n, w2.rng("test-way2", d, n)):
+                days.append(d)
+                break
+    assert days and max(days) <= 6                                                 # felled, it shows to anyone working there
+
+
+def test_a_hidden_way_is_worn_by_use_and_told():
+    from cybertron2.engine import layout as LY
+    roads = [["millbrook", "ashwood", 1, {"ends": {"millbrook": {"parcels": ["alder_copse"], "hidden": True}}}]]
+    w = world(roads=roads)
+    rid = "road:millbrook-ashwood"
+    base = LY.way_own(w, rid, "millbrook")
+    LY.wear_way(w, rid, "millbrook")
+    assert abs(LY.way_own(w, rid, "millbrook") - base - 0.05) < 1e-9
+    LY.learn_way(w, "Edric", rid, "millbrook", "found")
+    R._mentions(w, Here(w, "Edric"), "Edric", ["Sibyl"], "There is a path out through Alder Copse, north.")
+    assert LY.way_known(w, "Sibyl", rid, "millbrook")
+
+
+def test_an_arriving_traveller_gets_an_overview_in_its_turn():
+    from cybertron2.engine import prompt as PR
+    w = world(roads=[["millbrook", "ashwood", 1, {"terrain": "plain"}]])
+    depart(w, "Edric", "ashwood")
+    N.departures(w, w.s["today"])
+    next_day(w)
+    assert w.at("Edric") == "ashwood"
+    text = PR.turn_prompt(Here(w, "Edric"), Mind(w, "Edric"))
+    line = next(x for x in text.splitlines() if "Arriving, what you see first" in x or "Arriving, what you see first" in x)
+    assert 3 <= line.count(";") + 1 <= 5                                          # D2-116
