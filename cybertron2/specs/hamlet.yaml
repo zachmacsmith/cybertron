@@ -1,0 +1,64 @@
+# World 1 of the ladder (review 38.21): one hamlet, two farms at different levels, across a winter. About 8 people.
+# What it tests: the farming stages (D4-38), soil worn and restored (D4-39), crops and the cold (D2-53), sowing and dibbling (D2-54),
+# cattle by role, grazing, hay and breeding (D2-63, D4-41 to D4-45), field works on wet ground (D2-66), skill by practice (D2-52),
+# grain at a lit fire and the hand mill (D2-60, D2-61), and the signs of each (D4-48).
+#   The Thornes farm well (level 2): an ox team with a plough and harness, a bull, cows in milk, a grain/beans/fallow rotation,
+#     a field rested last year, and the hay meadow. They know ploughing and milking.
+#   The Ashbys farm with the hoe (level 1) on tired soil, and hold the Low Field, wet ground nobody has drained; old Ashby knows how
+#     to lay out ditches, the Thornes do not. They have no beasts.
+# Leverage (scenario_design.md §1): the Thornes hold the team, the bull and the hay; the Ashbys hold the wet field and the knowledge
+# to drain it, and the wood. Food binds through the winter: what is not in store by the frost is not there.
+name: hamlet
+seed: 31
+days: 16
+calendar: {season: summer, day: 3, season_days: 4}
+cold_days: []
+nodes:
+  hollow:
+    name: Hollow
+    parcels:
+      h_green: {name: the Green, cover: built, size: 1, text: "two farmhouses and a byre round a green", adj: [upper_field, common]}
+      upper_field: {name: Upper Field, cover: field, size: 2, text: "the Ashbys' barley on the slope", adj: [low_field],
+                    fertility: 0.7, state: {crop: {kind: barley, left: 40, ripe_day: 1}, last_crop: grain}}
+      low_field: {name: Low Field, cover: field, size: 2, ground: wet, text: "flat ground by the beck, rushes in the corners",
+                  adj: [beck], state: {last_crop: grain}}
+      long_acre: {name: Long Acre, cover: field, size: 2, text: "the Thornes' barley, ploughed and dunged", adj: [bean_close],
+                  fertility: 1.0, state: {crop: {kind: barley, left: 90, ripe_day: 2, broken: 2}, last_crop: legumes}}
+      bean_close: {name: Bean Close, cover: field, size: 1, text: "beans in flower", adj: [rest_field],
+                   state: {crop: {kind: beans, left: 22, ripe_day: 3}, last_crop: grain}}
+      rest_field: {name: Rest Field, cover: field, size: 1, text: "rested last year, grazed by the cattle", adj: [common], fertility: 1.1}
+      common: {name: the Common, cover: pasture, size: 3, text: "rough grazing", adj: [hay_meadow]}
+      hay_meadow: {name: Hay Meadow, cover: meadow, size: 2, text: "the Thornes' hay meadow, the grass knee high", adj: [beck]}
+      beck: {name: the Beck, cover: water, size: 1, text: "a quick stream"}
+      hollow_wood: {name: Hollow Wood, cover: forest, size: 2, text: "oak and hazel", adj: [upper_field],
+                    state: {plants: {K: 8, S: 7, r: 0.3}, game: {K: 6, S: 5, r: 0.25}, wood: {K: 60, S: 55, r: 0.03}}}
+roads: []
+buildings:
+  thorne_house: {name: Thorne House, parcel: h_green, household: Thorne, structure: timber, size: 5,
+                 fittings: {beds: 5, hearth: 1, bins: 1, hand mill: 1}, stock: {grain: 14, beans: 6, timber: 8, hay: 12, straw: 6}}
+  byre: {name: the Byre, parcel: h_green, household: Thorne, structure: timber, size: 3, fittings: {bins: 1},
+         stock: {hay: 20, dung: 20, wooden plough: 1, harness: 2}}
+  ashby_house: {name: Ashby House, parcel: h_green, household: Ashby, structure: wattle, size: 5,
+                fittings: {beds: 5, hearth: 1, bins: 1, hand mill: 1}, stock: {grain: 10, timber: 6}}
+herds:
+  thorne_cattle: {name: the Thorne cattle, kind: cattle, parcel: common, cows: 3, oxen: 2, bulls: 1, in_milk: 2}
+claims:
+- {thing: [herd, thorne_cattle], claimant: Thorne, rights: all, grounds: seeded}
+- {thing: [parcel, long_acre], claimant: Thorne, rights: all, grounds: seeded}
+- {thing: [parcel, bean_close], claimant: Thorne, rights: all, grounds: seeded}
+- {thing: [parcel, rest_field], claimant: Thorne, rights: all, grounds: seeded}
+- {thing: [parcel, hay_meadow], claimant: Thorne, rights: all, grounds: seeded}
+- {thing: [parcel, upper_field], claimant: Ashby, rights: all, grounds: seeded}
+- {thing: [parcel, low_field], claimant: Ashby, rights: all, grounds: seeded}
+- {thing: [parcel, hollow_wood], claimant: Ashby, rights: all, grounds: seeded}
+customs:
+- {text: "In Hollow the beasts go on the Common in summer and are fed hay in the byre through the winter.", nodes: all}
+- {text: "Barley sown after the middle of autumn will not ripen before the frost; rye will stand the winter.", nodes: all}
+incidents: []
+signs: []
+lines:
+  Thorne: {acting: [3, 5], min_adults: 2, crafts: [plough, milk, sow, reap, hoe], tools: {crude tool: 2}, holdings: {coin: 8, rye: 6}}
+  Ashby: {acting: [3, 5], min_adults: 2, crafts: [ditch, hoe, reap], tools: {crude tool: 2}, holdings: {coin: 3}}
+bounds: {acting: [6, 9], children_max: 4, youths_min: 1, per_min: 3, per_spread: 3}
+sim: {start: -58, fertility: 0.15, leave: 0.6}
+cast: {head: claude-opus-5-5, opus_extra: 0, middle: claude-sonnet-5-5, sonnet_extra: 1, rest: claude-haiku-5-5, youth: claude-haiku-5-5}
