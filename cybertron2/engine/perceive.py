@@ -139,33 +139,10 @@ def facts(here) -> list:
         f.update(kw)
         out.append(f)
 
-    cal = here.calendar()
-    if here.cold():
-        first = not here.cold(here.day - 1) if here.day > 0 else True
-        add(["sky"], "a hard frost lay on everything this morning" if first else "it stayed bitterly cold", 0.85 if first else 0.5,
-            ["season", "shelter", "farming"], sense="touch")
-    else:
-        add(["sky"], {"spring": "a mild day, showers on the wind", "summer": "a warm, settled day", "autumn": "a cool day, the nights drawing in",
-                      "winter": "a grey, raw day"}[cal["season"]], 0.05, ["season"])
-    if cal["left"] == 0:
-        add(["sky"], f"the last days of {cal['season']}: the light is changing", 0.1, ["season"])
     for pid, p in here.parcels().items():
         nm, sub = p["name"], f"parcel:{pid}"
         for sense, tpl, sal in COVERS[p["cover"]]["ambient"]:
             add([sub], tpl.format(name=nm), sal, ["place"], sense, ambient=True)
-        for key, r in p["res"].items():
-            if key in ("grass", "dung"):                                         # pastures speak through signs.py
-                continue
-            words = RESOURCES[key]
-            if r["K"] > 0:
-                ratio = r["S"] / r["K"]
-                if ratio < 0.35 and words["low"]:
-                    add([sub], words["low"].format(name=nm), 0.2, ["food"] if key in ("plants", "game") else [key])
-                elif ratio > 0.75 and words["high"]:
-                    add([sub], words["high"].format(name=nm), 0.08, ["food"] if key in ("plants", "game") else [key],
-                        skill="hunting" if key == "game" else None)
-            elif words["high"]:
-                add([sub], words["high"].format(name=nm), 0.05, [key])
     from cybertron2.engine import signs as SG                                  # fields, pastures and herds: bundles of signs
     SG.facts(here, add)
     for cid, c in here.remains().items():

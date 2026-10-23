@@ -128,6 +128,53 @@ HERD = [
 ]
 
 
+# ---------------------------------------------------------------------- the sky and the season
+SKY = [
+    dict(when=lambda x: x.cold and x.first_cold, sense="touch", p=0.85, tags=["season", "shelter", "farming"],
+         text=lambda x: "a hard frost lay on everything this morning"),
+    dict(when=lambda x: x.cold and x.first_cold, sense="sight", p=0.4, tags=["season", "farming"],
+         text=lambda x: "ice on the water butts and the puddles"),
+    dict(when=lambda x: x.cold and not x.first_cold, sense="touch", p=0.5, tags=["season", "shelter"], text=lambda x: "it stayed bitterly cold"),
+    dict(when=lambda x: x.cold and not x.first_cold, sense="sight", p=0.2, tags=["season", "timber"],
+         text=lambda x: "everyone is burning more wood against the cold"),
+    dict(when=lambda x: not x.cold, sense="sight", p=0.05, tags=["season"],
+         text=lambda x: {"spring": "a mild day, showers on the wind", "summer": "a warm, settled day",
+                         "autumn": "a cool day, the nights drawing in", "winter": "a grey, raw day"}[x.season]),
+    dict(when=lambda x: x.left == 0, sense="sight", p=0.1, tags=["season"], text=lambda x: f"the last days of {x.season}: the light is changing"),
+    dict(when=lambda x: x.left <= 1 and x.season == "autumn", sense="touch", p=0.3, tags=["season", "farming"], knack="sow",
+         text=lambda x: "the nights are sharp: frost is not far off, and anything still growing will not see it through"),
+    dict(when=lambda x: x.left <= 1 and x.season == "winter", sense="sight", p=0.2, tags=["season", "farming"], knack="sow",
+         text=lambda x: "the days lengthen: soon the ground can be worked again"),
+]
+
+# ---------------------------------------------------------------------- what grows wild on a parcel (forage, game, wood, the seam)
+WILD = [
+    dict(when=lambda x: x.r("plants") is not None and x.r("plants") < 0.35, sense="sight", p=0.2, tags=["food"],
+         text=lambda x: f"{x.nm} has been picked over: little wild food left"),
+    dict(when=lambda x: x.r("plants") is not None and x.r("plants") < 0.35, sense="sight", p=0.15, tags=["food"], knack="forage",
+         text=lambda x: f"bare stems where the berries were in {x.nm}: it will take days to come back"),
+    dict(when=lambda x: x.r("plants") is not None and x.r("plants") > 0.75, sense="sight", p=0.08, tags=["food"],
+         text=lambda x: f"{x.nm} is thick with berries, nuts and greens"),
+    dict(when=lambda x: x.r("game") is not None and x.r("game") < 0.35, sense="sight", p=0.2, tags=["food", "hunting"], knack="hunt",
+         text=lambda x: f"few fresh tracks in {x.nm}: the game is thin"),
+    dict(when=lambda x: x.r("game") is not None and x.r("game") < 0.2, sense="sound", p=0.15, tags=["food", "hunting"],
+         text=lambda x: f"{x.nm} is quiet: nothing moves at dusk"),
+    dict(when=lambda x: x.r("game") is not None and x.r("game") > 0.75, sense="sight", p=0.08, tags=["food", "hunting"], knack="hunt",
+         text=lambda x: f"fresh deer slots and droppings along the rides of {x.nm}"),
+    dict(when=lambda x: x.r("game") is not None and x.r("game") > 0.75, sense="sight", p=0.06, tags=["food", "hunting"],
+         text=lambda x: f"a hare starts from the bracken in {x.nm}"),
+    dict(when=lambda x: x.r("wood") is not None and x.r("wood") < 0.35, sense="sight", p=0.2, tags=["timber"],
+         text=lambda x: f"{x.nm} is thinned out: stumps where the big trees stood"),
+    dict(when=lambda x: x.r("wood") is not None and x.r("wood") < 0.5, sense="sight", p=0.15, tags=["timber"], knack="fell",
+         text=lambda x: f"the good straight trees in {x.nm} are gone; what is left is crooked and small"),
+    dict(when=lambda x: x.r("seam") is not None and 0 < x.r("seam") < 0.35, sense="sight", p=0.25, tags=["mining"], knack="mine",
+         text=lambda x: f"the seam at {x.nm} is nearly worked out"),
+    dict(when=lambda x: x.r("seam") is not None and x.r("seam") >= 0.35, sense="sight", p=0.05, tags=["mining"],
+         text=lambda x: f"a green-stained seam in {x.nm}"),
+    dict(when=lambda x: "quarry" in x.p["res"], sense="sight", p=0.05, tags=["building"], text=lambda x: f"a face of good stone at {x.nm}"),
+]
+
+
 # ---------------------------------------------------------------------- a building
 def _amt(q) -> str:
     return "none" if q < 0.05 else ("a little" if q < 1.5 else ("some" if q < 4 else ("plenty" if q < 10 else "a great deal")))
@@ -222,6 +269,7 @@ def context(here, pid, h=None):
     x.works_begun = bool(wk) and 0.0 < x.works_done < 1.0
     g = p["res"].get("grass")
     x.grass = g["S"] / g["K"] if g and g["K"] > 0 else None
+    x.r = lambda key: (p["res"][key]["S"] / p["res"][key]["K"]) if key in p["res"] and p["res"][key]["K"] > 0 else None
     x.dung = (p["res"].get("dung") or {}).get("S", 0.0)
     return x
 
@@ -254,7 +302,7 @@ def person_context(here, who):
 
 def facts(here, add) -> None:
     """Add every sign whose condition holds, at its base chance, for each field, pasture and herd here."""
-    names = {id(CROP): "crop", id(FIELD): "field", id(PASTURE): "pasture", id(HERD): "herd", id(BUILDING): "building", id(PERSON): "person"}
+    names = {id(SKY): "sky", id(WILD): "wild", id(CROP): "crop", id(FIELD): "field", id(PASTURE): "pasture", id(HERD): "herd", id(BUILDING): "building", id(PERSON): "person"}
 
     def emit(rows, x, about, concerns=()):
         for i, row in enumerate(rows):
@@ -267,8 +315,12 @@ def facts(here, add) -> None:
                 if row.get("peek"):
                     kw["peek"] = True
                 add(about, row["text"](x), row["p"], row.get("tags", []), row.get("sense", "sight"), concerns=list(concerns), **kw)
+    cal = here.calendar()
+    emit(SKY, SimpleNamespace(cold=here.cold(), first_cold=here.cold() and (here.day == 0 or not here.cold(here.day - 1)),
+                              season=cal["season"], left=cal["left"]), ["sky"])
     for pid, p in here.parcels().items():
         x = context(here, pid)
+        emit(WILD, x, [f"parcel:{pid}"])
         if p["cover"] == "field":
             if p.get("crop"):
                 emit(CROP, x, [f"parcel:{pid}"])
