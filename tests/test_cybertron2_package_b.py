@@ -222,3 +222,19 @@ def test_a_meeting_on_the_road_calls_llm_agents_in_their_own_conversation(tmp_pa
     calls = [x for r in rows if r["agent"] in ("Edric", "Simkin") for x in r.get("talk", []) if x.get("wave") == "fuse"]
     assert calls and all(not x.get("error") for x in calls)
     assert any("meeting goes on" in t for t in sent)                   # a second wave: what the other said
+
+
+def test_in_one_call_a_take_goes_to_the_find_not_the_meeting(monkeypatch):
+    monkeypatch.setitem(RD.TERRAIN["plain"], "meet", 1.0)
+    monkeypatch.setattr(RD.TH, "eye", lambda w, n, on="things": 3.0)
+    w = world(roads=[["millbrook", "ashwood", 1, {"terrain": "plain"}]])
+    w.s["containers"]["pile:r"] = {"kind": "pile", "node": "road:millbrook-ashwood", "stretch": 1, "goods": {"grain": 4.0}, "wear": {},
+                                   "parcel": None, "day": 0}
+    depart(w, "Edric", "ashwood")
+    depart(w, "Simkin", "millbrook")
+    N.departures(w, w.s["today"])
+    RD.night(w, w.s["today"])
+    woke = FU.plan(w, w.s["today"])
+    n = next(k for k, x in woke.items() if len(x["events"]) == 2)
+    out = FU.answer(w, w.s["today"], n, woke[n], {"actions": [{"do": "take"}, {"do": "go on"}]})
+    assert out[0].startswith("You took") and w.goods(w.hands(n)).get("grain", 0) >= 4.0

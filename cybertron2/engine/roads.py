@@ -348,7 +348,8 @@ def _finds(w, today, rec, members, t, pos):
         finder = next((n for n in members if w.rng("road-find", w.d, n, cid).random() < min(1.0, TH.own(w, c) * sight * TH.eye(w, n))), None)
         if finder:
             from cybertron2.engine import signs as SG
-            look = SG.roll(SG.THING, SG.thing_context(w, c), w.rng("road-find-look", w.d, finder, cid), near=True, at_node=False, least=True)
+            look = SG.roll(SG.THING, SG.thing_context(w, c), w.rng("road-find-look", w.d, finder, cid), mult=0.0, near=True, at_node=False,
+                           least=True)                                       # the finder's close look, not the glimpse again
             today["road"]["finds"].append({"id": f"find:{cid}:{finder}:{w.d}", "kind": "find", "road": road_id, "pos": pos, "thing": cid,
                                            "members": members, "finder": finder, "label": "; ".join(look) or TH.describe(w, c)})
             rec["finds"].append({"by": finder, "thing": cid})

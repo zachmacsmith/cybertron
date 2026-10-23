@@ -114,7 +114,8 @@ def answer(w, today, name, x, reply) -> list:
         elif do in FUSE[e["kind"]].get("also", []):
             lines.append(V.do(Here(w, name), Mind(w, name), a))
         else:
-            lines.append(f"Refused: {do}: in the night you can only {', '.join(FUSE[e['kind']]['choices'] + FUSE[e['kind']].get('also', []))}")
+            can = list(dict.fromkeys(c for ev in x["events"] for c in FUSE[ev["kind"]]["choices"] + FUSE[ev["kind"]].get("also", [])))
+            lines.append(f"Refused: {do}: now you can only {', '.join(can)}")
     if not acts:
         lines.append("You did nothing.")
     if len([a for a in (reply.get("actions") or []) if isinstance(a, dict)]) > x["acts"]:
@@ -123,11 +124,13 @@ def answer(w, today, name, x, reply) -> list:
 
 
 def _event_for(events, a):
+    """Which of the events an answer is to: the one it names, else the first whose kind offers that choice."""
     tgt = str(a.get("at") or a.get("target") or "").lower()
     for e in events:
         if tgt and tgt in str(e.get("label", "")).lower():
             return e
-    return events[0]
+    do = str(a.get("do", "")).strip().lower()
+    return next((e for e in events if do in FUSE[e["kind"]]["choices"] + FUSE[e["kind"]].get("also", [])), events[0])
 
 
 # ---------------------------------------------------------------------- a raid on a building (D2-81: only sometimes detected)
