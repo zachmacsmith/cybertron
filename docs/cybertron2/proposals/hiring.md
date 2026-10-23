@@ -1,6 +1,6 @@
 # Proposal: hiring (work for someone else)
 
-**Status:** discussion (23 Oct). **Owner:** 37.2, with 37.4 (the verbs, possession under D4-23) and 37.3 (employers as
+**Status:** accepted: D2-36 to D2-40 (23 Oct); in spec/economy/agreements.md. **Owner:** 37.2, with 37.4 (the verbs, possession under D4-23) and 37.3 (employers as
 institutions). **Affects:** spec/economy/money_and_markets.md, production.md; agents/actions.md (the `for` argument); world/holding.md
 (possession and output); institutions/ (payroll, offices).
 
@@ -84,6 +84,9 @@ duty is a miss or a breach (agreements.md §2) and the pay leg it conditions doe
 
 - 22 Oct: 02l: the harvest peak needs hired hands; 37.4's verbs.md: hiring as an offer whose terms are work.
 - 23 Oct: Zach: hiring, contracts and subscriptions next. Proposed: work `for` an employer, with pay legs from agreements.md.
+
+- 23 Oct: Zach accepted all of it (D2-31 to D2-40), widening `for`: people can act and pay on behalf of others (households,
+  companies, institutions), D2-37. Written into spec/economy/agreements.md.
 
 ## Sources
 

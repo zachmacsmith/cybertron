@@ -11,4 +11,4 @@ Goods, production and trade. Owner: 37.2 (37.4: carrying and lodging mechanisms)
 | [transport.md](transport.md) | carrying, the transport ladder, merchants | 02g §3, 38.06 §3 | written: decided rules only (23 Oct) |
 | [lodging.md](lodging.md) | hosts and inns | 02g §4, 38.05 §3 | written: decided rules only (23 Oct) |
 | [money_and_markets.md](money_and_markets.md) | coin, debts, ledgers, offers and swaps, prices | 02f, 38.05 §4 | written: decided rules only (23 Oct) |
-
+| [agreements.md](agreements.md) | agreements made of legs, the settlement rule, ledgers, acting for others, duties, presets (trade, credit, subscriptions, wages, rent, hiring) | proposals/agreements.md, hiring.md | written: decided rules only (23 Oct) |

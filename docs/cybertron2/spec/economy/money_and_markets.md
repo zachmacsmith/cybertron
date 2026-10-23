@@ -57,8 +57,7 @@ the knowledge is (information/).
 
 ## Open
 
-- Agreements made of legs (recurring payments, wages, rent, supply, loans), the settlement rule, ledgers: proposals/agreements.md.
-- Hiring: proposals/hiring.md.
+- Agreements, recurring payments, wages, rent, loans, ledgers and hiring: agreements.md (decided).
 
 ## Sources
 

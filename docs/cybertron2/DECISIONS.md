@@ -72,6 +72,16 @@ and correct them in place.**
 | D2-28 | 23 Oct | **Copper coin**, seeded with some households and the merchant; any smith can strike it, so its value follows copper's; an institution's stamp later | exchange_and_money.md §5 | |
 | D2-29 | 23 Oct | **Prices are only what agents witnessed or were told**; every settlement is witnessed by those present; no computed price is shown | exchange_and_money.md §4 | |
 | D2-30 | 23 Oct | **Markets are seeded custom** (a known place and day at a node), with no engine mechanic of their own; whoever holds the site may charge for stalls | exchange_and_money.md §6 | cybertron 1's Market Board as the market |
+| D2-31 | 23 Oct | **One system of agreements made of legs** (cybertron 1's Standing Contract): trade, credit, subscriptions, wages, rent, supply, loans and dues are sets of legs, made by offers | proposals/agreements.md | separate systems for each |
+| D2-32 | 23 Oct | **The settlement rule:** an obligation exists anywhere; it is paid automatically only where there is a path (in person at one node, in one ledger, by a carrier); otherwise it accrues as arrears, paid first later | agreements.md §2 | cybertron 1's legs moving goods anywhere |
+| D2-33 | 23 Oct | **Ledgers:** a container at an institution's seat holding goods for many, each share a record; payments between accounts in one ledger are record changes, so recurring payments run at a distance | agreements.md §5 | |
+| D2-34 | 23 Oct | **Legs may be in any good;** coin exists but nobody is forced to use it | agreements.md §6 | |
+| D2-35 | 23 Oct | **Port `cybertron/standing.py` and `cybertron/credit.py`** onto agreements (the code is 37.4's to change, by agreement on the board) | agreements.md | |
+| D2-36 | 23 Oct | **Work can be a leg** (a duty), the basis of hiring | agreements.md, hiring.md | |
+| D2-37 | 23 Oct | **Acting for others:** `for: <party>` on an act (work, give, offer, accept) does it on that party's behalf: output goes into, and payment comes from, the party's container at the node, if the actor may use it; so people work and pay for households, companies and institutions | hiring.md §1; conversation | |
+| D2-38 | 23 Oct | A worker acting for an employer may use the employer's tools in its container there | hiring.md §1 | |
+| D2-39 | 23 Oct | **Duties are checked by the engine** from what the worker did for the employer that day; a pay leg conditioned on a duty falls due only when the duty was done | hiring.md §3 | |
+| D2-40 | 23 Oct | **The first presets:** spot trade, credit sale, consignment, subscription, supply, board, rent and lease, loan, dues; day labour, piece rate, wages, sharecropping, tenancy, apprenticeship, shopkeeper, guard, carrier | agreements.md §3, hiring.md §2 | |
 
 ## Directions (Zach's stated aims recorded in the notes; designs follow them; checked by 37.2, 22 Oct)
 

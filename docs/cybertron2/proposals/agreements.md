@@ -1,6 +1,6 @@
 # Proposal: agreements and obligations (one system for trade, credit, subscriptions, wages, rent and dues)
 
-**Status:** discussion (23 Oct). **Owner:** 37.2, with 37.4 (law.md's mechanical clauses create the same records; the verbs) and
+**Status:** accepted: D2-31 to D2-36 (23 Oct); in spec/economy/agreements.md. **Owner:** 37.2, with 37.4 (law.md's mechanical clauses create the same records; the verbs) and
 37.3 (institutions, courts). **Affects:** spec/economy/money_and_markets.md; agents/actions.md (offer, accept, notice);
 institutions/ (contracts, ledgers, courts); information/ (debts and ledgers as knowledge and documents).
 
@@ -137,6 +137,9 @@ ledger balance should emerge as money. Whether agents adopt coin is a finding, n
 - 23 Oct: Zach: much of the economics and contracts was designed for cybertron 1; do we want a currency; an elegant method that
   brings things together; subscriptions (automatic transfers that recur until cancelled). Proposed: cybertron 1's Standing
   Contract as the one record, with the settlement rule, ledgers for distance, and currency as wanted, not required.
+
+- 23 Oct: Zach accepted all of it (D2-31 to D2-40), widening `for`: people can act and pay on behalf of others (households,
+  companies, institutions), D2-37. Written into spec/economy/agreements.md.
 
 ## Sources
 
