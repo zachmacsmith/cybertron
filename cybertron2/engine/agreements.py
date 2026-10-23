@@ -19,10 +19,30 @@ from cybertron2.engine.here import Refused, show
 
 
 # ---------------------------------------------------------------------- reading legs from what agents write
-def parse_legs(text, day) -> list:
-    """'2 meat, 1 copper tool by day 10' / '3 coin every 2 days for 4 times' / 'work 2 days' -> legs (without from/to)."""
+SEASONS = ("spring", "summer", "autumn", "winter")
+
+
+def _season_days(text, day, cal):
+    """'by autumn day 8' -> 'by day N' (the run's day of the next such date), as agents count by the season."""
+    import re as _re
+    if cal is None:
+        return text
+
+    def sub(m):
+        season, d = m.group(1).lower(), int(m.group(2))
+        for k in range(0, 4 * 60):
+            c = cal(day + k)
+            if c["season"] == season and c["day"] == d:
+                return f"day {day + k + 1}"
+        return m.group(0)
+    return _re.sub(r"(spring|summer|autumn|winter)\s+day\s+(\d+)", sub, text, flags=_re.I)
+
+
+def parse_legs(text, day, cal=None) -> list:
+    """'2 meat, 1 copper tool by day 10' (or 'by autumn day 3') / '3 coin every 2 days for 4 times' / 'work 2 days' -> legs."""
     legs = []
-    for part in [x.strip() for x in str(text or "").replace(" and ", ",").split(",") if x.strip()]:
+    text = _season_days(str(text or ""), day, cal)
+    for part in [x.strip() for x in text.replace(" and ", ",").split(",") if x.strip()]:
         low = part.lower()
         m = re.match(r"^(?:work|labour|labor)\s+(?:for\s+)?(\d+)\s+days?(?:\s+by\s+day\s+(\d+))?$", low)
         if m:
@@ -83,7 +103,7 @@ def make_offer(here, mind, o) -> str:
     if to_raw.lower() not in ("anyone", "all", "everyone", "") and to is None:
         raise Refused(f"{to_raw} is not here; an offer is made face to face")
     party = _party(here, o["for"]) if o.get("for") else None
-    give, get = parse_legs(o.get("give"), here.day), parse_legs(o.get("get"), here.day)
+    give, get = parse_legs(o.get("give"), here.day, here.calendar), parse_legs(o.get("get"), here.day, here.calendar)
     if not give and not get:
         raise Refused("an offer needs something given or got")
     why = _offer_goods(here, give, party)

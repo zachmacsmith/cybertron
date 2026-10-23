@@ -287,3 +287,10 @@ def test_giving_or_leaving_goods_pays_a_debt():
     assert w.s["agreements"][aid]["legs"][0]["prepaid"] == 5
     assert do(w, "Simkin", do="give", to="Elena", item="wild food", qty=3).startswith("You gave")
     assert w.s["agreements"][aid]["status"] == "done"
+
+
+def test_promises_read_season_dates():
+    w = world()
+    legs = AG.parse_legs("1 copper tool by autumn day 3", 0, w.calendar)
+    c = w.calendar(legs[0]["when"]["by"])
+    assert (c["season"], c["day"]) == ("autumn", 3)
