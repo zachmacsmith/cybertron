@@ -66,9 +66,31 @@ at the level of parcels, which the engine already has (a herd is on a parcel in 
 - **An unherded herd moves** up to about two steps a day across the parcel graph. Each step picks a neighbour by what draws it (a
   ripe crop, water when it is thirsty, good grazing, the way home at dusk for cows in milk) and crosses the border only with the
   border's odds (open 1; hurdles 0.3; a hedge 0.15; a wall 0.05; scaled by the fence's condition). Draws are keyed (D2-70).
+- **It can range further than two parcels** (proposed: up to about six steps a day when nothing holds it), but every parcel it
+  crosses where people are gives them a chance to notice it ("the Fenn cows are going past the mill", salience by how close), and
+  anyone there can turn it back or tell the owners.
 - **Where it goes, things happen:** in a field it eats and tramples the crop (a `draw` on the crop, recorded with the herd as the
-  cause and its holder known); in the woods it can be lost or meet wolves (higher hazard); at the edge of the node it can, rarely,
-  wander along an edge into the next node.
+  cause and its holder known); in the woods it can be lost or meet wolves (higher hazard).
+- **Rarely, it wanders off onto an edge.** It is then **on the road**, at no node (D4-10), and each day one of these happens
+  (proposed odds a day, keyed draws):
+
+  | Outcome | Odds a day | Raised by |
+  |---|---|---|
+  | **it dies** (a fall, the cold, wolves, no water) | about 0.1 | winter (about 0.25), a wolf-heavy era, a long or harsh edge (a ridge, a marsh) |
+  | **it finds its own way home** | about 0.1 | a short edge, cows in milk |
+  | **it reaches the far node** and is a stray there, seen by whoever is about | about 0.03 | a short edge |
+  | **it is found by a traveller** on that edge | about 0.2 for each day a traveller is on it | |
+  | **it is found by a searcher** | about 0.6 for each day of searching | |
+  | it stays lost | the rest | |
+
+- **Being found is a fuse event on the road** (D2-5): a traveller in transit normally makes no call (D4-10), but coming on the herd
+  gives it one urgent call: drive the beasts along (they arrive with it, at its destination, and slow a party on foot), drive them
+  back, or leave them. Whoever finds them can take them (possession, D4-23); the owner's claim, and whether the finder is seen as a
+  thief or a helper, are for custom and law (D2-79).
+- **Searching:** an agent can set out along an edge looking for its cattle (`travel` with the aim of searching: 37.4's verbs), which
+  makes finding them, if they are still alive, much likelier than a passing traveller's chance, at the cost of days on the road.
+- **The owners notice it themselves** (as D2-4 for people): the engine never says "your herd is lost"; the household sees the home
+  pasture empty at dawn, or hears from someone who saw the cattle heading out.
 - **People see it** where they are: "the Fenn cattle are in the Long Field, trampling the barley" (high salience to the field's
   holder), tracks and dung on a path after (low), a herd seen heading for the wood. Whose crop and whose herd are known, so
   damages are a claim people can press (custom, an arbiter, a court).
@@ -114,6 +136,9 @@ at the level of parcels, which the engine already has (a herd is on a parcel in 
   grain each working day, milk 0.8 food a day for 0.6 of the year, slaughter 40-50 meat and 2 hides, herding at least 1 unit a
   day, prices (cow 40-60 coin, ox 50-100, horse 90-150). 02l's and 02m's ox costs need a team of two.
 
+- 23 Oct: Zach: a herd that wanders off rarely goes onto an edge: it may die, be found by a traveller (a fuse event), reach the next
+  node, or come home; more than two parcels a day, but often noticed; people can set out along an edge to search, and are much more
+  likely to find it. Added, with odds a day.
 - 23 Oct: Zach: would we track the parcels a herd wanders through? Yes: fences on parcel borders, a walk of about two steps a day
   drawn by crops, water, grazing and home, crossing borders by the fence's odds; crops eaten, losses in the woods, damages known.
 - 23 Oct: Zach: are herds kept by fences or herding; timber fences round plots, upgraded to stone for fewer escapes and wolves.
