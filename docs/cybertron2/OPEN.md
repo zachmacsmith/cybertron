@@ -39,3 +39,31 @@ Each item has an owner (README "Who owns what") who resolves it, with Zach where
 | Q-17 | Edge terrain data (what an edge's land is: plain, woodland, ridge, river, marsh) for fires and signs across edges (D2-72, D2-74) and danger (C-6) | world/edges.md | 37.4 |
 | Q-18 | D2-74 amends D4-35: information/signs.md and perception need the cross-edge rule | spec/information | 37.4 |
 | Q-19 | Overlapping fuse events in more depth (D2-82's simple rule for now): a fire set during a raid, two raids on one night, a raid while a fire spreads, a meeting on the road and a find on the same stretch; whether one event can cut another's fuse, and who is woken by which | proposals/fuse_events.md | 37.2 with 37.4 |
+
+## Flagged for later
+
+Things Zach decided to add later, or parked, with where each is designed and what it waits on. Add a row whenever something is
+flagged; strike it through when it is built or decided.
+
+| # | Later | Decision | Designed in | Waits on | Owner |
+|---|---|---|---|---|---|
+| L-1 | Signs of slow change on long journeys | D2-89 | proposals/journeys.md §3 | slow states (eras, environment_state.md) | 37.2 |
+| L-2 | Scavengers, with wild animals that attack herds and hunters and are drawn to food | D2-95 | things_in_places.md §6 | wild animals as a system | 37.2 |
+| L-3 | Smell, simple: own salience and short reach | D2-101 | visibility.md §5 | nothing (any time) | 37.4 |
+| L-4 | Wind direction (fire spreading by the wind; smell following it) | D2-101 | visibility.md §5 | fire spreading | 37.2 |
+| L-5 | Building on landmarks: bridges, ferries, huts at a pass, wells, waystations, tolls | D2-108 | road_layout.md §4 | roads working in runs | 37.2 with 37.4 |
+| L-6 | Overlapping fuse events in depth | D2-82 | fuse_events.md; Q-19 | fuse events built | 37.2 with 37.4 |
+| L-7 | Waiting on a road for camps, tolls, patrols and ambushes (bandits) | proposed | road_encounters.md §4 | road meetings built | 37.4 |
+| L-8 | Herds wandering onto edges: lost, found, searched for | proposed | livestock.md; road_encounters.md §3 | roads with stretches | 37.2 with 37.4 |
+| L-9 | Disease (mortality, the sick, immunity, nursing, a healer); rot's risk feeds it (D2-96) | Q-16 | environment_catalogue.md §3 | | 37.2 with 37.1 |
+| L-10 | Irrigation | D2-67 | farming.md | the weather | 37.2 |
+| L-11 | Fences, hedges and walls for herds | proposed | fences.md; livestock.md | | 37.4 |
+| L-12 | Children and life ("we'll come back to this") | | life.md | | 37.4 with 37.1 |
+| L-13 | Economy options kept out of the first worlds: slash and burn, armour, nets, boats, the seed drill, clay, iron, the press | D2-14, D2-19 | economy_later.md | | 37.2 |
+| L-14 | Clothing | D2-10 (parked) | resources_and_goods.md | | 37.2 |
+| L-15 | Hiding in a building | 22 Oct (deferred) | information_economics.md | | 37.4 |
+| L-16 | Reflexes, fallbacks and policies as standing orders | D4-16 | 38.06 §4 | | 37.4 |
+| L-17 | Aims (cybertron 1's goals, edited) | D4-29 | spec/agents/aims.md | | 37.4 |
+| L-18 | An institution's stamp on coin | D2-28 | exchange_and_money.md | institutions | 37.2 with 37.3 |
+| L-19 | Further verb modifiers (going quietly, working carefully) | D2-93 | verb_modifiers.md §1 | modifiers built | 37.4 |
+| L-20 | The catalogue's later kinds (storm surge, locusts, anthrax, peat fires, the dark year, migration and trade eras, landslides) | D2-77 | environment_catalogue.md §6 | | 37.2 |

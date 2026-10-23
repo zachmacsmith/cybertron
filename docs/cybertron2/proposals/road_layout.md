@@ -1,6 +1,6 @@
 # Proposal: the layout of a road (stretches and landmarks)
 
-**Status:** partly accepted: D2-104, D2-105 (23 Oct); landmarks first, building on them, waiting and the escalation rule open. Design only. **Owner:** 37.2 (author); edges, places and travel
+**Status:** partly accepted: D2-104 to D2-108 (23 Oct); waiting it out and the line between automatic and a call open. Design only. **Owner:** 37.2 (author); edges, places and travel
 are 37.4's (world/edges.md, layout.md, place.md), so this goes to them. **Affects:** spec/world/edges.md, generation.md;
 spec/environment/ (risks of things on roads); road_encounters.md, journeys.md, things_in_places.md, hidden_ways.md; OPEN Q-17
 (edge terrain), which this would replace.
@@ -34,6 +34,10 @@ bridge), which makes roads places to invest in and to hold.
 | **a ruin, an old camp** | shelter for a night | | cover | possible | |
 | **an overlook** | none | | sees far along the road: parties ahead and behind | | a beacon |
 
+- **Stopping points (D2-107):** a spring, a meadow, wild fruit trees, a sheltered hollow. Passing one, a traveller can gather on
+  the way (proposed: 1 to 3 food in season, without losing the day, if the departure choice says so) or sleep better there (the
+  night out costs as in a camp, D2-68: 1.2 food instead of 1.5, and no fall from the cold in mild weather), and arrives more rested.
+  Knowing the place makes both likelier (proposed x2 to find it and use it); a stranger may pass it by.
 - A stretch with no landmark is plain road: travellers pass, meet by the terrain's odds, and nothing else happens.
 
 ### 2. What happens where
@@ -74,6 +78,11 @@ Even minor trouble keeps a small chance (proposed 0.1) of a call, so travel is n
 
 One shape: a call happens when the stakes are high, the departure choice does not cover it, and the agent noticed in time;
 experience raises the bar, and other people always lower it.
+
+**Decided (D2-106): experience works through the risk.** Experience lowers the chance that things go wrong (a carrier who knows the
+ford crosses it safely more often), and the call follows the risk as it stands for that traveller. So an experienced traveller is
+woken only when the risk is still high even for them (a flood, a blizzard on the pass), which is unusual for them, and they notice
+it and can react.
 
 **Choices at departure:** a short, fixed set given with `travel` (a modifier, D2-93): `on trouble: push on | wait up to N days |
 turn back | go round`. The departure prompt shows the landmarks the traveller knows on that road (known by having travelled it or
@@ -123,10 +132,10 @@ landmarks in all.
 ## Open questions (for Zach, and 37.4)
 
 1. ~~Stretches and landmarks~~ decided: D2-104 (very simple; no landmarks behaves as now).
-2. Which landmarks in the first worlds (proposed: ford, bridge, pass, narrows, spring)?
+2. ~~Which landmarks~~ decided: ford, bridge, pass, narrows, spring, and stopping points (D2-107).
 3. ~~How challenges are decided~~ decided: D2-105. Open: where the line falls between automatic and a call (§3: the event,
    the agent, or both), and the 0.1 chance.
-4. Building on landmarks (a bridge, a hut, a toll) in the first worlds, or later?
+4. ~~Building on landmarks~~ later, flagged (D2-108, OPEN L-5).
 5. ~~OPEN Q-17~~ the edge's terrain is its stretches' default (D2-104).
 6. Waiting it out at a block, as a departure choice and in a fuse call (§3)?
 
@@ -140,6 +149,10 @@ landmarks in all.
   emerge and connect) and D2-105 (minor trouble resolved automatically and reported with what went wrong; choices at departure such
   as "if trouble, turn back" or "keep pushing"; still some chance of a fuse call, and more extreme or complex, interacting situations
   give one with more choices). Asked whether travellers can wait out a block: §3, 37.2 proposes yes.
+
+- 23 Oct: Zach decided D2-106 (experience lowers the chance of trouble; an experienced traveller is woken only when the risk is
+  still high, unusual for them), D2-107 (the five landmarks, plus stopping points for gathering and rest, more if known), D2-108
+  (building on landmarks later, flagged).
 
 ## Sources
 

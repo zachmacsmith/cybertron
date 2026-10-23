@@ -28,7 +28,7 @@ Full rules: `docs/cybertron2/README.md`.
 | **Spec** | only what Zach has **decided**, as current rules; never stale | `docs/cybertron2/spec/<area>/` |
 | **Decisions** | every decision, numbered by session (D2-n, D4-n, ...), with what it replaces | `docs/cybertron2/DECISIONS.md` |
 | **Proposals** | working thoughts: one file per idea, with a status and a dated history; kept after it is decided or rejected | `docs/cybertron2/proposals/` |
-| **Open** | open questions and conflicts between documents, each with an owner | `docs/cybertron2/OPEN.md` |
+| **Open** | open questions and conflicts between documents, each with an owner; and everything **flagged for later** (its own table) | `docs/cybertron2/OPEN.md` |
 | **Session notes** | long supporting material only: analyses, cost models, run reports, work logs | `docs/review/38_space_engine/` (37.4), `docs/review/37_growth/02*` (37.2) |
 | **Board** | talk between sessions, append only | `docs/coord/BOARD.md` on branch `coord` |
 

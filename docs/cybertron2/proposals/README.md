@@ -46,7 +46,7 @@ proposal**; **Why**; **Alternatives considered**; **Open questions**; **Affects*
 | [journeys.md](journeys.md) | what travellers see on the way: daily notices on the road (others, herds, a body, traces left by passers), remembered on arrival; rare signs of slow change on long journeys | 37.2 (37.4 owns perception and roads) | accepted: D2-88, D2-89, D2-97 |
 | [hidden_ways.md](hidden_ways.md) | edges tied to a side and parcels, some hidden; found by work in the parcel, attention, knack and traces; the finder chooses whom to tell | 37.2 (37.4 owns edges and knowledge) | accepted: D2-90 to D2-92, D2-98 |
 | [things_in_places.md](things_in_places.md) | one kind of thing at a spot (a parcel, or a stretch of road: one per day of its length): goods left or hidden, remains, herds, camps, traces, hidden ways' ends; one noticing rule (conspicuousness x presence x attention x knack x traces); a find on the road worth taking gives a short call; left things held by nobody | 37.2 (37.4 owns places and perception; extends objects_in_world.md) | partly accepted: D2-85 to D2-87, D2-95, D2-96 |
-| [road_layout.md](road_layout.md) | a road as one place with stretches and a few landmarks (ford, bridge, pass, narrows, spring...): events happen where on the road; landmarks decide crossing challenges and risks; bridges, huts and tolls built on them | 37.2 (37.4 owns edges and travel) | partly accepted: D2-104, D2-105 |
+| [road_layout.md](road_layout.md) | a road as one place with stretches and a few landmarks (ford, bridge, pass, narrows, spring...): events happen where on the road; landmarks decide crossing challenges and risks; bridges, huts and tolls built on them | 37.2 (37.4 owns edges and travel) | partly accepted: D2-104 to D2-108 |
 | [verb_modifiers.md](verb_modifiers.md) | modifiers on verbs as data (`for`, `hidden`, `searching`, `method`, `aim`): the same act done another way, nothing by default, some common and some learned | 37.2 (37.4 owns verbs and knowledge) | partly accepted: D2-93, D2-94 |
 | [visibility.md](visibility.md) | how much a place and the day let each sense through: sight and sound by cover, changed by the land's state (felling, crops, snow, building) and by light and weather; multiplies every sign | 37.2 (37.4 owns perception) | accepted: D2-99 to D2-103 |
 | [recipes.md](recipes.md) | the first worlds' recipes as technique cards: gathering, making, building, working; basics and ten trades; tool wear; what travels; price anchors | 37.2 (37.4: verbs, knowledge) | discussion |
@@ -65,6 +65,8 @@ Newest first. Ideas decided or rejected in conversation before 23 Oct are backfi
 
 | Date | Idea | Outcome | Where |
 |---|---|---|---|
+| 23 Oct | Experience works through the risk; five landmarks and stopping points; building on landmarks later | accepted: D2-106 to D2-108 | road_layout.md |
+| 23 Oct | One list of everything flagged for later | added: OPEN.md "Flagged for later" | OPEN.md |
 | 23 Oct | Roads as stretches with optional landmarks; travel decides itself, minor trouble reported on arrival, choices at departure, a fuse call for extreme or complex situations | accepted: D2-104, D2-105 | road_layout.md |
 | 23 Oct | Visibility for sight and sound by land, state and weather (light only at night); loud things mask; smell later and simple; conspicuousness split | accepted: D2-99 to D2-102 | visibility.md |
 | 23 Oct | Light (dusk, night) in the day's notices; wind direction now | rejected: agents notice by day; no wind direction for now | visibility.md |
