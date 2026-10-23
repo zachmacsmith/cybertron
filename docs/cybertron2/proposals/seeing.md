@@ -126,11 +126,20 @@ tracks), whether it lasts or is momentary, and, hidden, whether it is true (sign
 | the land and sky | weather, the season's signs (D4-6), distant smoke, birds |
 | a gathering or room | who is there, who stands with whom, the mood |
 
-**Noticing is selection, done by the engine.** An agent need not take in every fact in range: the engine's draw (salience,
-attention, skill, chance) already chooses the handful it notices, and the description then conveys those. If the renderer chose
-instead (a model dropping some of the facts it was given), the agent's knowledge store would hold facts its text never mentioned,
-or the engine would have to read back what the text conveyed. So the engine picks fewer facts, and the renderer is judged on
-conveying all of the ones it was given.
+**Noticing: the engine offers, the describer picks, and reports what it picked.** An agent does not take in every fact in range.
+The engine offers a set of candidate facts for an observation, each marked **salient** (it stands out: a fire, a fight, a scream, a
+stranger, a cold hearth in the evening) or not, and each with an id. The describer (template or model) must:
+
+1. include **every salient fact**;
+2. add the facts **most relevant to this observer**: what bears on its state (a hungry man notices the woodpile and the bread
+   smell), its trade and skill (a builder the rotten beam), its concerns, its beliefs and its experience (the almanac keeper the
+   early geese; a man robbed last winter the broken lock), up to a few facts;
+3. **return the ids of the facts it conveyed**, with the text.
+
+Only the returned facts go into the agent's knowledge store, so the store and the text always agree, at no extra call. A template
+renderer does the same with relevance computed by the engine (facts tagged by what they bear on: food, shelter, a trade, danger, a
+named person, a claim, matched against the observer's state, skill and concerns); a model renderer judges relevance itself, which
+is where it can do better than a template.
 
 **Tracked: only what was perceived.** What an agent perceived goes into its knowledge store as dated beliefs (knowledge §7); what
 it was not given is never stored. So the record shows exactly who noticed what, when, and why (present, working, attending,
@@ -250,6 +259,11 @@ does.
 
 - 23 Oct: Zach: descriptions need not convey every fact; people notice some. Added: noticing is the engine's draw, so the engine
   picks fewer facts and the renderer conveys all it is given (else the store and the text disagree).
+
+- 23 Oct: Zach: the describer should notice at least the most salient facts and those most relevant to the observer (its state,
+  beliefs, experience). Replaced "the engine picks fewer facts" with: the engine offers candidates marked salient; the describer
+  includes all salient facts plus the most relevant to the observer, and returns the ids it conveyed, which alone go into the
+  knowledge store.
 
 ## Sources
 
