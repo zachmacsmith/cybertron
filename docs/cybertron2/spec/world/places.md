@@ -11,6 +11,8 @@ node, used without travelling. If you could go there and be back before nightfal
 - D4-11: node scale: if you could go there and be back before nightfall, it is the same node; a larger settlement is a cluster of
   nodes.
 - D4-35: everything happens in a place (core/architecture.md).
+- D2-85, D2-87: anything not in someone's hands or a building's store lies at a spot, a parcel here or a stretch of road
+  (world/things_in_places.md).
 - D4-47: some places start unexplored: from where its road starts the way is seen only as an unexplored way; whoever follows it
   learns the place, and others learn it by being told or led there.
 
@@ -46,4 +48,4 @@ The node they are at: its people, parcels and buildings. Other nodes only as the
 
 38.04 §1.
 
-*Current as of 23 Oct 2026: D4-2, D4-11, D4-35, D4-47.*
+*Current as of 24 Oct 2026: D2-85, D2-87, D4-2, D4-11, D4-35, D4-47.*

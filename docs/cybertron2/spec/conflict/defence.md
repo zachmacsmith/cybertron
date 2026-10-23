@@ -23,8 +23,9 @@ the arrivals talk on the day they arrive.
   break-in (D2-20).
 - **The watch:** `watch` for the night (no sleep; eats more); the watcher detects a fuse event at once and may wake the others
   (D2-21). A child can keep it (D4-19's menial tasks).
-- **Fuse events** (D2-5): an event that takes time has a detection time and a completion time; whoever detects it before it
-  completes is woken for one short decision from the event's own menu; then it resolves. No detection: the default applies.
+- **Fuse events** (D2-5, D2-80 to D2-84): conflict/fuse_events.md. A raid is detected only by chance (a watcher, a dog, those
+  inside, neighbours who hear it); a hut gives no call, a timber house one act, a stone one up to three; one call an agent a night,
+  appended to its own conversation. No detection: the default applies (those inside defend asleep).
 - **Gates** (D2-5): an enclosure's entry rule is checked at dawn; those it does not admit wait outside and talk with the keeper in
   the talk step; admitting takes effect at once.
 
@@ -38,7 +39,7 @@ Per building: structure (its multiplier). Per night: who watches where. Per gate
 |---|---|---|
 | multipliers by structure | timber x1, stone x2 (proposed) | calibrate |
 | the watcher's food | as working late, x1.5 (proposed) | calibrate |
-| urgent calls per agent a night | proposals/fuse_events.md | calibrate |
+| urgent calls per agent a night | 1 (conflict/fuse_events.md) | decided (D2-80) |
 
 ## What agents see
 
@@ -47,11 +48,11 @@ and its keeper as they know them.
 
 ## Open
 
-- Fuse events' detection and completion times, menus, order: proposals/fuse_events.md.
+- Overlapping events in depth (OPEN Q-19).
 - Gate rules beyond the check (tokens, tolls, passes): proposals/gates.md.
 
 ## Sources
 
 proposals/attacks_and_walls.md, fuse_events.md, gates.md; 02k.
 
-*Current as of 23 Oct 2026: D2-5, D2-20, D2-21, D2-49, D2-50.*
+*Current as of 24 Oct 2026: D2-5, D2-20, D2-21, D2-49, D2-50, D2-80 to D2-84.*

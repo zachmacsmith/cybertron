@@ -12,6 +12,8 @@ decides at the place it arrives.
 - D4-15, D4-25: speech is not a round late; the talk step comes before work, among the people at the node (information/speech.md).
 - D4-8: travel is the last act of a day; the traveller arrives at the start of a later round, sees the place and decides there.
 - D4-28: at the end of each stretch of days an agent writes its own memory (information/memory.md).
+- D2-80 to D2-84: the night begins with the fuse sub-step: events with a fuse, detected or not, and one urgent call for the woken
+  (conflict/fuse_events.md).
 
 ## Mechanics
 
@@ -21,7 +23,7 @@ decides at the place it arrives.
 | decide | every agent at a node is asked once, all at the same time (D4-14) |
 | talk | the talk step (information/speech.md): messages to one person wake them; up to the waves set there |
 | work | the day's acts are carried out; travel is the last act of the day (D4-8) |
-| night | where each sleeps, eating, the cold, deaths, spoilage (economy/buildings.md, economy/lodging.md); departures onto the roads |
+| night | first the fuse sub-step (conflict/fuse_events.md: the woken answer in their own conversation, D2-84); then fights, where each sleeps, eating, the cold, deaths, spoilage by condition (economy/goods.md "Decay"), departures onto the roads |
 | memory | at the end of a stretch, each agent writes what it wants to remember (D4-28) |
 
 Travellers on a road make no decision until they arrive (D4-10).
@@ -40,4 +42,4 @@ Travellers on a road make no decision until they arrive (D4-10).
 
 38.05 §1; 38.17 §6.
 
-*Current as of 23 Oct 2026: D4-8, D4-13, D4-14, D4-15, D4-25, D4-28.*
+*Current as of 24 Oct 2026: D4-8, D4-13, D4-14, D4-15, D4-25, D4-28, D2-80 to D2-84.*
