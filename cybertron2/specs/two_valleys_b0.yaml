@@ -1,0 +1,11 @@
+# The comparison arm for two_valleys_b.yaml: the same world, seed and spell, the road 2 days, but the roads hold nothing (no terrain,
+# no landmarks: D2-104), so meetings, trouble and notices are read against roads as before.
+base: cybertron2/specs/two_valleys_s1.yaml
+name: The two valleys, roads bare (comparison)
+days: 8
+weather: {3: heavy rain}               # the ford is high on days 3 and 4 (world/roads.md)
+spells:
+  - {kind: wet, from: 2, to: 6}
+roads:
+  - [wetham, highcombe, 2, track]
+  - [highcombe, old_wood, 1, {way: a forest path over the scarp that nobody uses}]

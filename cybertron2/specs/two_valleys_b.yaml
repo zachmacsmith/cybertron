@@ -1,0 +1,13 @@
+# Package B live run (37.2's brief 02r §5): the two valleys with the Wetham-Highcombe road made 2 days, a ford on its first stretch
+# (from Wetham) and a meadow on the second, in the hills; a wet spell in the first week. Each valley needs what the other has
+# (Highcombe about 0.6 of its food over the run, Wetham short of wood): one handcart trip of about 40 grain a run covers Highcombe's
+# shortfall, so the trade can be carried in the days available. The comparison arm is two_valleys_b0.yaml (the same, roads bare).
+base: cybertron2/specs/two_valleys_s1.yaml
+name: The two valleys, roads with landmarks
+days: 8
+weather: {3: heavy rain}               # the ford is high on days 3 and 4 (world/roads.md)
+spells:
+  - {kind: wet, from: 2, to: 6}
+roads:
+  - [wetham, highcombe, 2, track, {terrain: river valley, stretches: {1: {landmarks: [ford]}, 2: {terrain: hills, landmarks: [meadow]}}}]
+  - [highcombe, old_wood, 1, {way: a forest path over the scarp that nobody uses, terrain: woodland}]
