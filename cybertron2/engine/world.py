@@ -83,7 +83,7 @@ class World:
                       "people": {}, "institutions": {}, "claims": {}, "offers": {}, "agreements": {}, "know": {}, "mind": {},
                       "events": [], "acts": [], "log": [], "left": []}
         for nid, n in spec["nodes"].items():
-            s["nodes"][nid] = {"name": n["name"], "text": n.get("text", "")}
+            s["nodes"][nid] = {"name": n["name"], "text": n.get("text", ""), "unexplored": bool(n.get("unexplored"))}      # D4-47
             for pid, p in (n.get("parcels") or {}).items():
                 st = copy.deepcopy(p.get("state") or {})
                 res = {k: {"S": float(v["S"]), "K": float(v["K"]), "r": float(v.get("r", 0.3))} if k != "seam" else
@@ -96,7 +96,13 @@ class World:
                 par = {"node": nid, "name": p.get("name", pid), "cover": p["cover"], "size": int(p.get("size", 1)),
                        "adj": list(p.get("adj") or []), "text": p.get("text", ""), "res": res, "crop": None,
                        "fertility": float(p.get("fertility", 1.0)), "broken": float(st.get("broken", 0.0)),
-                       "last_crop": st.get("last_crop"), "last_kind": st.get("last_kind")}
+                       "last_crop": st.get("last_crop"), "last_kind": st.get("last_kind"), "ground": p.get("ground"),
+                       "works": None}
+                if st.get("works"):                                                  # seeded field works (D2-66): {done: plots}
+                    gw = st["works"]
+                    tech_y = 40.0 if p.get("ground") == "wet" else 60.0
+                    par["works"] = {"ground": p.get("ground"), "done": float(gw.get("done", par["size"])), "kept": 0.0, "pending": {},
+                                    "units": float(gw.get("done", par["size"])) * tech_y}
                 if st.get("crop"):
                     from cybertron2.engine import farm as FM
                     fam = FM.CROP_OF.get(str(st["crop"].get("kind", "grain")).lower(), "grain")
@@ -107,7 +113,9 @@ class World:
                 s["parcels"][b]["adj"].append(a)
         for i, e in enumerate(spec.get("roads") or spec.get("edges") or []):
             a, b, k = e[0], e[1], int(e[2]) if len(e) > 2 else 1
-            s["roads"][f"road:{a}-{b}"] = {"a": a, "b": b, "days": k, "track": "track" in e[3:]}     # a track lets carts pass
+            extra = next((x for x in e[3:] if isinstance(x, dict)), {})
+            s["roads"][f"road:{a}-{b}"] = {"a": a, "b": b, "days": k, "track": "track" in e[3:],     # a track lets carts pass
+                                           "way": extra.get("way", "an unexplored way")}             # seen from the known end (D4-47)
         for bid, b in (spec.get("buildings") or {}).items():
             self._new_building(bid, b)
         for hid, h in (spec.get("herds") or {}).items():                       # cattle by role (D2-63); a bare count is cows
@@ -196,6 +204,10 @@ class World:
         k = self.start[0] * self.season_len + self.start[1] + day
         at = k % self.season_len
         return {"season": SEASONS[(k // self.season_len) % 4], "day": at + 1, "left": self.season_len - at - 1, "year_day": k}
+
+    def knows_place(self, name, nid) -> bool:
+        """An unexplored place is known only to those who have been there or were told of it (D4-47)."""
+        return not self.s["nodes"][nid].get("unexplored") or nid in self.s["mind"][name]["places"]
 
     def year_days(self) -> int:
         return 4 * self.season_len

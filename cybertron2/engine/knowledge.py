@@ -123,7 +123,7 @@ def ready(here, tech, kind, key) -> str:
     y = (t.get("yield") or {}).get("kind")
     if t.get("seasons") and here.calendar()["season"] not in t["seasons"]:
         return f"{label(tech)} is done in {' and '.join(t['seasons'])}"
-    if kind == "parcel" and y in ("sow", "break", "tend", "manure", "crop", "herd", "milk", "slaughter"):
+    if kind == "parcel" and y in ("sow", "break", "tend", "manure", "crop", "herd", "milk", "slaughter", "works", "select"):
         from cybertron2.engine import farm as FM
         return FM.ready(here, tech, key)
     if kind == "parcel":
@@ -277,6 +277,8 @@ def options(here, mind, limit=10):
     can, near = [], []
     for tech, t in TECHNIQUES.items():
         lvl = level(mind, tech)
+        if t.get("crew") and lvl not in ("rough", "capable", "known"):
+            lvl = "known"                                                     # anyone can work on a crew (D2-66)
         if lvl not in ("rough", "capable", "known") or t["verb"] == "build":
             continue
         why = shortfall(here, mind, tech, TRY[lvl]["inputs"])

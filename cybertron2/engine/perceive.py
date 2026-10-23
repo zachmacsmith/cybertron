@@ -68,22 +68,30 @@ def seed_knowledge(w) -> None:
                 m["seeded"].append(c["text"])
         dist = {home: 0}
         todo = [home]
+        hidden = {nid for nid, n in w.s["nodes"].items() if n.get("unexplored") and nid != home}     # D4-47
         while todo:
             x = todo.pop(0)
             for r in w.s["roads"].values():
                 if x in (r["a"], r["b"]):
                     y = r["b"] if r["a"] == x else r["a"]
-                    if y not in dist or dist[x] + r["days"] < dist[y]:
+                    if y not in hidden and (y not in dist or dist[x] + r["days"] < dist[y]):
                         dist[y] = dist[x] + r["days"]
                         todo.append(y)
         for nid, n in w.s["nodes"].items():
-            ways = sorted((w.s["nodes"][r["b"] if r["a"] == nid else r["a"]]["name"], r["days"], r.get("track", False))
-                          for r in w.s["roads"].values() if nid in (r["a"], r["b"]))
-            v = views[nid]
-            m["places"][nid] = {"name": n["name"], "days": dist.get(nid), "ways": ways, "text": texts[nid], "seen": None if nid != home else -1,
-                                "buildings": sorted(b["name"] for b in v.buildings().values()),
-                                "parcels": sorted(p["name"] for p in v.parcels().values()),
-                                "herds": sorted(h["name"] for h in v.herds().values())}
+            if nid in hidden:
+                continue
+            m["places"][nid] = place_record(w, views[nid], nid, dist.get(nid), texts[nid], None if nid != home else -1, hidden)
+
+
+def place_record(w, view, nid, days, text, seen, hidden=()) -> dict:
+    """What one knows of a place: its roads (an unexplored one by its way, D4-47), what it is like, and what is there."""
+    ways = sorted(((r.get("way", "an unexplored way") if (r["b"] if r["a"] == nid else r["a"]) in hidden
+                    else w.s["nodes"][r["b"] if r["a"] == nid else r["a"]]["name"]), r["days"], r.get("track", False))
+                  for r in w.s["roads"].values() if nid in (r["a"], r["b"]))
+    return {"name": w.s["nodes"][nid]["name"], "days": days, "ways": ways, "text": text, "seen": seen,
+            "buildings": sorted(b["name"] for b in view.buildings().values()),
+            "parcels": sorted(p["name"] for p in view.parcels().values()),
+            "herds": sorted(h["name"] for h in view.herds().values())}
 
 
 def describe(view) -> str:
@@ -386,7 +394,11 @@ def evening(w, attend: dict, today: dict) -> dict:
 def _update_known(here, mind, F) -> None:
     """Being somewhere updates what one knows of it and of the people one meets there (D4-35: only by being there)."""
     pl = mind.store["places"].get(here.node)
+    if pl is None:                                                              # a place found (D4-47)
+        mind.store["places"][here.node] = pl = {"name": here.node_name, "days": None, "ways": [], "text": "", "seen": here.day,
+                                                "buildings": [], "parcels": [], "herds": [], "found": here.day}
     if pl is not None:
+        pl["ways"] = sorted((n, d, t) for _, n, d, t in here.roads())
         pl.update(text=describe(here), seen=here.day, buildings=sorted(b["name"] for b in here.buildings().values()),
                   parcels=sorted(p["name"] for p in here.parcels().values()), herds=sorted(h["name"] for h in here.herds().values()))
     for x in here.people(me=False):

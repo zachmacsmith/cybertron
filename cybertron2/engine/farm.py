@@ -119,7 +119,14 @@ def act(here, mind, tech, key, place_name, out, m, tm, a) -> tuple:
     k = y["kind"]
     f = here.p["farming"]
     if k == "sow":
-        return _sow(here, tech, key, place_name, out, m, a, f)
+        return _sow(here, mind, tech, key, place_name, out, m, a, f)
+    if k == "works":
+        return _works(here, mind, tech, key, place_name, out, m * tm, a, y)
+    if k == "select":
+        c = dict(here.parcels()[key]["crop"])
+        c["selected_by"] = here.name
+        here.apply("set", ref=("parcel", key), field="crop", value=c)
+        return 0.0, None, f"You went through the {c['kind']} in {place_name}, marking the best ears to keep for seed.", ("parcel", key)
     if k == "break":
         return _break(here, tech, key, place_name, out, m * tm, f)
     if k == "tend":
@@ -164,7 +171,49 @@ def _herd_on(here, key, a, role=None):
     return pick or hs[0]
 
 
-def _sow(here, tech, key, place_name, out, m, a, f):
+def ground_mult(p, par) -> float:
+    """A plot's yield from its ground (D2-66): wet or hill ground yields less until field works bring it to 1.0."""
+    pen = float(p["ground"].get(par.get("ground") or "", 1.0))
+    wk = par.get("works") or {}
+    done = min(1.0, float(wk.get("done", 0.0)) / max(1.0, float(par["size"]))) if wk.get("ground") == par.get("ground") else 0.0
+    return round(pen + (1 - pen) * done, 4)
+
+
+def master_share(here, mind, tech) -> float:
+    lo, hi = KN.curve(tech)
+    return max(0.0, min(1.0, (KN.skill(mind, tech) - lo) / (hi - lo)))
+
+
+def _works(here, mind, tech, key, place_name, out, mult, a, y):
+    """A field work as a project on the plot (D2-66): work by anyone counts on a day one who knows the technique works on it."""
+    par = here.parcels()[key]
+    wk = dict(par.get("works") or {"ground": y["ground"], "units": 0.0, "done": 0.0, "kept": 0.0, "pending": {}})
+    size = float(par["size"])
+    leads = KN.level(mind, tech) in ("capable", "known")
+    stone = float(y.get("stone", 0.0)) / float(y["units"]) * mult
+    if stone > 0:
+        from cybertron2.engine.verbs import _consume
+        _consume(here, {"stone": round(stone, 3)}, extra=out if out != here.hands else None)
+    if wk["done"] >= size - 1e-6:                                              # finished: this is upkeep (mending)
+        wk["kept"] = round(wk.get("kept", 0.0) + mult, 3)
+        here.apply("set", ref=("parcel", key), field="works", value=wk)
+        return 0.0, None, f"You mended the {_works_word(y)} of {place_name}.", ("parcel", key)
+    day = str(here.day)
+    pend = dict(wk.get("pending") or {})
+    p = pend.get(day, {"units": 0.0, "led": False})
+    p = {"units": round(p["units"] + mult, 3), "led": p["led"] or leads}
+    pend = {day: p}                                                          # only today's work waits for a leader
+    wk["pending"] = pend
+    here.apply("set", ref=("parcel", key), field="works", value=wk)
+    how = "" if leads else " (it holds only if someone who knows how to lay them out works on them today)"
+    return 0.0, None, f"You worked on the {_works_word(y)} of {place_name}{how}.", ("parcel", key)
+
+
+def _works_word(y) -> str:
+    return "ditches and banks" if y["ground"] == "wet" else "terraces"
+
+
+def _sow(here, mind, tech, key, place_name, out, m, a, f):
     par = here.parcels()[key]
     seed_good = str(a.get("item") or "grain").lower()
     fam = SEED_CROP.get(seed_good) or CROP_OF.get(seed_good)
@@ -192,6 +241,8 @@ def _sow(here, tech, key, place_name, out, m, a, f):
         fail = f["fail"][1] if last == fam else f["fail"][0]
         failed = here.rng("blight", here.day, key).random() < float(fail)
         g = grow_days(year, fam)
+        if KN.level(mind, "select seed") == "known":                          # seed selection (D2-65)
+            g = max(2, round(g * float(here.p["seed_selection"])))
         name = next((n for n in CROPS[fam]["names"] if n == str(par.get("last_kind", "")).lower()), CROPS[fam]["names"][0])
         c = {"kind": name, "crop": fam, "sown": here.day, "ripe_day": here.day + g, "window": int(f["window"]), "seed": 0.0, "area": 0.0,
              "area_left": 0.0, "broken": 0.0, "weeded": 0.0, "base": 0.0, "rot": 1.0, "failed": failed, "hardy": CROPS[fam]["hardy"],
@@ -207,7 +258,8 @@ def _sow(here, tech, key, place_name, out, m, a, f):
     c["area"] = round(c["area"] + area, 4)
     c["area_left"] = round(c["area_left"] + area, 4)
     c["broken"] = round(c["broken"] + broken_here, 4)
-    c["base"] = round(c["base"] + eq * ratio * float(par["fertility"]), 4)
+    skill_yield = 1 + float(here.p["master_yield"]) * master_share(here, mind, tech)       # D2-64
+    c["base"] = round(c["base"] + eq * ratio * float(par["fertility"]) * ground_mult(here.p, par) * skill_yield, 4)
     c["left"] = crop_left(f, c)
     here.apply("set", ref=("parcel", key), field="crop", value=c)
     how = "dibbled" if tech == "dibble" else "sowed"
@@ -314,6 +366,18 @@ def ready(here, tech, key) -> str:
             return f"the {c['kind']} in {p['name']} is ripe: past weeding"
         if y == "tend" and weed_gain(f, c.get("weeded", 0.0) / max(1e-9, c["area"])) >= float(f["weed_max"]) * 0.95:
             return f"the {c['kind']} in {p['name']} is as clean as weeding makes it"
+    if y == "works":
+        yy = t["yield"]
+        if p.get("ground") != yy["ground"]:
+            return f"{p['name']} is not {'wet' if yy['ground'] == 'wet' else 'hill'} ground"
+        wk = p.get("works") or {}
+        if wk.get("done", 0) >= float(p["size"]) - 1e-6 and wk.get("kept", 0) >= float(yy["upkeep"]) * float(p["size"]) - 1e-6:
+            return f"the {_works_word(yy)} of {p['name']} are whole and kept this season"
+    if y == "select":
+        if not c or here.day < int(c["ripe_day"]) or c["area_left"] <= 1e-6:
+            return f"there is no ripe crop in {p['name']} to choose seed from"
+        if c.get("selected_by") == here.name:
+            return f"you have chosen the seed from {p['name']} already"
     if y in ("herd", "milk", "slaughter"):
         hs = [h for h in here.herds().values() if h["parcel"] == key and head(h) > 0]
         if not hs:
@@ -388,7 +452,36 @@ def night(w) -> dict:
     return rec
 
 
+def _works_night(w, rec):
+    """Field works (D2-66): today's work holds if one who knew how worked on it; each season's upkeep, or the works decay a level."""
+    new_season = w.calendar(w.d + 1)["season"] != w.calendar()["season"]
+    for pid, par in w.s["parcels"].items():
+        wk = par.get("works")
+        if not wk:
+            continue
+        wk = dict(wk)
+        tech = "ditch" if wk["ground"] == "wet" else "terrace"
+        y = TECHNIQUES[tech]["yield"]
+        p = (wk.get("pending") or {}).get(str(w.d))
+        if p and p["led"]:
+            wk["units"] = round(wk["units"] + p["units"], 3)
+            wk["done"] = round(min(float(par["size"]), wk["units"] / float(y["units"])), 4)
+            rec["crops"].append((pid, "works", wk["done"]))
+        wk["pending"] = {}
+        if new_season and wk["done"] > 0:
+            if wk.get("kept", 0.0) + 1e-6 < float(y["upkeep"]) * wk["done"] and wk.get("finished_season") != w.calendar()["season"]:
+                wk["done"] = round(wk["done"] * 0.75, 4)                         # unkept, they decay a level
+                wk["units"] = round(wk["done"] * float(y["units"]), 3)
+                w.event(par["node"], "works", f"the {_works_word(y)} of {par['name']} are falling in for want of mending",
+                        about=[f"parcel:{pid}"], salience=0.4, tags=["farming"])
+            wk["kept"] = 0.0
+        if wk["done"] >= float(par["size"]) - 1e-6 and not wk.get("finished_season"):
+            wk["finished_season"] = w.calendar()["season"]
+        w.apply("set", par["node"], ref=("parcel", pid), field="works", value=wk)
+
+
 def _crops(w, rec):
+    _works_night(w, rec)
     f = w.p["farming"]
     year = w.year_days()
     winter = w.calendar()["season"] == "winter"
@@ -416,7 +509,8 @@ def _crops(w, rec):
                 c["rot"] = round(c.get("rot", 1.0) * (1 - float(f["rot"])), 4)
                 c["rotting"] = True
             c["left"] = crop_left(f, c)
-            if c["area_left"] <= 1e-6 or c["left"] <= 0.05 or (c.get("failed") and c.get("shown_failed") and not growing):
+            withering = c.get("failed") and growing                             # a blighted crop stands until its day
+            if c["area_left"] <= 1e-6 or (c["left"] <= 0.05 and not withering):
                 fert = soil_step(f, par["fertility"], c["crop"])               # the crop's slot ends (D4-39)
                 w.apply("set", node, ref=("parcel", pid), field="fertility", value=fert)
                 w.apply("set", node, ref=("parcel", pid), field="last_crop", value=c["crop"])

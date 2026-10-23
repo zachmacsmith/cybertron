@@ -8,6 +8,8 @@ may take from, the one slept in first (38.17 §9: to confirm).
 from __future__ import annotations
 
 from cybertron2.engine.data import EDIBLE, FITTINGS, ITEMS
+
+FIRE = tuple(f for f, d in FITTINGS.items() if d.get("fire"))
 from cybertron2.engine.world import Refused
 
 
@@ -38,7 +40,7 @@ def night(w) -> dict:
     for bid, b in s["buildings"].items():
         sleepers = [n for n, x in where.items() if x == bid]
         lit = False
-        if sleepers and b["fittings"].get("hearth"):
+        if sleepers and any(b["fittings"].get(f_) for f_ in FIRE):
             g = w.goods(b["stock"])
             if g.get("timber", 0.0) + 1e-9 >= fuel:
                 w.apply("destroy", b["node"], src=b["stock"], item="timber", qty=fuel, why="fire")
@@ -46,6 +48,7 @@ def night(w) -> dict:
         w.apply("set", b["node"], ref=("building", bid), field="fire", value=lit)
         if sleepers:
             rec["hearth"][bid] = {"sleepers": len(sleepers), "lit": lit}
+    tents = {}                                                                  # a tent sleeps two (D2-68): who shares whose
     for name in w.living():
         a = s["people"][name]
         bid = where.get(name)
@@ -54,12 +57,25 @@ def night(w) -> dict:
         if cold and state == "housed" and not b["fire"]:
             state = "no_fuel"
         need = float(p["ration"]) * float((p["shelter_cold"] if cold else p["shelter"]).get(state, 1.0))
+        fall = 1.0
+        gear = None
+        if state == "housed" and b["structure"] == "camp":                     # a camp (D2-68)
+            gear = "camp"
+        elif state == "unsheltered":                                            # out, with what one carries (D2-68)
+            gear = _gear(w, name, where, tents)
+        if gear:
+            out_ = p["camping"][gear]
+            need = float(p["ration"]) * float(out_[1] if cold else out_[0])
+            fall = float(out_[2])
+            if gear == "camp" and cold and not b["fire"]:
+                need, fall = float(p["ration"]) * float(p["camping"]["out"][1]), 0.0
+            rec.setdefault("camped", {})[name] = gear
         place = w.place_of(("person", name))
         stores = [a["hands"]]
         if place in s["nodes"]:
             mine = w.takeable(name, place)
             stores += sorted((c for c in mine if c != a["hands"]), key=lambda c: 0 if b is not None and c == b["stock"] else 1)
-        hearth = b is not None and bool(b["fittings"].get("hearth")) and bool(b["fire"])    # grain is boiled at a lit hearth (D2-60)
+        hearth = b is not None and any(b["fittings"].get(f_) for f_ in FIRE) and bool(b["fire"])   # grain boiled at a lit fire (D2-60)
         ate = _eat(w, place, stores, need, hearth)
         if ate + 1e-9 >= need:
             a["hunger"], a["missed"] = min(0, a["hunger"] + 1), 0
@@ -73,7 +89,7 @@ def night(w) -> dict:
             rec["missed"].append(name)
             if ate:
                 rec["ate"][name] = round(ate, 2)
-        if cold and state == "unsheltered" and w.rng("cold", w.d, name).random() < float(p["cold_starving"]):
+        if cold and state == "unsheltered" and w.rng("cold", w.d, name).random() < float(p["cold_starving"]) * fall:
             a["hunger"] = -2
             rec["cold_falls"].append(name)
     if w.d < w.days - 1:
@@ -103,6 +119,10 @@ def night(w) -> dict:
                 place = w.place_of(("container", cid))
                 lost = w.apply("destroy", place, src=cid, item=item, qty=round(q * r, 6), why="spoilt")
                 rec["spoiled"][item] = round(rec["spoiled"].get(item, 0.0) + lost, 4)
+    for bid, b in s["buildings"].items():                                       # a camp falls in after its nights (D2-68)
+        if b.get("lasts_until") is not None and w.d >= b["lasts_until"] and b["condition"] > 0:
+            w.apply("set", b["node"], ref=("building", bid), field="condition", value=0)
+            w.event(b["node"], "build", f"{b['name']} has fallen in", about=[f"building:{bid}"], salience=0.3, tags=["shelter"])
     for bid, b in s["buildings"].items():                                       # breaks (H-5)
         q = float(p["breaks"]["cold" if cold else "p"])
         if not b.get("unfinished") and b["condition"] > 0 and w.rng("break", w.d, bid).random() < q:
@@ -119,6 +139,25 @@ def night(w) -> dict:
             o["open"] = False                                                  # the offerer stays, or until its day
     s["log"].append(rec)
     return rec
+
+
+def _gear(w, name, where, tents):
+    """What someone sleeping out has to sleep in: a tent of one's own, a place in another's tent here, or a bedroll (D2-68)."""
+    a = w.s["people"][name]
+    g = w.goods(a["hands"])
+    place = w.place_of(("person", name))
+    if g.get("tent", 0) >= 1:
+        tents.setdefault(place, []).append([name, 1])
+        w.apply("wear", place, container=a["hands"], item="tent", uses=1)
+        return "tent"
+    for t in tents.get(place, []):
+        if t[1] < 2:
+            t[1] += 1
+            return "tent"
+    if g.get("bedroll", 0) >= 1:
+        w.apply("wear", place, container=a["hands"], item="bedroll", uses=1)
+        return "bedroll"
+    return None
 
 
 def sleeping_places(w, today) -> dict:

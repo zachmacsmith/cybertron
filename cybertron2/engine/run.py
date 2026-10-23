@@ -173,7 +173,17 @@ def talk(w, names, replies, results) -> dict:
 
 
 def _mentions(w, here, speaker, hearers, text):
-    """Hearing a craft named makes one aware of it (knowledge.md)."""
+    """Hearing a craft named makes one aware of it (knowledge.md); hearing of a place one did not know, from someone who knows it,
+    tells one of it and of the way there (D4-47)."""
+    low = f" {str(text).lower()} "
+    for nid, pl in PC.store(w, speaker)["places"].items():
+        nm = pl["name"].lower()
+        if f" {nm}" in low or f" {nm.removeprefix('the ')}" in low:
+            for h in hearers:
+                if nid not in PC.store(w, h)["places"]:
+                    PC.store(w, h)["places"][nid] = {**{k: v for k, v in pl.items() if k != "seen"}, "seen": None, "days": None,
+                                                     "told": speaker}
+                    PC.store(w, h)["today"]["heard"].append(f"(You had not heard of {pl['name']} before: {speaker} knows the way there.)")
     for tech in KN.mentions(text):
         if KN.basic(tech):
             continue
@@ -194,8 +204,8 @@ def dawn(w) -> None:
             h = w.s["herds"][hid]
             w.apply("set", node, ref=("herd", hid), field="parcel", value=pid)
             c = w.s["parcels"][pid].get("crop")
-            if c:
-                w.apply("set", node, ref=("parcel", pid), field="crop", value={**c, "left": round(max(0.0, c["left"] - float(inc.get("eats", 2))), 4)})
+            if c and c.get("area_left", 0) > 1e-6:
+                w.apply("draw", node, parcel=pid, key="crop", qty=round(min(c["left"], float(inc.get("eats", 2))), 4))
             holders = [m for m in w.living() if any(cl["claimant"] in (m, w.household_of(m)) for cl in w.claims_on(("parcel", pid)))]
             w.event(node, "stray", f"{h['name']} broke through into {w.s['parcels'][pid]['name']} at dawn and are trampling the "
                     f"{c.get('kind', 'crop') if c else 'ground'}", about=[f"parcel:{pid}"], salience=0.7, tags=["farming", "animals", "food"],

@@ -55,7 +55,7 @@ VERB = {
     "rest": {"args": "", "cost": 0, "doc": ""},
 }
 VERBS = tuple(VERB)
-FM_KINDS = ("sow", "break", "tend", "manure", "crop", "herd", "milk", "slaughter")
+FM_KINDS = ("sow", "break", "tend", "manure", "crop", "herd", "milk", "slaughter", "works", "select")
 FREE = tuple(v for v, d in VERB.items() if d["cost"] == 0)
 
 
@@ -246,7 +246,8 @@ def _technique(here, mind, a, party, verb):
         names = [t for t, d in TECHNIQUES.items() if d["verb"] == verb]
         raise Refused(f"{a.get('what')!r} is not something you {verb} ({verb}: {', '.join(names)})")
     t = TECHNIQUES[tech]
-    _level(mind, tech)
+    if not t.get("crew"):                                                     # crew work: anyone may dig, led by one who knows how
+        _level(mind, tech)
     kind, key, place_name = _site(here, mind, tech, a.get("at"))
     why = KN.shortfall(here, mind, tech, 1.0, key)
     if why:
@@ -365,10 +366,14 @@ def _build(here, mind, a, party):
             raise Refused(f"say where to build: a place on built ground or scrub here ({', '.join(here.parcels()[p]['name'] for p in lots) or 'none'})")
         par = here.parcels()[pid]
         used = sum(1 for b in here.buildings().values() if b["parcel"] == pid)
-        if used >= COVERS[par["cover"]]["lots"] * par["size"]:
+        if bp.get("structure") == "camp":                                        # a camp goes up anywhere but on water (D2-68)
+            if par["cover"] == "water":
+                raise Refused("you cannot camp on water")
+        elif used >= COVERS[par["cover"]]["lots"] * par["size"]:
             raise Refused(f"there is no room left to build on {par['name']}")
         _consume(here, bp["materials"], TRY[lvl]["inputs"], here.party_container(party) if party else None)
-        name = str(a.get("name") or "").strip()[:40] or f"{here.households()[party]['name'] if party in here.households() else here.name}'s new house"
+        who = here.households()[party]['name'] if party in here.households() else here.name
+        name = str(a.get("name") or "").strip()[:40] or (f"{who}'s camp on {par['name']}" if bp.get("structure") == "camp" else f"{who}'s new house")
         bid = here.apply("raise", node=here.node, parcel=pid, rec={"name": name, "structure": bp["structure"], "size": bp["size"],
                                                                      "fittings": {}, "unfinished": {"blueprint": what, "units_left": bp["units"]}})
         here.apply("claim", thing=("building", bid), claimant=owner, rights="all", grounds="built")
@@ -417,9 +422,16 @@ def _build_work(here, mind, bid, lvl, started=False):
     u["units_left"] = round(max(0.0, u["units_left"] - done), 2)
     here.record("build", u["blueprint"], None)
     if u["units_left"] <= 1e-9:
+        bp = BLUEPRINTS[u["blueprint"]]
         here.apply("set", ref=("building", bid), field="unfinished", value=None)
+        if bp.get("fittings"):                                                 # a blueprint that comes fitted (a camp: D2-68)
+            here.apply("set", ref=("building", bid), field="fittings", value=dict(bp["fittings"]))
+        if bp.get("lasts"):
+            here.apply("set", ref=("building", bid), field="lasts_until", value=here.day + int(bp["lasts"]))
         here.event("build", f"{here.name} finished {b['name']}", actor=here.name, about=[f"building:{bid}"], salience=0.6, tags=["building", "shelter"])
         KN.tried(here, mind, u["blueprint"], True)
+        if bp.get("fittings"):
+            return f"You made {b['name']}: shelter for {bp['size']} with a fire, for about {bp['lasts']} nights."
         return f"You finished {b['name']}. It has no fittings yet: beds, a hearth and bins make it a house."
     here.apply("set", ref=("building", bid), field="unfinished", value=u)
     return ("You began " if started else "You worked on ") + f"{b['name']}: about {show(u['units_left'])} units of work left."

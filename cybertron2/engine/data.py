@@ -45,6 +45,8 @@ ITEMS = {
     "handcart": {"weight": 0, "food": 0.0, "spoil": 0.0, "carry": 30, "track": True, "seen": True},   # 40 in all, on a track (02g §3)
     "wooden plough": {"weight": 4, "food": 0.0, "spoil": 0.0, "life": 60, "seen": True},       # D2-23; recipes.md §2 (60 plots)
     "harness": {"weight": 1, "food": 0.0, "spoil": 0.0, "life": 80, "seen": True},             # D2-23; 80 days' use
+    "bedroll": {"weight": 1, "food": 0.0, "spoil": 0.0, "life": 40, "seen": True, "camp": "bedroll"},    # D2-68: about 40 nights
+    "tent": {"weight": 6, "food": 0.0, "spoil": 0.0, "life": 30, "seen": True, "camp": "tent"},          # D2-68: sleeps 2
 }
 
 # Crops (D2-53, D4-38, D4-39; 02l §2-§3, calibrate): grow for a share of the year from the day sown; the cold kills what is still
@@ -91,13 +93,15 @@ RESOURCES = {
 FITTINGS = {
     "beds": {"label": "beds", "materials": {"timber": 2, "straw": 2}, "units": 1, "per": "bed", "basic": True,
              "does": "housed when sleeping here, one a bed"},                                                  # D2-56
-    "hearth": {"label": "a hearth", "materials": {"stone": 4}, "units": 3, "basic": False, "trade": "mason",
+    "hearth": {"label": "a hearth", "materials": {"stone": 4}, "units": 3, "basic": False, "trade": "mason", "fire": True,
                "does": "warmth (burns timber), porridge and baking"},
     "bins": {"label": "bins", "materials": {"timber": 3}, "units": 1, "basic": True, "does": "a store for food", "spoil": 0.5},
     "hand mill": {"label": "a hand mill", "materials": {"stone": 2}, "units": 2, "basic": True, "does": "grinding grain by hand",
                   "aliases": ["quern"]},                                                                     # D2-61
     "granary": {"label": "a granary floor", "materials": {"timber": 6}, "units": 4, "basic": True, "spoil": 0.2,
                 "does": "grain keeps longest, raised and dry"},                                              # D2-58
+    "fire ring": {"label": "a fire ring", "materials": {"stone": 1}, "units": 1, "basic": True, "fire": True,
+                  "does": "a fire in the open for warmth and cooking (burns timber)"},                              # D2-68: a camp's fire
     "oven": {"label": "a stone oven", "materials": {"stone": 6}, "units": 4, "basic": False, "trade": "mason",
              "does": "baking bread in batches"},                                                             # D2-60
     "anvil": {"label": "an anvil and bellows", "materials": {"stone": 6, "hide": 2, "timber": 1}, "units": 4, "needs": "hearth",
@@ -117,6 +121,8 @@ BLUEPRINTS = {
                     "structure": "timber", "basic": False, "trade": "carpenter"},
     "hall": {"label": "a hall, timber on stone", "materials": {"timber": 30, "stone": 10}, "units": 30, "size": 25,
              "structure": "timber", "basic": False, "trade": "carpenter"},
+    "camp": {"label": "a camp (a lean-to and a fire ring)", "materials": {"timber": 3}, "units": 1, "size": 4, "structure": "camp",
+             "basic": True, "fittings": {"beds": 4, "fire ring": 1}, "lasts": 10},                                  # D2-68
 }
 
 # Techniques: one handler reads these (38.17 §5). Tool multipliers by grade (recipes.md §8); "bare" is bare hands; a grade missing
@@ -150,6 +156,17 @@ TECHNIQUES = {
     "plough": {"verb": "work", "label": "ploughing with a yoked pair of oxen", "aliases": ["ploughing", "plow"], "at": {"covers": ["field"]},
                "draws": "plot", "yield": {"kind": "break", "plots": 0.25, "stone": 1.0}, "animals": {"oxen": 2},
                "uses": {"wooden plough": 1, "harness": 2}, "units": 1, "gives": "", "tags": ["farming", "animals"], "trade": "farmer"},
+    "ditch": {"verb": "work", "label": "ditching and banking wet ground", "aliases": ["ditches", "drain", "ditch and bank"],
+              "at": {"covers": ["field"]}, "draws": "plot", "yield": {"kind": "works", "ground": "wet", "units": 40.0, "upkeep": 1.5},
+              "tools": {"bare": 0.5, "crude": 1.0, "copper": 1.5}, "wear": 0.75, "units": 1, "gives": "", "tags": ["farming"],
+              "trade": "farmer", "crew": True},                                     # D2-66: 40 units a plot by a crew led by one who knows how
+    "terrace": {"verb": "work", "label": "terracing hill ground", "aliases": ["terraces", "terracing"], "at": {"covers": ["field"]},
+                "draws": "plot", "yield": {"kind": "works", "ground": "hill", "units": 60.0, "upkeep": 1.5, "stone": 6.0},
+                "tools": {"bare": 0.5, "crude": 1.0, "copper": 1.5}, "wear": 0.75, "units": 1, "gives": "", "tags": ["farming"],
+                "trade": "farmer", "crew": True},                                   # D2-66: 60 units and 6 stone a plot
+    "select seed": {"verb": "work", "label": "selecting seed from the best of a ripe crop", "aliases": ["seed selection"],
+                    "at": {"covers": ["field"]}, "draws": "crop", "yield": {"kind": "select"}, "units": 1, "gives": "", "tags": ["farming"],
+                    "trade": "farmer"},                               # D2-65: one who knows it sows crops that ripen 15% sooner
     "weed": {"verb": "work", "label": "weeding a growing crop", "aliases": ["weeding", "tend"], "basic": True, "at": {"covers": ["field"]},
              "draws": "crop", "yield": {"kind": "tend"}, "units": 1, "gives": "", "tags": ["farming"]},
     "manure": {"verb": "work", "label": "manuring a field", "aliases": ["manuring", "spread dung"], "basic": True, "at": {"covers": ["field"]},
@@ -196,7 +213,7 @@ TECHNIQUES = {
                    "at": {"fittings": ["oven"]}, "inputs": {"flour": 40, "timber": 2}, "units": 2, "gives": {"bread": 40},
                    "tags": ["food", "cooking"]},
     "dry meat": {"verb": "make", "label": "drying meat over a fire", "aliases": ["drying meat", "cure meat"], "basic": True,
-                 "at": {"fittings": ["hearth"]}, "inputs": {"meat": 2}, "units": 1, "gives": {"dried meat": 1}, "tags": ["food", "cooking"]},
+                 "at": {"fittings": ["hearth", "fire ring"]}, "inputs": {"meat": 2}, "units": 1, "gives": {"dried meat": 1}, "tags": ["food", "cooking"]},
     "cheese": {"verb": "make", "label": "making cheese", "aliases": ["cheesemaking"], "at": {"fittings": ["cellar"]},
                "inputs": {"milk": 6, "salt": 0.2}, "units": 1, "gives": {"cheese": 1}, "tags": ["food", "animals"], "trade": "herder"},
     "charcoal": {"verb": "make", "label": "burning charcoal", "aliases": ["charcoal burning"], "at": {"covers": ["forest"]},
@@ -204,6 +221,10 @@ TECHNIQUES = {
     "wooden plough": {"verb": "make", "label": "making a plough", "aliases": ["make a plough"], "inputs": {"timber": 4, "copper": 1},
                       "tools": {"crude": 1.0, "copper": 1.0}, "units": 4, "gives": {"wooden plough": 1}, "tags": ["farming", "craft"],
                       "trade": "carpenter"},
+    "bedroll": {"verb": "make", "label": "making a bedroll", "aliases": ["blanket roll"], "basic": True, "inputs": {"hide": 1}, "units": 1,
+                "gives": {"bedroll": 1}, "tags": ["travel"]},                                                           # D2-68
+    "tent": {"verb": "make", "label": "making a tent", "aliases": [], "basic": True, "inputs": {"hide": 3, "timber": 2}, "units": 2,
+             "gives": {"tent": 1}, "tags": ["travel"]},                                                                 # D2-68
     "harness": {"verb": "make", "label": "making a harness", "aliases": ["yoke"], "inputs": {"timber": 2, "hide": 1}, "units": 2,
                 "gives": {"harness": 1}, "tags": ["animals", "craft"], "trade": "leatherworker"},
     "crude tool": {"verb": "make", "label": "making a crude hand tool", "aliases": ["tool"], "basic": True, "inputs": {"timber": 1, "stone": 0.5},
@@ -255,6 +276,11 @@ PHYSICS = {
     "messages": {"per_day": 3, "jitter": {0: 37, 1: 37, 2: 18, 3: 8}, "max": 10},     # D4-31
     "say_units": 1,                                                                       # D4-31
     "carry": {"foot": 10},                                                                # transport.md (calibrate, OPEN C-1)
+    "ground": {"wet": 0.75, "hill": 0.6},                                # D2-66: until weather exists; field works bring each to 1.0
+    "master_yield": 0.2,                                                 # D2-64: a master farmer's crops yield x1.2
+    "seed_selection": 0.85,                                              # D2-65: ripen 15% sooner
+    "camping": {"out": [1.5, 2.0, 1.0], "bedroll": [1.35, 1.75, 0.5], "tent": [1.2, 1.4, 0.0], "camp": [1.2, 1.5, 0.0]},
+                                                                         # D2-68: food a night, in the cold, the cold's fall (share)
     "farming": {"plot_seed": 16.0, "ratio": 3.0, "break_gain": 1.5, "weed_max": 0.5, "weed_tau": 8.0, "window": 2, "rot": 0.25,
                 "fail": [0.05, 0.15], "fallow": 0.40, "grazed": [0.50, 1.15], "manure": [0.35, 1.15], "dung_per_plot": 10.0},
                 # D2-59 (16 seed a plot), D4-38 (02l: harvest 3x the seed, +1.5 broken, weeding to +50% on a curve of tau 1.5 small

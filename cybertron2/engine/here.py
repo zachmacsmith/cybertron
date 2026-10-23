@@ -44,23 +44,22 @@ class Here:
         return self._w.s["nodes"][self.node]["name"]
 
     def road_to(self, x):
-        """(node id, days, track) for a neighbouring node named x, else None. Roads from here are part of the place."""
+        """(node id, days, track) for a neighbouring place named x, or an unexplored way described as x, else None."""
         x = str(x or "").strip().lower().removeprefix("the ")
-        for r in self._w.s["roads"].values():
-            if self.node in (r["a"], r["b"]):
-                other = r["b"] if r["a"] == self.node else r["a"]
-                nm = self._w.s["nodes"][other]["name"].lower()
-                if x in (other.lower(), nm, nm.removeprefix("the ")):
-                    return other, r["days"], r.get("track", False)
+        for other, nm, days, track in self.roads():
+            nm = nm.lower()
+            if x and (x in (other.lower(), nm, nm.removeprefix("the "), nm.removeprefix("an ")) or (len(x) > 6 and x in nm)):
+                return other, days, track
         return None
 
     def roads(self) -> list:
-        """[(node id, name, days)] from here."""
+        """[(node id, name, days, track)] from here; a place one does not know is named by its way (D4-47)."""
         out = []
         for r in self._w.s["roads"].values():
             if self.node in (r["a"], r["b"]):
                 other = r["b"] if r["a"] == self.node else r["a"]
-                out.append((other, self._w.s["nodes"][other]["name"], r["days"], r.get("track", False)))
+                nm = self._w.s["nodes"][other]["name"] if self._w.knows_place(self.name, other) else r.get("way", "an unexplored way")
+                out.append((other, nm, r["days"], r.get("track", False)))
         return sorted(out, key=lambda x: x[1])
 
     # ------------------------------------------------------------------ me
