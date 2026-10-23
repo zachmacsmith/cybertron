@@ -45,38 +45,38 @@
   },
   "answers2": {
    "template": {
-    "text": "1. Probably not: the house is locked, the shutters are closed, and the cold chimney suggests no one has lit a fire, though someone could still be inside.\n2. It needs work, since the rotten ridge beam over the door is a clear sign of structural decay that should be repaired before it worsens.",
-    "cost_usd": 0.0003619,
-    "wall_s": 8.04,
-    "api_ms": 1336,
+    "text": "1. Probably not: the house is locked, the shutters are closed, and the cold chimney suggests no one has lit a fire.\n2. It needs work, since the ridge beam over the door is rotten at one end.",
+    "cost_usd": 4.991e-05,
+    "wall_s": 8.95,
+    "api_ms": 1365,
     "in_tokens": 1573,
-    "out_tokens": 95
+    "out_tokens": 68
    },
    "haiku": {
-    "text": "1. Probably not: the cold chimney, locked door, and closed shutters all suggest the house is empty for now.\n2. It needs some work, since the ridge beam over the door has rotted at one end, though the rest of the house looks well enough aged and sound.",
-    "cost_usd": 0.0003543,
-    "wall_s": 7.54,
-    "api_ms": 1415,
+    "text": "1. Probably not: the cold chimney, closed shutters, and locked door all suggest nobody is home right now.\n2. The house needs some work, since the rotted ridge beam over the door is a clear sign of structural decay that should be repaired soon.",
+    "cost_usd": 5.633e-05,
+    "wall_s": 8.35,
+    "api_ms": 1447,
     "in_tokens": 1565,
-    "out_tokens": 83
+    "out_tokens": 81
    },
    "raw": {
-    "text": "1. Probably not: the chimney is cold with no smoke, the door is locked, and the shutters are closed on a late autumn evening, so the house looks unoccupied.\n\n2. It needs work: the timber frame is worn and the ridge beam over the door is rotten at one end, which is a structural concern.",
-    "cost_usd": 0.00036760000000000004,
-    "wall_s": 7.37,
-    "api_ms": 1368,
+    "text": "1. Probably not: the chimney is cold with no smoke, the door is locked, and the shutters are closed, so the house looks empty.\n\n2. The house needs work, since its timber frame is worn and the ridge beam over the door is rotten at one end.",
+    "cost_usd": 5.662e-05,
+    "wall_s": 8.23,
+    "api_ms": 1375,
     "in_tokens": 1594,
-    "out_tokens": 98
+    "out_tokens": 81
    }
   },
   "leak_test": {
    "haiku": {
-    "text": "The miller's house is two storeys of worn timber on stone, its shutters closed and its door locked in the late autumn evening. The chimney is cold, and the ridge beam over the door has rotted at one end.",
-    "cost_usd": 0.0005092,
-    "wall_s": 8.63,
-    "api_ms": 2411,
+    "text": "You notice the miller's house is two storeys of timber frame on stone, worn with age. The ridge beam over the locked door is rotten at one end, and the shutters are closed on this late autumn evening, with the chimney cold and smokeless.",
+    "cost_usd": 0.0001331,
+    "wall_s": 8.37,
+    "api_ms": 1912,
     "in_tokens": 1742,
-    "out_tokens": 322
+    "out_tokens": 231
    }
   }
  },
@@ -126,38 +126,38 @@
   },
   "answers2": {
    "template": {
-    "text": "1. No, Gil is not fit for a full day of heavy work, since his injured arm is still seeping and he is favouring it while carrying a heavy load, and he looks hungry and thin.\n2. Gil has just come from the deep wood, where he presumably got the cut and gathered the split timber he is carrying.",
-    "cost_usd": 0.00036290000000000004,
-    "wall_s": 8.07,
-    "api_ms": 1905,
+    "text": "1. No, Gil is not fit for a full day of heavy work, since his injured arm is still bleeding and he is thin and hungry.\n2. Gil has just come from the deep wood, carrying split timber.",
+    "cost_usd": 4.981e-05,
+    "wall_s": 7.65,
+    "api_ms": 1244,
     "in_tokens": 1563,
-    "out_tokens": 101
+    "out_tokens": 68
    },
    "haiku": {
-    "text": "1. Probably not: he is thin, hungry, and has a bleeding arm wound, so he should rest rather than do a full day of heavy labour.\n2. He has just come from the deep wood, carrying split timber.",
-    "cost_usd": 0.000346,
-    "wall_s": 7.27,
-    "api_ms": 1326,
+    "text": "1. No, his arm is still seeping and he is thin and hungry, so he is unlikely fit for a full day of heavy work.\n2. He has just come out of the deep wood, carrying split timber.",
+    "cost_usd": 0.00012274,
+    "wall_s": 7.58,
+    "api_ms": 1775,
     "in_tokens": 1556,
-    "out_tokens": 70
+    "out_tokens": 214
    },
    "raw": {
-    "text": "1. Probably not: his hungry, thin look and bandaged, still-seeping arm suggest he is too weak and hurt for a full day of heavy work.\n2. He has just come from the deep wood, as he is carrying split timber and arrived from there at midday.",
-    "cost_usd": 0.0003589,
-    "wall_s": 8.58,
-    "api_ms": 2094,
+    "text": "1. No, a man with a bound, still-seeping forearm wound, who looks thin and hungry, is unlikely fit for a full day of heavy work.\n2. Gil has just come from the deep wood, carrying split timber.",
+    "cost_usd": 5.3009999999999996e-05,
+    "wall_s": 7.76,
+    "api_ms": 1423,
     "in_tokens": 1583,
-    "out_tokens": 85
+    "out_tokens": 74
    }
   },
   "leak_test": {
    "haiku": {
-    "text": "Ash sees Gil come up slowly through the trees at midday, a load of split timber on his back. He is thin in the face and looks hungry. A rag bound around his left forearm is still seeping, and he favours that arm as he walks.",
-    "cost_usd": 0.00038560000000000005,
-    "wall_s": 8.23,
-    "api_ms": 1713,
+    "text": "Ash sees Gil come up slowly at midday, thin in the face and hungry-looking, a load of split timber on his back. He carries himself carefully, favouring his left arm, where a rag bound around a cut is still seeping.",
+    "cost_usd": 5.507e-05,
+    "wall_s": 7.95,
+    "api_ms": 1367,
     "in_tokens": 1739,
-    "out_tokens": 76
+    "out_tokens": 75
    }
   }
  },
@@ -207,38 +207,38 @@
   },
   "answers2": {
    "template": {
-    "text": "1. No, the grain is only half ripe with green heads, so it needs more time before reaping.\n2. The eastern edge of the barley was damaged, trampled flat by cattle, as shown by the hoof prints.",
-    "cost_usd": 0.00034700000000000003,
-    "wall_s": 7.57,
-    "api_ms": 1268,
+    "text": "1. No, the grain is only half ripe with green tips, so it needs more time before reaping.\n2. Cattle damaged the eastern edge of the field, trampling the barley crop flat.",
+    "cost_usd": 4.6790000000000004e-05,
+    "wall_s": 7.26,
+    "api_ms": 1277,
     "in_tokens": 1561,
-    "out_tokens": 70
+    "out_tokens": 62
    },
    "haiku": {
-    "text": "1. No, the barley is not ready to reap yet, since its heads are still green at the tips.\n2. The eastern edge of the field, where the crop is trampled flat, was damaged, and cattle hoof prints mark it as the cause.",
-    "cost_usd": 0.0003487,
-    "wall_s": 7.22,
-    "api_ms": 1329,
+    "text": "1. No, the barley isn't ready yet, since it is only half ripe with green tips.\n2. The eastern edge of the field, where the crop lies trampled flat, was damaged, apparently by cattle, as shown by the hoof prints.",
+    "cost_usd": 5.52e-05,
+    "wall_s": 7.51,
+    "api_ms": 1360,
     "in_tokens": 1552,
-    "out_tokens": 77
+    "out_tokens": 79
    },
    "raw": {
-    "text": "1. No, the barley isn't ready yet, since only half of it is ripe and the heads are still green at the tips.\n2. The eastern edge of the field was trampled flat, and the hoof prints in the damage show that cattle caused it.",
-    "cost_usd": 0.00035470000000000006,
-    "wall_s": 7.64,
-    "api_ms": 1464,
+    "text": "1. Not yet: the heads are still green at the tips, so the barley is only half ripe and needs more time.\n2. Cattle trampled the eastern edge of the field, as shown by the hoof prints in the flattened barley.",
+    "cost_usd": 5.3e-05,
+    "wall_s": 7.46,
+    "api_ms": 1521,
     "in_tokens": 1582,
-    "out_tokens": 77
+    "out_tokens": 74
    }
   },
   "leak_test": {
    "haiku": {
-    "text": "The barley by the stream is half ripe, its heads still green at the tips, with thistle and dock thick along the rows. Along the eastern edge the crop is trampled flat, and cattle hoof prints show in the flattened stalks.",
-    "cost_usd": 0.0004874,
-    "wall_s": 8.45,
-    "api_ms": 2702,
+    "text": "Late summer, and the barley by the stream is half ripe, its heads still green at the tips. Thistle and dock grow thick along the rows, and along the eastern edge the crop lies trampled flat, with cattle hoof prints pressed into the damage.",
+    "cost_usd": 0.00018056000000000002,
+    "wall_s": 7.93,
+    "api_ms": 2211,
     "in_tokens": 1738,
-    "out_tokens": 280
+    "out_tokens": 326
    }
   }
  },
@@ -288,38 +288,38 @@
   },
   "answers2": {
    "template": {
-    "text": "1. Yes, possibly: the cold north wind, early migrating geese, and clear pale sky all suggest winter may come early.\n2. Probably: the thick column of smoke rising from the next valley suggests a fire or some other activity, such as burning or a homestead at work, is happening there.",
-    "cost_usd": 0.00035440000000000005,
-    "wall_s": 7.68,
-    "api_ms": 1872,
+    "text": "1. Yes, possibly: the cold northern wind, early migrating geese, and clear pale sky all suggest an early winter.\n2. Probably: the thick column of smoke from the next valley suggests a fire, a burning of fields or a hearth, or some other activity needing a closer look.",
+    "cost_usd": 6.256e-05,
+    "wall_s": 7.5,
+    "api_ms": 1420,
     "in_tokens": 1538,
     "out_tokens": 94
    },
    "haiku": {
-    "text": "1. Yes, the clear pale sky, the cold north wind, and the geese flying south earlier than expected all suggest winter may come early.\n2. Yes, a thick column of smoke rising from the next valley suggests something is burning there, perhaps a fire or a hearth gone out of control.",
-    "cost_usd": 0.0003579000000000001,
-    "wall_s": 7.43,
-    "api_ms": 1678,
+    "text": "1. Yes, the cold north wind, the early migrating geese, and the clear pale sky suggest winter may come early.\n2. Yes, a thick column of smoke rising from the next valley suggests something is burning there, such as a fire or a hearth.",
+    "cost_usd": 5.6710000000000004e-05,
+    "wall_s": 7.54,
+    "api_ms": 1632,
     "in_tokens": 1553,
-    "out_tokens": 95
+    "out_tokens": 82
    },
    "raw": {
-    "text": "1. Yes, the cold northern wind, early migrating geese, and early autumn season all suggest winter may come early.\n2. Yes, a thick column of smoke is rising from the next valley, so something is burning there.",
-    "cost_usd": 0.0003482,
-    "wall_s": 7.49,
-    "api_ms": 1626,
+    "text": "1. Yes, the cold northern wind, early migrating geese, and early autumn season all suggest winter may come early.\n2. Yes, a thick column of smoke is rising from the next valley, so something is likely burning there.",
+    "cost_usd": 5.185e-05,
+    "wall_s": 6.91,
+    "api_ms": 1319,
     "in_tokens": 1567,
-    "out_tokens": 70
+    "out_tokens": 72
    }
   },
   "leak_test": {
    "haiku": {
-    "text": "Old Wren watches the land under a pale, clear sky, where a cold wind from the north moves across the fields. Geese are flying south earlier than usual, and a thick column of smoke rises from the next valley.",
-    "cost_usd": 0.0004705,
-    "wall_s": 8.6,
-    "api_ms": 2106,
+    "text": "You see a clear, pale sky over the land this early autumn morning, and a cold wind blows from the north. Geese are flying south earlier than usual, and a thick column of smoke rises from the next valley.",
+    "cost_usd": 0.00012979000000000002,
+    "wall_s": 7.97,
+    "api_ms": 2007,
     "in_tokens": 1711,
-    "out_tokens": 257
+    "out_tokens": 225
    }
   }
  },
@@ -369,38 +369,38 @@
   },
   "answers2": {
    "template": {
-    "text": "1. Yes, someone entered the forest since last night's rain and has not come back out, since no prints lead away from the wood in the soft mud.\n2. The deer were moving out of the wood toward the field.",
-    "cost_usd": 0.00039410000000000004,
-    "wall_s": 8.86,
-    "api_ms": 1716,
+    "text": "1. Yes, someone entered the forest after the rain, but there are no prints coming back out, so they probably haven't returned yet (or left another way).\n2. The deer were moving out of the wood toward the field.",
+    "cost_usd": 4.917e-05,
+    "wall_s": 7.27,
+    "api_ms": 1326,
     "in_tokens": 1549,
-    "out_tokens": 169
+    "out_tokens": 67
    },
    "haiku": {
-    "text": "1. Yes, someone entered the forest recently, but there is no sign they have come back out, since the only boot prints go in and none return.\n\n2. The deer were moving out of the forest toward the field.",
-    "cost_usd": 0.00034480000000000003,
-    "wall_s": 7.54,
-    "api_ms": 1370,
+    "text": "1. Yes, someone entered the forest recently, but there is no sign they have come back out, since only inbound boot prints are visible.\n2. The deer were moving out of the forest toward the field.",
+    "cost_usd": 4.688e-05,
+    "wall_s": 7.67,
+    "api_ms": 1479,
     "in_tokens": 1570,
     "out_tokens": 62
    },
    "raw": {
-    "text": "1. Yes, someone entered the forest recently, but there is no sign they have come back out, since only one set of boot prints goes in and none comes out.\n\n2. The deer were moving out of the wood toward the field.",
-    "cost_usd": 0.0003509,
-    "wall_s": 7.03,
-    "api_ms": 1339,
+    "text": "1. Yes, someone entered the forest recently, but there is no sign they have come back out, since only one set of boot prints goes in and none comes out.\n2. The deer were moving out of the forest toward the field.",
+    "cost_usd": 4.956e-05,
+    "wall_s": 7.19,
+    "api_ms": 1326,
     "in_tokens": 1588,
     "out_tokens": 67
    }
   },
   "leak_test": {
    "haiku": {
-    "text": "The soft mud at the wood's edge holds fresh deer prints leading out of the trees toward the field, and beside them a single set of large boot prints goes into the wood with none coming back out. Both are fresh since last night's rain, and it is early morning.",
-    "cost_usd": 0.0004972,
-    "wall_s": 8.79,
-    "api_ms": 2565,
+    "text": "In the soft mud at the forest's edge, fresh deer prints lead out of the wood toward the field, since the rain last night. A single set of large boot prints goes into the trees, and none come back out.",
+    "cost_usd": 0.0001645,
+    "wall_s": 8.65,
+    "api_ms": 2484,
     "in_tokens": 1732,
-    "out_tokens": 302
+    "out_tokens": 294
    }
   }
  }

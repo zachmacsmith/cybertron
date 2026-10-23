@@ -1,0 +1,221 @@
+[
+ {
+  "id": "building",
+  "target": "the miller's house",
+  "visible_facts": {
+   "storeys": 2,
+   "material": "timber frame on stone",
+   "condition": "worn",
+   "chimney": "cold, no smoke",
+   "door": "locked",
+   "shutters": "closed",
+   "season": "late autumn",
+   "time": "evening",
+   "beam": "the ridge beam over the door is rotten at one end",
+   "light": "low evening sun on the west wall",
+   "sound_inside": "no sound from inside",
+   "smell": "woodsmoke from the other houses in the lane, none from this one",
+   "sign_doorstep": "dead leaves drifted against the doorstep, undisturbed",
+   "sign_chopping_block": "old grey chips round the chopping block, no fresh ones",
+   "about": "nobody else in the lane"
+  },
+  "observer": {
+   "name": "Brenna",
+   "stage": "grown woman",
+   "trade": "builder",
+   "skill": "reads timber and stone at a glance",
+   "state": "tired after a long day roofing",
+   "cares_about": "finding paid work before winter",
+   "relationship": "a neighbour she has built for before; he paid her late last time",
+   "attention": "attending closely"
+  },
+  "hidden_facts": {
+   "store": "34 grain inside",
+   "owner_debt": "the miller owes Gil 6 grain",
+   "inside": "nobody",
+   "away": "the miller has been away three nights, gone to the market town"
+  },
+  "questions": [
+   {
+    "q": "Is anyone likely to be at home in the miller's house right now?",
+    "a": "No (cold chimney, locked door, shutters closed in the evening)"
+   },
+   {
+    "q": "Is the house in good repair, or does it need work?",
+    "a": "Needs work (worn, a rotten beam over the door)"
+   }
+  ]
+ },
+ {
+  "id": "person",
+  "target": "Gil",
+  "visible_facts": {
+   "look": "hungry, thin in the face",
+   "wound": "a cut on the left forearm, bound with a rag, still seeping",
+   "carrying": "a load of split timber on his back",
+   "came_from": "the deep wood",
+   "gait": "walking slowly, favouring the arm",
+   "time": "midday",
+   "sound": "breathing hard",
+   "smell": "sweat and fresh-cut pine",
+   "sign_hands": "pine resin on his hands",
+   "sign_legs": "mud to the knee",
+   "weather": "bright and mild",
+   "about": "he walks alone",
+   "timber": "the split timber is pine, freshly cut"
+  },
+  "observer": {
+   "name": "Ash",
+   "stage": "young woman",
+   "trade": "spinner",
+   "skill": "none in particular",
+   "state": "hungry herself, uneasy",
+   "cares_about": "whether the household will eat this week",
+   "relationship": "Gil is her elder brother; they share a house",
+   "attention": "glancing as he passes"
+  },
+  "hidden_facts": {
+   "hunger": "he has eaten nothing for two days",
+   "how_wounded": "he fought Rook over the timber",
+   "timber_owner": "the timber was cut on Rook's plot"
+  },
+  "questions": [
+   {
+    "q": "Is Gil fit for a full day of heavy work today?",
+    "a": "No (hungry and wounded)"
+   },
+   {
+    "q": "Where has Gil just come from?",
+    "a": "The deep wood"
+   }
+  ]
+ },
+ {
+  "id": "field",
+  "target": "the barley field by the stream",
+  "visible_facts": {
+   "crop": "barley",
+   "ripeness": "half ripe, heads still green at the tips",
+   "weeds": "thistle and dock thick along the rows",
+   "damage": "trampled flat along the eastern edge",
+   "tracks_in_damage": "cattle hoof prints",
+   "season": "late summer",
+   "time": "late afternoon",
+   "sound": "cattle lowing in the pasture beyond the eastern edge",
+   "smell": "dung on the trampled edge",
+   "sign_fence": "a gap in the hurdle fence on the eastern edge, one hurdle down",
+   "birds": "rooks feeding on the trampled grain",
+   "stream": "the stream running low and clear",
+   "about": "nobody else in the fields"
+  },
+  "observer": {
+   "name": "Tam",
+   "stage": "grown man",
+   "trade": "farmer",
+   "skill": "judges a crop and its soil",
+   "state": "worried, short of grain since spring",
+   "cares_about": "bringing in a full harvest",
+   "relationship": "his own field",
+   "attention": "attending closely"
+  },
+  "hidden_facts": {
+   "whose_cattle": "the cattle are Ash's",
+   "who_broke_fence": "Ash's boy left the hurdle down",
+   "yield": "expected 40 grain"
+  },
+  "questions": [
+   {
+    "q": "Is the barley ready to reap now?",
+    "a": "No (half ripe)"
+   },
+   {
+    "q": "What damaged part of the field?",
+    "a": "Cattle trampled the eastern edge"
+   }
+  ]
+ },
+ {
+  "id": "land",
+  "target": "the sky and the land",
+  "visible_facts": {
+   "wind": "cold, from the north",
+   "birds": "geese flying south, earlier than usual",
+   "smoke": "a thick column of smoke rising from the next valley to the north",
+   "sky": "clear, pale",
+   "season": "early autumn",
+   "time": "morning",
+   "sound": "wind in dry beech leaves; the geese calling",
+   "smell": "woodsmoke on the wind, faint",
+   "frost": "white frost on the grass in the shade",
+   "trees": "beech leaves already turning",
+   "stream": "the stream low",
+   "about": "a herder driving cattle down from the high pasture"
+  },
+  "observer": {
+   "name": "Old Wren",
+   "stage": "old woman",
+   "trade": "keeps the almanac",
+   "skill": "reads the season's signs",
+   "state": "grieving her husband, who died last winter",
+   "cares_about": "whether the village's stores will last the winter",
+   "relationship": "the valley she has lived in all her life",
+   "attention": "attending to the land"
+  },
+  "hidden_facts": {
+   "smoke_cause": "the hill farm in the next valley is burning",
+   "winter": "the winter will be long and hard"
+  },
+  "questions": [
+   {
+    "q": "Are there signs that winter may come early?",
+    "a": "Yes (cold north wind, geese leaving early)"
+   },
+   {
+    "q": "Is anything happening in the next valley?",
+    "a": "Yes, a thick column of smoke is rising there (cause unknown)"
+   }
+  ]
+ },
+ {
+  "id": "tracks",
+  "target": "the edge of the forest above the village",
+  "visible_facts": {
+   "deer_tracks": "deer prints, fresh, heading out of the wood toward the field",
+   "boot_tracks": "one set of boot prints, large, going into the wood, none coming out",
+   "freshness": "since the rain last night",
+   "ground": "soft mud",
+   "time": "early morning",
+   "light": "grey dawn light, mist in the hollows",
+   "sound": "water dripping from the branches; a woodpecker drumming deeper in the wood",
+   "smell": "wet earth and leaf mould",
+   "sign_twig": "a broken hazel twig at head height where the boot prints enter",
+   "sign_droppings": "fresh deer droppings by the field gate",
+   "about": "nobody in sight; the village below still quiet"
+  },
+  "observer": {
+   "name": "Kell",
+   "stage": "young man",
+   "trade": "hunter",
+   "skill": "reads tracks",
+   "state": "hungry, eager for a kill",
+   "cares_about": "getting a deer before anyone else does",
+   "relationship": "his own hunting ground; he does not like others in it",
+   "attention": "attending closely"
+  },
+  "hidden_facts": {
+   "who": "Rook went in before dawn",
+   "why": "to check his snares",
+   "where_now": "Rook is at the snare line by the old oak"
+  },
+  "questions": [
+   {
+    "q": "Did someone enter the forest recently, and have they come back out?",
+    "a": "Yes, one person (large boots) went in since last night's rain; no prints coming out"
+   },
+   {
+    "q": "Which way were the deer moving?",
+    "a": "Out of the wood toward the field"
+   }
+  ]
+ }
+]
