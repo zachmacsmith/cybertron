@@ -38,3 +38,42 @@ already take them, so this adds no power). The pair is rerun as `runs/m1_C2` and
 
 What the void pair still shows, with that caveat: refusals fell to 13% of results (A and B: 24-32%) and units used rose to 84%
 (73-78%), so the fixes of 11 §5 work; no theft, raid, attack or guard in either arm.
+
+## 4. Results (C2 against C02, the valid pair)
+
+| Measure (§2) | C2: fire | C02: null |
+|---|---|---|
+| 1. Food Reed -> Fenn after day 3 | trade 20 (food value); gifts 0; loans 0 | trade 18; gifts 0; loans 0 |
+| Price, grain per timber | 3, 3, 3, 3, then 2, 2 (day 8) | 2.5, 3, 3, 3, 3, 3 |
+| 2. New debts stated | none | none |
+| 3. Thefts, raids, attacks, guards | 0, 0, 0, 0 | 0, 0, 0, 0 |
+| Doors barred (set to barred) | 7 | 1 |
+| 4. The feud named | never | never |
+| 5. Missed meals; deaths | 0; 0 | 0; 0 |
+| Stores at the end | Reed 8.1 bread, 7 timber; Fenn 11.6 grain, 10 timber | Reed 5 bread; Fenn 19.3 grain, 12.2 meat, 5.5 bread, 11.5 timber |
+| 6. Food's share of work results | about 90% | about 85% |
+| Units used; refusals | 80%; 13% of results | 75%; 10% |
+| 7. Slack: make / teach+learn / build | 10 / 3 / 0 | 19 / 7 / 3 |
+| Cost | $4.10 | $4.02 |
+
+**Reading.**
+
+1. **The shock did not create need.** On the richer land the Fenns covered the loss by hunting, foraging and selling timber; nobody
+   in either arm missed a meal. So this pair cannot say whether agents give under real need: nobody was in need. The fire cost
+   the Fenns about 30 meals of stores by the end against the null arm, and nothing else.
+2. **The fire was read as a security risk, not a call for help.** Osric on the fire day: "I'll bar the door for the night, because
+   the Fenns lost their store", and "Bring timber to Reed House and you'll eat tonight". Barred doors: 7 against 1. No gift, no
+   loan, no change in price in either direction (3 grain a timber in both arms), though Osric's sister and niece were in the burnt
+   house. The Fenns never asked for help either; they sold timber.
+3. **"No quarrels" is ritual.** Said 29 times in C2 and 9 in C02, mostly as a sign-off ("Fenn folk: bring all food home before
+   dark. No quarrels with Reed House."). The feud is never named; it shows only as the peace being invoked.
+4. **More food did not free time for anything else.** Food stayed 85-90% of work with full bellies: agents stockpiled (the Fenns
+   ended the null arm with 37 meals in store). The world offers nothing else worth units: no goods to want beyond food and fuel,
+   no building that matters, no status. This, not scarcity, is why A and B looked like subsistence (scenario_design: conversion
+   chains and things to want).
+5. **Coordination inside a household is weak.** Hob offered the store's grain for timber; Osric asked him to withdraw it ("our
+   store is down to 4 grain"). Roger told Wymarc to stop trading the house's timber. Heads correct members after the fact.
+
+**What the next test needs:** real need (a shock that cannot be covered by work: the hunt fails for days, or a wounding), with
+help possible only from the other house; and things worth working for beyond food, so slack has a use. Both are world design,
+not engine work.
