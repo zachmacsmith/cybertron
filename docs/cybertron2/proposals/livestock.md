@@ -35,6 +35,9 @@ answer.
 
 ## Fences, hedges and walls (23 Oct, discussion; for later)
 
+*37.4's [fences.md](fences.md) holds the mechanism (field works on parcels, the hamlet run's lost rye); this section is 37.2's numbers
+for it.*
+
 Zach: are herds kept in by fences or by herding? Both, proposed: **a herd stays put if it is herded or enclosed**. Unherded and
 unenclosed, it wanders: strays into crops (the M1 stray incident), gets lost, and is easy prey and easy to steal.
 
