@@ -55,7 +55,9 @@ def parcel_name(w, c) -> str:
     if c.get("in") in w.s["buildings"]:
         return w.s["buildings"][c["in"]]["name"]
     pid = c.get("parcel")
-    return w.s["parcels"][pid]["name"] if pid in w.s["parcels"] else w.s["nodes"].get(c.get("node"), {}).get("name", "the road")
+    if pid in w.s["parcels"]:
+        return w.s["parcels"][pid]["name"]
+    return w.s["nodes"][c["node"]]["name"] if c.get("node") in w.s["nodes"] else "the side of the road"
 
 
 def goods_words(goods: dict) -> str:

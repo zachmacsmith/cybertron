@@ -1,0 +1,15 @@
+# Package B, a short targeted live run for what the 8-day arms never produced: a meeting on the road and a find. The road made one
+# day with a ford (meetings near certain there); Simkin (Marsh, Wetham) and Joyce (Cragg, Highcombe) set off from opposite ends on
+# day 1 (Joyce carrying timber); a pack lies on the road. What they say, trade and choose is theirs.
+base: cybertron2/specs/two_valleys_s1.yaml
+name: The two valleys, a meeting on the road
+days: 3
+roads:
+  - [wetham, highcombe, 1, track, {terrain: river valley, stretches: {1: {landmarks: [ford]}}}]
+  - [highcombe, old_wood, 1, {way: a forest path over the scarp that nobody uses, terrain: woodland}]
+things:
+  - {road: [wetham, highcombe], stretch: 1, kind: pile, goods: {dried meat: 3, coin: 6}, age: 2}
+script:
+  - {day: 1, who: Simkin, do: {do: travel, to: Highcombe}}
+  - {day: 1, who: Joyce, do: {do: move, item: timber, qty: 4, to: hands}}
+  - {day: 1, who: Joyce, do: {do: travel, to: Wetham}}

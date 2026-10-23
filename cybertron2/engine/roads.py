@@ -342,7 +342,7 @@ def _finds(w, today, rec, members, t, pos):
             continue
         finder = next((n for n in members if w.rng("road-find", w.d, n, cid).random() < min(1.0, TH.own(w, c) * sight * TH.eye(w, n))), None)
         if finder:
-            today["road"]["finds"].append({"id": f"find:{cid}:{w.d}", "kind": "find", "road": road_id, "pos": pos, "thing": cid,
+            today["road"]["finds"].append({"id": f"find:{cid}:{finder}:{w.d}", "kind": "find", "road": road_id, "pos": pos, "thing": cid,
                                            "members": members, "finder": finder, "label": TH.describe(w, c)})
             rec["finds"].append({"by": finder, "thing": cid})
 

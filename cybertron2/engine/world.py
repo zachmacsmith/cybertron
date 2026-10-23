@@ -173,9 +173,14 @@ class World:
             if not h["offices"].get("head") and h["members"]:
                 h["offices"]["head"] = self._eldest(h["members"])
         for t in spec.get("things") or []:                                     # things lying at a spot from the start (D2-85)
-            node = s["parcels"][t["parcel"]]["node"]
-            cid = p_new_thing(self, node, t["parcel"], t.get("kind", "pile"), by=t.get("by"), hidden=t.get("hidden"),
-                              untaught=bool(t.get("untaught")))
+            if t.get("road"):                                                  # on a stretch of road (world/roads.md)
+                rid = next(r for r, x in s["roads"].items() if {x["a"], x["b"]} == set(t["road"]))
+                cid = p_new_thing(self, rid, None, t.get("kind", "pile"), by=t.get("by"), hidden=t.get("hidden"),
+                                  stretch=int(t.get("stretch", 1)))
+            else:
+                node = s["parcels"][t["parcel"]]["node"]
+                cid = p_new_thing(self, node, t["parcel"], t.get("kind", "pile"), by=t.get("by"), hidden=t.get("hidden"),
+                                  untaught=bool(t.get("untaught")))
             self.s["containers"][cid]["goods"] = {k: float(v) for k, v in (t.get("goods") or {}).items()}
             self.s["containers"][cid]["day"] = -int(t.get("age", 1))
             for who in t.get("known_by") or []:
