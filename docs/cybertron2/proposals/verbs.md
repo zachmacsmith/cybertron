@@ -140,6 +140,9 @@ beacon). Nothing found so far needs a new verb.
   folds in, rules against swelling (data first, a new verb only for a new kind of change, institutional acts through `invoke`, a
   coverage test, the count as a decision), and a check of what may not fit.
 
+- 23 Oct: built as a subset in M1 with `learn` kept as a verb; the same-day teach and learn match failed often in run B (Q5 in
+  [11_m1_slice.md](../../review/38_space_engine/11_m1_slice.md)), which supports the offer-and-accept form proposed here.
+
 ## Sources
 
 38.06 (all cybertron 1 actions), knowledge.md, 02g §5b (raids at scale), 02i (fittings, locks), 02k (fuse events, gates),

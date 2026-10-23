@@ -343,6 +343,10 @@ wrong fact on purpose; false beliefs come only from what people say, rumour and 
   attend to: replaced the short table in §3b with the full list (a person, a gathering, a building, a room, a plot, a site, a
   herd, goods in view, a posted notice, a road out, the land and sky, a body or a scene) and what is not attendable.
 
+- 23 Oct: tested in M1 runs A and B ([11_m1_slice.md](../../review/38_space_engine/11_m1_slice.md)): agents attend to their own house
+  more than anything (Q4 there); low-salience signs reach few, as designed; felt-watched and sightings read naturally. Not
+  revised yet.
+
 ## Sources
 
 cybertron2/prompt.py and perceive.py (as built), 38.02, knowledge.md, notes.md, verbs.md, D4-6, D4-11, D4-19, D4-21, D2-4.

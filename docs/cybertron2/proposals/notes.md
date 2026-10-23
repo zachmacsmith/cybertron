@@ -69,6 +69,9 @@ knowledge has to reach someone else or outlast the writer, which is where instit
 
 - 23 Oct: opening a note became a talk-step action shown at once (Zach: a note shown a day later is not worth opening).
 
+- 23 Oct: tested in M1 runs A and B ([11_m1_slice.md](../../review/38_space_engine/11_m1_slice.md)): Opus and Haiku write and pin
+  notes, Sonnet almost never; opening notes was used twice in 280 turns. Not revised.
+
 ## Sources
 
 cybertron 1's context module (scratchpad, files, pins, read_file, recall); 38.02 (perception, memory bands); 02h §3 (documents as

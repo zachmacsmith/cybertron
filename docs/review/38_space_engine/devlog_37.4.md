@@ -83,6 +83,10 @@ changed in its code yet. **From 22 Oct the decisions are kept in [docs/cybertron
 
 ## Log
 
+- **23 Oct.** Zach: build one node with memory, attending and knowledge, and test it with LLM runs, first planted founders,
+  then a generated society. Built `cybertron2/m1/` (data, world, knowledge, act, perceive, prompt, run, generate, report) and ran
+  A (6 founders, $3.21) and B (generated, 9 people, $4.28). Report and questions: [11_m1_slice.md](11_m1_slice.md).
+
 - **23 Oct.** Zach: teaching passes skill; agents should know how learning works; the world grows by data (D4-24); a deep dive on
   what agents see, attention and descriptions. Updated knowledge.md; wrote proposals/seeing.md.
 

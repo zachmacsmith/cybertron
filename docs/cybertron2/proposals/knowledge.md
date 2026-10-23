@@ -308,6 +308,10 @@ version of a quarrel. The engine never writes these and never checks them.
   action, must not drift, spread by testimony, are measured, and feed the prompt); the agent keeps interpretations, plans and
   opinions in its notes.
 
+- 23 Oct: tested in M1 runs A and B ([11_m1_slice.md](../../review/38_space_engine/11_m1_slice.md)): the paths work and are used
+  by name; one session took a youth to known (Q3 there); a craft only known of left one agent stuck for ten days (Q1 there). Not
+  revised yet.
+
 ## Sources
 
 38.02 (perception), 38.06 (actions), 09 §2c (childhood memories), 02c §5 (skills, apprenticeship), 02h (knowledge as documents,
