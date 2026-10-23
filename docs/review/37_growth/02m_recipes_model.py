@@ -268,3 +268,39 @@ if __name__ == "__main__":
     tool_methods()
     worth_of_tools()
     worth_table()
+
+
+# ---------------------------------------------------------------- 23 Oct (c): specialised tools
+# A specialised tool: a known recipe (a master smith's or a carpenter's), more copper, the smithy; better at one method than the
+# copper hand tool, lasts longer at it, and adds one qualitative ability. Useless (x1, crude-equivalent) at other methods.
+SPECIAL = {
+    # tool:          (method, copper, units, x yield over the copper hand tool, life in uses, what it alone can do)
+    "felling axe":   ("fell", 2, 5, 1.5, 80, "fells great trees: the great beams halls over 25 need (02i §2b)"),
+    "miner's pick":  ("mine", 2, 5, 1.33, 80, "works a deep seam (props and a crew) that hand tools cannot"),
+    "scythe":        ("cut hay", 2, 4, 1.67, 80, "one person cuts a pasture's hay inside the summer window"),
+    "mason's chisels": ("quarry", 1, 4, 1.33, 80, "dressed stone: millstones, arches, a third storey (D2-3)"),
+    "reaping hook":  ("reap", 1, 3, 1.33, 80, "loses less grain: +10% of the harvest brought in"),
+}
+USE_UNITS = 2                                        # a use is about 2 units of work
+
+
+def special_tools():
+    rows = []
+    for t, (m, cu, units, x, life, ability) in SPECIAL.items():
+        c = units + cu * cost("copper")
+        out_per_unit = METHODS[m][2]                 # copper hand tool's multiplier on that method
+        # units saved per use: the same output with the copper hand tool would take x times the work
+        saved = USE_UNITS * (1 - 1 / x)
+        wear_diff = c / life - cost("hand tool") / TOOLS["hand tool"][0]
+        payback = c / (saved - wear_diff)
+        hh = HOUSEHOLD_UNITS.get(m, 0) / USE_UNITS   # a household's uses a year
+        spec = DAY / USE_UNITS * 0.8                 # a full-time specialist: about 2.4 uses a day
+        rows.append([t, m, f"{c:.0f}", f"x{x:g}", life, f"{saved:.2f}", f"{payback:.0f}",
+                     f"{payback / hh:.1f} years" if hh else "never", f"{payback / spec:.0f} days", ability])
+    print("\n## Specialised tools: when they pay (against the copper hand tool, on their own method)\n")
+    print(table(rows, ["tool", "method", "cost", "better by", "life (uses)", "units saved a use", "uses to pay",
+                       "a household", "a full-time specialist", "what it alone can do"]))
+
+
+if __name__ == "__main__":
+    special_tools()

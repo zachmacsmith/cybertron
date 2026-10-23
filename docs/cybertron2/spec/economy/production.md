@@ -22,6 +22,7 @@ is in proposals.
 - D2-19: first worlds have a short metal ladder.
 - D2-23: the tool set below.
 - D2-43: the basic techniques and the ten trades below.
+- D2-44: bread. D2-46: weapons wear, with a small chance of breaking.
 
 ## Mechanics
 
@@ -52,6 +53,19 @@ is in proposals.
 | cart | transport (transport.md) | | |
 | weapons | fighting and hunting | strength in a fight; a better catch hunting | crude, blade |
 | trap | at a forest site | catches game overnight while the trapper is elsewhere; checked by a visit; depletes game like hunting; can be emptied by whoever checks it | |
+
+### Bread (D2-44)
+
+- Grain is eaten as porridge at a hearth, with no other work.
+- Flour: grain ground by hand at a quern, or at a mill (millstones turned by hand, faster with a water wheel).
+- Bread: flour, fuel and work at a hearth make a little more bread than the grain put in (11 from 10); bread is eaten without a
+  hearth and keeps longer than other carried food. A mill's holder may charge for milling.
+
+### Wear (D2-46)
+
+Tools and weapons wear by use on one scale: each method has a wear factor (reaping light, mining heavy); a fight is the heaviest
+use, so a blade lasts about 10 fights and a crude weapon about 3, with a small chance of breaking in any fight. A smith can mend a
+worn metal tool or blade.
 
 ### Basic techniques and trades (D2-43)
 
@@ -93,4 +107,4 @@ the soil in words ("tired", "good"), their seed in store, their tools and whethe
 [02l_farming.md](../../../review/37_growth/02l_farming.md), [02j_end_uses.md](../../../review/37_growth/02j_end_uses.md),
 [02d_ladders.md](../../../review/37_growth/02d_ladders.md); proposals/farming.md, proposals/tools.md.
 
-*Current as of 23 Oct 2026: H-6, D2-11 to D2-19, D2-23, D2-42, D2-43.*
+*Current as of 23 Oct 2026: H-6, D2-11 to D2-19, D2-23, D2-42, D2-43, D2-44, D2-46.*

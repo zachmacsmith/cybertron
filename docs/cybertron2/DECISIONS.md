@@ -85,6 +85,9 @@ and correct them in place.**
 | D2-41 | 23 Oct | **Meat is a good**, from the hunt and slaughter: more food per unit (dense), but spoils fast fresh; good for a household or a feast | proposals/recipes.md §11 | |
 | D2-42 | 23 Oct | **Milk** from cattle, now, as a technique agents must learn or try (not basic); it needs a cow in milk | recipes.md §11 | |
 | D2-43 | 23 Oct | **The basic set and the ten trades** of recipes.md §5 | recipes.md §5 | |
+| D2-44 | 23 Oct | **Bread:** porridge needs only a hearth; flour by hand quern or at a mill (millstones, a water wheel); 10 flour, 1 timber and 1 unit at a hearth make 11 bread, eaten without a hearth and keeping about 5% a day carried; the mill is a chokepoint | proposals/recipes.md §10 | |
+| D2-45 | 23 Oct | **Cellar and stalls** join the fittings: a cellar (stone) keeps food at a quarter of the house's spoilage; stalls house animals in winter (less fodder, dung kept, safe from rustling) | recipes.md §12 | 02g §1f's eight fittings |
+| D2-46 | 23 Oct | **Weapons wear** on the one wear scale for tools (a fight is heavy use: a blade lasts about 10 fights, a crude weapon about 3; a smith mends), **with a small chance of breaking** in a fight | recipes.md §9 | combat.py's weapon used up in every fight |
 
 ## Directions (Zach's stated aims recorded in the notes; designs follow them; checked by 37.2, 22 Oct)
 

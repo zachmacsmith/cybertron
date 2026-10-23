@@ -226,6 +226,55 @@ A year's worth against a year's cost (capital written off over its life, plus up
   this catalogue; when multi-node runs have these goods, check whether slack goes to them, and whether agents also need things
   valued for themselves (comfort, safety, standing).
 
+### 14. Milk and cheese: what they do that other food does not
+
+| | Milk | Cheese | Against other food |
+|---|---|---|---|
+| **where it comes from** | a living animal, daily, without killing it | milk, salt and time | meat ends the animal; grain needs a plot, seed and a season |
+| **what it turns into food** | grass, on land that grows no grain (hills, moor, grassland) | the same, stored | wild food is stock-limited; grain needs arable land |
+| **keeping** | the same day | like salted meat (about 2% a day) | |
+| **carrying** | not at all | high value per weight | |
+
+- **Milk is interest; meat is principal.** A herd that is milked feeds people every day and stays a herd; a slaughter feeds many
+  once and the animal is gone. That makes a herd a capital good that pays a return, so cattle can be lent, rented and given as
+  bride price for what they yield (02g §2), and wealth in cattle differs from wealth in grain.
+- **It makes pasture nodes food-producing.** Hill and grassland households live on milk where no grain grows, and are tied to
+  their herds, because milk must be drunk where the cow is.
+- **Cheese is how pastoral land exports food and gets through winter:** it turns the summer's milk (cows give less in winter) into
+  a store that keeps and travels, and it is **salt's second use**, so a cheese-making node must trade for salt. The hills then sell
+  copper and cheese; the valleys sell grain and bread.
+- **Recommendation: add cheese now** (6 milk, 0.2 salt, 1 unit, a cool room or a cellar to age it: 1 cheese worth 2 food). It
+  passes the pruning rule on two counts: it changes shelf life enough to move where things happen, and it creates a trade (salt
+  in, cheese out).
+
+### 15. Specialised tools
+
+Above the base hand tool, a few **specialised tools**: each a known recipe (a master smith's technique, not basic), made at a
+smithy with more copper, **better at one method, longer-lived at it, and able to do one thing the base tool cannot**. At other work
+it is no better than a crude tool.
+
+| Tool | Method | Cost (units) | Better than the copper hand tool | Life | What it alone can do | Pays back: household | Pays back: full-time specialist |
+|---|---|---|---|---|---|---|---|
+| felling axe | fell | 22 | x1.5 | 80 uses | fells great trees: the great beams a hall for more than 25 needs (02i §2b) | 2.7 years | 14 days |
+| miner's pick | mine | 22 | x1.33 | 80 | works a deep seam that hand tools cannot | never | 18 days |
+| scythe | cut hay | 21 | x1.67 | 80 | one person cuts a pasture's hay inside the summer window | 13 years | 11 days |
+| mason's chisels | quarry | 13 | x1.33 | 80 | dressed stone: millstones, arches, a third storey (D2-3) | never | 8 days |
+| reaping hook | reap | 12 | x1.33 | 80 | loses less grain: +10% of the harvest brought in | 1 year | 7 days |
+
+**Why it is relevant:**
+- **It makes specialisation pay for itself.** A specialised tool repays a full-time specialist in one to three weeks, and a
+  household in years or never. So the woodsman, the miner, the mason and the herder buy them; the household keeps one hand tool.
+  Tools then deepen the division of labour, as in Smith's pin factory, instead of every household doing everything a little better.
+- **The qualitative abilities are chokepoints.** Great beams, deep seams, dressed stone and millstones exist only where a
+  specialist with the right tool does the work, and the tool exists only where a smith knows the recipe. That ties the mason, the
+  miner and the woodsman to the master smith.
+- **It gives smithing depth:** a novice smith makes hand tools; a master makes these (knowledge.md's levels), so a master's
+  know-how is worth teaching and paying for.
+
+**What it costs the design:** five more goods, each with one use, against the pruning rule (02g §1f). They pass it on one test
+only, but the important one: each creates a dependence (specialist on master smith) and an ability nobody else has. Five is enough;
+more (a dozen tool kinds) would add goods without adding new dependences.
+
 ## Why
 
 - Each good in D2-24 has a reason to be made, a place it is made and a reason to travel; no good is single-use (02g §1f).
@@ -241,16 +290,13 @@ A year's worth against a year's cost (capital written off over its life, plus up
 
 ## Open questions (for Zach)
 
-Answered 23 Oct: meat in (D2-41); milk in as a technique (D2-42); the basic set and ten trades (D2-43).
+Answered 23 Oct: meat (D2-41); milk as a technique (D2-42); the basic set and ten trades (D2-43); bread as in §10 (D2-44); cellar
+and stalls (D2-45); weapons wear on the one scale with a small chance of breaking (D2-46).
 
-1. **Bread** as in §10: porridge needs nothing; flour by quern or mill; 11 bread from 10 grain, eaten without a hearth, keeping 5% a
-   day; the mill a chokepoint?
-2. **Cheese** (§11): milk and salt into a food that keeps; a second use for salt. Now or later?
-3. **Cellar and stalls** (§12) in the fittings list?
-4. **Weapon wear** from one wear scale (§9: a fight is factor 4; a blade lasts about 10 fights, a crude weapon 3; a smith mends),
-   or a chance of breaking per fight?
-5. **Tool effects by method** (§8) as data on one hand tool, with no separate axe, pick or sickle?
-6. Food's share of work: the open calibration (and 38.12: it is also about what else is worth wanting).
+1. **Cheese** now (§14)?
+2. **Specialised tools** (§15): the five, as master smiths' recipes with one qualitative ability each?
+3. Tool effects by method (§8) as data on one hand tool, as the base below the specialised tools?
+4. Food's share of work: the open calibration.
 
 ## History
 
@@ -261,6 +307,11 @@ Answered 23 Oct: meat in (D2-41); milk in as a technique (D2-42); the basic set 
 - 23 Oct (b): Zach: tools for every method, differing by resource; do tools take more from capacity or create from nothing; meat
   yes; bread slightly better and keeping longer; milk now if they learn it; what cellar and stalls are for; how the weapon number
   was got; more analysis of the worth of things and of different tools. Added §8-§13; decisions D2-41 to D2-43.
+
+- 23 Oct (c): Zach: bread as described (D2-44); what milk and cheese do that other food does not; cellar and stalls in (D2-45);
+  weapons wear, with a smaller chance of breaking (D2-46); could specialised versions of tools be crafted from known recipes, at a
+  forge, lasting longer and doing better at one thing, with a qualitative bonus? Added §14 (milk and cheese) and §15 (specialised
+  tools, with when each pays back).
 
 ## Sources
 
