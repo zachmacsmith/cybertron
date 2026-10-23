@@ -1,6 +1,6 @@
 # Proposal: what can happen (eras, weather, hazards that spread, and how people meet them)
 
-**Status:** discussion (23 Oct). Design only. **Owner:** 37.2 (at Zach's request). A companion to
+**Status:** partly accepted: D2-76 to D2-79 (23 Oct); disease deferred (OPEN Q-13). Design only. **Owner:** 37.2 (at Zach's request). A companion to
 [environment.md](environment.md), which holds the scheduler that runs these. **Affects:** as environment.md.
 
 ## Summary
@@ -137,11 +137,23 @@ conditioned on the incident ("if your house burns, the members owe you 10 timber
 4. Disease mortality and immunity (with 37.1); whether nursing reduces deaths; a healer later (economy_later.md: medicine).
 5. Windfalls' claims: the finder's, the holder's, or set by custom and law?
 
+## Answers (23 Oct)
+
+1. Four families of eras as a start, not the final schema; **outside raiders are new agents with raiding goals**, not scripts;
+   scripted dangers can be herds of dangerous beasts (D2-76).
+2. The first-world set (§6), every kind as data, the rest kept as expansions (D2-77).
+3. The six spreading patterns (D2-78).
+4. Disease: put off (OPEN Q-13).
+5. **Windfalls** (good-luck incidents: a bumper harvest, a stray herd, storm-felled oaks, a fish run) need no rule: whoever finds
+   one can take it, and custom and law decide claims (D2-79).
+
 ## History
 
 - 23 Oct: Zach asked what eras and weather events there could be (droughts, floods mostly in valleys and near rivers, storms,
   hurricanes and tornadoes, coasts) and things that spread within or between nodes (fires, diseases of crops, cattle and people),
   each with ways to prepare, respond and fight back. Written: this catalogue.
+
+- 23 Oct: Zach answered 1-5 (D2-76 to D2-79).
 
 ## Sources
 

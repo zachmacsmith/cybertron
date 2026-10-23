@@ -20,6 +20,11 @@ edges, as the edge's terrain allows.
 - D2-72: fires spread with the node's conditions, and between nodes when large and the edge suits.
 - D2-73: eras are starting conditions in the first worlds.
 - D2-74: some signs carry between nodes, as the edge's terrain allows (amends D4-35).
+- D2-76: eras in four families (climate, disease, ecology, outside pressure), one of each at a time; outside raiders are new agents
+  with goals, not scripts.
+- D2-77: the first-world set of kinds; every kind is data.
+- D2-78: six spreading patterns: adjacency, contact, carriage, flow, track, place-bound.
+- D2-79: windfalls follow possession and claims; no rule of their own.
 
 ## Mechanics
 
@@ -30,6 +35,18 @@ edges, as the edge's terrain allows.
   the spell, the season, the land kind and the place's own state set the odds of **incidents**; an active incident can **spread**
   to neighbouring places with its own odds. Eras, years and spells read nothing agents do and are drawn for the whole run at
   generation. In the first worlds the era is a starting condition and does not change within a run (D2-73).
+- **Eras** (D2-76) come in four families, one of each at a time: climate (steady, dry, wet, cold, warm, stormy; a sudden dark
+  year), disease (quiet, pestilence), ecology (mast and bust) and outside pressure (raiding, trade, migration). Outside pressure
+  arrives as **new agents** with their own goals (raiders, traders, migrants: seeding/), not as scripted events; a scripted danger,
+  where a world wants one, is a thing such as a herd of dangerous beasts.
+- **Kinds** (D2-77): every weather event, hazard and windfall is a data entry. The first worlds use drought, river flood, gale,
+  hail, late frost, blizzard (hills), lightning; house fire, wildfire, blight, smut in seed, rats in stores, murrain and wolves (with
+  cattle), fen fever, winter cough, one rare contagious disease; and the windfalls bumper harvest, flood silt, storm-felled oaks and
+  a stray herd. The rest of the catalogue (proposals/environment_catalogue.md) is kept as expansions.
+- **Spreading** (D2-78) follows one of six patterns: adjacency (neighbouring parcels and buildings), contact (people or animals
+  together), carriage (goods and travellers along edges), flow (downstream), track (a path across places), place-bound.
+- **Windfalls** (D2-79): good luck (a bumper harvest, a stray herd, storm-felled oaks) is an incident like any other; whoever finds
+  it can take it, and who it belongs to is for custom and law.
 - **Hazard** (D2-69): for each kind and each place it can happen at, each day: base x weather x season x land kind x exposure. An
   incident happens when the draw U(seed, kind, place, day) falls below it (D2-70).
 - **Risks of things** (D2-71): a kind of object (a building, a fitting, a store, a herd, a crop, a road, a mine) may carry risks in
@@ -56,7 +73,6 @@ its risks. Per incident: day, place, kind, parameters, cause. Per edge: what it 
 
 ## Open
 
-- The catalogue of kinds for the first worlds (proposals/environment_catalogue.md).
 - Edge terrain data (world/edges.md, 37.4) for fires and signs across edges.
 - Disease: mortality, units of the sick, immunity, nursing (with 37.1): to flesh out.
 
@@ -64,4 +80,4 @@ its risks. Per incident: day, place, kind, parameters, cause. Per edge: what it 
 
 38.04 §3; devlog 37.4 #4-#6; proposals/environment.md, environment_catalogue.md; 02q_environment_model.py.
 
-*Current as of 23 Oct 2026: D4-4 to D4-6, D2-69 to D2-74.*
+*Current as of 23 Oct 2026: D4-4 to D4-6, D2-69 to D2-74, D2-76 to D2-79.*

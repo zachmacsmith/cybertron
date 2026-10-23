@@ -141,6 +141,10 @@ and correct them in place.**
 | D2-73 | 23 Oct | **Eras are starting conditions in the first worlds;** shorter eras and scripted shifts are world settings for long runs and experiments | environment.md §10 | |
 | D2-74 | 23 Oct | **Some signs carry between nodes:** a sign's kind says whether and how far it carries, and the edge's terrain decides what is experienced at the far end (open plains carry sight far, a mountain ridge blocks it, a forest path hides it), worked out by the engine from edge and node data | conversation | D4-35 in part (nothing seen at another node except as carried) |
 | D2-75 | 23 Oct | **The environment spec area moves to 37.2** (37.4 builds and runs M1) | conversation | 37.4's ownership of spec/environment |
+| D2-76 | 23 Oct | **Eras in four families** (climate, disease, ecology, outside pressure), one of each at a time, as a starting schema, not a final one. **Outside raiders are new agents** that arrive with goals (to raid), not scripted events; scripted dangers, where wanted, are things like herds of dangerous beasts | proposals/environment_catalogue.md §1; conversation | outside raiders as scripted incidents |
+| D2-77 | 23 Oct | **The first-world set** of weather, spreading hazards and windfalls in environment_catalogue.md §6; every kind is data in the engine, and the rest of the catalogue is kept as expansions | environment_catalogue.md §6 | |
+| D2-78 | 23 Oct | **Six spreading patterns** as the scheduler's vocabulary: adjacency, contact, carriage, flow, track, place-bound | environment_catalogue.md §3 | |
+| D2-79 | 23 Oct | **Windfalls have no rule of their own:** whoever finds a windfall can take it (possession, D4-23); claims on it are settled by custom and by whatever law people make | conversation | the question of a windfall rule |
 
 ## Directions (Zach's stated aims recorded in the notes; designs follow them; checked by 37.2, 22 Oct)
 
