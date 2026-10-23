@@ -161,3 +161,4 @@ Newest first. Ideas decided or rejected in conversation before 23 Oct are backfi
 | 22 Oct | A separate environment scheduler (37.4's draft `environment.py` on `wp/environment`) | rejected: one central scheduler on cybertron2 | D4-4 |
 | 22 Oct | Speech heard a round late (phase-0 cybertron2) | rejected: a talk step at the node | D4-15 |
 | 22 Oct | Places as single woods and meadows (phase-0 cybertron2) | rejected: a node is a village or valley with sites | D4-2, D4-11 |
+| 23 Oct | Farming stages' work and returns (02l §2); soil fertility worn and restored; the plot unit; oxen as a role within cattle; winter fodder of hay and straw; recipes.md as the calibrate base | accepted: D4-38 to D4-43 (38.20 A1, A2, A5, B3, B4, E1) | farming.md, livestock.md, recipes.md (spec: 37.2's production.md, livestock.md) |
