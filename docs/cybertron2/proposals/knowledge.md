@@ -185,9 +185,9 @@ Free speech cannot be parsed for meaning reliably, so the engine uses two cheap,
 
 **If agents do not bother:** a technique mentioned only loosely in words is still in the hearer's memory of what it heard (the
 recent rounds), so the model knows of it for a while even if the engine did not record it; rule 1 catches most mentions anyway,
-because names are what people use. **Asking:** a hearer can ask in words ("will you teach me to fire pots?"), and `learn {from,
-technique}` in its plan is a visible request: the other's prompt shows "Eoin wants to learn smithing from you"; teaching happens
-only if the teacher also chooses `teach` that day.
+because names are what people use. **Asking:** a hearer can ask in words ("will you teach me to fire pots?"), or make it a visible request with `offer {to,
+give: <a payment or nothing>, get: teaching of <technique>}`; the other's prompt shows "Eoin asks you to teach him smithing".
+Teaching happens only if the teacher chooses `teach` and the learner accepts that day: the teacher's choice, and its leverage.
 
 The same two rules (mentions and `about`) carry testimony about places, people, claims and laws (02_perception's testimony), so
 one mechanism spreads every kind of awareness.
