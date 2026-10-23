@@ -16,6 +16,9 @@ a stretch of days are one conversation (memory.md).
 - D2-4, D2-29: no computed absence, no computed price (perception.md).
 - D2-84: an urgent call in the night is appended to the agent's own conversation: what it senses, what it carries, who is in the
   house with it, how many things there is time for, and the choices (conflict/fuse_events.md).
+- D2-97: on arrival, "On the way: ..." (what the traveller noticed and what trouble cost) opens its turn. World/roads.md: the
+  roads line names the landmarks one knows on each road and what a night or a day of waiting on it costs; `travel` takes its
+  choices for trouble (`on trouble`, `days`, `stop at`, `gather`).
 - D2-99: the day's weather is part of "Now"; what one knows lies about a place (world/things_in_places.md) is part of "Here".
 
 ## Mechanics
@@ -39,4 +42,4 @@ a stretch of days are one conversation (memory.md).
 
 38.02; cybertron2/engine/prompt.py; 38.17.
 
-*Current as of 24 Oct 2026: D2-4, D2-29, D2-84, D2-99, D4-19, D4-24, D4-26, D4-27, D4-29, D4-32.*
+*Current as of 24 Oct 2026: D2-4, D2-29, D2-84, D2-97, D2-99, D4-19, D4-24, D4-26, D4-27, D4-29, D4-32.*

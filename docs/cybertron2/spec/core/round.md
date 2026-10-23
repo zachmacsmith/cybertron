@@ -26,7 +26,9 @@ decides at the place it arrives.
 | night | first the fuse sub-step (conflict/fuse_events.md: the woken answer in their own conversation, D2-84); then fights, where each sleeps, eating, the cold, deaths, spoilage by condition (economy/goods.md "Decay"), departures onto the roads |
 | memory | at the end of a stretch, each agent writes what it wants to remember (D4-28) |
 
-Travellers on a road make no decision until they arrive (D4-10).
+Travellers on a road make no daily decision until they arrive (D4-10); on a road with a terrain they may get one urgent call a day,
+for trouble, a meeting or a find (D2-81, world/roads.md). Departures happen at nightfall before the roads' night and the fuse
+sub-step, so those leaving are on their first stretch.
 
 ## Parameters
 
