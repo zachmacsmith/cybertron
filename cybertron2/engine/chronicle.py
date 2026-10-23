@@ -2,7 +2,7 @@
 (to whom, in which building), each agent's stated reasoning, what it did and what the night brought, the memories written that
 night; every prompt, reply and talk-step exchange behind an expander. Works on a run in progress (it reads what is logged so far).
 
-    python -m cybertron2.m1.chronicle <run dir> [--out file.html]
+    python -m cybertron2.engine.chronicle <run dir> [--out file.html]
 """
 from __future__ import annotations
 
@@ -38,12 +38,16 @@ def build(run: Path) -> str:
     mems = [json.loads(x) for x in open(run / "memory.jsonl")] if (run / "memory.jsonl").exists() else []
     agents = spec["agents"]
     house = {n: a.get("household", "") for n, a in agents.items()}
+    for t in turns:                                                     # households change (D4-36): the latest known
+        if t.get("household"):
+            house[t["agent"]] = t["household"]
     holds = sorted(set(house.values()))
     nodes = spec.get("nodes") or {"home": spec.get("node") or {}}
     vname = {k: v.get("name", k) for k, v in nodes.items()}
     home = {}                                                            # each household's village, from its house's parcel
-    for h in (spec.get("houses") or {}).values():
-        home[h["household"]] = next((k for k, v in nodes.items() if h["parcel"] in (v.get("parcels") or {})), None)
+    for h in list((spec.get("houses") or {}).values()) + list((spec.get("buildings") or {}).values()):
+        if h.get("household"):
+            home.setdefault(h["household"], next((k for k, v in nodes.items() if h["parcel"] in (v.get("parcels") or {})), None))
 
     def who(n):
         h = house.get(n, "")
@@ -55,7 +59,7 @@ def build(run: Path) -> str:
     out.append(f"<h1>{esc(spec.get('name', run.name))}</h1><div class='mute'>{len(days)} of {spec.get('days')} days logged · "
                f"${cost:.2f} so far · {esc(', '.join(vname.values()))}</div>")
     if len(nodes) > 1:
-        roads = "; ".join(f"{vname.get(a, a)} to {vname.get(b, b)}: {d} day{'s' if d != 1 else ''}" for a, b, d in spec.get("edges") or [])
+        roads = "; ".join(f"{vname.get(a, a)} to {vname.get(b, b)}: {d} day{'s' if d != 1 else ''}" for a, b, d in spec.get("roads") or spec.get("edges") or [])
         out.append(f"<div class='mute'>Roads: {esc(roads)}</div>")
     out.append("<h2>The people</h2><table><tr><th>Name</th><th>House</th><th>Village</th><th>Stage</th><th>Model</th><th>Knows, holds</th></tr>")
     for n, a in agents.items():
@@ -131,7 +135,7 @@ def build(run: Path) -> str:
 
 
 def main(argv=None):
-    ap = argparse.ArgumentParser(prog="cybertron2.m1.chronicle")
+    ap = argparse.ArgumentParser(prog="cybertron2.engine.chronicle")
     ap.add_argument("run")
     ap.add_argument("--out")
     a = ap.parse_args(argv)
