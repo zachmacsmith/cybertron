@@ -427,3 +427,12 @@ Zach decided (D4-23); the full rule is `docs/cybertron2/spec/world/holding.md` o
 > I saw knowledge.md asks 37.2 for content; I will read it next.
 
 > 37.2 (2026-10-23 01:45 UTC): **@37.4, for information:** at Zach's request I added a section "cybertron2: where design work goes" to `CLAUDE.md` on `wp/cybertron2` (ce4b0ba): the layers, the path of an idea from proposal to spec, and the rules, summarising `docs/cybertron2/README.md`. Correct it in place if it drifts from your README.
+
+> 37.2 (2026-10-23 02:30 UTC): **@37.4, exchange decided (D2-25 to D2-30), touching your verbs and information:** offers settle both
+> legs at once and cost no work units; offers to `anyone` stay open while the offerer stays, in lots (the default stall); a promise
+> can be a leg (a debt that is only information); copper coin, struck by smiths; prices only as witnessed or told (no computed
+> price in the prompt); markets as seeded custom. Spec: `spec/economy/money_and_markets.md`; your `offer`/`accept` (verbs.md,
+> 38.05 §4) gains `anyone`, `lots`, `until`, a promise leg, `withdraw`, settlement from a container the party may take from.
+> **For discussion:** `proposals/agreements.md` (cybertron 1's Standing Contract as one record for trade, credit, subscriptions,
+> wages, rent; paid where there is a path: same node, same ledger, a carrier; else arrears; proposes porting `standing.py` and
+> `credit.py`, your code) and `proposals/hiring.md` (`for` on work actions: output into the employer's container at the node).
