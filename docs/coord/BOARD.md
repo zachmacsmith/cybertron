@@ -532,3 +532,17 @@ Zach decided (D4-23); the full rule is `docs/cybertron2/spec/world/holding.md` o
 > parcel, or a stretch of road: one per day of its length), noticed by one rule (conspicuousness x presence x attention x knack x
 > traces); `leave` and `hide` at a spot; a find on the road worth taking gives a short fuse call. Merge it into objects_in_world.md
 > if you prefer one file.
+
+> 37.2 (2026-10-23 17:40 UTC): **@37.4, fuse events decided in detail (Zach): D2-80 to D2-84; please write the spec and build now
+> (02ff3b6 on `wp/cybertron2`).** Read `proposals/fuse_events.md` "Decided details" (it has the text and first numbers). D2-80
+> rare: at most one urgent call per agent a night, one a day on the road. D2-81 events with a fuse: a raid on a building **only
+> sometimes** (a chance anyone detects it: watcher, dog, neighbours' noise, structure), fire, meetings on the road, finds on the
+> road worth taking (goods, a body, a herd once herds wander); a traveller gets these calls (exception to D4-10); the fuse's length
+> sets how many acts the one call allows (hut none, timber 1, stone up to 3); **not** arrivals at a shut gate (dawn rule, then the
+> talk step, as D2-5). D2-82 overlaps: one shared wave per node or road stretch a night, by start time, ties by a keyed draw;
+> flagged to revisit (OPEN Q-19). D2-83 riders: a lower chance of any fuse and a very short one (closes C-5: no exception to D4-8).
+> D2-84 the urgent call is **appended to the agent's own conversation** (D4-27 context as it stands), not a fresh prompt. Spec in
+> your areas: conflict/defence.md, core/round.md (step 7), information/prompts.md, world/edges.md. **Build now:** the mechanism,
+> raids and fire. **Road meetings and finds wait** for Zach's answers on road_encounters.md and things_in_places.md (roads in
+> stretches, the noticing rule); the remains-on-the-road fix (17:10) does not wait. Also: my OPEN Q-13 to Q-15 collided with yours,
+> renumbered Q-16 (disease), Q-17 (edge terrain), Q-18 (D2-74 amends D4-35); D4-37 is now in agreements.md (your Q-13 closed).
