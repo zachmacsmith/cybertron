@@ -204,7 +204,73 @@ def test_a_thing_is_a_bundle_of_signs_a_glimpse_from_afar_and_its_contents_only_
     x = SG.thing_context(w, w.s["containers"]["pile:x"])
     rng = w.rng("t")
     far = SG.roll(SG.THING, x, rng, mult=1.0, near=False)
-    close = SG.roll(SG.THING, x, rng, mult=1.0, near=True)
     assert far and not any("coin" in t for t in far)                    # a glimpse: heaped brush, no contents
-    assert any("coin" in t for t in close)                               # a close look names what is there
+    close = [r for _, r in SG.true_rows(SG.THING, x) if r.get("reach") == "near" and "coin" in r["text"](x)]
+    assert close                                                          # a close look names what is there ...
+    assert all(abs(r["p"](x) - TH.own(w, w.s["containers"]["pile:x"])) < 1e-9 for r in close)   # ... found only as hiding allows
     assert SG.readable({"knows": "hunt"}, set()) is False and SG.readable({"lay": "hunt"}, set()) is True
+
+
+def _thing(w, cid, **c):
+    from cybertron2.engine import signs as SG
+    base = {"kind": "pile", "node": "millbrook", "parcel": "alder_copse", "goods": {}, "wear": {}, "day": 0}
+    base.update(c)
+    w.s["containers"][cid] = base
+    return SG.thing_context(w, base)
+
+
+def test_no_glimpse_of_a_thing_names_what_it_holds_or_whose_body_it_is():
+    import re
+    from cybertron2.engine import signs as SG
+    from cybertron2.engine.data import ITEMS
+    w = world(weather={1: "clear", 2: "rain", 3: "snow", 4: "clear"}, cold_days=[3, 4])
+    w.cold_days = {2, 3}
+    w.s["people"]["Odo"]["cause"] = "attack"
+    goods = {"coin": 4.0, "hide": 1.0, "grain": 12.0, "meat": 2.0, "rotting meat": 1.0}
+    states = [dict(kind="remains", of="Odo", body=True, died=0, goods=dict(goods)), dict(kind="remains", of="Odo", body=True, died=0, buried=1),
+              dict(goods=dict(goods)), dict(goods={"bread": 2.0, "copper": 1.0}), dict(goods=dict(goods), hidden="under brush", untaught=True),
+              dict(goods=dict(goods), hidden="buried"), dict(goods={"timber": 3.0}, door=next(iter(w.s["buildings"])))]
+    seen = 0
+    for day in (0, 1, 3, 13):
+        w.s["day"] = day
+        for k, st in enumerate(states):
+            x = _thing(w, f"t{k}", **st)
+            for _, row in SG.true_rows(SG.THING, x):
+                if row.get("reach", "rule") == "near":
+                    continue
+                text = row["text"](x)
+                seen += 1
+                assert "Odo" not in text, text
+                assert not any(re.search(rf"\b{re.escape(i)}\b", text) for i in ITEMS if i in x.goods), text
+    assert seen > 20
+
+
+def test_a_things_signs_follow_the_weather_the_season_and_who_reads_them():
+    from cybertron2.engine import signs as SG
+    w = world(weather={1: "clear", 2: "clear", 3: "clear", 4: "clear"})
+    w.s["day"] = 3
+    warm = [r["text"](x) for x in [_thing(w, "b", kind="remains", of="Odo", body=True, died=0)] for _, r in SG.true_rows(SG.THING, x)]
+    assert any("flies" in t for t in warm) and any("crows" in t for t in warm)
+    w.cold_days = {3}
+    cold = [r["text"](x) for x in [_thing(w, "b", kind="remains", of="Odo", body=True, died=0)] for _, r in SG.true_rows(SG.THING, x)]
+    assert not any("flies" in t for t in cold) and any("frozen hard" in t for t in cold)   # flies in the warm, nothing in frost
+    x = SG.thing_context(w, w.s["containers"]["b"])
+    crows = [r for _, r in SG.true_rows(SG.THING, x) if "crows" in r["text"](x)]
+    assert crows and all(r["reach"] == "node" for r in crows)                           # seen from anywhere at the place
+    cache = _thing(w, "c", goods={"coin": 5.0}, hidden="under brush")
+    rng = w.rng("t")
+    hunter = SG.roll(SG.THING, cache, rng, mult=1.0, know={"hunt"})
+    lay = SG.roll(SG.THING, cache, rng, mult=1.0, know=set())
+    assert any("someone has hidden something" in t for t in hunter) and not any("someone has hidden something" in t for t in lay)
+
+
+def test_tracks_are_plain_in_snow_and_a_hunter_counts_them():
+    from cybertron2.engine import signs as SG
+    w = world(weather={1: "snow", 2: "clear", 3: "clear"}, cold_days=[1, 2, 3])
+    w.cold_days = {0, 1, 2}
+    w.s["day"] = 2
+    tr = {"road": "r", "pos": 1, "day": 1, "kind": "tracks", "n": 3, "toward": "Ashwood", "by": []}
+    x = SG.trace_context(w, tr)
+    texts = {r.get("knows"): r["text"](x) for _, r in SG.true_rows(SG.TRACE, x)}
+    assert "plain in the snow" in texts[None] and "three people" in texts["hunt"]
+    assert "three" not in " ".join(SG.roll(SG.TRACE, x, w.rng("t"), know=set()))
