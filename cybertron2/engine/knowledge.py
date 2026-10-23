@@ -137,13 +137,7 @@ def ready(here, tech, kind, key) -> str:
 def available(here, item, who=None, extra=None) -> float:
     """How much of a good one can use here: what one carries and the stores here one may take from (and a party's, acting for it)."""
     cids = here.takeable(who) + ([extra] if extra and extra not in here.takeable(who) else [])
-    total = 0.0
-    for cid in cids:
-        if cid == here.hands:
-            total += here.carried().get(item, 0.0)
-        elif cid.startswith("stock:"):
-            total += here.stock(cid[len("stock:"):]).get(item, 0.0)
-    return total
+    return sum(here.contents(cid).get(item, 0.0) for cid in cids)          # whose ever they are: hands of `who`, or stores
 
 
 def shortfall(here, mind, tech, mult=1.0, at=None, extra=None) -> str:
@@ -161,7 +155,10 @@ def shortfall(here, mind, tech, mult=1.0, at=None, extra=None) -> str:
     if t.get("tools"):
         tool, m = here.best_tool(t["tools"])
         if m is None:
-            return f"you need a tool for {label(tech)}; you have none"
+            from cybertron2.engine.data import TOOLS
+            near = next((cid for cid in here.takeable() if cid != here.hands and any(here.contents(cid).get(x, 0) >= 1 for x in TOOLS)), None)
+            return f"you need a tool in your hands for {label(tech)}" + (
+                f"; there is one in {here.buildings()[near[len('stock:'):]]['name']}'s store: take it into your hands (move)" if near else "; you have none")
     for item, q in (t.get("inputs") or {}).items():
         need = round(q * mult, 2)
         have = available(here, item, extra=extra)

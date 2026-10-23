@@ -258,3 +258,20 @@ def test_bot_run_is_deterministic(tmp_path):
     for k in ("a", "b"):
         R.run("cybertron2/specs/valley_s5.yaml", tmp_path / k, days=4, bots=True)
     assert (tmp_path / "a" / "days.jsonl").read_text() == (tmp_path / "b" / "days.jsonl").read_text()
+
+
+def test_accepting_reads_the_offerers_goods_not_ones_own():
+    w = world()
+    w.s["people"]["Warin"]["at"] = "ashwood"
+    line = AG.make_offer(Here(w, "Warin"), Mind(w, "Warin"), {"to": "anyone", "give": "1 copper tool", "get": "4 wild food"})
+    oid = line.split()[2].rstrip(":")
+    w.s["containers"][w.hands("Simkin")]["goods"]["wild food"] = 4
+    assert do(w, "Simkin", do="accept", offer=oid).startswith("You accepted")
+    assert w.goods(w.hands("Simkin")).get("copper tool") == 1
+
+
+def test_a_tool_in_the_store_is_named_when_refused():
+    w = world()
+    w.s["containers"]["stock:smith_house"]["goods"]["crude tool"] = 1
+    r = do(w, "Osric", do="gather", what="mine")
+    assert "Smith House's store" in r

@@ -118,6 +118,9 @@ def talk(w, names, replies, results) -> dict:
             here.event("speech", f"{n} spoke {where}", actor=n, salience=0.1, sense="sound")
         for t in [t for t in (r.get("tell") or []) if isinstance(t, dict)][:MAX_SAY]:
             text, to = str(t.get("text", ""))[:600], here.person(t.get("to"))
+            if to and to not in names and w.s["people"][to]["stage"] == "child":
+                results[n].append(f"Refused: tell: {to} is a child and takes no part in the talk; say it aloud, or tell someone else")
+                continue
             if not to or to not in names or to == n:
                 results[n].append(f"Refused: tell: nobody called {t.get('to')!r} is here to hear you")
                 continue

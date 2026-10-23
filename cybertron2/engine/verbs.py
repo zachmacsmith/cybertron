@@ -337,7 +337,7 @@ def _technique(here, mind, a, party, verb):
                tech=tech, concerns=_holders_people(here, thing) if note else [])
     here.record(verb, tech, party, site=key)
     if word:
-        return word if not for_txt else word + for_txt
+        return word if not for_txt else word.rstrip(".") + for_txt + "."
     if y["kind"] == "chance" and got <= 0:
         return f"You hunted in {place_name}{note} and caught nothing{extra_got}."
     via = f" with your {tool}" if tool else (" with your bare hands" if t.get("tools") else "")
