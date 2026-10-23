@@ -331,7 +331,9 @@ def _make(here, mind, a, party):
         if why:
             res.append(f"Refused: make {tech}: {why}")
             break
-        site = KN.where(here, tech)[0]
+        sites = KN.where(here, tech)                                           # one's own house's fitting first
+        site = sorted(sites, key=lambda x: (x[0] != "building" or x[1] not in here.homes_here(),
+                                            x[0] != "building" or not here.may_take(here.buildings()[x[1]]["stock"])))[0]
         _consume(here, t.get("inputs") or {}, TRY[lvl]["inputs"], extra)
         ok = here.rng("make", here.day, here.name, tech, i).random() < TRY[lvl]["chance"]
         rose = KN.tried(here, mind, tech, ok, units=t["units"])
