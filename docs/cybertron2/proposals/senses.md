@@ -78,8 +78,17 @@ parameter, so a run can turn them on one at a time and measure what they change.
 
 spec/information/perception.md; cybertron2/engine/signs.py, perceive.py; proposals/seeing.md (attention, glimpses).
 
+### 4. From the first runs (hamlet, two valleys; 23 Oct)
+
+Signs that point at a job are used: weeds led to weeding, standing water to ditching, slumping banks to mending, ripeness to reaping,
+cows heavy with milk to milking (17 of 19). Signs about animals' condition are mostly ignored: "lowing and restless" 0 of 8, a new
+calf 1 of 15, a pasture grazed bare 1 of 9 (Water Meadow grazed to the earth and the herd left on it). To try: clearer words that say
+what the sign means ("the cows are lowing: they are hungry"), and making such signs a concern of the herd's holders. Nobody attends
+to the sky or the place in general; season and weather signs reach them only in passing.
+
 ## History
 
+- 23 Oct: §4 added from the first runs (which signs are acted on, which ignored).
 - 23 Oct: written for Zach after D4-48 ("note down somewhere for me to build out and extend the sensory system"), with his remark
   that what one notices should depend on the person.
 
