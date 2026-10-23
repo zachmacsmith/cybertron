@@ -216,7 +216,9 @@ def _works_word(y) -> str:
 
 def _sow(here, mind, tech, key, place_name, out, m, a, f):
     par = here.parcels()[key]
-    seed_good = str(a.get("item") or "grain").lower()
+    if not a.get("item"):
+        raise Refused(f"say which seed to sow (item: {', '.join(sorted(SEED_CROP))})")
+    seed_good = str(a.get("item")).lower()
     fam = SEED_CROP.get(seed_good) or CROP_OF.get(seed_good)
     if fam is None:
         raise Refused(f"{seed_good!r} is not seed; one sows {', '.join(sorted(SEED_CROP))}")
@@ -275,7 +277,8 @@ def _sow(here, mind, tech, key, place_name, out, m, a, f):
 def _break(here, tech, key, place_name, out, mult, f):
     par = here.parcels()[key]
     y = TECHNIQUES[tech]["yield"]
-    room = float(par["size"]) - float(par.get("broken", 0.0))
+    sown = float((par.get("crop") or {}).get("area", 0.0))                     # break only the ground not yet sown
+    room = float(par["size"]) - float(par.get("broken", 0.0)) - sown
     plots = round(min(room, float(y["plots"]) * mult), 4)
     if plots <= 1e-9:
         raise Refused(f"{par['name']} is already broken and ready for sowing")
@@ -349,10 +352,10 @@ def ready(here, tech, key) -> str:
     if y == "sow" and c and c["seed"] >= float(p["size"]) * float(f["plot_seed"]) - 1e-6:
         return f"{p['name']} is sown as thick as it will take"
     if y == "break":
-        if c:
+        if c and (here.day >= int(c["ripe_day"]) or c["area"] >= float(p["size"]) - 1e-6):
             return f"{p['name']} has a crop in it"
-        if float(p.get("broken", 0.0)) >= float(p["size"]) - 1e-6:
-            return f"{p['name']} is broken and ready for sowing"
+        if float(p.get("broken", 0.0)) + (c["area"] if c else 0.0) >= float(p["size"]) - 1e-6:
+            return f"{p['name']} is broken and ready for sowing" if not c else f"the rest of {p['name']} is broken and ready for sowing"
         why = team_shortfall(here, t)
         if why:
             return why

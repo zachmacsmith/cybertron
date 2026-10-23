@@ -137,7 +137,7 @@ def test_farming_sow_ripen_reap_and_rot():
     w = world()
     w.s["parcels"]["brook_field"]["crop"] = None
     w.s["containers"][w.hands("Hamo")]["goods"]["grain"] = 6
-    assert do(w, "Hamo", do="work", what="sow", at="Brook Field").startswith("You sowed")
+    assert do(w, "Hamo", do="work", what="sow", at="Brook Field", item="grain").startswith("You sowed")
     c = w.s["parcels"]["brook_field"]["crop"]
     assert c["ripe_day"] == w.d + FM.grow_days(w.year_days(), "grain")    # a share of the year from the day sown (D2-53)
     assert do(w, "Hamo", do="work", what="reap", at="Brook Field").startswith("Refused")

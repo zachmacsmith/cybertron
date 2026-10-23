@@ -43,13 +43,13 @@ def test_dibbling_uses_less_seed_for_the_same_ground():
     w = world()
     clear(w, "long_field")
     give(w, "Edric", grain=40)
-    do(w, "Edric", do="work", what="sow", at="Long Field")
+    do(w, "Edric", do="work", what="sow", at="Long Field", item="grain")
     c = w.s["parcels"]["long_field"]["crop"]
     used_b, area_b = 40 - w.goods(w.hands("Edric"))["grain"], c["area"]
     w2 = world()
     clear(w2, "long_field")
     give(w2, "Edric", grain=40)
-    do(w2, "Edric", do="work", what="dibble", at="Long Field")
+    do(w2, "Edric", do="work", what="dibble", at="Long Field", item="grain")
     c2 = w2.s["parcels"]["long_field"]["crop"]
     used_d = 40 - w2.goods(w2.hands("Edric"))["grain"]
     assert used_d < used_b and c2["area"] / used_d > area_b / used_b * 1.5        # about 40% less seed for the same ground (D2-54)
@@ -63,12 +63,12 @@ def test_breaking_the_soil_raises_the_harvest_and_turns_up_stone():
         do(w, "Edric", do="work", what="hoe", at="Long Field")
     assert w.s["parcels"]["long_field"]["broken"] > 0.9
     assert w.goods(w.hands("Edric")).get("stone", 0) > 0.5                     # fieldstone (D2-56)
-    do(w, "Edric", do="work", what="sow", at="Long Field")
+    do(w, "Edric", do="work", what="sow", at="Long Field", item="grain")
     broken = w.s["parcels"]["long_field"]["crop"]
     w2 = world()
     clear(w2, "long_field")
     give(w2, "Edric", grain=10)
-    do(w2, "Edric", do="work", what="sow", at="Long Field")
+    do(w2, "Edric", do="work", what="sow", at="Long Field", item="grain")
     plain = w2.s["parcels"]["long_field"]["crop"]
     assert broken["base"] / broken["seed"] > 1.4 * plain["base"] / plain["seed"]  # D4-38: x1.5
 
@@ -94,7 +94,7 @@ def test_the_cold_kills_a_growing_crop_unless_hardy():
     clear(w, "long_field")
     clear(w, "brook_field")
     give(w, "Edric", grain=10, rye=10)
-    do(w, "Edric", do="work", what="sow", at="Long Field")
+    do(w, "Edric", do="work", what="sow", at="Long Field", item="grain")
     do(w, "Edric", do="work", what="sow", at="Brook Field", item="rye")
     while w.calendar()["season"] != "winter":
         w.s["day"] += 1
@@ -109,7 +109,7 @@ def test_a_failed_crop_shows_blight_and_gives_nothing():
     w = world(physics={"farming": {"fail": [1.0, 1.0]}})
     clear(w, "long_field")
     give(w, "Edric", grain=10)
-    do(w, "Edric", do="work", what="sow", at="Long Field")
+    do(w, "Edric", do="work", what="sow", at="Long Field", item="grain")
     c = w.s["parcels"]["long_field"]["crop"]
     w.s["day"] = c["sown"] + (c["ripe_day"] - c["sown"]) // 2
     FM.night(w)
@@ -122,7 +122,7 @@ def test_seed_selection_ripens_sooner():
     clear(w, "long_field")
     give(w, "Edric", grain=10)
     w.s["know"]["Edric"]["select seed"] = {"level": "known", "skill": 1.0, "seen": 0, "wins": 0, "fails": 0, "source": "", "since": -1}
-    do(w, "Edric", do="work", what="sow", at="Long Field")
+    do(w, "Edric", do="work", what="sow", at="Long Field", item="grain")
     g = w.s["parcels"]["long_field"]["crop"]["ripe_day"] - w.d
     assert g < FM.grow_days(w.year_days(), "grain")                            # D2-65
 
@@ -285,3 +285,12 @@ def test_signs_come_in_bundles_and_practised_hands_read_more():
     reap = next(f for f in crop if f.get("knack") == "reap")
     w.s["know"]["Edric"]["reap"] = {"level": "known", "skill": 1.3, "seen": 0, "wins": 0, "fails": 0, "source": "", "since": -1}
     assert PC2.knack(Mind(w, "Edric"), reap) == 2.0 and PC2.knack(Mind(w, "Sibyl"), reap) == 1.0
+
+
+def test_sowing_names_its_seed_and_the_unsown_rest_can_still_be_broken():
+    w = world()
+    clear(w, "long_field")
+    give(w, "Edric", grain=6, crude_tool=1)
+    assert "say which seed" in do(w, "Edric", do="work", what="sow", at="Long Field")
+    do(w, "Edric", do="work", what="sow", at="Long Field", item="grain")
+    assert do(w, "Edric", do="work", what="hoe", at="Long Field").startswith("You hoed")    # the rest of the field

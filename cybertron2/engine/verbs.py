@@ -14,7 +14,7 @@ from cybertron2.engine.here import Refused, show
 # `when` (only in a world with roads). The prompt's verb list and the reply schema are generated from it.
 VERB = {
     "gather": {"args": '{"what", "at"?: place, "for"?: party}', "cost": "craft", "doc": "take from the land: {crafts}"},
-    "work": {"args": '{"what", "at"?: place or building, "item"?: the seed to sow, or the beast to slaughter (cow, ox, bull, calf), "for"?: party}',
+    "work": {"args": '{"what", "at"?: place or building, "item"?: the seed to sow (grain, rye, beans: always say which), or the beast to slaughter (cow, ox, bull, calf), "for"?: party}',
              "cost": "craft", "doc": "{crafts}"},
     "make": {"args": '{"what", "qty"?: times, "for"?: party}', "cost": "craft",
              "doc": "a recipe; the inputs come from what you carry, then from stores here you may take from: {crafts}"},
