@@ -32,6 +32,13 @@ building grow large or tall.
 - **Limits** that stop one giant hall winning: span by material, rooms by material, heat (a hearth warms about 10), upkeep growing
   with cost, land (lots per node), fire.
 
+### Fire and the vault (D2-49)
+
+Stone resists fire: it rarely catches, hardly spreads, and when it burns the walls stand and only the roof and contents are lost.
+A **vault** (a room roofed with a stone arch: ground floor, small, much dearer, a mason with chisels and dressed stone) does not
+burn at all: the place for a treasury, an archive of deeds, a granary or a strongroom. Proposed cost: about twice a stone room of
+the same size.
+
 ### Fittings: a closed vocabulary (02i §3, cut by the pruning rule, 02g §1f)
 
 First worlds: **beds, hearth, bins, benches, shelves, lock, anvil-and-bellows, millstones** (with a water wheel by a river), and **cellar and stalls** (D2-45). Each
@@ -85,6 +92,8 @@ per fitting and per room.
 
 - 23 Oct: Zach asked whether a room for 25 has 25 beds. It did not: each bed counted as a fitting, so a hall slept 6. Fixed: beds
   are one fitting for any number up to the room's size; a room seats its size by day and sleeps it by night.
+
+- 23 Oct: Zach: stone resists fire but is not fireproof; add a vault that does not burn (D2-49).
 
 ## Sources
 

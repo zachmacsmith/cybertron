@@ -48,6 +48,39 @@ others. Households rotate it; children can keep it (D4-19's menial tasks). A tow
 - **Raiders turn to what cannot be walled:** herds, crops, mills, people on the roads. Horses fit the node raid: strike on arrival,
   drive herds off, carry loot, leave before pursuit; a rider's real cost is the horse's grain (02j).
 
+### Setting fire (23 Oct; with D2-49: stone resists fire, the vault does not burn)
+
+**What a raider needs:**
+
+| Need | How |
+|---|---|
+| to be there | at the building, at night or unseen by day (it is witnessed by anyone present) |
+| fire | a **torch** (basic: half a timber and half a unit) or embers taken from any lit hearth; everyone knows how to make fire |
+| access to something that burns | a thatched or timber roof can be lit **from outside**; a stone building's roof needs a ladder or a way in (a break-in first, or someone inside); **a vault cannot be lit** |
+| work | `attack {target, aim: burn}`: about 1 unit for the attempt |
+
+**Will it catch?** Proposed chances per attempt: wattle and thatch 0.8, timber frame 0.6, stone with a timber roof 0.2 (once the
+roof is reached), a vault 0; higher in a dry season, about half in rain (the season and weather are 37.4's).
+
+**A fire is a fuse event** (fuse_events.md): it starts, then takes the night to run its course, so people can respond in time.
+
+- **Who notices:** sleepers inside (smoke) most of the time; a watcher at once; neighbours often; the whole node sees the flames.
+- **What they can do** (the urgent call's menu): fight it (a bucket line: each pair of hands with water cuts the damage, more if
+  the fire is caught early; a well or river at the site makes it possible), save what they can carry, flee, or fight the raiders.
+- **Unfought,** the building burns: timber and wattle are lost with what is in them; stone keeps its walls (repair about a third of
+  the cost) but loses roof and contents; a cellar's contents mostly survive; a vault's entirely. Documents on shelves burn (an
+  archive can be lost in a night). Fire spreads to adjoining rooms and to wattle neighbours, hardly from stone.
+- **People asleep inside who do not wake** are wounded (the harm model's wound) rather than killed outright; to make death possible
+  is a choice (Open).
+
+**What it is for, in a raid:**
+- **Smoking defenders out:** a stone house with a burning roof cannot be held. Defenders who leave lose the walls' multiplier
+  (x2 for stone) and fight in the open, or yield. This is the counter to the stone house (02k §3) without making stone weak.
+- **Destruction and terror:** burning destroys rather than takes. It serves revenge, a feud, pressure on a rival, or denying a
+  granary or a mill to an enemy (a burned mill is a chokepoint lost for many days, 02g §5b).
+- **The counters:** a watch, dogs, stone, a vault for what must not burn, space between buildings, water near at hand, and a fire
+  crew (neighbours, or an office).
+
 ## Why
 
 - Stone needed a value beyond density: per night of shelter it does not pay (02j), but as defence it does, for those with stock.
@@ -70,7 +103,7 @@ others. Households rotate it; children can keep it (D4-19's menial tasks). A tow
 2. The multipliers (x1 timber, x2 stone) and whether a village wall multiplies guards on it.
 3. The watch's food cost (x1.5 proposed).
 4. Exposure weights in a node raid.
-5. Damage and burning of buildings (02g §5b): condition lost, contents lost, repair work.
+5. Setting fire (above): the catch chances, the bucket line's effect, wounds or deaths for sleepers who do not wake.
 
 ## Affects
 
@@ -87,6 +120,10 @@ agents/actions.md (raid kinds, watch).
   (a person, a building with a break-in and a separate fight, a whole node) and whether horses fit the node raid.
 - 22 Oct: Zach decided the three kinds and the break-in (D2-20); the watch skipping sleep, rotated, kept by children (D2-21); any
   party may raid a node, rejecting 37.2's riders-or-large-parties proposal (D2-22).
+
+- 23 Oct: Zach: stone resists fire (walls stand) and a vault does not burn (D2-49); raiders can set fire when they attack: what
+  would they need? Added "Setting fire": a torch or embers, access to something that burns, catch chances by material, fire as a
+  fuse event with a bucket line, smoking defenders out of stone houses.
 
 ## Sources
 

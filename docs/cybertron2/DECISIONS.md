@@ -90,6 +90,7 @@ and correct them in place.**
 | D2-46 | 23 Oct | **Weapons wear** on the one wear scale for tools (a fight is heavy use: a blade lasts about 10 fights, a crude weapon about 3; a smith mends), **with a small chance of breaking** in a fight | recipes.md §9 | combat.py's weapon used up in every fight |
 | D2-47 | 23 Oct | **Cheese:** milk, a little salt and work, aged in a cool room or cellar, make a food that keeps about as well as salted meat and travels; salt's second use | proposals/recipes.md §14 | |
 | D2-48 | 23 Oct | **Specialised tools:** felling axe, miner's pick, scythe, mason's chisels, reaping hook; each a master smith's recipe made at a smithy with more copper, better and longer-lived at one method, with one ability the hand tool lacks, and no better than a crude tool at other work | recipes.md §15 | |
+| D2-49 | 23 Oct | **Stone resists fire but is not fireproof** (rarely catches, hardly spreads; when it burns the walls stand and the roof and contents are lost); **a vault** (a stone-arched room, ground floor, dear) does not burn at all | proposals/buildings.md; conversation | |
 
 ## Directions (Zach's stated aims recorded in the notes; designs follow them; checked by 37.2, 22 Oct)
 
