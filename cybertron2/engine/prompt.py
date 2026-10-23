@@ -5,6 +5,7 @@ what it knows how to do, how to act), the morning message, the talk-step and set
 from __future__ import annotations
 
 import copy
+import math
 
 from cybertron2.engine import agreements as AG, knowledge as KN, perceive as PC, verbs as V
 from cybertron2.engine.data import BLUEPRINTS, FITTINGS, ITEMS, TECHNIQUES
@@ -400,8 +401,8 @@ def talk_prompt(here, mind, heard, also, offers, opened, cards, sent=0) -> str:
 def lighten_prompt(here, mind, a: dict, did: list) -> str:
     goods = ", ".join(f"{show(q)} {i} ({show(q * ITEMS[i]['weight'])} weight)" for i, q in sorted(here.carried().items()) if q > 0.05)
     L = ["## Setting off", "Today so far: " + (" ".join(x for x in did if not x.startswith(PC.SPEECH)) or "nothing"),
-         f"You meant to set off for {a.get('to')} tonight, but you carry {show(here.load())} weight and you can carry "
-         f"{here.capacity():g}. You carry: {goods}.",
+         f"You meant to set off for {a.get('to')} tonight, but you carry {math.ceil(here.load() * 10 - 1e-9) / 10:g} weight and you can carry "
+         f"{here.capacity():g}: set down at least {math.ceil((here.load() - here.capacity()) * 10 - 1e-9) / 10:g}. You carry: {goods}.",
          f"Before you go you may give things to someone here ({', '.join(here.people(me=False)) or 'nobody is here'}), put them in a store "
          f"you may use, or leave them at a building here ({', '.join(b['name'] for b in here.buildings().values()) or 'none'}): "
          "{\"do\": \"leave\", \"item\", \"qty\", \"at\": building}; what is left there is found by its household in the morning. Then "

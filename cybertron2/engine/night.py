@@ -87,6 +87,9 @@ def night(w) -> dict:
         else:
             a["hunger"], a["missed"] = max(-2, a["hunger"] - 1), a["missed"] + 1
             rec["missed"].append(name)
+            raw = sorted({i for cid in stores for i, q in w.goods(cid).items() if q > 1e-9 and ITEMS.get(i, {}).get("cook")})
+            if raw and not hearth:                                             # had food that needs a fire (D2-60)
+                rec.setdefault("uncooked", {})[name] = raw
             if ate:
                 rec["ate"][name] = round(ate, 2)
         if cold and state == "unsheltered" and w.rng("cold", w.d, name).random() < float(p["cold_starving"]) * fall:

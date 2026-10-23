@@ -6,6 +6,7 @@ Each handler: (here, mind, a) -> result line. Refusals name what is short and co
 """
 from __future__ import annotations
 
+import math
 from cybertron2.engine import farm as FM, knowledge as KN
 from cybertron2.engine.data import BLUEPRINTS, COVERS, FITTINGS, ITEMS, TECHNIQUES, TRY
 from cybertron2.engine.here import Refused, show
@@ -709,7 +710,8 @@ def _travel(here, mind, a, party):
     load, cap = here.load(), here.capacity(track)
     if load > cap + 1e-9:
         cart = any(ITEMS[i].get("track") for i, q in here.carried().items() if q >= 1)
-        raise Refused(f"you carry {show(load)} weight; you can carry {cap:g} on this road"
+        raise Refused(f"you carry {math.ceil(load * 10 - 1e-9) / 10:g} weight; you can carry {cap:g} on this road, so set down "
+                      f"at least {math.ceil((load - cap) * 10 - 1e-9) / 10:g}"
                       + (" (a cart needs a road with a track, and this one has none)" if cart and not track else ""))
     here.today()["travel"][here.name] = to
     here.event("depart", f"{here.name} set off on the road", actor=here.name, salience=0.6, tags=["travel"])
