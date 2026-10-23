@@ -21,7 +21,7 @@ day that may only rephrase given facts.
 |---|---|---|---|---|
 | Who you are | name, role, age (stage), household and kin, others in the land | yes | stage words, not ages (D4-19) | at coming of age, a partnership, a death in the household |
 | What you want | the aim in world terms | yes | | rarely (a goal change) |
-| The land | **every place, its features and neighbours** | yes | **only the places the agent knows, as it last knew them** (a map is knowledge) | as it travels or is told |
+| The land | **every place, its features and neighbours** | yes | **only the places the agent knows, as it last knew them** (a map is knowledge); **every edge from its current node is always visible**, named where it leads if the agent knows, otherwise described by what it looks like ("a cart track north-east, rising toward the hills, well used") | as it travels or is told |
 | How life works | rules with their numbers | yes | the manual's common knowledge, short; detail by look-up | rarely |
 | What you know how to do | | no | crafts, rough ideas, awareness with sources (knowledge §4d) | when it learns |
 | Your institutions | | no | memberships, offices and their powers (`invoke`), laws it knows | when it joins, takes office, or learns a law |
@@ -112,6 +112,37 @@ does.
 - **Long rule text in every prompt**: keep the short common knowledge, move detail to look-ups.
 - **Ids where names will do.**
 
+## 5b. A worked example (proposed; abridged)
+
+**System prompt** (rebuilt on change):
+> You are Cela, a woman of the Alder household (Bram, your husband; Dara and Eoin, your children), living at Alder House in
+> Millbrook. Others you know: the Wynns (Near Wood), Torvald's people (the Hills, by repute).
+> What you want: keep your children safe and fed; keep on good terms with the Wynns.
+> The places you know: Millbrook (home: fields, meadow, the brook, three houses); the Near Wood (a day east; timber, game); the
+> Hills (a day north-east, by repute: copper, Torvald's forge). From Millbrook: a track east into the woods (to the Near Wood); a
+> cart track north-east, rising toward the hills (to the Hills); a footpath south along the brook (you have not been).
+> How life works here: [a short paragraph of common knowledge; detail by look-up].
+> What you know how to do: farming (competent): sow, tend and reap barley and beans; cooking, mending. A rough idea of: firing
+> pots (you saw Mora fire them). You know of: ploughs (you saw Torvald's), kilns (Wynn told you of them).
+> How to act: [the 24 verbs with syntax; the reply fields: say, tell, note, pin, open, attend, look up].
+
+**Turn prompt** (each day):
+> Day 9 of autumn; winter in 6 days. Cold and clear. You have 6 units.
+> Here, Millbrook: the barley on the Long Field is ripe; the brook runs low. Bram and Eoin are here; Wynn arrived this morning from
+> the Near Wood, carrying a full pack.
+> Concerned you yesterday: Wynn offered 3 grain for a pot (open until tonight).
+> Seen yesterday: Dara spent the day in the Near Wood; Torvald's son passed through toward the Hills with copper.
+> You attended to: Wynn House: the door barred, smoke from the chimney though Wynn was away.
+> You: fed; carrying 2 grain, a knife. Tonight at home you need 1 food.
+> Your house: sound; 14 grain, 6 beans, 9 timber; four of you sleep here.
+> Owed and asked: the village's harvest levy, 2 grain, due by winter.
+> Today you could: reap the Long Field (ripe: about 2 days' work for one); make bread; try firing a pot (clay at the brook, you
+> would need a firing pit).
+> People you know: Wynn (neighbour, owes you a favour since the flood); Torvald (a stranger, armed).
+> Lasting memories: the flood two summers ago took the low field; your mother died last winter.
+> Earlier days: [one line each]. Yesterday in full: [what you did, heard, saw].
+> Pinned note: "Ask Wynn about the kiln before winter." Other notes: Prices at the Hills; What the Wynns owe.
+
 ## 6. Open questions
 
 1. How many people a glimpse covers, and how they are chosen (familiarity, salience, a seeded sample).
@@ -125,6 +156,10 @@ does.
 - 23 Oct: proposed (37.4, with Zach), after Zach asked for a deep dive on everything an agent is shown, whether agents should see
   everything others do, attention to a person or a building, the feeling of being watched, and generating rich descriptions
   automatically or with a model.
+
+- 23 Oct: Zach: every edge from the agent's node is visible, described by its look unless the agent knows where it leads; asked
+  for a walk-through of a whole prompt (added §5b); a quick test of templates against a model writing descriptions is running
+  (docs/review/38_space_engine/10_descriptions_test.md).
 
 ## Sources
 
