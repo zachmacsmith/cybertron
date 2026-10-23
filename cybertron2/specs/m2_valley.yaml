@@ -6,7 +6,7 @@
 #   Coppergate: the copper seam and a smithy on a hillside: ore, copper, tools and coin, little food.
 name: m2_valley
 seed: 11
-days: 12
+days: 20
 calendar: {season: summer, day: 4, season_days: 6}
 cold_days: [9, 10, 11, 12]
 nodes:
