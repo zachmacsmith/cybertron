@@ -161,6 +161,13 @@ does.
   for a walk-through of a whole prompt (added §5b); a quick test of templates against a model writing descriptions is running
   (docs/review/38_space_engine/10_descriptions_test.md).
 
+- 23 Oct: the quick test (docs/review/38_space_engine/10_descriptions_test.md; 5 states, 45 calls, $0.05): templates conveyed all
+  32 visible facts with nothing invented; Haiku and Sonnet conveyed 29, each inventing 2 small details ("beyond the ridge" where
+  there is none); no hidden fact leaked; an agent understood template text as well as model prose (the reader's instruction to
+  draw conclusions mattered, the wording did not); templates read flatter. Its recommendation: templates in the engine, with
+  phrasing pools written once by a model against set fact values and checked; a narrator per place only as a later experiment;
+  prompts that invite agents to draw conclusions from what they see.
+
 ## Sources
 
 cybertron2/prompt.py and perceive.py (as built), 38.02, knowledge.md, notes.md, verbs.md, D4-6, D4-11, D4-19, D4-21, D2-4.
