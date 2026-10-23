@@ -163,3 +163,23 @@ def test_travel_is_the_last_act_and_arrives_next_morning():
     host = next(n for n in w.agents_acting() if w.s["agents"][n]["household"] == "Smith" and n != who)
     assert AC.do(w, host, {"do": "welcome", "person": who}, w.s["today"]).startswith("You welcome")
     assert w.sleeps(who) == ("smith_house", False)
+
+
+def test_too_heavy_to_leave_then_leave_goods_at_a_house_found_next_morning():
+    from cybertron2.m1 import act as AC, run as R, prompt as PR
+    w = World(load_spec("cybertron2/specs/m2_valley_s5.yaml"))
+    w.s["today"] = today = R._blank_today()
+    who = next(n for n, a in w.s["agents"].items() if w.at(n) == "ashwood" and a["stage"] == "adult")
+    w.s["agents"][who]["holdings"]["timber"] = 6.0                             # 12 weight
+    assert AC.do(w, who, {"do": "travel", "to": "Coppergate"}, today).startswith("Refused: travel: you carry")
+    assert "weight" in PR.turn_prompt(w, who) and "timber 2" in PR.system_prompt(w, who)
+    assert "leave" in PR.lighten_prompt(w, who, {"to": "Coppergate"}, [])
+    before = w.s["houses"]["fenn_house"]["stock"].get("timber", 0)
+    assert AC.do(w, who, {"do": "leave", "item": "timber", "qty": 2, "at": "Fenn House"}, today).startswith("You left")
+    assert w.s["houses"]["fenn_house"]["stock"]["timber"] == before + 2
+    assert AC.do(w, who, {"do": "leave", "item": "timber", "qty": 1, "at": "Smith House"}, today).startswith("Refused")   # not here
+    assert AC.do(w, who, {"do": "travel", "to": "Coppergate"}, today).startswith("You set off")
+    w.night()
+    w.s["day"] = 1; w.s["today"] = R._blank_today(); R.dawn(w)
+    e = [x for x in w.s["events"] if x["kind"] == "left"]
+    assert e and e[0]["dawn"] and e[0]["node"] == "ashwood" and f"{who} left 2 timber at Fenn House" == e[0]["text"]

@@ -208,6 +208,11 @@ def talk(w, names, replies, results) -> tuple[dict, dict]:
             if short:
                 results[n].append(f"Refused: offer: you and your house's store do not have enough {', '.join(short)}")
                 continue
+            same = next((k for k, x in w.s["offers"].items() if x["open"] and x["by"] == n and x["to"] == to and x["give"] == give
+                         and x["get"] == get), None)
+            if same:                                                     # restated in a talk wave: already open, not made twice
+                results[n].append(f"Your offer {same} is already open.")
+                continue
             w.s["seq"] += 1
             oid = f"O{w.s['seq']}"
             if to:                                                       # to one person: set aside, open today, wakes them
@@ -311,6 +316,7 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
         budget = {n: max(0, w.units_for(n) - spoke[n]) for n in names}           # speaking aloud took units (D4-31)
         used = {n: 0 for n in names}
         rep = {n: {} for n in names}
+        heavy = {}
         for i in range(max((len(p) for p in plans.values()), default=0)):
             for n in order:
                 if i >= len(plans[n]) or not w.s["agents"][n]["alive"] or n in today.get("travel", {}):
@@ -322,6 +328,9 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
                         results[n].append(f"Not done: {a.get('do')} {a.get('what') or ''}".rstrip() + f": it takes {c} units and you had {budget[n] - used[n]} left")
                     continue
                 res = AC.do(w, n, a, today)
+                if res.startswith("Refused: travel: you carry"):            # too heavy to leave: asked what to leave behind
+                    heavy[n] = a
+                    continue
                 if not res.startswith("Refused"):
                     used[n] += c
                     results[n].append(res)
@@ -329,6 +338,22 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
                     rep[n][res] = rep[n].get(res, 1) + 1
                 else:
                     results[n].append(res)
+        if heavy:                                                        # too heavy to set off: what to leave, and with whom
+            texts = {n: PR.lighten_prompt(w, n, heavy[n], results[n]) for n in heavy}
+            lr, lm, le = _parallel(lambda n: decide(w, n, texts[n], openings[n] + "\n\n" + texts[n], systems[n], backend, conv),
+                                   {n: (n,) for n in heavy}, workers)
+            for n in heavy:
+                talk_log[n].append({"wave": "lighten", "prompt": texts[n], "reply": lr.get(n) or {}, "usage": (lm.get(n) or {}).get("usage"),
+                                    "seconds": (lm.get(n) or {}).get("seconds")})
+                acts = [x for x in ((lr.get(n) or {}).get("actions") or []) if isinstance(x, dict)
+                        and str(x.get("do", "")).lower() in ("give", "leave", "move", "travel")][:8]
+                if not any(str(x.get("do", "")).lower() == "travel" for x in acts):
+                    results[n].append(f"You did not set off for {heavy[n].get('to')}: too heavy to carry.")
+                for x in acts:
+                    res = AC.do(w, n, x, today)
+                    results[n].append(res)
+                    if str(x.get("do", "")).lower() == "travel":
+                        break
         for n in names:
             results[n] = [f"{x} (x{rep[n][x]})" if x in rep[n] else x for x in results[n]]
             if used[n] < budget[n]:
@@ -414,6 +439,12 @@ def dawn(w) -> None:
             w.happen("fire", f"fire broke out in {h['name']} in the night: the store is burnt, most of its food is gone and the roof "
                      f"is damaged", parcel=h["parcel"], salience=0.95, tags=["danger", "food", "shelter"], concerns=live,
                      extra={"dawn": True, "about": f"h:{hid}", "house": hid})
+    for x in [x for x in w.s.get("left", []) if x["day"] == w.d - 1]:      # goods left at a house yesterday are found this morning
+        h = w.s["houses"][x["house"]]
+        live = [y for y in w.living() if w.s["agents"][y]["house"] == x["house"]]
+        w.happen("left", f"{x['by']} left {x['qty']:g} {x['item']} at {h['name']}", actor=x["by"], salience=0.6, tags=["food"]
+                 if x["item"] in EDIBLE else [], concerns=live, extra={"dawn": True, "about": f"h:{x['house']}", "house": x["house"],
+                                                                      "node": w.node_of(h["parcel"])})
     for x in w.arrive():                                                   # travellers whose journey ends this morning
         w.s["agents"][x["agent"]]["arrived"] = w.d
         w.happen("arrive", f"{x['agent']} arrived from {w.s['nodes'][x['from']]['name']}", actor=x["agent"], salience=0.7,

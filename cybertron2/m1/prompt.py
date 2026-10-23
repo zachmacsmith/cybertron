@@ -188,6 +188,18 @@ def _place_lines(w, node) -> list:
     return out
 
 
+def weights_text() -> str:
+    """The carrying weight of goods, generated from ITEMS: the exceptions to the common weight, then the rest."""
+    from collections import Counter
+    common = Counter(v.get("weight", 1) for v in ITEMS.values()).most_common(1)[0][0]
+    odd = [f"{i} {v.get('weight', 1):g}" for i, v in ITEMS.items() if v.get("weight", 1) != common]
+    return "weights: " + ", ".join(odd) + f", everything else {common:g}"
+
+
+def load(w, name) -> float:
+    return sum(ITEMS[i].get("weight", 1) * q for i, q in w.s["agents"][name]["holdings"].items() if q > 1e-9)
+
+
 def describe_node(w, nid) -> str:
     """A node in one line, generated from what is there: houses and households, kinds of land and what they give, fittings, the
     herd, and the trades of the lines born there (what is known of it by repute; not what married-in people brought)."""
@@ -290,7 +302,7 @@ def system_prompt(w, name) -> str:
     if len(w.s["nodes"]) > 1:
         lines += ["", f"Other places (only what is carried goes between them; a night out costs {p['shelter']['unsheltered']:g} "
                   f"meals, {p['shelter_cold']['unsheltered']:g} in the cold, unless someone takes you in; on foot you carry at most "
-                  f"{p['carry']['foot']:g} weight):"] + _map_lines(w, name)
+                  f"{p['carry']['foot']:g} weight; {weights_text()}):"] + _map_lines(w, name)
     lines += ["", "What you know how to do:"] + KN.crafts_lines(w, name)
     lines += ["", "What you can do (each action is a verb and what it acts on):", verb_lines(w, name), "", REPLY_LINES]
     return "\n".join(lines)
@@ -380,7 +392,8 @@ def turn_prompt(w, name, opening=True) -> str:
             hl += [describe_node(w, node)] + _place_lines(w, node)
         L.append("## Here\n" + "\n".join(hl))
     hold = ", ".join(f"{show(q)} {i}" for i, q in sorted(a["holdings"].items()) if q > 0.05) or "nothing"
-    you = [f"You are {STAGES[a['hunger']]}" + (", and hurt" if a["wounded"] else "") + f". You carry: {hold}."]
+    you = [f"You are {STAGES[a['hunger']]}" + (", and hurt" if a["wounded"] else "") + f". You carry: {hold}"
+           + (f" (weight {show(load(w, name))} of the {w.p['carry']['foot']:g} you can travel with)" if len(w.s["nodes"]) > 1 else "") + "."]
     L.append("## You\n" + "\n".join(you + _house_lines(w, name)))
     can, near = KN.options(w, name)
     opt = ["Today you could: " + "; ".join(can) + "." if can else "Of your crafts, none can be done today with what you have."]
@@ -389,7 +402,8 @@ def turn_prompt(w, name, opening=True) -> str:
     if not opening:
         opt.append("What you know how to do: " + " ".join(x.removeprefix("- ") for x in KN.crafts_lines(w, name)))
     L.append("## Your crafts today\n" + "\n".join(opt))
-    owed = [_offer_text(w, oid, o) for oid, o in w.s["offers"].items() if o["open"] and o["by"] != name and o["to"] in (None, name)]
+    owed = [_offer_text(w, oid, o) for oid, o in w.s["offers"].items() if o["open"] and o["by"] != name and o["to"] in (None, name)
+            and w.at(o["by"]) == w.at(name)]                                 # offers are taken face to face: only those here
     mine = [_offer_text(w, oid, o) for oid, o in w.s["offers"].items() if o["open"] and o["by"] == name]
     if owed or mine:
         L.append("## Offers open\n" + "\n".join([f"- {x}" for x in owed] + [f"- yours: {x}" for x in mine]))
@@ -425,6 +439,24 @@ def talk_prompt(w, name, heard: list, also: list, offers: list, opened: list, ca
     sent = sum(1 for x in results_so_far if x.startswith("You told ")) if results_so_far is not None else 0
     L.append(f"You have {max(0, w.s['agents'][name]['messages'] - sent)} private messages left today. You may answer (tell, say) and "
              "change your plan: give your whole plan for the day again (it replaces the one before). Reply with JSON only.")
+    return "\n\n".join(L)
+
+
+def lighten_prompt(w, name, a: dict, did: list) -> str:
+    """Asked again when the day's travel finds the agent too heavy to set off: its load, what weighs what, who and which houses are
+    here; it may give things to someone here, leave them at a house here (found there next morning), or stay."""
+    me = w.s["agents"][name]
+    goods = ", ".join(f"{show(q)} {i} ({show(q * ITEMS[i].get('weight', 1))} weight)" for i, q in sorted(me["holdings"].items()) if q > 0.05)
+    node = w.at(name)
+    houses = [v["name"] for v in w.s["houses"].values() if w.node_of(v["parcel"]) == node]
+    people = [x for x in w.here(name) if x != name]
+    L = ["## Setting off", "Today so far: " + (" ".join(x for x in did if not x.startswith(PC.SPEECH)) or "nothing"),
+         f"You meant to set off for {a.get('to')} tonight, but you carry {show(load(w, name))} weight and on foot you can carry "
+         f"{w.p['carry']['foot']:g}. You carry: {goods}.",
+         f"Before you go you may give things to someone here ({', '.join(people) or 'nobody is here'}), or leave them at a house here "
+         f"({', '.join(houses) or 'none'}): {{\"do\": \"leave\", \"item\", \"qty\", \"at\": house}}; whatever is left there is "
+         "found by that household in the morning. Then travel again. Or stay here tonight: leave out the travel.",
+         "Reply with JSON only: put these in \"actions\" (give, leave, move, travel; no work), and leave everything else empty."]
     return "\n\n".join(L)
 
 

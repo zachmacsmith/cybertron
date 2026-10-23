@@ -14,6 +14,7 @@ numbers (capacities, costs).
 - D2-2: one merchant household with a cart is seeded in the first region.
 - D2-4: a death on the road is never announced; the household saw the departure and remembers the stated plan.
 - D2-23: carts, harness (an ox pulls) and saddle (a horse carries a rider).
+- D4-32: a traveller too heavy to set off is told and chooses what to leave, with a person or at a house.
 
 ## Mechanics
 
@@ -22,6 +23,8 @@ numbers (capacities, costs).
 - **A cart** needs a draught animal with a harness (D2-23).
 - A traveller who dies on the road is not announced; those at home know only that it left and what it said it would do (D2-4).
 - Weight and carrying capacity: 37.4's mechanism and 02g's numbers, not yet decided (OPEN C-1).
+- **Too heavy to set off** (D4-32): a traveller over its capacity is told its load and asked what to leave; it may give goods to someone
+  at the node or leave them at a house there (`leave`), whose household finds them the next morning; then it sets off, or stays.
 
 ## Data
 
@@ -50,4 +53,4 @@ visibly carry.
 [02g §3](../../../review/37_growth/02g_resources_and_transport.md), [02g_transport_model.py](../../../review/37_growth/02g_transport_model.py),
 38.05 §2, 38.06 §3; proposals/transport_and_lodging.md.
 
-*Current as of 23 Oct 2026: D2-2, D2-4, D2-23, D4-8, D4-9, D4-10.*
+*Current as of 23 Oct 2026: D2-2, D2-4, D2-23, D4-8, D4-9, D4-10, D4-32.*

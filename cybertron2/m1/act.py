@@ -29,8 +29,10 @@ VERB = {
     "travel": {"args": '{"to": a place}', "cost": 0, "when": "roads",
                "doc": "the day's last act: you leave at nightfall and arrive on a later morning"},
     "welcome": {"args": '{"person"}', "cost": 0, "when": "roads", "doc": "let a visitor sleep in your house tonight"},
+    "leave": {"args": '{"item", "qty", "at": a house here}', "cost": 0, "when": "roads",
+              "doc": "put something you carry into a house's store here, for its household (they find it in the morning)"},
     "gather": {"args": '{"what", "at": place}', "cost": "craft", "doc": "take from the land: {crafts}"},
-    "make": {"args": '{"what", "qty"?: how many times}', "cost": "craft", "doc": "a recipe: {crafts}"},
+    "make": {"args": '{"what", "qty"?: how many times}', "cost": "craft", "doc": "a recipe, from what you carry (take the inputs from your store first): {crafts}"},
     "work": {"args": '{"what", "at"?: place}', "cost": "craft", "doc": "{crafts}"},
     "move": {"args": '{"item", "qty", "to": house | hands}', "cost": 0,
              "doc": '"house" puts it in your house\'s store, "hands" takes it out (at home)'},
@@ -643,16 +645,36 @@ def _travel(w, name, a, today):
     if to is None or to not in w.s["edges"].get(here, {}):
         ways = ", ".join(f"{w.s['nodes'][b]['name']} ({k} day{'s' if k > 1 else ''})" for b, k in w.s["edges"].get(here, {}).items())
         raise Refused(f"there is no way from here to {a.get('to')!r}; from here you can go to {ways or 'nowhere'}")
-    load = sum(ITEMS[i]["weight"] * q for i, q in w.s["agents"][name]["holdings"].items() if q > 1e-9)
+    from cybertron2.m1.prompt import load as _load
+    load = _load(w, name)
     cap = float(w.p["carry"]["foot"])
     if load > cap + 1e-9:
-        raise Refused(f"you carry {show(load)} weight; on foot you can carry {cap:g}: leave something behind")
+        raise Refused(f"you carry {show(load)} weight; on foot you can carry {cap:g}")
     today.setdefault("travel", {})[name] = to
     days = w.s["edges"][here][to]
     w.happen("depart", f"{name} set off toward {w.s['nodes'][to]['name']}", actor=name, salience=0.6, tags=["travel"],
              extra={"node": here})
     return (f"You set off for {w.s['nodes'][to]['name']} at the end of the day: {days} day{'s' if days > 1 else ''} on the road, "
             f"sleeping out; you arrive on the morning of day {w.d + days + 1}. Nothing more is done today.")
+
+
+def _leave(w, name, a, today):
+    """Leave goods at a house at this node (one's own or another's): into its store; its household finds them next morning."""
+    x = str(a.get("at") or "").strip().lower().removeprefix("the ")
+    hid = next((h for h, v in w.s["houses"].items() if w.node_of(v["parcel"]) == w.at(name)
+                and x in (v["name"].lower(), v["household"].lower(), v["household"].lower() + "s", h)), None)
+    if hid is None:
+        here = ", ".join(v["name"] for v in w.s["houses"].values() if w.node_of(v["parcel"]) == w.at(name))
+        raise Refused(f"there is no house called {a.get('at')!r} here; the houses here: {here or 'none'}")
+    item, q = _item(a.get("item")), _qty(a.get("qty"))
+    me = w.s["agents"][name]
+    if me["holdings"].get(item, 0.0) + 1e-9 < q:
+        raise Refused(f"you carry only {show(me['holdings'].get(item, 0.0))} {item}")
+    me["holdings"][item] = round(me["holdings"][item] - q, 6)
+    h = w.s["houses"][hid]
+    _add(h["stock"], item, q)
+    w.s.setdefault("left", []).append({"day": w.d, "by": name, "item": item, "qty": q, "house": hid})
+    return f"You left {q:g} {item} at {h['name']}."
 
 
 def _welcome(w, name, a, today):
