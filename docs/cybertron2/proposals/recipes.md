@@ -316,6 +316,31 @@ Zach: bread at 1.1 adds almost nothing; capital and labour should buy real upsid
 | cheese | 0.37 | 0.08 | 0.030 |
 | dried meat (proposed: meat dried to half its weight) | 0.31 | 0.06 | 0.025 |
 
+**Default low, ceiling high, through capital (Zach, 23 Oct).** The default (sow and reap, crude tools, whole grain at home) should
+give little more than a household needs; the ceiling should feed many more people, but only while capital-heavy supply chains
+work. Food per plot of land, against the default:
+
+| Rung | Food a plot-slot | Against the default | Depends on |
+|---|---|---|---|
+| default: sow and reap, fallow, whole grain | 1.5 | x1 | nothing |
+| ox plough, weeding, manure, rotation, whole grain | 7.5 | x5 | a team (breeding herd, pasture, hay, a herder), plough (carpenter, copper), harness (hides) |
+| + a mill | 10.8 | x7 | millstones (a mason with chisels, D2-48, from a master smith), a wheel (carpenter, copper), a river site |
+| + bread | 14.0 | x9 | an oven (stone), fuel |
+| + a master farmer and a reaping hook | 23.1 | x15 (probably too high: see below) | a season's practice; a master smith |
+
+Per unit of work the range is smaller: about 0.77 units a food by default against about 0.21 with everything (x3.7). **Each rung
+falls back when a link breaks:** the smith dies, the copper route is raided, the herd is driven off, the mill burns. That is the
+interlocking dependence scenario_design asks for. **The top rung is likely too high** because skill multiplies yield per plot as
+well as work; proposed: on farming, skill cuts the work and raises yield only a little (x1.1 at mastery), which keeps the land
+ceiling near x10.
+
+**A mill should be expensive** (Zach: wouldn't it be?). Proposed: two millstones of dressed stone (a mason with chisels: 10 stone
+and 8 units each), a mill room (timber on stone, about 30 units), a water wheel (30 timber, 2 copper, 20 units by a carpenter) and
+a leat (an earthwork: about 40 units of a crew's work): about 150-200 units in all, a month of one person's work or a week of a
+crew's; upkeep: the stones re-dressed by a mason and the wheel mended every season. At a village of 15 it pays back in about two
+years (longer than a run); at a town of 60 in about half a year. So seeded villages inherit their mills, and new ones are built
+by towns or lords, who then charge for milling.
+
 Bulk grain needs a pack animal for an edge or a cart for two or three; **dense food (cheese, cured meat) travels on foot.** A town
 a few edges from its farms is fed by carts and cured food, as historically.
 
