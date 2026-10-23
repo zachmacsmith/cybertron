@@ -19,6 +19,8 @@ ALIASES = {
     "hunt": ["hunt", "hunting"], "fell": ["fell", "felling", "chop timber"], "reap": ["reap", "reaping", "harvest"],
     "milk": ["milk", "milking"], "grind": ["grind", "grinding", "flour"], "bread": ["bread", "baking", "bake"],
     "crude weapon": ["crude weapon", "club", "spear"], "forage": ["forage", "foraging"],
+    "mine": ["mine", "mining", "dig ore"], "smelt": ["smelt", "smelting"], "copper tool": ["copper tool", "hand tool", "tool"],
+    "coin": ["coin", "strike coin", "minting"],
 }
 
 
@@ -176,23 +178,26 @@ def resolve(x):
 
 # ---------------------------------------------------------------------- needs, cards, options
 def _where(w, name, tech):
-    """The places this technique can be done for this agent, as (kind, id, label)."""
+    """The places at the agent's node where this technique can be done, as (kind, id, label): parcels of a cover, its own house
+    (only at home), or fittings of a kind (a smithy)."""
+    from cybertron2.m1.data import COVERS
     at = TECHNIQUES[tech]["needs"].get("at")
     if not at:
         return [("anywhere", None, "anywhere")]
+    node = w.at(name)
     out = []
     for a in at:
         if a == "house":
             h = w.home(name)
-            if h is not None:
+            if h is not None and w.node_of(h["parcel"]) == node:
                 out.append(("house", w.s["agents"][name]["house"], h["name"]))
-        elif a in ("firing pit",):
-            for f in w.fittings_at(a):
-                out.append(("fitting", f["parcel"], f.get("name") or a))
-        else:
-            for pid, p in w.parcels().items():
+        elif a in COVERS:
+            for pid, p in w.parcels(node).items():
                 if p["cover"] == a:
                     out.append(("parcel", pid, p["name"]))
+        else:
+            for f in w.fittings_at(a, node):
+                out.append(("fitting", f["parcel"], f.get("name") or a))
     return out
 
 
@@ -204,7 +209,7 @@ def shortfall(w, name, tech, mult=1.0, at=None) -> str:
     where = _where(w, name, tech)
     if not where:
         need = nd.get("at", [])
-        return f"there is no {' or '.join(need)} here" if need != ["house"] else "you have no house"
+        return f"there is no {' or '.join(need)} here" if need != ["house"] else "your house is not here"
     if at is not None and nd.get("at") and nd["at"] != ["house"]:
         if not any(x[1] == at for x in where):
             names = ", ".join(x[2] for x in where)

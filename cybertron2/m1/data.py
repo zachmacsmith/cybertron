@@ -23,6 +23,9 @@ ITEMS = {
     "crude tool": {"weight": 1, "food": 0.0, "spoil": 0.0},
     "copper tool": {"weight": 1, "food": 0.0, "spoil": 0.0},
     "crude weapon": {"weight": 1, "food": 0.0, "spoil": 0.0},
+    "copper ore": {"weight": 3, "food": 0.0, "spoil": 0.0},           # heavy: smelting belongs at the seam (recipes.md)
+    "copper": {"weight": 1, "food": 0.0, "spoil": 0.0},
+    "coin": {"weight": 0, "food": 0.0, "spoil": 0.0},                 # copper coin, carried (D2-1, D2-28)
 }
 EDIBLE = tuple(i for i, v in ITEMS.items() if v["food"] > 0)
 WEAPONS = {"crude weapon": 2.0}
@@ -30,6 +33,7 @@ TOOLS = ("copper tool", "crude tool")                          # best first
 TOOL_MULT = {                                                   # recipes.md §9: bare hands, crude, copper
     "fell": {"bare": 0.25, "crude tool": 1.0, "copper tool": 2.0},
     "reap": {"bare": 0.6, "crude tool": 1.0, "copper tool": 1.5},
+    "mine": {"bare": 0.0, "crude tool": 1.0, "copper tool": 1.5},      # no mining without a tool
 }
 
 COVERS = {
@@ -50,6 +54,8 @@ COVERS = {
               "ambient": [("sound", "voices and work about the houses", 0.2)]},
     "scrub": {"gather": ["forage"], "work": [], "lots": 4, "risks": ["fire"], "becomes": "forest if left; field if cleared",
               "ambient": []},
+    "rock": {"gather": ["mine (a seam, with a tool)"], "work": [], "lots": 0, "risks": ["rockfall"], "becomes": "",
+             "ambient": [("sound", "the ring of picks from {name}", 0.25)]},
 }
 
 # verb, the object agents name, and what it needs. "at": a cover type or "house" (one's own house: its hearth and quern).
@@ -70,6 +76,14 @@ TECHNIQUES = {
               "units": 1, "gives": {"bread": 11}, "tags": ["food", "cooking"]},
     "crude weapon": {"verb": "make", "label": "making a crude weapon", "basic": True, "needs": {"inputs": {"timber": 1}}, "units": 1,
                      "gives": {"crude weapon": 1}, "tags": ["weapons"]},
+    "mine": {"verb": "gather", "label": "mining copper ore", "needs": {"at": ["rock"]}, "units": 2, "gives": "copper ore",
+             "tags": ["mining", "craft"]},
+    "smelt": {"verb": "make", "label": "smelting copper", "needs": {"inputs": {"copper ore": 3, "timber": 4}, "at": ["smithy"]},
+              "units": 3, "gives": {"copper": 1}, "tags": ["mining", "craft"]},
+    "copper tool": {"verb": "make", "label": "making a copper hand tool", "needs": {"inputs": {"copper": 1, "timber": 0.5},
+                    "at": ["smithy"]}, "units": 3, "gives": {"copper tool": 1}, "tags": ["craft", "smithing"]},
+    "coin": {"verb": "make", "label": "striking coin", "needs": {"inputs": {"copper": 1}, "at": ["smithy"]}, "units": 1,
+             "gives": {"coin": 10}, "tags": ["craft", "smithing"]},
     "repair": {"verb": "work", "label": "repairing a house", "basic": True, "needs": {"inputs": {"timber": 2}, "at": ["house"]},
                "units": 2, "gives": "repair", "tags": ["building", "shelter"]},
 }
@@ -104,5 +118,7 @@ PHYSICS = {
     "felt_watched": 0.3,
     "glimpse": 3,
     "messages": {"per_day": 3, "jitter": {0: 37, 1: 37, 2: 18, 3: 8}, "max": 10},   # private messages a day (cybertron 1's DM limit)
-    "say_units": 1,                                                                     # a say (public or in a building) takes 1 unit
+    "say_units": 1,
+    "mine": {"ore": 2.0},                                                 # recipes.md §1: 2 ore for 2 units with a crude tool
+    "carry": {"foot": 10},                                                # weight carried on foot (transport spec, OPEN C-1: calibrate)                                                                     # a say (public or in a building) takes 1 unit
 }

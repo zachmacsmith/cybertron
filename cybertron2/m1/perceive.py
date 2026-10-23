@@ -59,6 +59,8 @@ def dawn(w) -> None:
         rng = w.rng("dawn", w.d, name)
         t = store(w, name)["today"]
         for e in ev:
+            if e.get("node") not in (None, w.at(name)):
+                continue                                                 # it happened at another node
             f = {"concerns": e.get("concerns", []), "about": [e.get("about") or "sky"], "tags": e["tags"]}
             p = 1.0 if name in f["concerns"] or e["salience"] >= SALIENT else min(1.0, e["salience"] * (0.3 + relevance(w, name, f)))
             if rng.random() < p:
@@ -68,6 +70,25 @@ def dawn(w) -> None:
 
 def store(w, name) -> dict:
     return w.s["mind"][name]
+
+
+def fact_node(w, f):
+    """The node a fact belongs to (None: everywhere, as the sky)."""
+    if "node" in f:
+        return f["node"]
+    for sub in f["about"]:
+        kind, _, key = sub.partition(":")
+        if kind == "p":
+            return w.node_of(key)
+        if kind == "h":
+            return w.node_of(w.s["houses"][key]["parcel"])
+        if kind == "herd":
+            return w.node_of(w.s["herds"][key]["parcel"])
+        if kind == "fit":
+            return w.node_of(w.s["fittings"][int(key)]["parcel"])
+        if kind == "a":
+            return w.at(key)
+    return None
 
 
 # ---------------------------------------------------------------------- facts
@@ -166,6 +187,8 @@ def facts(w) -> list:
         add([f"herd:{hid}", f"p:{hd['parcel']}"], f"{hd['name']} ({hd['count']} head) on {p['name']}", 0.1, ["animals"])
     # people
     for x in w.living():
+        if w.at(x) is None:
+            continue                                                     # on the road: seen nowhere
         a = s["agents"][x]
         add([f"a:{x}"], f"{x} {WORDS_STAGE[a['hunger']]}", 0.1 if a["hunger"] == 0 else 0.35, ["food"] if a["hunger"] else [],
             concerns=[x])
@@ -184,7 +207,7 @@ def facts(w) -> list:
             continue                                                     # speech is heard, not seen
         if e.get("dawn"):                                                # a dawn sign or incident lasts the day: seen again by
             add([e.get("about") or "sky"], e["text"], e["salience"], e["tags"], e.get("sense", "sight"), e.get("concerns", []),
-                event=e["id"], kind=e["kind"], dawn=True)                # whoever attends to it, or notices it later
+                event=e["id"], kind=e["kind"], dawn=True, node=e.get("node"))                # whoever attends to it, or notices it later
             continue
         about = [f"a:{e['actor']}"] if e.get("actor") else []
         if e.get("target"):
@@ -194,7 +217,7 @@ def facts(w) -> list:
         if e.get("house"):
             about.append(f"h:{e['house']}")
         add(about, e["text"], e["salience"], e["tags"], e.get("sense", "sight"), e.get("concerns", []), event=e["id"],
-            actor=e.get("actor"), tech=e.get("tech"), kind=e["kind"])
+            actor=e.get("actor"), tech=e.get("tech"), kind=e["kind"], node=e.get("node"))
     return out
 
 
@@ -229,7 +252,7 @@ def _mine(name, f) -> bool:
 # ---------------------------------------------------------------------- the evening: who perceives what
 def evening(w, attend: dict, today: dict) -> dict:
     """Perception for everyone after the day's work. attend: {name: target as written}. Returns {name: log record}."""
-    F = facts(w)
+    ALL = facts(w)
     living = w.agents_acting()
     logs = {}
     for name in w.living():
@@ -240,9 +263,10 @@ def evening(w, attend: dict, today: dict) -> dict:
     for name in living:
         tgt = today["watch"].get(name) or attend.get(name)
         who = w.person(tgt) if tgt else None
-        if who and who != name:
+        if who and who != name and w.at(who) == w.at(name):
             watchers.setdefault(who, []).append(name)
     for name in living:
+        F = [f for f in ALL if fact_node(w, f) in (None, w.at(name))]       # what is at its node, and the sky
         t = store(w, name)["today"]
         rng = w.rng("notice", w.d, name)
         tgt_raw = today["watch"].get(name) or attend.get(name)
@@ -293,7 +317,7 @@ def evening(w, attend: dict, today: dict) -> dict:
             t["attended"] = {"target": label, "lines": [f["text"] for f in att] or ["nothing out of the ordinary"]}
         seen |= {f["id"] for f in att}
         # a glimpse of a few others: where they spent the day
-        others = [x for x in living if x != name and f"a:{x}" != subject]
+        others = [x for x in living if x != name and f"a:{x}" != subject and w.at(x) == w.at(name)]
         kin = [x for x in others if w.s["agents"][x]["house"] == w.s["agents"][name]["house"]]
         rest = [x for x in others if x not in kin]
         rng.shuffle(rest)
@@ -344,7 +368,7 @@ def evening(w, attend: dict, today: dict) -> dict:
         logs[name] = {"notice": [f["id"] for f in notice], "attended": [f["id"] for f in att], "concerned": [f["id"] for f in con],
                       "target": label}
         store(w, name)["log"].append({"day": w.d, **logs[name]})
-    return {"facts": F, "agents": logs}
+    return {"facts": ALL, "agents": logs}
 
 
 def resolve_target(w, name, x):
@@ -358,12 +382,12 @@ def resolve_target(w, name, x):
     if low in ("sky", "the sky", "weather", "the weather", "the land and sky", "the land", "the sky and the weather"):
         return "sky", "the land and sky"
     who = w.person(s)
-    if who and who != name:
+    if who and who != name and w.at(who) == w.at(name):
         return f"a:{who}", who
     hid = w.house_by_name(s)
-    if hid:
+    if hid and w.node_of(w.s["houses"][hid]["parcel"]) == w.at(name):
         return f"h:{hid}", w.s["houses"][hid]["name"]
-    pid = w.parcel_by_name(s)
+    pid = w.parcel_by_name(s, w.at(name))
     if pid:
         return f"p:{pid}", w.parcels()[pid]["name"]
     for hid, h in w.s["herds"].items():
@@ -382,7 +406,7 @@ def steals(w, today, attend) -> None:
         h = w.s["houses"][st["house"]]
         seen_by = []
         for x in w.agents_acting():
-            if x == st["by"]:
+            if x == st["by"] or w.at(x) != w.node_of(h["parcel"]):
                 continue
             sub, _ = resolve_target(w, x, today["watch"].get(x) or attend.get(x))
             at_home = w.s["agents"][x]["house"] == st["house"] and not today["worked"].get(x) and not today["watch"].get(x)

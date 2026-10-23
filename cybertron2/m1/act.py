@@ -21,9 +21,9 @@ from cybertron2.m1 import knowledge as KN
 from cybertron2.m1.data import EDIBLE, ITEMS, TECHNIQUES, TOOL_MULT, TOOLS, TRY, WEAPONS
 from cybertron2.m1.world import World, show
 
-VERBS = ("gather", "make", "work", "move", "give", "accept", "set", "attack", "guard", "steal", "watch", "teach", "learn",
+VERBS = ("travel", "welcome", "gather", "make", "work", "move", "give", "accept", "set", "attack", "guard", "steal", "watch", "teach", "learn",
          "rest")
-FREE = ("move", "give", "accept", "set", "rest")
+FREE = ("move", "give", "accept", "set", "rest", "travel", "welcome")
 
 
 class Refused(Exception):
@@ -78,11 +78,31 @@ def do(w: World, name: str, a: dict, today: dict) -> str:
         return f"Refused: {v or 'action'}: {e}"
 
 
-def _parcel(w, x, what=""):
-    pid = w.parcel_by_name(x)
+def _parcel(w, x, what="", name=None):
+    pid = w.parcel_by_name(x, w.at(name) if name else None)
     if pid is None:
         raise Refused(f"there is no place called {x!r} here" + (f" to {what}" if what else ""))
     return pid
+
+
+def _near(w, name, x):
+    """A living person at the same node, or None."""
+    who = w.person(x)
+    return who if who and who != name and w.s["agents"][who]["alive"] and w.at(who) == w.at(name) else None
+
+
+def _here_house(w, name, x):
+    hid = w.house_by_name(x)
+    return hid if hid and w.node_of(w.s["houses"][hid]["parcel"]) == w.at(name) else None
+
+
+def _at_home(w, name):
+    h = w.home(name)
+    if h is None:
+        raise Refused("you have no house")
+    if w.node_of(h["parcel"]) != w.at(name):
+        raise Refused(f"{h['name']} is at {w.s['nodes'][w.node_of(h['parcel'])]['name']}; you are not there")
+    return h
 
 
 def _skill_mult(w, name, tech) -> float:
@@ -113,9 +133,9 @@ def _add(store, item, q):
 def _gather(w, name, a, today):
     tech = KN.resolve(a.get("what"))
     if tech is None or TECHNIQUES[tech]["verb"] != "gather":
-        raise Refused(f"{a.get('what')!r} is not something you gather (gathering: forage, hunt, fell)")
+        raise Refused(f"{a.get('what')!r} is not something you gather (gathering: forage, hunt, fell, mine)")
     lvl = _level_or_refuse(w, name, tech)
-    pid = _parcel(w, a.get("at") or "", tech) if a.get("at") else None
+    pid = _parcel(w, a.get("at") or "", tech, name) if a.get("at") else None
     if pid is None:
         opts = [x for x in KN._where(w, name, tech) if x[0] == "parcel"]
         if not opts:
@@ -159,6 +179,17 @@ def _gather(w, name, a, today):
         _add(me["holdings"], "timber", got)
         st["felled"] = int(st.get("felled", 0)) + 1
         word = f"You felled {show(got)} timber in {p['name']}" + (f" with your {tool}." if tool else " with your bare hands.")
+    if tech == "mine":
+        tool, tm = tool_of(me, "mine")
+        if not tool:
+            raise Refused("you cannot mine with your bare hands: you need a tool")
+        seam = st.get("seam")
+        if not seam or seam.get("left", 0) <= 1e-9:
+            raise Refused(f"there is no ore left to mine at {p['name']}")
+        got = round(min(seam["left"], pp["mine"]["ore"] * m * tm), 2)
+        seam["left"] = round(seam["left"] - got, 4)
+        _add(me["holdings"], "copper ore", got)
+        word = f"You mined {show(got)} copper ore at {p['name']} with your {tool}."
     KN.tried(w, name, tech, got > 0)
     w.happen("work", f"{name} was {TECHNIQUES[tech]['label'].split(' (')[0]} at {p['name']}", actor=name, parcel=pid,
              salience=0.15, tags=TECHNIQUES[tech]["tags"], extra={"tech": tech})
@@ -204,7 +235,7 @@ def _work(w, name, a, today):
         w.happen("work", f"{name} repaired {h['name']}", actor=name, parcel=h["parcel"], salience=0.3, tags=["building", "shelter"])
         return f"You repaired {h['name']}: it is now {('ruined', 'damaged', 'sound')[h['condition']]}."
     _level_or_refuse(w, name, tech)
-    pid = _parcel(w, a.get("at"), "reap") if a.get("at") else next((x[1] for x in KN._where(w, name, tech) if KN._crop_ripe(w, x[1])), None)
+    pid = _parcel(w, a.get("at"), "reap", name) if a.get("at") else next((x[1] for x in KN._where(w, name, tech) if KN._crop_ripe(w, x[1])), None)
     if pid is None:
         raise Refused("no field here has a ripe crop")
     why = KN.shortfall(w, name, tech, 1.0, pid)
@@ -228,7 +259,7 @@ def _work(w, name, a, today):
 def _make(w, name, a, today):
     tech = KN.resolve(a.get("what"))
     if tech is None or TECHNIQUES[tech]["verb"] != "make":
-        raise Refused(f"{a.get('what')!r} is not something you make (recipes: grind, bread, crude weapon)")
+        raise Refused(f"{a.get('what')!r} is not something you make (recipes: grind, bread, crude weapon, smelt, copper tool, coin)")
     lvl = _level_or_refuse(w, name, tech)
     qty = max(1, int(_qty(a.get("qty"), 1)))
     t = TECHNIQUES[tech]
@@ -260,7 +291,7 @@ def _build(w, name, a, today):
     if tech is None or TECHNIQUES[tech]["verb"] != "build":
         raise Refused(f"{a.get('what')!r} is not something you build (building: firing pit)")
     lvl = _level_or_refuse(w, name, tech)
-    pid = _parcel(w, a.get("at"), "build") if a.get("at") else next((x[1] for x in KN._where(w, name, tech)), None)
+    pid = _parcel(w, a.get("at"), "build", name) if a.get("at") else next((x[1] for x in KN._where(w, name, tech)), None)
     if pid is None or w.parcels()[pid]["cover"] not in TECHNIQUES[tech]["needs"].get("at", []):
         raise Refused(f"a {tech} is built on built ground (the green and the houses)")
     mult = TRY[lvl]["inputs"]
@@ -285,9 +316,7 @@ def _build(w, name, a, today):
 # ---------------------------------------------------------------------- goods
 def _move(w, name, a, today):
     me = w.s["agents"][name]
-    h = w.home(name)
-    if h is None:
-        raise Refused("you have no house")
+    h = _at_home(w, name)
     item = _item(a.get("item"))
     to = str(a.get("to") or "house").strip().lower().removeprefix("the ").removeprefix("my ").removeprefix("your ")
     hid = w.house_by_name(to)
@@ -312,7 +341,7 @@ def _move(w, name, a, today):
 
 
 def _give(w, name, a, today):
-    to = w.person(a.get("to"))
+    to = _near(w, name, a.get("to"))
     if to is None or not w.s["agents"][to]["alive"]:
         raise Refused(f"there is nobody called {a.get('to')!r} here")
     if to == name:
@@ -338,12 +367,16 @@ def _accept(w, name, a, today):
     by = o["by"]
     if by == name:
         raise Refused("that is your own offer")
+    if w.at(by) != w.at(name):
+        raise Refused(f"{by} is not here; an offer is taken face to face")
     A, B = w.s["agents"][by]["holdings"], w.s["agents"][name]["holdings"]
-    theirs = (w.home(by) or {}).get("stock", {})                        # an offer not set aside is paid from hand, then store
+    hb = w.home(by)
+    theirs = hb["stock"] if hb is not None and w.node_of(hb["parcel"]) == w.at(by) else {}   # their store, if they are at home
     for item, q in o["give"].items():
         if not o.get("held") and A.get(item, 0.0) + theirs.get(item, 0.0) + 1e-9 < q:
             raise Refused(f"{by} no longer has {q:g} {item}; nothing was exchanged")
-    mine = (w.home(name) or {}).get("stock", {})                         # the taker pays from hand, then its own house's store
+    hm = w.home(name)
+    mine = hm["stock"] if hm is not None and w.node_of(hm["parcel"]) == w.at(name) else {}   # pays from hand, then its store at home
     for item, q in o["get"].items():
         if B.get(item, 0.0) + mine.get(item, 0.0) + 1e-9 < q:
             raise Refused(f"you and your house's store have only {show(B.get(item, 0.0) + mine.get(item, 0.0))} {item}; nothing was exchanged")
@@ -388,8 +421,8 @@ def _set(w, name, a, today):
 def _attack(w, name, a, today):
     tgt = str(a.get("target", ""))
     aim = str(a.get("aim", "rob")).lower()
-    who = w.person(tgt)
-    hid = w.house_by_name(tgt)
+    who = _near(w, name, tgt)
+    hid = _here_house(w, name, tgt)
     if who and who != name and w.s["agents"][who]["alive"]:
         today["fights"].append({"kind": "attack", "by": name, "target": who, "aim": "hurt" if aim == "hurt" else "rob"})
         w.happen("threat", f"{name} squared up to {who}", actor=name, target=who, salience=0.7, tags=["danger"], concerns=[who])
@@ -409,7 +442,7 @@ def _guard(w, name, a, today):
 
 
 def _steal(w, name, a, today):
-    hid = w.house_by_name(a.get("from"))
+    hid = _here_house(w, name, a.get("from"))
     if hid is None:
         raise Refused(f"no house called {a.get('from')!r} here")
     h = w.s["houses"][hid]
@@ -503,7 +536,7 @@ def settle_fights(w) -> list:
 
 # ---------------------------------------------------------------------- learning from others
 def _watch(w, name, a, today):
-    who = w.person(a.get("person") or a.get("to") or a.get("target"))
+    who = _near(w, name, a.get("person") or a.get("to") or a.get("target"))
     if who is None or who == name or not w.s["agents"][who]["alive"]:
         raise Refused(f"there is nobody called {a.get('person')!r} here to watch")
     today["watch"][name] = who
@@ -511,7 +544,7 @@ def _watch(w, name, a, today):
 
 
 def _teach(w, name, a, today):
-    to = w.person(a.get("to"))
+    to = _near(w, name, a.get("to"))
     tech = KN.resolve(a.get("what"))
     if to is None or to == name:
         raise Refused(f"there is nobody called {a.get('to')!r} here to teach")
@@ -524,7 +557,7 @@ def _teach(w, name, a, today):
 
 
 def _learn(w, name, a, today):
-    frm = w.person(a.get("from"))
+    frm = _near(w, name, a.get("from"))
     tech = KN.resolve(a.get("what"))
     if frm is None or frm == name:
         raise Refused(f"there is nobody called {a.get('from')!r} here to learn from")
@@ -556,6 +589,38 @@ def settle_teaching(w, today) -> dict:
         if not any(t["by"] == l["from"] and t["to"] == l["by"] and t["tech"] == l["tech"] for t in today["teach"]):
             out.setdefault(l["by"], []).append(f"You meant to learn from {l['from']}, but {l['from']} did not set aside time to teach you.")
     return out
+
+
+def _travel(w, name, a, today):
+    """The day's last act (D4-8): the agent leaves at nightfall and arrives at the start of a later day (D4-10)."""
+    here = w.at(name)
+    x = str(a.get("to") or "").strip().lower().removeprefix("the ")
+    to = next((nid for nid, n in w.s["nodes"].items() if x in (nid.lower(), n["name"].lower())), None)
+    if to is None or to not in w.s["edges"].get(here, {}):
+        ways = ", ".join(f"{w.s['nodes'][b]['name']} ({k} day{'s' if k > 1 else ''})" for b, k in w.s["edges"].get(here, {}).items())
+        raise Refused(f"there is no way from here to {a.get('to')!r}; from here you can go to {ways or 'nowhere'}")
+    load = sum(ITEMS[i]["weight"] * q for i, q in w.s["agents"][name]["holdings"].items() if q > 1e-9)
+    cap = float(w.p["carry"]["foot"])
+    if load > cap + 1e-9:
+        raise Refused(f"you carry {show(load)} weight; on foot you can carry {cap:g}: leave something behind")
+    today.setdefault("travel", {})[name] = to
+    days = w.s["edges"][here][to]
+    w.happen("depart", f"{name} set off toward {w.s['nodes'][to]['name']}", actor=name, salience=0.6, tags=["travel"],
+             extra={"node": here})
+    return (f"You set off for {w.s['nodes'][to]['name']} at the end of the day: {days} day{'s' if days > 1 else ''} on the road, "
+            f"sleeping out; you arrive on the morning of day {w.d + days + 1}. Nothing more is done today.")
+
+
+def _welcome(w, name, a, today):
+    """A host lets a visitor sleep in its house tonight (spec/economy/lodging.md): sheltered as the household is."""
+    who = _near(w, name, a.get("person") or a.get("to"))
+    if who is None:
+        raise Refused(f"there is nobody called {a.get('person') or a.get('to')!r} here to welcome")
+    h = _at_home(w, name)
+    today.setdefault("guests", {})[who] = w.s["agents"][name]["house"]
+    w.happen("welcome", f"{name} took {who} in for the night at {h['name']}", actor=name, target=who, salience=0.4,
+             tags=["shelter"], concerns=[who])
+    return f"You welcome {who} to sleep at {h['name']} tonight."
 
 
 def _rest(w, name, a, today):

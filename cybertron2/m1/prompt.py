@@ -59,8 +59,8 @@ def schema_for(w, name) -> dict:
     a["do"]["enum"] = list(VERBS)
     a["item"]["enum"] = list(_ITEMS)
     a["what"]["enum"] = techs
-    a["at"]["enum"] = parcels + houses
-    a["to"]["enum"] = ["house", "hands"] + people
+    a["at"]["enum"] = parcels + houses + [f["name"] for f in w.s["fittings"]]
+    a["to"]["enum"] = ["house", "hands"] + people + sorted(n["name"] for n in w.s["nodes"].values())
     a["from"]["enum"] = people + houses
     a["target"]["enum"] = people + houses
     a["person"]["enum"] = people
@@ -76,8 +76,11 @@ def schema_for(w, name) -> dict:
     return s
 
 
-VERB_LINES = """- gather {"what": forage | hunt | fell, "at": place}  hunting needs a weapon to do well; felling a tool (bare hands do little)
-- make {"what": grind | bread | crude weapon, "qty"?}  grind grain to flour at your house's quern; bake bread from flour
+VERB_LINES = """- travel {"to": a place}                              the day's last act: you leave at nightfall and arrive on a later morning
+- welcome {"person"}                                  let a visitor sleep in your house tonight (free)
+- gather {"what": forage | hunt | fell | mine, "at": place}  hunting needs a weapon; felling a tool (bare hands do little); mining a tool
+- make {"what": grind | bread | crude weapon | smelt | copper tool | coin, "qty"?}  grind and bake at your house; smelt, tools
+                                                      and coin at a smithy
 - work {"what": reap | milk | repair, "at"?: place}    reap a ripe field (a tool helps); milk a cow in milk; repair your house
 - move {"item", "qty", "to": house | hands}            "house" puts it in your house's store; "hands" takes it out (free)
 - give {"to": person, "item", "qty"}                    (free)
@@ -128,9 +131,14 @@ def _kin(w, name) -> list:
     return out
 
 
-def _place_lines(w) -> list:
+def home_node(w, name):
+    h = w.home(name)
+    return w.node_of(h["parcel"]) if h else w.at(name)
+
+
+def _place_lines(w, node) -> list:
     out = []
-    for pid, p in w.parcels().items():
+    for pid, p in w.parcels(node).items():
         c = COVERS[p["cover"]]
         can = [g for g in c["gather"]] + c["work"]
         adj = ", ".join(w.parcels()[q]["name"] for q in p["adj"])
@@ -148,8 +156,32 @@ def _place_lines(w) -> list:
         if houses:
             bits.append("houses: " + ", ".join(houses))
         out.append(line + ". " + "; ".join(bits) + (f". Next to {adj}." if adj else "."))
-    for f in w.s["node"]["features"].values():
+    for f in w.s["nodes"][node]["features"].values():
         out.append(f"- {f['name']}: {f['text']}")
+    for f in w.s["fittings"]:
+        if w.node_of(f["parcel"]) == node:
+            out.append(f"- {f.get('name') or f['kind']} on {w.parcels()[f['parcel']]['name']}")
+    return out
+
+
+def _map_lines(w, name) -> list:
+    """The other nodes as the agent knows them: name, how far by the tracks from its home, and their repute (the node's text)."""
+    home = home_node(w, name)
+    dist = {home: 0}
+    todo = [home]
+    while todo:                                                          # days by the shortest way
+        x = todo.pop(0)
+        for y, k in w.s["edges"].get(x, {}).items():
+            if y not in dist or dist[x] + k < dist[y]:
+                dist[y] = dist[x] + k
+                todo.append(y)
+    out = []
+    for nid, n in w.s["nodes"].items():
+        if nid == home:
+            continue
+        ways = ", ".join(f"{w.s['nodes'][b]['name']} ({k} day{'s' if k > 1 else ''})" for b, k in w.s["edges"].get(nid, {}).items())
+        far = f"{dist[nid]} day{'s' if dist.get(nid, 0) > 1 else ''} from home" if nid in dist else "no way known"
+        out.append(f"- {n['name']}: {far}. {n['text']} Tracks lead from it to {ways}.")
     return out
 
 
@@ -157,10 +189,11 @@ def system_prompt(w, name) -> str:
     a = w.s["agents"][name]
     h = w.home(name)
     stage = {"youth": "a youth, not yet grown", "adult": "a grown adult", "elder": "an elder"}.get(a["stage"], a["stage"])
-    lines = [f"You are {name}, {stage}, of {h['name'] if h else 'no house'} in {w.s['node']['name']}."
+    hn = w.s["nodes"][home_node(w, name)]
+    lines = [f"You are {name}, {stage}, of {h['name'] if h else 'no house'} in {hn['name']}."
              + (f" You are the household's {a['role']}." if a.get("role") else "") + (f" By trade: {a['trade']}." if a.get("trade") else "")]
-    if w.s["node"]["text"]:
-        lines.append(w.s["node"]["text"])
+    if hn["text"]:
+        lines.append(hn["text"])
     lines += ["", "Your people:"] + _kin(w, name)
     if a.get("aim") and w.spec.get("aims", False):                       # aims are off unless a world turns them on
         lines += ["", f"What you want: {a['aim']}"]
@@ -184,7 +217,10 @@ def system_prompt(w, name) -> str:
               "being taught by someone who knows it makes you capable (a youth learns faster). Practice makes you surer and better.",
               "- What you notice: each morning you hear what concerned you and what stood out the day before. You see one thing "
               "closely each day, whatever you chose to attend to; the rest you only glimpse.",
-              "", f"The place, {w.s['node']['name']}:"] + _place_lines(w)
+              "", f"The place, {hn['name']}:"] + _place_lines(w, home_node(w, name))
+    if len(w.s["nodes"]) > 1:
+        lines += ["", "Other places (only what is carried goes between them; a night on the road costs about one and a half "
+                  "meals, more in the cold, unless someone takes you in):"] + _map_lines(w, name)
     lines += ["", "What you know how to do:"] + KN.crafts_lines(w, name)
     lines += ["", "What you can do (each action is a verb and what it acts on):", VERB_LINES, "", REPLY_LINES]
     return "\n".join(lines)
@@ -264,6 +300,15 @@ def turn_prompt(w, name, opening=True) -> str:
         L.append("## What you saw yesterday\n" + ("\n".join(y) if y else "A quiet day: nothing stood out."))
     if t["dawn"]:
         L.append("## This morning\n" + "\n".join(f"- {x}" for x in t["dawn"]))
+    if len(w.s["nodes"]) > 1:
+        node = w.at(name)
+        hl = [f"You are at {w.s['nodes'][node]['name']}" + ("" if node == home_node(w, name) else ", away from home")
+              + ". Here today: " + (", ".join(x for x in w.here(name) if x != name) or "nobody else") + "."]
+        if a.get("arrived") == w.d:
+            hl.append("You arrived this morning.")
+        if node != home_node(w, name):
+            hl += _place_lines(w, node)
+        L.append("## Here\n" + "\n".join(hl))
     hold = ", ".join(f"{show(q)} {i}" for i, q in sorted(a["holdings"].items()) if q > 0.05) or "nothing"
     you = [f"You are {STAGES[a['hunger']]}" + (", and hurt" if a["wounded"] else "") + f". You carry: {hold}."]
     L.append("## You\n" + "\n".join(you + _house_lines(w, name)))

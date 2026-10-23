@@ -11,6 +11,8 @@ State (World.s, plain JSON):
     know        {name: {tech: {level, skill, seen, tries, wins, source, since}}}   (knowledge.py)
     mind        {name: perception store}                                          (perceive.py)
     offers      {id: {by, to, give, get, day, open}}
+    nodes       {id: {name, text, features}}; edges {a: {b: days}}; parcels {id: {..., node}}; an agent's "at" (a node, None on the
+                road) and "transit" ({from, to, left, arrive} while travelling)
     events      today's happenings: [{id, kind, actor, target, parcel, text, salience, tags, sense, concerns}]
     log         one record per night
 
@@ -59,20 +61,25 @@ class World:
         self.season_len = int(cal.get("season_days", 6))
         self.start = (SEASONS.index(cal.get("season", "summer")), int(cal.get("day", 1)) - 1)
         self.cold_days = {int(d) - 1 for d in spec.get("cold_days") or ()}
-        n = spec["node"]
-        s = {"day": 0, "node": {"name": n["name"], "text": n.get("text", ""), "parcels": {}, "features": {}},
-             "fittings": [], "houses": {}, "herds": {}, "agents": {}, "know": {}, "mind": {}, "offers": {}, "events": [], "log": [],
-             "seq": 0}
-        for pid, p in n["parcels"].items():
-            st = copy.deepcopy(p.get("state") or {})
-            s["node"]["parcels"][pid] = {"name": p.get("name", pid), "cover": p["cover"], "size": p.get("size", 1),
-                                         "side": p.get("side", ""), "adj": list(p.get("adj") or []), "text": p.get("text", ""),
-                                         "state": st}
-        for a, b in [(a, b) for a, p in s["node"]["parcels"].items() for b in p["adj"]]:
-            if a not in s["node"]["parcels"][b]["adj"]:
-                s["node"]["parcels"][b]["adj"].append(a)
-        for fid, f in (n.get("features") or {}).items():
-            s["node"]["features"][fid] = {"name": f.get("name", fid), "parcels": list(f.get("parcels") or []), "text": f.get("text", "")}
+        nodes = spec.get("nodes") or {"home": spec["node"]}                  # one node (M1 specs) or several, joined by edges
+        s = {"day": 0, "nodes": {}, "edges": {}, "parcels": {}, "fittings": [], "houses": {}, "herds": {}, "agents": {}, "know": {},
+             "mind": {}, "offers": {}, "events": [], "log": [], "seq": 0}
+        for nid, n in nodes.items():
+            s["nodes"][nid] = {"name": n["name"], "text": n.get("text", ""), "features": {}}
+            for pid, p in n["parcels"].items():
+                s["parcels"][pid] = {"name": p.get("name", pid), "cover": p["cover"], "size": p.get("size", 1), "side": p.get("side", ""),
+                                     "adj": list(p.get("adj") or []), "text": p.get("text", ""), "state": copy.deepcopy(p.get("state") or {}),
+                                     "node": nid}
+            for fid, f in (n.get("features") or {}).items():
+                s["nodes"][nid]["features"][fid] = {"name": f.get("name", fid), "parcels": list(f.get("parcels") or []),
+                                                    "text": f.get("text", "")}
+        for a, b in [(a, b) for a, p in s["parcels"].items() for b in p["adj"]]:
+            if a not in s["parcels"][b]["adj"]:
+                s["parcels"][b]["adj"].append(a)
+        for e in spec.get("edges") or []:                                        # [a, b, days, text?]
+            a, b, k = e[0], e[1], int(e[2]) if len(e) > 2 else 1
+            s["edges"].setdefault(a, {})[b] = k
+            s["edges"].setdefault(b, {})[a] = k
         for f in spec.get("fittings") or []:
             s["fittings"].append(dict(f))
         for hid, h in spec["houses"].items():
@@ -98,8 +105,11 @@ class World:
                 "attack": round(random.Random(f"{self.seed}|attack|{name}").uniform(blo, bhi), 4),
                 "defence": round(random.Random(f"{self.seed}|defence|{name}").uniform(blo, bhi), 4),
                 "relations": dict(a.get("relations") or {}), "notes": {}, "pinned": None,
-                "messages": self._message_limit(name)}
+                "messages": self._message_limit(name), "at": None, "transit": None}
         self.s = s
+        for name, a in s["agents"].items():                                    # everyone starts at its house's node
+            hid = a["house"]
+            a["at"] = s["parcels"][s["houses"][hid]["parcel"]]["node"] if hid else next(iter(s["nodes"]))
         from cybertron2.m1 import knowledge as KN, perceive as PC
         for name, a in spec["agents"].items():
             KN.seed(self, name, a)
@@ -135,14 +145,27 @@ class World:
         return sorted(n for n, a in self.s["agents"].items() if a["alive"])
 
     def agents_acting(self) -> list:
-        return [n for n in self.living() if self.s["agents"][n]["stage"] != "child"]
+        """Those who decide today: living, not children, not on the road."""
+        return [n for n in self.living() if self.s["agents"][n]["stage"] != "child" and not self.s["agents"][n]["transit"]]
 
-    def parcels(self) -> dict:
-        return self.s["node"]["parcels"]
+    def at(self, name):
+        """The node an agent is at (None on the road)."""
+        return self.s["agents"][name]["at"]
 
-    def parcel_by_name(self, x):
+    def node_of(self, pid):
+        return self.s["parcels"][pid]["node"]
+
+    def here(self, name) -> list:
+        """The living people at the same node as this agent (itself included)."""
+        n = self.at(name)
+        return [x for x in self.living() if n is not None and self.s["agents"][x]["at"] == n]
+
+    def parcels(self, node=None) -> dict:
+        return {k: v for k, v in self.s["parcels"].items() if node is None or v["node"] == node}
+
+    def parcel_by_name(self, x, node=None):
         x = str(x or "").strip().lower()
-        for pid, p in self.parcels().items():
+        for pid, p in self.parcels(node).items():
             if x in (pid.lower(), p["name"].lower(), p["name"].lower().removeprefix("the ")):
                 return pid
         return None
@@ -187,8 +210,23 @@ class World:
         hid = self.s["agents"][name]["house"]
         return self.s["houses"].get(hid) if hid else None
 
-    def fittings_at(self, kind) -> list:
-        return [f for f in self.s["fittings"] if f["kind"] == kind]
+    def fittings_at(self, kind, node=None) -> list:
+        return [f for f in self.s["fittings"] if f["kind"] == kind and (node is None or self.node_of(f["parcel"]) == node)]
+
+    def sleeps(self, name):
+        """Where an agent sleeps tonight: (house id, own) or (None, False) out in the open: at home if at its house's node, a
+        house that welcomed it (the lodging spec's host), else out; anyone leaving or on the road sleeps out (D4-12)."""
+        a = self.s["agents"][name]
+        today = self.s.get("today") or {}
+        if a["transit"] or name in today.get("travel", {}):
+            return None, False
+        hid = a["house"]
+        if hid and self.node_of(self.s["houses"][hid]["parcel"]) == a["at"]:
+            return hid, True
+        g = today.get("guests", {}).get(name)
+        if g and self.node_of(self.s["houses"][g]["parcel"]) == a["at"]:
+            return g, False
+        return None, False
 
     def units_for(self, name) -> int:
         a = self.s["agents"][name]
@@ -217,6 +255,9 @@ class World:
              "salience": salience, "tags": list(tags), "sense": sense, "concerns": sorted(set(concerns))}
         if extra:
             e.update(extra)
+        if "node" not in e:                                                  # where it happened: the place, else the people
+            e["node"] = (self.node_of(parcel) if parcel else
+                         next((self.s["agents"][x]["at"] for x in (actor, target) if x and x in self.s["agents"]), None))
         self.s["events"].append(e)
         return e
 
@@ -229,9 +270,12 @@ class World:
         rec["fights"] = AC.settle_fights(self)
         rec["deaths"] += [f["killed"] for f in rec["fights"] if f.get("killed")]
         self._regrow()
+        rec["departed"] = self._depart()
+        where = {n: self.sleeps(n) for n in self.living()}
+        rec["slept"] = {n: (s["houses"][h]["name"] if h else "out") for n, (h, _) in where.items()}
         fuel = float(p["fuel"]["cold" if self.cold() else "normal"])
         for hid, h in s["houses"].items():
-            sleepers = [n for n in self.living() if s["agents"][n]["house"] == hid]
+            sleepers = [n for n in self.living() if where[n][0] == hid]
             need = fuel if sleepers else 0.0
             ok = h["stock"].get("timber", 0.0) + 1e-9 >= need
             if ok and need:
@@ -240,12 +284,13 @@ class World:
             rec["hearth"][hid] = {"sleepers": len(sleepers), "lit": h["fire"]}
         for name in self.living():
             a = s["agents"][name]
-            h = self.home(name)
+            hid, own = where[name]
+            h = s["houses"][hid] if hid else None
             state = "unsheltered" if h is None or h["condition"] == 0 else ("damaged" if h["condition"] == 1 else "housed")
             if self.cold() and state == "housed" and h is not None and not h["fire"]:
                 state = "no_fuel"
             need = float(p["ration"]) * float((p["shelter_cold"] if self.cold() else p["shelter"]).get(state, 1.0))
-            ate = self._eat(name, need, h)
+            ate = self._eat(name, need, h if own else None)                  # a guest or a traveller eats what it carries
             if ate + 1e-9 >= need:
                 a["hunger"], a["missed"] = min(0, a["hunger"] + 1), 0
                 rec["ate"][name] = round(ate, 2)
@@ -287,6 +332,30 @@ class World:
                         s["agents"][o["by"]]["holdings"][item] = round(s["agents"][o["by"]]["holdings"].get(item, 0.0) + q, 6)
         s["log"].append(rec)
         return rec
+
+    def _depart(self) -> list:
+        """Travellers leave at nightfall (D4-8): on the road until the morning of their arrival, D4-10's length in days."""
+        out = []
+        for name, to in sorted(((self.s.get("today") or {}).get("travel") or {}).items()):
+            a = self.s["agents"][name]
+            if not a["alive"] or a["at"] is None:
+                continue
+            days = self.s["edges"][a["at"]][to]
+            a["transit"] = {"from": a["at"], "to": to, "left": self.d, "arrive": self.d + days}
+            a["at"] = None
+            out.append({"agent": name, "from": a["transit"]["from"], "to": to, "arrive": self.d + days})
+        return out
+
+    def arrive(self) -> list:
+        """At dawn, travellers whose journey ends today are at their destination."""
+        out = []
+        for name in self.living():
+            a = self.s["agents"][name]
+            t = a["transit"]
+            if t and t["arrive"] <= self.d:
+                a["at"], a["transit"] = t["to"], None
+                out.append({"agent": name, **t})
+        return out
 
     def _eat(self, name, need, h) -> float:
         """Eat up to `need` in food value: from hands first, then the house stock, most perishable first."""
