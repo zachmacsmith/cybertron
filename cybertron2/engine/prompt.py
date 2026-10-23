@@ -146,13 +146,15 @@ def _kin_lines(mind) -> list:
     return out
 
 
-def _place_lines(here) -> list:
+def _place_lines(here, mind=None) -> list:
     out = []
     for pid, p in here.parcels().items():
         adj = ", ".join(here.parcels()[q]["name"] for q in p["adj"] if q in here.parcels())
         herds = [h for h in here.herds().values() if h["parcel"] == pid]
         what = sorted({t for t, d in TECHNIQUES.items() if p["cover"] in (d.get("at") or {}).get("covers", [])
-                       and (d.get("draws") in (None, "plot", "crop") or d.get("draws") in p["res"] or (d.get("draws") == "herd" and herds))})
+                       and (d.get("draws") in (None, "plot", "crop") or d.get("draws") in p["res"] or (d.get("draws") == "herd" and herds))
+                       and (d.get("yield") or {}).get("ground", p.get("ground")) == p.get("ground")
+                       and (mind is None or d.get("crew") or KN.level(mind, t) in ("rough", "capable", "known"))})
         held = _holders(here, ("parcel", pid))
         bits = [f"{p['cover']}"] + ([f"held by {held}"] if held else []) + (["here one can " + ", ".join(what)] if what else [])
         bs = [b["name"] + (" (half built)" if b.get("unfinished") else "") for b in here.buildings().values() if b["parcel"] == pid]
@@ -334,7 +336,7 @@ def turn_prompt(here, mind, opening=True) -> str:
           + (", ".join(here.people(me=False)) or "nobody else") + "."]
     if a.get("arrived") == here.day:
         hl.append("You arrived this morning.")
-    hl += _place_lines(here)
+    hl += _place_lines(here, mind)
     L.append("## Here\n" + "\n".join(hl))
     hold = ", ".join(f"{show(q)} {i}" for i, q in sorted(here.carried().items()) if q > 0.05) or "nothing"
     you = [f"You are {STAGES[a['hunger']]}" + (", and hurt" if a["wounded"] else "") + f". You carry: {hold}"

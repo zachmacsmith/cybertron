@@ -117,7 +117,8 @@ def describe(view) -> str:
         bits.append(", ".join(FITTINGS[f]["label"] for f in fits))
     herds = [h for h in view.herds().values() if h["count"] > 0]
     if herds:
-        bits.append(", ".join(f"{h['kind']} ({h['count']}, {h['in_milk']} in milk)" for h in herds))
+        from cybertron2.engine import farm as FM
+        bits.append(", ".join(f"{h['kind']} ({FM.herd_words(h)})" for h in herds))
     trades = view.born_trades()
     if trades:
         bits.append("its people know " + ", ".join(sorted(KN.label(t) for t in trades)))
@@ -153,6 +154,8 @@ def facts(here) -> list:
         for sense, tpl, sal in COVERS[p["cover"]]["ambient"]:
             add([sub], tpl.format(name=nm), sal, ["place"], sense, ambient=True)
         for key, r in p["res"].items():
+            if key in ("grass", "dung"):                                         # pastures speak through signs.py
+                continue
             words = RESOURCES[key]
             if r["K"] > 0:
                 ratio = r["S"] / r["K"]
@@ -163,23 +166,8 @@ def facts(here) -> list:
                         skill="hunting" if key == "game" else None)
             elif words["high"]:
                 add([sub], words["high"].format(name=nm), 0.05, [key])
-        c = p.get("crop")
-        if c:
-            crop = c.get("kind", "crop")
-            ripe = here.day >= int(c.get("ripe_day", 0))
-            if c.get("left", 0) <= 1e-9:
-                add([sub], f"{nm} is reaped bare", 0.15, ["farming", "food"])
-            elif c.get("rotting"):
-                add([sub], f"the {crop} in {nm} is going over: ears shedding and rotting in the field", 0.6, ["farming", "harvest", "food"])
-            elif c.get("reaped"):
-                add([sub], f"{nm} is part reaped: sheaves down, the rest of the {crop} standing", 0.25, ["farming", "harvest", "food"])
-            elif ripe:
-                add([sub], f"the {crop} in {nm} stands ripe and ready for the sickle", 0.35, ["farming", "harvest", "food"])
-            else:
-                k = int(c["ripe_day"]) - here.day
-                add([sub], f"the {crop} in {nm} is growing", 0.1, ["farming"])
-                add([sub], f"you judge the {crop} in {nm} will be fit to reap in about {k} day{'s' if k != 1 else ''}", 0.05,
-                    ["farming", "harvest"], skill="farming")
+    from cybertron2.engine import signs as SG                                  # fields, pastures and herds: bundles of signs
+    SG.facts(here, add)
     for bid, b in here.buildings().items():
         nm, sub = b["name"], f"building:{bid}"
         live = [x for x in here.people() if bid in here.homes_here(x)]
@@ -188,7 +176,10 @@ def facts(here) -> list:
             continue
         add([sub], f"{nm} is " + {2: "sound", 1: "in poor repair: the thatch slipping, a wall cracked", 0: "a ruin"}[b["condition"]],
             0.1 if b["condition"] == 2 else 0.4, ["building", "shelter"], concerns=live)
-        if b["fittings"].get("hearth"):
+        if b["structure"] == "camp":
+            add([sub], f"{nm}: a lean-to of branches round a fire ring" + (", sagging now" if b.get("lasts_until") is not None
+                and b["lasts_until"] - here.day <= 2 else ""), 0.2, ["shelter", "travel"])
+        if any(b["fittings"].get(f_) for f_ in ("hearth", "fire ring")):
             if b["fire"]:
                 add([sub], f"smoke from {nm}'s roof at dawn", 0.08, ["shelter"], sense="smell")
             elif here.cold(here.day - 1 if here.day else 0) and live:
@@ -203,9 +194,6 @@ def facts(here) -> list:
         else:
             goods = ", ".join(f"{_amount(q)} {i}" for i, q in sorted(st.items()) if q >= 0.5 and i != "timber") or "nothing much"
             add([sub], f"through {nm}'s open door: {goods}", 0.05, ["food"] if any(i in EDIBLE for i in st) else [], peek=True)
-    for hid, h in here.herds().items():
-        p = here.parcels()[h["parcel"]]
-        add([f"herd:{hid}", f"parcel:{h['parcel']}"], f"{h['name']} ({h['count']} head) on {p['name']}", 0.1, ["animals"])
     for cid, c in here.remains().items():
         goods = ", ".join(f"{_amount(q)} {i}" for i, q in c["goods"].items() if q > 0.05)
         add(["sky"], f"what {c['of']} carried lies where they died: {goods}", 0.7, ["death", "food"])
@@ -251,6 +239,18 @@ def relevance(here, mind, f) -> float:
     if "danger" in f["tags"]:
         r += 0.3
     return min(1.0, r)
+
+
+def knack(mind, f) -> float:
+    """A sign with a knack is read twice as often by one practised at that work, half as often by one who is not (signs.py)."""
+    k = f.get("knack")
+    if not k or k not in TECHNIQUES:
+        return 1.0
+    r = mind.know.get(k)
+    lo = KN.curve(k)[0]
+    if r and (r.get("level") == "known" and (not KN.basic(k) or float(r.get("skill", lo)) >= lo + 0.05)):
+        return 2.0
+    return 0.5 if not KN.basic(k) or not r else 1.0
 
 
 def _can_read(mind, f) -> bool:
@@ -314,7 +314,7 @@ def evening(w, attend: dict, today: dict) -> dict:
             if f.get("kind") in ROUTINE or (f["about"] and f["about"][0] == f"person:{name}"):
                 continue
             rel = relevance(here, mind, f)
-            p = 1.0 if f["salience"] >= SALIENT else min(1.0, f["salience"] * (0.3 + rel) * (1.8 if place else 1.0))
+            p = 1.0 if f["salience"] >= SALIENT else min(1.0, f["salience"] * (0.3 + rel) * (1.8 if place else 1.0) * knack(mind, f))
             if rng.random() < p:
                 cand.append((f["salience"] + rel, f))
         cand.sort(key=lambda x: -x[0])

@@ -46,7 +46,8 @@ def normalise_crop(par, c, day, grow) -> dict:
     area = float(c.get("area", par["size"]))
     left = float(c.get("left", 0.0))
     out = {"kind": c.get("kind", fam), "crop": fam, "sown": int(c.get("sown", int(c.get("ripe_day", day)) - grow)),
-           "ripe_day": int(c.get("ripe_day", day + grow)), "window": int(c.get("window", 2)), "seed": float(c.get("seed", 0.0)),
+           "ripe_day": int(c.get("ripe_day", day + grow)), "window": int(c.get("window", 2)),
+           "seed": float(c.get("seed", area * float(_f_default()["plot_seed"]))),
            "area": area, "area_left": area, "broken": float(c.get("broken", 0.0)), "weeded": 0.0, "base": left, "rot": 1.0,
            "failed": bool(c.get("failed", False)), "hardy": CROPS[fam]["hardy"], "sower": c.get("sower")}
     out["left"] = crop_left(_f_default(), out)
@@ -592,6 +593,7 @@ def _herds(w, rec):
             while acc >= 1.0:
                 acc -= 1.0
                 w.apply("set", node, ref=("herd", hid), field="young", value=int(w.s["herds"][hid].get("young", 0)) + 1)
+                w.apply("set", node, ref=("herd", hid), field="last_calf", value=w.d + 1)
                 milk = min(float(w.s["herds"][hid]["cows"]), milk + 1.0)
                 w.event(node, "herd", f"a calf was born to {h['name']} on {par['name']}", about=[f"herd:{hid}"], salience=0.4,
                         tags=["animals"])
