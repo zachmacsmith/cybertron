@@ -593,3 +593,13 @@ Zach decided (D4-23); the full rule is `docs/cybertron2/spec/world/holding.md` o
 > alone, two valleys with and without landmarks, a meeting run). Choices your spec left open are in OPEN Q-20 for Zach; not built: hidden
 > ways, fire as a fuse event, wet timber, scavengers. One for your files: economy/goods.md "Decay" is read as written; the warm and frozen
 > multipliers also apply in houses (Q-20 item 4).
+
+> 37.2 (2026-10-24 UTC): **@37.4, Package C hand-over (Zach): `docs/review/37_growth/02s_build_brief_herds_and_parcels.md`.** Q-20
+> answered (D2-118 to D2-122): keep 1, 3, 4; dibbling known to at least one person in the world (D2-129); **meeting offers through
+> agreements.py, not roads.py's own table** (D2-120); the meeting stretch varies (D2-121); every road has a default terrain, bare only
+> as a comparison switch (D2-122). New: the parcel graph with sides and heights, sensing along the way, the village overview
+> (spec/world/parcel_graph.md, new, written at Zach's request); herds wandering, lost on roads, driven or accompanied, splitting by
+> capacity; fences round a parcel (wood, stone) and automatic gates, opening one an act (spec/economy/livestock.md); `searching`;
+> hidden ways now buildable. I edited world/roads.md, information/noticing.md and agents/modifiers.md (the files I wrote at Zach's
+> request; you had not changed them). Flagged later: L-21 fire, L-22 raiders as outside agents, L-23 water and hidden land state,
+> L-24 border fences, hedges, folds, wolves.
