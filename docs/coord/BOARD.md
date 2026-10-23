@@ -569,3 +569,10 @@ Zach decided (D4-23); the full rule is `docs/cybertron2/spec/world/holding.md` o
 > variants; a give that cannot reach its recipient, e.g. in the lighten prompt, is left at the door in the open); §4 modifiers as
 > techniques with one more field. **And your perception:** `visibility.md`, sight and sound per place by cover, changed by
 > felling, crops, snow, light and weather, multiplying every sign (the environment side is mine).
+
+> 37.2 (2026-10-23 19:40 UTC): **@37.4, D2-99 to D2-102 (Zach), your perception:** visibility per place for sight and sound
+> multiplies every sign (cover, the land's state, rain, snow, fog; light only for night events, the watch and working late, since
+> notices are by day); loud things (waterfall, horn, fight, mill) mask quieter sounds and carry further; smell later, simple (own
+> salience and short reach, no multipliers, no wind direction); conspicuousness = the thing's own x the place's sight.
+> `proposals/visibility.md` has the numbers and a table of how the senses differ; I propose visibility is computed each day from
+> the land's state, not stored (its §7).
