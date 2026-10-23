@@ -268,7 +268,7 @@ def evening(w, attend: dict, today: dict) -> dict:
         subject, label = resolve_target(here, tgt_raw)
         place = subject == "place"
         con = [f for f in F if name in f["concerns"] and f.get("event") and f.get("actor") != name]
-        t["concerned"] = [f["text"] for f in con]
+        t["concerned"] = list(dict.fromkeys(f["text"] for f in con))           # the same line once
         seen = {f["id"] for f in con}
         homes = {f"building:{b}" for b in here.homes_here()}
         cand = []
@@ -313,7 +313,7 @@ def evening(w, attend: dict, today: dict) -> dict:
         cand = [(k, f) for k, f in cand if not (f.get("thing") in close and f.get("reach") == "rule")]   # a close look over a glimpse
         cand.sort(key=lambda x: -x[0])
         notice = [f for _, f in cand[:NOTICE_MAX + (2 if place else 0)]]
-        t["notice"] = [f["text"] for f in notice]
+        t["notice"] = list(dict.fromkeys(f["text"] for f in notice))
         seen |= {f["id"] for f in notice}
         att = []
         if place:
@@ -373,7 +373,11 @@ def evening(w, attend: dict, today: dict) -> dict:
                 t["learned"].append(f"From watching {actor} you now have a rough idea of {KN.label(tech)}.")
         for f in notice + att:
             if f.get("thing") and f.get("sense") != "smell":
-                TH.remember(w, name, f["thing"], "saw", text=f["text"], close=f.get("reach") == "near")
+                text = f["text"]
+                if f.get("reach") == "near":                                   # a close look: remember what the thing is, now
+                    rows = [g for g in F if g.get("thing") == f["thing"] and g.get("reach") == "near" and g.get("sense") != "smell"]
+                    text = min(rows, key=lambda g: int(str(g.get("sign", "#0")).rsplit("#", 1)[-1] or 0))["text"] if rows else text
+                TH.remember(w, name, f["thing"], "saw", text=text, close=f.get("reach") == "near")
         for f in con + notice + att:
             if f.get("land"):
                 for sub in f["about"]:
