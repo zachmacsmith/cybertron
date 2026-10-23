@@ -1,5 +1,7 @@
 # Proposal: modifiers on verbs (ways of doing an act that people know or learn)
 
+> **Decided parts are in the spec:** spec/agents/modifiers.md, spec/world/things_in_places.md (23 Oct). This file keeps the reasoning, the history and what is still open.
+
 **Status:** accepted: D2-93, D2-94, D2-111, D2-112 (23 Oct); `searching` and `aim: burn` as modifiers still open. Spec written:
 spec/agents/modifiers.md. Design only. **Owner:** 37.2 (author); verbs and knowledge are 37.4's (verbs.md, knowledge.md,
 D4-24), so this goes to them. **Affects:** spec/agents/actions.md; verbs.md; knowledge.md; information/prompts.md; things in

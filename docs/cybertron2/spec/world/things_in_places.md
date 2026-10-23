@@ -15,6 +15,7 @@ extends world/places.md, world/holding.md (D4-23) and core/architecture.md (cont
 - D2-87: left things are held by nobody: anyone can pick them up; the dead leave everything where they die; in the open food and
   bodies spoil much faster and rot, with a disease risk.
 - D2-93: hiding is the `hidden` modifier, tryable untaught (agents/modifiers.md).
+- D2-95: scavengers later, with wild animals (OPEN L-2).
 - D2-96: rot near water, food and people; a death in a settlement is highly salient; burying is work on the body, shown only where
   one lies, its labour by the ground and the cold.
 - D2-111: `leave` folds into `give`; a give that cannot reach its recipient is left at its door.
@@ -93,4 +94,4 @@ Things they notice where they are (information/noticing.md); the bury option whe
 [proposals/things_in_places.md](../../proposals/things_in_places.md), [verb_modifiers.md](../../proposals/verb_modifiers.md),
 [objects_in_world.md](../../proposals/objects_in_world.md).
 
-*Current as of 23 Oct 2026: D2-85, D2-87, D2-93, D2-96, D2-111.*
+*Current as of 23 Oct 2026: D2-85, D2-87, D2-93, D2-95, D2-96, D2-111.*

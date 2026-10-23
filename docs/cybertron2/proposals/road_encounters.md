@@ -1,5 +1,7 @@
 # Proposal: meetings on the road (travellers, lost herds, ambushes)
 
+> **Decided parts are in the spec:** spec/world/roads.md, spec/conflict/fuse_events.md (23 Oct). This file keeps the reasoning, the history and what is still open.
+
 **Status:** accepted: D2-81, D2-110 (23 Oct); odds by stretch and landmark (D2-104); waiting on a road later (OPEN L-7); searching
 with wandering herds (OPEN L-8). Design only. **Owner:** 37.2 (author); travel, transit and combat are 37.4's (world/edges.md,
 agents/, conflict/), so this goes to them on the board. **Affects:** world/edges.md, spec/core (the day), agents/actions.md

@@ -1,5 +1,7 @@
 # Proposal: things left in places, and who finds them
 
+> **Decided parts are in the spec:** spec/world/things_in_places.md, spec/information/noticing.md (23 Oct). This file keeps the reasoning, the history and what is still open.
+
 **Status:** partly accepted: D2-85 to D2-87 (23 Oct); roads' layout, hiding and decay still to explore. Design only. **Owner:** 37.2 (author); places, perception and the engine are 37.4's, and this
 extends their [objects_in_world.md](objects_in_world.md) and the movables of [layout.md](layout.md), so 37.4 may merge it there.
 **Affects:** spec/world/places.md, edges.md, holding.md; spec/information/perception.md, signs.md; spec/conflict/defence.md (fuse

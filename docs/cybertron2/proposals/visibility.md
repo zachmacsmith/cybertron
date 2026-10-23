@@ -1,5 +1,7 @@
 # Proposal: visibility (what a place and the day let the senses reach)
 
+> **Decided parts are in the spec:** spec/environment/visibility.md (23 Oct). This file keeps the reasoning, the history and what is still open.
+
 **Status:** accepted: D2-99 to D2-103 (23 Oct); numbers to calibrate; smell later. Design only. **Owner:** 37.2 (author; the environment, D2-75, sets the land and the weather);
 perception and the senses are 37.4's (perception.md, senses.md, seeing.md, D4-48, D4-50), which apply it. **Affects:**
 spec/information/perception.md, signs.md; spec/environment/scheduler.md (weather, light); spec/world/places.md, edges.md;

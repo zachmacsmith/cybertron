@@ -1,5 +1,7 @@
 # Proposal: the layout of a road (stretches and landmarks)
 
+> **Decided parts are in the spec:** spec/world/roads.md (23 Oct). This file keeps the reasoning, the history and what is still open.
+
 **Status:** partly accepted: D2-104 to D2-108 (23 Oct); waiting it out and the line between automatic and a call open. Design only. **Owner:** 37.2 (author); edges, places and travel
 are 37.4's (world/edges.md, layout.md, place.md), so this goes to them. **Affects:** spec/world/edges.md, generation.md;
 spec/environment/ (risks of things on roads); road_encounters.md, journeys.md, things_in_places.md, hidden_ways.md; OPEN Q-17

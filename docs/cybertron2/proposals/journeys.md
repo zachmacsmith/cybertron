@@ -1,5 +1,7 @@
 # Proposal: what travellers see on the way
 
+> **Decided parts are in the spec:** spec/information/noticing.md (23 Oct). This file keeps the reasoning, the history and what is still open.
+
 **Status:** accepted: D2-88, D2-89, D2-97 (23 Oct). Design only. **Owner:** 37.2 (author); perception, roads and memory are 37.4's (place.md,
 seeing.md, senses.md, D4-48), so this goes to them. **Affects:** spec/information/perception.md, memory.md, signs.md;
 spec/world/edges.md; environment/ (signs of slow change).

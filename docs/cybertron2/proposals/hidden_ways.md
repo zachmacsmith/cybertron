@@ -1,5 +1,7 @@
 # Proposal: hidden ways (edges no one knows until they are found)
 
+> **Decided parts are in the spec:** spec/world/roads.md, spec/information/noticing.md (23 Oct). This file keeps the reasoning, the history and what is still open.
+
 **Status:** accepted: D2-90 to D2-92, D2-98 (23 Oct); numbers to calibrate. Design only. **Owner:** 37.2 (author); edges, places and knowledge are 37.4's (world/edges.md,
 layout.md, knowledge.md, D4-47), so this goes to them. **Affects:** spec/world/edges.md, places.md, generation.md;
 spec/information/ (knowledge of ways); seeding; conflict/ (raids by hidden ways).

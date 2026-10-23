@@ -1,5 +1,7 @@
 # Proposal: fuse events (time to respond)
 
+> **Decided parts are in the spec:** spec/conflict/fuse_events.md (23 Oct). This file keeps the reasoning, the history and what is still open.
+
 **Status:** accepted: D2-5 (the mechanism), D2-80 to D2-84 (the details, 23 Oct); the first numbers are to calibrate, and
 overlapping events are to review (OPEN Q-19). **Owner:** 37.2 (author); the mechanism is
 37.4's (the day, the night, the scheduler, combat), the economics of what buys time are 37.2's.
