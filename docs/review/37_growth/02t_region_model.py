@@ -16,6 +16,7 @@ FOOD = {"grain": 1.0, "flour": 1.0, "bread": 1.3, "dried meat": 3.0, "beans": 0.
 #   grain counted ground (1.0): every village here has a hand mill or the mill; whole grain at a hearth is only 0.7 (D2-60)
 WEIGHT = {"grain": 1, "timber": 2, "charcoal": 2, "bread": 1, "copper tool": 1}
 CARRY = {"foot": 10, "pack": 20, "handcart": 40}     # weight; a handcart only on a road with a track
+CARRY_PROPOSED = {"pack ox": 60, "ox cart": 200}     # NOT BUILT: 02g §3 (OPEN C-1); an ox cart needs 2 oxen, harness, a track
 FUEL = {"normal": 0.5, "cold": 2.0}                  # timber a hearth a night (D4-49)
 NIGHT_OUT = {"normal": 1.5, "cold": 2.0}             # food a night on the road, no gear (D4-12)
 UNITS = {"summer": 7, "autumn": 6, "winter": 5, "spring": 6}
@@ -136,12 +137,12 @@ def trip(a: str, b: str, mode: str, cold: bool = False):
     """(days away from home for a round trip, nights out, weight carried each way). Travel is the day's last act (D4-8): a road of
     n days is n nights out each way; the days between are on the road; the day at the far end is spent there."""
     r = road(a, b)
-    if r is None or (mode == "handcart" and not r[3]):
+    if r is None or (mode in ("handcart", "ox cart") and not r[3]):
         return None
     n = r[2]
     away = 2 * (n - 1) + 1
     nights = 2 * n
-    return away, nights, CARRY[mode]
+    return away, nights, {**CARRY, **CARRY_PROPOSED}[mode]
 
 
 def route(src: str, dst: str):
@@ -165,7 +166,7 @@ def plan(src: str, dst: str, good: str, qty: float, mode: str):
         days_one_way = sum(road(a, b)[2] for a, b in legs)
         away = 2 * days_one_way - 1 if len(legs) == 1 else 2 * days_one_way
         nights = 2 * days_one_way
-        per = CARRY[mode] / WEIGHT[good]
+        per = {**CARRY, **CARRY_PROPOSED}[mode] / WEIGHT[good]
         n = math.ceil(qty / per)
         food = n * nights * (NIGHT_OUT["normal"] - RATION)   # what a night out costs beyond a night at home
         c = (n, away, nights, per, food, " via Millford" if len(legs) == 2 else "")
@@ -266,6 +267,12 @@ if __name__ == "__main__":
           f"; {sum(free.values()):.0f} in all.")
     print(f"Fuel carrying is {fuel_days / sum(free.values()):.0%} of the region's free adult-days before the cold "
           f"(a carrier's day at the far end can also be spent felling or trading there).")
+
+    print("\nIf the merchant had an ox cart (proposed, not built: 200 a load on a track):\n")
+    flows([("Barleyfield", "Ashwood", "grain", need["Ashwood"]["food"], "ox cart"),
+           ("Ashwood", "Barleyfield", "timber", need["Barleyfield"]["timber_cold"], "ox cart"),
+           ("Barleyfield", "Millford", "grain", need["Millford"]["food"], "ox cart"),
+           ("Ashwood", "Millford", "timber", need["Millford"]["timber_cold"], "ox cart")])
 
     aw = VILLAGES["Ashwood"]
     felled = fuel_demand(aw) + need["Barleyfield"]["timber"] + need["Millford"]["timber"] + need["Coppergate"]["timber"] + \
