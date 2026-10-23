@@ -83,6 +83,8 @@ changed in its code yet. **From 22 Oct the decisions are kept in [docs/cybertron
 
 ## Log
 
+- **23 Oct.** Zach: how agents know what they can do, make and build. Wrote proposals/knowledge.md.
+
 - **23 Oct.** Zach: how law comes over, and whether it can still be manipulated; a place for what we are thinking over, apart
   from the spec. Added docs/cybertron2/proposals/ (README, layout) and proposals/law.md (text law, three channels, records not
   goods, Python as clause implementation and a world setting, routes of capture).

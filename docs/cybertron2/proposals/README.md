@@ -23,6 +23,7 @@ proposal**; **Why**; **Alternatives considered**; **Open questions**; **Affects*
 
 | File | Summary | Owner | Status |
 |---|---|---|---|
+| [knowledge.md](knowledge.md) | what agents know they can do: few verbs on many objects, options computed from place and knowledge, know-how spread by teaching, apprenticeship and documents, a manual of common knowledge only, no blind crafting | 37.4 (37.2: content) | discussion |
 | [law.md](law.md) | law as text taking effect through mechanical clauses on records, duties of office, and judgment only on disputes; Python as the clause implementation and a world setting; how law can still be captured | 37.4 (37.3 to review) | discussion |
 
 ## Log of ideas and their outcomes
@@ -31,6 +32,8 @@ Newest first. Ideas decided or rejected in conversation before 23 Oct are backfi
 
 | Date | Idea | Outcome | Where |
 |---|---|---|---|
+| 23 Oct | Knowing what you can do: few verbs, options computed from place and knowledge, know-how as personal knowledge | discussion | [knowledge.md](knowledge.md) |
+| 23 Oct | Blind crafting (Minecraft's grid) for discovering recipes | rejected in the proposal, Zach to confirm | [knowledge.md](knowledge.md) §6 |
 | 23 Oct | Law as text with mechanical clauses on records, duties of office, judgment on disputes | discussion | [law.md](law.md) |
 | 22 Oct | Holding as a recognised claim; the engine enforces possession only | accepted: D4-23 | spec/world/holding.md |
 | 22 Oct | Plots split by a primitive, with a minimum plot size (37.1's question) | rejected: plots whole, holdings divided; viability is land per mouth | D4-23 |
