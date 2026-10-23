@@ -1,0 +1,9 @@
+# Package C, an opened gate (D2-132): barleyfield_c.yaml for 5 days, with one act scripted: on day 2 Randal (a Hale, who has an old
+# quarrel with Bennet Barrow over East Field) opens the gate of Barrow Close and leaves it. While it is open the Barrows' cattle pass as if
+# there were no fence. Read: whether the herd gets out, who saw the gate opened, who notices it standing open, whether a Barrow shuts it,
+# and what anyone does about the cattle. Everything else is the agents' own.
+base: cybertron2/specs/barleyfield_c.yaml
+name: Barleyfield, an opened gate (Package C)
+days: 5
+script:
+  - {day: 2, who: Randal, do: {do: work, what: open the gate, at: Barrow Close}}
