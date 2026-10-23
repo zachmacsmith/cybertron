@@ -11,6 +11,8 @@ node, used without travelling. If you could go there and be back before nightfal
 - D4-11: node scale: if you could go there and be back before nightfall, it is the same node; a larger settlement is a cluster of
   nodes.
 - D4-35: everything happens in a place (core/architecture.md).
+- D4-47: some places start unexplored: from where its road starts the way is seen only as an unexplored way; whoever follows it
+  learns the place, and others learn it by being told or led there.
 
 ## Mechanics
 
@@ -19,6 +21,8 @@ node, used without travelling. If you could go there and be back before nightfal
 - **Sites** inside a node are parcels of land (one cover each: forest, field, pasture, meadow, water, scrub, rock, built ground) and
   the buildings on built ground. Moving between sites costs no travel.
 - **Clusters.** A larger settlement is several nodes joined by short edges, not one large node (D4-11).
+- **Unexplored nodes** (D4-47): a world marks some nodes unexplored; nobody is seeded with knowledge of them; they become known by
+  going there or being told.
 
 ## Data
 
@@ -42,4 +46,4 @@ The node they are at: its people, parcels and buildings. Other nodes only as the
 
 38.04 §1.
 
-*Current as of 23 Oct 2026: D4-2, D4-11, D4-35.*
+*Current as of 23 Oct 2026: D4-2, D4-11, D4-35, D4-47.*
