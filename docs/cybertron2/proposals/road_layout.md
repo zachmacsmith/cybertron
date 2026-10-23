@@ -1,6 +1,6 @@
 # Proposal: the layout of a road (stretches and landmarks)
 
-**Status:** discussion (23 Oct; Zach: "let's explore this next"). Design only. **Owner:** 37.2 (author); edges, places and travel
+**Status:** partly accepted: D2-104, D2-105 (23 Oct); landmarks first, building on them, waiting and the escalation rule open. Design only. **Owner:** 37.2 (author); edges, places and travel
 are 37.4's (world/edges.md, layout.md, place.md), so this goes to them. **Affects:** spec/world/edges.md, generation.md;
 spec/environment/ (risks of things on roads); road_encounters.md, journeys.md, things_in_places.md, hidden_ways.md; OPEN Q-17
 (edge terrain), which this would replace.
@@ -48,10 +48,28 @@ bridge), which makes roads places to invest in and to hold.
 - **Journeys** (journeys.md): a traveller's notices come from what the stretches hold ("the river is high at the ford"; "the
   bridge at Alder Beck is down").
 
-### 3. Crossing challenges decided by what is there
+### 3. Crossing challenges decided by what is there (D2-105)
 
-How a traveller in transit (who makes no call, D4-10) meets a challenge: proposed, a **standing choice given when setting out**
-(as burn orders are given before a raid, D2-51), with a sensible default:
+Travel decides itself most of the time; decisions are needed only where something complex emerges. Three tiers:
+
+| Tier | When | How it is decided | What the traveller learns |
+|---|---|---|---|
+| **nothing** | most days on most roads | | journeys.md's notices |
+| **minor trouble** | a high ford, mud, a lame ox, a cold night at the pass | by the traveller's choice at departure, or the default | on arrival, with what it cost ("the ford was high: you waited a day; 2 grain got wet") |
+| **serious or complex** | proposed: a risk of death above about 5%, a loss of more than half the load or herd, other people involved (a meeting, a party camped at the block), or two challenges at once (the bridge down and the ford in flood) | a **fuse call** (D2-81), with the choices the situation offers; still rare, at most one a day (D2-80) | in the call itself |
+
+Even minor trouble keeps a small chance (proposed 0.1) of a call, so travel is not wholly mechanical.
+
+**Choices at departure:** a short, fixed set given with `travel` (a modifier, D2-93): `on trouble: push on | wait up to N days |
+turn back | go round`. The departure prompt shows the landmarks the traveller knows on that road (known by having travelled it or
+been told); on an unknown road they meet them as they come.
+
+**Waiting it out (37.2 proposes yes):** a traveller can wait at a block (a flooded ford, a snowed pass) for up to N days, sleeping
+out (D4-12: 1.5 food a night, the cold), better with a bedroll, tent or camp (D2-68). It is the same act as road_encounters.md
+§4's `wait` on a road, brought forward for this one use. The risk is real: in the region run (38.23) people starved on the road,
+so waiting with little food should show in the departure prompt as a cost.
+
+Defaults when no choice is given:
 
 | Challenge | Default | Other choices at departure |
 |---|---|---|
@@ -89,17 +107,23 @@ landmarks in all.
 
 ## Open questions (for Zach, and 37.4)
 
-1. Stretches with a terrain and a few landmarks, as data kinds like parcels?
+1. ~~Stretches and landmarks~~ decided: D2-104 (very simple; no landmarks behaves as now).
 2. Which landmarks in the first worlds (proposed: ford, bridge, pass, narrows, spring)?
-3. Crossing challenges met by a standing choice given at departure, with defaults, rather than a call?
+3. ~~How challenges are decided~~ decided: D2-105. Open: the escalation thresholds and the 0.1 chance of a call (§3).
 4. Building on landmarks (a bridge, a hut, a toll) in the first worlds, or later?
-5. Does this replace OPEN Q-17 (edge terrain) as the data 37.4 adds to edges?
+5. ~~OPEN Q-17~~ the edge's terrain is its stretches' default (D2-104).
+6. Waiting it out at a block, as a departure choice and in a fuse call (§3)?
 
 ## History
 
 - 23 Oct: Zach (on whether roads should be in one stretch per day): perhaps landmarks along a road used for events, like a node
   being one thing in the game with parcels; most edges hold little, but a mountain pass, a bridge section and so on, with events
   varying by where on the journey they happen, and the challenges of crossing decided by what is present, as at a node. Written.
+
+- 23 Oct: Zach decided D2-104 (stretches and landmarks, very simple: most of the time a single-terrain edge, but complex events can
+  emerge and connect) and D2-105 (minor trouble resolved automatically and reported with what went wrong; choices at departure such
+  as "if trouble, turn back" or "keep pushing"; still some chance of a fuse call, and more extreme or complex, interacting situations
+  give one with more choices). Asked whether travellers can wait out a block: §3, 37.2 proposes yes.
 
 ## Sources
 
