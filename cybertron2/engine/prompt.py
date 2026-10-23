@@ -7,8 +7,8 @@ from __future__ import annotations
 import copy
 import math
 
-from cybertron2.engine import agreements as AG, knowledge as KN, perceive as PC, verbs as V
-from cybertron2.engine.data import BLUEPRINTS, FITTINGS, ITEMS, TECHNIQUES
+from cybertron2.engine import agreements as AG, knowledge as KN, modifiers as MOD, perceive as PC, verbs as V
+from cybertron2.engine.data import BLUEPRINTS, FITTINGS, FUSE, ITEMS, MODIFIERS, TECHNIQUES
 from cybertron2.engine.here import CONDITION, STAGES, show
 
 SCHEMA = {
@@ -20,7 +20,8 @@ SCHEMA = {
             "item": {"type": "string"}, "qty": {"type": "number"}, "from": {"type": "string"}, "target": {"type": "string"},
             "aim": {"type": "string"}, "offer": {"type": "string"}, "person": {"type": "string"}, "thing": {"type": "string"},
             "household": {"type": "string"}, "name": {"type": "string"}, "for": {"type": "string"}, "feed": {"type": "boolean"},
-            "days": {"type": "number"}, "lots": {"type": "number"}, "agreement": {"type": "string"}},
+            "days": {"type": "number"}, "lots": {"type": "number"}, "agreement": {"type": "string"}, "hidden": {"type": "string"},
+            "method": {"type": "string"}},
             "required": ["do"]}},
         "say": {"type": "array", "items": {"type": "object", "properties": {"to": {"type": "string"}, "text": {"type": "string"}},
                                             "required": ["to", "text"]}},
@@ -59,10 +60,11 @@ def _known(mind):
 def schema_for(here, mind) -> dict:
     """The reply schema with closed arguments as enums of what the agent knows; free text stays free."""
     people, buildings, parcels, herds, nodes, holds = _known(mind)
-    techs = sorted(t for t in TECHNIQUES if KN.level(mind, t) is not None) or sorted(TECHNIQUES)
+    techs = sorted(t for t in TECHNIQUES if KN.level(mind, t) is not None and t not in MODIFIERS) or sorted(t for t in TECHNIQUES if t not in MODIFIERS)
     s = copy.deepcopy(SCHEMA)
     a = s["properties"]["actions"]["items"]["properties"]
-    a["do"]["enum"] = [v for v in V.VERBS if V.verb_here(here, v)]
+    a["do"]["enum"] = [v for v in V.VERBS if V.verb_here(here, v)] + sorted({c for d in FUSE.values() for c in d["choices"]})
+    # the night's choices are in the one schema, so an urgent call continues the agent's conversation (D2-84; a new schema restarts it)
     a["item"]["enum"] = list(ITEMS)
     a["what"]["enum"] = techs + [x for x in ("shelter", "shelter and food") if x not in techs]
     a["at"]["enum"] = parcels + buildings
@@ -74,6 +76,8 @@ def schema_for(here, mind) -> dict:
     a["thing"]["enum"] = ["door"] + parcels + buildings + herds
     a["household"]["enum"] = holds
     a["for"]["enum"] = ["my household"] + people + holds
+    for key in ("hidden", "method"):                                          # modifiers (D2-93): their values
+        a[key]["enum"] = sorted({TECHNIQUES[m]["value"] for m in MODIFIERS if TECHNIQUES[m]["key"] == key})
     for k in ("tell", "explain"):
         s["properties"][k]["items"]["properties"]["to"]["enum"] = people
     s["properties"]["explain"]["items"]["properties"]["what"]["enum"] = techs
@@ -115,6 +119,9 @@ def verb_lines(here, mind) -> str:
         n = V.verb_units(here.p, v)
         cost = "the craft's units" if n is None else ("free" if n == 0 else f"{n} unit{'s' if n > 1 else ''}")
         out.append(f"- {v} {d['args']}".rstrip() + f": {d['doc'].replace('{crafts}', '; '.join(crafts))}".rstrip(": ") + f" ({cost})")
+        mods = MOD.lines(mind, v, place=True) + [x for t in TECHNIQUES if TECHNIQUES[t]["verb"] == v for x in MOD.lines(mind, v, t)]
+        if mods:                                                               # the ways of doing it one knows (D2-93)
+            out.append("  ways: " + "; ".join(dict.fromkeys(mods)))
     return "\n".join(out)
 
 
@@ -329,8 +336,8 @@ def turn_prompt(here, mind, opening=True) -> str:
         if own:
             L.append("## Your own memory of recent days (written by you)\n" + "\n".join(f"- {x['span']}: {x['text']}" for x in own))
     L.append(f"## Now\n{cal['season'].capitalize()}, day {cal['day']} of the season ({cal['left']} left), day {here.day + 1} of these days"
-             + (", and cold" if here.cold() else "") + f". You have {here.units()} units of work today (saying something aloud takes one) and "
-             f"{a['messages']} private messages.")
+             + (", and cold" if here.cold() else "") + f": {here.weather_words()}. You have {here.units()} units of work today (saying "
+             f"something aloud takes one) and {a['messages']} private messages.")
     rec = _yesterday_record(mind, opening)
     if rec:
         L.append("## What happened yesterday\n" + "\n".join(rec))
@@ -360,6 +367,9 @@ def turn_prompt(here, mind, opening=True) -> str:
                     + ("" if known else ": a way nobody you know has followed; travel along it by naming it") + ")")
     if ways:
         hl.append("Roads from here: " + "; ".join(ways) + ".")
+    lying = _things_lines(here, mind)
+    if lying:
+        hl.append("Lying about, that you know of: " + "; ".join(lying) + ".")
     L.append("## Here\n" + "\n".join(hl))
     hold = ", ".join(f"{show(q)} {i}" for i, q in sorted(here.carried().items()) if q > 0.05) or "nothing"
     you = [f"You are {STAGES[a['hunger']]}" + (", and hurt" if a["wounded"] else "") + f". You carry: {hold}"
@@ -396,6 +406,36 @@ def turn_prompt(here, mind, opening=True) -> str:
     return "\n\n".join(L)
 
 
+def _things_lines(here, mind) -> list:
+    """What one knows lies about here (world/things_in_places.md): as one last saw it, and how one knows."""
+    out = []
+    for cid, (r, c) in sorted(here.known_things().items(), key=lambda kv: kv[1][0]["day"]):
+        how = {"put": "you put it there", "saw": "you saw it", "took": "you took from it"}.get(r["how"], r["how"])
+        out.append(f"{r['text']} ({how}, {_daystr(mind, r['day'])})")
+    return out[-8:]
+
+
+def fuse_prompt(here, mind, x) -> str:
+    """The urgent call in the night (D2-84), appended to the agent's own conversation: what it senses, what it holds, who is with it,
+    how many things there is time for, and the choices."""
+    kinds = {e["kind"] for e in x["events"]}
+    choices = []
+    for k in kinds:
+        d = FUSE[k]
+        choices += [c for c in d["choices"] + d.get("also", []) if c not in choices]
+    hold = ", ".join(f"{show(q)} {i}" for i, q in sorted(here.carried().items()) if q > 0.05) or "nothing"
+    words = {"defend": "go to the door and fight off whoever is there", "flee": "slip out and keep away until it is over",
+             "hand over": "hand food out of the store to them so they go ({\"do\": \"hand over\", \"item\", \"qty\"})",
+             "alarm": "shout and wake the house", "stay": "lie still", "move": "move something between your hands and the store",
+             "take": "take something (a weapon) from a store", "give": "give something to someone"}
+    L = ["## In the night", "You are woken: " + "; ".join(x["signs"]) + ".",
+         f"You carry: {hold}. With you: {', '.join(here.people(me=False)) or 'nobody'}.",
+         f"There is time for {x['acts']} thing{'s' if x['acts'] > 1 else ''}, no more. You can: "
+         + "; ".join(f"{c} ({words.get(c, c)})" for c in choices) + ".",
+         "Reply with JSON only: \"actions\" (at most " + str(x["acts"]) + "), and a short \"why\"."]
+    return "\n\n".join(L)
+
+
 def talk_prompt(here, mind, heard, also, offers, opened, cards, sent=0) -> str:
     L = ["## Before the day's work"]
     if heard:
@@ -418,11 +458,12 @@ def lighten_prompt(here, mind, a: dict, did: list) -> str:
     L = ["## Setting off", "Today so far: " + (" ".join(x for x in did if not x.startswith(PC.SPEECH)) or "nothing"),
          f"You meant to set off for {a.get('to')} tonight, but you carry {math.ceil(here.load() * 10 - 1e-9) / 10:g} weight and you can carry "
          f"{here.capacity():g}: set down at least {math.ceil((here.load() - here.capacity()) * 10 - 1e-9) / 10:g}. You carry: {goods}.",
-         f"Before you go you may give things to someone here ({', '.join(here.people(me=False)) or 'nobody is here'}), put them in a store "
-         f"you may use, or leave them at a building here ({', '.join(b['name'] for b in here.buildings().values()) or 'none'}): "
-         "{\"do\": \"leave\", \"item\", \"qty\", \"at\": building}; what is left there is found by its household in the morning. Then "
-         "travel again. Or stay here tonight: leave out the travel.",
-         "Reply with JSON only: put these in \"actions\" (give, leave, move, travel; no work), and leave everything else empty."]
+         f"Before you go you may give things to someone here ({', '.join(here.people(me=False)) or 'nobody is here'}), to a household or "
+         f"a building here ({', '.join(b['name'] for b in here.buildings().values()) or 'none'}), or put them down at a place here: "
+         "{\"do\": \"give\", \"item\", \"qty\", \"to\": a person, household, building or place}. What is put into a house's store is "
+         "found by its household in the morning; a house you cannot get into, or someone not here, gets it left at the door, in the "
+         "open; a place keeps it in the open, where anyone may take it. Then travel again. Or stay here tonight: leave out the travel.",
+         "Reply with JSON only: put these in \"actions\" (give, move, travel; no work), and leave everything else empty."]
     return "\n\n".join(L)
 
 

@@ -14,7 +14,7 @@ import os
 import time
 from pathlib import Path
 
-from cybertron2.engine import agreements as AG, knowledge as KN, night as N, perceive as PC, prompt as PR, settle as ST, verbs as V
+from cybertron2.engine import agreements as AG, fuse as FU, knowledge as KN, night as N, perceive as PC, prompt as PR, settle as ST, verbs as V
 from cybertron2.engine.converse import Conversations
 from cybertron2.engine.data import EDIBLE, TECHNIQUES
 from cybertron2.engine.here import Here, Mind
@@ -55,14 +55,21 @@ def bot_plan(w, name, talk=None) -> dict:
     return out
 
 
-def decide(w, name, text, opening, system, backend, conv, talk=None) -> tuple[dict, dict]:
+def bot_fuse(w, name, x) -> dict:
+    """A scripted bot's answer to an urgent call: those inside defend and raise the alarm; neighbours come to help."""
+    e = x["events"][0]
+    inside = e.get("building") in w.homes(name)
+    return {"actions": ([{"do": "alarm"}, {"do": "defend"}] if inside else [{"do": "defend"}])[: x["acts"]]}
+
+
+def decide(w, name, text, opening, system, backend, conv, talk=None, schema=None, fuse=None) -> tuple[dict, dict]:
     model = w.s["people"][name]["model"]
     if model == "bot":
-        return bot_plan(w, name, talk), {"model": "bot", "sent": text}
+        return (bot_fuse(w, name, fuse) if fuse else bot_plan(w, name, talk)), {"model": "bot", "sent": text}
     from cybertron import llm
     t0 = time.monotonic()
     attempts = []
-    schema = PR.schema_for(Here(w, name), Mind(w, name))
+    schema = schema or PR.schema_for(Here(w, name), Mind(w, name))
     sent, ctx = conv.message(name, w.d, system, schema, text, opening)
     out, reasoning, usage = llm.call(backend, model, ctx["conv"]["system"], sent, schema,
                                      thinking_budget=int((w.spec.get("llm") or {}).get("thinking_budget", 2000)), attempts=attempts)
@@ -340,6 +347,9 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
                 break
         attend = {n: replies[n].get("attend") for n in names if replies[n].get("attend")}
         plans = {n: [x for x in (replies[n].get("actions") or []) if isinstance(x, dict)][:MAX_ACTIONS] for n in names}
+        for sc in w.spec.get("script") or []:                              # scripted acts (dry runs): done first that day
+            if int(sc["day"]) - 1 == day and sc["who"] in plans:
+                plans[sc["who"]] = [dict(sc["do"])] + plans[sc["who"]]
         order = list(names)
         w.rng("order", day).shuffle(order)
         spoke = {n: sum(1 for y in results[n] if y.startswith("You said (")) * int(w.p["say_units"]) for n in names}
@@ -393,7 +403,19 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
             results.setdefault(n, []).extend(lines)
         ST.settle_thefts(w, today, attend)
         w.s["left"] = [x for x in w.s.get("left", []) if x["day"] >= day - 1] + [{**x, "day": day} for x in today["left"]]
+        woke = FU.plan(w, today)                                            # fuse events: the urgent calls (D2-80 to D2-84)
+        if woke:
+            texts = {n: PR.fuse_prompt(Here(w, n), Mind(w, n), x) for n, x in woke.items()}
+            fr, fm, fe = _parallel(lambda n: decide(w, n, texts[n], openings.get(n, "") + "\n\n" + texts[n], systems.get(n) or
+                                                    PR.system_prompt(Here(w, n), Mind(w, n)), backend, conv, fuse=woke[n]),
+                                   {n: (n,) for n in woke}, workers)
+            for n, x in woke.items():
+                lines = FU.answer(w, today, n, x, fr.get(n) or {})
+                results.setdefault(n, []).extend(["In the night: " + y for y in lines])
+                talk_log.setdefault(n, []).append({"wave": "fuse", "prompt": texts[n], "reply": fr.get(n) or {},
+                                                   "usage": (fm.get(n) or {}).get("usage"), "error": fe.get(n)})
         rec = N.night(w)
+        rec["fuse"] = FU.record(today)
         per = PC.evening(w, attend, today)
         nights = night_lines(w, rec)
         for n in names:

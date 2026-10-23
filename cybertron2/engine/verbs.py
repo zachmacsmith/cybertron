@@ -610,7 +610,7 @@ def _give(here, mind, a, party):
         try:
             hh = _party(here, to_raw)
         except Refused:
-            hh = None
+            hh = here.someone(to_raw)
         if hh in here.households():
             house = here.party_container(hh)
             if house and house.startswith("stock:") and here.can_enter(house[len("stock:"):]):

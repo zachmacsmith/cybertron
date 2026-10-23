@@ -7,7 +7,7 @@ may take from, the one slept in first (38.17 §9: to confirm).
 """
 from __future__ import annotations
 
-from cybertron2.engine.data import EDIBLE, FITTINGS, ITEMS
+from cybertron2.engine.data import DECAY, EDIBLE, FITTINGS, ITEMS
 
 FIRE = tuple(f for f, d in FITTINGS.items() if d.get("fire"))
 from cybertron2.engine.world import Refused
@@ -114,21 +114,17 @@ def night(w) -> dict:
                     rec["deaths"].append(name)
                     if place in s["nodes"]:
                         w.event(place, "death", f"{name} died in the night, of hunger", target=name, salience=1.0, tags=["death", "food"])
-    for cid, c in s["containers"].items():                                    # spoilage
-        if c["kind"] == "stock":                                               # the best keeping fitting in the building (D2-45, D2-58)
-            bb = s["buildings"][c["of"]]
-            mult = float(p["house_spoil"]) * min([1.0] + [float(FITTINGS[f_].get("spoil", 1.0)) for f_, n in bb["fittings"].items()
-                                                          if n and f_ in FITTINGS])
-        else:
-            mult = 1.0
+    for cid, c in list(s["containers"].items()):                              # spoilage, by condition (D2-58, D2-87)
         if c["kind"] == "hands" and not s["people"][c["of"]]["alive"]:
             continue
         for item, q in list(c["goods"].items()):
-            r = ITEMS.get(item, {}).get("spoil", 0.0) * mult
+            r, becomes = decay_rate(w, c, item)
             if q > 1e-9 and r > 0:
                 place = w.place_of(("container", cid))
-                lost = w.apply("destroy", place, src=cid, item=item, qty=round(q * r, 6), why="spoilt")
+                lost = w.apply("destroy", place, src=cid, item=item, qty=round(q * min(1.0, r), 6), why="spoilt")
                 rec["spoiled"][item] = round(rec["spoiled"].get(item, 0.0) + lost, 4)
+                if becomes and lost > 1e-9:
+                    w.apply("create", place, dst=cid, item=becomes, qty=lost, why="rot")
     for bid, b in s["buildings"].items():                                       # a camp falls in after its nights (D2-68)
         if b.get("lasts_until") is not None and w.d >= b["lasts_until"] and b["condition"] > 0:
             w.apply("set", b["node"], ref=("building", bid), field="condition", value=0)
@@ -149,6 +145,31 @@ def night(w) -> dict:
             o["open"] = False                                                  # the offerer stays, or until its day
     s["log"].append(rec)
     return rec
+
+
+def decay_rate(w, c, item) -> tuple:
+    """A good's loss tonight in its container (economy/goods.md "Decay", D2-87): its rate in a house, times the keeping fittings (D2-45,
+    D2-58) in a store, the conditions of a thing at a spot (open, dry or wet; buried) and the season and the frost; and what the lost
+    share becomes in the open. Hands keep the rate in hand. Returns (share, becomes)."""
+    from cybertron2.engine import environment as EV, things as TH
+    p = w.p
+    base = float(ITEMS.get(item, {}).get("spoil", 0.0))
+    table = DECAY.get(ITEMS.get(item, {}).get("decay") or "default", DECAY["default"])
+    season = 1.0
+    if w.cold():
+        season *= float(table.get("frozen", 1.0))
+    elif w.calendar()["season"] == "summer":
+        season *= float(table.get("warm", 1.0))
+    if c["kind"] == "stock":
+        bb = w.s["buildings"][c["of"]]
+        keep = min([1.0] + [float(FITTINGS[f_].get("spoil", 1.0)) for f_, n in bb["fittings"].items() if n and f_ in FITTINGS])
+        return base * float(p["house_spoil"]) * keep * season, None
+    if c["kind"] in TH.KINDS:
+        cond = "buried" if c.get("hidden") == "buried" or c.get("buried") is not None else ("open_wet" if EV.wet(w) else "open_dry")
+        if base <= 0:
+            return float((table.get("abs") or {}).get(cond, 0.0)), None
+        return base * float(p["house_spoil"]) * float(table.get(cond, 1.0)) * season, table.get("becomes")
+    return base * season, None
 
 
 def _gear(w, name, where, tents):

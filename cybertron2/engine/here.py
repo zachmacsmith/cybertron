@@ -104,6 +104,11 @@ class Here:
         x = str(x or "").strip().lower()
         return next((n for n in self.people() if n.lower() == x), None)
 
+    def someone(self, x):
+        """A living person anywhere, by name (for a give that cannot reach them: D2-111), else None."""
+        x = str(x or "").strip().lower()
+        return next((n for n in self._w.living() if n.lower() == x), None)
+
     def hands_of(self, x) -> str:
         if x not in self.people():
             raise Refused(f"{x} is not here")
@@ -235,6 +240,10 @@ class Here:
             if any(c["claimant"] == party and "withdrawal" in c["rights"] for c in self._w.claims_on(("building", bid))):
                 return b["stock"]
         return None
+
+    def weather_words(self, day=None) -> str:
+        from cybertron2.engine import environment as EV
+        return EV.words(self._w, day)
 
     def house_of(self, party):
         """A person's or a household's house here (where a give that cannot reach them is left at the door: D2-111)."""

@@ -34,11 +34,20 @@ def settle_fights(w, today) -> list:
         if f["kind"] == "raid":
             bid = f["building"]
             b = w.s["buildings"][bid]
-            inside = [n for n in w.present(node) if bid in w.homes(n) and n != by]
-            gd = [g for g, at in guards.items() if at == bid and w.at(g) == node and g != by]
-            D = sum(strength(d, "defence") + cc["guard"] for d in gd) + sum(cc["asleep"] * strength(d, "defence") for d in inside if d not in gd)
+            fled, awake = set(today.get("fled", [])), set(today.get("awake", []))       # what the woken chose (fuse events, D2-81)
+            inside = [n for n in w.present(node) if bid in w.homes(n) and n != by and n not in fled]
+            gd = [g for g, at in guards.items() if at == bid and w.at(g) == node and g != by and g not in fled]
+            D = sum(strength(d, "defence") + cc["guard"] for d in gd) + sum(
+                (1.0 if d in awake else cc["asleep"]) * strength(d, "defence") for d in inside if d not in gd)
             X = 2 * (D + 1) * (2.0 if b["structure"] == "stone" else 1.0) * (1.5 if b["door"] == "barred" else 1.0)   # D2-20
             holders = inside + [m for m in w.living() if bid in w.homes(m) and w.at(m) == node and m not in inside]
+            if f.get("handed"):                                                 # food handed out at the door: no fight
+                h = f["handed"]
+                rec = {"kind": "raid", "by": by, "building": bid, "outcome": "handed", "took": h["qty"]}
+                w.event(node, "raid", f"in the night someone came to {b['name']} and was handed {h['item']} at the door", actor=by,
+                        about=[f"building:{bid}"], salience=0.95, tags=["danger", "food"], concerns=holders)
+                out.append(rec)
+                continue
             if rng.random() < P ** 2 / (P ** 2 + (X / 2) ** 2):
                 took = 0.0
                 for item in EDIBLE:
