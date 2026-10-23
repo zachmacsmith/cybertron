@@ -11,3 +11,4 @@ Goods, production and trade. Owner: 37.2 (37.4: carrying and lodging mechanisms)
 | transport.md | carrying, the transport ladder, merchants | 02g §3, 38.06 §3 | to compile |
 | lodging.md | hosts and inns | 02g §4, 38.05 §3 | to compile |
 | money_and_markets.md | coin, debts, ledgers, offers and swaps, prices | 02f, 38.05 §4 | to compile |
+| [later.md](later.md) | goods, tools and methods considered and kept out of the first worlds | 02g §1d, §1f, §3, §6; 02j; 02l | written (23 Oct) |

@@ -106,6 +106,33 @@ The value of a service is priced at what it saves: an extra grain is worth the 0
 - **Transport** (02g §3): on foot 0.92 actions a unit an edge; pack ox 0.19; ox cart 0.074 (from about 16 units a round on a
   route); wagon 0.033 (about 115); river boat 0.006.
 
+### Traps, harness and saddle (23 Oct; Zach: in the tool set, D2-23)
+
+**Traps:** a trapline checked once a day (1 unit a visit plus 0.1 a trap); each trap catches about 1.5 food with chance 0.3 x the
+game's share of its capacity, and lasts about 20 nights (1.6 units to make: timber and hide strips).
+
+| Case | Work a day | Catch a day | Food a unit |
+|---|---|---|---|
+| one trap, full game | 1.18 | 0.45 | 0.38 |
+| six traps, full game | 2.07 | 2.70 | **1.30** |
+| six traps, game at half | 2.07 | 1.35 | 0.65 |
+| six traps, game at a fifth | 2.07 | 0.54 | 0.26 |
+
+- **A trap is only worth it as a line:** the visit is the cost, so six traps beat foraging (about 1 food a unit) and one does not.
+- **Traps deplete game,** and their return falls with it; with game's threshold (37.4) a trapped-out forest can collapse. Trapping
+  is a commons problem like the herd's.
+- **Traps work while the trapper is away and can be robbed** by whoever checks them first, seen only if someone is there.
+
+**Harness and saddle are cheap; the animal is the burden.**
+
+| Good | Units to make | Life | A year | Upkeep of what it serves, a year (40 days, one animal kept alone) |
+|---|---|---|---|---|
+| harness (yoke and straps) | 3.7 | 2 years | 1.8 | an ox: about 48 (hay, its own raising, 1 unit a day of herding) |
+| saddle | 5.3 | 4 years | 1.3 | a horse: about 65 (grain on working days, herding) |
+
+The herding share falls to about 0.2 units a head a day in a common herd (02l §5). A rider's real cost is the horse's grain, so a
+raiding people needs a farming base or steady loot (02k §3).
+
 ## 4. Every processed good: full cost, chain depth, roots
 
 | Good | Actions | Depth | Roots | Needs |
@@ -123,6 +150,12 @@ The value of a service is priced at what it saves: an extra grain is worth the 0
 | paper page | 0.17 | 1 | fibre | a paper mill |
 | pottery jar | 2.66 | 1 | clay, timber | a kiln |
 | salted meat | 0.17 a unit | 1 | salt | nothing |
+| trap | 1.58 | 1 | hide, timber | nothing |
+| harness | 3.66 | 1 | hide, timber | nothing |
+| saddle | 5.33 | 1 | hide, timber | a leatherworker's skill |
+| hide armour (later) | 7.00 | 1 | hide | a leatherworker's skill |
+| net (later) | 5.00 | 1 | fibre | fibre |
+| boat (later) | 15.95 | 1 | hide, timber | a boatwright; water |
 
 **Timber is in every metal.** Fuel is the hidden spine (02g §1e): an iron tool is mostly burnt wood.
 

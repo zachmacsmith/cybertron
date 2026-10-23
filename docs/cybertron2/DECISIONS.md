@@ -63,6 +63,7 @@ and correct them in place.**
 | D2-20 | 22 Oct | **Three kinds of attack:** on a person; on a building (a break-in whose work depends on the structure, then a fight with whoever defends); on a whole node (targets drawn by exposure, value and hardness, so a stone building is less likely to be picked and stronger when it is). **Walls multiply the defence of those inside** | 02k §3 | combat.py's raid on a house only |
 | D2-21 | 22 Oct | **The watch:** a watcher skips the night's sleep and eats more for it, detects first and can wake the others; households rotate it; children can keep it | 02k §3 | |
 | D2-22 | 22 Oct | **Any party may raid a node:** no minimum size; a small party usually fails and the outcome depends on the defences; a single rider may attack, at greater risk | 02k §3 | 02k's proposal (riders and large parties only) |
+| D2-23 | 23 Oct | **The tool set:** hand tools as one good with grades (crude, then metal); the plough (needs an ox); carts; weapons (fighting, and hunting); **traps** (catch game overnight while the trapper is elsewhere); **harness** (an ox pulls) and **saddle** (a horse carries a rider). Armour, nets, boats and the seed drill wait (spec/economy/later.md) | 02j §3; conversation | 02g's single "tools and blades" good |
 
 ## Directions (Zach's stated aims recorded in the notes; designs follow them; checked by 37.2, 22 Oct)
 

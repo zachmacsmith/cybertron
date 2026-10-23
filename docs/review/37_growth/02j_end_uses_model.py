@@ -48,6 +48,13 @@ RECIPES = {
     "paper page": ({"fibre": 0.25}, 0.05, "a paper mill"),
     "pottery jar": ({"clay": 4, "timber": 2}, 1.0, "a kiln"),
     "salted meat": ({"salt": 0.2}, 0.1, "nothing (per unit of meat)"),
+    # tools added 23 Oct (Zach: traps, harness and saddle in; armour, nets, boats and the seed drill as later options)
+    "trap": ({"timber": 1, "hide": 0.25}, 1.0, "nothing (a snare or deadfall; cord from hide strips)"),
+    "harness": ({"timber": 2, "hide": 1}, 2.0, "nothing (a yoke and straps: an ox pulls a plough or a cart)"),
+    "saddle": ({"timber": 1, "hide": 2}, 3.0, "a leatherworker's skill (a horse carries a rider)"),
+    "hide armour": ({"hide": 4}, 3.0, "a leatherworker's skill"),
+    "net": ({"fibre": 4}, 3.0, "fibre (flax): later"),
+    "boat": ({"timber": 15, "hide": 1}, 10.0, "a boatwright; a river or coast"),
 }
 
 
@@ -166,6 +173,31 @@ def writing():
     print(table(rows, ["rung", "a sheet", "an original page (write it)", "a copy", "needs"]))
 
 
+def burdens():
+    """What the new tools cost to make, over their life, against what they serve (proposals, 23 Oct)."""
+    g = ROOTS["wild food"][0]                       # a food's worth, at the cost of foraging it
+    rows = []
+    # trap: a line of n traps checked once a day at the site (1 unit a visit + 0.1 a trap); each catches with chance p x the
+    # game's share of its capacity, about 1.5 food; a trap lasts about 20 nights
+    for n, game in ((1, 1.0), (6, 1.0), (6, 0.5), (6, 0.2)):
+        food = n * 0.3 * game * 1.5
+        units = 1.0 + 0.1 * n + n * cost("trap") / 20
+        rows.append([f"trapline of {n}, game at {game:.0%} of capacity", f"{n * cost('trap'):.1f}", "20 nights",
+                     f"{units:.2f} a day", f"{food:.2f} food a day", f"{food / units:.2f} food a unit"])
+    print("\n## Traps: a trapline, checked once a day (forage gives about 1 food a unit; hunting about the same, with a party)\n")
+    print(table(rows, ["case", "units to make", "life", "work", "catch", "return"]))
+    rows = []
+    year = 40
+    for name, good, life, serves, upkeep in (
+            ("harness (ox)", "harness", 2, "an ox", 0.1 * year + 20 / 5 + 1.0 * year),
+            ("saddle (horse)", "saddle", 4, "a horse: grain 1 a working day, herding", 0.8 * year * 0.77 + 1.0 * year),
+            ("hide armour", "hide armour", 3, "a fighter", 0.0)):
+        c = cost(good)
+        rows.append([name, f"{c:.1f}", f"{life} years", f"{c / life:.1f}", serves, f"{upkeep:.0f}" if upkeep else "-"])
+    print("\n## Equipment: cost to make, a year, and the yearly upkeep of what it serves (a 40-day year, one animal kept alone)\n")
+    print(table(rows, ["good", "units to make", "life", "units a year", "serves", "upkeep of what it serves, a year"]))
+
+
 def goods():
     rows = [[g, f"{cost(g):.2f}", depth(g), ", ".join(sorted(roots_of(g))), RECIPES[g][2]] for g in RECIPES]
     print("\n## Every processed good: full cost, chain depth, roots\n")
@@ -177,4 +209,5 @@ if __name__ == "__main__":
     shelter()
     storage()
     writing()
+    burdens()
     goods()
