@@ -217,6 +217,12 @@ def dawn(w) -> None:
             w.event(node, "stray", f"{h['name']} broke through into {w.s['parcels'][pid]['name']} at dawn and are trampling the "
                     f"{c.get('kind', 'crop') if c else 'ground'}", about=[f"parcel:{pid}"], salience=0.7, tags=["farming", "animals", "food"],
                     concerns=holders, dawn=True)
+        if inc["kind"] == "death":                                          # a death in the night (old age; life.md, later)
+            who = inc["person"]
+            if w.s["people"][who]["alive"]:
+                place = w.at(who)
+                w.apply("die", place, person=who, cause=inc.get("cause", "old age"))
+                w.event(place, "death", f"{who} died in the night", target=who, salience=1.0, tags=["death"], dawn=True)
         if inc["kind"] == "fire":
             bid = inc["building"]
             b = w.s["buildings"][bid]
@@ -347,9 +353,12 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
                 break
         attend = {n: replies[n].get("attend") for n in names if replies[n].get("attend")}
         plans = {n: [x for x in (replies[n].get("actions") or []) if isinstance(x, dict)][:MAX_ACTIONS] for n in names}
-        for sc in w.spec.get("script") or []:                              # scripted acts (dry runs): done first that day
+        scripted = {}
+        for sc in w.spec.get("script") or []:                              # scripted acts (dry runs): done first that day, in order
             if int(sc["day"]) - 1 == day and sc["who"] in plans:
-                plans[sc["who"]] = [dict(sc["do"])] + plans[sc["who"]]
+                scripted.setdefault(sc["who"], []).append(dict(sc["do"]))
+        for n, acts in scripted.items():
+            plans[n] = acts + plans[n]
         order = list(names)
         w.rng("order", day).shuffle(order)
         spoke = {n: sum(1 for y in results[n] if y.startswith("You said (")) * int(w.p["say_units"]) for n in names}

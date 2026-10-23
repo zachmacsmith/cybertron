@@ -1,0 +1,12 @@
+# Package A, small live run: the hamlet over 6 days with a wet spell, a death in the night, and an old cache in the wood that one
+# person knows of. Nothing is scripted: what the agents do with the body, the cache, the weather and the night is theirs.
+base: cybertron2/specs/hamlet_s1.yaml
+name: The hamlet, Package A live run
+days: 6
+spells:
+  - {kind: wet, from: 2, to: 4}
+incidents:
+  - {day: 2, kind: death, node: hollow, person: Richolda}
+things:
+  - {parcel: hollow_wood, kind: pile, goods: {coin: 12, crude weapon: 1}, hidden: buried, by: Randal, age: 30, known_by: [Randal]}
+  - {parcel: hollow_wood, kind: pile, goods: {hide: 2, dried meat: 3}, hidden: under brush, age: 3}

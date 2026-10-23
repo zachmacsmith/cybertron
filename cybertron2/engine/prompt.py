@@ -429,7 +429,7 @@ def fuse_prompt(here, mind, x) -> str:
              "alarm": "shout and wake the house", "stay": "lie still", "move": "move something between your hands and the store",
              "take": "take something (a weapon) from a store", "give": "give something to someone"}
     L = ["## In the night", "You are woken: " + "; ".join(x["signs"]) + ".",
-         f"You carry: {hold}. With you: {', '.join(here.people(me=False)) or 'nobody'}.",
+         f"You carry: {hold}. With you: {', '.join(x.get('with') or []) or 'nobody'}.",
          f"There is time for {x['acts']} thing{'s' if x['acts'] > 1 else ''}, no more. You can: "
          + "; ".join(f"{c} ({words.get(c, c)})" for c in choices) + ".",
          "Reply with JSON only: \"actions\" (at most " + str(x["acts"]) + "), and a short \"why\"."]

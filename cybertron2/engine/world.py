@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import contextlib
 import copy
+import os
 import json
 import math
 import random
@@ -63,8 +64,16 @@ def merge(base, over):
 
 
 def load_spec(path) -> dict:
+    """A world's spec; `base: <path>` makes it a variant: the base, with this file's keys merged over it (a comparison arm, a dry
+    run). Lists replace; tables merge."""
     with open(path) as f:
-        return yaml.safe_load(f)
+        spec = yaml.safe_load(f)
+    if spec.get("base"):
+        base = spec.pop("base")
+        if not os.path.exists(base):
+            base = os.path.join(os.path.dirname(path), os.path.basename(base))
+        spec = merge(load_spec(base), spec)
+    return spec
 
 
 class World:
@@ -161,6 +170,14 @@ class World:
         for iid, h in s["institutions"].items():                               # a head by default: the eldest adult member
             if not h["offices"].get("head") and h["members"]:
                 h["offices"]["head"] = self._eldest(h["members"])
+        for t in spec.get("things") or []:                                     # things lying at a spot from the start (D2-85)
+            node = s["parcels"][t["parcel"]]["node"]
+            cid = p_new_thing(self, node, t["parcel"], t.get("kind", "pile"), by=t.get("by"), hidden=t.get("hidden"),
+                              untaught=bool(t.get("untaught")))
+            self.s["containers"][cid]["goods"] = {k: float(v) for k, v in (t.get("goods") or {}).items()}
+            self.s["containers"][cid]["day"] = -int(t.get("age", 1))
+            for who in t.get("known_by") or []:
+                self.s.setdefault("_seed_things", []).append((who, cid))
         for ag in spec.get("agreements") or []:                               # seeded debts (D4-21): open legs in arrears
             p_agree(self, None, {k: v for k, v in ag.items() if k != "status"})
         from cybertron2.engine import agreements as AG, knowledge as KN, perceive as PC
@@ -169,6 +186,9 @@ class World:
             KN.seed(self, name, a)
             PC.seed(self, name, a)
         PC.seed_knowledge(self)
+        from cybertron2.engine import things as TH
+        for who, cid in self.s.pop("_seed_things", []):                        # who knows where a seeded thing lies
+            TH.remember(self, who, cid, "put")
 
     def _new_building(self, bid, b):
         s = self.s

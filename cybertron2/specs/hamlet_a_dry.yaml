@@ -1,0 +1,16 @@
+# Package A dry run (37.2's brief 02r §5): the hamlet with a raid on a timber house and on a stone one, a death left unburied, a
+# cache hidden in the wood, and two wet days. Run with --bots; the scripted acts happen first on their day.
+base: cybertron2/specs/hamlet_s1.yaml
+name: The hamlet, Package A dry run
+days: 6
+weather: {2: rain, 3: heavy rain, 4: fog, 5: clear, 6: clear}
+buildings:
+  ashby_house: {structure: stone}
+incidents:
+  - {day: 3, kind: death, node: hollow, person: Richolda}
+script:
+  - {day: 2, who: Matthew, do: {do: attack, target: Thorne House, aim: rob}}
+  - {day: 2, who: Payn, do: {do: move, item: grain, qty: 4, to: hands}}
+  - {day: 2, who: Payn, do: {do: give, item: grain, qty: 4, to: Hollow Wood, hidden: buried}}
+  - {day: 4, who: Thomas, do: {do: attack, target: Ashby House, aim: rob}}
+  - {day: 4, who: Edith, do: {do: give, item: grain, qty: 2, to: Upper Field}}

@@ -77,8 +77,11 @@ def plan(w, today) -> dict:
             x["events"].append(e)
             x["signs"].append(sign)
             x["acts"] = max(x["acts"], acts_for(e))
-    for name in out:
+    from cybertron2.engine.night import sleeping_places
+    where = sleeping_places(w, today)
+    for name, x in out.items():
         called[name] = w.d
+        x["with"] = [m for m in w.present(w.at(name)) if m != name and where.get(m) and where.get(m) == where.get(name)]
     return out
 
 
