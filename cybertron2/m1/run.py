@@ -109,6 +109,15 @@ def _parallel(fn, jobs: dict, workers) -> tuple[dict, dict, dict]:
     return replies, meta, errors
 
 
+def household(w, x, names) -> list:
+    """The people of a household named as 'the Reeds', 'Reeds', 'Reed House' or 'Reed'."""
+    x = str(x or "").strip().lower().removeprefix("the ").removesuffix(" house").removesuffix(" household")
+    for hh in {a["household"] for a in w.s["agents"].values()}:
+        if x in (hh.lower(), hh.lower() + "s", hh.lower() + "es"):
+            return [n for n in names if w.s["agents"][n]["household"] == hh]
+    return []
+
+
 # ---------------------------------------------------------------------- the talk step
 def talk(w, names, replies, results) -> dict:
     """Deliver say, tell, explain and offers from the plans. Returns {name: {heard, offers, opened, cards}} for whoever is asked
@@ -126,14 +135,17 @@ def talk(w, names, replies, results) -> dict:
                 PC.store(w, h)["today"]["heard"].append(f"(You had not heard of {TECHNIQUES[tech]['label'].split(' (')[0]} before.)")
             w.happen("speech", f"{n} spoke to everyone", actor=n, salience=0.1, sense="sound")
         for t in [t for t in (r.get("tell") or []) if isinstance(t, dict)][:MAX_SAY]:
-            to, text = w.person(t.get("to")), str(t.get("text", ""))[:600]
-            if to and to in names and to != n:
-                box[to]["heard"].append(f"{n} told you: {text}")
-                PC.store(w, to)["today"]["heard"].append(f"{n} told you: {text}")
-                KN.mentions(w, n, [to], text)
-                results[n].append(f"You told {to}: {text}")
-            else:
+            text = str(t.get("text", ""))[:600]
+            to = [w.person(t.get("to"))] if w.person(t.get("to")) else household(w, t.get("to"), names)
+            to = [x for x in to if x and x in names and x != n]
+            if not to:
                 results[n].append(f"Refused: tell: nobody called {t.get('to')!r} is here to hear you")
+                continue
+            for x in to:
+                box[x]["heard"].append(f"{n} told you" + (f" and the rest of your household" if len(to) > 1 else "") + f": {text}")
+                PC.store(w, x)["today"]["heard"].append(f"{n} told you: {text}")
+            KN.mentions(w, n, to, text)
+            results[n].append(f"You told {', '.join(to)}: {text}")
         for x in [x for x in (r.get("explain") or []) if isinstance(x, dict)][:2]:
             to, tech = w.person(x.get("to")), KN.resolve(x.get("what"))
             if not to or to not in names or tech is None:
@@ -161,7 +173,9 @@ def talk(w, names, replies, results) -> dict:
                 continue
             w.s["seq"] += 1
             oid = f"O{w.s['seq']}"
-            w.s["offers"][oid] = {"by": n, "to": to, "give": give, "get": get, "day": w.d, "open": True}
+            for i, q in give.items():                                    # set aside until taken or nightfall
+                w.s["agents"][n]["holdings"][i] = round(w.s["agents"][n]["holdings"][i] - q, 6)
+            w.s["offers"][oid] = {"by": n, "to": to, "give": give, "get": get, "day": w.d, "open": True, "held": True}
             results[n].append("You offered " + PR._offer_text(w, oid, w.s["offers"][oid]))
             for m in ([to] if to else [m for m in names if m != n]):
                 box[m]["offers"].append(PR._offer_text(w, oid, w.s["offers"][oid]))

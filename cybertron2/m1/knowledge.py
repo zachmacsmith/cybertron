@@ -170,6 +170,9 @@ def resolve(x):
     for tech, t in TECHNIQUES.items():
         if x and (x in t["label"].lower() or t["label"].lower().startswith(x)):
             return tech
+    for tech, names in ALIASES.items():                                  # a description that names the craft ("Pottage: boil...")
+        if any(x.startswith(n) for n in names):
+            return tech
     return None
 
 

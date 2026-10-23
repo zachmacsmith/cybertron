@@ -30,3 +30,24 @@ def test_knowledge_paths():
     KN.taught(w, "Tam", "Ivy", "pot")
     assert KN.level(w, "Ivy", "pot") == "known"                      # a youth learns faster
     assert KN.shortfall(w, "Wat", "fell") == "you need an axe; you have none"
+
+
+def test_offer_goods_set_aside_and_returned():
+    from cybertron2.m1 import act as AC, run as R
+    w = World(load_spec(SPEC))
+    w.s["today"] = R._blank_today()
+    w.s["agents"]["Osric"]["holdings"]["grain"] = 4
+    names = w.agents_acting()
+    res = {n: [] for n in names}
+    R.talk(w, names, {**{n: {} for n in names}, "Osric": {"offers": [{"to": "Agnes", "give": "4 grain", "get": "1 timber"}],
+                                                          "tell": [{"to": "the Fenns", "text": "grain for timber"}]}}, res)
+    assert w.s["agents"]["Osric"]["holdings"]["grain"] == 0                  # set aside
+    assert any(x.startswith("You told Agnes, Ivy, Tam") for x in res["Osric"])
+    oid = next(iter(w.s["offers"]))
+    w.s["agents"]["Agnes"]["holdings"]["timber"] = 1
+    assert AC.do(w, "Agnes", {"do": "accept", "offer": oid}, w.s["today"]).startswith("You accepted")
+    assert w.s["agents"]["Agnes"]["holdings"]["grain"] == 4 and w.s["agents"]["Osric"]["holdings"]["timber"] == 1
+    R.talk(w, names, {**{n: {} for n in names}, "Agnes": {"offers": [{"to": "anyone", "give": "2 grain", "get": "1 bread"}]}}, res)
+    assert w.s["agents"]["Agnes"]["holdings"]["grain"] == 2
+    w.night()
+    assert w.s["agents"]["Agnes"]["holdings"]["grain"] > 3                  # returned at nightfall (less what she ate)

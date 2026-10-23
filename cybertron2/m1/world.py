@@ -247,8 +247,11 @@ class World:
                 h["condition"] -= 1
                 rec["breaks"].append(hid)
         for o in s["offers"].values():
-            if o["open"] and o["day"] < self.d:
-                o["open"] = False                                            # offers last until nightfall
+            if o["open"] and o["day"] <= self.d:
+                o["open"] = False                                            # offers last until nightfall; set-aside goods go back
+                if o.get("held") and s["agents"][o["by"]]["alive"]:
+                    for item, q in o["give"].items():
+                        s["agents"][o["by"]]["holdings"][item] = round(s["agents"][o["by"]]["holdings"].get(item, 0.0) + q, 6)
         s["log"].append(rec)
         return rec
 

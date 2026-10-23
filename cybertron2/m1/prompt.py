@@ -53,9 +53,11 @@ VERB_LINES = """- gather {"what": forage | cut withies | dig clay | glean | hunt
 REPLY_LINES = """Reply with JSON:
 - "why": a sentence or two on what you mean to do today and why.
 - "actions": today's plan, in order, each {"do": verb, ...}. Actions beyond your units are not done.
-- "say": things you say aloud; everyone here hears them before the day's work. "tell": [{"to", "text"}] said to one person alone.
-- "explain": [{"to", "what"}] explain a craft you know to someone (they get a rough idea of it; free).
-- "offers": [{"to": a person or "anyone", "give": "2 bread", "get": "1 timber"}] an exchange anyone named may accept today.
+- "say": things you say aloud; everyone here hears them before the day's work. "tell": [{"to", "text"}] said to one person
+  (or one household) alone.
+- "explain": [{"to", "what": the craft's name}] explain a craft you know well to someone (they get a rough idea of it; free).
+- "offers": [{"to": a person or "anyone", "give": "2 bread", "get": "1 timber"}] an exchange anyone named may accept today. What
+  you offer must be in your hands; it is set aside until the offer is taken or night falls. Only goods can be offered.
 - "attend": the one thing you pay close attention to today: a person, a house, a place, the cattle, the sky, or "the place in general".
   You will see it in detail tomorrow morning. It costs nothing.
 - "note": [{"title", "text"}] write or replace one of your private notes (up to 8, about 150 words each); "pin": a title to show

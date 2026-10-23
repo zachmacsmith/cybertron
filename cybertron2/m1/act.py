@@ -336,13 +336,14 @@ def _accept(w, name, a, today):
         raise Refused("that is your own offer")
     A, B = w.s["agents"][by]["holdings"], w.s["agents"][name]["holdings"]
     for item, q in o["give"].items():
-        if A.get(item, 0.0) + 1e-9 < q:
+        if not o.get("held") and A.get(item, 0.0) + 1e-9 < q:
             raise Refused(f"{by} no longer has {q:g} {item}; nothing was exchanged")
     for item, q in o["get"].items():
         if B.get(item, 0.0) + 1e-9 < q:
             raise Refused(f"you have only {show(B.get(item, 0.0))} {item}; nothing was exchanged")
     for item, q in o["give"].items():
-        A[item] = round(A[item] - q, 6)
+        if not o.get("held"):
+            A[item] = round(A[item] - q, 6)
         _add(B, item, q)
     for item, q in o["get"].items():
         B[item] = round(B[item] - q, 6)
