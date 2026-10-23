@@ -136,3 +136,20 @@ a test now covers it); `pin` given a note's text instead of its title was refuse
 reply). Behaviour: foraging 227 of 600 planned acts, hunting 71, reaping 34, felling 32; 5 trades and 6 gifts across houses; Hamo
 ended with 28 timber and 10 grain. Open for Zach: whether a tell to one's own household should wake (house speech already reaches
 them), and whether the town's broadcasts should be capped or summarised in the next morning's message.
+
+## 8. Speech limits: cybertron 1 against M1 (run F)
+
+| | cybertron 1 | M1 (run F) |
+|---|---|---|
+| Private | `dm`/`reply`, free in the DM step but rationed: 3 a round plus a personal jitter (mostly 3-6), hard cap 10 (`base.yaml:11-19`); replies count against it; 2 reply waves | `tell`, free, 3 a reply, no daily ration; 2 waves, so up to 9 a day; mean 2.6, most 8 |
+| Public | `post` **costs one of the agent's 3-7 actions**, arrives next round, clipped to 100 tokens in others' feeds (DMs 400) (31_institutions/04_information.md:10-14) | `say` to everyone or in a building, free, 3 a reply, heard the next morning, up to 600 characters |
+| DM share (DMs ÷ all messages) | Millbrook 0.84 (577 DMs, 106 posts); target ≤ 0.7 (04_information.md:450) | 0.60 (290 tells, 191 says) |
+| Extra calls from talk | Ashwood: 595 DM-reply calls to 713 decisions, 0.83 a decision (20_memory_and_prompts.md:119, 357) | 146 talk calls to 110 decisions, 1.33 a decision (no ration) |
+
+What cybertron 1 found: coordination ran through DMs and the square while most channels went unused; a council chamber stayed at
+0 posts while its members exchanged 63-108 DMs; the one hall that worked carried one order a round to many (04_information.md:15-19);
+long runs' public posts collapsed from 30-120 per 40 rounds to 0-6 (36c_first_batch_log.md:236); a ritual hashtag post by about
+40 of 100 agents that never did anything (14_state_of_nature.md:35); broadcast by identical DMs; and DM-reply calls that shared no
+cached prefix, 72% of a run's cost in cache writes never read (20_memory_and_prompts.md:32) — the fault M1's sessions now avoid.
+No review reports agents hitting the DM limit; halving the reply waves (cutting about 30% of calls) was considered and not done
+(36b_first_batch.md:292).
