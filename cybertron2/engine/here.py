@@ -205,6 +205,9 @@ class Here:
     def homes_here(self, who=None) -> list:
         return [b for b in self._w.homes(who or self.name) if self._w.s["buildings"][b]["node"] == self.node]
 
+    def dwellings_here(self, who=None) -> list:
+        return [b for b in self._w.dwellings(who or self.name) if self._w.s["buildings"][b]["node"] == self.node]
+
     def household(self, who=None):
         return self._w.household_of(who or self.name)
 

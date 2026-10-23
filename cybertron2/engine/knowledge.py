@@ -226,8 +226,8 @@ def options(here, mind, limit=10):
         places = ", ".join(sorted({s[2] for s in sites}))
         tag = "" if lvl == "known" else (" (a try)" if lvl == "rough" else " (not yet sure of hand)")
         if not why:
-            can.append(f"{t['verb']} {tech}{tag} at {places} ({t['units']} units)")
-        elif len(near) < 4 and not why.startswith("there is no"):
+            can.append(f"{t['verb']} {tech}{tag}" + (f" at {places}" if places and places != "anywhere" else "") + f" ({t['units']} units)")
+        elif len(near) < 4 and not why.startswith(("there is no", "there are no")):
             near.append(f"{t['verb']} {tech}{tag}, but {why}")
     return can[:limit], near[:4]
 

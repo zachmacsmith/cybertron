@@ -130,7 +130,7 @@ def sleeping_places(w, today) -> dict:
             continue
         if name in chosen:
             continue
-        home = next((b for b in w.homes(name) if s["buildings"][b]["node"] == a["at"]), None)
+        home = next((b for b in w.dwellings(name) if s["buildings"][b]["node"] == a["at"]), None)
         if home:
             out[name] = home
             beds_used[home] = beds_used.get(home, 0) + 1

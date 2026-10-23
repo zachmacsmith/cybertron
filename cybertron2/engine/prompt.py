@@ -150,7 +150,9 @@ def _place_lines(here) -> list:
     out = []
     for pid, p in here.parcels().items():
         adj = ", ".join(here.parcels()[q]["name"] for q in p["adj"] if q in here.parcels())
-        what = sorted({t for t, d in TECHNIQUES.items() if p["cover"] in (d.get("at") or {}).get("covers", [])})
+        herds = [h for h in here.herds().values() if h["parcel"] == pid]
+        what = sorted({t for t, d in TECHNIQUES.items() if p["cover"] in (d.get("at") or {}).get("covers", [])
+                       and (d.get("draws") in (None, "plot", "crop") or d.get("draws") in p["res"] or (d.get("draws") == "herd" and herds))})
         held = _holders(here, ("parcel", pid))
         bits = [f"{p['cover']}"] + ([f"held by {held}"] if held else []) + (["here one can " + ", ".join(what)] if what else [])
         bs = [b["name"] + (" (half built)" if b.get("unfinished") else "") for b in here.buildings().values() if b["parcel"] == pid]
@@ -278,13 +280,18 @@ def _house_lines(here, mind) -> list:
         out.append("Tonight: " + (f"you may sleep at {', '.join(here.buildings()[b]['name'] for b in hosts)}" if hosts else "nobody has let you in here yet")
                    + (f", and eat from {', '.join(here.buildings()[b]['name'] for b in feed)}'s store" if feed else
                       "; away from a store you may take from, you eat only what you carry") + ".")
-    for bid in homes:
+    others = [b for b in homes if not here.buildings()[b]["fittings"].get("beds")]
+    if others:
+        out.append("Also yours here: " + "; ".join(f"{here.buildings()[b]['name']} (store: " + (", ".join(f"{show(q)} {i}" for i, q in
+                   sorted(here.stock(b).items()) if q > 0.05) or "empty") + ")" for b in others) + ".")
+    for bid in [b for b in homes if b not in others]:
         b = here.buildings()[bid]
         st = here.stock(bid)
         who = [x for x in here.people(me=False) if bid in here.homes_here(x)]
         stock = ", ".join(f"{show(q)} {i}" for i, q in sorted(st.items()) if q > 0.05) or "empty"
         food = sum(st.get(i, 0) * ITEMS[i]["food"] for i in ITEMS if ITEMS[i]["food"])
-        out.append(f"{b['name']} is {CONDITION[b['condition']]}; door {b['door']}" + (f"; fire {'lit' if b['fire'] else 'out'} last night" if b['fittings'].get('hearth') else "; no hearth")
+        out.append(f"{b['name']} is {CONDITION[b['condition']]}; door {b['door']}" + ((f"; fire {'lit' if b['fire'] else 'out'} last night" if here.day else "")
+                   if b['fittings'].get('hearth') else "; no hearth")
                    + f". Sleeping there: you{', ' + ', '.join(who) if who else ''} ({b['fittings'].get('beds', 0)} beds).")
         out.append(f"Its store: {stock} (food worth {show(food)} meals; those who eat from it eat about {len(who) + 1} a night"
                    + (f", and the fire takes {here.p['fuel']['cold' if here.cold() else 'normal']:g} timber" if b['fittings'].get('hearth') else "") + ").")

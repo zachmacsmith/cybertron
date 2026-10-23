@@ -334,9 +334,14 @@ class World:
     def homes(self, name) -> list:
         """The buildings one may use as a member of its household, or by its own claim (D4-36: home is not fixed)."""
         hh = self.household_of(name)
-        return [bid for bid, b in self.s["buildings"].items() if not b.get("unfinished")
+        held = [bid for bid, b in self.s["buildings"].items() if not b.get("unfinished")
                 and any(c["claimant"] in (name, hh) and "access" in c["rights"] and c["grounds"] != "granted"
                         for c in self.claims_on(("building", bid)))]
+        return sorted(held, key=lambda b: -int(self.s["buildings"][b]["fittings"].get("beds", 0)))     # dwellings first
+
+    def dwellings(self, name) -> list:
+        """Homes one can sleep in: held buildings with beds."""
+        return [b for b in self.homes(name) if self.s["buildings"][b]["fittings"].get("beds")]
 
     def may_take(self, name, cid) -> bool:
         c = self.s["containers"][cid]
