@@ -82,6 +82,9 @@ and correct them in place.**
 | D2-38 | 23 Oct | A worker acting for an employer may use the employer's tools in its container there | hiring.md §1 | |
 | D2-39 | 23 Oct | **Duties are checked by the engine** from what the worker did for the employer that day; a pay leg conditioned on a duty falls due only when the duty was done | hiring.md §3 | |
 | D2-40 | 23 Oct | **The first presets:** spot trade, credit sale, consignment, subscription, supply, board, rent and lease, loan, dues; day labour, piece rate, wages, sharecropping, tenancy, apprenticeship, shopkeeper, guard, carrier | agreements.md §3, hiring.md §2 | |
+| D2-41 | 23 Oct | **Meat is a good**, from the hunt and slaughter: more food per unit (dense), but spoils fast fresh; good for a household or a feast | proposals/recipes.md §11 | |
+| D2-42 | 23 Oct | **Milk** from cattle, now, as a technique agents must learn or try (not basic); it needs a cow in milk | recipes.md §11 | |
+| D2-43 | 23 Oct | **The basic set and the ten trades** of recipes.md §5 | recipes.md §5 | |
 
 ## Directions (Zach's stated aims recorded in the notes; designs follow them; checked by 37.2, 22 Oct)
 

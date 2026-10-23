@@ -65,6 +65,8 @@ Newest first. Ideas decided or rejected in conversation before 23 Oct are backfi
 | 23 Oct | The verbs (a lean set of 24) and what each agent is shown; force always shown | ready for a decision | [verbs.md](verbs.md) |
 | 23 Oct | Detecting what was told by reading the meaning of free speech | rejected in the proposal: name mentions, an `about` field and explicit `explain`/`teach` instead | [knowledge.md](knowledge.md) §4e |
 | 23 Oct | Know-how as a continuous score (0-1) | replaced in the proposal by four levels moved by counts (Zach) | [knowledge.md](knowledge.md) §4c |
+| 23 Oct | Meat (dense, spoils fast), milk as a learned technique, the basic set and ten trades | accepted: D2-41 to D2-43 | [recipes.md](recipes.md) |
+| 23 Oct | Separate tools per method (axe, pick, sickle) | rejected in the proposal: wear is per use, so they add only up-front cost; effects differ by method as data | [recipes.md](recipes.md) §8 |
 | 23 Oct | Recipes for the first worlds in work units (about 40 techniques, ten trades; a coin about a food; smelting at the seam; copper tools as the step up) | discussion | [recipes.md](recipes.md) |
 | 23 Oct | Agreements of legs, the settlement rule, ledgers, legs in any good, porting standing.py and credit.py, work as a leg, acting for others, engine-checked duties, the presets | accepted: D2-31 to D2-40 | spec/economy/agreements.md |
 | 23 Oct | Hiring as agreements with a work leg; `for` on work actions sends output to the employer's container | accepted: D2-36 to D2-40 | [hiring.md](hiring.md) |

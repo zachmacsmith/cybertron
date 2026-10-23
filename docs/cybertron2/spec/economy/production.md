@@ -21,6 +21,7 @@ is in proposals.
 - D2-18: the plough needs an ox; fodder takes land; dung keeps the soil.
 - D2-19: first worlds have a short metal ladder.
 - D2-23: the tool set below.
+- D2-43: the basic techniques and the ten trades below.
 
 ## Mechanics
 
@@ -52,6 +53,16 @@ is in proposals.
 | weapons | fighting and hunting | strength in a fight; a better catch hunting | crude, blade |
 | trap | at a forest site | catches game overnight while the trapper is elsewhere; checked by a visit; depletes game like hunting; can be emptied by whoever checks it | |
 
+### Basic techniques and trades (D2-43)
+
+- **Basic** (everyone knows): forage, hunt, fell, cut hay, sow, hoe, weed, reap, manure, herd, slaughter; make a crude tool, a crude
+  weapon or a pack; salt meat (given salt); build a small wattle room, bins, benches, shelves, beds; repair.
+- **Trades** (techniques a household passes on; knowledge.md's levels): farmer and herder (plough with oxen, yoke an ox; milking,
+  D2-42); woodsman and carpenter (plough, handcart, cart, framed rooms and halls, water wheel); trapper (traps); miner and smelter
+  (mine ore, smelt copper); smith (hand tools, blades, coin, locks, anvil and bellows); mason (quarry; stone rooms, hearths,
+  cellars, millstones); salter (boil salt); leatherworker (harness, saddle); parchmenter and scribe (parchment; reading and
+  writing); horse breaker (break a horse).
+
 ## Data
 
 Per plot: fertility, the crop growing (kind, day sown), the last crop grown. Tools are items in holdings with wear.
@@ -82,4 +93,4 @@ the soil in words ("tired", "good"), their seed in store, their tools and whethe
 [02l_farming.md](../../../review/37_growth/02l_farming.md), [02j_end_uses.md](../../../review/37_growth/02j_end_uses.md),
 [02d_ladders.md](../../../review/37_growth/02d_ladders.md); proposals/farming.md, proposals/tools.md.
 
-*Current as of 23 Oct 2026: H-6, D2-11 to D2-19, D2-23.*
+*Current as of 23 Oct 2026: H-6, D2-11 to D2-19, D2-23, D2-42, D2-43.*
