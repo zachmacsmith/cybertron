@@ -4,8 +4,8 @@ What an agent is and can do. Owner: 37.4.
 
 | File | Covers | Compiled from | State |
 |---|---|---|---|
-| actions.md | the action list, where each can be done, refusals | 38.06 §1-2 | to compile |
-| work.md | work units, costs, age, health, daylight, working late | 38.06 §3 | to compile |
-| standing_orders.md | routine, later reflexes, fallbacks and policies | 38.06 §4 | to compile |
-| models.md | which model plays whom; one agent, one model, for life; casts | 38.09 §3b, scenario_design §2 | to compile |
+| [actions.md](actions.md) | the action list, where each can be done, refusals | 38.06 §1-2 | **written** (D4-24, D4-29, D4-32, D4-35, D4-36) |
+| [work.md](work.md) | work units, costs, age, health, daylight, working late | 38.06 §3 | **written** (D4-17, D4-19, D4-31) |
+| [standing_orders.md](standing_orders.md) | routine, later reflexes, fallbacks and policies | 38.06 §4 | **written** (D4-16) |
+| [models.md](models.md) | which model plays whom; one agent, one model, for life; casts | 38.09 §3b, scenario_design §2 | **written** (D4-20) |
 | aims.md | no aims for now | D4-29 | **written** |

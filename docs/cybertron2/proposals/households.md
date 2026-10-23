@@ -1,6 +1,6 @@
 # Households and dwellings: membership, use and home are data that agents change
 
-**Status:** discussion. **Owner:** 37.4 (37.2: building costs; 37.1 when it joins: inheritance).
+**Status:** partly accepted: D4-36 (the principle); the open questions remain. **Owner:** 37.4 (37.2: building costs; 37.1 when it joins: inheritance).
 
 ## Summary
 
@@ -79,6 +79,8 @@ With membership, use and home as data:
 - `spec/agents/` (verbs: admit, leave, grant, withdraw, and the build verb).
 
 ## History
+
+- **23 Oct 2026.** Zach stated the principle (D4-36): joining, taking up an empty house and building one are all supported. Open questions unchanged.
 
 - **23 Oct 2026.** Found that 38.09 and 38.05 already designed joining and hosting; this proposal follows them (38.16).
 

@@ -1,6 +1,6 @@
 # Place as the engine's foundation: everything is somewhere, and an agent can reach only where it is
 
-**Status:** discussion. **Owner:** 37.4.
+**Status:** accepted in principle: D4-35 (the mechanism is part of the D4-34 rebuild). **Owner:** 37.4.
 
 ## Summary
 
@@ -165,6 +165,8 @@ construction, not by care.
 - `spec/economy/lodging.md` (none).
 
 ## History
+
+- **23 Oct 2026.** Zach stated the principle (D4-35); the mechanism (Here, Mind, the chokepoint's place checks) is built under D4-34.
 
 - **23 Oct 2026.** Proposed by 37.4 after the valley run (38.15) and Zach's "Things happening in other nodes shouldn't even be able
   to accidentally see them. Every single event should occur in a place."
