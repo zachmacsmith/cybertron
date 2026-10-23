@@ -45,6 +45,7 @@ proposal**; **Why**; **Alternatives considered**; **Open questions**; **Affects*
 | [road_encounters.md](road_encounters.md) | meetings on the road as fuse events: travellers going opposite ways, lost herds, searches; later waiting on a road for camps, tolls and ambushes | 37.2 (37.4 owns travel and combat) | discussion |
 | [journeys.md](journeys.md) | what travellers see on the way: daily notices on the road (others, herds, a body, traces left by passers), remembered on arrival; rare signs of slow change on long journeys | 37.2 (37.4 owns perception and roads) | discussion |
 | [hidden_ways.md](hidden_ways.md) | edges tied to a side and parcels, some hidden; found by work in the parcel, attention, knack and traces; the finder chooses whom to tell | 37.2 (37.4 owns edges and knowledge) | discussion |
+| [things_in_places.md](things_in_places.md) | one kind of thing at a spot (a parcel, or a stretch of road: one per day of its length): goods left or hidden, remains, herds, camps, traces, hidden ways' ends; one noticing rule (conspicuousness x presence x attention x knack x traces); a find on the road worth taking gives a short call; left things held by nobody | 37.2 (37.4 owns places and perception; extends objects_in_world.md) | discussion |
 | [recipes.md](recipes.md) | the first worlds' recipes as technique cards: gathering, making, building, working; basics and ten trades; tool wear; what travels; price anchors | 37.2 (37.4: verbs, knowledge) | discussion |
 | [hiring.md](hiring.md) | work for someone: `for` on work actions puts output into the employer's container; day labour, piece rate, wages, sharecropping, tenancy, apprenticeship, shopkeepers, guards, carriers | 37.2 (37.4, 37.3) | accepted: D2-36 to D2-40 |
 | [agreements.md](agreements.md) | one system of agreements made of legs (cybertron 1's Standing Contract): trade, credit, subscriptions, wages, rent, dues; paid where there is a path, else arrears; ledgers; currency wanted, not required | 37.2 (37.4, 37.3) | accepted: D2-31 to D2-36 |
@@ -61,6 +62,7 @@ Newest first. Ideas decided or rejected in conversation before 23 Oct are backfi
 
 | Date | Idea | Outcome | Where |
 |---|---|---|---|
+| 23 Oct | Things left in places (goods, caches, bodies, herds, ways) noticed by one rule; roads in stretches; the dead on the road leave remains | discussion | [things_in_places.md](things_in_places.md) |
 | 23 Oct | Everything happens in a place; nothing seen across nodes by accident | accepted: D4-35 | spec/core/architecture.md |
 | 23 Oct | Moving is general: join a household, take up an empty house, build one | accepted: D4-36 | spec/institutions/membership.md |
 | 23 Oct | Rebuild the M1 engine on the designed general core | accepted: D4-34 | spec/core/architecture.md |

@@ -70,6 +70,8 @@ For each person who spends time in a parcel a hidden way starts from, each day (
   forest or mountains no one knows of it until it is found; hunting or foraging there gives a chance to stumble on it; observing
   the forest or mountains raises it, observing then acting raises it a lot; finding should scale with experience; finders decide
   whom to tell. Written.
+- 23 Oct: the finding rule (§2) generalised to every thing at a spot in [things_in_places.md](things_in_places.md); a hidden
+  way's end is one case.
 
 ## Sources
 

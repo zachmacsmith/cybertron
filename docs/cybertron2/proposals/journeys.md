@@ -66,6 +66,8 @@ seen it"; "farms along the valley stand empty"; "new ruts: more carts use this r
 
 - 23 Oct: Zach: even when nothing happens, travellers should arrive with what they saw on the trip, more on multi-day edges:
   herds, other people, a body, signs left by others; longer journeys could give rarer signs of structural shifts. Written.
+- 23 Oct: Zach: what lies on the road should be a case of objects left somewhere. The road's contents and how they are noticed
+  now follow [things_in_places.md](things_in_places.md) (roads in one stretch per day; one noticing rule).
 
 ## Sources
 
