@@ -183,3 +183,88 @@ if __name__ == "__main__":
     tools()
     weight_and_travel()
     anchors()
+
+
+# ---------------------------------------------------------------- 23 Oct (b): tools by method, and the worth of things
+
+# What one hand tool (D2-23: one good, two grades) does in each method. A tool never adds to a site's stock: on a stock-limited site
+# it takes the same stock faster (more per unit of work, and the site runs down sooner); on land it changes the work a plot takes.
+# Multipliers are on output per unit of work (gathering) or divide the units (work on a plot). Wear: uses of tool life per use.
+METHODS = {
+    # method:      (bare hands, crude, copper, wear per use, draws on, why)
+    "forage":      (1.0, 1.0, 1.0, 0.0, "plants (stock)", "picking by hand: no tool helps (a pack helps carry)"),
+    "fell":        (0.25, 1.0, 2.0, 1.0, "forest timber (slow stock)", "metal axes cut about 2x stone ones (copper; steel ~3x)"),
+    "quarry":      (0.0, 1.0, 1.5, 2.0, "a quarry (endless)", "wedges and hammers; hard on tools"),
+    "mine":        (0.0, 1.0, 1.5, 2.0, "a seam (finite)", "picks; hard on tools; no tool, no mining"),
+    "cut hay":     (0.3, 1.0, 1.5, 0.5, "pasture (regrows)", "a sickle or scythe"),
+    "hoe":         (0.5, 1.0, 1.5, 1.0, "the plot's soil", "breaking ground by hand"),
+    "reap":        (0.6, 1.0, 1.5, 0.5, "the crop", "a sickle"),
+    "hunt":        (0.3, 1.0, 1.3, 0.3, "game (threshold stock)", "the weapon: crude spear 1, copper blade 1.3"),
+}
+
+
+def tool_methods():
+    rows = [[m, f"x{b:g}", f"x{c:g}", f"x{k:g}", f"{w:g}", d, why] for m, (b, c, k, w, d, why) in METHODS.items()]
+    print("\n## One hand tool, different effects by method (output per unit of work, or units divided)\n")
+    print(table(rows, ["method", "bare hands", "crude", "copper", "wear a use", "draws on", "why"]))
+
+
+# A household of 5 (3 working adults) in a 40-day year: how often it does each method (units a year with a crude tool)
+HOUSEHOLD_UNITS = {"fell": 24, "hoe": 72, "reap": 36, "cut hay": 4, "quarry": 0, "mine": 0, "forage": 30, "hunt": 16}
+
+
+def worth_of_tools():
+    """Units a year a copper tool saves a household against crude ones, against what the tools cost it."""
+    rows = []
+    saved = uses_c = uses_k = 0.0
+    for m, u in HOUSEHOLD_UNITS.items():
+        b, c, k, w, *_ = METHODS[m]
+        if m == "hunt":
+            continue                                           # weapons are a separate good
+        s = u - u * c / k                                      # units saved for the same output
+        saved += s
+        uses_c += u / 2 * w                                    # a use is about 2 units of work
+        uses_k += u * c / k / 2 * w
+        rows.append([m, u, f"{s:.0f}"])
+    cost_c = uses_c / TOOLS["crude tool"][0] * cost("crude tool")
+    cost_k = uses_k / TOOLS["hand tool"][0] * cost("hand tool")
+    print("\n## Is a copper tool worth it to a household of 5 (40-day year)?\n")
+    print(table(rows, ["method", "units a year (crude)", "saved with copper"]))
+    print(f"\nSaved: {saved:.0f} units a year. Tools worn: crude {cost_c:.1f} units a year, copper {cost_k:.1f}. "
+          f"Net gain from copper: {saved - (cost_k - cost_c):.0f} units a year, about {(saved - (cost_k - cost_c)) / DAY:.0f} "
+          "worker-days: a household should want one, and buy it from a smith.")
+
+
+# What owning a thing is worth a year against what it costs a year (capital written off over its life, plus upkeep), for a
+# household and, where it differs, for a village or a specialist. Worth is in units saved or food kept (1 food = 1 unit).
+WORTH = [
+    # thing, cost to have, life (years), worth a year to a household, worth a year at scale, why
+    ("copper hand tool", 12, 1.1, 49, 49, "worksheet above: wears about one tool a year; saves 49 units"),
+    ("plough and ox", 15 + 20, 3, 6, 60, "02l: worth it above about 4-8 plots; a village shares the herd"),
+    ("trap line of 6, 40 nights", 9.5, 0.5, 7, 7, "54 food for 41 units of checking, against 45 units to forage it: barely pays at full plants; pays where plants are short"),
+    ("salt for 2 slaughters (6 salt)", 12, 1, 24, 24, "keeps 2 x 15 meat: about 12 of each would rot fresh"),
+    ("bins", 3, 6, 1.5, 1.5, "02j: the household's best store"),
+    ("cellar", 16, 15, 0.4, 5, "02j: pays only at village scale (a granary)"),
+    ("beds for 5", 15, 6, 10, 10, "housed sleep: less food a night (02e)"),
+    ("hearth", 7, 10, 25, 25, "winter: without it the household eats x1.5-2 and risks starving (H-5)"),
+    ("lock", 13, 10, 2, 8, "worth the theft it stops: little in a household, much on a store or a treasury"),
+    ("cart", 22.7, 4, 0, 60, "02g: pays only above about 16 units a day on a route: a merchant's"),
+    ("stalls for 2 oxen", 6, 6, 4, 4, "winter: less fodder, dung kept for the fields, safe from rustling"),
+]
+
+
+def worth_table():
+    rows = []
+    for name, c, life, w_h, w_s, why in WORTH:
+        a = c / life
+        rows.append([name, f"{c:g}", f"{life:g}", f"{a:.1f}", f"{w_h:g}", f"{w_h / a:.1f}" if a else "-", f"{w_s:g}",
+                     f"{w_s / a:.1f}" if a else "-", why])
+    print("\n## The worth of things: a year's worth against a year's cost (units)\n")
+    print(table(rows, ["thing", "cost", "life (years)", "cost a year", "worth a year, household", "ratio",
+                       "worth a year, at scale", "ratio", "why"]))
+
+
+if __name__ == "__main__":
+    tool_methods()
+    worth_of_tools()
+    worth_table()
