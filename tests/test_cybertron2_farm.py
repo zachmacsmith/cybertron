@@ -307,3 +307,11 @@ def test_a_hired_worker_puts_the_work_into_the_employers_store():
                                "legs": [{"work": 1, "done": 0, "by": None, "from": "Fenn", "to": "Reed", "when": {}}]}
     r = do(w, "Simkin", do="work", what="reap", at="Long Field", **{"for": "the Reeds"})
     assert "into Reed House" in r, r                                           # D2-37: for the employer, into its store
+
+
+def test_anyone_can_give_to_a_household_and_leave_goods_anywhere():
+    w = world()
+    give(w, "Edric", grain=4)
+    r = do(w, "Edric", do="give", to="the Hales", item="grain", qty=2)
+    assert "Hale House" in r, r
+    assert do(w, "Edric", do="leave", item="grain", qty=1, at="Hale House").startswith("You left")

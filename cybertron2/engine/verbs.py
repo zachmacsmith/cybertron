@@ -24,8 +24,9 @@ VERB = {
              "doc": "between your hands and a store here you may use (your household's)"},
     "take": {"args": '{"item", "qty", "from": building or someone\'s remains}', "cost": 1,
              "doc": "from any store you can get into; without the right to it, it is theft, and you may be seen"},
-    "give": {"args": '{"to": person, "item", "qty", "for"?: party}', "cost": 0, "doc": "to someone here"},
-    "leave": {"args": '{"item", "qty", "at": a building here}', "cost": 0, "when": "roads",
+    "give": {"args": '{"to": a person or a household here, "item", "qty", "for"?: your household, to give from its store}', "cost": 0,
+             "doc": "to anyone here; to a household, it goes into their house's store"},
+    "leave": {"args": '{"item", "qty", "at": a building here}', "cost": 0,
               "doc": "put something you carry into a building's store here, for its household (they find it in the morning)"},
     "accept": {"args": '{"offer": id, "lots"?: n, "for"?: party}', "cost": 0, "doc": "an open offer here: both sides at once, or nothing"},
     "withdraw": {"args": '{"offer": id}', "cost": 0, "doc": "take back an offer of yours"},
@@ -501,9 +502,29 @@ def _take(here, mind, a, party):
 
 def _give(here, mind, a, party):
     to = here.person(a.get("to"))
+    if to is None:                                                          # to a household: into its house's store here
+        try:
+            hh = _party(here, a.get("to"))
+        except Refused:
+            hh = None
+        house = here.party_container(hh) if hh in here.households() else None
+        if house and house.startswith("stock:"):
+            item, q = item_of(a.get("item")), _qty(a.get("qty"))
+            if here.carried().get(item, 0.0) + 1e-9 < q:
+                raise Refused(f"you carry only {show(here.carried().get(item, 0.0))} {item}")
+            bid = house[len("stock:"):]
+            here.apply("transfer", src=here.hands, dst=house, item=item, qty=q)
+            name = here.households()[hh]["name"]
+            here.event("give", f"{here.name} gave {q:g} {item} to {name}, into {here.buildings()[bid]['name']}", actor=here.name,
+                       about=[f"building:{bid}"], salience=0.35, tags=["food"] if ITEMS[item]["food"] else [],
+                       concerns=list(here.institution(hh)["members"]))
+            here.record("give", None, party, to=hh, item=item, qty=q)
+            return f"You gave {q:g} {item} to {name}: it is in {here.buildings()[bid]['name']}."
     if to is None or to == here.name:
         raise Refused(f"there is nobody called {a.get('to')!r} here")
     item, q = item_of(a.get("item")), _qty(a.get("qty"))
+    if party and party != here.name and party != here.household() and not here.works_for(party):
+        raise Refused(f"'for' gives from that household's store, which is not yours: to give to {party}, give with 'to' instead")
     src = here.hands if not party or party == here.name else _out(here, party)
     have = here.carried().get(item, 0.0) if src == here.hands else here.stock(src[len("stock:"):]).get(item, 0.0)
     if have + 1e-9 < q:
