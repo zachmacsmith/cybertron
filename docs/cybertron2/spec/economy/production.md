@@ -24,6 +24,7 @@ is in proposals.
 - D2-43: the basic techniques and the ten trades below.
 - D2-52: skill by practice on all work. D2-53: crops from the sowing day; the cold kills what is not hardy. D2-54: sowing work per
   unit of seed; broadcast or dibble.
+- D2-58: grain spoils a little (house, bins, cellar). D2-59: the plot takes about 16 seed a sowing.
 - D2-44: bread. D2-46: weapons wear, with a small chance of breaking. D2-47: cheese. D2-48: specialised tools.
 
 ## Mechanics
@@ -120,6 +121,8 @@ Per plot: fertility, the crop growing (kind, day sown), the last crop grown. Too
 |---|---|---|
 | seed a plot, harvest per seed, work per stage, fertility changes, the weeding curve | 02l model's values as the starting point | calibrate |
 | the harvest window and the loss a day after it | 2 days; a quarter of what is left a day | calibrate |
+| grain spoilage a day: house, bins, cellar or granary | 0.5%, 0.25%, 0.1% | decided (D2-58) |
+| seed a plot (one adult's season by hoe) | about 16; about a fifth of the harvest | decided (D2-59); yields calibrate |
 | crop cycles (days from sowing to ripe) | about a quarter of the year for grain, a third for winter grain, a sixth for legumes, a tenth for a garden | calibrate |
 | sowing work and seed: broadcast against dibbling | dibbling about 3x the work, about 0.6x the seed | calibrate |
 | the skill curve: practice to mastery; fading | 02c §5 (multiplier 0.5 + 1.5(1 - exp(-p/tau))); tau so mastery takes about a season of full-time work | calibrate |
@@ -141,4 +144,4 @@ the soil in words ("tired", "good"), their seed in store, their tools and whethe
 [02l_farming.md](../../../review/37_growth/02l_farming.md), [02j_end_uses.md](../../../review/37_growth/02j_end_uses.md),
 [02d_ladders.md](../../../review/37_growth/02d_ladders.md); proposals/farming.md, proposals/tools.md.
 
-*Current as of 23 Oct 2026: H-6, D2-11 to D2-19, D2-23, D2-42, D2-43, D2-44, D2-46, D2-47, D2-48, D2-52, D2-53, D2-54.*
+*Current as of 23 Oct 2026: H-6, D2-11 to D2-19, D2-23, D2-42, D2-43, D2-44, D2-46, D2-47, D2-48, D2-52, D2-53, D2-54, D2-58, D2-59.*

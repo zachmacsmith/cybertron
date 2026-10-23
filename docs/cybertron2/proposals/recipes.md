@@ -288,7 +288,37 @@ to haul the beam.
 only, but the important one: each creates a dependence (specialist on master smith) and an ability nobody else has. Five is enough;
 more (a dozen tool kinds) would add goods without adding new dependences.
 
-## Why
+### 16. The food ladder: investment for upside (23 Oct, proposal; would replace D2-44's figures)
+
+Zach: bread at 1.1 adds almost nothing; capital and labour should buy real upside, and farms must be able to eat without a mill.
+
+| Eaten as | Food a grain | Units a food (hoe) | Units a food (ox plough) | Needs |
+|---|---|---|---|---|
+| whole grain, boiled at home | 0.7 | 0.77 | 0.60 | a hearth |
+| porridge from a hand quern | 1.0 | 0.74 | 0.62 | a quern |
+| porridge from mill flour | 1.0 | 0.57 | 0.45 | a mill |
+| bread, baked at a hearth | **1.3** | 0.51 | 0.42 | mill flour, a hearth |
+| bread, from a bakehouse oven | **1.3** | 0.46 | **0.37** | mill flour, a stone oven (batches of about 40) |
+
+- From a hoe household eating whole grain to an ox-ploughed, milled, oven-baked loaf: **about 2.1 times the food per unit of work.**
+  Each investment adds: the plough and team, the mill, the oven.
+- **Bread also keeps** (about 5% a day) **and is eaten without a hearth**, so it is the town's and the traveller's food.
+- **Farms eat without a mill:** whole grain, legumes, milk, cheese, meat and a garden.
+- The oven returns as a fitting (stone, which fields now yield: D2-56).
+
+**Food that travels on foot** (units of work to carry one food one edge; a milled ration costs about 0.45):
+
+| Food | On foot | Pack ox | Ox cart |
+|---|---|---|---|
+| grain | 0.92 | 0.19 | 0.074 |
+| bread | 0.71 | 0.15 | 0.057 |
+| salted meat | 0.61 | 0.13 | 0.049 |
+| cheese | 0.37 | 0.08 | 0.030 |
+| dried meat (proposed: meat dried to half its weight) | 0.31 | 0.06 | 0.025 |
+
+Bulk grain needs a pack animal for an edge or a cart for two or three; **dense food (cheese, cured meat) travels on foot.** A town
+a few edges from its farms is fed by carts and cured food, as historically.
+
 
 - Each good in D2-24 has a reason to be made, a place it is made and a reason to travel; no good is single-use (02g §1f).
 - Interlocking chokepoints (scenario_design): the seam and the smithy (copper, tools, blades, coin, locks), the spring (salt), the

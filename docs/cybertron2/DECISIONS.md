@@ -112,6 +112,8 @@ and correct them in place.**
 | D2-55 | 23 Oct | **Labour need not be scarce; land binds, and more labour grows output** (more land cleared and worked, optional stages done): farming is never forced to be harder; good farms should feed towns of many people with politics and armies | conversation | the proposal to force breaking the soil |
 | D2-56 | 23 Oct | **Recipe changes from the chain analysis:** charcoal is a good again (made at the wood, much lighter than its timber); cheese gives about 2.5 food from 6 milk; beds are made of timber and straw, not hides; fields yield some fieldstone, so a hearth needs no quarry; shore salt is sun-dried, inland springs are boiled; an institution's stamp on coin comes later | proposals/recipes.md; 02p | D2-24's folding of charcoal; beds of hides |
 | D2-57 | 23 Oct | **The first region seeds two smiths** (no single-smith monopoly in the first runs); smithing pays most in a society already thriving | 02p; conversation | |
+| D2-58 | 23 Oct | **Grain spoils a little:** about 0.5% a day in a house, 0.25% in bins, 0.1% in a cellar or granary (about 18%, 10% and 4% over a 40-day year) | 02n; conversation | grain never spoiling (the engine as built) |
+| D2-59 | 23 Oct | **The plot's numbers** (D4-23's plot, what one adult works in a season by hoe and weeding): about 16 seed a sowing, about a fifth of the harvest | 02n | 02l's small plots |
 
 ## Directions (Zach's stated aims recorded in the notes; designs follow them; checked by 37.2, 22 Oct)
 
