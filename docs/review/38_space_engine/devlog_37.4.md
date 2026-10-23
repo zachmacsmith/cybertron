@@ -83,6 +83,11 @@ changed in its code yet. **From 22 Oct the decisions are kept in [docs/cybertron
 
 ## Log
 
+- **23 Oct.** The valley: a verb registry and generated prompt verbs, generated village descriptions, the three-village world
+  generated, multi-node wiring in the run loop; a 20-day LLM run (m2_V, $8.85). Coppergate starved (4 deaths), kin carried all
+  trade. Fixes after the run: carrying shown, leaving goods (D4-32), offers by place, make's inputs, home as last seen; scope audit.
+  [15_m2_valley.md](15_m2_valley.md).
+
 - **23 Oct.** Zach: speech by scope with only direct speech waking (D4-25), thinking and past reasoning (D4-26), conversation memory
   (D4-27), agent-written memory at set times (D4-28), no aims (D4-29). Built in M1 (`converse.py`); M1 re-based on the decided
   economy (undecided crafts removed); check run E. Comparison with cybertron 1 and the content history: [14](14_cybertron1_comparison.md).
