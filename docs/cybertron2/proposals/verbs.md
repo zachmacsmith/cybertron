@@ -26,28 +26,64 @@ Rough budget per turn: system prompt about 1,500 tokens (world rules, verbs, cra
 turn prompt about 1,500-2,500 (here, today's options, self and house, seen and heard, memory bands, pinned note and titles,
 duties). Busy places (a market day, a crowded hall) are trimmed by priority, as cybertron 1's context module did.
 
-## The verbs
+## How actions are defined
 
-Each verb's meaning is crisp so that similar ones do not blur: **make** produces a carried item; **build** produces something fixed
-at a lot or in a room; **work** is labour on something fixed (a plot, a project, a repair); **gather** takes from a site.
+- **A verb is a handler with typed referents**: who acts (always the agent), what it acts on (a person here, goods carried, a
+  site here, a technique, a container, a claim, an institution, a power), its parameters, and the kind of change it makes on the
+  chokepoint (one or a few primitives). Verbs are not interchangeable because their referents and changes differ.
+- **An action is one use of a verb**: verb + object + parameters (`make {what: "pot", qty: 2}`).
+- **Everything else is data, not verbs.** Techniques (recipes, blueprints, methods), fittings, claims, offices' powers and laws'
+  clauses add objects for existing verbs. A new kind of pot, a mill, a guild's power to fine: none adds a verb.
 
-| Group | Verbs | Always shown? | Objects come from |
+So verbs partition actions by the kind of change and the kind of thing changed; the world grows by data.
+
+## The verbs (a lean set: 24)
+
+| Verb | Acts on | Kind of change | Folds in (from earlier lists) |
 |---|---|---|---|
-| Body and place | `travel`, `rest`, `watch` (a person, for the day) | yes | edges; people here |
-| Getting | `gather {site, how?}` | yes (basic foraging needs no technique) | sites here; gathering methods known |
-| Making and building | `make {what}`, `build {what, at}`, `work {what, at}` | yes | techniques known (or a rough idea, to try) |
-| Goods | `give`, `offer`, `accept`, `store`, `take`, `pack` | yes | goods carried; people here; one's house |
-| Talk and mind | `say`, `tell`, `explain`, `note`, `pin`, `open` (free, talk step) | yes | people here; techniques known; one's notes |
-| Learning | `teach`, `learn` | yes | techniques; people here |
-| Writing | `write`, `read` | if literate | documents carried or here |
-| Hospitality | `host`, `welcome`, `lodge` | yes | people here; inns here |
-| Land and claims | `claim`, `transfer_claim` (give, sell, let) | yes | sites and plots here; claims held |
-| Force | `attack`, `raid`, `guard`, `steal`, `damage`, `flee`, `yield` | **yes, always** | people, houses, buildings, herds here |
-| Life | `partner`, `conceive`, `join`, `leave`, `bequeath` | yes (adults) | people here; households |
-| Institutions | `found`, `propose`, `vote`, `appoint`, `judge`, `proclaim`, `register`, `collect`, and powers a law defines | members and office holders only | institutions it belongs to; its offices |
+| `travel {to, with?}` | an edge | move self (and party) | flee (at night, as a response), scout later |
+| `rest` | | none | |
+| `gather {site, method?}` | a site here | take from the land | forage, hunt, fell, quarry, mine, fish, draw water |
+| `make {what, qty?}` | a recipe | transform goods into a carried item | forge, craft, cook, cure, weave, write a copy |
+| `build {what, at}` | a blueprint, a lot or room | make something fixed | fortify (walls, gates, locks) |
+| `work {what, at}` | a method, on a plot, project, building, animal or person | labour on something fixed or living | sow, tend crops, reap, repair, operate a mill, herd, yoke, milk, tend the wounded, bury |
+| `move {goods, from, to}` | goods, between containers the agent may use | move goods | store, take, pack |
+| `give {to, goods}` | a person here | hand over | yield (to a demand), deliver an errand, give a claim |
+| `offer {to?, give, get}` | a person here, or anyone here | propose an exchange | sell, hire, let land, lodge at an inn, ask to be taught |
+| `accept {offer}` | an offer | carry out both sides at once | |
+| `set {thing, setting}` | something the agent controls | change a setting | lock or open a door, welcome guests, who may use a farm or a stock, standing prices, an office's settings |
+| `claim {thing}` | a plot or site | assert a claim | |
+| `attack {target, aim}` | a person, house, building or herd here | force | raid (aim rob), damage, burn, drive off |
+| `guard {where?}` | the place or a person | defend tonight | keep watch |
+| `steal {goods, from}` | goods in an unwatched place | take unseen | |
+| `watch {person}` | a person working here | learn by watching | |
+| `teach {to, technique}` | a person here who accepts | pass know-how | learn (the learner accepts, or asks with `offer`) |
+| `read {document}` / `write {what}` | a document | information to and from objects (literacy) | |
+| `join {institution}` / `leave {institution}` / `found {institution}` | an institution (households included) | membership | partner (joining a household), adopt |
+| `conceive {with}` | a partner here who also chooses it | a child | |
+| `invoke {power, ...}` | a power the agent holds through an office or a law | whatever the power does | propose, vote, appoint, judge, register, proclaim, collect, muster: every institutional act |
 
-**Force is always shown.** Run 2's raiders never raided, starving beside full stores; if attack and raid were hidden or buried, the
-question "will they fight" could not even be asked. They stay in every system prompt, with their costs in world terms.
+**Free, in the reply rather than as verbs** (talk step, no work units): `say`, `tell` (with an optional `about`, and `explain` to
+give a rough idea of a technique), `note`, `pin`, `open` (a note), `look up` (a card).
+
+## Rules against swelling
+
+cybertron 1 reached 145 actions because each mechanism got its own action. To keep the list near 24:
+
+1. **New things are data.** A new mechanic first tries to be a technique, a fitting, a setting, a claim, an institution's power or
+   a law's clause on an existing verb.
+2. **A new verb needs a new kind of change** on the chokepoint or a new kind of referent that no verb takes, shown in a short note,
+   and Zach's yes.
+3. **Institutional acts are powers**, all through `invoke`, shown only to holders.
+4. **Every verb is in the coverage test**: each spec mechanic names the verb that reaches it, and each verb names its primitives.
+5. **The count is reported** in the spec; growing it is a decision (DECISIONS.md), like any other.
+
+## What may not fit the verbs
+
+Checked against the designs so far: ceremonies and oaths (an institution's power through `invoke`, or a promise in words);
+threats and negotiation (talk); prayer and ritual (later, as a work method at a site); hiding (a later `set` on oneself, 02h §4a);
+searching a place for hidden things or a lost traveller (a later `gather` method, or `scout`); signals and beacons (`work` at a
+beacon). Nothing found so far needs a new verb.
 
 ## Force and defence: what was missing
 
@@ -56,10 +92,10 @@ question "will they fight" could not even be asked. They stay in every system pr
 | Fight a person | `attack` (as built) | exists |
 | Take a house's food by force | `raid` (as built) | exists |
 | Defend people and houses at night | `guard` (as built) | exists |
-| Take without a fight | **`steal {item, from}`**: only when nobody else is present at the place (everything else is witnessed, handoff §4); taking from a house needs its door unlocked or the lock broken (02i fittings) | missing |
-| Damage or burn a building, drive off a herd | **`damage {building}`**, `raid {herd}` (02g §5b) | proposed by 37.2 |
-| Escape | **`flee`**: leave a fight before it is settled (travel as a reflex, at night, unsheltered) | missing |
-| Give in | **`yield {goods}`**: hand over what is demanded to end a threat (a demand made in the talk step) | missing |
+| Take without a fight | **`steal {goods, from}`**: only when nobody else is present at the place (everything else is witnessed, handoff §4); taking from a house needs its door unlocked or the lock broken (02i fittings) | missing |
+| Damage or burn a building, drive off a herd | `attack {target, aim: damage, burn or drive off}` (02g §5b) | proposed by 37.2 |
+| Escape | `travel` as a response before a fight is settled (at night, unsheltered) | via travel |
+| Give in | `give` what is demanded (a demand made in the talk step) | via give |
 | Fortify | `build` walls, gates, towers, locks (blueprints and fittings, techniques) | via build |
 | Arm | `make` weapons (recipes); carrying a weapon is holding it | via make |
 | Keep watch and raise the alarm | a guard detects early; the hue and cry wakes neighbours (02k fuse events) | proposed (02k) |
@@ -70,11 +106,11 @@ question "will they fight" could not even be asked. They stay in every system pr
 
 | Area | Missing | Proposed |
 |---|---|---|
-| Health | wounds exist, care does not | `tend {person}` (a technique: healing; midwifery), shortening a wound |
-| The dead | bodies lie where they fell | `bury {person}` (kin's duty; a lasting memory to those present) |
+| Health | wounds exist, care does not | `work {what: tend wounds, at: person}` (healing and midwifery as methods) |
+| The dead | bodies lie where they fell | `work {what: bury, at: the body}` (a lasting memory to those present) |
 | Animals | herding, breeding, milking, yoking, riding, breaking | gathering and working methods on herds (37.2 livestock) |
 | Hiring | wages for work | an `offer` whose terms are work (a contract once institutions exist) |
-| Exploration | scouting an edge, mapping | `scout {edge}` (37.5); a map is a document (`write`) |
+| Exploration | scouting an edge, mapping | `travel` and return, later a scouting method (37.5); a map is a document (`write`) |
 | Travel together | leaving as a party, escorting | `travel {to, with}` |
 
 ## How it avoids confusion and bloat
@@ -89,15 +125,20 @@ question "will they fight" could not even be asked. They stay in every system pr
 
 ## Open questions
 
-1. The final verb list (about 25) and which are free (no work units).
+1. The lean set of 24: anything to merge or split (for example `steal` into `move`, which would hide the act).
 2. `steal`: allowed only unseen? Detected later (a missing item noticed by its owner)?
-3. `flee` and `yield` as reflexes (standing orders, later) or only as chosen actions?
+3. Fleeing and yielding as reflexes (standing orders, later) or only as chosen actions?
 4. A coverage test: every mechanic in the spec reachable by some verb and object.
 
 ## History
 
 - 23 Oct: proposed (37.4, with Zach), after Zach asked how the whole space of possible actions compares with what an agent is
   shown, whether it avoids confusion and bloat, and what is missing (attacking, raiding, guarding, fortifying).
+
+- 23 Oct: Zach: how are actions defined (verbs as handlers, or a partition)? which verbs? closed lists tend to swell. Added how
+  actions are defined (verbs are typed handlers; actions are uses; everything else is data), a lean set of 24 verbs with what each
+  folds in, rules against swelling (data first, a new verb only for a new kind of change, institutional acts through `invoke`, a
+  coverage test, the count as a decision), and a check of what may not fit.
 
 ## Sources
 

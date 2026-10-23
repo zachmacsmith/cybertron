@@ -110,7 +110,7 @@ Skill (how well and how cheaply) stays 37.2's continuous practice curve in the e
 | **Seeing it done** | present at the site or in the room when someone does it (perception records it) | to aware at once; to **rough idea** after 3 sightings; never beyond by watching in passing |
 | **Watching on purpose** | `watch {person}` for the day, working beside them | each day counts as 2 sightings; to **capable** after 3 such days |
 | **Being explained it** | `explain {to, technique}` in the talk step, by someone who knows it | to **rough idea** |
-| **Being taught** | `teach` and `learn`, both present, the same day (teacher about 2 units, learner about 4) | up one level a day; a youth two (D4-19) |
+| **Being taught** | `teach {to, technique}`, accepted by the learner, both present, one day (teacher about 2 units, learner about 4) | **one session to capable** (a youth: to known); practice does the rest |
 | **Reading a method** | `read {document}`, literate, a written method made by someone who knows it | to **capable** |
 | **Trying** | `make` or `build` with a rough idea or capable | success: the result, and a step toward the next level (2 successes from rough idea to capable, 2 more to known); failure: the inputs are lost, and 2 failures count as one success |
 
@@ -138,13 +138,21 @@ So a rough idea tells the agent what to gather and where to go, and a refusal te
 > You know of: ploughs (you saw Torvald make them); kilns (Wynn told you of them).
 > Today you could make: a knife; a blade, with 4 more copper.
 
+**Is teaching worth it, and will agents do it?** One session costs the teacher about a third of a day and saves the learner
+several days of watching and the materials wasted in trying. So teaching pays where the teacher gains from the learner's skill: **a
+household teaching its own** (its labour becomes more productive: this will be most teaching, as it was historically), **an
+apprentice** (labour at the master's forge), **payment** (a price below what the learner saves), or **duty** (a guild's or a
+village's rule). It does not pay where the learner becomes a competitor, which is why masters keep secrets and guilds form.
+Whether LLM agents teach readily, refuse or charge is behaviour to measure: run 2 suggests they give too readily rather than too
+little.
+
 **Two worked examples.**
 
 - *Watching.* Cela lives next to the potter. She sees Mora fire pots three times: a rough idea. She tries: it takes 1.7 times the
   clay, and it cracks. She tries again and it holds (two failures and a success: one step short of capable). One more success and
   she is capable, two more and she knows it. She paid no one; it cost her clay, fuel and days.
-- *Teaching.* Eoin (a youth) is taught smithing by Torvald, who wants a forge-hand: two levels a day, so from aware to known in two
-  days. Torvald spent 4 units and gained an apprentice whose skill grows twice as fast while he works at Torvald's forge. Torvald
+- *Teaching.* Eoin (a youth) is taught smithing by Torvald, who wants a forge-hand: one session, and Eoin knows it. Torvald spent
+  2 units and gained an apprentice whose skill grows twice as fast while he works at Torvald's forge. Torvald
   could have refused, or charged Eoin's household.
 
 ### 4d. Where an agent's knowledge shows
@@ -246,6 +254,10 @@ and materials, works out a new recipe within their trade) is a later option, tie
   detect that telling happened? Added §4d (system prompt lists known crafts and awareness by name, rebuilt on change; the turn prompt
   shows today's options and near misses; full cards by look-up in the talk step) and §4e (mentions of known names make hearers aware,
   an optional `about` field, `explain` for a rough idea, `learn` as a visible request; the same rule carries all testimony).
+
+- 23 Oct: Zach: is teaching economically viable, would agents do it, should it take fewer rounds? Teaching became one session (to
+  capable; a youth to known), the learner accepting; added when teaching pays (household, apprentice, payment, duty) and when it
+  does not (a competitor), as behaviour to measure.
 
 ## Sources
 
