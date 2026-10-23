@@ -1,0 +1,75 @@
+# The valley: base world for cybertron2.engine.generate (three villages a day apart). The land, roads, buildings, herds, claims and
+# lines are written here; the people, their kin and their past are generated (D4-21). Decided rules only; numbers marked calibrate
+# in the spec come from recipes.md.
+#   Millbrook: fields, cattle in milk, a small copse: grain and milk, short of timber, stone and tools.
+#   Ashwood: deep forest: game and timber, no fields.
+#   Coppergate: a copper seam, a quarry and the smithy on a hillside: ore, stone, copper, tools and coin; little food.
+name: valley
+seed: 11
+days: 20
+calendar: {season: summer, day: 4, season_days: 6}
+cold_days: [9]
+nodes:
+  millbrook:
+    name: Millbrook
+    parcels:
+      mb_green: {name: the Green, cover: built, size: 2, text: "the green with the two houses", adj: [long_field, mb_pasture, mb_brook]}
+      long_field: {name: Long Field, cover: field, size: 3, text: "the barley field", adj: [alder_copse],
+                   state: {crop: {kind: barley, left: 34, ripe_day: 2}}}
+      brook_field: {name: Brook Field, cover: field, size: 1, text: "a small oat field", adj: [mb_brook],
+                    state: {crop: {kind: oats, left: 14, ripe_day: 5}}}
+      mb_pasture: {name: Common Pasture, cover: pasture, size: 3, text: "the common grazing", state: {plants: {K: 12, S: 10, r: 0.3}}}
+      alder_copse: {name: Alder Copse, cover: forest, size: 1, text: "a small copse of alder and hazel",
+                    state: {plants: {K: 10, S: 8, r: 0.3}, game: {K: 6, S: 4, r: 0.25}, wood: {K: 25, S: 20, r: 0.03}}}
+      mb_brook: {name: the Brook, cover: water, size: 1, text: "a clear brook", adj: [mb_meadow]}
+      mb_meadow: {name: Brook Meadow, cover: meadow, size: 2, text: "wet meadow by the brook", state: {plants: {K: 14, S: 12, r: 0.3}}}
+  ashwood:
+    name: Ashwood
+    parcels:
+      aw_clearing: {name: the Clearing, cover: built, size: 1, text: "a clearing with one long house", adj: [deep_wood, aw_glade]}
+      deep_wood: {name: Deep Wood, cover: forest, size: 6, text: "old oak and ash forest",
+                  state: {plants: {K: 40, S: 34, r: 0.3}, game: {K: 40, S: 34, r: 0.25}, wood: {K: 150, S: 140, r: 0.03}}}
+      aw_glade: {name: the Glade, cover: meadow, size: 1, text: "a sunny glade", adj: [aw_brook], state: {plants: {K: 10, S: 8, r: 0.3}}}
+      aw_brook: {name: Ash Brook, cover: water, size: 1, text: "a stream under the trees"}
+  coppergate:
+    name: Coppergate
+    parcels:
+      cg_yard: {name: the Yard, cover: built, size: 1, text: "a yard with the house and the smithy", adj: [the_seam, cg_scrub]}
+      the_seam: {name: the Seam, cover: rock, size: 1, text: "a green-stained seam in the hillside", state: {seam: {S: 60, K: 60}}}
+      cg_quarry: {name: the Quarry, cover: rock, size: 1, text: "a face of grey stone", adj: [the_seam], state: {quarry: {S: 0, K: 0}}}
+      cg_scrub: {name: the Hillside, cover: scrub, size: 2, text: "thorn and gorse", adj: [cg_pasture], state: {plants: {K: 8, S: 6, r: 0.3}}}
+      cg_pasture: {name: High Pasture, cover: pasture, size: 2, text: "thin upland grazing", state: {plants: {K: 8, S: 6, r: 0.3}}}
+roads:
+- [millbrook, ashwood, 1]
+- [ashwood, coppergate, 1]
+- [millbrook, coppergate, 2]
+buildings:
+  reed_house: {name: Reed House, parcel: mb_green, household: Reed, structure: wattle, size: 6,
+               fittings: {beds: 5, hearth: 1, bins: 1, quern: 1}, stock: {grain: 6, bread: 2, timber: 2}}
+  hale_house: {name: Hale House, parcel: mb_green, household: Hale, structure: wattle, size: 5,
+               fittings: {beds: 5, hearth: 1, bins: 1, quern: 1}, stock: {grain: 4, wild food: 2, timber: 2}}
+  fenn_house: {name: Fenn House, parcel: aw_clearing, household: Fenn, structure: wattle, size: 6,
+               fittings: {beds: 6, hearth: 1, bins: 1, quern: 1}, stock: {meat: 4, wild food: 2, timber: 8}}
+  smith_house: {name: Smith House, parcel: cg_yard, household: Smith, structure: wattle, size: 5,
+                fittings: {beds: 5, hearth: 1, bins: 1, quern: 1}, stock: {wild food: 2, timber: 4, copper ore: 3, copper: 1}}
+  smithy: {name: the Smithy, parcel: cg_yard, household: Smith, structure: wattle, size: 4, fittings: {hearth: 1, anvil: 1}}
+stock_mouths: 3
+herds:
+  cattle: {name: the Millbrook cattle, kind: cattle, parcel: mb_pasture, count: 6, in_milk: 2}
+claims:
+- {thing: [herd, cattle], claimant: Reed, rights: all, grounds: seeded}
+- {thing: [parcel, long_field], claimant: Reed, rights: all, grounds: seeded}
+- {thing: [parcel, brook_field], claimant: Hale, rights: all, grounds: seeded}
+- {thing: [parcel, the_seam], claimant: Smith, rights: all, grounds: seeded}
+incidents:
+- {day: 4, kind: stray, node: millbrook, herd: cattle, into: long_field, eats: 3}
+signs:
+- {day: 7, node: all, about: sky, sense: touch, text: "a white frost on the grass at dawn, weeks before its time", salience: 0.6, tags: [season, farming]}
+lines:
+  Reed: {crafts: [milk], tools: [crude tool], holdings: {grain: 1, coin: 8}}
+  Hale: {crafts: [], tools: [crude tool], holdings: {coin: 6}}
+  Fenn: {crafts: [], tools: [crude tool, crude weapon], holdings: {meat: 1, coin: 6}}
+  Smith: {crafts: [mine, smelt, copper tool, coin], tools: [copper tool, crude tool], holdings: {coin: 20}}
+bounds: {acting: [12, 15], children_max: 4, youths_min: 2, per_min: 2, per_spread: 3}
+sim: {start: -58, fertility: 0.15, leave: 0.6}
+cast: {head: claude-opus-5-5, opus_extra: 0, middle: claude-sonnet-5-5, sonnet_extra: 2, rest: claude-haiku-5-5, youth: claude-haiku-5-5}
