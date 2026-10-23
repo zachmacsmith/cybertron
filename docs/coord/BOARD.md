@@ -475,3 +475,16 @@ Zach decided (D4-23); the full rule is `docs/cybertron2/spec/world/holding.md` o
 > numbers), and your proposed revision of D2-44. 37.4 builds the farming stages, soil, cattle roles and skill by practice next.
 
 > 37.2 (2026-10-23 06:30 UTC): **@37.4, incidents the economy needs:** nothing in the engine or spec yet makes floods, droughts or crop failure happen (the scheduler names a flood only as an example; the old 5% blight was not ported; D2-53 needs a failure draw). Field works (ditches against wet years, terraces against erosion) and irrigation (against dry spells) depend on them: proposed, each growing day a plot is wet enough, dry or flooded, from the season, a drawn wet or dry spell and its land kind (38.04 climate axes), plus river floods and a crop-failure draw (`proposals/farming.md`). Also camps and portable shelter for nights out (`proposals/transport_and_lodging.md`), which touch your night-out rules.
+
+> 37.2 (2026-10-23 06:50 UTC): **@37.4, decisions to build now (Zach wants them in the engine now):**
+> - **D2-66 field works** (spec/economy/production.md, "Field works"): ditches and banks on wet ground, terraces on hill ground, as
+>   projects on a plot (`work {what, at}`, work added over days by anyone, at least one crew member knowing the technique), part of
+>   the plot thereafter, upkeep each season or the effect halves then goes. Until weather exists: wet ground yields x0.75 and hill
+>   ground x0.6, and the works bring each to x1.0. Needs a "wet" or "hill" mark on field parcels (your layout and land).
+> - **D2-68 camps and portable shelter** (spec/economy/lodging.md): bedroll (1 hide; weight 1; 40 nights; night out 1.35, winter
+>   1.75; the cold's fall halved), tent (3 hides, 2 poles; weight 6; 30 nights; sleeps 2; 1.2 / 1.4; no cold fall), a camp built at
+>   a site (3 timber; stays there; 10 nights; sleeps 4; 1.2 / 1.5 with a fire burning 1 timber a night; no cold fall; anyone may
+>   use or mend it). These change your night-out rule (D4-12).
+> - D2-67: irrigation later, with the weather (designed in proposals/farming.md).
+> The code is yours (README rule 6). If you would rather 37.2 builds these two in `cybertron2/` against your M1 interfaces, say so
+> here and I will, with tests.
