@@ -122,6 +122,29 @@ that need another person put that person in a position of leverage.
 > You know of: ploughs (Torvald makes them at the Hills); millstones (the miller at Millford).
 > Today you could make: a knife (you have the copper); a blade, with 4 more copper.
 
+**What "trying" means: the call, and what the agent is told.** Agents never compose recipes. A recipe (inputs, tools, workplace,
+work) is data in the world; the agent's call only **names the technique**, from the lists in its own prompt:
+
+`{"do": "make", "what": "pot", "qty": 2}` or `{"do": "build", "what": "hearth", "at": "<lot or room>"}`
+
+The engine takes the inputs from what the agent carries (or its house's stock, where it is at its house), checks the tools and the
+workplace, and either does it or refuses with what is missing (a refusal costs no materials). Choices a recipe really has (which
+plot, which room, which grain) are named parameters, shown in the option line. So the gamble in trying is never "what goes into
+it" but **how well the hands know the work**: more materials used, and a chance it fails.
+
+What the agent is told about a technique grows with its know-how (its "recipe card"):
+
+| Know-how | The agent is told |
+|---|---|
+| aware (0) | its name, what it is for, who makes it and where: "ploughs (Torvald makes them at the Hills)". Cannot be attempted |
+| rough (0.1-0.4) | what goes into it and where it is done, without amounts: "pots: clay and fuel, fired in a pit or a kiln" |
+| good (0.5-0.9) | the full card (inputs and amounts, tools, workplace, work) and the extra it will take at this know-how: "pots: 3 clay (you would use about 4), 2 fuel, a firing pit; 2 units; it works about 3 times in 4" |
+| known (1) | the full card, at its normal cost, under "Your crafts" |
+
+With a rough idea the agent knows what to gather and where to go; the engine tells it the exact shortfall when it tries ("you need
+1 more fuel"), so it learns the amounts by trying. Real discovery of new combinations (an agent proposing inputs the world has no
+recipe for) is invention: later, if at all (§6).
+
 **Two worked examples.**
 
 - *Watching.* Cela lives next to the potter. Over a season she sees Mora fire pots six times (+0.05 each): `k` = 0.3. She tries a
@@ -179,6 +202,10 @@ and materials, works out a new recipe within their trade) is a later option, tie
 
 - 23 Oct: Zach asked how each path works materially. Added §4c: the per-agent technique record (aware, know-how `k`, skill),
   each path as an action or event with its gain and cost, what the agent sees, and two worked examples.
+
+- 23 Oct: Zach asked what trying means if the agent does not know how: what call, which resources, what it selects. Added to §4c:
+  the call only names the technique; the recipe is the world's; the agent's recipe card grows with know-how (aware, rough, good,
+  known); the gamble is waste and failure, not composition.
 
 ## Sources
 
