@@ -34,8 +34,8 @@ building grow large or tall.
 
 ### Fittings: a closed vocabulary (02i §3, cut by the pruning rule, 02g §1f)
 
-First worlds: **beds, hearth, bins, benches, shelves, lock, anvil-and-bellows, millstones** (with a water wheel by a river). Each
-has a cost, a capacity, upkeep, prerequisites and one hook in the rules. Oven, cellar, stalls, copy desks, loom, kiln and press come
+First worlds: **beds, hearth, bins, benches, shelves, lock, anvil-and-bellows, millstones** (with a water wheel by a river), and **cellar and stalls** (D2-45). Each
+has a cost, a capacity, upkeep, prerequisites and one hook in the rules. Oven, copy desks, loom, kiln and press come
 with the goods that need them. Beds are one fitting for any number of beds up to the room's size (2 timber and a hide each), so a hall for 25 sleeps 25 and keeps its other slots (recipes.md §3, 23 Oct).
 
 ### Rooms as channels (02i §4; D2-9)
