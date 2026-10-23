@@ -334,12 +334,19 @@ interlocking dependence scenario_design asks for. **The top rung is likely too h
 well as work; proposed: on farming, skill cuts the work and raises yield only a little (x1.1 at mastery), which keeps the land
 ceiling near x10.
 
-**A mill should be expensive** (Zach: wouldn't it be?). Proposed: two millstones of dressed stone (a mason with chisels: 10 stone
-and 8 units each), a mill room (timber on stone, about 30 units), a water wheel (30 timber, 2 copper, 20 units by a carpenter) and
-a leat (an earthwork: about 40 units of a crew's work): about 150-200 units in all, a month of one person's work or a week of a
-crew's; upkeep: the stones re-dressed by a mason and the wheel mended every season. At a village of 15 it pays back in about two
-years (longer than a run); at a town of 60 in about half a year. So seeded villages inherit their mills, and new ones are built
-by towns or lords, who then charge for milling.
+**A mill you can grow (Zach, 23 Oct: the full mill is a lot; a cheap small mill that can be expanded).** Milling makes a grain
+worth 1.0 food instead of 0.7 eaten whole: 0.3 food a grain, about 0.16 units of growing work saved (more where land is short,
+since the same fields then feed 43% more people). Each rung is built by adding parts to the one below (D2-9):
+
+| Rung | Adds | Cost (units) | Grinding work a grain | Pays back against eating grain whole: 15 people | 60 people |
+|---|---|---|---|---|---|
+| hand mill | two small stones turned by hand, in any room | about 8 | 0.125 | about 15 days | about 4 days |
+| ox mill | dressed millstones (a mason with chisels), a room, an ox to turn them | about 60 more | 0.06 (and the ox's keep) | about 70 days | about 11 days |
+| water mill | a wheel (carpenter, copper) and a leat at a river site | about 90 more | 0.025 | about 75 days from scratch | about 30 days from an ox mill |
+
+So a household or village builds a hand mill quickly; a large village or a cluster's centre turns it into an ox mill; a town or
+a lord at a river adds the wheel. Within a run of 20-30 days only the hand mill pays at village size; bigger mills are seeded or
+built where many people eat. The quern is dropped: the hand mill does its job better for a few units more.
 
 Bulk grain needs a pack animal for an edge or a cart for two or three; **dense food (cheese, cured meat) travels on foot.** A town
 a few edges from its farms is fed by carts and cured food, as historically.
