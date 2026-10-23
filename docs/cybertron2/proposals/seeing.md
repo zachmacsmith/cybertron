@@ -76,6 +76,15 @@ An observation is **a fact the engine draws from the state**, at a fidelity set 
 | The land and sky | the weather, the season's signs, smoke from the next valley, birds leaving early (signs, D4-6) | the almanac keeper, the old |
 | A gathering | who is there, who stands with whom, the mood | anyone attending |
 
+**How much there is to see.** A thing at a moment carries more facts than its state fields: its own state (a building's storeys,
+material, condition, fittings: about 5-15), what its **processes and occupants give off** (cattle lowing in a byre, a hammer at a
+working forge, bread smelling from an oven, smoke from a lit hearth, a dog barking at a stranger), what **the weather and light do to
+it** (mud after rain, frost on the thatch, low evening sun), **traces of recent use** (fresh chips at the chopping block, a new cart
+rut, a door left open), and **who and what is about it**. All of these can be derived from the state by simple rules (a table of what
+each fitting, animal, process and weather gives off to each sense), so they are facts, not invention: a place may hold 20-60 at a
+time, of which attention and salience pick 5-12 for one observation. Rendering, by template or model, may only state or directly
+imply given facts.
+
 Observations are how information that is otherwise not obvious enters the world: a store that looks too full after a lean
 season, a neighbour's ox that is not theirs, tracks where nobody should have walked, a house that has been empty three nights.
 
@@ -167,6 +176,11 @@ does.
   draw conclusions mattered, the wording did not); templates read flatter. Its recommendation: templates in the engine, with
   phrasing pools written once by a model against set fact values and checked; a narrator per place only as a later experiment;
   prompts that invite agents to draw conclusions from what they see.
+
+- 23 Oct: Zach: the facts may be too thin; add what things give off (sounds, smells), and a model description should only imply real
+  given facts, seen through the observer's eyes (who they are, their skill, their state, what they care about). Added the paragraph
+  on how much there is to see (derived sensory and ambient facts); a second test round is running with richer facts and an
+  observer's-eye prompt.
 
 ## Sources
 
