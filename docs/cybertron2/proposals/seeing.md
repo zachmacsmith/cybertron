@@ -114,17 +114,25 @@ tracks), whether it lasts or is momentary, and, hidden, whether it is true (sign
 | **Standing watch** (`guard`, or a watch office) | a better chance of catching momentary facts at the node's edges: **hooves on the road at dusk** is how a raid is heard coming (the detection of a fuse event, 02k) |
 | **Being watched** | a chance of the fact "someone was watching you" |
 
-**What attending gives, by kind of target:**
+**Everything an agent can attend to** (one a day; only what is at its node, or visible from it):
 
-| Target | Facts |
+| Target | What attending gives |
 |---|---|
-| a person | condition (fed, hungry, wounded, ill, tired), what they carry and wear, what they did today and with whom, where they went when they left |
-| a building | structure, material, condition, fittings visible, smoke and sounds and smells from inside, who went in and out today, how full the store looks |
-| a site or plot | crop and soil, weeds, water level, animals on it, traces of trespass or work |
-| a herd | about how many, their condition, whose marks they carry, unrest before weather |
-| an edge or road | who came along it today, tracks, its condition; at dusk, anything approaching |
-| the land and sky | weather, the season's signs (D4-6), distant smoke, birds |
-| a gathering or room | who is there, who stands with whom, the mood |
+| **a person** here | condition (fed, hungry, wounded, ill, tired), what they carry and wear, what they did today, with whom, where they went when they left |
+| **a gathering** (a market, a meeting in a hall, a crowd, a quarrel) | who is there, who stands with whom, who speaks and who is listened to, the mood |
+| **a building** (from outside) | structure, material, condition, what can be seen of its fittings, smoke, sounds and smells from inside, who went in and out today, how full its store looks |
+| **a room** it may enter | who is in it, what is on show (goods, a notice, a document left out), its fittings in use |
+| **a field or plot** | crop and its ripeness, soil, weeds, water, animals on it, signs of work or trespass |
+| **a wood, pasture or other site** (the stream, the well, a quarry, a seam) | the state of what it gives (plants, game, timber, stone), signs of use, tracks |
+| **a herd or animals** | about how many, their condition, whose marks they carry, how they behave (unrest before weather) |
+| **goods in view** (a cart, a stall, a pack being unloaded) | what and roughly how much, their quality to a skilled eye |
+| **a notice or document posted** | its text, if it can read |
+| **a road out** (each edge) | who came along it today, tracks, its condition, and at dusk anything approaching |
+| **the land and sky** | weather, the season's signs, the horizon: smoke, a glow at night, birds |
+| **a body, or a scene** (where a fight was, a burnt house) | what can be seen of what happened |
+
+Not attendable: other nodes (only what can be seen from here, such as smoke on the horizon), anything inside a room it may not
+enter, and its own house and body (already shown to it every round).
 
 **Noticing: the engine offers, the describer picks, and reports what it picked.** An agent does not take in every fact in range.
 The engine offers a set of candidate facts for an observation, each marked **salient** (it stands out: a fire, a fight, a scream, a
@@ -209,9 +217,8 @@ does.
 **Slight misreadings are acceptable** (Zach, 23 Oct): people mis-see things a little all the time, so a narrator's small
 stretches ("the north wind has frost in it") need not be caught. The check catches only what would mislead an agent into a wrong
 act or a wrong belief about something that matters: a new object, place or person; a new cause or order it would act on ("the deer
-prints are fresher still"); a hidden fact. Misperception as a mechanic (a mistaken count, a misjudged freshness, more often for the
-unskilled or the glancing) belongs in the engine, drawn from the seed, so it is the same in every arm and recorded as a false
-belief (knowledge §7), not left to the narrator.
+prints are fresher still"); a hidden fact.There is **no deliberate misperception** (Zach): the engine never gives an agent a
+wrong fact on purpose; false beliefs come only from what people say, rumour and old sightings (knowledge §7).
 
 ## 5. What is missing, and what should go
 
@@ -327,6 +334,10 @@ belief (knowledge §7), not left to the narrator.
 - 23 Oct: Zach: a very slight misinterpretation is fine; people mis-see things subtly all the time. Added to §4: the check catches
   only misleading inventions (new objects, causes or orders an agent would act on, hidden facts); misperception as a mechanic lives
   in the engine (seeded, recorded as false beliefs).
+
+- 23 Oct: Zach: no deliberate misperception. Removed the engine misperception mechanic. Zach asked for everything an agent can
+  attend to: replaced the short table in §3b with the full list (a person, a gathering, a building, a room, a plot, a site, a
+  herd, goods in view, a posted notice, a road out, the land and sky, a body or a scene) and what is not attendable.
 
 ## Sources
 
