@@ -181,6 +181,10 @@ and correct them in place.**
 | D2-111 | 23 Oct | **`leave` folds into `give`:** give to a person, a household, a building or a place; leaving and hiding are giving to a place (hiding with the `hidden` modifier); a give that cannot reach its recipient (someone not here, a building one may not use) is left at its door, in the open | verb_modifiers.md §5 | `leave` as its own verb |
 | D2-112 | 23 Oct | **Modifiers are techniques** that change another act: the same record, levels and ways of learning as other know-how, with one more field naming the verbs they change | verb_modifiers.md §4 | modifiers as a separate kind of knowledge |
 | D2-113 | 23 Oct | **Travellers can wait out a block** (a flooded ford, a snowed pass), as a choice at departure ("wait up to N days, then turn back") or in a fuse call, each day costing a night out; the cost in food is shown | road_layout.md §3 | |
+| D2-114 | 24 Oct | **A node's parcels form a graph of neighbours, shaped by the environment and terrain** (generation: rivers, slopes, woods, fields), each parcel with a side and a height; no coordinates; nobody decides movement inside a node: anyone can act on any parcel | proposals/parcel_graph.md; conversation | a plain list of parcels; coordinates |
+| D2-115 | 24 Oct | **Acting senses along the way:** whoever acts on a parcel senses the parcels it is in, those next to them, and those it must pass through to get there, without choosing a route | parcel_graph.md §2 | sensing only the parcel acted on |
+| D2-116 | 24 Oct | **The village as a whole:** an agent can attend to the village to learn how it fits together (which parcels lie next to which, where the roads leave); on arriving somewhere it gets a concise overview of what is noticeable there, not relative positions | parcel_graph.md §3 | |
+| D2-117 | 24 Oct | **Herds can wander far:** an unherded herd can cross much of a village in a day, not only two parcels | livestock.md | about two steps a day |
 
 ## Directions (Zach's stated aims recorded in the notes; designs follow them; checked by 37.2, 22 Oct)
 

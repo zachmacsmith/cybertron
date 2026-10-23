@@ -26,6 +26,7 @@ proposal**; **Why**; **Alternatives considered**; **Open questions**; **Affects*
 | [households.md](households.md) | membership, use and home as data agents change: admit and leave, grant use of a house, home derived, occupy an empty house (possession and a claim), build one from parts; the night follows use | 37.4 (37.2: building costs) | partly accepted: D4-36 |
 | [place.md](place.md) | place as the foundation: every entity and event has a place; state partitioned by node; agent-facing code gets only a view of where the agent is (`Here`) and its own mind (`Mind`), never the world; only travel moves anything between nodes; static and canary tests | 37.4 | accepted in principle: D4-35 |
 | [layout.md](layout.md) | the layout inside a node: parcels of one cover (forest, field, pasture, water, built ground...) with neighbours and a side; features (brook, road, well, seam); structures on built ground; movables on a parcel or in a room; attention, claims and land change on one model | 37.4 | discussion |
+| [parcel_graph.md](parcel_graph.md) | parcels as a graph of neighbours shaped by the land, each with a side and a height; no coordinates or walking; sensing along the way; attending to the village; an overview on arrival | 37.2 (37.4 owns places and perception) | partly accepted: D2-114 to D2-116 |
 | [seeing.md](seeing.md) | everything an agent is shown each round and how it changes; attention (concerns you, salient, a glimpse, one thing attended to in detail), feeling watched, observations from the state; templates first, an optional narrator per node and day; what is missing and what should go | 37.4 | discussion |
 | [verbs.md](verbs.md) | the closed list of about 25 verbs always in the system prompt (force always shown), objects shown by knowledge and place, office verbs to holders; the possible space against the shown space; gaps (steal, damage, flee, yield, tend, bury, scout) | 37.4 | ready for a decision |
 | [notes.md](notes.md) | private notes: up to 8, one pinned and shown, titles of the rest, opened in the talk step and shown at once; memory, not objects: never passed on except by telling, lost at death | 37.4 | discussion |
@@ -65,6 +66,8 @@ Newest first. Ideas decided or rejected in conversation before 23 Oct are backfi
 
 | Date | Idea | Outcome | Where |
 |---|---|---|---|
+| 24 Oct | The parcel graph from the land, with sides and heights; sensing along the way; the village as a whole; herds wandering far; fire, raiders as outside agents, and water and the land's hidden state flagged for later | accepted: D2-114 to D2-117; OPEN L-21 to L-23 | parcel_graph.md, livestock.md, OPEN.md |
+| 24 Oct | Parcels as a plain list, or with coordinates | rejected: D2-114 | parcel_graph.md |
 | 23 Oct | Meetings on the road with a short conversation and a choice of direction; `leave` folded into `give`; modifiers as techniques; waiting out a block; good places on the way change one's state, stopping only if known and chosen in advance | accepted: D2-109 to D2-113 | road_layout.md, road_encounters.md, verb_modifiers.md |
 | 23 Oct | Stopping points on the way | replaced: D2-109 | road_layout.md |
 | 23 Oct | A meeting as one wave of decisions | replaced: a short conversation (D2-110) | road_encounters.md |

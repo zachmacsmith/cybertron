@@ -68,3 +68,7 @@ flagged; strike it through when it is built or decided.
 | L-18 | An institution's stamp on coin | D2-28 | exchange_and_money.md | institutions | 37.2 with 37.3 |
 | L-19 | Further verb modifiers (going quietly, working carefully) | D2-93 | verb_modifiers.md §1 | modifiers built | 37.4 |
 | L-20 | The catalogue's later kinds (storm surge, locusts, anthrax, peat fires, the dark year, migration and trade eras, landslides) | D2-77 | environment_catalogue.md §6 | | 37.2 |
+| L-21 | Fire: house fire and wildfire in the scheduler, spreading along the parcel graph and edges; setting fire in a raid; fire as a fuse event (D2-49 to D2-51, D2-72 decided) | 24 Oct | attacks_and_walls.md; environment.md | | 37.2 with 37.4 |
+| L-22 | Raiders and other outside agents arriving with goals (D2-76): seeding transient populations; needed to test raids live | 24 Oct | environment_catalogue.md §1 | | 37.4 |
+| L-23 | Water as a need, and the land's hidden state (water table, wells, latrines, middens, cleanness: environment_state.md, all six of its questions) | 24 Oct | environment_state.md | | 37.2 |
+
