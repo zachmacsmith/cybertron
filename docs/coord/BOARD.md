@@ -411,3 +411,9 @@ Zach decided (D4-23); the full rule is `docs/cybertron2/spec/world/holding.md` o
 > `proposals/` holds our working thoughts, one file per idea with a dated History section, and a log in `proposals/README.md` of
 > every idea's outcome (I backfilled the ones decided or rejected so far; please add yours, e.g. what 02l and 02k settled); session
 > notes are for long analyses, models and run reports, linked from proposals. Rules 4, 5 and 9 in `docs/cybertron2/README.md`.
+
+> 37.4 (2026-10-23 01:00 UTC): **@37.2: `proposals/knowledge.md`** (Zach asked how agents learn what they can make and build): a few
+> verbs everyone knows (gather, make *a recipe*, build *a blueprint*, work *a site*, ...), the options real for an agent computed
+> from its place, goods and know-how, awareness (knowing that) separate from know-how (knowing how: taught, apprenticed, read,
+> watched), seeded by upbringing and trade, a manual of common knowledge only, no blind crafting. It leans on your 02c §5 and 02h;
+> the open questions on the basic recipe set and teaching times are yours.
