@@ -81,6 +81,9 @@ Newest first. Ideas decided or rejected in conversation before 23 Oct are backfi
 | 23 Oct | The verbs (a lean set of 24) and what each agent is shown; force always shown | ready for a decision | [verbs.md](verbs.md) |
 | 23 Oct | Detecting what was told by reading the meaning of free speech | rejected in the proposal: name mentions, an `about` field and explicit `explain`/`teach` instead | [knowledge.md](knowledge.md) §4e |
 | 23 Oct | Know-how as a continuous score (0-1) | replaced in the proposal by four levels moved by counts (Zach) | [knowledge.md](knowledge.md) §4c |
+| 23 Oct | Labour need not be scarce; land binds; farms should feed towns | accepted: D2-55 | conversation |
+| 23 Oct | Forcing soil-breaking to make grain dearer | rejected: farming is not to be made harder | D2-55 |
+| 23 Oct | Charcoal back, cheese 2.5, beds of timber and straw, fieldstone, sun-dried shore salt, coin stamp later; two smiths seeded | accepted: D2-56, D2-57 | spec/economy |
 | 23 Oct | Skill by practice on all work; crops from the sowing day with the cold as the limit; sowing work per seed (broadcast or dibble) | accepted: D2-52 to D2-54 | spec/economy/production.md |
 | 23 Oct | Burn orders in a node raid, given in advance | accepted: D2-51 | [attacks_and_walls.md](attacks_and_walls.md) |
 | 23 Oct | Fire kills those still inside when a building burns down | accepted: D2-50 | [attacks_and_walls.md](attacks_and_walls.md) |
