@@ -81,6 +81,8 @@ Newest first. Ideas decided or rejected in conversation before 23 Oct are backfi
 | 23 Oct | The verbs (a lean set of 24) and what each agent is shown; force always shown | ready for a decision | [verbs.md](verbs.md) |
 | 23 Oct | Detecting what was told by reading the meaning of free speech | rejected in the proposal: name mentions, an `about` field and explicit `explain`/`teach` instead | [knowledge.md](knowledge.md) §4e |
 | 23 Oct | Know-how as a continuous score (0-1) | replaced in the proposal by four levels moved by counts (Zach) | [knowledge.md](knowledge.md) §4c |
+| 23 Oct | Irrigation's effects through a plot's water each day; floods, droughts and blight noted as missing (need 37.4's incidents) | discussion | [farming.md](farming.md) |
+| 23 Oct | Camps and portable shelter: bedroll, tent, a camp built at a site | discussion | [transport_and_lodging.md](transport_and_lodging.md) |
 | 23 Oct | Master farmer's skill raises yield x1.2; seed selection | accepted: D2-64, D2-65 | spec/economy/production.md |
 | 23 Oct | Field works (ditches on wet land, terraces on hills) as projects on a plot; irrigation's parts | discussion | [farming.md](farming.md) |
 | 23 Oct | The food ladder; the mill ladder (water mill a new build at a river); dried meat; cattle as three roles of one kind | accepted: D2-60 to D2-63 | spec/economy |

@@ -59,6 +59,27 @@ who dies never arrives and nobody is told (D2-4); a later traveller on the edge 
 An inn needs a flow of about 3-5 travellers a day; a hamlet off the road has hosts. Inns collect news and prices, hold letters for
 collection (the first post office), change horses for coaches, and know who travels where with what.
 
+### Camps and portable shelter (23 Oct, discussion)
+
+For travel and for exploring new land (37.5's frontier). A night out without gear costs 1.5 food (2 in winter) and the cold's
+chance of waking starving (D4-12, H-5). Gear and camps cut that, at a weight and with wear:
+
+| Shelter | Made from | Weight | Lasts | A night out (winter) | Cold fall | Pays back |
+|---|---|---|---|---|---|---|
+| none | | | | 1.5 (2.0) | yes, 0.3 | |
+| **bedroll** | 1 hide | 1 | about 40 nights | 1.35 (1.75) | halved | 13 nights (3 in winter) |
+| **tent** | 3 hides, 2 timber poles; 2 units | 6 | about 30 nights | 1.2 (1.4) | none | 21 nights (4 in winter) |
+| **a camp built at a site** (a lean-to and a fire ring) | 3 timber; 1 unit; stays where it is built | 0 (left behind) | about 10 nights, then decays | 1.2 (1.5) with a fire | none | 10 nights (2 in winter) |
+
+- **Weight is the trade-off:** a tent is 6 of a walker's 10, so tents go with pack animals and carts (merchants, war bands);
+  walkers carry a bedroll or build a camp where they stop.
+- **A camp stays at its site** after the builder leaves, so the next traveller can use it or mend it: wayside shelters on a route
+  are a public good someone has to keep up, and a rival to the inn.
+- **A camp is how settlement starts** (D4-2: a node can be a camp): an explorer's camp at a new node becomes a hut, then a house
+  (02e, 02i), as people stay.
+- **Inns compete with gear:** an inn's price must be below what a traveller saves against its own tent or camp, plus the weight it
+  would have carried (02g §4).
+
 ## Why
 
 - Costing every rung in the same units as production says which goods travel and which rung pays, by route traffic (Von Thünen,
@@ -95,6 +116,9 @@ agents/work.md (carrying); life/ (deaths on the road).
   to notice. Added §3c; the "not seen for N rounds" prompt line flagged (D2-4).
 - 22 Oct: Zach suggested hosts and inns; added §4; 37.4 decided nights out at 1.5 and hosts and inns as part of the design (D4-12).
 - 22 Oct: 37.4's 38.08 took 02g's carrying numbers and agreed edge danger and unannounced deaths; logged as OPEN C-1 and C-6.
+
+- 23 Oct: Zach: what should camps and portable shelters look like for travel and exploring? Added: bedroll, tent, a camp built
+  at a site; weights, lives, food a night, paybacks; camps as wayside shelters and as the start of a settlement.
 
 ## Sources
 

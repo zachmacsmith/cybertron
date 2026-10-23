@@ -76,12 +76,39 @@ day's work)". On a project: "the ditches round plot 3 are about half dug". The s
 So ditches are for wet ground and terraces for hills, and neither is worth it on ordinary land unless land is short. Both pay back
 over more days than one run, so they test whether agents invest for their heirs; seeded worlds start with some plots improved.
 
-**Irrigation (later, D2-14; what it would look like).** A river node only. Parts: a **weir and headgate** at the river (about 10
-stone, 6 timber and 20 units, built by a mason and a carpenter), a **main channel** (about 120 units: a crew of 6 for three or four
-days), and a **field channel** to each plot it serves (about 15 units each); about 8 plots on the river side. Upkeep: clearing silt
-each season (about 30 units, shared). Gain: irrigated plots yield about +50%, lose half the blight and keep growing in dry spells:
-each plot's share pays back in about 11-35 days. It needs an institution: **water shares and turns**, upkeep shared as dues in work
-(agreements), and it competes with a mill's leat for the same water, upstream against downstream.
+**What the works protect against does not exist yet (checked 23 Oct).** Neither the engine nor the spec has floods, droughts or crop
+disease: the scheduler (spec/environment/scheduler.md) names a flood only as an example of an incident kind, and none is defined;
+"a fever" appears only as a cause of death in generated family histories. The old engine's 5% blight was not ported. D2-53 says a
+crop sown twice running is likelier to fail, which needs a failure draw that does not exist. So ditches (wet years), terraces
+(erosion) and irrigation (dry spells) need **37.4's incidents and cycles first**: wet and dry spells by season and land kind
+(38.04's climate axes: a valley "suffers wet", grassland "suffers dry"), river floods, and a crop-failure (blight) draw.
+
+**Irrigation: what it does.** Crops need water while they grow. Proposed, with 37.4's weather: each growing day a plot is wet
+enough, dry, or flooded, from the season, the spell (dry or wet, drawn by the scheduler) and its land kind. A dry day cuts the
+crop's eventual harvest a little; a run of dry days can ruin it. **An irrigated plot is never dry while the channel runs**, so:
+1. **it is safe in a drought**, the main reason irrigation was built: the harvest does not fail when the rain does;
+2. **it yields more in an ordinary year** wherever rain is short of what the crop wants (about +30-50% on dry land kinds, little
+   on wet ones);
+3. **it can grow a crop in the dry season,** when unwatered plots lie idle, so more harvests a year;
+4. **it can turn dry grassland into fields** that would otherwise not be worth sowing.
+
+**How it works.**
+- **Parts:** a weir and headgate at the river (about 10 stone, 6 timber, 20 units; a mason and a carpenter), a main channel (about
+  120 units: a crew of 6 for three or four days), and a field channel to each plot (about 15 units each). One channel serves about
+  8 plots on the river side, more on flat land.
+- **Water is finite.** The river gives the channel a flow that falls in a dry spell; in a dry spell the channel cannot water every
+  plot at once, so plots take **turns**. Whoever controls the headgate (`set {thing: headgate, setting: open | shut | turns}`)
+  controls the water: an office (a water bailiff) or a holder.
+- **Upkeep:** silt cleared each season (about 30 units, shared); a flood can breach the weir (repair work); a gate left open in a
+  flood lets the river into the fields.
+- **Knowledge:** water works is a rare technique (a master's, often from elsewhere), so building one depends on finding or
+  hiring someone who knows it.
+- **What agents see:** "the river channel: running, low (dry spell); the Reed and Fenn plots take turns, the Reeds' day today";
+  on a plot, "watered" or "dry".
+- **Institutions it needs:** water shares (a claim on the channel, D4-23), turns, upkeep as dues in work (agreements), and a way to
+  settle quarrels (upstream against downstream; the mill's leat against the fields).
+- **Payback:** each served plot's share (about 34 units) pays back in about 11-35 days when dry spells are common; where rain is
+  reliable it hardly pays. Its value is set by the weather, as it should be.
 
 Together these lift the ceiling by about x1.7 on top of the methods, mill and bread (food ladder, recipes.md §16). **Works that
 belong to the plot make tenure matter:** who pays for the ditches, and who gains if the land is let or inherited (D4-23; a lease's
@@ -150,6 +177,10 @@ terms in agreements). That is the old engine's lesson (review 15 §2.7) carried 
 - 23 Oct: Zach: master skill yes (D2-64); seed selection yes (D2-65); how would field works and irrigation actually work? Worked
   out: field works as projects on a plot with upkeep, led by someone who knows the technique; ditches pay only on wet land, terraces
   on hills; irrigation's parts, costs and the institution it needs.
+
+- 23 Oct: Zach: do floods and crop disease exist now (no: they need 37.4's incidents); flesh out irrigation and say what it does.
+  Added: irrigation's effects through a plot's water each growing day, finite water and turns, the headgate's controller, upkeep,
+  knowledge, what agents see, and the institutions.
 
 ## Sources
 
