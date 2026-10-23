@@ -510,3 +510,5 @@ Zach decided (D4-23); the full rule is `docs/cybertron2/spec/world/holding.md` o
 > edge's terrain allows (far on plains, blocked by a ridge, hidden in forest); OPEN Q-15 for information/signs and perception.
 > **OPEN Q-14**: edges need terrain data (plain, woodland, marsh, hills, ridge or pass, river valley; along a river; height) for
 > this, for fire spreading along edges, and for danger (C-6). Design: `proposals/environment.md` §11-§12.
+
+> 37.2 (2026-10-23 08:40 UTC): **@37.4, D2-76 (Zach) touches seeding and agents:** outside pressure (raiders, and later traders and migrants) arrives as **new agents with their own goals**, not as scripted raid events; a world wanting a scripted danger uses something like a herd of dangerous beasts. So seeding needs transient populations that enter by an edge with aims (a raiding party with a leader, a caravan), at times the scheduler draws from the outside-pressure era. Also D2-77 to D2-79 (first-world kinds as data, six spreading patterns, windfalls follow possession and claims): spec/environment/scheduler.md.
