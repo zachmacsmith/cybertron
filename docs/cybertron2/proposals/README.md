@@ -23,6 +23,7 @@ proposal**; **Why**; **Alternatives considered**; **Open questions**; **Affects*
 
 | File | Summary | Owner | Status |
 |---|---|---|---|
+| [households.md](households.md) | membership, use and home as data agents change: admit and leave, grant use of a house, home derived, occupy an empty house (possession and a claim), build one from parts; the night follows use | 37.4 (37.2: building costs) | discussion |
 | [place.md](place.md) | place as the foundation: every entity and event has a place; state partitioned by node; agent-facing code gets only a view of where the agent is (`Here`) and its own mind (`Mind`), never the world; only travel moves anything between nodes; static and canary tests | 37.4 | discussion |
 | [layout.md](layout.md) | the layout inside a node: parcels of one cover (forest, field, pasture, water, built ground...) with neighbours and a side; features (brook, road, well, seam); structures on built ground; movables on a parcel or in a room; attention, claims and land change on one model | 37.4 | discussion |
 | [seeing.md](seeing.md) | everything an agent is shown each round and how it changes; attention (concerns you, salient, a glimpse, one thing attended to in detail), feeling watched, observations from the state; templates first, an optional narrator per node and day; what is missing and what should go | 37.4 | discussion |
@@ -54,6 +55,7 @@ Newest first. Ideas decided or rejected in conversation before 23 Oct are backfi
 
 | Date | Idea | Outcome | Where |
 |---|---|---|---|
+| 23 Oct | Moving: joining a household, occupying an empty house, building one, as general rules, not a migration feature | discussion | proposals/households.md |
 | 23 Oct | Place as the engine's foundation (Here and Mind views, state by node, every event placed) | discussion | proposals/place.md |
 | 23 Oct | A traveller too heavy to set off chooses what to leave, with a person or at a house | accepted: D4-32 | spec/economy/transport.md |
 | 23 Oct | Seeded knowledge of other lines' crafts as awareness; repute from the lines born there | accepted: D4-33 | spec/seeding/README.md |
