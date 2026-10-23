@@ -83,6 +83,10 @@ changed in its code yet. **From 22 Oct the decisions are kept in [docs/cybertron
 
 ## Log
 
+- **23 Oct.** Zach: how law comes over, and whether it can still be manipulated; a place for what we are thinking over, apart
+  from the spec. Added docs/cybertron2/proposals/ (README, layout) and proposals/law.md (text law, three channels, records not
+  goods, Python as clause implementation and a world setting, routes of capture).
+
 - **22 Oct.** Zach: what it means to hold a plot. Wrote spec/world/holding.md (D4-23): possession, claims, recognition,
   holders, disputes, whole plots, land per mouth, `transfer_claim`. Posted to 37.1, 37.2 and 37.3.
 

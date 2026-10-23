@@ -8,18 +8,21 @@ under the rules below. Set up 22 Oct 2026 by the 37.4 session at Zach's request.
 
 | Layer | What it holds | Where | Who writes |
 |---|---|---|---|
-| **The spec** (here) | what cybertron2 is: every decided rule, its data, its parameters, what agents see, and what is still open | `docs/cybertron2/` on `wp/cybertron2` | each session in the sections it owns |
+| **The spec** (here) | what cybertron2 is: every decided rule, its data, its parameters, what agents see, and what is still open | `docs/cybertron2/spec/` on `wp/cybertron2` | each session in the sections it owns |
+| **Proposals** | designs under discussion, not yet decided: one file each, with a status | `docs/cybertron2/proposals/` | any session; accepted parts move into the spec |
 | **Design notes** | the reasoning: analyses, options weighed, models, run reports, work logs | each session's own folder: `docs/review/38_space_engine/` (37.4), `docs/review/37_growth/02*` (37.2), and later any other session's | that session only |
 | **The board** | conversation between sessions: proposals, questions, replies, status | `docs/coord/BOARD.md` on branch `coord` | everyone, append only |
 
-A design note is where an idea is worked out with Zach; when Zach decides, the decision is recorded here and the spec section
-changes in the same commit. A proposal that changes another session's section goes to the board first.
+A design note is where an idea is worked out with Zach; a design ready to be weighed goes into `proposals/`; when Zach decides, the
+decision is recorded in DECISIONS.md and the spec changes in the same commit, and the proposal is marked accepted. A proposal that
+changes another session's section is announced on the board.
 
 ## Files
 
 | File | What |
 |---|---|
 | [DECISIONS.md](DECISIONS.md) | every decision Zach has made about cybertron2, numbered, dated, sourced, with what it replaces |
+| [proposals/](proposals/README.md) | what we are thinking over before it is decided, one file per proposal, each with its status |
 | [OPEN.md](OPEN.md) | open questions and conflicts between documents, each with an owner |
 | [spec/](spec/README.md) | a folder of areas (core, world, agents, information, environment, economy, conflict, life, institutions, seeding, measurement), each a folder of small files, one per topic, in a fixed layout: decided rules, mechanics, data, parameters (each marked decided, proposed or to calibrate), what agents see, open points, sources |
 | `BUILD_PLAN.md` (to move here from 38.08) | milestones, each pointing at spec sections, with acceptance checks |
