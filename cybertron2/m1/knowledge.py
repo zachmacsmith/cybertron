@@ -58,8 +58,7 @@ def _set(w, name, tech, lvl, source):
     if LEVELS.index(lvl) > LEVELS.index(r["level"]):
         r["level"] = lvl
         r["since"] = w.d
-        if r["level"] in ("rough", "capable") or not r.get("source"):
-            r["source"] = source
+        r["source"] = source                                             # how it reached its present level
         return True
     return False
 

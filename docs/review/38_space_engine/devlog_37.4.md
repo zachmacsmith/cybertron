@@ -83,6 +83,9 @@ changed in its code yet. **From 22 Oct the decisions are kept in [docs/cybertron
 
 ## Log
 
+- **23 Oct.** Run D: a three-household generated village, 4 Opus and 7 Haiku, with an enum-constrained reply schema; audit of
+  memory, notes, perception and knowledge: [13_m1_village_memory.md](13_m1_village_memory.md).
+
 - **23 Oct.** Follow-up to 11: a fire in one house's store (C) against a null arm (C0), richer land, measures written first. The
   first pair was void (a `move` fault made Osric's storing take food out; his mother starved); fixed and rerun as C2 and C02. No
   need arose, no gifts, the fire read as a risk; food stays 85-90% of work with full bellies. [12_m1_shock.md](12_m1_shock.md).
