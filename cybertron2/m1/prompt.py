@@ -184,6 +184,48 @@ def _place_lines(w, node) -> list:
     return out
 
 
+def describe_node(w, nid) -> str:
+    """A node in one line, generated from what is there: houses and households, kinds of land and what they give, fittings, the
+    herd, and the trades of the people who live there (what is known of it by repute)."""
+    from cybertron2.m1.data import COVERS
+    ps = w.parcels(nid)
+    houses = [h for h in w.s["houses"].values() if w.node_of(h["parcel"]) == nid]
+    holds = sorted({h["household"] for h in houses})
+    bits = [f"{len(houses)} house{'s' if len(houses) != 1 else ''}" + (f" (the {', the '.join(x + 's' for x in holds)})" if holds else "")]
+    land = []
+    for cover in ("field", "forest", "pasture", "meadow", "water", "rock", "scrub"):
+        here = [p for p in ps.values() if p["cover"] == cover]
+        if not here:
+            continue
+        gives = []
+        for p in here:
+            st = p["state"]
+            if st.get("crop"):
+                gives.append(st["crop"].get("kind", "a crop"))
+            if st.get("game") and st["game"]["K"] >= 20:
+                gives.append("game")
+            if st.get("seam"):
+                gives.append("a copper seam")
+        size = sum(p["size"] for p in here)
+        word = {"field": "fields", "forest": "woodland", "pasture": "pasture", "meadow": "meadow", "water": "water", "rock": "rock",
+                "scrub": "scrub"}[cover]
+        land.append(("much " if size >= 6 else "") + word + (f" ({', '.join(sorted(set(gives)))})" if gives else ""))
+    if land:
+        bits.append(", ".join(land))
+    fits = sorted({f["kind"] for f in w.s["fittings"] if w.node_of(f["parcel"]) == nid})
+    if fits:
+        bits.append("a " + ", a ".join(fits))
+    milk = sum(int(hd.get("in_milk", 0)) for hd in w.s["herds"].values() if w.node_of(hd["home"]) == nid)
+    if milk:
+        bits.append(f"cows in milk ({milk})")
+    people = [x for x, a in w.s["agents"].items() if a["alive"] and a["house"] and w.node_of(w.s["houses"][a["house"]]["parcel"]) == nid]
+    trades = sorted({TECHNIQUES[t]["label"].split(" (")[0] for x in people for t, r in w.s["know"].get(x, {}).items()
+                     if r["level"] == "known" and not TECHNIQUES[t].get("basic")})
+    if trades:
+        bits.append("its people know " + ", ".join(trades))
+    return "; ".join(bits) + "."
+
+
 def _map_lines(w, name) -> list:
     """The other nodes as the agent knows them: name, how far by the tracks from its home, and their repute (the node's text)."""
     home = home_node(w, name)
@@ -201,7 +243,7 @@ def _map_lines(w, name) -> list:
             continue
         ways = ", ".join(f"{w.s['nodes'][b]['name']} ({k} day{'s' if k > 1 else ''})" for b, k in w.s["edges"].get(nid, {}).items())
         far = f"{dist[nid]} day{'s' if dist.get(nid, 0) > 1 else ''} from home" if nid in dist else "no way known"
-        out.append(f"- {n['name']}: {far}. {n['text']} Tracks lead from it to {ways}.")
+        out.append(f"- {n['name']}, {far}: {describe_node(w, nid)} Tracks lead from it to {ways}.")
     return out
 
 
@@ -212,8 +254,7 @@ def system_prompt(w, name) -> str:
     hn = w.s["nodes"][home_node(w, name)]
     lines = [f"You are {name}, {stage}, of {h['name'] if h else 'no house'} in {hn['name']}."
              + (f" You are the household's {a['role']}." if a.get("role") else "") + (f" By trade: {a['trade']}." if a.get("trade") else "")]
-    if hn["text"]:
-        lines.append(hn["text"])
+    lines.append(f"{hn['name']}: {describe_node(w, home_node(w, name))}")
     lines += ["", "Your people:"] + _kin(w, name)
     if a.get("aim") and w.spec.get("aims", False):                       # aims are off unless a world turns them on
         lines += ["", f"What you want: {a['aim']}"]
@@ -331,7 +372,7 @@ def turn_prompt(w, name, opening=True) -> str:
         if a.get("arrived") == w.d:
             hl.append("You arrived this morning.")
         if node != home_node(w, name):
-            hl += _place_lines(w, node)
+            hl += [describe_node(w, node)] + _place_lines(w, node)
         L.append("## Here\n" + "\n".join(hl))
     hold = ", ".join(f"{show(q)} {i}" for i, q in sorted(a["holdings"].items()) if q > 0.05) or "nothing"
     you = [f"You are {STAGES[a['hunger']]}" + (", and hurt" if a["wounded"] else "") + f". You carry: {hold}."]
