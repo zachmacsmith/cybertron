@@ -97,3 +97,23 @@ def test_only_direct_speech_wakes():
     assert set(woken) == {"Agnes"}                                       # told directly
     assert any("in Reed House" in x for x in quiet["Maud"]) and not any("in Reed House" in x for x in quiet["Tam"])
     assert any("to everyone" in x for x in quiet["Tam"])
+
+
+def test_say_in_any_building_by_access():
+    from cybertron2.m1 import run as R
+    spec = load_spec(SPEC)
+    spec["buildings"] = {"hall": {"name": "the Hall", "parcel": "green", "access": "public"},
+                         "barn": {"name": "the Barn", "parcel": "green", "access": ["Osric", "Tam"]}}
+    spec["houses"]["fenn_house"]["access"] = ["Wat"]                         # a neighbour's boy let into Fenn House
+    w = World(spec)
+    w.s["today"] = R._blank_today()
+    names = w.agents_acting()
+    res = {n: [] for n in names}
+    _, quiet = R.talk(w, names, {**{n: {} for n in names}, "Osric": {"say": [{"to": "the Barn", "text": "barn"},
+                                                                            {"to": "the Hall", "text": "hall"},
+                                                                            {"to": "Fenn House", "text": "fenn"}]},
+                                  "Agnes": {"say": [{"to": "Fenn House", "text": "home"}]}}, res)
+    assert any("the Barn" in x for x in quiet["Tam"]) and not any("the Barn" in x for x in quiet["Maud"])
+    assert all(any("the Hall" in x for x in quiet[m]) for m in names if m != "Osric")
+    assert any(x.startswith("Refused: say: you have no access to Fenn House") for x in res["Osric"])
+    assert any("home" in x for x in quiet["Wat"]) and any("home" in x for x in quiet["Ivy"]) and not any("home" in x for x in quiet["Maud"])

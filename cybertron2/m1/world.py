@@ -78,7 +78,9 @@ class World:
         for hid, h in spec["houses"].items():
             s["houses"][hid] = {"name": h.get("name", hid), "parcel": h["parcel"], "household": h["household"], "beds": int(h.get("beds", 5)),
                                 "condition": int(h.get("condition", 2)), "stock": {k: float(v) for k, v in (h.get("stock") or {}).items()},
-                                "door": h.get("door", "open"), "fire": False}
+                                "door": h.get("door", "open"), "fire": False, "access": h.get("access", "household")}
+        s["buildings"] = {bid: {"name": b.get("name", bid), "parcel": b["parcel"], "access": b.get("access", "public")}
+                          for bid, b in (spec.get("buildings") or {}).items()}   # other buildings (a hall); houses are buildings too
         for hid, h in (spec.get("herds") or {}).items():
             s["herds"][hid] = {"name": h.get("name", hid), "parcel": h["parcel"], "count": int(h.get("count", 6)), "home": h["parcel"]}
         house_of = {h["household"]: hid for hid, h in s["houses"].items()}
@@ -135,6 +137,28 @@ class World:
             if x in (pid.lower(), p["name"].lower(), p["name"].lower().removeprefix("the ")):
                 return pid
         return None
+
+    def buildings(self) -> dict:
+        """Every building: houses and the rest, {id: record}."""
+        return {**self.s["houses"], **self.s.get("buildings", {})}
+
+    def building_by_name(self, x):
+        x = str(x or "").strip().lower().removeprefix("the ")
+        for bid, b in self.buildings().items():
+            if x in (bid.lower(), b["name"].lower(), b["name"].lower().removeprefix("the ")):
+                return bid
+        return None
+
+    def has_access(self, name, bid) -> bool:
+        """Access is data on each building (D2-7, D4-30): "household" (its household), "public" (everyone at the node), or a list
+        of names; a house's household always has it."""
+        b = self.buildings()[bid]
+        acc = b.get("access", "household")
+        if bid in self.s["houses"] and self.s["agents"][name]["house"] == bid:
+            return True
+        if acc == "public":
+            return True
+        return isinstance(acc, list) and name in acc
 
     def house_by_name(self, x):
         x = str(x or "").strip().lower()

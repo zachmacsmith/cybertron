@@ -38,9 +38,8 @@ SCHEMA = {
 }
 
 def access(w, name) -> list:
-    """The buildings an agent has access to (D2-7): for now, its own house."""
-    hid = w.s["agents"][name]["house"]
-    return [hid] if hid else []
+    """The buildings an agent has access to (D2-7, D4-30)."""
+    return [bid for bid in w.buildings() if w.has_access(name, bid)]
 
 
 def schema_for(w, name) -> dict:
@@ -68,7 +67,7 @@ def schema_for(w, name) -> dict:
     a["aim"]["enum"] = ["rob", "hurt"]
     a["thing"]["enum"] = ["door"]
     s["properties"]["tell"]["items"]["properties"]["to"]["enum"] = people
-    s["properties"]["say"]["items"]["properties"]["to"]["enum"] = ["everyone"] + [w.s["houses"][h]["name"] for h in access(w, name)]
+    s["properties"]["say"]["items"]["properties"]["to"]["enum"] = ["everyone"] + [w.buildings()[b]["name"] for b in access(w, name)]
     s["properties"]["explain"]["items"]["properties"]["to"]["enum"] = people
     s["properties"]["explain"]["items"]["properties"]["what"]["enum"] = techs
     s["properties"]["offers"]["items"]["properties"]["to"]["enum"] = ["anyone"] + people
@@ -96,8 +95,9 @@ REPLY_LINES = """Reply with JSON:
 - "actions": today's plan, in order, each {"do": verb, ...}. Actions beyond your units are not done.
 - "tell": [{"to": a person, "text"}] said to that person alone. They hear it before the day's work and may answer or change
   their plans.
-- "say": [{"to": "everyone" or your house, "text"}] said to the whole village, or in your house (everyone of your house here today
-  hears it). They hear it, but it does not call them away from their day: they take it in when they next have a moment.
+- "say": [{"to": "everyone" or a building you have access to, "text"}] said to the whole village, or in a building (everyone who
+  has access to it and is here today hears it, wherever they are). They hear it, but it does not call them away from their day:
+  they take it in when they next have a moment.
 - "explain": [{"to", "what": the craft's name}] explain a craft you know well to someone (they get a rough idea of it; free).
 - "offers": [{"to": a person or "anyone", "give": "2 bread", "get": "1 timber"}] an exchange anyone named may accept today. What
   you offer comes from your hands, then your house's store; it is set aside until taken, or returned to your hands at nightfall.

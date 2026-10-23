@@ -140,12 +140,12 @@ def talk(w, names, replies, results) -> tuple[dict, dict]:
         r = replies[n]
         for x in [x for x in (r.get("say") or []) if isinstance(x, dict) and str(x.get("text", "")).strip()][:MAX_SAY]:
             text, to = str(x["text"])[:600], str(x.get("to") or "everyone")
-            hid = w.house_by_name(to)
-            if hid and hid not in PR.access(w, n):
-                results[n].append(f"Refused: say: you have no access to {w.s['houses'][hid]['name']}")
+            bid = w.building_by_name(to)
+            if bid and not w.has_access(n, bid):
+                results[n].append(f"Refused: say: you have no access to {w.buildings()[bid]['name']}")
                 continue
-            hearers = [m for m in names if m != n and (not hid or w.s["agents"][m]["house"] == hid)]
-            where = f"in {w.s['houses'][hid]['name']}" if hid else "to everyone"
+            hearers = [m for m in names if m != n and (not bid or w.has_access(m, bid))]
+            where = f"in {w.buildings()[bid]['name']}" if bid else "to everyone"
             for m in hearers:
                 box[m]["also"].append(f"{n} said ({where}): {text}")
                 PC.store(w, m)["today"]["heard"].append(f"{n} said ({where}): {text}")
