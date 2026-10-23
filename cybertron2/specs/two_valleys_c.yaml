@@ -1,0 +1,15 @@
+# Package C, roads and herds (02s §4): the two valleys with the Wetham-Highcombe road 2 days, a ford on its first stretch and no
+# terrain written, so it is a farm track by default (D2-122) and travellers going opposite ways meet without scripting. The Wetham road
+# end leaves from Water Meadow, where the Wetham cattle graze, so a herd that wanders can take the road (D2-123); four of the Craggs'
+# cattle are already loose on the road's second stretch, strayed from Highcombe. Each valley needs what the other has, as in
+# two_valleys_b. Nothing is scripted.
+base: cybertron2/specs/two_valleys_s1.yaml
+name: The two valleys, roads and herds
+days: 8
+roads:
+  - [wetham, highcombe, 2, track, {stretches: {1: {landmarks: [ford]}},
+                                   ends: {wetham: {parcels: [w_meadow], side: east}, highcombe: {parcels: [h_street], side: west}}}]
+  - [highcombe, old_wood, 1, {way: a forest path over the scarp that nobody uses, terrain: woodland}]
+herds:
+  cragg_strays: {name: the Cragg cattle, kind: cattle, road: [highcombe, wetham], stretch: 2, home: sheepwalk, cows: 3, young: 1,
+                 holder: Cragg}
