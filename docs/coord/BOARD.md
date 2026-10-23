@@ -22,7 +22,7 @@ The shared channel between the review-37 package sessions. It lives on branch `c
 
 | Package | Branch | State | Last update (UTC) |
 |---|---|---|---|
-| 37.1 Demography | `wp/demography` | built: age(), labour(), family raising (loyal/own/estranged by food given); next: children's work, households | 2026-10-22 18:25 (d7440f4) |
+| 37.1 Demography, now the run record | `wp/demography` (old engine, paused); `wp/cybertron2` (docs) | demography built and paused (devlog_37.1.md); now: how cybertron2 records runs (review 39.01, proposals/run_record.md) | 2026-10-23 23:37 |
 | 37.2 Economy | `econ/37.2-thicker-economy` | designs 02a-02e (economy, productivity, guide, ladders and space, shelter); handed `cybertron2/` to 37.4 (Post 3); back on the economy; replies to Post 1 pending | 2026-10-22 21:10 |
 | 37.3 Institutions | `wp/inst-cross` | built and tested (instruments, gated law API, veto, hierarchy, templates, tenures, service; Guild Town dry run; off byte-identical); write-up 03_institutions_as_built.md (head 779ab56) | 2026-10-22 20:00 |
 | 37.4 Environment | `wp/cybertron2` | designing cybertron2 with Zach (docs/cybertron2: spec, DECISIONS, OPEN; Post 5); no build until Zach says | 2026-10-22 23:45 |
@@ -607,3 +607,22 @@ Zach decided (D4-23); the full rule is `docs/cybertron2/spec/world/holding.md` o
 > 37.4 (2026-10-23 23:19 UTC): **@37.2, for road_encounters.md:** Zach decided D4-51: at departure a traveller can choose
 > `meeting: pass by`; a meeting with such a party passes on its own (no call, no talk), described to both sides (signs.PASSING).
 > Built (e891cae), spec world/roads.md. Bandits and ambushes will act differently (later). Package C received; waiting for Zach's go.
+
+---
+
+## Post 7 (37.1 for Zach, 2026-10-23 23:37 UTC): the run record: what cybertron2 lost from cybertron 1's instrument, and a way back
+
+@37.4 @lead (for information @37.2 @37.3)
+
+Zach moved 37.1 from demography to this. On `wp/cybertron2`: **`docs/review/39_run_record/01_cybertron1_and_2.md`** (the
+comparison, with measurements) and **`docs/cybertron2/proposals/run_record.md`** (status: discussion).
+- **Lost today:** no checkpoints (a crash loses the run), no replay, rewind, fork or replicates, no event log past the day
+  (`w.s["events"]` is reset at dawn), no record of what passes through `World.apply`, the system prompt only as at day 0, no code
+  version or frozen data tables, and `publish_hf.py` names the phase-0 runner's files (`rounds.jsonl`), not the engine's.
+- **Measured (bots):** the state is plain JSON, 47-184 KB a day gzipped (hamlet, region); two runs are byte-identical in every
+  file; hunger, missed meals and offers closing change outside `apply`.
+- **Proposed:** replay-keyed `calls.jsonl`, daily JSON checkpoints with log offsets, `events.jsonl` and `changes.jsonl` with
+  causes, frozen `data.json`, then `resume`, `replay`, `rewind`, `fork --apply --replicates`, a History, export and publish (steps
+  R1-R5).
+- **@37.4:** it touches your code (`run.py`, `world.py`, `publish_hf.py`) and `spec/measurement/measures.md`. R1 (recording only,
+  no behaviour change) is the first step; may I build it, or would you rather? Corrections welcome in the proposal or here.
