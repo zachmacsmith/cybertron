@@ -184,6 +184,7 @@ def test_a_bull_with_the_cows_breeds_and_driving_him_apart_stops_it():
 def test_cattle_eat_grass_then_fodder_and_starve_without():
     w = world()
     w.s["parcels"]["mb_pasture"]["res"]["grass"]["S"] = 0.0
+    w.s["herds"]["cattle"]["watched"] = w.d                                   # herded, so it stays on the bare pasture (D2-117)
     FM.night(w)
     assert w.s["herds"]["cattle"]["hungry"] == 1
     bid = "reed_house"
@@ -191,6 +192,7 @@ def test_cattle_eat_grass_then_fodder_and_starve_without():
     w.s["claims"]["seeded-herd"] = {"thing": ["herd", "cattle"], "claimant": "Reed", "rights": ["access", "withdrawal", "management",
                                     "exclusion", "alienation"], "grounds": "seeded", "since": -1}
     w.s["parcels"]["mb_pasture"]["res"]["grass"]["S"] = 0.0
+    w.s["herds"]["cattle"]["watched"] = w.d
     FM.night(w)
     assert w.s["herds"]["cattle"]["hungry"] == 0                              # hay from the holder's store (D4-42, D4-45)
     assert w.goods(w.s["buildings"][bid]["stock"])["hay"] < 50

@@ -162,6 +162,63 @@ HERD = [
 ]
 
 
+# ---------------------------------------------------------------------- herds that are out, fences and gates (livestock.md)
+# Read by the noticing rule (information/noticing.md; D2-117, D2-130, D2-132): a row's `own` is its own conspicuousness; the chance is
+# p x own x the parcel's visibility for the sense x where one was (worked, passed through 0.3, next door 0.1) x attention x the eye.
+# `holders` rows are read only by those who hold the herd (their pasture empty: nobody tells them) or the parcel (a gate left open:
+# they shut it). Context: herd_context / fence_context below.
+ASTRAY = [
+    dict(when=lambda x: x.in_crop and x.ripe, own=0.95, sense="sight", p=1.0, tags=["animals", "farming", "food", "harvest"],
+         text=lambda x: f"{x.name} are in {x.nm}, eating and trampling the ripe {x.crop}"),
+    dict(when=lambda x: x.in_crop and not x.ripe, own=0.95, sense="sight", p=1.0, tags=["animals", "farming", "food"],
+         text=lambda x: f"{x.name} are in {x.nm}, trampling the young {x.crop}"),
+    dict(when=lambda x: x.in_crop and x.trampled >= 1.0, own=0.8, sense="sight", p=0.6, tags=["animals", "farming"], knack="reap",
+         text=lambda x: f"a swathe of {x.crop} flattened and grazed off in {x.nm}, hoof-marks deep in the soil"),
+    dict(when=lambda x: not x.in_crop and x.nm_cover in ("pasture", "meadow"), own=0.95, sense="sight", p=1.0, tags=["animals"],
+         text=lambda x: f"{x.name} have strayed onto {x.nm}, away from {x.home}"),
+    dict(when=lambda x: not x.in_crop and x.nm_cover not in ("pasture", "meadow"), own=0.95, sense="sight", p=1.0, tags=["animals"],
+         text=lambda x: f"{x.name} are wandering loose on {x.nm}"),
+    dict(when=lambda x: True, own=0.6, sense="sound", p=0.5, tags=["animals"],
+         text=lambda x: f"lowing and the crack of hedges from {x.nm}: beasts loose where they should not be"),
+    dict(when=lambda x: x.hungry, own=0.6, sense="sound", p=0.5, tags=["animals", "food"], knack="herd",
+         text=lambda x: f"{x.name} bawling and roaming on {x.nm}: hungry beasts looking for grazing"),
+    dict(when=lambda x: x.whose, own=0.7, sense="sight", p=0.5, tags=["animals"], knack="herd",
+         text=lambda x: f"you know those beasts on {x.nm}: {x.whose}"),
+    dict(when=lambda x: x.strays, own=0.8, sense="sight", p=0.6, tags=["animals"],
+         text=lambda x: f"a few head broken off from {x.base} are on {x.nm} on their own"),
+    dict(when=lambda x: x.from_road, own=0.9, sense="sight", p=1.0, tags=["animals"],
+         text=lambda x: f"beasts nobody here knows are on {x.nm}: {x.words}, come in off the road"),
+]
+EMPTY = [
+    dict(when=lambda x: True, own=0.9, sense="sight", p=1.0, tags=["animals", "danger"], holders="herd",
+         text=lambda x: f"{x.home} is empty: {x.name} are not there"),
+    dict(when=lambda x: x.gap, own=0.6, sense="sight", p=0.6, tags=["animals"], holders="herd",
+         text=lambda x: f"hoof-marks lead out through the gap in the fence round {x.home}"),
+    dict(when=lambda x: x.gate_open, own=0.6, sense="sight", p=0.6, tags=["animals"], holders="herd",
+         text=lambda x: f"the gate of {x.home} stands open and the beasts are gone"),
+]
+FENCE = [
+    dict(when=lambda x: x.building, own=0.6, sense="sight", p=0.5, tags=["animals", "farming"],
+         text=lambda x: f"stakes and {'stone' if x.kind == 'stone' else 'woven hazel'} going up round {x.nm}: {x.done}"),
+    dict(when=lambda x: x.gate_open, own=0.6, sense="sight", p=1.0, tags=["animals"], gate=True,
+         text=lambda x: f"the gate of {x.nm} is standing open"),
+    dict(when=lambda x: x.gate_open and x.opened_by, own=0.3, sense="sight", p=0.3, tags=["animals"],
+         text=lambda x: f"the gate of {x.nm} is propped open with a stone, as if on purpose"),
+    dict(when=lambda x: x.whole and x.kind == "wood", own=0.3, sense="sight", p=0.08, tags=["animals"],
+         text=lambda x: f"a sound wattle fence round {x.nm}"),
+    dict(when=lambda x: x.whole and x.kind == "stone", own=0.4, sense="sight", p=0.08, tags=["animals", "building"],
+         text=lambda x: f"a dry-stone wall round {x.nm}, its coping stones even"),
+    dict(when=lambda x: x.gappy, own=0.5, sense="sight", p=0.5, tags=["animals"], knack="fence",
+         text=lambda x: f"the {x.word} round {x.nm} has gaps in it: it wants mending"),
+    dict(when=lambda x: x.gappy and x.kind == "wood", own=0.4, sense="sight", p=0.3, tags=["animals"],
+         text=lambda x: f"the wattles round {x.nm} are sagging and the stakes rotting at the foot"),
+    dict(when=lambda x: x.down, own=0.5, sense="sight", p=0.4, tags=["animals"],
+         text=lambda x: f"the old {x.word} round {x.nm} is down in places: beasts could walk through it"),
+    dict(when=lambda x: x.whole and x.herd_in and not x.gate_open, own=0.4, sense="sight", p=0.1, tags=["animals"],
+         text=lambda x: f"{x.herd_in} safe behind the {x.word} round {x.nm}"),
+]
+
+
 # ---------------------------------------------------------------------- the sky and the season
 SKY = [
     dict(when=lambda x: x.cold and x.first_cold, sense="touch", p=0.85, tags=["season", "shelter", "farming"],
@@ -455,6 +512,26 @@ def sky_context(here):
                            water=names("water"), wood=names("forest"))
 
 
+def _herds_out(here, add) -> None:
+    """Herds off their home ground and empty home pastures, fences and gates: by the noticing rule (D2-117, D2-130, D2-132)."""
+    w = here._w
+    for hid, h in here.herds().items():
+        if FM.head(h) <= 0 or h.get("parcel") is None:
+            continue
+        if h["parcel"] != h.get("home"):
+            x = herd_context(w, hid)
+            spot_rows(here, ASTRAY, x, [f"herd:{hid}", f"parcel:{h['parcel']}"], here.node, h["parcel"], add)
+    for hid, h in w.s["herds"].items():                                         # home pastures of herds that are away (or lost)
+        if FM.head(h) <= 0 or h.get("home") not in here.parcels() or h.get("parcel") == h.get("home"):
+            continue
+        holders = [cl["claimant"] for cl in w.claims_on(("herd", hid))]
+        people = sorted({m for x in holders for m in ([x] if x in w.s["people"] else w.members(x) if x in w.s["institutions"] else [])})
+        spot_rows(here, EMPTY, herd_context(w, hid), [f"parcel:{h['home']}"], here.node, h["home"], add, only=people)
+    for pid, p in here.parcels().items():
+        if p.get("fence"):
+            spot_rows(here, FENCE, fence_context(w, pid), [f"parcel:{pid}"], here.node, pid, add)
+
+
 def facts(here, add) -> None:
     """Add every sign whose condition holds, at its base chance, for each field, pasture and herd here."""
     names = {id(SKY): "sky", id(WILD): "wild", id(CROP): "crop", id(FIELD): "field", id(PASTURE): "pasture", id(HERD): "herd", id(BUILDING): "building", id(PERSON): "person"}
@@ -485,6 +562,7 @@ def facts(here, add) -> None:
     for hid, h in here.herds().items():
         if FM.head(h) > 0:
             emit(HERD, context(here, h["parcel"], h), [f"herd:{hid}", f"parcel:{h['parcel']}"])
+    _herds_out(here, add)
     for bid, b in here.buildings().items():
         if b.get("unfinished"):
             add([f"building:{bid}"], f"{b['name']} is half built", 0.3, ["building"])
@@ -901,6 +979,52 @@ def thing_context(w, c):
                         dogs=not on_road and any(b["node"] == c.get("node") and b["fittings"].get("dog") for b in w.s["buildings"].values()))
     x.warm = not x.cold
     return x
+
+
+def herd_context(w, hid):
+    """A herd off its home ground (ASTRAY), or its home pasture without it (EMPTY)."""
+    h = w.s["herds"][hid]
+    par = w.s["parcels"][h["parcel"]] if h.get("parcel") in w.s["parcels"] else None
+    home = w.s["parcels"].get(h.get("home")) or {}
+    c = (par or {}).get("crop") or {}
+    in_crop = bool(c) and c.get("area_left", 0) > 1e-6
+    holders = [cl["claimant"] for cl in w.claims_on(("herd", hid))]
+    hh = {iid: x["name"] for iid, x in w.s["institutions"].items()}
+    whose = " and ".join(sorted({hh.get(x, x) for x in holders}))
+    hfc = home.get("fence") or {}
+    return SimpleNamespace(h=h, name=h["name"], base=h.get("base_name") or h["name"], words=FM.herd_words(h),
+                           nm=(par or {}).get("name", ""), nm_cover=(par or {}).get("cover", ""), home=home.get("name", "their pasture"),
+                           in_crop=in_crop, crop=c.get("kind", "crop"), ripe=in_crop and w.d >= int(c.get("ripe_day", 10 ** 9)),
+                           trampled=float((c.get("trampled") or {}).get("qty", 0.0)) if (c.get("trampled") or {}).get("by") == hid else 0.0,
+                           hungry=int(h.get("hungry", 0)) > 0, whose=(f"they are {whose}'s" if whose else ""),
+                           strays=bool(h.get("split_of")), from_road=bool(h.get("strayed_in")),
+                           gap=bool(hfc.get("built")) and 0 < int(hfc.get("level", 0)) < 2, gate_open=hfc.get("gate") == "open")
+
+
+def fence_context(w, pid):
+    from cybertron2.engine.data import FENCES
+    par = w.s["parcels"][pid]
+    fc = par.get("fence") or {}
+    kind = fc.get("kind", "wood")
+    need = FM.fence_need(par, kind)["units"]
+    built = bool(fc.get("built"))
+    lvl = int(fc.get("level", 0))
+    frac = min(1.0, float(fc.get("units", 0.0)) / need) if need else 0.0
+    herd_in = next((h["name"] for h in w.s["herds"].values() if h.get("parcel") == pid and FM.head(h) > 0), "")
+    return SimpleNamespace(nm=par["name"], kind=kind, word=FENCES[kind]["words"][0], building=not built and frac > 0,
+                           done=("barely begun" if frac < 0.25 else "half done" if frac < 0.75 else "nearly done"),
+                           whole=built and lvl >= 2, gappy=built and lvl == 1, down=built and lvl <= 0,
+                           gate_open=built and lvl > 0 and fc.get("gate") == "open", opened_by=(fc.get("opened") or {}).get("by"),
+                           herd_in=herd_in)
+
+
+def spot_rows(here, rows, x, about, node, parcel, add, concerns=(), only=None, **extra) -> None:
+    """Emit a bundle read by the noticing rule at a spot: each true row as a fact carrying its own conspicuousness."""
+    for i, row in true_rows(rows, x):
+        p = row["p"](x) if callable(row["p"]) else row["p"]
+        add(about, row["text"](x), p, row.get("tags", []), row.get("sense", "sight"), concerns=list(concerns), knack=row.get("knack"),
+            spot={"node": node, "parcel": parcel, "own": float(row["own"])}, only=only, gate=parcel if row.get("gate") else None,
+            sign=f"{about[0]}#spot{i}", **extra)
 
 
 def road_context(w, name, t, pos):

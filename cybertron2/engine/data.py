@@ -193,6 +193,21 @@ TECHNIQUES = {
     "herd": {"verb": "work", "label": "herding (watching the beasts)", "aliases": ["herding", "watch the herd", "tend the herd"], "basic": True,
              "at": {"covers": ["pasture", "meadow", "field"]}, "draws": "herd", "yield": {"kind": "herd"}, "units": 1, "gives": "",
              "tags": ["animals"]},
+    # Fences round a parcel and gates (livestock.md "Fences and gates": D2-130, D2-132): a field work on the parcel; FENCES has the numbers
+    "fence": {"verb": "work", "label": "fencing a parcel round (wattle or post and rail)", "basic": True,
+              "aliases": ["fencing", "put up a fence", "wattle fence", "mend the fence", "build a fence", "a fence"],
+              "at": {"covers": ["pasture", "meadow", "field", "built", "scrub"]}, "draws": "plot", "yield": {"kind": "fence", "fence": "wood"},
+              "tools": {"bare": 0.5, "crude": 1.0, "copper": 1.5}, "wear": 0.5, "units": 1, "gives": "", "tags": ["animals", "farming", "timber"]},
+    "wall": {"verb": "work", "label": "walling a parcel round (a dry-stone wall)", "basic": False, "trade": "mason", "crew": True,
+             "aliases": ["walling", "dry wall", "dry-stone wall", "stone wall", "build a wall", "mend the wall", "a wall"],
+             "at": {"covers": ["pasture", "meadow", "field", "built", "scrub"]}, "draws": "plot", "yield": {"kind": "fence", "fence": "stone"},
+             "tools": {"bare": 0.5, "crude": 1.0, "copper": 1.5}, "wear": 0.75, "units": 1, "gives": "", "tags": ["animals", "farming", "building"]},
+    "open the gate": {"verb": "work", "label": "opening a gate and leaving it open", "basic": True, "aliases": ["open gate", "leave the gate open"],
+                      "at": {"covers": ["pasture", "meadow", "field", "built", "scrub"]}, "draws": "plot", "yield": {"kind": "gate", "gate": "open"},
+                      "units": 0, "gives": "", "tags": ["animals"]},
+    "shut the gate": {"verb": "work", "label": "shutting a gate", "basic": True, "aliases": ["shut gate", "close the gate", "close gate"],
+                      "at": {"covers": ["pasture", "meadow", "field", "built", "scrub"]}, "draws": "plot", "yield": {"kind": "gate", "gate": "shut"},
+                      "units": 0, "gives": "", "tags": ["animals"]},
     "dung": {"verb": "gather", "label": "gathering dung", "aliases": ["gather dung", "collect dung"], "basic": True,
                     "at": {"covers": ["pasture", "meadow", "field"]}, "draws": "dung", "yield": {"kind": "fixed", "base": 5.0}, "units": 1,
                     "gives": "dung", "tags": ["animals", "farming"]},
@@ -376,6 +391,31 @@ THINGS = {
     "body_days": 10,                                                # "dead some days", then bones to the season's end
     "rot_after": 2,                                                 # a body unburied this many days smells of rot
 }
+# Fences round a parcel (livestock.md, D2-130; calibrate): what a build takes for a parcel of size s (x the square root of s), the chance a
+# day a herd gets through by its level (whole, gappy; down is no fence), and its upkeep: a wood fence loses a level each season unless
+# a quarter of the build's work is spent mending it; a stone wall keeps.
+FENCES = {
+    "wood": {"inputs": {"timber": 4.0}, "units": 10.0, "through": {2: 0.3, 1: 0.6}, "decays": True, "mend": 0.25,
+             "words": ("fence", "a wattle fence")},
+    "stone": {"inputs": {"stone": 8.0}, "units": 20.0, "through": {2: 0.05, 1: 0.2}, "decays": False, "mend": 0.25, "led": "wall",
+              "words": ("wall", "a dry-stone wall")},
+}
+
+# Herds that are not held (livestock.md: D2-117, D2-123, D2-124, D2-128, D2-131; calibrate where the spec says so).
+HERDS = {
+    "steps": {"fed": 1, "drawn": 8},             # a day: a fed herd on good pasture 0 to 1 steps; hungry or drawn up to 8 (D2-123)
+    "good_grass": 0.3,                           # grazing above this share of the pasture's best counts as good
+    "draw": {"ripe": 1.0, "water": 0.3, "home": 0.5},   # beyond the food a parcel offers: a ripe crop's pull, water, home for cows in milk
+    "trample": 0.01,                             # of the standing crop, a head a day
+    "onto_road": 0.1,                            # a step from a parcel where a road leaves
+    "own": 0.95,                                 # a herd's own conspicuousness (information/noticing.md)
+    "road": {"die": 0.15, "die_winter": 0.3, "gone": 0.15, "search": 5.0},   # D2-124, D2-125
+    "capacity": {"drover": 10, "herder": 30, "unherded": 6},                 # D2-128
+    "split": {"under": 0.01, "over": 0.1, "max": 0.6},                       # D2-128
+    "share": {"centre": 0.25, "sd": 1.0, "max": 0.5},                        # D2-131: a quarter x 2^z, z Laplace (sd 1 doubling)
+    "call": {"share": 0.25, "head": 3},          # a split while driving calls a drover who notices it, if this big (D2-127)
+}
+
 # The parcel graph (world/parcel_graph.md; D2-114 to D2-116): heights in words; the fittings that strike an arriving eye; the overview's
 # length.
 LAYOUT = {
@@ -451,6 +491,10 @@ FUSE.update({
              "choices": ["take", "bury", "go on"], "also": []},
     "crossing": {"sense": "sight", "label": "trouble on the road", "acts": {"road": 1},
                  "choices": ["push on", "wait", "turn back", "go round"], "also": []},
+    # a herd found loose on the road, and a group breaking off a herd one drives (livestock.md: D2-124, D2-127)
+    "herd": {"sense": "sight", "label": "beasts loose on the road", "acts": {"road": 2},
+             "choices": ["drive on", "drive back", "accompany", "leave"], "also": []},
+    "split": {"sense": "sight", "label": "beasts breaking away", "acts": {"road": 1}, "choices": ["go after them", "let them go"], "also": []},
 })
 # Travel's choices at departure (D2-105, D2-109, D2-113) are modifiers known to all.
 TECHNIQUES.update({
@@ -464,5 +508,7 @@ TECHNIQUES.update({
                 "values": ["stop", "pass by"]},                                                                      # D4-51
     "gather on the way": {"verb": "modifier", "label": "gathering at good places one passes", "basic": True, "modifies": ["travel"],
                           "key": "gather", "value": "*", "changes": {}, "units": 0, "gives": "", "tags": ["travel"]},
+    "searching": {"verb": "modifier", "label": "searching the road for a herd or a person", "basic": True, "modifies": ["travel"],
+                  "key": "searching", "value": "*", "changes": {}, "units": 0, "gives": "", "tags": ["travel", "animals"]},   # D2-125
 })
 MODIFIERS = {t for t, d in TECHNIQUES.items() if d.get("modifies")}

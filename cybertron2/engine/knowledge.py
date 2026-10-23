@@ -144,7 +144,7 @@ def ready(here, tech, kind, key) -> str:
     y = (t.get("yield") or {}).get("kind")
     if t.get("seasons") and here.calendar()["season"] not in t["seasons"]:
         return f"{label(tech)} is done in {' and '.join(t['seasons'])}"
-    if kind == "parcel" and y in ("sow", "break", "tend", "manure", "crop", "herd", "milk", "slaughter", "works", "select"):
+    if kind == "parcel" and y in ("sow", "break", "tend", "manure", "crop", "herd", "milk", "slaughter", "works", "select", "fence", "gate"):
         from cybertron2.engine import farm as FM
         return FM.ready(here, tech, key)
     if kind == "parcel":

@@ -66,6 +66,10 @@ def bot_fuse(w, name, x) -> dict:
         return {"actions": [{"do": "take"}]}
     if e["kind"] == "crossing":
         return {"actions": [{"do": e.get("default") or "wait"}]}
+    if e["kind"] == "herd":
+        return {"actions": [{"do": "accompany"}]}
+    if e["kind"] == "split":
+        return {"actions": [{"do": "go after them"}]}
     inside = e.get("building") in w.homes(name)
     return {"actions": ([{"do": "alarm"}, {"do": "defend"}] if inside else [{"do": "defend"}])[: x["acts"]]}
 
@@ -252,6 +256,8 @@ def dawn(w) -> None:
             RD.arrived(w, name, t)                                          # its notices on the way, remembered (D2-97)
             w.apply("arrive", t["to"], person=name)
             w.s["people"][name]["arrived"] = w.d
+            from cybertron2.engine import herds as HD
+            HD.arrive_with(w, name, t["to"])                                # beasts it accompanied come in with it (D2-127)
             w.event(t["to"], "arrive", f"{name} arrived from {w.s['nodes'][t['from']]['name']}", actor=name, salience=0.7, tags=["travel"], dawn=True)
     for sg in w.spec.get("signs") or []:
         if int(sg["day"]) - 1 == w.d:

@@ -169,3 +169,160 @@ def test_attending_to_the_village_lists_neighbours_sides_and_road_ends_and_an_ar
     assert att["target"].startswith("how") and any("next to" in x for x in att["lines"])
     ov = here.overview()
     assert 3 <= len(ov) <= 5
+
+
+# ---------------------------------------------------------------------- C3 to C6: fences, wandering, roads, splitting
+def _fence(w, pid, kind="wood", level=2, gate="shut"):
+    w.s["parcels"][pid]["fence"] = {"kind": kind, "units": 99.0, "level": level, "built": True, "gate": gate, "mend": 0.0, "pending": {}}
+
+
+def _escapes(w, hid, days, **h):
+    """Over many days, how often the herd leaves its parcel (each day from the same state)."""
+    from cybertron2.engine import herds as HD
+    start = dict(w.s["herds"][hid])
+    out = 0
+    for d in range(days):
+        w.s["herds"][hid] = {**start, **h}
+        w.s["day"] = 10 + d
+        HD.wander(w, hid, {"herds": []})
+        out += w.s["herds"][hid].get("parcel") != start["parcel"]
+    w.s["herds"][hid] = start
+    return out / days
+
+
+def test_a_fenced_pasture_holds_its_herd_at_the_fences_odds_and_an_opened_gate_lets_it_out():
+    w = barleyfield()
+    w.s["parcels"]["bf_pasture"]["res"]["grass"]["S"] = 0.0                       # bare: they want to go
+    _fence(w, "bf_pasture", "wood")
+    assert 0.24 < _escapes(w, "cattle", 600, hungry=2) < 0.36                       # wood: 0.3 a day (D2-130)
+    _fence(w, "bf_pasture", "stone")
+    assert _escapes(w, "cattle", 600, hungry=2) < 0.09                              # stone: 0.05
+    w.s["day"] = 3
+    who = "Bennet"
+    assert V.cost(Here(w, who), {"do": "work", "what": "open the gate", "at": "the Common"}) == 0
+    r = do(w, who, do="work", what="open the gate", at="the Common")
+    assert r.startswith("You opened the gate"), r
+    assert any(e["kind"] == "gate" and e["actor"] == who for e in w.s["events"])     # seen by whoever is about (D2-132)
+    assert _escapes(w, "cattle", 50, hungry=2) > 0.95
+
+
+def test_a_household_that_notices_its_open_gate_shuts_it():
+    from cybertron2.engine import perceive as PC
+    w = barleyfield()
+    _fence(w, "west_field", gate="open")                                            # the Barrows' field
+    barrows = [n for n in w.living() if w.household_of(n) == "Barrow" and w.s["people"][n]["stage"] == "adult"]
+    for d in range(6):                                                              # each day some notice it, by the rule
+        w.s["today"] = R.blank_today()
+        for n in barrows:
+            w.s["today"]["worked"][n] = ["west_field"]
+        PC.evening(w, {}, w.s["today"])
+        if w.s["parcels"]["west_field"]["fence"]["gate"] == "shut":
+            break
+        w.s["day"] += 1
+    assert w.s["parcels"]["west_field"]["fence"]["gate"] == "shut"
+    assert any("you shut the gate of West Field" in w.s["mind"][n]["today"]["notice"] for n in barrows)
+
+
+def test_a_wood_fence_unmended_loses_a_level_a_season_and_a_finished_fence_needs_its_materials():
+    from cybertron2.engine import farm as FM, herds as HD
+    w = barleyfield()
+    w.s["containers"][w.hands("Bennet")]["goods"]["timber"] = 20.0
+    r = do(w, "Bennet", do="work", what="fence", at="West Field")
+    assert "worked on a fence round West Field" in r
+    need = FM.fence_need(w.s["parcels"]["west_field"], "wood")
+    used = 20.0 - w.goods(w.hands("Bennet"))["timber"]                              # in proportion to the work done (bare hands: half)
+    assert 0 < used <= need["inputs"]["timber"] / need["units"] + 1e-6
+    HD._fences(w, {"herds": []})
+    assert w.s["parcels"]["west_field"]["fence"]["units"] > 0
+    _fence(w, "west_field")
+    w.s["day"] = w.calendar()["left"] - 1 + w.d if False else w.s["day"]
+    while w.calendar(w.d + 1)["season"] == w.calendar()["season"]:
+        w.s["day"] += 1
+    HD._fences(w, {"herds": []})
+    assert w.s["parcels"]["west_field"]["fence"]["level"] == 1                      # a season unmended
+
+
+def test_a_hungry_unherded_herd_crosses_several_parcels_and_tramples_a_field_while_a_fed_one_stays():
+    from cybertron2.engine import herds as HD
+    w = barleyfield()
+    w.s["day"] = 3                                                                  # the barley in North Field is ripe
+    w.s["parcels"]["bf_pasture"]["res"]["grass"]["S"] = 0.0
+    w.s["herds"]["cattle"]["hungry"] = 2
+    before = w.s["parcels"]["north_field"]["crop"]["left"]
+    way = HD.wander(w, "cattle", {"herds": []})
+    assert len(way) >= 2 and w.s["herds"]["cattle"]["parcel"] == "north_field"
+    c = w.s["parcels"]["north_field"]["crop"]
+    assert abs(before - c["left"] - before * 0.01 * 8) < 0.01 and c["trampled"]["by"] == "cattle"   # 1% a head (D2-123)
+    w2 = barleyfield()
+    w2.s["parcels"]["north_field"]["crop"]["ripe_day"] = 60
+    assert _escapes(w2, "cattle", 100, hungry=0) < 0.1                              # fed on good pasture: mostly stays
+
+
+def test_a_herd_on_a_road_drifts_loses_head_and_a_searcher_finds_it_far_more_often(monkeypatch):
+    from cybertron2.engine import herds as HD
+    from cybertron2.engine.data import HERDS
+    w = world(roads=[["millbrook", "ashwood", 3, {"terrain": "woodland"}]])
+    rid = "road:millbrook-ashwood"
+    HD.onto_road(w, "cattle", rid, "millbrook", {"herds": []})
+    w.apply("set", rid, ref=("herd", "cattle"), field="pos", value=2)
+    monkeypatch.setitem(HERDS["road"], "gone", 0.0)
+    start = dict(w.s["herds"]["cattle"], cows=10, oxen=0, bulls=0, young=0)
+    lost, moved = {"winter": [], "else": []}, 0
+    for d in range(800):
+        w.s["herds"]["cattle"] = dict(start)
+        w.s["day"] = 10 + d
+        HD._on_road(w, "cattle", {"herds": []})
+        h = w.s["herds"]["cattle"]
+        lost["winter" if w.calendar()["season"] == "winter" else "else"].append(10 - FM_head(h))
+        moved += h.get("pos") != 2
+    mean = {k: sum(v) / len(v) for k, v in lost.items()}
+    assert 1.3 < mean["else"] < 1.7 and 2.6 < mean["winter"] < 3.4 and moved == 800   # 0.15 a head a day, 0.3 in winter (D2-124)
+    w.s["herds"]["cattle"] = dict(start)
+    depart(w, "Edric", "ashwood", searching="the Millbrook cattle")
+    depart(w, "Sibyl", "ashwood")
+    from cybertron2.engine import roads as RD
+    N.departures(w, w.s["today"])
+    assert RD.searching_for(w, "Edric", "cattle") and not RD.searching_for(w, "Sibyl", "cattle")
+    assert RD.herd_chance(w, "Edric", "cattle", 2) >= 3 * RD.herd_chance(w, "Sibyl", "cattle", 2)   # x5, capped at 1 (D2-125)
+
+
+def FM_head(h):
+    from cybertron2.engine import farm as FM
+    return FM.head(h)
+
+
+def test_a_found_herd_taken_along_arrives_with_the_party_and_is_held_by_the_taker(monkeypatch):
+    from cybertron2.engine import herds as HD, roads as RD
+    w = world(roads=[["millbrook", "ashwood", 1, {"terrain": "plain"}]])
+    rid = "road:millbrook-ashwood"
+    HD.onto_road(w, "cattle", rid, "millbrook", {"herds": []})
+    monkeypatch.setattr(RD.TH, "eye", lambda w, n, on="things": 3.0)
+    depart(w, "Simkin", "millbrook")                                                # from Ashwood
+    N.departures(w, w.s["today"])
+    RD.night(w, w.s["today"])
+    woke = FU.plan(w, w.s["today"])
+    assert woke["Simkin"]["events"][0]["kind"] == "herd"
+    FU.answer(w, w.s["today"], "Simkin", woke["Simkin"], {"actions": [{"do": "accompany"}]})
+    assert w.s["herds"]["cattle"]["with"] == "Simkin"
+    assert any(c["claimant"] in ("Simkin", w.household_of("Simkin")) and c["grounds"] == "found" for c in w.claims_on(("herd", "cattle")))
+    next_day(w)
+    assert w.at("Simkin") == "millbrook" and w.s["herds"]["cattle"]["node"] == "millbrook" and w.s["herds"]["cattle"]["parcel"]
+
+
+def test_twenty_head_split_about_a_tenth_a_day_with_one_drover_almost_never_with_two_and_shares_peak_near_a_quarter():
+    import random
+    from cybertron2.engine import herds as HD
+    assert abs(HD.split_chance(20, 10) - 0.1) < 1e-9 and HD.split_chance(20, 20) == 0.01           # D2-128
+    rng = random.Random(7)
+    xs = [HD.share(rng) for _ in range(20000)]
+    bins = [sum(a < x <= b for x in xs) / len(xs) for a, b in ((0, 1 / 16), (1 / 16, 1 / 8), (1 / 8, 1 / 5), (1 / 5, 1 / 3), (1 / 3, 1 / 2))]
+    assert max(xs) <= 0.5 and 0.40 < bins[3] < 0.50 and 0.20 < bins[2] < 0.28 and bins[0] < 0.05      # D2-131
+    w = world()
+    h = w.s["herds"]["cattle"]
+    h.update(cows=20, oxen=0, bulls=0, young=0, count=20, with_=None)
+    splits = 0
+    for d in range(300):
+        w.s["day"] = d
+        w.s["herds"] = {"cattle": dict(h)}
+        splits += bool(HD.split(w, "cattle", {"herds": []}, drove=1))
+    assert 0.06 < splits / 300 < 0.15

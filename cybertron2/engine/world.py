@@ -545,6 +545,28 @@ def p_new_herd(w, like, parcel):
     return hid
 
 
+def p_split_herd(w, like, take):
+    """A group broken off a herd (D2-128, D2-131), where the herd is (a parcel, or a stretch of road): the owner's still."""
+    h = w.s["herds"][like]
+    base = h.get("base_name") or h["name"]
+    k = 2
+    while f"{like}-{k}" in w.s["herds"]:
+        k += 1
+    hid = f"{like}-{k}"
+    n = sum(int(v) for v in take.values())
+    milk = min(float(h.get("in_milk", 0.0)), float(take.get("cows", 0)))
+    w.s["herds"][hid] = {**{x: v for x, v in h.items() if x not in ("cows", "oxen", "bulls", "young", "in_milk", "count", "births")},
+                         "name": f"{base}: {n} strays", "base_name": base, "split_of": like, "split_day": w.d, "cows": 0, "oxen": 0, "bulls": 0, "young": 0,
+                         "in_milk": milk, "births": 0.0, "milked": {"day": -1, "n": 0}, "watched": -1, "with": None}
+    for r, q in take.items():
+        w.s["herds"][hid][r] = int(q)
+        h[r] = int(h.get(r, 0)) - int(q)
+    h["in_milk"] = round(float(h.get("in_milk", 0.0)) - milk, 4)
+    h["count"] = sum(int(h.get(r, 0)) for r in ("cows", "oxen", "bulls", "young"))
+    w.s["herds"][hid]["count"] = n
+    return hid
+
+
 def p_admit(w, person, inst):
     old = w.household_of(person)
     if old and old != inst:
@@ -717,6 +739,7 @@ PRIMITIVES = {
     "wear": (p_wear, _rc("container")),
     "set": (p_set, lambda kw: [tuple(kw["ref"])]),
     "new_herd": (p_new_herd, lambda kw: [("herd", kw["like"]), ("parcel", kw["parcel"])]),
+    "split_herd": (p_split_herd, lambda kw: [("herd", kw["like"])]),
     "admit": (p_admit, _r("person", "person")),
     "leave": (p_leave, _r("person", "person")),
     "found": (p_found, _r("person", "person")),

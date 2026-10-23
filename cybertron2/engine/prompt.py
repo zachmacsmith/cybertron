@@ -22,6 +22,7 @@ SCHEMA = {
             "household": {"type": "string"}, "name": {"type": "string"}, "for": {"type": "string"}, "feed": {"type": "boolean"},
             "days": {"type": "number"}, "lots": {"type": "number"}, "agreement": {"type": "string"}, "hidden": {"type": "string"},
             "method": {"type": "string"}, "on trouble": {"type": "string"}, "stop at": {"type": "string"}, "gather": {"type": "boolean"},
+            "searching": {"type": "string"},
             "text": {"type": "string"}},
             "required": ["do"]}},
         "say": {"type": "array", "items": {"type": "object", "properties": {"to": {"type": "string"}, "text": {"type": "string"}},
@@ -446,7 +447,12 @@ def fuse_prompt(here, mind, x) -> str:
                   "other party, to where they are going", "attack": "set on them ({\"do\": \"attack\", \"target\", \"aim\": rob | hurt})",
                   "flee": "get away from them", "accept": "take an offer made in this meeting ({\"do\": \"accept\", \"offer\": id})",
                   "take": "take what you can carry of it ({\"do\": \"take\", \"item\"?, \"qty\"?})", "bury": "bury the dead",
-                  "push on": "cross anyway", "wait": "wait a day for it to pass", "go round": "go round by another way, a day longer"})
+                  "push on": "cross anyway", "wait": "wait a day for it to pass", "go round": "go round by another way, a day longer",
+                  "drive on": "drive the beasts a stretch on your way and leave them there",
+                  "drive back": "drive them a stretch back the way you came and leave them there (two days more for you)",
+                  "accompany": "take them along with you at their pace, to where you are going, or back ({\"do\": \"accompany\", "
+                               "\"to\"?: \"back\"}); whoever takes them holds them", "leave": "leave them where they are",
+                  "go after them": "round them up and bring them back (it costs a day)", "let them go": "let them go and keep the rest"})
     road = here.node is None
     head = "## On the road" if road else "## In the night"
     L = [head, ("Something happens: " if road else "You are woken: ") + "; ".join(x["signs"]) + ".",

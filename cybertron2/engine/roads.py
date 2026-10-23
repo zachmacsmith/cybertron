@@ -139,7 +139,10 @@ def night(w, today) -> dict:
     """The roads tonight (D2-97, D2-104 to D2-110, D2-113): positions, trouble, good places, notices, meetings and finds."""
     rec = {"trouble": [], "meetings": [], "finds": [], "good": []}
     today["road"] = {"meetings": [], "finds": [], "crossings": [], "fed": {}}
+    today["road"].update(herds=[], splits=[])
     ps = parties(w)
+    from cybertron2.engine import herds as HD
+    HD.follow(w)                                                            # herds a party accompanies go with it (D2-127)
     for key, members in ps.items():
         t = w.s["people"][members[0]]["transit"]
         pos = position(w, t)
@@ -148,6 +151,8 @@ def night(w, today) -> dict:
             _landmark(w, today, rec, members, t, pos, lm)
         _notices(w, members, t, pos, ps)
         _finds(w, today, rec, members, t, pos)
+        _herd_finds(w, today, rec, members, t, pos)
+        _driven_splits(w, today, rec, members, t, pos)
     _meetings(w, today, rec, ps)
     for key, members in ps.items():                                         # what each party leaves behind it (D2-88)
         t = w.s["people"][members[0]]["transit"]
@@ -359,6 +364,66 @@ def _finds(w, today, rec, members, t, pos):
             rec["finds"].append({"by": finder, "thing": cid})
 
 
+# ---------------------------------------------------------------------- herds on the road (D2-124, D2-125, D2-127, D2-128)
+def searching_for(w, name, hid) -> bool:
+    """Whether one set out searching for this herd (`travel {searching: ...}`, D2-125): its name, its owners', or any beasts."""
+    want = str((w.s["people"][name]["transit"].get("choices") or {}).get("searching") or "").strip().lower().removeprefix("the ")
+    if not want:
+        return False
+    h = w.s["herds"][hid]
+    names = {h["name"].lower(), str(h.get("base_name") or "").lower(), h.get("kind", "cattle"), "herd", "beasts", "cattle", "cows"}
+    owners = {str(w.s["institutions"].get(c["claimant"], {}).get("name") or c["claimant"]).lower() for c in w.claims_on(("herd", hid))}
+    return want in names or any(want in x or x in want for x in names | owners if x)
+
+
+def herd_chance(w, name, hid, pos) -> float:
+    """The noticing rule on a stretch (information/noticing.md): own x the terrain's sight x presence (1.0) x the eye, x5 searching."""
+    h = w.s["herds"][hid]
+    sight = EV.visibility(w, None, sense="sight", cover=st_cover(w, h["node"], pos))
+    from cybertron2.engine.data import HERDS
+    att = float(HERDS["road"]["search"]) if searching_for(w, name, hid) else 1.0
+    return min(1.0, float(HERDS["own"]) * sight * TH.eye(w, name) * att)
+
+
+def _herd_finds(w, today, rec, members, t, pos):
+    from cybertron2.engine import farm as FM, herds as HD
+    for hid, h in HD.on_stretch(w, t["road"], pos).items():
+        if h.get("with"):
+            continue
+        finder = next((n for n in members if w.rng("herd-find", w.d, n, hid).random() < herd_chance(w, n, hid, pos)), None)
+        if finder:
+            today["road"]["herds"].append({"id": f"herd:{hid}:{finder}:{w.d}", "kind": "herd", "road": t["road"], "pos": pos, "herd": hid,
+                                           "members": members, "finder": finder, "label": f"{FM.herd_words(h)} loose by the road"})
+            rec.setdefault("herds", []).append({"by": finder, "herd": hid})
+
+
+def _driven_splits(w, today, rec, members, t, pos):
+    """A group breaking off a herd the party accompanies (D2-128): a call only if it is a quarter of the herd or 3 head or more and a
+    drover notices it (D2-127)."""
+    from cybertron2.engine import farm as FM, herds as HD
+    from cybertron2.engine.data import HERDS
+    for hid, h in list(w.s["herds"].items()):
+        if h.get("with") not in members or FM.head(h) <= 0:
+            continue
+        n = FM.head(h)
+        r = {"herds": []}
+        new = HD.split(w, hid, r, drove=len(members))
+        if not new:
+            continue
+        w.apply("set", t["road"], ref=("herd", new), field="lost", value={"day": w.d, "from": t["from"], "road": t["road"]})
+        k = FM.head(w.s["herds"][new])
+        rec.setdefault("splits", []).append({"herd": hid, "new": new, "head": k})
+        big = k >= float(HERDS["call"]["share"]) * n or k >= int(HERDS["call"]["head"])
+        saw = next((m for m in members if w.rng("split-see", w.d, m, new).random() < herd_chance(w, m, new, pos)), None)
+        if big and saw:
+            today["road"]["splits"].append({"id": f"split:{new}:{w.d}", "kind": "split", "road": t["road"], "pos": pos, "herd": hid,
+                                            "new": new, "members": members, "finder": saw,
+                                            "label": f"{k} head breaking away from {h['name']}"})
+        elif saw:
+            for m in members:
+                _note(w, m, f"{k} head strayed off from {h['name']} at {stretch_name(w, t['road'], pos)}", first=True)
+
+
 # ---------------------------------------------------------------------- meetings (D2-110)
 def _meetings(w, today, rec, ps):
     keys = list(ps)
@@ -440,6 +505,110 @@ def _src_finds(w, today):
 @FU.source("crossing")
 def _src_crossings(w, today):
     return [dict(c, structure="road") for c in (today.get("road") or {}).get("crossings", [])]
+
+
+@FU.source("herd")
+def _src_herds(w, today):
+    return [dict(f, structure="road") for f in (today.get("road") or {}).get("herds", [])]
+
+
+@FU.source("split")
+def _src_splits(w, today):
+    return [dict(f, structure="road") for f in (today.get("road") or {}).get("splits", [])]
+
+
+@FU.detector("herd")
+def _det_herd(w, today, e):
+    return {e["finder"]: f"by the road, at {stretch_name(w, e['road'], e['pos'])}, you come upon beasts with nobody minding them: "
+                         f"{e['label']}. A herd loose on the road soon dies or is lost for good"}
+
+
+@FU.detector("split")
+def _det_split(w, today, e):
+    return {e["finder"]: f"on the road, at {stretch_name(w, e['road'], e['pos'])}: {e['label']}, off into the {st_cover(w, e['road'], e['pos'])}"}
+
+
+def _hold_found(w, name, e):
+    """Whoever takes a found herd holds it (D4-23): a claim for the taker's household (or itself); the owner's claim stays, for custom and
+    law."""
+    hid = e["herd"]
+    me = w.household_of(name) or name
+    if not any(c["claimant"] == me for c in w.claims_on(("herd", hid))):
+        w.apply("claim", e["road"], thing=("herd", hid), claimant=me, rights=["access", "withdrawal"], grounds="found")
+
+
+@FU.choice("herd", "drive on")
+@FU.choice("herd", "drive back")
+def _ch_drive(w, today, name, e, a):
+    from cybertron2.engine import herds as HD
+    h = w.s["herds"].get(e["herd"])
+    if not h or h["node"] != e["road"] or h.get("with"):
+        raise Refused("the beasts are not there to drive")
+    t = w.s["people"][name]["transit"]
+    back = str(a.get("do")).lower() == "drive back"
+    toward = t["from"] if back else t["to"]
+    HD.drive_stretch(w, e["herd"], toward)
+    if back:                                                                    # a stretch back and a stretch again: two days more
+        for n in e["members"]:
+            w.s["people"][n]["transit"]["arrive"] += 2
+    word = f"back toward {w.s['nodes'][toward]['name']}" if back else f"on toward {w.s['nodes'][toward]['name']}"
+    _note(w, name, f"you found {FM_words(w, e['herd'])} loose by the road and drove them a stretch {word}", first=True)
+    return f"You drove the beasts a stretch {word} and left them there."
+
+
+@FU.choice("herd", "accompany")
+def _ch_accompany(w, today, name, e, a):
+    from cybertron2.engine import herds as HD
+    h = w.s["herds"].get(e["herd"])
+    if not h or h["node"] != e["road"] or h.get("with"):
+        raise Refused("the beasts are not there to take")
+    t = w.s["people"][name]["transit"]
+    to = str(a.get("to") or "").strip().lower()
+    if to in ("back", "home", w.s["nodes"][t["from"]]["name"].lower()):
+        for n in e["members"]:
+            if not w.s["people"][n]["transit"].get("turned"):
+                turn_back(w, n)
+    _hold_found(w, name, e)
+    HD.accompany(w, e["herd"], name)
+    dest = w.s["nodes"][w.s["people"][name]["transit"]["to"]]["name"]
+    _note(w, name, f"you found {FM_words(w, e['herd'])} loose by the road and took them along to {dest}", first=True)
+    return f"You took the beasts along with you, toward {dest}; they go at your pace."
+
+
+@FU.choice("herd", "leave")
+def _ch_leave_herd(w, today, name, e, a):
+    _note(w, name, f"you saw {FM_words(w, e['herd'])} loose by the road and left them", first=True)
+    return "You left the beasts where they were."
+
+
+@FU.choice("split", "go after them")
+def _ch_after(w, today, name, e, a):
+    """Rounding them up costs the party a day; the group rejoins the herd it broke from."""
+    new, hid = w.s["herds"].get(e["new"]), w.s["herds"].get(e["herd"])
+    if not new or not hid or new["node"] != e["road"]:
+        raise Refused("they are gone")
+    for role in ("cows", "oxen", "bulls", "young"):
+        w.apply("set", e["road"], ref=("herd", e["herd"]), field=role, value=int(hid.get(role, 0)) + int(new.get(role, 0)))
+        w.apply("set", e["road"], ref=("herd", e["new"]), field=role, value=0)
+    w.apply("set", e["road"], ref=("herd", e["new"]), field="count", value=0)
+    from cybertron2.engine import farm as FM
+    w.apply("set", e["road"], ref=("herd", e["herd"]), field="count", value=FM.head(w.s["herds"][e["herd"]]))
+    for n in e["members"]:
+        w.s["people"][n]["transit"]["arrive"] += 1
+        _note(w, n, f"some of the beasts broke away at {stretch_name(w, e['road'], e['pos'])}; rounding them up cost a day", first=True)
+    return "You went after them and brought them back; it cost the day."
+
+
+@FU.choice("split", "let them go")
+def _ch_let_go(w, today, name, e, a):
+    for n in e["members"]:
+        _note(w, n, f"{e['label']} at {stretch_name(w, e['road'], e['pos'])}; you let them go", first=True)
+    return "You let them go and kept the rest together."
+
+
+def FM_words(w, hid) -> str:
+    from cybertron2.engine import farm as FM
+    return FM.herd_words(w.s["herds"][hid])
 
 
 def _party_words(w, members) -> str:

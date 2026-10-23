@@ -18,7 +18,7 @@ from __future__ import annotations
 import math
 
 from cybertron2.engine import knowledge as KN
-from cybertron2.engine.data import CROP_OF, CROPS, ITEMS, SEED_CROP, TECHNIQUES
+from cybertron2.engine.data import CROP_OF, CROPS, FENCES, ITEMS, SEED_CROP, TECHNIQUES
 from cybertron2.engine.here import Refused, show
 
 ROLES = ("cows", "oxen", "bulls", "young")
@@ -85,6 +85,17 @@ def head(h) -> int:
     return int(sum(int(h.get(r, 0)) for r in ROLES))
 
 
+def herd_capacity(p, h, day, drovers=0) -> int:
+    """How many head the people with a herd hold together (D2-128): 10 a drover on a road, 30 a herder on pasture, about 6 unherded."""
+    from cybertron2.engine.data import HERDS
+    cap = HERDS["capacity"]
+    if drovers:
+        return int(cap["drover"]) * drovers
+    hd = h.get("herders") or {}
+    n = int(hd.get("n", 0)) if hd.get("day") == day else 0
+    return int(cap["herder"]) * n if n else int(cap["unherded"])
+
+
 def herd_words(h) -> str:
     bits = [f"{int(h[r])} {ROLE_WORD[r][0 if int(h[r]) == 1 else 1]}" for r in ROLES if int(h.get(r, 0)) > 0]
     milk = int(round(h.get("in_milk", 0.0)))
@@ -123,6 +134,10 @@ def act(here, mind, tech, key, place_name, out, m, tm, a) -> tuple:
         return _sow(here, mind, tech, key, place_name, out, m, a, f)
     if k == "works":
         return _works(here, mind, tech, key, place_name, out, m * tm, a, y)
+    if k == "fence":
+        return _fence(here, mind, tech, key, place_name, out, m * tm, a, y)
+    if k == "gate":
+        return _gate(here, key, place_name, y["gate"])
     if k == "select":
         c = dict(here.parcels()[key]["crop"])
         c["selected_by"] = here.name
@@ -150,6 +165,9 @@ def act(here, mind, tech, key, place_name, out, m, tm, a) -> tuple:
     if k == "herd":
         hid = _herd_on(here, key, a)
         here.apply("set", ref=("herd", hid), field="watched", value=here.day)
+        hd = here.herds()[hid].get("herders") or {}
+        n = int(hd.get("n", 0)) + 1 if hd.get("day") == here.day else 1        # herders today: each holds about 30 head (D2-128)
+        here.apply("set", ref=("herd", hid), field="herders", value={"day": here.day, "n": n})
         return 0.0, None, f"You watched {here.herds()[hid]['name']} on {place_name} today.", ("herd", hid)
     if k == "milk":
         hid = _herd_on(here, key, a, role="cows")
@@ -209,6 +227,61 @@ def _works(here, mind, tech, key, place_name, out, mult, a, y):
     here.apply("set", ref=("parcel", key), field="works", value=wk)
     how = "" if leads else " (it holds only if someone who knows how to lay them out works on them today)"
     return 0.0, None, f"You worked on the {_works_word(y)} of {place_name}{how}.", ("parcel", key)
+
+
+# ---------------------------------------------------------------------- fences round a parcel and gates (D2-130, D2-132)
+def fence_need(par, kind) -> dict:
+    """What a whole fence of this kind round this parcel takes: work units and materials, x the square root of its size."""
+    d = FENCES[kind]
+    r = math.sqrt(max(1.0, float(par["size"])))
+    return {"units": float(d["units"]) * r, "inputs": {i: q * r for i, q in d["inputs"].items()}}
+
+
+def fence_word(kind) -> str:
+    return FENCES[kind]["words"][0]
+
+
+def _fence(here, mind, tech, key, place_name, out, mult, a, y):
+    """Fencing as a field work (D2-130): materials go in with the work, in proportion; a wall's work counts on a day one who knows
+    walling works on it. Work on a whole fence is mending (a quarter of the build a season keeps it); on a gappy one it restores it."""
+    par = here.parcels()[key]
+    kind = y["fence"]
+    fc = dict(par.get("fence") or {})
+    if not fc or fc.get("kind") != kind or (fc.get("level", 0) <= 0 and fc.get("built")):
+        fc = {"kind": kind, "units": 0.0, "level": 0, "built": False, "gate": "shut", "mend": 0.0, "pending": {}}
+    need = fence_need(par, kind)
+    from cybertron2.engine.verbs import _consume, _src
+    _consume(here, {i: round(q / need["units"] * mult, 3) for i, q in need["inputs"].items()}, extra=_src(here, a.get("for") and here.household(), out))
+    word = fence_word(kind)
+    led = FENCES[kind].get("led")
+    leads = not led or KN.level(mind, led) in ("capable", "known")
+    if fc["built"]:
+        fc["mend"] = round(float(fc.get("mend", 0.0)) + mult, 3)
+        here.apply("set", ref=("parcel", key), field="fence", value=fc)
+        return 0.0, None, f"You mended the {word} round {place_name}.", ("parcel", key)
+    day = str(here.day)
+    p = (fc.get("pending") or {}).get(day, {"units": 0.0, "led": False})
+    fc["pending"] = {day: {"units": round(p["units"] + mult, 3), "led": p["led"] or leads}}
+    here.apply("set", ref=("parcel", key), field="fence", value=fc)
+    done = min(1.0, (fc["units"] + fc["pending"][day]["units"]) / need["units"])
+    how = "" if leads else f" (it holds only if someone who knows {KN.label(led)} works on it today)"
+    return 0.0, None, f"You worked on a {word} round {place_name}: about {round(done * 100):d} parts in a hundred done{how}.", ("parcel", key)
+
+
+def _gate(here, key, place_name, to):
+    """Opening a gate and leaving it, or shutting one: no units; seen by whoever is about (D2-132)."""
+    par = here.parcels()[key]
+    fc = dict(par["fence"])
+    fc["gate"] = to
+    if to == "open":
+        fc["opened"] = {"day": here.day, "by": here.name}
+    here.apply("set", ref=("parcel", key), field="fence", value=fc)
+    holders = [c["claimant"] for c in here.claims(("parcel", key))]
+    people = sorted({m for x in holders for m in ([x] if x in here.people() else (here.households().get(x) or {}).get("members", []))})
+    here.event("gate", f"{here.name} {'opened the gate of ' + place_name + ' and left it open' if to == 'open' else 'shut the gate of ' + place_name}",
+               actor=here.name, about=[f"parcel:{key}"], salience=0.45 if to == "open" else 0.25, tags=["animals"], concerns=people)
+    return 0.0, None, (f"You opened the gate of {place_name} and left it standing open." if to == "open"
+                       else f"You shut the gate of {place_name}."), ("parcel", key)
 
 
 def _works_word(y) -> str:
@@ -373,6 +446,19 @@ def ready(here, tech, key) -> str:
             return f"the {c['kind']} in {p['name']} is ripe: past weeding"
         if y == "tend" and weed_gain(f, c.get("weeded", 0.0) / max(1e-9, c["area"])) >= float(f["weed_max"]) * 0.95:
             return f"the {c['kind']} in {p['name']} is as clean as weeding makes it"
+    if y == "fence":
+        fc = p.get("fence") or {}
+        kind = t["yield"]["fence"]
+        if fc.get("built") and fc.get("level", 0) > 0 and fc.get("kind") != kind:
+            return f"there is already a {fence_word(fc['kind'])} round {p['name']}"
+        if fc.get("built") and fc.get("level", 0) >= 2 and float(fc.get("mend", 0.0)) >= float(FENCES[kind]["mend"]) * fence_need(p, kind)["units"] - 1e-6:
+            return f"the {fence_word(kind)} round {p['name']} is whole and mended this season"
+    if y == "gate":
+        fc = p.get("fence") or {}
+        if not fc.get("built") or fc.get("level", 0) <= 0:
+            return f"there is no fence round {p['name']}, so no gate"
+        if fc.get("gate") == t["yield"]["gate"]:
+            return f"the gate of {p['name']} is {'open' if fc['gate'] == 'open' else 'shut'} already"
     if y == "works":
         yy = t["yield"]
         if p.get("ground") != yy["ground"]:
@@ -393,7 +479,7 @@ def ready(here, tech, key) -> str:
             n = sum(int(round(h.get("in_milk", 0.0))) - (h["milked"]["n"] if h["milked"]["day"] == here.day else 0) for h in hs)
             if n <= 0:
                 return "no cow there is in milk" if not any(h.get("in_milk", 0) >= 0.5 for h in hs) else "the cows in milk are milked today"
-        if y == "herd" and all(h.get("watched") == here.day for h in hs):
+        if y == "herd" and all(h.get("watched") == here.day and head(h) <= herd_capacity(here.p, h, here.day) for h in hs):
             return "the beasts there are watched today"
     return ""
 
@@ -455,6 +541,8 @@ def night(w) -> dict:
     """Crops grow, fail, die of the cold, ripen and rot; fields rest; herds graze, eat fodder, breed, drop dung and stray."""
     rec = {"crops": [], "herds": []}
     _crops(w, rec)
+    from cybertron2.engine import herds as HD
+    HD.night(w, rec)                                                         # fences, splitting, wandering, roads (D2-117 to D2-131)
     _herds(w, rec)
     return rec
 
@@ -559,15 +647,14 @@ def _herds(w, rec):
         if n <= 0:
             continue
         node, pid = h["node"], h["parcel"]
+        if node not in w.s["nodes"] or pid is None:                            # on a road (herds.py)
+            continue
         par = w.s["parcels"][pid]
         need = float(n)
         got = 0.0
-        c = par.get("crop")
-        if c and c.get("area_left", 0) > 1e-6:                                 # beasts in a standing crop eat it
-            eat = min(c["left"], need)
-            if eat > 0:
-                w.apply("draw", node, parcel=pid, key="crop", qty=eat)
-                got += eat
+        ate = h.get("ate") or {}
+        if ate.get("day") == w.d:                                              # what it ate and trampled in a crop (herds.trample)
+            got += min(need, float(ate["q"]))
         g = par["res"].get("grass")
         if g and got < need:
             got += w.apply("draw", node, parcel=pid, key="grass", qty=round(min(need - got, max(0.0, g["S"] - 0.05 * g["K"])), 4))
@@ -613,14 +700,4 @@ def _herds(w, rec):
             dd = 1 - (1 - float(r)) ** (1 / slot)
             w.apply("set", node, ref=("parcel", pid), field="fertility",
                     value=round(par["fertility"] + dd * max(0.0, float(level) - par["fertility"]), 4))
-        if h.get("watched") != w.d and w.rng("stray", w.d, hid).random() < float(cp["stray"]):
-            near = [x for x in par["adj"] if (w.s["parcels"][x].get("crop") or {}).get("area_left", 0) > 1e-6]
-            if near:                                                            # unwatched, they get into a crop
-                x = near[w.rng("stray-to", w.d, hid).randrange(len(near))]
-                xc = dict(w.s["parcels"][x]["crop"])
-                eat = round(min(xc["left"], 0.5 * n), 2)
-                w.apply("draw", node, parcel=x, key="crop", qty=eat)
-                w.event(node, "herd", f"{h['name']} got into {w.s['parcels'][x]['name']} in the night and ate and trampled the "
-                        f"{xc['kind']}", about=[f"herd:{hid}", f"parcel:{x}"], salience=0.7, tags=["animals", "farming", "food"])
-                rec["herds"].append((hid, "strayed", x))
         w.apply("set", node, ref=("herd", hid), field="count", value=head(w.s["herds"][hid]))

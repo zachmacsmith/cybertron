@@ -291,6 +291,16 @@ def evening(w, attend: dict, today: dict) -> dict:
                 if rng.random() < min(1.0, p):
                     cand.append((1.0 + f["salience"], f))
                 continue
+            if f.get("spot"):                                                  # herds out, fences, gates: the noticing rule (D2-117)
+                if f.get("only") is not None and name not in f["only"]:
+                    continue
+                if f["text"] in t["dawn"] or not SG.readable(f, practised(mind)):
+                    continue
+                sp = f["spot"]
+                p = f["salience"] * TH.spot_chance(w, name, sp["node"], sp["parcel"], sp["own"], tgt_raw, f.get("sense", "sight")) * knack(mind, f)
+                if rng.random() < min(1.0, p):
+                    cand.append((1.0 + f["salience"], f))
+                continue
             if f["id"] in seen or f.get("actor") == name or f.get("peek") or f.get("ambient") or not _can_read(mind, f):
                 continue
             if (f.get("knows") or f.get("lay")) and not SG.readable(f, practised(mind)):
@@ -314,6 +324,9 @@ def evening(w, attend: dict, today: dict) -> dict:
         cand.sort(key=lambda x: -x[0])
         notice = [f for _, f in cand[:NOTICE_MAX + (2 if place else 0)]]
         t["notice"] = list(dict.fromkeys(f["text"] for f in notice))
+        for f in notice:                                                       # one of the holding household shuts an open gate (D2-132)
+            if f.get("gate") and _shut_gate(w, name, f["gate"]):
+                t["notice"].append(f"you shut the gate of {w.s['parcels'][f['gate']]['name']}")
         seen |= {f["id"] for f in notice}
         att = []
         if place:
@@ -418,6 +431,16 @@ def _update_known(here, mind, F) -> None:
             dead = next((s[7:] for s in f["about"] if s.startswith("person:") and s[7:] != f.get("actor")), None)
             if dead and dead in mind.store["kin"]:
                 mind.store["kin"][dead]["alive"] = False
+
+
+def _shut_gate(w, name, pid) -> bool:
+    """Anyone of the parcel's household who notices its gate open shuts it (livestock.md, D2-132)."""
+    fc = w.s["parcels"][pid].get("fence") or {}
+    holders = {cl["claimant"] for cl in w.claims_on(("parcel", pid))}
+    if fc.get("gate") != "open" or not ({name, w.household_of(name)} & holders):
+        return False
+    w.apply("set", w.s["parcels"][pid]["node"], ref=("parcel", pid), field="fence", value={**fc, "gate": "shut"})
+    return True
 
 
 def resolve_target(here, x):
