@@ -207,7 +207,7 @@ def test_a_thing_is_a_bundle_of_signs_a_glimpse_from_afar_and_its_contents_only_
     assert far and not any("coin" in t for t in far)                    # a glimpse: heaped brush, no contents
     close = [r for _, r in SG.true_rows(SG.THING, x) if r.get("reach") == "near" and "coin" in r["text"](x)]
     assert close                                                          # a close look names what is there ...
-    assert all(abs(r["p"](x) - TH.own(w, w.s["containers"]["pile:x"])) < 1e-9 for r in close)   # ... found only as hiding allows
+    assert abs(TH.hidden_factor(w.s["containers"]["pile:x"]) - 0.2) < 1e-9     # ... found only as hiding allows (perceive: p x this)
     assert SG.readable({"knows": "hunt"}, set()) is False and SG.readable({"lay": "hunt"}, set()) is True
 
 

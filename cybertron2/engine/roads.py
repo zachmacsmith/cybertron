@@ -114,12 +114,21 @@ def _learn(w, name, road_id, pos, lm, crossed=True):
         rec["crossed"] += 1
 
 
-def _note(w, name, text):
+def _note(w, name, text, first=False):
+    """A line for "On the way" (D2-97). What happened (trouble, a stop, a meeting, a find) goes before what was merely seen, so the
+    arrival lines keep it when there are many."""
     t = w.s["people"][name]["transit"]
-    if t is not None:
-        t.setdefault("notices", [])
-        if text not in t["notices"]:
-            t["notices"].append(text)
+    if t is None:
+        return
+    t.setdefault("notices", [])
+    if text in t["notices"]:
+        return
+    if first:
+        k = int(t.get("notices_first", 0))
+        t["notices"].insert(k, text)
+        t["notices_first"] = k + 1
+    else:
+        t["notices"].append(text)
 
 
 def night(w, today) -> dict:
@@ -169,7 +178,7 @@ def _landmark(w, today, rec, members, t, pos, lm):
             for n in members:
                 tt = w.s["people"][n]["transit"]
                 tt.update(stopped=True, stop_until=w.d + days - 1, arrive=tt["arrive"] + days)
-                _note(w, n, f"you stopped {days} day{'s' if days > 1 else ''} at {d['words']}")
+                _note(w, n, f"you stopped {days} day{'s' if days > 1 else ''} at {d['words']}", first=True)
         if t.get("stop_until") is not None and w.d <= t["stop_until"]:
             for n in members:
                 today["road"].setdefault("camp", {})[n] = True
@@ -182,7 +191,7 @@ def _landmark(w, today, rec, members, t, pos, lm):
                 if (t.get("choices") or {}).get("gather"):
                     q = round(min(2.0, float(g["gather"][0]) * mult), 2)
                     w.apply("create", road_id, dst=w.hands(n), item="wild food", qty=q, why="gathered on the way")
-                    _note(w, n, f"you gathered {q:g} wild food at {d['words']}")
+                    _note(w, n, f"you gathered {q:g} wild food at {d['words']}", first=True)
                 else:
                     today["road"]["fed"][n] = float(g["fed"])
                     _note(w, n, f"you ate well on the way, at {d['words']}")
@@ -238,17 +247,17 @@ def apply_choice(w, rec, members, t, pos, lm, ch, choice, exp=1.0, by_call=False
     if choice.startswith("wait"):
         for n in members:
             w.s["people"][n]["transit"]["arrive"] += 1
-            _note(w, n, f"{words}: you waited a day")
+            _note(w, n, f"{words}: you waited a day", first=True)
         rec["trouble"].append({"members": members, "at": d["words"], "what": ch, "did": "waited"})
     elif choice.startswith("go round"):
         for n in members:
             w.s["people"][n]["transit"]["arrive"] += 1
-            _note(w, n, f"{words}: you went round by another way, a day longer")
+            _note(w, n, f"{words}: you went round by another way, a day longer", first=True)
         rec["trouble"].append({"members": members, "at": d["words"], "what": ch, "did": "went round"})
     elif choice.startswith("turn back"):
         for n in members:
             turn_back(w, n)
-            _note(w, n, f"{words}: you turned back")
+            _note(w, n, f"{words}: you turned back", first=True)
         rec["trouble"].append({"members": members, "at": d["words"], "what": ch, "did": "turned back"})
     else:                                                                      # push on: cross anyway
         push = d.get("push") or {}
@@ -262,11 +271,11 @@ def apply_choice(w, rec, members, t, pos, lm, ch, choice, exp=1.0, by_call=False
                         if ITEMS[item]["weight"] > 0 and item != "handcart" and q > 1e-9:
                             w.apply("destroy", road_id, src=w.hands(n), item=item, qty=round(q * share, 6), why="lost at the ford")
                     lost.append(n)
-                    _note(w, n, f"{words}: you crossed anyway, and the water took part of your load")
+                    _note(w, n, f"{words}: you crossed anyway, and the water took part of your load", first=True)
             elif push.get("foot") == "soaked":
                 today_soaked = w.s["today"].setdefault("soaked", [])
                 today_soaked.append(n)
-                _note(w, n, f"{words}: you crossed anyway and were soaked to the skin")
+                _note(w, n, f"{words}: you crossed anyway and were soaked to the skin", first=True)
             if push.get("death") and EV.weather(w) == "snow" and w.rng("road-death", w.d, n).random() < float(push["death"]) * exp:
                 w.apply("die", road_id, person=n, cause="the cold on the pass")
                 lost.append(n)
@@ -317,9 +326,7 @@ def _notices(w, members, t, pos, ps):
             o = w.s["people"][others[0]]["transit"]
             if position(w, o) != pos or (o["from"], o["to"]) == (t["from"], t["to"]):
                 continue
-            far = SimpleNamespace(n=len(others), cart=any(w.goods(w.hands(m)).get("handcart", 0) >= 1 for m in others),
-                                  armed=any(w.weapon(m) for m in others), toward=w.s["nodes"][o["to"]]["name"], weather=EV.weather(w))
-            for text in SG.roll(SG.TRAVELLER, far, rng, mult=sight, know=know):
+            for text in SG.roll(SG.TRAVELLER, SG.traveller_context(w, others, o, pos), rng, mult=sight, know=know):
                 _note(w, n, text)
 
 
@@ -471,6 +478,8 @@ def _ch_take(w, today, name, e, a):
             w.apply("transfer", e["road"], src=e["thing"], dst=w.hands(name), item=item, qty=x)
             took.append(f"{x:g} {item}")
     w.s["mind"][name].setdefault("found", []).append(e["thing"])
+    if took:
+        _note(w, name, "you found something by the road and took " + ", ".join(took), first=True)
     return ("You took " + ", ".join(took) + ".") if took else "You could carry nothing more."
 
 
@@ -588,7 +597,7 @@ def settle_meeting(w, e) -> list:
         deals = "".join(f"; {o['by']} traded {o['give'][1]:g} {o['give'][0]} for {o['get'][1]:g} {o['get'][0]}" for o in traded)
         for n in party:
             if w.s["people"][n]["alive"] and w.s["people"][n]["transit"] is not None:
-                _note(w, n, f"you met {', '.join(other)} at {where}{deals}")
+                _note(w, n, f"you met {', '.join(other)} at {where}{deals}", first=True)
     for at in e.get("attacks", []):
         tgt = at["target"]
         if tgt in e.get("fled", []) and w.rng("flee", w.d, tgt).random() < float(ROADS["flee"]):

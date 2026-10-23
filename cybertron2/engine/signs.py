@@ -467,7 +467,7 @@ def facts(here, add) -> None:
                 ok = False
             if ok:
                 kw = {"knack": row.get("knack"), "sign": f"{about[0]}#{names[id(rows)]}{i}"}
-                for k in ("peek", "eye", "land"):
+                for k in ("peek", "eye", "land", "knows", "lay"):
                     if row.get(k):
                         kw[k] = row[k]
                 p = row["p"](x) if callable(row["p"]) else row["p"]
@@ -523,7 +523,7 @@ def _old(age) -> str:
 
 # A thing at a spot: a body (fresh, dead some days, bones; buried), goods in the open (a heap, a bundle, at a door), goods hidden
 # (under brush, buried). Glimpses never name what a cache holds or whose a body is: that is for a close look (reach "near"), and a
-# close look finds a hidden thing only at its own conspicuousness (x.look), so working beside a cache does not undo the hiding.
+# close look at a hidden thing is as unlikely as its hiding makes it (perceive: a near row's p times things.hidden_factor).
 _OPEN = lambda x: not x.hidden and not x.body                                          # noqa: E731
 THING = [
     # ---- a body, fresh (the day of death)
@@ -604,13 +604,13 @@ THING = [
     dict(when=lambda x: x.pack and _OPEN(x), sense="sight", p=1.0, reach="near", tags=["food"],
          text=lambda x: f"a bundle lies {x.at}, with {x.goods_words} in it"),
     # ---- what the weather and the days have done to goods in the open (close)
-    dict(when=lambda x: x.seed and not x.body and x.rained and x.hidden != "buried", sense="sight", p=lambda x: 0.8 * x.look, reach="near",
+    dict(when=lambda x: x.seed and not x.body and x.rained and x.hidden != "buried", sense="sight", p=0.8, reach="near",
          tags=["food"],
          text=lambda x: f"the {x.seed_words} {x.at} {'is' if ' and ' not in x.seed_words else 'are'} dark with wet and going mouldy"),
-    dict(when=lambda x: x.meat and not x.body and x.warm and x.age >= 1 and x.hidden != "buried", sense="sight", p=lambda x: 0.7 * x.look,
+    dict(when=lambda x: x.meat and not x.body and x.warm and x.age >= 1 and x.hidden != "buried", sense="sight", p=0.7,
          reach="near", tags=["food"],
          text=lambda x: f"the meat {x.at} is turning, and flies are at it"),
-    dict(when=lambda x: x.meat and not x.body and x.cold and x.hidden != "buried", sense="touch", p=lambda x: 0.6 * x.look, reach="near",
+    dict(when=lambda x: x.meat and not x.body and x.cold and x.hidden != "buried", sense="touch", p=0.6, reach="near",
          tags=["food"],
          text=lambda x: f"the meat {x.at} is frozen hard"),
     dict(when=lambda x: x.rotting_food and not x.body and x.hidden != "buried", sense="smell", p=1.0, reach="near", tags=["food"],
@@ -635,7 +635,7 @@ THING = [
          text=lambda x: f"footprints in the snow lead to a spot {x.at} and back"),
     dict(when=lambda x: x.hidden == "under brush" and x.food and x.dogs, sense="sight", p=0.2, reach="node", tags=["food"],
          text=lambda x: f"a dog keeps nosing at the brush {x.at}"),
-    dict(when=lambda x: x.hidden == "under brush", sense="sight", p=lambda x: x.look, reach="near", tags=["food"],
+    dict(when=lambda x: x.hidden == "under brush", sense="sight", p=1.0, reach="near", tags=["food"],
          text=lambda x: f"something hidden under brush {x.at}: {x.goods_words}"),
     # ---- buried (not a body): turned earth; a close look tells something is there, not what
     dict(when=lambda x: x.hidden == "buried" and not x.body and x.age <= 5, sense="sight", p=1.0, lay="hunt", tags=["food"],
@@ -648,7 +648,7 @@ THING = [
          text=lambda x: f"a patch {x.at} where the earth has sunk after the rain, the shape of a hole filled in"),
     dict(when=lambda x: x.hidden == "buried" and not x.body and x.food and x.dogs, sense="sight", p=0.2, reach="node", tags=["food"],
          text=lambda x: f"a dog digging {x.at}"),
-    dict(when=lambda x: x.hidden == "buried" and not x.body, sense="touch", p=lambda x: x.look, reach="near", tags=["food"],
+    dict(when=lambda x: x.hidden == "buried" and not x.body, sense="touch", p=1.0, reach="near", tags=["food"],
          text=lambda x: f"something is buried {x.at}, not deep: the earth is loose underfoot"),
 ]
 
@@ -900,7 +900,6 @@ def thing_context(w, c):
                         snow_laid=EV.snow_lying(w, laid),
                         dogs=not on_road and any(b["node"] == c.get("node") and b["fittings"].get("dog") for b in w.s["buildings"].values()))
     x.warm = not x.cold
-    x.look = min(1.0, TH.own(w, c)) if c.get("hidden") else 1.0               # a close look finds a hidden thing only as hiding allows
     return x
 
 
@@ -915,6 +914,17 @@ def road_context(w, name, t, pos):
                            snow=EV.snow_lying(w), season=w.calendar()["season"], cold=w.cold(), day=w.d, toward=w.s["nodes"][t["to"]]["name"],
                            first_night=w.d == t["left"], cart=w.goods(w.hands(name)).get("handcart", 0) >= 1,
                            spell=EV.spell(w), since_heavy=EV.since_heavy_rain(w))
+
+
+def traveller_context(w, others, o, pos):
+    """A party seen far off on one's stretch (roads._notices): how many, a cart, arms, beasts' loads, where bound, and the land."""
+    from cybertron2.engine import environment as EV, roads as RD
+    from cybertron2.engine.data import ITEMS
+    st = RD.stretch(w, o["road"], pos)
+    load = sum(q * ITEMS[i]["weight"] for m in others for i, q in w.goods(w.hands(m)).items() if q > 1e-9)
+    return SimpleNamespace(n=len(others), cart=any(w.goods(w.hands(m)).get("handcart", 0) >= 1 for m in others),
+                           armed=any(w.weapon(m) for m in others), toward=w.s["nodes"][o["to"]]["name"], weather=EV.weather(w),
+                           terrain=st["terrain"] or "plain", snow=EV.snow_lying(w), laden=load >= 8 * len(others), season=w.calendar()["season"])
 
 
 def trace_context(w, x):

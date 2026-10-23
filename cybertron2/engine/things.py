@@ -170,9 +170,20 @@ def attention(w, name, parcel, target) -> float:
     return float(NOTICING["attention"]["search" if worked else "place"])
 
 
+def hidden_factor(c) -> float:
+    """How much hiding keeps even a close look from finding a thing (THINGS hidden, taught or untaught); 1 if not hidden."""
+    how = c.get("hidden")
+    if not how:
+        return 1.0
+    taught, untaught = THINGS["hidden"][how]
+    return float(untaught if c.get("untaught") else taught)
+
+
 def close(w, name, c, target=None) -> bool:
-    """A close look: one worked at the spot today, searched it, or it lies in one's own house."""
+    """A close look: one worked at the spot today, searched it, or it lies in (or at the door of) one's own house."""
     if c.get("in") and c["in"] in w.homes(name):
+        return True
+    if c.get("door") and c["door"] in w.homes(name):
         return True
     pid = c.get("parcel")
     if pid not in w.s["parcels"]:
@@ -200,13 +211,17 @@ def known(mind) -> dict:
     return mind.store.setdefault("things", {})
 
 
-def remember(w, name, cid, how, text=None) -> None:
-    """One knows a thing is there: it put it there, or noticed it (with the day and the words it saw: a glimpse or a close look)."""
+def remember(w, name, cid, how, text=None, close=False) -> None:
+    """One knows a thing is there: it put it there, or noticed it (with the day and the words it saw). What it shows in "Lying
+    about" is its closest look so far, not merely the last line noticed."""
     c = w.s["containers"][cid]
     k = w.s["mind"][name].setdefault("things", {})
     r = k.get(cid) or {"texts": []}
     text = text or describe(w, c)
-    r.update(day=w.d, how=how, node=c.get("node"), parcel=c.get("parcel"), text=text)
+    near = close or how in ("put", "took")
+    if near or not r.get("close"):                                             # a later glimpse does not undo a close look
+        r.update(text=text, close=bool(near or r.get("close")))
+    r.update(day=w.d, how=how, node=c.get("node"), parcel=c.get("parcel"))
     r["texts"] = list(dict.fromkeys(r.get("texts", []) + [text]))[-6:]
     k[cid] = r
 

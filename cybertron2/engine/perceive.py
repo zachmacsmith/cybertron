@@ -284,8 +284,8 @@ def evening(w, attend: dict, today: dict) -> dict:
                 reach = f.get("reach", "rule")
                 if reach == "rule":
                     p = f["salience"] * TH.chance(w, name, c, tgt_raw)
-                elif reach == "near":
-                    p = f["salience"] if TH.close(w, name, c, tgt_raw) else 0.0
+                elif reach == "near":                                          # a close look, as hard as the hiding makes it
+                    p = f["salience"] * TH.hidden_factor(c) if TH.close(w, name, c, tgt_raw) else 0.0
                 else:
                     p = f["salience"]
                 if rng.random() < min(1.0, p):
@@ -293,6 +293,8 @@ def evening(w, attend: dict, today: dict) -> dict:
                 continue
             if f["id"] in seen or f.get("actor") == name or f.get("peek") or f.get("ambient") or not _can_read(mind, f):
                 continue
+            if (f.get("knows") or f.get("lay")) and not SG.readable(f, practised(mind)):
+                continue                                                    # an expert's reading, or a lay one (signs.py)
             if f.get("dawn") and f["text"] in t["dawn"]:
                 continue
             if homes & set(f["about"]) and not f.get("event"):
@@ -307,6 +309,8 @@ def evening(w, attend: dict, today: dict) -> dict:
                 p *= eye(here, name)
             if rng.random() < p:
                 cand.append((f["salience"] + rel, f))
+        close = {f["thing"] for _, f in cand if f.get("thing") and f.get("reach") == "near"}
+        cand = [(k, f) for k, f in cand if not (f.get("thing") in close and f.get("reach") == "rule")]   # a close look over a glimpse
         cand.sort(key=lambda x: -x[0])
         notice = [f for _, f in cand[:NOTICE_MAX + (2 if place else 0)]]
         t["notice"] = [f["text"] for f in notice]
@@ -369,7 +373,7 @@ def evening(w, attend: dict, today: dict) -> dict:
                 t["learned"].append(f"From watching {actor} you now have a rough idea of {KN.label(tech)}.")
         for f in notice + att:
             if f.get("thing") and f.get("sense") != "smell":
-                TH.remember(w, name, f["thing"], "saw", text=f["text"])
+                TH.remember(w, name, f["thing"], "saw", text=f["text"], close=f.get("reach") == "near")
         for f in con + notice + att:
             if f.get("land"):
                 for sub in f["about"]:
