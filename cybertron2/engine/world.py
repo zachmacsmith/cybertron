@@ -107,6 +107,13 @@ class World:
                        "fertility": float(p.get("fertility", 1.0)), "broken": float(st.get("broken", 0.0)),
                        "last_crop": st.get("last_crop"), "last_kind": st.get("last_kind"), "ground": p.get("ground"),
                        "works": None, "side": p.get("side", "centre"), "height": int(p.get("height", 1))}   # D2-114
+                if p.get("fence"):                                                   # a fence round it (D2-130): {kind, level, gate}
+                    fz = p["fence"]
+                    from cybertron2.engine import farm as FM
+                    need = FM.fence_need(par, fz.get("kind", "wood"))["units"]
+                    par["fence"] = {"kind": fz.get("kind", "wood"), "units": need, "level": int(fz.get("level", 2)), "built": True,
+                                    "gate": fz.get("gate", "shut"), "mend": float(fz.get("mended", 0.25)) * need,   # kept this season
+                                    "pending": {}, "since": -1}
                 if st.get("works"):                                                  # seeded field works (D2-66): {done: plots}
                     gw = st["works"]
                     tech_y = 40.0 if p.get("ground") == "wet" else 60.0
@@ -135,6 +142,14 @@ class World:
             roles = {r: int(h.get(r, 0)) for r in ("cows", "oxen", "bulls", "young")}
             if not any(roles.values()):
                 roles["cows"] = int(h.get("count", 6))
+            if h.get("road"):                                                   # a herd lost on a road: {road: [a, b], stretch, home}
+                a, b = h["road"]
+                rid = f"road:{a}-{b}" if f"road:{a}-{b}" in s["roads"] else f"road:{b}-{a}"
+                s["herds"][hid] = {"node": rid, "parcel": None, "home": h.get("home"), "pos": int(h.get("stretch", 1)),
+                                   "lost": {"day": -1, "from": a, "road": rid}, "name": h.get("name", hid), "kind": h.get("kind", "cattle"),
+                                   **roles, "count": sum(roles.values()), "in_milk": float(min(roles["cows"], int(h.get("in_milk", 0)))),
+                                   "milked": {"day": -1, "n": 0}, "births": 0.0, "hungry": 0, "watched": -1}
+                continue
             s["herds"][hid] = {"node": self.node_of(h["parcel"]), "parcel": h["parcel"], "home": h["parcel"], "name": h.get("name", hid),
                                "kind": h.get("kind", "cattle"), **roles, "count": sum(roles.values()),
                                "in_milk": float(min(roles["cows"], int(h.get("in_milk", 0)))), "milked": {"day": -1, "n": 0},
@@ -164,6 +179,11 @@ class World:
                     s["institutions"][hh]["offices"]["head"] = name
         for c in spec.get("claims") or []:                                     # seeded claims (D4-21, D4-23)
             self._claim(tuple(c["thing"]), c["claimant"], c.get("rights", "all"), c.get("grounds", "seeded"), since=-1)
+        for kind, table in (("parcel", {p: x for n in spec.get("nodes", {}).values() for p, x in (n.get("parcels") or {}).items()}),
+                            ("herd", spec.get("herds") or {})):                 # `holder:` on a parcel or herd: a seeded claim
+            for key, x in table.items():
+                if (x or {}).get("holder") and not self.claims_on((kind, key)):
+                    self._claim((kind, key), x["holder"], "all", "seeded", since=-1)
         for bid, b in s["buildings"].items():                                  # a house claimed by its household unless given
             hh = (spec["buildings"][bid] or {}).get("household")
             if hh and not self.claims_on(("building", bid)):

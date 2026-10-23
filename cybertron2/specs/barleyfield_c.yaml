@@ -1,0 +1,45 @@
+# Package C, herds and fences in one node (02s §4): Barleyfield cut out of the region, with two herds: the Reeds' cattle on the open
+# Common, its grass thin, and the Barrows' cattle in Barrow Close behind a wattle fence; ripe barley in North Field and ripe oats in
+# West Field, both next to where the herds are; a road leaving from the Common's west side to the Downs, a pasture nobody here has been
+# to; a wood with a game trail out of it that nobody knows. Sides and heights set from the land. Nothing is scripted.
+base: cybertron2/specs/barleyfield_s1.yaml
+name: Barleyfield, Package C live run (herds and fences)
+days: 10
+spells:
+  - {kind: dry, from: 1, to: 10}
+nodes:
+  barleyfield:
+    parcels:
+      bf_green: {side: centre, height: 1}
+      north_field: {side: north, height: 1}
+      bean_field: {side: north, height: 1}
+      rest_field: {side: north, height: 2}
+      east_field: {side: east, height: 2}
+      west_field: {side: west, height: 1, holder: Barrow,
+                   state: {crop: {kind: oats, left: 70, ripe_day: 2}, last_crop: legumes}}
+      south_field: {side: south, height: 1}
+      brook_field: {side: south, height: 0}
+      bf_meadow: {side: south, height: 0}
+      bf_pasture: {side: west, height: 1, state: {grass: {K: 100, S: 30, r: 0.32}}}
+      barrow_close: {name: Barrow Close, cover: pasture, size: 2, side: east, height: 1, holder: Barrow,
+                     text: "the Barrows' close, a wattle fence round it", adj: [east_field, bf_green],
+                     fence: {kind: wood, level: 2, gate: shut}}
+      barley_wood: {name: Barley Wood, cover: forest, size: 2, side: west, height: 2, text: "a wood of ash and hazel at the edge of the fields",
+                    adj: [west_field], state: {wood: {K: 150, S: 120, r: 0.03}, plants: {K: 6, S: 5, r: 0.3}, game: {K: 5, S: 4, r: 0.25}}}
+  downs:
+    name: the Downs
+    unexplored: true
+    parcels:
+      downs_grass: {name: the Downs, cover: pasture, size: 6, text: "open downland grazing", adj: []}
+  hollow:
+    name: Hollow End
+    unexplored: true
+    parcels:
+      hollow_clearing: {name: the Hollow, cover: meadow, size: 2, text: "a clearing at the end of a trail", adj: []}
+roads:
+  - [barleyfield, downs, 1, {terrain: hills, way: "a drove road west over the downs",
+                             ends: {barleyfield: {parcels: [bf_pasture], side: west}}}]
+  - [barleyfield, hollow, 1, {terrain: woodland, way: "a game trail through the trees",
+                              ends: {barleyfield: {parcels: [barley_wood], side: west, hidden: true}}}]
+herds:
+  barrow_cattle: {name: the Barrow cattle, kind: cattle, parcel: barrow_close, cows: 4, oxen: 1, young: 1, in_milk: 2, holder: Barrow}

@@ -277,9 +277,6 @@ def dawn(w) -> None:
             for node in (list(w.s["nodes"]) if sg.get("node") in (None, "all") else [sg["node"]]):
                 w.event(node, "sign", sg["text"], about=[sg.get("about", "sky")], salience=float(sg.get("salience", 0.3)),
                         tags=sg.get("tags", ["season"]), sense=sg.get("sense", "sight"), dawn=True)
-    for hid, h in w.s["herds"].items():                                     # a stray herd wanders home after a day
-        if h["parcel"] != h["home"] and not any(int(i["day"]) - 1 == w.d and i.get("herd") == hid for i in w.spec.get("incidents") or []):
-            w.apply("set", h["node"], ref=("herd", hid), field="parcel", value=h["home"])
 
 
 def night_lines(w, rec) -> dict:

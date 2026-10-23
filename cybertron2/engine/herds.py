@@ -103,7 +103,7 @@ def value(w, h, pid) -> float:
         food += max(0.0, g["S"] - 0.05 * g["K"]) / n
     v = min(1.0, food)
     if c and c.get("area_left", 0) > 1e-6 and w.d >= int(c["ripe_day"]):
-        v += float(dr["ripe"])
+        v += float(dr["ripe"]) * v                                             # a ripe crop pulls while there is much of it left
     if hungry and par["cover"] == "water":
         v += float(dr["water"])
     if pid == h.get("home") and float(h.get("in_milk", 0.0)) >= 0.5 and not hungry:
@@ -143,12 +143,14 @@ def wander(w, hid, rec) -> list:
     road_at = {p: (rid, other) for rid, other, end in LY.road_ends(w, node) if not end.get("hidden") for p in end["parcels"]}
     way = []
     for _ in range(n):
-        if pid in road_at and rng.random() < float(HERDS["onto_road"]):     # onto the road from a road-end parcel
-            onto_road(w, hid, road_at[pid][0], node, rec)
-            return way
         goal = target(w, h, pid)
         if goal == pid:
             break
+        if pid in road_at and rng.random() < float(HERDS["onto_road"]):     # a step from a road-end parcel may take the road
+            if way:
+                w.apply("set", node, ref=("herd", hid), field="parcel", value=pid)
+            onto_road(w, hid, road_at[pid][0], node, rec)
+            return way
         step = LY.path(w, pid, goal, (hid,))[1]
         if through(w, step) < 1.0 and rng.random() >= through(w, step):
             break                                                             # the fence round it kept them out
