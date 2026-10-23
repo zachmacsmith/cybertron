@@ -190,3 +190,35 @@ def test_traces_left_by_a_party_fade_and_are_read_by_a_later_traveller(monkeypat
     N.departures(w, w.s["today"])
     RD.night(w, w.s["today"])
     assert any("going toward Ashwood, a day old" in x for x in w.s["people"]["Sibyl"]["transit"]["notices"])
+
+
+def test_a_meeting_on_the_road_calls_llm_agents_in_their_own_conversation(tmp_path, monkeypatch):
+    from cybertron import llm
+    sent = []
+
+    def fake_call(backend, model, system, user, schema, **kw):
+        text = str(user).split("Plan your day")[-1]
+        sent.append(text)
+        if "## On the road" in text and "meeting goes on" not in text:
+            return {"why": "x", "actions": [{"do": "go on"}], "say": [{"to": "everyone", "text": "Well met."}]}, None, {"cc_equiv_usd": 0.0}
+        return {"why": "x", "actions": [{"do": "travel", "to": "Ashwood"}] if "Millbrook" in text else []}, None, {"cc_equiv_usd": 0.0}
+    monkeypatch.setattr(llm, "call", fake_call)
+    monkeypatch.setitem(RD.TERRAIN["woodland"], "meet", 1.0)
+    spec = copy.deepcopy(SPEC)
+    spec["days"] = 2
+    spec["roads"] = [["millbrook", "ashwood", 1, {"terrain": "woodland"}]]
+    for n, a in spec["agents"].items():
+        if a.get("model"):
+            a["model"] = "bot"
+    spec["agents"]["Edric"]["model"] = "claude-haiku-5-5"
+    spec["agents"]["Simkin"]["model"] = "claude-haiku-5-5"
+    spec["script"] = [{"day": 1, "who": "Edric", "do": {"do": "travel", "to": "Ashwood"}},
+                      {"day": 1, "who": "Simkin", "do": {"do": "travel", "to": "Millbrook"}}]
+    import yaml
+    p = tmp_path / "s.yaml"
+    p.write_text(yaml.safe_dump(spec))
+    R.run(str(p), str(tmp_path / "out"), backend="api", workers=2)
+    rows = [json.loads(l) for l in open(tmp_path / "out" / "turns.jsonl")]
+    calls = [x for r in rows if r["agent"] in ("Edric", "Simkin") for x in r.get("talk", []) if x.get("wave") == "fuse"]
+    assert calls and all(not x.get("error") for x in calls)
+    assert any("meeting goes on" in t for t in sent)                   # a second wave: what the other said

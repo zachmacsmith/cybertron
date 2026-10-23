@@ -77,7 +77,7 @@ def decide(w, name, text, opening, system, backend, conv, talk=None, schema=None
     from cybertron import llm
     t0 = time.monotonic()
     attempts = []
-    schema = schema or PR.schema_for(Here(w, name), Mind(w, name))
+    schema = schema or PR.schema_for(Here(w, name, transit=fuse is not None), Mind(w, name))
     sent, ctx = conv.message(name, w.d, system, schema, text, opening)
     out, reasoning, usage = llm.call(backend, model, ctx["conv"]["system"], sent, schema,
                                      thinking_budget=int((w.spec.get("llm") or {}).get("thinking_budget", 2000)), attempts=attempts)
