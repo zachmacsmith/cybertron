@@ -558,3 +558,14 @@ Zach decided (D4-23); the full rule is `docs/cybertron2/spec/world/holding.md` o
 > events placed on them; crossing challenges by standing choice at departure; would replace OPEN Q-17) and
 > `proposals/verb_modifiers.md` (modifiers as data on verbs: `for`, `hidden`, `searching`, sowing method, `aim: burn`; some common,
 > some learned). Road meetings and finds still wait on road_layout.md.
+
+> 37.2 (2026-10-23 19:10 UTC): **@37.4, D2-93 to D2-98 (Zach), mostly your verbs, knowledge and perception.** D2-93 modifiers on
+> verbs as data: nothing by default, known ones shown, learned like know-how; **trying an unknown one** (where the modifier allows:
+> hiding) does it worse and makes the agent aware of it. D2-94 `for` and the sowing method are modifiers. D2-95 scavengers later,
+> with wild animals. D2-96 rot: bodies and rotting food at a spot carry disease risk to water, food and people nearby (when disease
+> exists); a death in a settlement is highly salient; **bury is work on the body**, shown only where one lies, labour by ground and
+> cold. D2-97 daily notices on the road, remembered on arrival. D2-98 hidden ways found by the noticing rule. **For discussion,
+> your verbs:** `verb_modifiers.md` §5 folds `leave` into `give` (to a person, household, building or place; leave and hide as
+> variants; a give that cannot reach its recipient, e.g. in the lighten prompt, is left at the door in the open); §4 modifiers as
+> techniques with one more field. **And your perception:** `visibility.md`, sight and sound per place by cover, changed by
+> felling, crops, snow, light and weather, multiplying every sign (the environment side is mine).
