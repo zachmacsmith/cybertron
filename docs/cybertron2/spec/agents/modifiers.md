@@ -16,6 +16,8 @@ and the know-how of proposals/knowledge.md (D4-24).
   modifier allows it, does it worse and makes the agent aware of it.
 - D2-94: `for` and the sowing method are modifiers.
 - D2-112: modifiers are techniques with one more field naming the verbs they change.
+- D2-125: `searching` on travel, known to all.
+- D2-129: at least one person in the world knows dibbling by default; it spreads by teaching.
 - D2-111: `give` takes `to: <place>`; leaving and hiding are giving to a place (world/things_in_places.md).
 
 ## Mechanics
@@ -37,8 +39,9 @@ A modifier is a technique (the same record, levels and ways of being learned as 
 |---|---|---|---|---|
 | `for: <party>` | work, gather, make, build, give, offer, accept | output into, and payment from, that party's container (D2-37) | all | |
 | `hidden: under brush` / `hidden: buried` | give to a place | conspicuousness x0.2 / x0.03; 1 / 2 units of work | all | tryable (half as well hidden) |
-| `method: dibble` | sow | 3x the work, 0.6x the seed (D2-54) | learned | no |
+| `method: dibble` | sow | 3x the work, 0.6x the seed (D2-54) | learned (at least one person in the world knows it, D2-129) | no |
 | `on trouble`, `stop at`, `gather` | travel | the choices at departure (world/roads.md) | all | |
+| `searching: <herd or person>` | travel | attention x5 for it on each stretch (D2-125) | all | |
 
 ### Showing and using
 
@@ -67,11 +70,11 @@ untaught try, the modifier in its verb line.
 
 ## Open
 
-- `searching` on travel and `aim: burn` on attack as modifiers (proposals/verb_modifiers.md Q3).
+- `aim: burn` on attack as a modifier (with fire: OPEN L-21).
 - Later modifiers: going quietly, working carefully (OPEN L-19).
 
 ## Sources
 
 [proposals/verb_modifiers.md](../../proposals/verb_modifiers.md), [knowledge.md](../../proposals/knowledge.md).
 
-*Current as of 23 Oct 2026: D2-93, D2-94, D2-111, D2-112.*
+*Current as of 24 Oct 2026: D2-93, D2-94, D2-111, D2-112, D2-125, D2-129.*

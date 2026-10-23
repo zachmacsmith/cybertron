@@ -71,4 +71,4 @@ flagged; strike it through when it is built or decided.
 | L-21 | Fire: house fire and wildfire in the scheduler, spreading along the parcel graph and edges; setting fire in a raid; fire as a fuse event (D2-49 to D2-51, D2-72 decided) | 24 Oct | attacks_and_walls.md; environment.md | | 37.2 with 37.4 |
 | L-22 | Raiders and other outside agents arriving with goals (D2-76): seeding transient populations; needed to test raids live | 24 Oct | environment_catalogue.md §1 | | 37.4 |
 | L-23 | Water as a need, and the land's hidden state (water table, wells, latrines, middens, cleanness: environment_state.md, all six of its questions) | 24 Oct | environment_state.md | | 37.2 |
-
+| L-24 | Fences on the borders between parcels (rather than round a parcel); hedges; night folds; wolves | D2-130 | fences.md; livestock.md | the parcel graph and fences round parcels built | 37.2 with 37.4 |

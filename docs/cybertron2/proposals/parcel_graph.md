@@ -1,5 +1,7 @@
 # Proposal: the parcel graph (where things are inside a node)
 
+> **Decided parts are in the spec:** spec/world/parcel_graph.md (24 Oct).
+
 **Status:** partly accepted: D2-114 to D2-116 (24 Oct); sides, heights and the overview's form to confirm. Design only.
 **Owner:** 37.2 (author); places, layout and perception are 37.4's ([layout.md](layout.md), [seeing.md](seeing.md)), so this goes to
 them. **Affects:** spec/world/places.md, generation.md; spec/information/noticing.md, perception.md, prompts.md; world/roads.md

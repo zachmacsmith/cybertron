@@ -66,6 +66,8 @@ Newest first. Ideas decided or rejected in conversation before 23 Oct are backfi
 
 | Date | Idea | Outcome | Where |
 |---|---|---|---|
+| 24 Oct | Dibbling known to at least one person in the world; fences round a parcel; the split share peaked at a quarter; gates automatic, opening one an act | accepted: D2-129 to D2-132 | livestock.md |
+| 24 Oct | Fences on borders between parcels (for now); one farmer per village knowing dibbling | replaced: D2-130, D2-129; borders later (L-24) | livestock.md |
 | 24 Oct | Build choices confirmed or changed (Q-20); herds wandering, lost on roads, driven, split by size; fences wood then stone on borders; searching as a modifier | accepted: D2-118 to D2-128 | livestock.md, fences.md, OPEN Q-20 |
 | 24 Oct | Road-meeting offers as their own goods-for-goods system | rejected: the same agreement system as at a node (D2-120) | road_encounters.md |
 | 24 Oct | The parcel graph from the land, with sides and heights; sensing along the way; the village as a whole; herds wandering far; fire, raiders as outside agents, and water and the land's hidden state flagged for later | accepted: D2-114 to D2-117; OPEN L-21 to L-23 | parcel_graph.md, livestock.md, OPEN.md |

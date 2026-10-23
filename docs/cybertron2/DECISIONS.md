@@ -196,6 +196,10 @@ and correct them in place.**
 | D2-126 | 24 Oct | **Fences are built with herd wandering:** wood first, then stone, on the borders between parcels | fences.md; livestock.md | herding only |
 | D2-127 | 24 Oct | **Driving a found herd:** a finder can drive it a stretch (on or back) or accompany it all the way, following it automatically; a further fuse call only if a sizeable group splits off and the drover notices | livestock.md | |
 | D2-128 | 24 Oct | **Herd size and splitting:** one person can hold only so many head; beyond that a group is likelier to split off and wander in its own direction; with enough people a herd almost always stays together | livestock.md | |
+| D2-129 | 24 Oct | **Dibbling: at least one person in the whole world knows it by default** (amends D2-119), and it spreads by teaching | conversation | at least one farmer in each village |
+| D2-130 | 24 Oct | **Fences go round a parcel for now: a parcel is fenced or not** (wood, or stone), keeping its herd in and strays out (amends D2-126); fences on the borders between parcels later (OPEN L-24) | conversation ("a plot is just fenced or not") | fences on borders now |
+| D2-131 | 24 Oct | **When a herd splits, the share that breaks off** is most often about a quarter, falling off exponentially toward smaller groups and toward half (in doublings from a quarter, with a spread of about one doubling), and at least one head | conversation | a uniform quarter to half |
+| D2-132 | 24 Oct | **Gates open and close by themselves** when people or a driven herd pass; nobody acts on them to move. **Opening a gate and leaving it open is an act** anyone can do, seen by whoever is present, so it can be sabotage | conversation | gates as something to work every time |
 
 ## Directions (Zach's stated aims recorded in the notes; designs follow them; checked by 37.2, 22 Oct)
 

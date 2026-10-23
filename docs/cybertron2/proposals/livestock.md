@@ -1,5 +1,7 @@
 # Proposal: livestock
 
+> **Decided parts are in the spec:** spec/economy/livestock.md (24 Oct: wandering, roads, driving, splitting, fences round a parcel, gates). This file keeps the reasoning, the history and what is still open.
+
 **Status:** partly accepted: D2-6, D2-18 (rest discussion). **Owner:** 37.2 (numbers), with 37.4 (the mechanism is shared:
 README "Who owns what"). **Affects:** spec/economy/livestock.md, spec/economy/production.md (draught, dung, fodder),
 spec/economy/transport.md (pack animals, carts, riders), spec/world (pasture; 37.4), spec/conflict/raids.md (herds driven off).
@@ -175,6 +177,10 @@ Revises the odds above. Proposed numbers, to confirm or calibrate:
 - 23 Oct: Zach: are herds kept by fences or herding; timber fences round plots, upgraded to stone for fewer escapes and wolves.
   Added: herded or enclosed; hurdles, post and rail, hedge, dry-stone wall, a fold; costs, upkeep, effects, paybacks; enclosure as a
   claim. For later.
+
+- 24 Oct: Zach decided D2-123 to D2-125, D2-127, D2-128, D2-130 to D2-132: herds wander far; lost on roads drifting a stretch a day,
+  losses by head, found by noticing; driving a stretch or accompanying; capacity and splitting, the share split off peaked at a
+  quarter; fences round a parcel (fenced or not) for now, borders later; gates automatic, opening one an act. Spec written.
 
 ## Sources
 

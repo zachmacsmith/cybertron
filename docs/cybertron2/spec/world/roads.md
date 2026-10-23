@@ -25,6 +25,9 @@ Written by 37.2 at Zach's request (23 Oct), from proposals/road_layout.md, road_
 - D2-90: each road end is tied to a side and parcels, a road or hidden. D2-92: how hidden follows the land. D2-98: hidden ways are
   found by the noticing rule.
 - D2-81: travellers get fuse calls (an exception to D4-10).
+- D2-120: offers in a meeting go through the same agreement system as at a node. D2-121: where crossing parties meet varies.
+- D2-122: every road has a terrain by default; a bare road is only a comparison switch.
+- D2-125: `searching` on travel.
 
 ## Mechanics
 
@@ -33,7 +36,8 @@ Written by 37.2 at Zach's request (23 Oct), from proposals/road_layout.md, road_
 - An edge of n days has **n stretches**, numbered from each end. A traveller leaving at nightfall spends its first night on
   stretch 1 from its end, its second on stretch 2, and arrives at dawn after the last (D4-8).
 - Each stretch has a **terrain** (plain, farmland, woodland, marsh, hills, mountain, river valley): the edge's terrain unless the
-  world gives that stretch its own.
+  world gives that stretch its own. **Every road has a terrain** (D2-122): from the land it crosses, else a farm track; a world can
+  make a road bare (no meetings, notices or traces) only as a switch for a comparison arm.
 - Things on a road lie on a stretch (world/things_in_places.md): remains, dropped goods, a camp, traces.
 
 ### Landmarks (D2-107, D2-109)
@@ -96,7 +100,7 @@ or a camp); the departure prompt states what N days of waiting would cost in foo
 ### Meetings (D2-110)
 
 - **Who meets:** parties going opposite ways on one edge meet on the night they are on the same stretch, or cross between
-  stretches (on the stretch where they cross). Parties going the same way that left the same day already travel together.
+  stretches; then where they meet is drawn between the two stretches (keyed), three times likelier on one with a landmark (D2-121). Parties going the same way that left the same day already travel together.
 - **Chance:** by the stretch: 0.95 at a ford, bridge, pass or narrows; otherwise by terrain: farmland 0.9, river valley 0.8,
   woodland 0.7, marsh 0.6, open plain 0.6 (seen from afar: either can choose to meet or avoid); fog halves it
   (environment/visibility.md).
@@ -104,8 +108,9 @@ or a camp); the departure prompt states what N days of waiting would cost in foo
   they visibly carry. Then:
   1. **A short conversation:** up to 3 waves of talk among everyone in both parties, as the talk step at a node
      (information/speech.md); speech costs nothing in transit.
-  2. **Giving and offers** during the talk: `give`, `offer` and `accept`, free as at a node (D2-25), settling from what each
-     carries.
+  2. **Giving and offers** during the talk: `give`, `offer` and `accept`, free as at a node (D2-25), through **the same agreement
+     system as at a node** (D2-120: spec/economy/agreements.md): legs due now settle from what each carries; promises and payments
+     over time stay open and are paid where there is a path (D2-32).
   3. **Each party's choice**, made at once: go on; turn back; change course (travel with the other party, the same way, to its
      destination); attack; flee.
 - **Resolution:** an attack is fought on the road as at a node (conflict/combat.md), the other party's choice counting as its
@@ -114,7 +119,7 @@ or a camp); the departure prompt states what N days of waiting would cost in foo
 
 ### Where a road leaves a node; hidden ways (D2-90, D2-92, D2-98)
 
-- Each end of an edge is tied to **a side of the node and one or more parcels** (world/places.md, layout); those working there are
+- Each end of an edge is tied to **a side of the node and one or more parcels** (world/parcel_graph.md); those working there are
   near it.
 - Each end is a **road** (known to everyone at the node) or **hidden** (known to none, or to those who found it or were told). The
   two ends can differ.
@@ -158,11 +163,12 @@ party and the conversation.
 - Waiting on a road for camps, tolls, patrols and ambushes: later (OPEN L-7).
 - Herds wandering onto roads, and searching for them: later (OPEN L-8).
 - Building on landmarks: later (OPEN L-5).
-- Whether `searching` on travel is a modifier (agents/modifiers.md).
+- Searching: `travel {to, searching: <herd or person>}` (D2-125): attention x5 for that herd or person on each stretch passed
+  (information/noticing.md); the searcher may turn back at any point by its departure choice.
 
 ## Sources
 
 [proposals/road_layout.md](../../proposals/road_layout.md), [road_encounters.md](../../proposals/road_encounters.md),
 [hidden_ways.md](../../proposals/hidden_ways.md), [journeys.md](../../proposals/journeys.md); world/edges.md.
 
-*Current as of 23 Oct 2026: D2-81, D2-90, D2-92, D2-98, D2-104 to D2-110, D2-113.*
+*Current as of 24 Oct 2026: D2-81, D2-90, D2-92, D2-98, D2-104 to D2-110, D2-113, D2-120 to D2-122, D2-125.*
