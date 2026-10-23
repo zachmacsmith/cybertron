@@ -23,6 +23,7 @@ proposal**; **Why**; **Alternatives considered**; **Open questions**; **Affects*
 
 | File | Summary | Owner | Status |
 |---|---|---|---|
+| [layout.md](layout.md) | the layout inside a node: parcels of one cover (forest, field, pasture, water, built ground...) with neighbours and a side; features (brook, road, well, seam); structures on built ground; movables on a parcel or in a room; attention, claims and land change on one model | 37.4 | discussion |
 | [seeing.md](seeing.md) | everything an agent is shown each round and how it changes; attention (concerns you, salient, a glimpse, one thing attended to in detail), feeling watched, observations from the state; templates first, an optional narrator per node and day; what is missing and what should go | 37.4 | discussion |
 | [verbs.md](verbs.md) | the closed list of about 25 verbs always in the system prompt (force always shown), objects shown by knowledge and place, office verbs to holders; the possible space against the shown space; gaps (steal, damage, flee, yield, tend, bury, scout) | 37.4 | ready for a decision |
 | [notes.md](notes.md) | private notes: up to 8, one pinned and shown, titles of the rest, opened in the talk step and shown at once; memory, not objects: never passed on except by telling, lost at death | 37.4 | discussion |
@@ -49,6 +50,7 @@ Newest first. Ideas decided or rejected in conversation before 23 Oct are backfi
 
 | Date | Idea | Outcome | Where |
 |---|---|---|---|
+| 23 Oct | A per-node layout: parcels, features, structures, movables | discussion | [layout.md](layout.md) |
 | 23 Oct | Deliberate misperception by the engine (a seeded wrong fact) | rejected (Zach) | [seeing.md](seeing.md) §4 |
 | 23 Oct | Two channels: a daily notice of the most salient facts (templates, by chance and relevance) and attending (detail, model description); signs of shifts by salience and relevance | discussion (Zach's direction) | [seeing.md](seeing.md) §3c |
 | 23 Oct | The engine keeps facts about the world as dated beliefs with a source; the agent keeps interpretations and plans | discussion | [knowledge.md](knowledge.md) §7 |

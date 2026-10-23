@@ -131,6 +131,9 @@ tracks), whether it lasts or is momentary, and, hidden, whether it is true (sign
 | **the land and sky** | weather, the season's signs, the horizon: smoke, a glow at night, birds |
 | **a body, or a scene** (where a fight was, a burnt house) | what can be seen of what happened |
 
+These are instances of four general kinds (a parcel, a feature, a structure or room, a movable) plus gatherings and the sky:
+see [layout.md](layout.md), which generalises them.
+
 Not attendable: other nodes (only what can be seen from here, such as smoke on the horizon), anything inside a room it may not
 enter, and its own house and body (already shown to it every round).
 
