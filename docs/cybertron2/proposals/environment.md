@@ -1,7 +1,7 @@
 # Proposal: the environment over time (one scheduler for eras, years, spells, incidents and their signs)
 
-**Status:** discussion (23 Oct). Design only: nothing is to be built yet (Zach). **Owner:** 37.2, at Zach's request (23 Oct),
-taking over the environment design from 37.4, who owns the engine and the spec area `spec/environment/` and is building M1.
+**Status:** partly accepted: D2-69 to D2-75 (23 Oct); the catalogue, disease and the details are discussion. Design only: nothing
+is to be built yet (Zach). **Owner:** 37.2, who now owns `spec/environment/` (D2-75); 37.4 builds.
 **Affects:** spec/environment/scheduler.md, calendar.md, climate_and_eras.md (to write), resources.md; information/signs.md,
 perception.md; world/land.md (land kinds' responses); life/ (illness); economy/production.md (crops, herds, forests); conflict/
 (fire); core/architecture.md (the scheduler's place in the day). **Model:**
@@ -225,6 +225,64 @@ A run of 20-30 days is about one year (D4-13). **An era of several years never c
 3. **A scripted shift** for experiments: an era change on a chosen day, the same in every arm.
 Proposed: 1 for the first worlds, 2 and 3 available as world settings.
 
+## 11. Risks attached to things (D2-71)
+
+Zach: incidents vary with how a world is set up, and every new object brings its own risks; many emerge from the systems rather
+than from the weather. So risks are **data on kinds of things**, not only on the land:
+
+| Thing | Its risks | Raised by | Prevented or reduced by |
+|---|---|---|---|
+| **a house or any building** | a break (H-5), **collapse** (injures or kills those inside), a chimney fire | missed upkeep (condition low), gales, snow load, wattle | upkeep, stone, mending after a storm |
+| **a mill** (D2-61) | the wheel breaks; a flood damages the wheel and leat; the stones crack | missed upkeep, high river, hard use | upkeep by a carpenter and a mason; a sluice to shut in a flood |
+| **a store** | rats, damp, theft, fire | full and old stores, wattle, damp | cellars, bins, a lock, a cat (later) |
+| **a herd** | strays (fences down), **escapes** onto crops, wolves, murrain, theft | poor fencing, hunger, winter, pasture shared with other herds | fences mended (upkeep), a herder, stalls (D2-45), a watch |
+| **a crop** | blight, smut (seed-borne), a **new pest** that attacks one crop kind, hail, frost | the same crop twice, wet spells, seed from elsewhere | rotation, clean seed, seed selection (D2-65) |
+| **a road, a bridge, a ford** | washed out, a bridge falls | floods, missed upkeep | upkeep, stone bridges |
+| **a mine or quarry** | collapse (injury, the seam closed for days) | a deep seam, wet spells, no props | props (timber), a skilled miner, a miner's pick (D2-48) |
+| **a hearth or oven** | fire spreading to the roof | thatch, dry spells, no one watching it | stone, a fire watch |
+| **gear and tools** | wear and breaking (D2-46) | use | a smith's mending |
+
+- **The hazard of a thing's risk** uses the same formula (D2-69): base x conditions x **neglect**, where neglect is how far the
+  thing's condition has fallen through missed upkeep. So upkeep is the price of lower risk, and a household or institution that
+  cannot keep up its buildings carries a growing chance of losing them, or the people inside.
+- **Novel risks arrive with novel things:** a new crop kind from the frontier can bring a pest the region has never seen; a herd
+  bought at a far market can bring murrain (carriage, environment_catalogue.md §3). The world file and the frontier (37.5) can add
+  risk entries with the things that carry them.
+- **Emergent incidents** need no scheduler entry beyond the thing's risk: a collapsed house is the house's own risk firing; its
+  draw is still keyed (D2-70), so arms stay paired.
+
+## 12. Across edges (D2-72, D2-74)
+
+Zach: fires, and some things people experience, should cross between nodes, depending on the edge: a mountain ridge, a forest
+path and a long plain carry different things.
+
+**What the engine needs on an edge** (world/edges.md, 37.4: OPEN Q-14): its **terrain** along the way (open plain, farmland,
+woodland, marsh, hills, a ridge or pass, a river valley), its **length** (days, as now), whether it follows a **river**, and its
+**height change**. Generation already derives edges from terrain (D4-22), so these come from the same layers.
+
+| Terrain of the edge | Sight (smoke by day, fire at night, a beacon) | Sound (bells, a great noise) | Fire spreading | Disease and pests |
+|---|---|---|---|---|
+| open plain, farmland | far: smoke seen two or three days' travel off | about a day | grass fire in a dry spell | carried by travellers |
+| woodland | hidden: seen only as smoke above the trees, close | short | **carries fire** (a forest fire can run along it) | carried |
+| marsh | far over flat ground, hazy | short | stops fire | fever along it |
+| hills | partly: from the tops | short | patchy | carried |
+| ridge or high pass | **blocks** sight between its two sides, except from the top | blocked | stops fire above the tree line | carried, slowly |
+| river valley | along the valley, not over its sides | carries along the water | stops fire (the river) | **floods flow down it**; fever |
+
+- **A sign's reach** = its kind's carrying power (smoke from a burning wood carries far; a house fire's smoke less; a sound little)
+  x the edge's terrain factor, shrinking with length. Signs that arrive are weaker (lower salience) and vaguer ("smoke to the
+  east, toward Ashwood"), so a far sign says that something is happening, not what.
+- **Fire across an edge:** a fire burning several parcels next to a wooded edge tries that edge with a hazard set by its size,
+  the spell (dry, windy) and the edge's terrain; if it crosses, it reaches the far node's parcels by that edge a day later.
+- **What does not cross** without a carrier: speech, prices, deaths, decisions (D4-35 still holds for everything but signs a kind
+  declares as carrying).
+
+## 13. Answers so far (23 Oct)
+
+1-2. The layers, the hazard and paired draws: accepted (D2-69, D2-70). 3. The catalogue: wider than §6 (environment_catalogue.md),
+and risks attach to things (D2-71, §11); fires cross edges (D2-72). 4. Eras as starting conditions (D2-73). 5. Signs carry between
+nodes as the edge's terrain allows (D2-74, §12). 6. Disease: to flesh out (OPEN Q-13). 7. The environment area moves to 37.2 (D2-75).
+
 ## Why
 
 - One scheduler, drawn from the seed, keeps every arm on the same weather (D4-4) and keeps environmental dice out of every other
@@ -263,6 +321,10 @@ Proposed: 1 for the first worlds, 2 and 3 available as world settings.
   (forest fires that spread, diseases), how they fit the world, and a central, general, clean, extensible scheduler where slower
   scales set the odds of faster ones and each has observable signs; both mechanical consequences and experience across land,
   individuals and salience; design only, nothing built. Written: this proposal and the exploration model.
+
+- 23 Oct: Zach answered §Open 1-7 (D2-69 to D2-75): risks attached to things and emerging from the systems (a mill breaking or
+  flooding, a neglected house collapsing on its people); fires across edges; signs across edges set by the edge's terrain; disease
+  to flesh out; the area moves to 37.2. Added §11-§13.
 
 ## Sources
 

@@ -39,8 +39,8 @@ board.
 
 | Area | Owner | Sections |
 |---|---|---|
-| The engine and its world model | **37.4** | spec areas core, world, agents, information, environment, conflict, seeding, measurement; the build plan; the registers (DECISIONS, OPEN) as editor |
-| The economy | **37.2** | spec area economy (goods, production and skills, buildings, livestock, transport numbers, money and markets) |
+| The engine and its world model | **37.4** | spec areas core, world, agents, information, conflict, seeding, measurement; the build plan; the registers (DECISIONS, OPEN) as editor |
+| The economy and the environment | **37.2** | spec areas economy and environment (D2-75); (goods, production and skills, buildings, livestock, transport numbers, money and markets) |
 | Shared | 37.4 (mechanism) and 37.2 (numbers) | carrying (economy/transport.md), lodging (economy/lodging.md); writing materials and papers in information/; walls and gates in conflict/ |
 | Life and kinship | 37.4 until 37.1 joins cybertron2 | spec area life |
 | Institutions | 37.4 until 37.3 joins cybertron2 | spec area institutions |

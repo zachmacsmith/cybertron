@@ -12,7 +12,7 @@ state it adds); **Parameters** (value and status: decided, proposed, calibrate);
 | [world/](world/README.md) | Places, land and the map | 37.4 |
 | [agents/](agents/README.md) | What an agent is and can do | 37.4 |
 | [information/](information/README.md) | What agents know and how it moves | 37.4 (37.2: writing materials, papers' economics) |
-| [environment/](environment/README.md) | The world changing over time | 37.4 |
+| [environment/](environment/README.md) | The world changing over time | 37.2 (D2-75; 37.4 builds) |
 | [economy/](economy/README.md) | Goods, production and trade | 37.2 (37.4: carrying and lodging mechanisms) |
 | [conflict/](conflict/README.md) | Force, defence and danger | 37.4 (37.2: the economics of walls and gates) |
 | [life/](life/README.md) | People over their lives | 37.4 (until 37.1 joins) |
