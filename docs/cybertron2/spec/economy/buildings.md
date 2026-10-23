@@ -17,6 +17,8 @@ buildings and buildings of two or three storeys need stone. Walls multiply the d
   kept, safe from rustling) are fittings.
 - D2-49: stone resists fire (walls stand; roof and contents can burn); a vault (stone-arched, ground floor, dear) does not burn.
 - D2-56: beds are made of timber and straw.
+- D2-60: an oven (stone) is a fitting: bread in batches. D2-61: millstones (hand, dressed), the ox gear and a water wheel are
+  fittings; a water wheel only at a river site.
 - D2-20: walls multiply the defence of those inside, and a stone building is less likely to be picked in a node raid (conflict/).
 
 ## Mechanics
@@ -59,4 +61,4 @@ with a hearth"), who holds them as they know it, and the rooms they may enter.
 [02e_shelter.md](../../../review/37_growth/02e_shelter.md), [02i_buildings.md](../../../review/37_growth/02i_buildings.md),
 [02k §3](../../../review/37_growth/02k_fuses_and_gates.md); proposals/buildings.md, proposals/shelter.md.
 
-*Current as of 23 Oct 2026: H-5, D2-3, D2-9, D2-20, D2-45, D2-49, D2-56.*
+*Current as of 23 Oct 2026: H-5, D2-3, D2-9, D2-20, D2-45, D2-49, D2-56, D2-60, D2-61.*

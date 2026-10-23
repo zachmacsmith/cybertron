@@ -25,7 +25,8 @@ is in proposals.
 - D2-52: skill by practice on all work. D2-53: crops from the sowing day; the cold kills what is not hardy. D2-54: sowing work per
   unit of seed; broadcast or dibble.
 - D2-58: grain spoils a little (house, bins, cellar). D2-59: the plot takes about 16 seed a sowing.
-- D2-44: bread. D2-46: weapons wear, with a small chance of breaking. D2-47: cheese. D2-48: specialised tools.
+- D2-60: the food ladder (whole 0.7, ground 1.0, bread 1.3). D2-61: the mill ladder. D2-62: dried meat.
+- D2-46: weapons wear, with a small chance of breaking. D2-47: cheese. D2-48: specialised tools.
 
 ## Mechanics
 
@@ -62,12 +63,19 @@ is in proposals.
 | weapons | fighting and hunting | strength in a fight; a better catch hunting | crude, blade |
 | trap | at a forest site | catches game overnight while the trapper is elsewhere; checked by a visit; depletes game like hunting; can be emptied by whoever checks it | |
 
-### Bread (D2-44)
+### Grain as food, mills and bread (D2-60, D2-61)
 
-- Grain is eaten as porridge at a hearth, with no other work.
-- Flour: grain ground by hand at a quern, or at a mill (millstones turned by hand, faster with a water wheel).
-- Bread: flour, fuel and work at a hearth make a little more bread than the grain put in (11 from 10); bread is eaten without a
-  hearth and keeps longer than other carried food. A mill's holder may charge for milling.
+| Eaten as | Food a grain | Needs |
+|---|---|---|
+| whole grain, boiled | 0.7 | a hearth |
+| ground grain (porridge) | 1.0 | a mill |
+| bread | 1.3; keeps about 5% a day; eaten without a hearth | flour, fuel, a hearth or an oven |
+
+- **Mills, built by adding parts:** a hand mill (two small stones turned by hand, any room); an ox mill (dressed millstones made
+  by a mason, turned by an ox) by upgrading it; a water mill (a wheel and a leat) only at a river site, usually a new building,
+  which can reuse dressed millstones carried there. Each rung grinds more grain per unit of work. A mill's holder may charge for
+  milling.
+- **Bread** is baked from flour at a hearth or, in batches, at a stone oven.
 
 ### Specialised tools (D2-48)
 
@@ -144,4 +152,4 @@ the soil in words ("tired", "good"), their seed in store, their tools and whethe
 [02l_farming.md](../../../review/37_growth/02l_farming.md), [02j_end_uses.md](../../../review/37_growth/02j_end_uses.md),
 [02d_ladders.md](../../../review/37_growth/02d_ladders.md); proposals/farming.md, proposals/tools.md.
 
-*Current as of 23 Oct 2026: H-6, D2-11 to D2-19, D2-23, D2-42, D2-43, D2-44, D2-46, D2-47, D2-48, D2-52, D2-53, D2-54, D2-58, D2-59.*
+*Current as of 23 Oct 2026: H-6, D2-11 to D2-19, D2-23, D2-42, D2-43, D2-46, D2-47, D2-48, D2-52, D2-53, D2-54, D2-58, D2-59, D2-60, D2-61, D2-62.*

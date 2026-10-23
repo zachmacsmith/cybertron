@@ -120,6 +120,10 @@ and correct them in place.**
 | D2-57 | 23 Oct | **The first region seeds two smiths** (no single-smith monopoly in the first runs); smithing pays most in a society already thriving | 02p; conversation | |
 | D2-58 | 23 Oct | **Grain spoils a little:** about 0.5% a day in a house, 0.25% in bins, 0.1% in a cellar or granary (about 18%, 10% and 4% over a 40-day year) | 02n; conversation | grain never spoiling (the engine as built) |
 | D2-59 | 23 Oct | **The plot's numbers** (D4-23's plot, what one adult works in a season by hoe and weeding): about 16 seed a sowing, about a fifth of the harvest | 02n | 02l's small plots |
+| D2-60 | 23 Oct | **The food ladder:** grain eaten whole (boiled at a hearth) is worth 0.7 food a grain, ground grain 1.0, bread 1.3; bread keeps (about 5% a day) and is eaten without a hearth; a stone oven bakes in batches. Farms can always eat without a mill | proposals/recipes.md §16 | D2-44's figures (porridge 1.0 with no grinding, bread 1.1) |
+| D2-61 | 23 Oct | **A mill ladder built by adding parts:** a hand mill (cheap, any room); an ox mill (dressed millstones by a mason, an ox to turn them) by upgrading it; a water mill needs a river site, so it is usually a new building, which can reuse the dressed millstones (carried by cart) | recipes.md §16; conversation | one expensive mill |
+| D2-62 | 23 Oct | **Dried meat** is a good: meat dried to about half its weight, keeping and travelling well | recipes.md §16 | |
+| D2-63 | 23 Oct | **Cattle are one kind with three roles:** cows (milk, calves), oxen (trained steers that pull) and bulls (needed for breeding; whoever holds the bull controls a herd's breeding); they share feeding, herding and slaughter rules; young are not a separate kind within a run | 02o; conversation | four kinds (cows, bulls, oxen, calves) as separate goods |
 
 ## Directions (Zach's stated aims recorded in the notes; designs follow them; checked by 37.2, 22 Oct)
 

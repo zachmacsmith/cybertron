@@ -81,8 +81,10 @@ Newest first. Ideas decided or rejected in conversation before 23 Oct are backfi
 | 23 Oct | The verbs (a lean set of 24) and what each agent is shown; force always shown | ready for a decision | [verbs.md](verbs.md) |
 | 23 Oct | Detecting what was told by reading the meaning of free speech | rejected in the proposal: name mentions, an `about` field and explicit `explain`/`teach` instead | [knowledge.md](knowledge.md) §4e |
 | 23 Oct | Know-how as a continuous score (0-1) | replaced in the proposal by four levels moved by counts (Zach) | [knowledge.md](knowledge.md) §4c |
+| 23 Oct | The food ladder; the mill ladder (water mill a new build at a river); dried meat; cattle as three roles of one kind | accepted: D2-60 to D2-63 | spec/economy |
+| 23 Oct | One expensive mill; every mill upgrade a full rebuild | rejected: a ladder by parts, geography deciding the water mill | D2-61 |
 | 23 Oct | Grain spoils a little; the plot's seed | accepted: D2-58, D2-59 | spec/economy/production.md |
-| 23 Oct | The food ladder: whole grain 0.7, ground 1.0, bread 1.3 that keeps; an oven | discussion | [recipes.md](recipes.md) §16 |
+| 23 Oct | The food ladder: whole grain 0.7, ground 1.0, bread 1.3 that keeps; an oven | accepted: D2-60 | [recipes.md](recipes.md) §16 |
 | 23 Oct | Labour need not be scarce; land binds; farms should feed towns | accepted: D2-55 | conversation |
 | 23 Oct | Forcing soil-breaking to make grain dearer | rejected: farming is not to be made harder | D2-55 |
 | 23 Oct | Charcoal back, cheese 2.5, beds of timber and straw, fieldstone, sun-dried shore salt, coin stamp later; two smiths seeded | accepted: D2-56, D2-57 | spec/economy |

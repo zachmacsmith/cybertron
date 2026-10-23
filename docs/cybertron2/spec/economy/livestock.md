@@ -9,10 +9,14 @@ live on grassland. On the farm, oxen pull the plough and their dung keeps the so
 
 - D2-6: one livestock system; animals are bred, not made; wild herds live on grassland.
 - D2-18: the plough needs an ox; fodder takes land; dung keeps the soil.
+- D2-63: cattle are one kind with three roles: cows (milk, calves), oxen (trained steers that pull), bulls (breeding).
 - D2-23: an ox works with a harness, a horse carries a rider with a saddle.
 
 ## Mechanics
 
+- **Cattle roles** (D2-63): a cow gives milk after calving and bears calves; an ox, a steer trained to the yoke, pulls a plough
+  or cart; a bull is needed for a herd to breed, so whoever holds the bull controls breeding. All three share the rules for
+  feeding, herding and slaughter. Young animals are counted with the herd; none grows up within a run.
 - A herd is a count of animals of one kind held by an owner at a node (holding: spec/world/holding.md). It grows only by breeding.
 - Animals eat: they graze where there is grazing, and need stored fodder where there is none (winter).
 - An ox with a harness can pull a plough (production.md) or a cart (transport.md). A horse with a saddle carries a rider.
@@ -44,4 +48,4 @@ Their animals by kind and count, whether they are fed, the pasture in words, wil
 [02g §2-2c](../../../review/37_growth/02g_resources_and_transport.md), [02l §5](../../../review/37_growth/02l_farming.md);
 proposals/livestock.md.
 
-*Current as of 23 Oct 2026: D2-6, D2-18, D2-23.*
+*Current as of 23 Oct 2026: D2-6, D2-18, D2-23, D2-63.*
