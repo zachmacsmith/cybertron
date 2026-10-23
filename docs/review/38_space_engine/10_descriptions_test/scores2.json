@@ -1,0 +1,13 @@
+{
+ "_note": "Run 2, judged by hand from raw_outputs2.json, cross-read against the Sonnet clause check stored there. Visible facts: building 15, person 13, field 13, land 12, tracks 11 (64 in all).",
+ "coverage": {"template2": "64/64",
+   "haiku": {"building": "14/15 (season)", "person": "12/13 (weather; 'hungry' dropped, 'thin in the face' kept)", "field": "12/13 (season)", "land": "10/12 (season, time)", "tracks": "5/11 (ground, time, light, sound, smell, about)", "total": "53/64"},
+   "sonnet": {"building": "15/15 (season only as 'before the winter')", "person": "11/13 (time, weather)", "field": "11/13 (season, stream)", "land": "9/12 (sky, season, time)", "tracks": "8/11 (time, light, smell)", "total": "54/64"}},
+ "unsupported_clauses": {"haiku": 0, "sonnet": 0, "checker_agrees": true},
+ "minor_stretches": {"haiku": ["land: geese calls 'carried through beech leaves' (two facts joined)"],
+   "sonnet": ["person: 'mud to the knee from the deep wood' (a cause joined to two facts)", "tracks: 'all you hear is' (claims no other sound)", "land: leaves 'have already turned' (fact: already turning)"]},
+ "leaks": {"haiku": 0, "sonnet": "1 borderline: land 'you know what that means before you let yourself say it' hints at the hidden hard winter (flagged by the checker); it is also what an almanac keeper would infer from early geese"},
+ "observer_view": {"haiku": "slight: 'your eye goes to', 'in your ground'; otherwise the facts in good prose", "sonnet": "strong: the builder sees work before winter and remembers late pay; 'your barley'; 'with the house still hungry'; 'you count it all against the stores'; 'your wood'"},
+ "sentence_limit": "Sonnet broke the 1-3 sentence limit twice (building, land: 4 sentences)",
+ "comprehension_sensible_reader": {"haiku2": "10/10", "sonnet2": "10/10"}
+}

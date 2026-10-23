@@ -1,0 +1,257 @@
+{
+ "building": {
+  "template2": "It is late autumn, evening: the miller's house stands two storeys high built of timber frame on stone and is worn with age, there are old grey chips round the chopping block, no fresh ones, your eye catches that the ridge beam over the door is rotten at one end, its door is locked. The shutters are closed, the chimney is cold, no smoke, dead leaves drifted against the doorstep, undisturbed. You hear no sound from inside, there is a smell of woodsmoke from the other houses in the lane, none from this one. Nobody else in the lane, there is low evening sun on the west wall.",
+  "haiku": {
+   "text": "Two storeys of worn timber frame on stone sit in low evening sun on the west wall, and the lane's woodsmoke stops at this house. The ridge beam over the door is rotten at one end, the chimney is cold, the shutters are closed, and the door is locked, with dead leaves undisturbed against the doorstep and only old grey chips round the chopping block. No sound comes from inside, and nobody else is in the lane.",
+   "cost_usd": 0.0007473,
+   "wall_s": 10.61,
+   "api_ms": 3811,
+   "in_tokens": 1955,
+   "out_tokens": 713,
+   "check": {
+    "text": "{\"clauses\":[{\"clause\":\"Two storeys of worn timber frame on stone sit in low evening sun on the west wall\",\"supports\":[\"storeys\",\"material\",\"condition\",\"light\",\"time\"]},{\"clause\":\"the lane's woodsmoke stops at this house\",\"supports\":[\"smell\"]},{\"clause\":\"The ridge beam over the door is rotten at one end\",\"supports\":[\"beam\"]},{\"clause\":\"the chimney is cold\",\"supports\":[\"chimney\"]},{\"clause\":\"the shutters are closed\",\"supports\":[\"shutters\"]},{\"clause\":\"the door is locked\",\"supports\":[\"door\"]},{\"clause\":\"with dead leaves undisturbed against the doorstep\",\"supports\":[\"sign_doorstep\"]},{\"clause\":\"and only old grey chips round the chopping block\",\"supports\":[\"sign_chopping_block\"]},{\"clause\":\"No sound comes from inside\",\"supports\":[\"sound_inside\"]},{\"clause\":\"nobody else is in the lane\",\"supports\":[\"about\"]}],\"leaked\":[],\"conveyed\":[\"storeys\",\"material\",\"condition\",\"light\",\"time\",\"smell\",\"beam\",\"chimney\",\"shutters\",\"door\",\"sign_doorstep\",\"sign_chopping_block\",\"sound_inside\",\"about\"]}",
+    "cost_usd": 0.012466,
+    "wall_s": 9.54,
+    "api_ms": 3169,
+    "in_tokens": 2145,
+    "out_tokens": 389
+   },
+   "answers": {
+    "text": "1. Probably not: the locked door, closed shutters, cold chimney, and absence of any sound or smoke suggest nobody is home.\n2. It needs work, at least at the ridge beam, which is rotten at one end, and the old, undisturbed signs of neglect suggest the rest of the house is also worn.",
+    "cost_usd": 0.0003754,
+    "wall_s": 7.8,
+    "api_ms": 1723,
+    "in_tokens": 1623,
+    "out_tokens": 102
+   }
+  },
+  "sonnet": {
+   "text": "Your eye goes straight to the ridge beam over the door, rotten at one end, on a worn two-storey house of timber frame on stone, and you know that's work for someone before the winter. The chimney is cold, the shutters closed, the door locked, and there's no sound from inside. Dead leaves lie undisturbed against the step and only old grey chips lie round the chopping block, while the other houses in the lane give off woodsmoke and this one gives none. The low evening sun is on the west wall and there's nobody in the lane, and you stand there tired from the roofing, remembering he paid you late last time.",
+   "cost_usd": 0.014797999999999999,
+   "wall_s": 13.85,
+   "api_ms": 6169,
+   "in_tokens": 1958,
+   "out_tokens": 697,
+   "check": {
+    "text": "{\"clauses\":[{\"clause\":\"Your eye goes straight to the ridge beam over the door, rotten at one end,\",\"supports\":[\"beam\",\"attention\",\"skill\"]},{\"clause\":\"on a worn two-storey house of timber frame on stone,\",\"supports\":[\"storeys\",\"material\",\"condition\"]},{\"clause\":\"and you know that's work for someone before the winter.\",\"supports\":[\"beam\",\"cares_about\",\"trade\",\"season\"]},{\"clause\":\"The chimney is cold, the shutters closed, the door locked, and there's no sound from inside.\",\"supports\":[\"chimney\",\"shutters\",\"door\",\"sound_inside\"]},{\"clause\":\"Dead leaves lie undisturbed against the step\",\"supports\":[\"sign_doorstep\"]},{\"clause\":\"and only old grey chips lie round the chopping block,\",\"supports\":[\"sign_chopping_block\"]},{\"clause\":\"while the other houses in the lane give off woodsmoke and this one gives none.\",\"supports\":[\"smell\"]},{\"clause\":\"The low evening sun is on the west wall\",\"supports\":[\"light\",\"time\"]},{\"clause\":\"and there's nobody in the lane,\",\"supports\":[\"about\"]},{\"clause\":\"and you stand there tired from the roofing,\",\"supports\":[\"state\"]},{\"clause\":\"remembering he paid you late last time.\",\"supports\":[\"relationship\"]}],\"leaked\":[],\"conveyed\":[\"beam\",\"storeys\",\"material\",\"condition\",\"chimney\",\"shutters\",\"door\",\"sound_inside\",\"sign_doorstep\",\"sign_chopping_block\",\"smell\",\"light\",\"about\",\"season\"]}",
+    "cost_usd": 0.013722,
+    "wall_s": 10.83,
+    "api_ms": 3857,
+    "in_tokens": 2199,
+    "out_tokens": 493
+   },
+   "answers": {
+    "text": "1. Probably not: the chimney is cold, the shutters are closed, the door is locked, and no smoke or sound comes from the house.\n2. It needs work: the ridge beam over the door is rotten at one end, and the worn timber frame will need repairs before winter.",
+    "cost_usd": 0.0004347,
+    "wall_s": 7.82,
+    "api_ms": 1843,
+    "in_tokens": 1677,
+    "out_tokens": 199
+   }
+  }
+ },
+ "person": {
+  "template2": "Midday: Gil looks hungry, thin in the face, he has mud to the knee, you see him walking slowly, favouring the arm, he is bent under a load of split timber on his back. He has come from the deep wood, there is a cut on the left forearm, bound with a rag, still seeping, you see pine resin on his hands, the split timber is pine, freshly cut. Breathing hard, you can hear, there is a smell of sweat and fresh-cut pine. He walks alone, the day is bright and mild.",
+  "haiku": {
+   "text": "Gil comes out of the deep wood alone at midday, thin in the face and breathing hard under a load of freshly split pine. Your eye goes to the rag bound on his left forearm, still seeping, and to the mud on his legs as he favours that arm and walks slowly past you. He smells of sweat and fresh-cut pine, and resin shows on his hands.",
+   "cost_usd": 0.0008465,
+   "wall_s": 11.65,
+   "api_ms": 5213,
+   "in_tokens": 1911,
+   "out_tokens": 929,
+   "check": {
+    "text": "{\"clauses\":[{\"clause\":\"Gil comes out of the deep wood alone at midday\",\"supports\":[\"came_from\",\"about\",\"time\"]},{\"clause\":\"thin in the face and breathing hard under a load of freshly split pine\",\"supports\":[\"look\",\"sound\",\"carrying\",\"timber\"]},{\"clause\":\"Your eye goes to the rag bound on his left forearm, still seeping\",\"supports\":[\"wound\"]},{\"clause\":\"and to the mud on his legs as he favours that arm and walks slowly past you\",\"supports\":[\"sign_legs\",\"gait\",\"attention\"]},{\"clause\":\"He smells of sweat and fresh-cut pine\",\"supports\":[\"smell\"]},{\"clause\":\"and resin shows on his hands\",\"supports\":[\"sign_hands\"]}],\"leaked\":[],\"conveyed\":[\"came_from\",\"about\",\"time\",\"look\",\"sound\",\"carrying\",\"timber\",\"wound\",\"sign_legs\",\"gait\",\"smell\",\"sign_hands\"]}",
+    "cost_usd": 0.01129,
+    "wall_s": 9.05,
+    "api_ms": 2310,
+    "in_tokens": 2076,
+    "out_tokens": 299
+   },
+   "answers": {
+    "text": "1. No, his bleeding arm, mud-caked legs, and laboured breathing suggest he is not fit for a full day of heavy work today.\n2. He has just come from the deep wood, where he was cutting pine.",
+    "cost_usd": 0.00035430000000000005,
+    "wall_s": 7.4,
+    "api_ms": 1510,
+    "in_tokens": 1595,
+    "out_tokens": 71
+   }
+  },
+  "sonnet": {
+   "text": "Gil comes past thin in the face and breathing hard, a load of fresh-cut split pine on his back, and you see he's walking slowly, favouring the left arm, where the rag round his cut is still seeping. He's alone, mud to the knee from the deep wood, resin on his hands and the smell of sweat and pine on him, and you can't help wondering whether he's fit enough to bring in more, with the house still hungry.",
+   "cost_usd": 0.009022,
+   "wall_s": 8.71,
+   "api_ms": 2082,
+   "in_tokens": 1914,
+   "out_tokens": 137,
+   "check": {
+    "text": "{\"clauses\":[{\"clause\":\"Gil comes past thin in the face and breathing hard,\",\"supports\":[\"look\",\"sound\",\"about\"]},{\"clause\":\"a load of fresh-cut split pine on his back,\",\"supports\":[\"carrying\",\"timber\"]},{\"clause\":\"and you see he's walking slowly, favouring the left arm,\",\"supports\":[\"gait\",\"wound\"]},{\"clause\":\"where the rag round his cut is still seeping.\",\"supports\":[\"wound\"]},{\"clause\":\"He's alone,\",\"supports\":[\"about\"]},{\"clause\":\"mud to the knee from the deep wood,\",\"supports\":[\"sign_legs\",\"came_from\"]},{\"clause\":\"resin on his hands and the smell of sweat and pine on him,\",\"supports\":[\"sign_hands\",\"smell\"]},{\"clause\":\"and you can't help wondering whether he's fit enough to bring in more,\",\"supports\":[\"wound\",\"gait\",\"look\"]},{\"clause\":\"with the house still hungry.\",\"supports\":[\"state\",\"cares_about\",\"relationship\"]}],\"leaked\":[],\"conveyed\":[\"look\",\"wound\",\"carrying\",\"came_from\",\"gait\",\"sound\",\"smell\",\"sign_hands\",\"sign_legs\",\"about\",\"timber\"]}",
+    "cost_usd": 0.012176,
+    "wall_s": 10.56,
+    "api_ms": 3347,
+    "in_tokens": 2095,
+    "out_tokens": 380
+   },
+   "answers": {
+    "text": "1. No, it's doubtful: he's thin, breathing hard, injured in the arm, and has already hauled a heavy load, so a full day of heavy work is unlikely to be wise.\n2. He has just come from the deep wood, where he cut the split pine.",
+    "cost_usd": 0.00036510000000000004,
+    "wall_s": 7.77,
+    "api_ms": 1523,
+    "in_tokens": 1614,
+    "out_tokens": 85
+   }
+  }
+ },
+ "field": {
+  "template2": "Late summer, late afternoon: the barley field by the stream is sown with barley, overhead, rooks feeding on the trampled grain, the rows are choked with thistle and dock thick along the rows, the grain is half ripe, heads still green at the tips. You find a gap in the hurdle fence on the eastern edge, one hurdle down, the crop is trampled flat along the eastern edge and you read cattle hoof prints there. Cattle lowing in the pasture beyond the eastern edge, you can hear, there is a smell of dung on the trampled edge. The stream running low and clear, nobody else in the fields.",
+  "haiku": {
+   "text": "You stand alone in the late afternoon with the barley by the stream, half ripe and still green at the tips, and your eye goes straight to the eastern edge, where it lies trampled flat. Cattle hoof prints mark the crushed stalks, dung sits on the ground, and rooks feed on the spilled grain while cattle low in the pasture beyond a gap where one hurdle of the fence is down. Thistle and dock stand thick along the rows, and the stream runs low and clear beside it all.",
+   "cost_usd": 0.0007182,
+   "wall_s": 11.26,
+   "api_ms": 3935,
+   "in_tokens": 1937,
+   "out_tokens": 662,
+   "check": {
+    "text": "{\"clauses\":[{\"clause\":\"You stand alone in the late afternoon\",\"supports\":[\"about\",\"time\"]},{\"clause\":\"with the barley by the stream, half ripe and still green at the tips\",\"supports\":[\"crop\",\"ripeness\",\"stream\"]},{\"clause\":\"and your eye goes straight to the eastern edge, where it lies trampled flat\",\"supports\":[\"damage\",\"attention\"]},{\"clause\":\"Cattle hoof prints mark the crushed stalks\",\"supports\":[\"tracks_in_damage\",\"damage\"]},{\"clause\":\"dung sits on the ground\",\"supports\":[\"smell\"]},{\"clause\":\"and rooks feed on the spilled grain\",\"supports\":[\"birds\"]},{\"clause\":\"while cattle low in the pasture beyond a gap where one hurdle of the fence is down\",\"supports\":[\"sound\",\"sign_fence\"]},{\"clause\":\"Thistle and dock stand thick along the rows\",\"supports\":[\"weeds\"]},{\"clause\":\"and the stream runs low and clear beside it all\",\"supports\":[\"stream\"]}],\"leaked\":[],\"conveyed\":[\"about\",\"time\",\"crop\",\"ripeness\",\"stream\",\"damage\",\"tracks_in_damage\",\"smell\",\"birds\",\"sound\",\"sign_fence\",\"weeds\"]}",
+    "cost_usd": 0.012517999999999998,
+    "wall_s": 9.69,
+    "api_ms": 2966,
+    "in_tokens": 2138,
+    "out_tokens": 397
+   },
+   "answers": {
+    "text": "1. No, the barley is not ready to reap yet, since its tips are still green and it is only half ripe.\n2. The eastern edge of the field is damaged, with the barley trampled flat by cattle that have gotten through a fallen hurdle in the fence.",
+    "cost_usd": 0.0003682,
+    "wall_s": 7.83,
+    "api_ms": 1393,
+    "in_tokens": 1632,
+    "out_tokens": 84
+   }
+  },
+  "sonnet": {
+   "text": "Your barley stands only half ripe, the heads still green at the tips, and the thistle and dock grow thick along the rows. Along the eastern edge it is trampled flat, cattle hoof prints in the mess and dung strong on the air, with one hurdle down in the fence and the cattle lowing just beyond. Rooks are feeding on the flattened grain in the late afternoon, and no one else is out in the fields to see it.",
+   "cost_usd": 0.009146,
+   "wall_s": 8.68,
+   "api_ms": 2018,
+   "in_tokens": 1940,
+   "out_tokens": 139,
+   "check": {
+    "text": "{\"clauses\":[{\"clause\":\"Your barley stands only half ripe, the heads still green at the tips\",\"supports\":[\"crop\",\"ripeness\"]},{\"clause\":\"and the thistle and dock grow thick along the rows.\",\"supports\":[\"weeds\"]},{\"clause\":\"Along the eastern edge it is trampled flat, cattle hoof prints in the mess\",\"supports\":[\"damage\",\"tracks_in_damage\"]},{\"clause\":\"and dung strong on the air,\",\"supports\":[\"smell\"]},{\"clause\":\"with one hurdle down in the fence\",\"supports\":[\"sign_fence\"]},{\"clause\":\"and the cattle lowing just beyond.\",\"supports\":[\"sound\"]},{\"clause\":\"Rooks are feeding on the flattened grain in the late afternoon,\",\"supports\":[\"birds\",\"time\"]},{\"clause\":\"and no one else is out in the fields to see it.\",\"supports\":[\"about\"]}],\"leaked\":[],\"conveyed\":[\"crop\",\"ripeness\",\"weeds\",\"damage\",\"tracks_in_damage\",\"smell\",\"sign_fence\",\"sound\",\"birds\",\"time\",\"about\"]}",
+    "cost_usd": 0.011975999999999999,
+    "wall_s": 9.47,
+    "api_ms": 3154,
+    "in_tokens": 2115,
+    "out_tokens": 352
+   },
+   "answers": {
+    "text": "1. No, the barley is not ready to reap yet, since the heads are still green at the tips and the grain is only half ripe.\n2. The eastern edge of the field is damaged, trampled flat by cattle, with a fence hurdle knocked down.",
+    "cost_usd": 0.0003621,
+    "wall_s": 7.53,
+    "api_ms": 1391,
+    "in_tokens": 1609,
+    "out_tokens": 81
+   }
+  }
+ },
+ "land": {
+  "template2": "Early autumn, morning now: the wind is cold, from the north, you see a thick column of smoke rising from the next valley to the north, geese flying south, earlier than usual, the sky is clear, pale. Wind in dry beech leaves; the geese calling, you can hear, there is a smell of woodsmoke on the wind, faint. You see beech leaves already turning, you see white frost on the grass in the shade, the stream low, a herder driving cattle down from the high pasture.",
+  "haiku": {
+   "text": "Geese are flying south earlier than usual, their calls carried on the cold north wind through beech leaves already turning. Under a clear, pale sky, a thick column of smoke rises from the next valley to the north, and faint woodsmoke comes to you on the air. The stream runs low, white frost lies on the grass in the shade, and a herder is driving cattle down from the high pasture.",
+   "cost_usd": 0.0006963,
+   "wall_s": 10.21,
+   "api_ms": 4131,
+   "in_tokens": 1910,
+   "out_tokens": 629,
+   "check": {
+    "text": "{\"clauses\":[{\"clause\":\"Geese are flying south earlier than usual\",\"supports\":[\"birds\"]},{\"clause\":\"their calls carried on the cold north wind through beech leaves already turning\",\"supports\":[\"sound\",\"wind\",\"trees\"]},{\"clause\":\"Under a clear, pale sky, a thick column of smoke rises from the next valley to the north\",\"supports\":[\"sky\",\"smoke\"]},{\"clause\":\"and faint woodsmoke comes to you on the air\",\"supports\":[\"smell\"]},{\"clause\":\"The stream runs low\",\"supports\":[\"stream\"]},{\"clause\":\"white frost lies on the grass in the shade\",\"supports\":[\"frost\"]},{\"clause\":\"and a herder is driving cattle down from the high pasture\",\"supports\":[\"about\"]}],\"leaked\":[],\"conveyed\":[\"birds\",\"sound\",\"wind\",\"trees\",\"sky\",\"smoke\",\"smell\",\"stream\",\"frost\",\"about\"]}",
+    "cost_usd": 0.011136,
+    "wall_s": 10.66,
+    "api_ms": 4193,
+    "in_tokens": 2055,
+    "out_tokens": 292
+   },
+   "answers": {
+    "text": "1. Yes, likely: the geese are migrating south early, the beech leaves are already turning, there is a cold north wind, and there is frost on the grass.\n2. Yes, something is burning: a thick column of smoke rises from the next valley to the north, with woodsmoke carried on the air.",
+    "cost_usd": 0.0003667000000000001,
+    "wall_s": 7.52,
+    "api_ms": 1314,
+    "in_tokens": 1597,
+    "out_tokens": 95
+   }
+  },
+  "sonnet": {
+   "text": "The geese are going south too early, and you know what that means before you let yourself say it. The wind is cold out of the north, it carries a faint woodsmoke, and a thick column of smoke is standing up from the next valley over. White frost still lies on the grass in the shade, the beech leaves have already turned and rattle dry in the wind, and the stream is low. A herder is bringing his cattle down from the high pasture, and you count it all against the stores.",
+   "cost_usd": 0.009068,
+   "wall_s": 9.49,
+   "api_ms": 3436,
+   "in_tokens": 1913,
+   "out_tokens": 142,
+   "check": {
+    "text": "{\"clauses\":[{\"clause\":\"The geese are going south too early\",\"supports\":[\"birds\"]},{\"clause\":\"and you know what that means before you let yourself say it.\",\"supports\":[\"skill\",\"trade\"]},{\"clause\":\"The wind is cold out of the north,\",\"supports\":[\"wind\"]},{\"clause\":\"it carries a faint woodsmoke,\",\"supports\":[\"smell\",\"wind\"]},{\"clause\":\"and a thick column of smoke is standing up from the next valley over.\",\"supports\":[\"smoke\"]},{\"clause\":\"White frost still lies on the grass in the shade,\",\"supports\":[\"frost\"]},{\"clause\":\"the beech leaves have already turned and rattle dry in the wind,\",\"supports\":[\"trees\",\"sound\"]},{\"clause\":\"and the stream is low.\",\"supports\":[\"stream\"]},{\"clause\":\"A herder is bringing his cattle down from the high pasture,\",\"supports\":[\"about\"]},{\"clause\":\"and you count it all against the stores.\",\"supports\":[\"cares_about\",\"attention\"]}],\"leaked\":[\"winter\"],\"conveyed\":[\"wind\",\"birds\",\"smoke\",\"smell\",\"frost\",\"trees\",\"stream\",\"about\",\"sound\"]}",
+    "cost_usd": 0.011977999999999999,
+    "wall_s": 9.54,
+    "api_ms": 2925,
+    "in_tokens": 2073,
+    "out_tokens": 369
+   },
+   "answers": {
+    "text": "1. Yes, the early southward migration of the geese, the frost, the cold north wind, the turned and dry beech leaves, and the low stream all suggest winter may come early.\n2. Probably: the thick column of smoke rising from the next valley suggests a fire there, though it could be a hearth or a burn-off, so I can't be certain what it is.",
+    "cost_usd": 0.00037930000000000006,
+    "wall_s": 7.71,
+    "api_ms": 1643,
+    "in_tokens": 1615,
+    "out_tokens": 113
+   }
+  }
+ },
+ "tracks": {
+  "template2": "Early morning: there are deer prints, fresh, heading out of the wood toward the field, every print made since the rain last night, you see fresh deer droppings by the field gate, there is one set of boot prints, large, going into the wood, none coming out in the soft mud. You find a broken hazel twig at head height where the boot prints enter. Water dripping from the branches; a woodpecker drumming deeper in the wood, you can hear, there is a smell of wet earth and leaf mould. Nobody in sight; the village below still quiet, grey dawn light, mist in the hollows.",
+  "haiku": {
+   "text": "Fresh deer prints, made since the rain last night, run out of the wood toward the field, and fresh droppings lie by the gate, so the deer have only just passed. But one large set of boots went into the trees, none came back out, and a hazel twig lies snapped at head height where they entered, in your ground.",
+   "cost_usd": 0.0008385,
+   "wall_s": 12.68,
+   "api_ms": 5886,
+   "in_tokens": 1946,
+   "out_tokens": 899,
+   "check": {
+    "text": "{\"clauses\":[{\"clause\":\"Fresh deer prints, made since the rain last night, run out of the wood toward the field\",\"supports\":[\"deer_tracks\",\"freshness\"]},{\"clause\":\"and fresh droppings lie by the gate\",\"supports\":[\"sign_droppings\"]},{\"clause\":\"so the deer have only just passed\",\"supports\":[\"deer_tracks\",\"sign_droppings\",\"freshness\"]},{\"clause\":\"But one large set of boots went into the trees, none came back out\",\"supports\":[\"boot_tracks\"]},{\"clause\":\"and a hazel twig lies snapped at head height where they entered\",\"supports\":[\"sign_twig\"]},{\"clause\":\"in your ground\",\"supports\":[\"relationship\"]}],\"leaked\":[],\"conveyed\":[\"deer_tracks\",\"freshness\",\"sign_droppings\",\"boot_tracks\",\"sign_twig\"]}",
+    "cost_usd": 0.011042,
+    "wall_s": 37.29,
+    "api_ms": 30386,
+    "in_tokens": 2069,
+    "out_tokens": 277
+   },
+   "answers": {
+    "text": "1. Yes, someone entered the forest since the rain, and they have not come back out.\n2. The deer were moving out of the wood toward the field.",
+    "cost_usd": 0.0003978,
+    "wall_s": 8.13,
+    "api_ms": 1936,
+    "in_tokens": 1575,
+    "out_tokens": 166
+   }
+  },
+  "sonnet": {
+   "text": "The deer prints are fresh in the soft mud, made since last night's rain and heading out of the wood toward the field, and there are fresh droppings by the gate. But one set of big boot prints goes in past a hazel twig snapped at head height, and none come back out of your wood. Nobody is in sight, the village below is quiet, and all you hear is water dripping from the branches and a woodpecker drumming deeper in.",
+   "cost_usd": 0.014102,
+   "wall_s": 15.34,
+   "api_ms": 7941,
+   "in_tokens": 1949,
+   "out_tokens": 631,
+   "check": {
+    "text": "{\"clauses\":[{\"clause\":\"The deer prints are fresh in the soft mud, made since last night's rain and heading out of the wood toward the field\",\"supports\":[\"deer_tracks\",\"ground\",\"freshness\"]},{\"clause\":\"and there are fresh droppings by the gate.\",\"supports\":[\"sign_droppings\"]},{\"clause\":\"But one set of big boot prints goes in past a hazel twig snapped at head height\",\"supports\":[\"boot_tracks\",\"sign_twig\"]},{\"clause\":\"and none come back out of your wood.\",\"supports\":[\"boot_tracks\",\"relationship\"]},{\"clause\":\"Nobody is in sight, the village below is quiet\",\"supports\":[\"about\"]},{\"clause\":\"and all you hear is water dripping from the branches and a woodpecker drumming deeper in.\",\"supports\":[\"sound\"]}],\"leaked\":[],\"conveyed\":[\"deer_tracks\",\"freshness\",\"ground\",\"sign_droppings\",\"boot_tracks\",\"sign_twig\",\"about\",\"sound\"]}",
+    "cost_usd": 0.011640000000000001,
+    "wall_s": 9.8,
+    "api_ms": 3008,
+    "in_tokens": 2106,
+    "out_tokens": 322
+   },
+   "answers": {
+    "text": "1. Yes, someone entered the forest recently, but there's no sign they have come back out.\n2. The deer were moving out of the wood toward the field.",
+    "cost_usd": 0.0003467,
+    "wall_s": 6.84,
+    "api_ms": 1146,
+    "in_tokens": 1612,
+    "out_tokens": 49
+   }
+  }
+ }
+}

@@ -234,6 +234,14 @@ does.
   produced on demand by rules and a sense table, and from happenings; each with sense, salience, range, skill; chosen by presence,
   work, attention, watch; only what was perceived is stored.
 
+- 23 Oct: test run 2 (10_descriptions_test.md "Run 2"; 64 richer facts incl. sounds and smells; observer profiles; every clause
+  must rest on a given fact; 30 calls, $0.18): no clause without a supporting fact in either model (the rule worked); Haiku and
+  Sonnet conveyed 83-84% of facts (dropping season, time, light), with a few small stretches; one borderline hint at a hidden fact
+  (Sonnet's almanac keeper "knows what the early geese mean", a belief she might fairly form); comprehension unchanged (10/10).
+  Only Sonnet writes through the observer's eyes (about 15 times Haiku's cost). Recommendation unchanged: templates for facts in
+  the engine; an observer's-eye Sonnet narrator only as a later experiment, with a checker that knows which beliefs an observer
+  may form.
+
 ## Sources
 
 cybertron2/prompt.py and perceive.py (as built), 38.02, knowledge.md, notes.md, verbs.md, D4-6, D4-11, D4-19, D4-21, D2-4.
