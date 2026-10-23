@@ -580,6 +580,15 @@ def settle_meeting(w, e) -> list:
     get away). Returns lines for the record."""
     from cybertron2.engine import settle as ST
     out = []
+    for i, party in enumerate(e["parties"]):                                  # remembered on arrival (D2-97)
+        other = e["parties"][1 - i]
+        traded = [o for o in (e.get("offers") or {}).values() if o.get("taken") and (o["by"] in party or o["taken"] in party)]
+        lms = stretch(w, e["road"], e["pos"])["landmarks"]
+        where = LANDMARKS[lms[0]["kind"]]["words"] if lms else "the road"
+        deals = "".join(f"; {o['by']} traded {o['give'][1]:g} {o['give'][0]} for {o['get'][1]:g} {o['get'][0]}" for o in traded)
+        for n in party:
+            if w.s["people"][n]["alive"] and w.s["people"][n]["transit"] is not None:
+                _note(w, n, f"you met {', '.join(other)} at {where}{deals}")
     for at in e.get("attacks", []):
         tgt = at["target"]
         if tgt in e.get("fled", []) and w.rng("flee", w.d, tgt).random() < float(ROADS["flee"]):
