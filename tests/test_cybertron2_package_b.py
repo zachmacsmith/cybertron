@@ -69,7 +69,7 @@ def test_a_three_day_road_parties_leaving_days_apart_cross_on_the_right_stretch(
     N.departures(w, w.s["today"])
     RD.night(w, w.s["today"])                                       # Edric on 3, Simkin on 2: they crossed
     m = w.s["today"]["road"]["meetings"]
-    assert len(m) == 1 and m[0]["pos"] == 3
+    assert len(m) == 1 and m[0]["pos"] in (2, 3)                    # drawn between the two (D2-121)
 
 
 FORD = {"terrain": "river valley", "stretches": {1: {"landmarks": ["ford"]}}}
@@ -137,8 +137,9 @@ def test_a_meeting_gives_each_one_call_a_conversation_and_an_offer_settles_from_
     e = woke["Edric"]["events"][0]
     said, offers = RD.meeting_talk(w, e, {"Edric": {"say": [{"to": "everyone", "text": "Good day."}],
                                                      "offers": [{"to": "Simkin", "give": "3 grain", "get": "2 timber"}]}})
-    assert said == ["Edric: Good day."] and offers and offers[0].startswith("R1")
-    out = FU.answer(w, w.s["today"], "Simkin", woke["Simkin"], {"actions": [{"do": "accept", "offer": "R1"}, {"do": "turn back"}]})
+    assert said == ["Edric: Good day."] and offers and "Edric offers 3 grain for 2 timber" in offers[0]
+    oid = offers[0].split(":")[0]                                             # an offer of the agreement system (D2-120)
+    out = FU.answer(w, w.s["today"], "Simkin", woke["Simkin"], {"actions": [{"do": "accept", "offer": oid}, {"do": "turn back"}]})
     assert w.goods(w.hands("Simkin"))["grain"] == 3.0 and w.goods(w.hands("Edric"))["timber"] == 2.0
     t = w.s["people"]["Simkin"]["transit"]
     assert t["to"] == "ashwood" and t["arrive"] == w.d + 1                    # turned back: home at the next dawn
@@ -160,8 +161,9 @@ def test_a_find_on_the_road_is_a_call_only_if_noticed_and_the_finder_can_take_it
 
 
 def test_an_edge_with_no_landmarks_behaves_exactly_as_before(tmp_path, monkeypatch):
-    """D2-104: a road without terrain or landmarks holds nothing; a run is the same as with the roads step switched off."""
-    spec = copy.deepcopy(SPEC)
+    """D2-104, D2-122: a road made bare holds nothing; a run is the same as with the roads step switched off."""
+    from cybertron2.engine.variants import bare_roads
+    spec = bare_roads(copy.deepcopy(SPEC))
     spec["days"] = 6
     for a in spec["agents"].values():
         if a.get("model"):

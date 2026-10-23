@@ -195,6 +195,7 @@ class World:
         for name, a in spec["agents"].items():
             KN.seed(self, name, a)
             PC.seed(self, name, a)
+        KN.seed_world(self)                                                    # dibbling known to someone (D2-129)
         PC.seed_knowledge(self)
         from cybertron2.engine import things as TH
         for who, cid in self.s.pop("_seed_things", []):                        # who knows where a seeded thing lies
@@ -276,6 +277,18 @@ class World:
 
     def present(self, node) -> list:
         return [x for x in self.living() if self.s["people"][x]["at"] == node]
+
+    def company(self, name) -> list:
+        """Who is with someone: those at its node; on the road, its party and any party it is meeting tonight (D2-110, D2-120)."""
+        if self.at(name) is not None:
+            return self.present(self.at(name))
+        t = self.s["people"][name]["transit"] or {}
+        key = lambda n: tuple((self.s["people"][n]["transit"] or {}).get(k) for k in ("road", "from", "to", "left", "arrive"))
+        out = {n for n in self.living() if self.s["people"][n]["transit"] and key(n) == key(name)}
+        for m in ((self.s.get("today") or {}).get("road") or {}).get("meetings", []):
+            if any(name in p for p in m["parties"]):
+                out |= {n for p in m["parties"] for n in p if self.s["people"][n]["alive"]}
+        return sorted(out | {name}) if t else [name]
 
     def agents_acting(self) -> list:
         return [n for n in self.living() if self.s["people"][n]["stage"] != "child" and self.s["people"][n]["at"] is not None]
@@ -659,7 +672,7 @@ def p_raise(w, node, parcel, rec):
 def p_offer(w, by, rec):
     w.s["seq"] += 1
     oid = f"O{w.s['seq']}"
-    w.s["offers"][oid] = {"node": w.at(by), "by": by, **rec}
+    w.s["offers"][oid] = {"node": w.place_of(("person", by)), "by": by, **rec}
     return oid
 
 

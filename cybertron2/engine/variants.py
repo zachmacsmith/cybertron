@@ -40,12 +40,12 @@ def one_node(spec: dict, node: str) -> dict:
 
 
 def bare_roads(spec: dict) -> dict:
-    """Every road as before Package B: no terrain, no landmarks (D2-104)."""
+    """Every road bare, as before Package B: no terrain, no landmarks, nothing on it (D2-104; the switch D2-122 keeps)."""
     s = copy.deepcopy(spec)
     roads = []
     for e in s.get("roads") or []:
         extra = {k: v for k, v in next((x for x in e[3:] if isinstance(x, dict)), {}).items() if k not in ("terrain", "stretches")}
-        roads.append(list(e[:3]) + [x for x in e[3:] if not isinstance(x, dict)] + ([extra] if extra else []))
+        roads.append(list(e[:3]) + [x for x in e[3:] if not isinstance(x, dict)] + [{**extra, "bare": True}])
     s["roads"] = roads
     return s
 

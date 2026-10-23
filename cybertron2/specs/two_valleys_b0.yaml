@@ -7,5 +7,5 @@ weather: {3: heavy rain}               # the ford is high on days 3 and 4 (world
 spells:
   - {kind: wet, from: 2, to: 6}
 roads:
-  - [wetham, highcombe, 2, track]
-  - [highcombe, old_wood, 1, {way: a forest path over the scarp that nobody uses}]
+  - [wetham, highcombe, 2, track, {bare: true}]
+  - [highcombe, old_wood, 1, {way: a forest path over the scarp that nobody uses, bare: true}]

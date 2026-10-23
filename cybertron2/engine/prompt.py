@@ -450,8 +450,9 @@ def fuse_prompt(here, mind, x) -> str:
          f"There is time for {x['acts']} thing{'s' if x['acts'] > 1 else ''}, no more. You can: "
          + "; ".join(f"{c} ({words.get(c, c)})" for c in choices) + "."]
     if "meeting" in kinds:
-        L.append("You may also speak (\"say\": [{\"to\": \"everyone\", \"text\"}]) and make offers of goods for goods "
-                 "(\"offers\": [{\"to\", \"give\": \"2 grain\", \"get\": \"1 timber\"}]), settled from what each carries. "
+        L.append("You may also speak (\"say\": [{\"to\": \"everyone\", \"text\"}]) and make offers as in a village "
+                 "(\"offers\": [{\"to\", \"give\": \"2 grain\", \"get\": \"1 timber\"}]; a promise as \"1 timber by day 6\"). "
+                 "What is due now moves from what each carries; a promise stays agreed, to be paid where you next meet. "
                  "Everyone in the meeting hears it, and may answer, before what each chooses is done.")
     L.append("Reply with JSON only: \"actions\" (at most " + str(x["acts"]) + "), and a short \"why\".")
     return "\n\n".join(L)

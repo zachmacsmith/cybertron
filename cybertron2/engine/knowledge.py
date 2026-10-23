@@ -63,6 +63,25 @@ def seed(w, name, spec_agent) -> None:
             k.setdefault(tech, {"level": "aware", "skill": 0.6, "seen": 0, "wins": 0, "fails": 0, "source": src, "since": -1})
 
 
+def seed_world(w) -> list:
+    """D2-129: each technique in KNOWN_SOMEWHERE that nobody knows is given to one person, chosen by a keyed draw among the adults whose
+    trade fits (else any adult). Returns [(tech, person)] seeded."""
+    from cybertron2.engine.data import KNOWN_SOMEWHERE
+    out = []
+    for tech, words in KNOWN_SOMEWHERE.items():
+        if any((w.s["know"].get(n) or {}).get(tech, {}).get("level") == "known" for n in w.living()):
+            continue
+        adults = [n for n in w.living() if w.s["people"][n]["stage"] == "adult"]
+        fit = [n for n in adults if any(x in str(w.s["people"][n].get("trade") or "").lower() for x in words)] or adults
+        if not fit:
+            continue
+        who = sorted(fit)[int(w.rng("known-somewhere", tech).random() * len(fit))]
+        w.s["know"].setdefault(who, {})[tech] = {"level": "known", "skill": curve(tech)[0], "seen": 0, "wins": 0, "fails": 0,
+                                                 "source": "from your upbringing", "since": -1}
+        out.append((tech, who))
+    return out
+
+
 def _set(w, name, tech, lvl, source) -> bool:
     k = w.s["know"].setdefault(name, {})
     r = k.get(tech)

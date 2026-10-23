@@ -38,7 +38,7 @@ def next_day(w):
 # ---------------------------------------------------------------------- the core
 def test_agent_facing_modules_never_read_the_world():
     """D4-35: verbs, prompts and the knowledge views see only Here and Mind (engine-side functions are listed)."""
-    engine_side = {KN: {"seed", "_set"}, AG: {"settle", "_due", "_person_for", "_present_for", "install", "_credit"}, V: set(), PR: set()}
+    engine_side = {KN: {"seed", "seed_world", "_set"}, AG: {"settle", "_due", "_person_for", "_present_for", "install", "_credit"}, V: set(), PR: set()}
     for mod, allowed in engine_side.items():
         tree = ast.parse(inspect.getsource(mod))
         for fn in [n for n in ast.walk(tree) if isinstance(n, ast.FunctionDef) and n.name not in allowed]:

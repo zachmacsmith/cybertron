@@ -280,6 +280,9 @@ for _k, _b in list(BLUEPRINTS.items()) + list(FITTINGS.items()):
     TECHNIQUES.setdefault(_k, {"verb": "build", "label": "building " + _b["label"], "aliases": [], "basic": _b.get("basic", False),
                                "units": _b["units"], "gives": "", "tags": ["building", "shelter"], "trade": _b.get("trade")})
 
+# Techniques at least one person in the world knows (D2-129): when no one in a world file does, one is chosen by a keyed draw among the
+# adults whose trade has one of these words (else among all adults), and knows it from its upbringing.
+KNOWN_SOMEWHERE = {"method: dibble": ["sow", "seed", "reap", "plough", "hoe", "field", "farm"]}
 LEVELS = ("aware", "rough", "capable", "known")
 TRY = {"rough": {"inputs": 1.7, "chance": 0.5}, "capable": {"inputs": 1.3, "chance": 0.75}, "known": {"inputs": 1.0, "chance": 1.0}}
 SKILL_WORDS = ((0.85, "master"), (0.5, "skilled"), (0.2, "competent"), (0.0, "novice"))   # by the share of the way to a master
@@ -428,6 +431,8 @@ ROADS = {
     "waves": 3,                             # a meeting's conversation (D2-110)
     "notices": 5,                           # "On the way" lines on arrival (D2-97)
     "trace_days": {"tracks": 3, "ashes": 10, "ruts": 60},   # D2-88
+    "meet_landmark": 3.0,                   # crossing parties meet three times likelier on a stretch with a landmark (D2-121)
+    "terrain": "farmland",                  # every road's terrain unless its world gives one (D2-122: a farm track)
 }
 FUSE.update({
     "meeting": {"sense": "sight", "label": "a meeting on the road", "acts": {"road": 3},

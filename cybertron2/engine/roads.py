@@ -4,8 +4,8 @@ D2-81, D2-86, D2-97, D2-104 to D2-110, D2-113).
 A road with a terrain is one place with parts: one stretch a day of its length, each with a terrain and 0 to 2 landmarks. Each
 night, after the departures, `night` places every party on its stretch, settles minor trouble by its choices at departure (or the
 default), feeds those passing good places, gathers what each notices, and finds the meetings and the finds worth taking, which the
-fuse sub-step turns into urgent calls (fuse.py: kinds "meeting", "find", "crossing", registered here). A road with no terrain and no
-landmarks is as before: nothing happens on it (D2-104), so a world's roads can be switched off for a comparison arm.
+fuse sub-step turns into urgent calls (fuse.py: kinds "meeting", "find", "crossing", registered here). Every road has a terrain, a farm
+track unless its world says otherwise (D2-122); a road made bare holds nothing (D2-104), the switch for a comparison arm.
 
 Positions are counted from the road's `a` end: a party on its k-th stretch from its own start is at k (from a) or n+1-k (from b).
 """
@@ -20,12 +20,16 @@ from cybertron2.engine.world import Refused
 
 # ---------------------------------------------------------------------- the road's parts
 def active(road) -> bool:
-    return bool(road.get("terrain")) or any(s.get("landmarks") for s in road.get("stretches") or [])
+    """A bare road holds nothing (D2-104): only a switch for a comparison arm, since every road has a terrain (D2-122)."""
+    return not road.get("bare") and (bool(road.get("terrain")) or any(s.get("landmarks") for s in road.get("stretches") or []))
 
 
 def build(extra: dict, days: int) -> dict:
-    """A road's terrain and stretches from its spec (`terrain`, `stretches`: {k: {terrain, landmarks}} counted from its first node)."""
-    terrain = extra.get("terrain")
+    """A road's terrain and stretches from its spec (`terrain`, `stretches`: {k: {terrain, landmarks}} counted from its first node);
+    a road given no terrain is a farm track (D2-122); `bare: true` makes it hold nothing (the comparison switch)."""
+    if extra.get("bare"):
+        return {"terrain": None, "bare": True, "stretches": [{"terrain": None, "landmarks": []} for _ in range(days)]}
+    terrain = extra.get("terrain") or ROADS["terrain"]
     st = []
     given = {int(k): v for k, v in (extra.get("stretches") or {}).items()}
     for k in range(1, days + 1):
@@ -370,7 +374,7 @@ def _meetings(w, today, rec, ps):
             crossed = prev_a is not None and prev_b is not None and (prev_a - prev_b) * (pa - pb) < 0
             if pa != pb and not crossed:
                 continue
-            pos = pa if ta["from"] == w.s["roads"][ka[0]]["a"] else pb      # where they cross: the a-end party's stretch tonight
+            pos = meeting_stretch(w, ka[0], pa, pb, ps[ka][0], ps[kb][0])
             st = stretch(w, ka[0], pos)
             p = max([float(LANDMARKS[l["kind"]].get("meet", 0.0)) for l in st["landmarks"]] or [0.0]) or \
                 float(TERRAIN.get(st["terrain"] or "plain", {}).get("meet", 0.6))
@@ -391,6 +395,19 @@ def _meetings(w, today, rec, ps):
             t = w.s["people"][n]["transit"]
             if t is not None:
                 t["last_pos"] = position(w, t)
+
+
+def meeting_stretch(w, road_id, pa, pb, a, b) -> int:
+    """Where crossing parties meet: a stretch between the two positions, drawn (keyed), three times likelier on one with a landmark
+    (D2-121)."""
+    span = list(range(min(pa, pb), max(pa, pb) + 1))
+    weights = [float(ROADS["meet_landmark"]) if stretch(w, road_id, k)["landmarks"] else 1.0 for k in span]
+    x = w.rng("meet-where", w.d, a, b).random() * sum(weights)
+    for k, wt in zip(span, weights):
+        x -= wt
+        if x < 0:
+            return k
+    return span[-1]
 
 
 def passes(w, party) -> bool:
@@ -566,43 +583,33 @@ def _ch_give(w, today, name, e, a):
 
 @FU.choice("meeting", "accept")
 def _ch_accept(w, today, name, e, a):
-    o = (e.get("offers") or {}).get(str(a.get("offer") or ""))
-    if not o or o["to"] not in (name, "anyone") or o["by"] == name:
-        raise Refused("no such offer to you in this meeting")
-    giver, taker = o["by"], name
-    for who, item, q in ((giver, o["give"][0], o["give"][1]), (taker, o["get"][0], o["get"][1])):
-        if w.goods(w.hands(who)).get(item, 0.0) + 1e-9 < q:
-            raise Refused(f"{who} does not carry {q:g} {item}")
-    w.apply("transfer", e["road"], src=w.hands(giver), dst=w.hands(taker), item=o["give"][0], qty=o["give"][1])
-    w.apply("transfer", e["road"], src=w.hands(taker), dst=w.hands(giver), item=o["get"][0], qty=o["get"][1])
-    o["taken"] = name
-    return f"You took {giver}'s offer: {o['give'][1]:g} {o['give'][0]} for {o['get'][1]:g} {o['get'][0]}."
+    """Taking an offer made in the meeting: the agreement system as at a node, the road the place (D2-120); a promise stays open and
+    is paid where the two are next at one node (D2-32)."""
+    from cybertron2.engine import agreements as AG
+    from cybertron2.engine.here import Here, Mind
+    out = AG.accept(Here(w, name, transit=True), Mind(w, name), a, None)
+    e.setdefault("deals", []).append(out.split(": ", 1)[-1].split(". Agreement")[0].rstrip("."))
+    return out
 
 
 def meeting_talk(w, e, replies) -> tuple:
     """A wave of a meeting's conversation (D2-110): what each said (to all in the meeting: speech is free in transit) and the offers
-    made, as goods for goods settled from what each carries (D2-25). Returns (lines, offers) for the next wave."""
-    from cybertron2.engine.agreements import parse_legs
-
-    def parse_goods(text):
-        legs = [l for l in parse_legs(text, w.d) if "item" in l and l["when"].get("now")]
-        return (legs[0]["item"], float(legs[0]["qty"])) if legs else None
+    made, through the agreement system with the road as the place (D2-120). Returns (lines, offers) for the next wave."""
+    from cybertron2.engine import agreements as AG
+    from cybertron2.engine.here import Here, Mind
     said, offers = [], []
-    everyone = [n for p in e["parties"] for n in p]
     for n, r in replies.items():
         for x in [x for x in (r.get("say") or []) + (r.get("tell") or []) if isinstance(x, dict) and str(x.get("text", "")).strip()][:3]:
             said.append(f"{n}: {str(x['text'])[:400]}")
+        here = Here(w, n, transit=True)
         for o in [o for o in (r.get("offers") or []) if isinstance(o, dict)][:2]:
             try:
-                give, get = parse_goods(o.get("give")), parse_goods(o.get("get"))
-            except Exception:
+                line = AG.make_offer(here, Mind(w, n), o)
+            except Refused as err:
+                e.setdefault("refused", []).append(f"{n}: {err}")
                 continue
-            if not give or not get:
-                continue
-            to = next((m for m in everyone if m.lower() == str(o.get("to") or "").lower()), "anyone")
-            oid = f"R{len(e.setdefault('offers', {})) + 1}"
-            e["offers"][oid] = {"by": n, "to": to, "give": give, "get": get}
-            offers.append(f"{oid}: {n} offers {give[1]:g} {give[0]} for {get[1]:g} {get[0]}" + ("" if to == "anyone" else f" (to {to})"))
+            if line.startswith("You offered "):
+                offers.append(line.removeprefix("You offered ").split(" (open")[0])
     return said, offers
 
 
@@ -613,10 +620,9 @@ def settle_meeting(w, e) -> list:
     out = []
     for i, party in enumerate(e["parties"]):                                  # remembered on arrival (D2-97)
         other = e["parties"][1 - i]
-        traded = [o for o in (e.get("offers") or {}).values() if o.get("taken") and (o["by"] in party or o["taken"] in party)]
         lms = stretch(w, e["road"], e["pos"])["landmarks"]
         where = LANDMARKS[lms[0]["kind"]]["words"] if lms else "the road"
-        deals = "".join(f"; {o['by']} traded {o['give'][1]:g} {o['give'][0]} for {o['get'][1]:g} {o['get'][0]}" for o in traded)
+        deals = "".join(f"; agreed: {d}" for d in e.get("deals", []))
         for n in party:
             if w.s["people"][n]["alive"] and w.s["people"][n]["transit"] is not None:
                 _note(w, n, f"you met {', '.join(other)} at {where}{deals}", first=True)

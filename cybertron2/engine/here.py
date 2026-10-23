@@ -17,6 +17,7 @@ class Here:
         self.node = w.at(name)
         if self.node is None and not transit:                                  # on the road: only for an urgent call (D2-81)
             raise Refused(f"{name} is on the road")
+        self.place = self.node if self.node is not None else w.place_of(("person", name))   # a node, or the road one is on
 
     # ------------------------------------------------------------------ time and rules
     @property
@@ -97,7 +98,8 @@ class Here:
 
     # ------------------------------------------------------------------ who and what is here
     def people(self, me=True) -> list:
-        return [x for x in self._w.present(self.node) if me or x != self.name]
+        """Who is here: at the node, or on the road one's party and whoever one meets (D2-120)."""
+        return [x for x in self._w.company(self.name) if me or x != self.name]
 
     def person(self, x):
         """A living person here, by name, else None."""
@@ -169,17 +171,18 @@ class Here:
                 and any(q > 1e-9 for q in c["goods"].values())}
 
     def offers(self) -> dict:
-        return {oid: o for oid, o in self._w.s["offers"].items() if o["node"] == self.node and o["open"]}
+        return {oid: o for oid, o in self._w.s["offers"].items() if o["node"] == self.place and o["open"]
+                and (self.node is not None or o["by"] in self.people())}
 
     def offer(self, oid) -> dict:
         o = self._w.s["offers"][oid]
-        if o["node"] != self.node:
+        if o["node"] != self.place:
             raise Refused(f"offer {oid} is not here")
         return o
 
     def contents(self, cid) -> dict:
         """What is in a container here (hands of someone here, a store here)."""
-        if self._w.place_of(("container", cid)) != self.node:
+        if self._w.place_of(("container", cid)) != self.place:
             raise Refused("that is not here")
         return dict(self._w.goods(cid))
 
@@ -319,22 +322,22 @@ class Here:
 
     # ------------------------------------------------------------------ acting, at this node only
     def apply(self, prim, **kw):
-        return self._w.apply(prim, self.node, **kw)
+        return self._w.apply(prim, self.place, **kw)
 
     def event(self, kind, text, **kw):
-        return self._w.event(self.node, kind, text, **kw)
+        return self._w.event(self.place, kind, text, **kw)
 
     def record(self, verb, tech=None, for_=None, **extra):
-        self._w.record(self.name, verb, tech, for_, self.node, **extra)
+        self._w.record(self.name, verb, tech, for_, self.place, **extra)
 
     def cause(self, verb, for_=None):
-        return self._w.cause(actor=self.name, verb=verb, for_=for_, node=self.node)
+        return self._w.cause(actor=self.name, verb=verb, for_=for_, node=self.place)
 
     def new_offer(self, rec) -> str:
         return self.apply("offer", by=self.name, rec=rec)
 
     def new_agreement(self, rec) -> str:
-        return self.apply("agree", node=self.node, rec=rec)
+        return self.apply("agree", node=self.place, rec=rec)
 
     def today(self) -> dict:
         return self._w.s["today"]

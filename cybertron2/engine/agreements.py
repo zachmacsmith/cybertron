@@ -113,9 +113,10 @@ def make_offer(here, mind, o) -> str:
     same = next((oid for oid, x in here.offers().items() if x["by"] == here.name and x["to"] == to and x["give"] == give and x["get"] == get), None)
     if same:
         return f"Your offer {same} is already open."
-    until = here.day if to else (int(o["until"]) - 1 if o.get("until") else None)
+    road = here.node is None                                                # in a meeting on the road: open while it lasts (D2-120)
+    until = here.day if to or road else (int(o["until"]) - 1 if o.get("until") else None)
     oid = here.new_offer({"for": party, "to": to, "give": give, "get": get, "lots": lots, "taken": 0, "until": until, "open": True})
-    return "You offered " + offer_text(here, oid) + (" (open today)" if to else " (open while you stay here)")
+    return "You offered " + offer_text(here, oid) + (" (open while you meet)" if road else " (open today)" if to else " (open while you stay here)")
 
 
 def offer_text(here, oid) -> str:
