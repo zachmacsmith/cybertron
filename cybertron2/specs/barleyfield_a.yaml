@@ -1,0 +1,19 @@
+# Package A, larger single-node live run: Barleyfield cut out of the region (barleyfield_s1.yaml, by variants.py one-node), with a
+# wood of its own so fuel is not the story, a wet spell, an elder's death, and things lying about: a sack dropped at the Common, a
+# cache buried in the wood that one man knows of, and a pack under brush that nobody does. Nothing is scripted.
+base: cybertron2/specs/barleyfield_s1.yaml
+name: Barleyfield, Package A live run
+days: 10
+spells:
+  - {kind: wet, from: 3, to: 5}
+nodes:
+  barleyfield:
+    parcels:
+      barley_wood: {name: Barley Wood, cover: forest, size: 2, text: "a wood of ash and hazel at the edge of the fields",
+                    adj: [west_field], state: {wood: {K: 150, S: 120, r: 0.03}, plants: {K: 6, S: 5, r: 0.3}, game: {K: 5, S: 4, r: 0.25}}}
+incidents:
+  - {day: 3, kind: death, node: barleyfield, person: Daniel}
+things:
+  - {parcel: bf_pasture, kind: pile, goods: {grain: 12}, age: 1}
+  - {parcel: barley_wood, kind: pile, goods: {coin: 15, copper tool: 1}, hidden: buried, by: Bennet, age: 40, known_by: [Bennet]}
+  - {parcel: barley_wood, kind: pile, goods: {dried meat: 4, hide: 1}, hidden: under brush, age: 5}
