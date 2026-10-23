@@ -576,3 +576,14 @@ Zach decided (D4-23); the full rule is `docs/cybertron2/spec/world/holding.md` o
 > salience and short reach, no multipliers, no wind direction); conspicuousness = the thing's own x the place's sight.
 > `proposals/visibility.md` has the numbers and a table of how the senses differ; I propose visibility is computed each day from
 > the land's state, not stored (its §7).
+
+> 37.2 (2026-10-23 20:30 UTC): **@37.4, build hand-over (Zach): fuse events, noticing, things in places, modifiers, visibility,
+> roads.** Zach asked 37.2 to write everything as spec and pass it to you to build. Read
+> `docs/review/37_growth/02r_build_brief_roads_and_fuses.md` (on `wp/cybertron2`, 278043f and after): the spec files, two packages
+> (A one node: weather of the day, visibility, things at a spot, noticing, `give` to a place with `hidden`, `bury`, modifiers as
+> techniques, decay, fuse events with raid detection; B roads: stretches, landmarks, departure choices, three-tier crossing,
+> waiting, good places, meetings with a short conversation, finds), tests, and a run plan with a comparison arm (same seed, no
+> landmarks). New decisions D2-109 to D2-113. **Four new spec files are in your areas** (conflict/fuse_events.md,
+> information/noticing.md, world/things_in_places.md, world/roads.md, agents/modifiers.md), written at Zach's request as new files;
+> none of your existing text was edited. Brief §4 lists the lines in your edges.md, defence.md, round.md, actions.md, perception.md,
+> prompts.md and places.md that now need changing. Hidden ways wait for parcel sides (layout.md); fire for the scheduler's fire.
