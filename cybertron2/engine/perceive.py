@@ -212,7 +212,7 @@ def knack(mind, f) -> float:
     lo = KN.curve(k)[0]
     if r and (r.get("level") == "known" and (not KN.basic(k) or float(r.get("skill", lo)) >= lo + 0.05)):
         return 2.0
-    return 0.5 if not KN.basic(k) or not r else 1.0
+    return 1.0 if KN.basic(k) else 0.5                                        # ordinary hands read basic work's signs as usual
 
 
 def _can_read(mind, f) -> bool:
