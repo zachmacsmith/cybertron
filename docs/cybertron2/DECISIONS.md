@@ -170,6 +170,7 @@ and correct them in place.**
 | D2-100 | 23 Oct | **Loud things mask quieter ones:** a waterfall, a horn, a fight, a mill or smithy at work covers quieter sounds near it, and itself carries further | visibility.md §4 | |
 | D2-101 | 23 Oct | **Smell later, and simple:** smell signs carry their own salience and a short reach (the spot, the parcel, perhaps the next), not multiplied by visibility; no wind direction for now; some are very salient (the stench of a corpse, a midden, livestock) | visibility.md §5 | wind direction now |
 | D2-102 | 23 Oct | **A thing's conspicuousness is its own** (size, kind, how hidden) **x the place's sight**, not a cover column per table | things_in_places.md §1, visibility.md | |
+| D2-103 | 23 Oct | **Visibility is computed, not stored:** a value that emerges each day from the environment (cover and vegetation, a standing crop, snow, smoke as a short-lived state near fires, ambient loudness, the weather) | visibility.md §7 | visibility as a stored variable |
 
 ## Directions (Zach's stated aims recorded in the notes; designs follow them; checked by 37.2, 22 Oct)
 

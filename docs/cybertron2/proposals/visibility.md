@@ -1,6 +1,6 @@
 # Proposal: visibility (what a place and the day let the senses reach)
 
-**Status:** accepted: D2-99 to D2-102 (23 Oct); numbers to calibrate; smell later. Design only. **Owner:** 37.2 (author; the environment, D2-75, sets the land and the weather);
+**Status:** accepted: D2-99 to D2-103 (23 Oct); numbers to calibrate; smell later. Design only. **Owner:** 37.2 (author; the environment, D2-75, sets the land and the weather);
 perception and the senses are 37.4's (perception.md, senses.md, seeing.md, D4-48, D4-50), which apply it. **Affects:**
 spec/information/perception.md, signs.md; spec/environment/scheduler.md (weather, light); spec/world/places.md, edges.md;
 things_in_places.md, hidden_ways.md, road_layout.md, road_encounters.md, fuse_events.md (detection).
@@ -126,7 +126,7 @@ it describes.
 
 1. ~~Visibility per place and sense~~ decided: D2-99. 2. ~~Sight and sound now, smell later~~ decided: D2-99 to D2-101.
 3. ~~The numbers~~ starting values (D2-99; calibrate). 4. ~~Split conspicuousness~~ decided: D2-102.
-5. Visibility computed each day from the land's state (smoke included) rather than stored (§7)?
+5. ~~Computed, not stored~~ decided: D2-103.
 6. The masking factors (x0.3, x0.6) and what counts as very loud.
 
 ## History
@@ -138,6 +138,8 @@ it describes.
   agents act once a day: it is not, so light only matters for night events, the watch and working late), D2-100 (very loud things
   mask others), D2-101 (smell later, simple: own salience, no wind for now; corpses, animals), D2-102 (split conspicuousness).
   Asked whether visibility fits the land's hidden parameters, with smoke from fires: §7.
+
+- 23 Oct: Zach decided D2-103: visibility is a value, but a computed one that emerges from the environment.
 
 ## Sources
 
