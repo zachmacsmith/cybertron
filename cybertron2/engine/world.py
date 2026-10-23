@@ -567,27 +567,43 @@ def p_harm(w, person, wounded=None, hunger=None):
 
 
 def p_die(w, person, cause, to=None):
-    """Death (09 §2d): what the dead carried lies where they died (or goes to a killer who takes it)."""
+    """Death (09 §2d, D2-87, D2-96): the body lies where one died, at a parcel of the node or on the road, with what one carried (or
+    a killer takes what one carried)."""
+    from cybertron2.engine import things as TH
     a = w.s["people"][person]
     place = w.place_of(("person", person))
+    spot = TH.spot_of(w, person) if a["at"] is not None else None
     a["alive"], a["died"], a["cause"] = False, w.d, cause
     hands = w.goods(a["hands"])
     left = {i: q for i, q in hands.items() if q > 1e-9}
-    if left:
-        if to:
-            for i, q in left.items():
-                _add(w.goods(w.hands(to)), i, q)
-        elif place is not None:                                                 # at a node, or on the road where one fell
-            w.s["seq"] += 1
-            cid = f"remains:{w.s['seq']}"
-            w.s["containers"][cid] = {"kind": "remains", "of": person, "node": place, "goods": dict(left), "wear": {},
-                                      "on_road": place not in w.s["nodes"]}
-        for i in left:
-            hands[i] = 0.0
+    if to:
+        for i, q in left.items():
+            _add(w.goods(w.hands(to)), i, q)
+        left = {}
+    if place is not None:                                                     # at a node, or on the road where one fell
+        w.s["seq"] += 1
+        cid = f"remains:{w.s['seq']}"
+        w.s["containers"][cid] = {"kind": "remains", "of": person, "node": place, "parcel": spot, "goods": dict(left), "wear": {},
+                                  "on_road": place not in w.s["nodes"], "body": True, "died": w.d}
+    for i in list(hands):
+        hands[i] = 0.0
     for iid, h in w.s["institutions"].items():
         if h["offices"].get("head") == person:
             h["offices"]["head"] = w._eldest(w.members(iid))
     return place
+
+
+def p_new_thing(w, node, parcel, kind, **fields):
+    """A thing at a spot (world/things_in_places.md): an empty container at a parcel (or, on the road, a stretch), filled by transfer."""
+    w.s["seq"] += 1
+    cid = f"{kind}:{w.s['seq']}"
+    w.s["containers"][cid] = {"kind": kind, "node": node, "parcel": parcel, "goods": {}, "wear": {}, "day": w.d, **fields}
+    return cid
+
+
+def p_set_thing(w, cid, field, value):
+    w.s["containers"][cid][field] = value
+    return value
 
 
 def p_learn(w, person, tech, level, source):
@@ -659,6 +675,8 @@ PRIMITIVES = {
     "harm": (p_harm, _r("person", "person")),
     "die": (p_die, _r("person", "person")),
     "learn": (p_learn, _r("person", "person")),
+    "new_thing": (p_new_thing, _r("parcel", "parcel")),
+    "set_thing": (p_set_thing, _rc("cid")),
     "raise": (p_raise, _r("parcel", "parcel")),
     "offer": (p_offer, _r("person", "by")),
     "close_offer": (p_close_offer, _r("offer", "offer")),

@@ -236,6 +236,51 @@ class Here:
                 return b["stock"]
         return None
 
+    def house_of(self, party):
+        """A person's or a household's house here (where a give that cannot reach them is left at the door: D2-111)."""
+        hh = self._w.s["institutions"].get(party)
+        members = hh["members"] if hh else [party] if party in self._w.s["people"] else []
+        for bid in self.buildings():
+            if any(bid in self._w.homes(m) for m in members):
+                return bid
+        return None
+
+    # ------------------------------------------------------------------ things at a spot (world/things_in_places.md)
+    def things(self) -> dict:
+        from cybertron2.engine import things as TH
+        return TH.at_node(self._w, self.node)
+
+    def thing(self, cid) -> dict:
+        c = self._w.s["containers"].get(cid)
+        return c if c and c.get("node") == self.node else None
+
+    def bodies(self) -> dict:
+        from cybertron2.engine import things as TH
+        return TH.bodies(self._w, self.node)
+
+    def spot_name(self, c) -> str:
+        from cybertron2.engine import things as TH
+        return TH.parcel_name(self._w, c)
+
+    def bury_units(self, cid, cairn=False) -> int:
+        from cybertron2.engine import things as TH
+        return TH.bury_units(self._w, cid, cairn)
+
+    def find_thing(self, where, item=None):
+        from cybertron2.engine import things as TH
+        return TH.find(self._w, self.name, where, item)
+
+    def remember_thing(self, cid, how) -> None:
+        from cybertron2.engine import things as TH
+        TH.remember(self._w, self.name, cid, how)
+
+    def known_things(self) -> dict:
+        from cybertron2.engine import things as TH
+        return {cid: (r, self.thing(cid)) for cid, r in TH.known_here(self._w, self.name, self.node).items()}
+
+    def living_in(self, bid) -> list:
+        return [m for m in self._w.living() if bid in self._w.homes(m)]
+
     def household_name(self, bid):
         return _household_name(self._w, bid)
 

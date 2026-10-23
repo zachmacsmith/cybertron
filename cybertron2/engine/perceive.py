@@ -145,9 +145,13 @@ def facts(here) -> list:
             add([sub], tpl.format(name=nm), sal, ["place"], sense, ambient=True)
     from cybertron2.engine import signs as SG                                  # fields, pastures and herds: bundles of signs
     SG.facts(here, add)
-    for cid, c in here.remains().items():
-        goods = ", ".join(f"{_amount(q)} {i}" for i, q in c["goods"].items() if q > 0.05)
-        add(["sky"], f"what {c['of']} carried lies where they died: {goods}", 0.7, ["death", "food"])
+    from cybertron2.engine import things as TH                                 # things at a spot: one noticing rule (D2-85)
+    for cid, c in TH.at_node(here._w, here.node).items():
+        about = ([f"parcel:{c['parcel']}"] if c.get("parcel") else []) + [f"thing:{cid}"]
+        tags = ["death"] if c.get("body") else ["food"] if any(ITEMS.get(i, {}).get("food") for i in c["goods"]) else []
+        add(about, TH.describe(here._w, c), TH.own(here._w, c), tags, "sight", thing=cid)
+        if TH.rotting(here._w, c):
+            add(about, TH.rot_words(here._w, c), 0.6, ["death", "danger"] if c.get("body") else ["food"], "smell", thing=cid, rot=True)
     for e in here.events():
         if e["kind"] == "speech":
             continue
@@ -193,10 +197,10 @@ def knack(mind, f) -> float:
 
 
 def eye(here, name) -> float:
-    """One's eye for the land, drawn once (D4-50): some never read how bare a place is and learn it only by finding nothing."""
-    u = here.rng("eye", name).random()
-    blind = float(here.p["land_blind"])
-    return 0.0 if u < blind else 0.5 + (u - blind) / (1 - blind)
+    """One's eye for the land on how bare a place is (D4-50, D2-91): none (learns only by finding nothing), ordinary or keen; drawn
+    once and raised by roaming work (things.eye_level)."""
+    from cybertron2.engine import things as TH
+    return TH.eye(here._w, name, on="bare")
 
 
 LAND_DRAWS = {"plants": "wild food", "wood": "timber", "game": "game"}
@@ -256,7 +260,18 @@ def evening(w, attend: dict, today: dict) -> dict:
         seen = {f["id"] for f in con}
         homes = {f"building:{b}" for b in here.homes_here()}
         cand = []
+        from cybertron2.engine import things as TH
+        knows = TH.known_here(w, name, here.node)
         for f in F:
+            if f.get("thing"):                                                 # the noticing rule (D2-85): not the salience formula
+                if f["thing"] in knows and knows[f["thing"]].get("text") == f["text"] and not f.get("rot"):
+                    continue                                                    # already known as it is
+                c = w.s["containers"][f["thing"]]
+                p = 1.0 if f.get("rot") and TH.presence(w, name, c.get("parcel"), 1.0) >= 0.5 else (
+                    0.3 if f.get("rot") else TH.chance(w, name, c, tgt_raw))
+                if rng.random() < p:
+                    cand.append((1.0 + f["salience"], f))
+                continue
             if f["id"] in seen or f.get("actor") == name or f.get("peek") or f.get("ambient") or not _can_read(mind, f):
                 continue
             if f.get("dawn") and f["text"] in t["dawn"]:
@@ -284,6 +299,7 @@ def evening(w, attend: dict, today: dict) -> dict:
             att = amb[:4]
         elif subject:
             pool = [f for f in F if subject in f["about"] and f["id"] not in seen and f.get("actor") != name and _can_read(mind, f)
+                    and not f.get("thing")                                    # things: by the noticing rule, attention x3 (D2-85)
                     and (not f.get("peek") or subject.startswith("building:"))]
             pool.sort(key=lambda f: -(f["salience"] + relevance(here, mind, f)))
             texts = set()
@@ -332,6 +348,9 @@ def evening(w, attend: dict, today: dict) -> dict:
                 t["learned"].append(f"You saw {actor} at {KN.label(tech)}, which you had not seen done before.")
             if rose:
                 t["learned"].append(f"From watching {actor} you now have a rough idea of {KN.label(tech)}.")
+        for f in notice + att:
+            if f.get("thing") and not f.get("rot"):
+                TH.remember(w, name, f["thing"], "saw")
         for f in con + notice + att:
             if f.get("land"):
                 for sub in f["about"]:

@@ -16,25 +16,25 @@ PHYSICS     the numbers of the day and the night
 from __future__ import annotations
 
 ITEMS = {
-    "grain": {"weight": 1, "food": 0.7, "spoil": 0.0167, "cook": True},  # boiled whole at a hearth (D2-60); seed (D2-17); spoils
+    "grain": {"weight": 1, "food": 0.7, "spoil": 0.0167, "cook": True, "decay": "grain"},  # boiled whole at a hearth (D2-60); seed (D2-17); spoils
                                                                        # 0.5% a day in a house, less in bins, a cellar, a granary (D2-58)
-    "rye": {"weight": 1, "food": 0.7, "spoil": 0.0167, "cook": True},    # winter grain (D2-53)
-    "beans": {"weight": 1, "food": 0.6, "spoil": 0.0167, "cook": True},  # legumes: less food, restore the soil (D2-53)
-    "flour": {"weight": 1, "food": 1.0, "spoil": 0.0167, "cook": True},  # ground grain, eaten as porridge (D2-60)
-    "bread": {"weight": 1, "food": 1.3, "spoil": 0.05},                # keeps, eaten without a hearth (D2-60)
-    "dried meat": {"weight": 1, "food": 3.0, "spoil": 0.02},           # meat dried to half its weight (D2-62)
-    "cheese": {"weight": 1, "food": 2.5, "spoil": 0.02},               # 6 milk (D2-47, D2-56)
+    "rye": {"weight": 1, "food": 0.7, "spoil": 0.0167, "cook": True, "decay": "grain"},    # winter grain (D2-53)
+    "beans": {"weight": 1, "food": 0.6, "spoil": 0.0167, "cook": True, "decay": "grain"},  # legumes: less food, restore the soil (D2-53)
+    "flour": {"weight": 1, "food": 1.0, "spoil": 0.0167, "cook": True, "decay": "grain"},  # ground grain, eaten as porridge (D2-60)
+    "bread": {"weight": 1, "food": 1.3, "spoil": 0.05, "decay": "bread"},                # keeps, eaten without a hearth (D2-60)
+    "dried meat": {"weight": 1, "food": 3.0, "spoil": 0.02, "decay": "dried meat"},           # meat dried to half its weight (D2-62)
+    "cheese": {"weight": 1, "food": 2.5, "spoil": 0.02, "decay": "cheese"},               # 6 milk (D2-47, D2-56)
     "salt": {"weight": 1, "food": 0.0, "spoil": 0.0},                  # D2-24, D2-56
     "hay": {"weight": 1, "food": 0.0, "spoil": 0.0, "fodder": 1.0},    # cut from pasture in summer (D4-42)
     "straw": {"weight": 1, "food": 0.0, "spoil": 0.0, "fodder": 1.0},  # from the grain harvest (D4-42)
     "dung": {"weight": 1, "food": 0.0, "spoil": 0.0},                  # manure (D2-18, D4-39)
     "charcoal": {"weight": 2, "food": 0.0, "spoil": 0.0},              # from 5 timber, made at the wood (D2-56)
     "wild food": {"weight": 1, "food": 1.0, "spoil": 0.15},
-    "meat": {"weight": 1, "food": 1.5, "spoil": 0.30},                 # dense, spoils fresh (D2-41)
+    "meat": {"weight": 1, "food": 1.5, "spoil": 0.30, "decay": "fresh meat"},                 # dense, spoils fresh (D2-41)
     "milk": {"weight": 1, "food": 0.5, "spoil": 1.0},                  # the same day (D2-42)
     "timber": {"weight": 2, "food": 0.0, "spoil": 0.0},                # D2-24
     "stone": {"weight": 3, "food": 0.0, "spoil": 0.0},                 # D2-3, D2-24
-    "hide": {"weight": 1, "food": 0.0, "spoil": 0.0},                  # D2-24
+    "hide": {"weight": 1, "food": 0.0, "spoil": 0.0, "decay": "hide"},                  # D2-24
     "copper ore": {"weight": 3, "food": 0.0, "spoil": 0.0},
     "copper": {"weight": 1, "food": 0.0, "spoil": 0.0},                # D2-19, D2-24
     "coin": {"weight": 0, "food": 0.0, "spoil": 0.0},                  # copper coin, carried (D2-1, D2-28)
@@ -47,6 +47,20 @@ ITEMS = {
     "harness": {"weight": 1, "food": 0.0, "spoil": 0.0, "life": 80, "seen": True},             # D2-23; 80 days' use
     "bedroll": {"weight": 1, "food": 0.0, "spoil": 0.0, "life": 40, "seen": True, "camp": "bedroll"},    # D2-68: about 40 nights
     "tent": {"weight": 6, "food": 0.0, "spoil": 0.0, "life": 30, "seen": True, "camp": "tent"},          # D2-68: sleeps 2
+    "rotting meat": {"weight": 1, "food": 0.0, "spoil": 0.3, "rot": True},  # what fresh meat becomes in the open (D2-87); signs, no health yet
+}
+
+# Decay by condition (economy/goods.md "Decay", D2-87; calibrate): multipliers on an item's rate in a house, for a thing at a spot
+# (open, dry or wet; buried), and for the season and the frost; `abs` is a share lost a day where the house rate is none (hides);
+# `becomes` is what the lost share turns into in the open.
+DECAY = {
+    "grain": {"open_dry": 4, "open_wet": 10, "buried": 2, "warm": 1.2, "frozen": 0.5},
+    "bread": {"open_dry": 3, "open_wet": 8, "buried": 3, "warm": 1.5, "frozen": 0.2},
+    "fresh meat": {"open_dry": 2, "open_wet": 2.5, "buried": 1, "warm": 1.5, "frozen": 0.1, "becomes": "rotting meat"},
+    "dried meat": {"open_dry": 2, "open_wet": 6, "buried": 2, "warm": 1.2, "frozen": 0.5},
+    "cheese": {"open_dry": 3, "open_wet": 5, "buried": 1, "warm": 1.5, "frozen": 0.3},
+    "hide": {"abs": {"open_dry": 0.01, "open_wet": 0.03, "buried": 0.02}},
+    "default": {"open_dry": 2, "open_wet": 4, "buried": 1, "warm": 1.2, "frozen": 0.5},   # goods the table does not name (37.4; calibrate)
 }
 
 # Crops (D2-53, D4-38, D4-39; 02l §2-§3, calibrate): grow for a share of the year from the day sown; the cold kills what is still
@@ -66,16 +80,16 @@ TOOLS = tuple(sorted((i for i, v in ITEMS.items() if v.get("tool")), key=lambda 
 WEAPONS = tuple(i for i, v in ITEMS.items() if v.get("weapon"))
 
 COVERS = {
-    "forest": {"words": "woodland", "lots": 0,
+    "forest": {"words": "woodland", "lots": 0, "sight": 0.35, "sound": 0.7, "dig": "soft",
                "ambient": [("sound", "birdsong and the creak of trees from {name}", 0.2), ("smell", "leaf mould on the air from {name}", 0.15)]},
-    "field": {"words": "fields", "lots": 0, "ambient": [("sight", "{name} stretching out beyond the houses", 0.1)]},
-    "pasture": {"words": "pasture", "lots": 0,
+    "field": {"words": "fields", "lots": 0, "sight": 1.0, "sound": 1.0, "dig": "soft", "ambient": [("sight", "{name} stretching out beyond the houses", 0.1)]},
+    "pasture": {"words": "pasture", "lots": 0, "sight": 1.0, "sound": 1.0, "dig": "soft",
                 "ambient": [("sound", "cattle lowing on {name}", 0.35), ("smell", "dung and trodden grass from {name}", 0.15)]},
-    "meadow": {"words": "meadow", "lots": 0, "ambient": [("sound", "insects in the long grass of {name}", 0.15)]},
-    "water": {"words": "water", "lots": 0, "ambient": [("sound", "water running over stones in {name}", 0.3)]},
-    "built": {"words": "built ground", "lots": 6, "ambient": [("sound", "voices and work about the houses", 0.2)]},
-    "scrub": {"words": "scrub", "lots": 4, "ambient": []},
-    "rock": {"words": "rock", "lots": 0, "ambient": [("sound", "the ring of picks from {name}", 0.25)]},
+    "meadow": {"words": "meadow", "lots": 0, "sight": 1.0, "sound": 1.0, "dig": "soft", "ambient": [("sound", "insects in the long grass of {name}", 0.15)]},
+    "water": {"words": "water", "lots": 0, "sight": 1.0, "sound": 1.0, "dig": "soft", "ambient": [("sound", "water running over stones in {name}", 0.3)]},
+    "built": {"words": "built ground", "lots": 6, "sight": 0.7, "sound": 1.0, "dig": "soft", "ambient": [("sound", "voices and work about the houses", 0.2)]},
+    "scrub": {"words": "scrub", "lots": 4, "sight": 0.5, "sound": 0.9, "dig": "stony", "ambient": []},
+    "rock": {"words": "rock", "lots": 0, "sight": 0.5, "sound": 0.9, "dig": "stony", "ambient": [("sound", "the ring of picks from {name}", 0.25)]},
 }
 
 # How each resource comes back (D4-7) and how it is seen (in words, never numbers: environment/resources.md).
@@ -147,9 +161,6 @@ TECHNIQUES = {
     "sow": {"verb": "work", "label": "sowing a field broadcast (seed thrown)", "aliases": ["sowing", "plant", "broadcast"], "basic": True,
             "at": {"covers": ["field"]}, "draws": "plot", "yield": {"kind": "sow", "seed": 6.0, "worth": 1.0}, "units": 1, "gives": "",
             "tags": ["farming"]},
-    "dibble": {"verb": "work", "label": "dibbling seed (set by hand, seed by seed)", "aliases": ["dibbling", "set seed"], "basic": True,
-               "at": {"covers": ["field"]}, "draws": "plot", "yield": {"kind": "sow", "seed": 2.0, "worth": 1.67}, "units": 1, "gives": "",
-               "tags": ["farming"]},
     "hoe": {"verb": "work", "label": "breaking the soil with a hoe", "aliases": ["hoeing", "dig", "break the soil"], "basic": True,
             "at": {"covers": ["field"]}, "draws": "plot", "yield": {"kind": "break", "plots": 0.0625, "stone": 1.0},
             "tools": {"bare": 0.5, "crude": 1.0, "copper": 1.5}, "wear": 0.5, "units": 1, "gives": "", "tags": ["farming"]},
@@ -239,6 +250,31 @@ TECHNIQUES = {
     "coin": {"verb": "make", "label": "striking coin", "aliases": ["strike coin", "minting"], "at": {"fittings": ["anvil"]},
              "inputs": {"copper": 1}, "units": 1, "gives": {"coin": 10}, "tags": ["craft", "smithing"], "trade": "smith"},
 }
+# Modifiers (agents/modifiers.md; D2-93, D2-94, D2-111, D2-112): techniques with `modifies` (verb, or verb:technique), the action
+# argument they are written as (`key`: `value`; "*" any value), and what they change, read by the verb they modify. `untaught`:
+# tryable (done worse, and one becomes aware of it) or no (refused, and one becomes aware it exists). Basic ones everyone knows.
+TECHNIQUES.update({
+    "for": {"verb": "modifier", "label": "doing it for someone (into their store, from it by right or agreement)", "aliases": [],
+            "basic": True, "modifies": ["gather", "work", "make", "build", "give", "accept", "offer"], "key": "for", "value": "*",
+            "changes": {"destination": "party"}, "units": 0, "gives": "", "tags": []},                                     # D2-37, D2-94
+    "hidden: under brush": {"verb": "modifier", "label": "hiding something under brush", "aliases": ["hide", "under brush", "brush"],
+                            "modifies": ["give:place"], "key": "hidden", "value": "under brush", "untaught": "tryable",
+                            "changes": {"hidden": "under brush", "units": 1}, "units": 1, "gives": "", "tags": ["hiding"]},
+    "hidden: buried": {"verb": "modifier", "label": "burying something to hide it", "aliases": ["bury it", "buried", "cache"],
+                       "modifies": ["give:place"], "key": "hidden", "value": "buried", "untaught": "tryable",
+                       "changes": {"hidden": "buried", "units": 2}, "units": 2, "gives": "", "tags": ["hiding"]},
+    "method: dibble": {"verb": "modifier", "label": "dibbling seed (set by hand, seed by seed)", "aliases": ["dibble", "dibbling", "set seed"],
+                       "modifies": ["work:sow"], "key": "method", "value": "dibble", "untaught": "no",
+                       "changes": {"yield": {"seed": 2.0, "worth": 1.67}, "word": "dibbled"}, "units": 0, "gives": "",
+                       "tags": ["farming"], "trade": "farmer"},                                      # D2-54, D2-94: 3x the work, 0.6x the seed
+    "method: cairn": {"verb": "modifier", "label": "raising a cairn of stones over the dead", "aliases": ["cairn"], "basic": True,
+                      "modifies": ["work:bury"], "key": "method", "value": "cairn", "changes": {"inputs": {"stone": 3}, "units": 2},
+                      "units": 2, "gives": "", "tags": ["death"]},                                    # D2-96
+    "bury": {"verb": "work", "label": "burying the dead", "aliases": ["burial", "bury the dead", "bury the body"], "basic": True,
+             "at": {"things": "body"}, "yield": {"kind": "bury"}, "units": 2, "units_by": "bury", "gives": "", "tags": ["death"]},   # D2-96
+})
+MODIFIERS = {t for t, d in TECHNIQUES.items() if d.get("modifies")}
+
 # Building and fitting are techniques too, for knowledge (basic or a trade), with their costs in BLUEPRINTS and FITTINGS.
 for _k, _b in list(BLUEPRINTS.items()) + list(FITTINGS.items()):
     TECHNIQUES.setdefault(_k, {"verb": "build", "label": "building " + _b["label"], "aliases": [], "basic": _b.get("basic", False),
@@ -291,4 +327,72 @@ PHYSICS = {
                # 02o (calibrate): births a cow a year, a cow in milk 0.6 of the year, dung for 2 plots a head a year, 2 head a plot of
                # pasture in summer, an unwatched herd strays
     "repair": {"timber": 2},
+    "bury": {"soft": 2, "stony": 4, "frozen": 6},                        # D2-96: units of work by the ground and the cold (calibrate)
+    "untaught": 0.5,                                                     # D2-93: an untaught try works half as well (calibrate)
+}
+
+# ---------------------------------------------------------------------------------------------------- the environment (37.2's spec)
+# The day's weather by spell (environment/scheduler.md, D2-69, D2-99; calibrate): the chances of each kind of day within a spell.
+# A spell comes from the world's spec (`spells`: [{kind, from, to}], days counted from 1); otherwise `normal`. Rain falls as snow in
+# winter and on cold days. Each kind's effect on the senses (environment/visibility.md, D2-99) and whether it wets what lies out.
+WEATHER = {
+    "clear": {"sight": 1.0, "sound": 1.0, "wet": False, "words": "a clear day"},
+    "rain": {"sight": 0.8, "sound": 0.7, "wet": True, "words": "rain all day"},
+    "heavy rain": {"sight": 0.6, "sound": 0.5, "wet": True, "words": "heavy rain, the ground running with water"},
+    "fog": {"sight": 0.3, "sound": 1.0, "wet": False, "words": "a thick fog lying on the land"},
+    "snow": {"sight": 0.5, "sound": 0.7, "wet": True, "words": "snow falling"},
+    "gale": {"sight": 0.9, "sound": 0.5, "wet": False, "words": "a gale tearing at the roofs", "loud": "loud"},
+}
+SPELLS = {
+    "normal": {"clear": 0.55, "rain": 0.25, "heavy rain": 0.05, "fog": 0.10, "gale": 0.05},
+    "wet": {"clear": 0.20, "rain": 0.45, "heavy rain": 0.20, "fog": 0.15},
+    "dry": {"clear": 0.85, "rain": 0.03, "fog": 0.07, "gale": 0.05},
+    "cold snap": {"clear": 0.50, "fog": 0.15, "snow": 0.30, "gale": 0.05},
+    "storm": {"clear": 0.05, "rain": 0.25, "heavy rain": 0.40, "gale": 0.30},
+}
+ENV = {
+    "night": {"sight": 0.1, "moon": 0.25, "sound": 1.2},            # D2-99: light only for night events
+    "snow_melt": 3,                                                 # snow lies until three days without frost
+    "snow_ground": 0.5,                                             # things on the ground under lying snow
+    "crop_high": 0.5,                                               # a grain crop standing high: that field's sight
+    "crop_high_from": 0.6,                                          # ... from this share of its growing time until reaped
+    "smoke": 0.7,                                                   # a parcel with smoke that day
+    "smoke_tags": ["smithing"], "smoke_techs": ["charcoal", "smelt", "dry meat"],
+    "mask": {"very": 0.3, "loud": 0.6},                             # D2-100: quieter sounds near something very loud, or loud
+    "loud_kinds": {"fight": "very", "raid": "very", "threat": "very"},
+    "loud_tags": {"smithing": "loud"}, "loud_techs": {"mill": "loud", "water mill": "loud", "grind": "loud"},
+    "inside_sound": 0.5,                                            # walls
+    "ford_high_after": 2,                                           # a ford is high for 2 days after heavy rain (world/roads.md)
+}
+
+# ------------------------------------------------------------------------------------ things at a spot and noticing them (D2-85)
+# Own conspicuousness (information/noticing.md; calibrate); hiding multiplies it (taught, untaught).
+THINGS = {
+    "body": 0.9, "body_built": 1.0, "heap": 0.9, "heap_min": 10, "pack": 0.4, "camp": 0.7, "trace": 0.3,
+    "hidden": {"under brush": [0.2, 0.4], "buried": [0.03, 0.06]},
+    "body_days": 10,                                                # "dead some days", then bones to the season's end
+    "rot_after": 2,                                                 # a body unburied this many days smells of rot
+}
+NOTICING = {
+    # presence: where the observer was and what it did, by what its work draws on (D2-85)
+    "presence": {"game": 1.0, "plants": 0.7, "herd": 0.5, "work": 0.5, "about": 0.5, "crossing": 0.3, "elsewhere": 0.05, "road": 1.0},
+    "elsewhere_min": 0.8,                                           # only things this conspicuous are seen from elsewhere at the node
+    "attention": {"place": 3.0, "search": 5.0},
+    "eye": {"none": 0.5, "ordinary": 1.0, "keen": 3.0},             # D2-91 on things
+    "eye_bare": {"none": 0.0, "ordinary": 1.0, "keen": 2.0},        # D4-50 on how bare a place is (none: only by failing)
+    "eye_keen": 0.15,                                               # the share born keen (the share with none is `land_blind`)
+    "eye_practice": {"techs": ["hunt", "forage"], "find": 5.0, "steps": [30.0, 120.0]},   # units of roaming work (and finds) to rise
+}
+
+# ---------------------------------------------------------------------------------------------- fuse events (conflict/fuse_events.md)
+# Each kind: its sense, who can detect it and with what chance, how long the fuse is by the building's structure (acts in the call),
+# the choices offered, and what happens with no call. Road kinds (meetings, finds, crossings) are added by the roads package.
+FUSE = {
+    "raid": {"sense": "sound", "label": "a break-in",
+             "detect": {"watcher": 0.9, "dog": 0.6, "inside": {"wattle": 0.3, "timber": 0.3, "stone": 0.5, "camp": 0.3},
+                        "neighbour": 0.15},
+             "acts": {"camp": 0, "wattle": 0, "timber": 1, "stone": 3},     # hut: none; timber: 1; stone: up to 3 (D2-81)
+             "riders": {"detect": 0.5, "acts": 1},                          # D2-83
+             "choices": ["defend", "flee", "hand over", "alarm", "stay"],
+             "also": ["move", "take", "give"]},
 }

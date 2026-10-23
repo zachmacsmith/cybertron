@@ -108,6 +108,8 @@ def where(here, tech) -> list:
     if not at:
         return [("anywhere", None, "anywhere")]
     out = []
+    if at.get("things"):                                                       # work on a thing at a spot: the dead (D2-96)
+        return [("thing", cid, f"the body of {c['of']} at {here.spot_name(c)}") for cid, c in here.bodies().items()]
     for c in at.get("covers", []):
         out += [("parcel", pid, p["name"]) for pid, p in here.parcels().items() if p["cover"] == c]
     for f in at.get("fittings", []):
@@ -165,6 +167,13 @@ def ready(here, tech, kind, key) -> str:
                     return f"the cows in milk have all been milked today ({h['in_milk']} of them)"
             if y == "slaughter" and hs[0]["count"] <= 0:
                 return "there are no beasts left"
+    if kind == "thing":
+        c = here.thing(key)
+        if not c or not c.get("body"):
+            return "there is no body there"
+        if c.get("buried") is not None:
+            return f"{c['of']} is already buried"
+        return ""
     if kind == "building" and y == "repair" and here.buildings()[key]["condition"] >= 2:
         return f"{here.buildings()[key]['name']} is sound"
     return ""
@@ -257,7 +266,7 @@ def crafts_lines(mind) -> list:
     capable = [f"{TECHNIQUES[t]['label']} ({r['source']})" for t, r in sorted(k.items()) if r["level"] == "capable"]
     rough = [f"{TECHNIQUES[t]['label']} ({r['source']})" for t, r in sorted(k.items()) if r["level"] == "rough"]
     aware = [f"{TECHNIQUES[t]['label']} ({r['source']})" for t, r in sorted(k.items()) if r["level"] == "aware"]
-    basics = ", ".join(label(t) for t in TECHNIQUES if basic(t))
+    basics = ", ".join(label(t) for t in TECHNIQUES if basic(t) and not TECHNIQUES[t].get("modifies"))
     out = [f"- Everyone knows: {basics}."]
     if practised:
         out.append("- Long practice has made you better than most at: " + "; ".join(practised) + ".")
@@ -276,6 +285,8 @@ def options(here, mind, limit=10):
     """Today's options: techniques one could do here now, and near misses."""
     can, near = [], []
     for tech, t in TECHNIQUES.items():
+        if t.get("modifies"):                                                  # modifiers show on their verbs' lines
+            continue
         lvl = level(mind, tech)
         if t.get("crew") and lvl not in ("rough", "capable", "known"):
             lvl = "known"                                                     # anyone can work on a crew (D2-66)

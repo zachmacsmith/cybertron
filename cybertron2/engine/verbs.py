@@ -7,7 +7,7 @@ Each handler: (here, mind, a) -> result line. Refusals name what is short and co
 from __future__ import annotations
 
 import math
-from cybertron2.engine import farm as FM, knowledge as KN, perceive as PC
+from cybertron2.engine import farm as FM, knowledge as KN, modifiers as MOD, perceive as PC, things as TH
 from cybertron2.engine.data import BLUEPRINTS, COVERS, FITTINGS, ITEMS, TECHNIQUES, TRY
 from cybertron2.engine.here import Refused, show
 
@@ -23,12 +23,14 @@ VERB = {
               "cost": 2, "doc": "start or carry on a building or a fitting: its materials when you start, then the work over days: {crafts}"},
     "move": {"args": '{"item", "qty", "to": store | hands, "at"?: building}', "cost": 0,
              "doc": "between your hands and a store here you may use (your household's)"},
-    "take": {"args": '{"item", "qty", "from": building or someone\'s remains}', "cost": 1,
-             "doc": "from any store you can get into; without the right to it, it is theft, and you may be seen"},
-    "give": {"args": '{"to": a person or a household here, "item", "qty", "for"?: your household, to give from its store}', "cost": 0,
-             "doc": "to anyone here; to a household, it goes into their house's store"},
-    "leave": {"args": '{"item", "qty", "at": a building here}', "cost": 0,
-              "doc": "put something you carry into a building's store here, for its household (they find it in the morning)"},
+    "take": {"args": '{"item", "qty", "from": a building, someone\'s remains, or a place where you know something lies}', "cost": 1,
+             "doc": "from any store you can get into (without the right to it, it is theft, and you may be seen), or from what lies in the "
+                    "open (nobody's: whoever takes it holds it)"},
+    "give": {"args": '{"to": a person, a household, a building or a place here, "item", "qty", "for"?: your household, to give from its store, "hidden"?}',
+             "cost": 0, "doc": "to a person here, into their hands; to a household, or a building you may use, into its store; to a "
+                               "building you may not use, or someone not here, left at its door; to a place (a field, a wood), left "
+                               "there in the open, where anyone may find it and take it. Leaving, putting down and hiding are giving "
+                               "to a place"},
     "accept": {"args": '{"offer": id, "lots"?: n, "for"?: party}', "cost": 0, "doc": "an open offer here: both sides at once, or nothing"},
     "withdraw": {"args": '{"offer": id}', "cost": 0, "doc": "take back an offer of yours"},
     "release": {"args": '{"agreement": id}', "cost": 0,
@@ -90,14 +92,42 @@ def cost(here, a) -> int:
     tech = KN.resolve(a.get("what"), a.get("do"))
     if tech is None:
         return 1
+    tech, a = _as_modified(tech, v, a)
     n = int(TECHNIQUES[tech]["units"])
-    if v == "make":
+    if TECHNIQUES[tech].get("units_by") == "bury":                            # by the ground and the cold (D2-96)
+        cid = _thing_site(here, a.get("at"))
+        if cid:
+            n = here.bury_units(cid, cairn=str(a.get("method", "")).lower() == "cairn")
+    elif v == "make":
         n *= max(1, int(_qty(a.get("qty"), 1)))
-    return n
+    return n + MOD.units(a, v, tech)
+
+
+def _as_modified(tech, verb, a):
+    """A modifier written as the technique ("dibble") is the technique it modifies, with the modifier set (D2-94)."""
+    d = TECHNIQUES.get(tech, {})
+    if d.get("modifies"):
+        base = next((x.split(":", 1)[1] for x in d["modifies"] if x.startswith(f"{verb}:")), None)
+        if base:
+            return base, {**a, d["key"]: d["value"]}
+    return tech, a
+
+
+def _thing_site(here, at):
+    """A body here by its person's name or its place's name (for burying)."""
+    low = str(at or "").strip().lower()
+    for cid, c in here.bodies().items():
+        pname = here.spot_name(c).lower()
+        if not low or low in (c["of"].lower(), pname, pname.removeprefix("the ")) or c["of"].lower() in low:
+            return cid
+    return None
 
 
 def do(here, mind, a) -> str:
     v = str((a or {}).get("do", "")).lower().strip()
+    if v in ALIASES:                                                          # leaving, putting down and hiding are giving (D2-111)
+        a = ALIASES[v](a)
+        v = "give"
     try:
         if v not in VERBS:
             raise Refused(f"unknown verb {v!r}; the verbs are {', '.join(VERBS)}")
@@ -206,6 +236,11 @@ def _skill_mult(here, mind, tech) -> float:
 
 def _site(here, mind, tech, at):
     sites = KN.where(here, tech)
+    if sites and sites[0][0] == "thing":
+        cid = _thing_site(here, at)
+        if cid is None:
+            raise Refused(f"there is no body to bury here called {at!r}" if at else "there is no body here to bury")
+        return "thing", cid, next(s[2] for s in sites if s[1] == cid)
     if at:
         key = here.parcel(at) or here.building(at)
         if key is None:
@@ -259,9 +294,11 @@ def _technique(here, mind, a, party, verb):
     if tech is None or TECHNIQUES[tech]["verb"] != verb:
         names = [t for t, d in TECHNIQUES.items() if d["verb"] == verb]
         raise Refused(f"{a.get('what')!r} is not something you {verb} ({verb}: {', '.join(names)})")
+    tech, a = _as_modified(tech, verb, a)
     t = TECHNIQUES[tech]
     if not t.get("crew"):                                                     # crew work: anyone may dig, led by one who knows how
         _level(mind, tech)
+    a = {**a, "_mods": MOD.resolve(here, mind, verb, a, tech=tech)}           # ways of doing it (D2-93)
     kind, key, place_name = _site(here, mind, tech, a.get("at"))
     why = KN.shortfall(here, mind, tech, 1.0, key)
     if why:
@@ -301,6 +338,15 @@ def _technique(here, mind, a, party, verb):
         note = _against(here, thing) if thing[0] in ("parcel", "herd") else note
         if word and not word.startswith("You"):
             suffix, word = word, ""                                             # a note to the plain result, below
+    elif y["kind"] == "bury":                                                 # D2-96
+        c = here.thing(key)
+        cairn = "method: cairn" in a["_mods"]["_used"]
+        if cairn:
+            _consume(here, a["_mods"].get("inputs") or {})
+        here.apply("set_thing", cid=key, field="buried", value=here.day)
+        here.apply("set_thing", cid=key, field="cairn", value=cairn)
+        word = f"You buried {c['of']} at {here.spot_name(c)}" + (" under a cairn of stones." if cairn else ".")
+        thing = ("parcel", c["parcel"]) if c.get("parcel") else thing
     elif y["kind"] == "repair":
         b = here.buildings()[key]
         _consume(here, t.get("inputs") or {}, extra=b["stock"] if here.may_take(b["stock"]) else None)
@@ -317,7 +363,8 @@ def _technique(here, mind, a, party, verb):
         here.apply("create", dst=out, item=gives, qty=got, why=tech)
     if tool and t.get("wear"):
         here.apply("wear", container=here.hands, item=tool, uses=t["wear"])
-    KN.tried(here, mind, tech, got > 0 or y["kind"] in ("sow", "tend", "repair", "slaughter", "break", "manure", "herd"), units=t["units"])
+    KN.tried(here, mind, tech, got > 0 or y["kind"] in ("sow", "tend", "repair", "slaughter", "break", "manure", "herd", "bury"), units=t["units"])
+    MOD.practise(here, mind, a["_mods"])
     for_txt = f" for {here.households()[party]['name'] if party in here.households() else party}" if party and party != here.name else ""
     text = f"{here.name} was {KN.label(tech)} at {place_name}{for_txt}{note}"
     here.event("work", text, actor=here.name, about=[f"{thing[0]}:{thing[1]}"], salience=0.35 if note else 0.15, tags=t["tags"],
@@ -496,10 +543,18 @@ def _move(here, mind, a, party):
 def _take(here, mind, a, party):
     item = item_of(a.get("item"))
     src_name = str(a.get("from") or "")
-    rem = next((cid for cid, c in here.remains().items() if c["of"].lower() in src_name.lower()), None)
+    rem = here.find_thing(src_name, item)                        # what one knows lies here (D2-87: nobody's)
+    if rem is None and here.parcel(src_name) is not None and here.building(src_name) is None:
+        raise Refused(f"you know of no {item} lying at {src_name}")
     if rem:
-        src, label, theft = rem, f"what {here.remains()[rem]['of']} left", False
-        have = here.remains()[rem]["goods"].get(item, 0.0)
+        c = here.thing(rem)
+        src, theft = rem, False
+        label = f"what {c['of']} left" if c.get("body") else f"what lay at {here.spot_name(c)}"
+        have = c["goods"].get(item, 0.0)
+        if c.get("by") != here.name:
+            f = mind.store.setdefault("found", [])
+            if rem not in f:
+                f.append(rem)                                                   # finding things trains the eye (D2-91)
     else:
         bid = here.building(src_name)
         if bid is None:
@@ -517,59 +572,109 @@ def _take(here, mind, a, party):
         here.today()["thefts"].append({"by": here.name, "building": bid, "item": item, "qty": round(q, 2)})
         here.record("take", None, None, theft=True)
         return f"You took {show(q)} {item} from {label}, which is not yours to take from. Whether anyone saw, you will learn."
-    here.event("take", f"{here.name} took {item} from {label}", actor=here.name, salience=0.3, tags=["food"] if ITEMS[item]["food"] else [])
+    c = here.thing(src) or {"kind": "stock"}
+    here.event("take", f"{here.name} took {item} from {label}", actor=here.name, salience=0.4 if c["kind"] in TH.KINDS else 0.3,
+               about=[f"parcel:{c['parcel']}"] if c.get("parcel") else [], tags=["food"] if ITEMS[item]["food"] else [])
+    if c["kind"] in TH.KINDS:
+        here.remember_thing(src, "took")
     return f"You took {show(q)} {item} from {label}."
 
 
 def _give(here, mind, a, party):
-    to = here.person(a.get("to"))
-    if to is None:                                                          # to a household: into its house's store here
-        try:
-            hh = _party(here, a.get("to"))
-        except Refused:
-            hh = None
-        house = here.party_container(hh) if hh in here.households() else None
-        if house and house.startswith("stock:"):
-            item, q = item_of(a.get("item")), _qty(a.get("qty"))
-            if here.carried().get(item, 0.0) + 1e-9 < q:
-                raise Refused(f"you carry only {show(here.carried().get(item, 0.0))} {item}")
-            bid = house[len("stock:"):]
-            here.apply("transfer", src=here.hands, dst=house, item=item, qty=q)
-            name = here.households()[hh]["name"]
-            here.event("give", f"{here.name} gave {q:g} {item} to {name}, into {here.buildings()[bid]['name']}", actor=here.name,
-                       about=[f"building:{bid}"], salience=0.35, tags=["food"] if ITEMS[item]["food"] else [],
-                       concerns=list(here.institution(hh)["members"]))
-            here.record("give", None, party, to=hh, item=item, qty=q)
-            return f"You gave {q:g} {item} to {name}: it is in {here.buildings()[bid]['name']}."
-    if to is None or to == here.name:
-        raise Refused(f"there is nobody called {a.get('to')!r} here")
+    """Giving (D2-111, world/things_in_places.md): to a person here, into their hands; to a household or a building one may use, into
+    its store; to a building one may not use, or someone not here, at its door, in the open; to a place, left there (hidden, with the
+    `hidden` modifier)."""
+    to_raw = a.get("to") or a.get("at")
+    to = here.person(to_raw)
     item, q = item_of(a.get("item")), _qty(a.get("qty"))
-    if party and party != here.name and party != here.household() and not here.works_for(party):
-        raise Refused(f"'for' gives from that household's store, which is not yours: to give to {party}, give with 'to' instead")
-    src = here.hands if not party or party == here.name else _out(here, party)
-    have = here.carried().get(item, 0.0) if src == here.hands else here.stock(src[len("stock:"):]).get(item, 0.0)
-    if have + 1e-9 < q:
-        raise Refused(f"there is only {show(have)} {item} to give")
-    here.apply("transfer", src=src, dst=here.hands_of(to), item=item, qty=q)
-    here.event("give", f"{here.name} gave {q:g} {item} to {to}", actor=here.name, target=to, about=[f"person:{to}"], salience=0.35,
-               tags=["food"] if ITEMS[item]["food"] else [], concerns=[to])
-    here.record("give", None, party, to=to, item=item, qty=q)
-    return f"You gave {q:g} {item} to {to}."
-
-
-def _leave(here, mind, a, party):
-    bid = here.building(a.get("at"))
-    if bid is None:
-        raise Refused(f"there is no building called {a.get('at')!r} here; the buildings here: " + ", ".join(b["name"] for b in here.buildings().values()))
-    b = here.buildings()[bid]
-    if not here.can_enter(bid):
-        raise Refused(f"{b['name']}'s door is barred")
-    item, q = item_of(a.get("item")), _qty(a.get("qty"))
+    if to and to != here.name:
+        if party and party != here.name and party != here.household() and not here.works_for(party):
+            raise Refused(f"'for' gives from that household's store, which is not yours: to give to {party}, give with 'to' instead")
+        src = here.hands if not party or party == here.name else _out(here, party)
+        have = here.carried().get(item, 0.0) if src == here.hands else here.stock(src[len("stock:"):]).get(item, 0.0)
+        if have + 1e-9 < q:
+            raise Refused(f"there is only {show(have)} {item} to give")
+        here.apply("transfer", src=src, dst=here.hands_of(to), item=item, qty=q)
+        here.event("give", f"{here.name} gave {q:g} {item} to {to}", actor=here.name, target=to, about=[f"person:{to}"], salience=0.35,
+                   tags=["food"] if ITEMS[item]["food"] else [], concerns=[to])
+        here.record("give", None, party, to=to, item=item, qty=q)
+        return f"You gave {q:g} {item} to {to}."
     if here.carried().get(item, 0.0) + 1e-9 < q:
         raise Refused(f"you carry only {show(here.carried().get(item, 0.0))} {item}")
+    pid = here.parcel(to_raw)
+    bid = here.building(to_raw)
+    if pid is not None and bid is None:
+        return _put_down(here, mind, a, item, q, pid)
+    hh = None
+    if bid is None:
+        try:
+            hh = _party(here, to_raw)
+        except Refused:
+            hh = None
+        if hh in here.households():
+            house = here.party_container(hh)
+            if house and house.startswith("stock:") and here.can_enter(house[len("stock:"):]):
+                return _into_store(here, house[len("stock:"):], item, q, party, hh)
+            bid = here.house_of(hh)
+        elif hh:                                                                   # someone not here: left at their door (D2-111)
+            bid = here.house_of(hh)
+            if bid is not None:
+                return _put_down(here, mind, a, item, q, here.buildings()[bid]["parcel"], door=bid)
+        if bid is None:
+            raise Refused(f"there is nobody, no household's house and no place called {to_raw!r} here")
+    b = here.buildings()[bid]
+    if here.may_take(b["stock"]) or here.can_enter(bid):
+        return _into_store(here, bid, item, q, party, hh)
+    return _put_down(here, mind, a, item, q, b["parcel"], door=bid)
+
+
+def _into_store(here, bid, item, q, party, hh):
+    b = here.buildings()[bid]
     here.apply("transfer", src=here.hands, dst=b["stock"], item=item, qty=q)
-    here.today()["left"].append({"by": here.name, "item": item, "qty": q, "building": bid})
-    return f"You left {q:g} {item} at {b['name']}."
+    owners = here.households()[hh]["name"] if hh else None
+    here.event("give", f"{here.name} put {q:g} {item} into {b['name']}" + (f", for {owners}" if owners else ""), actor=here.name,
+               about=[f"building:{bid}"], salience=0.35, tags=["food"] if ITEMS[item]["food"] else [],
+               concerns=list(here.institution(hh)["members"]) if hh else [])
+    here.today()["left"].append({"by": here.name, "item": item, "qty": q, "building": bid})   # its household finds it in the morning
+    here.record("give", None, party, to=hh or bid, item=item, qty=q)
+    return f"You gave {q:g} {item} to {owners}: it is in {b['name']}." if owners else f"You left {q:g} {item} at {b['name']}."
+
+
+def _put_down(here, mind, a, item, q, pid, door=None):
+    """Left at a spot, in the open (D2-87): nobody's; hidden with the `hidden` modifier (D2-93)."""
+    mods = MOD.resolve(here, mind, "give", a, place=True)
+    how = mods.get("hidden")
+    untaught = bool(how) and any(TECHNIQUES[m]["key"] == "hidden" for m in mods["_untaught"])
+    cid = here.apply("new_thing", node=here.node, parcel=pid, kind="pile", by=here.name, hidden=how, untaught=untaught, door=door)
+    here.apply("transfer", src=here.hands, dst=cid, item=item, qty=q)
+    here.remember_thing(cid, "put")
+    MOD.practise(here, mind, mods)
+    pname = here.parcels()[pid]["name"]
+    where = f"at the door of {here.buildings()[door]['name']}" if door else f"at {pname}"
+    verb = {"under brush": "hid", "buried": "buried"}.get(how, "left")
+    tail = {"under brush": " under brush", "buried": " in the ground"}.get(how, "")
+    here.event("put", f"{here.name} {verb} {item} {where}{tail}", actor=here.name,
+               about=[f"parcel:{pid}"] + ([f"building:{door}"] if door else []), salience=0.25 if how else 0.4,
+               tags=["food"] if ITEMS[item]["food"] else [], concerns=here.living_in(door) if door else [])
+    here.record("give", None, None, to=f"parcel:{pid}", item=item, qty=q, hidden=how)
+    out = f"You {verb} {q:g} {item} {where}" + (tail or ", in the open")
+    if door:
+        out += " (you could not put it inside)"
+    if untaught:
+        out += ". You have never been shown how to hide things well; it is not as well hidden as it might be"
+    return out + "."
+
+
+def _alias_give(hidden=None):
+    def f(a):
+        b = {**a, "to": a.get("to") or a.get("at")}
+        if hidden and not b.get("hidden"):
+            b["hidden"] = hidden
+        return b
+    return f
+
+
+ALIASES = {"leave": _alias_give(), "put": _alias_give(), "drop": _alias_give(), "hide": _alias_give("under brush")}
 
 
 # ---------------------------------------------------------------------- hosting and grants (05 §3; D4-23 rights)
@@ -815,7 +920,7 @@ def _withdraw(here, mind, a, party):
     return AG.withdraw(here, a)
 
 
-HANDLERS = {"gather": _gather, "work": _work, "make": _make, "build": _build, "move": _move, "take": _take, "give": _give, "leave": _leave,
+HANDLERS = {"gather": _gather, "work": _work, "make": _make, "build": _build, "move": _move, "take": _take, "give": _give,
             "accept": _accept, "withdraw": _withdraw, "release": _release, "host": _host, "grant": _grant, "revoke": _revoke, "join": _join, "admit": _admit,
             "leave_household": _leave_household, "found": _found, "claim": _claim, "sleep": _sleep, "set": _set, "travel": _travel,
             "watch": _watch, "teach": _teach, "learn": _learn, "attack": _attack, "guard": _guard, "fire": _fire, "rest": _rest,

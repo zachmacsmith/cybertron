@@ -49,7 +49,8 @@ def test_dibbling_uses_less_seed_for_the_same_ground():
     w2 = world()
     clear(w2, "long_field")
     give(w2, "Edric", grain=40)
-    do(w2, "Edric", do="work", what="dibble", at="Long Field", item="grain")
+    w2.apply("learn", "millbrook", person="Edric", tech="method: dibble", level="known", source="test")    # a learned way (D2-94)
+    do(w2, "Edric", do="work", what="sow", method="dibble", at="Long Field", item="grain")
     c2 = w2.s["parcels"]["long_field"]["crop"]
     used_d = 40 - w2.goods(w2.hands("Edric"))["grain"]
     assert used_d < used_b and c2["area"] / used_d > area_b / used_b * 1.5        # about 40% less seed for the same ground (D2-54)

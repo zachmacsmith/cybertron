@@ -224,7 +224,8 @@ def _sow(here, mind, tech, key, place_name, out, m, a, f):
     if fam is None:
         raise Refused(f"{seed_good!r} is not seed; one sows {', '.join(sorted(SEED_CROP))}")
     seed_good = CROPS[fam]["seed"]
-    y = TECHNIQUES[tech]["yield"]
+    mods = a.get("_mods") or {}
+    y = {**TECHNIQUES[tech]["yield"], **(mods.get("yield") or {})}           # the sowing method (a modifier: D2-94)
     c = par.get("crop")
     if c and (c["crop"] != fam or here.day >= c["ripe_day"]):
         raise Refused(f"{par['name']} already has {c['kind']} in it")
@@ -267,7 +268,7 @@ def _sow(here, mind, tech, key, place_name, out, m, a, f):
     c["base"] = round(c["base"] + eq * ratio * float(par["fertility"]) * ground_mult(here.p, par) * skill_yield, 4)
     c["left"] = crop_left(f, c)
     here.apply("set", ref=("parcel", key), field="crop", value=c)
-    how = "dibbled" if tech == "dibble" else "sowed"
+    how = mods.get("word") or "sowed"
     soil = " on broken ground" if broken_here > 0 else ""
     word = (f"You {how} {show(seed)} {seed_good} in {place_name}{soil} (about {show(area)} of a plot); the {c['kind']} should be ready to "
             f"reap in about {c['ripe_day'] - here.day} days.")
