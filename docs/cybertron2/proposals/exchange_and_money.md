@@ -7,6 +7,9 @@ institutions/ (tolls, market rights, courts for debts, with 37.3).
 
 ## Summary
 
+*The general system (every agreement as legs, the settlement rule, ledgers, currency) is in [agreements.md](agreements.md); this
+file is the spot trade, prices, coin and markets.*
+
 Goods change hands between people at the same node through **offers that settle both sides at once when accepted**. An offer can
 go to one person for the day, or to **anyone here** for as long as the offerer stays, in lots (a stall without a building). Making
 and accepting offers takes **no work units**, like speech: what trade costs in cybertron2 is being in the same place at the same
