@@ -1,6 +1,6 @@
 # Proposal: things left in places, and who finds them
 
-**Status:** discussion (23 Oct). Design only. **Owner:** 37.2 (author); places, perception and the engine are 37.4's, and this
+**Status:** partly accepted: D2-85 to D2-87 (23 Oct); roads' layout, hiding and decay still to explore. Design only. **Owner:** 37.2 (author); places, perception and the engine are 37.4's, and this
 extends their [objects_in_world.md](objects_in_world.md) and the movables of [layout.md](layout.md), so 37.4 may merge it there.
 **Affects:** spec/world/places.md, edges.md, holding.md; spec/information/perception.md, signs.md; spec/conflict/defence.md (fuse
 events on the road); cybertron2/engine (containers, `leave`, death, signs.py).
@@ -77,12 +77,37 @@ one in the far wood by few.
   social: others may honour it or not; a taker seen taking can be named, owed, or punished by custom or law.
 - Taking from remains is as today (`take` from someone's remains).
 
-### 6. Change over time
+### 6. Change over time: each item says how it decays (to explore with Zach)
 
-- Food in the open spoils faster than in a house (proposed x2), and animals scavenge: meat and bodies first, grain in the open
-  next, buried things rarely.
-- A body's signs change ("dead some days", then "bones by the ford"), and are gone after about a season.
-- Traces fade over days. A hidden way grows back (hidden_ways.md).
+Decided (D2-87): in the open, food and bodies spoil much faster and rot, and rotting things carry a disease risk. Proposed: every
+item declares **how it decays under each condition**, as data, so the rule is one lookup and a new item is a new row.
+
+**Conditions** (any that apply multiply): where it is (a house; bins, cellar or granary as now, D2-58; in the open; buried; in
+water), the season (warm faster, frozen almost not at all), and wet (rain, a flood, a damp parcel).
+
+| Item | In a house a day | Open, dry | Open, wet | Buried | Warm season | Frozen | Becomes |
+|---|---|---|---|---|---|---|---|
+| grain | 0.5% (D2-58) | x4 | x10 (sprouts, moulds) | x2 (damp) | x1.2 | x0.5 | nothing |
+| bread | about 2% (keeps, D2-44) | x3 | x8 | x3 | x1.5 | x0.2 | nothing |
+| fresh meat | about 15% | x2 | x2.5 | x1 | x1.5 | x0.1 | rotting meat |
+| dried or salted meat | about 1% | x2 | x6 | x2 | x1.2 | x0.5 | nothing |
+| cheese | about 1% | x3 | x5 | x1 | x1.5 | x0.3 | nothing |
+| hides | none | 1% a day | 3% a day | 2% a day | | | nothing |
+| timber, charcoal | none | none | charcoal and timber get wet: no use as fuel until dried | | | | |
+| tools, coin, ore, stone | none | none (tools rust a little if wet) | | | | | |
+| a body | | "dead some days" about 10 days, "bones" to the season's end | faster | kept | faster | kept | bones, then nothing |
+
+**Scavengers** are what I meant: wild animals and pests that eat what is left exposed (crows and foxes anywhere, wolves and
+boar in wild land, rats and dogs near houses). Separately from spoiling, an exposed item loses a share each day by how much it
+draws them (meat and bodies most, grain and bread next, cheese, hides little, tools none), how many there are where it lies (the
+parcel's wildlife; more in forest, rats at a settlement), and what protects it (buried, sealed, in a building: none). Scavengers
+also make a thing **easier to notice** (crows circling a body, a fox at the grain), and may draw predators (wolves near a carcass,
+a risk to herds and people).
+
+**Rot and disease:** rotting meat, spoiled food and bodies are things with a disease risk (D2-71), higher near a well, a
+stream or houses (environment_state.md: the water cascade); a burial removes it.
+
+Traces fade over days (D2-88). How a hidden way hides again follows its land (D2-92).
 
 ## What it gives a world
 
@@ -113,12 +138,14 @@ run (38.23) people died on the road, some carrying grain. Until roads hold thing
 
 ## Open questions (for Zach, and 37.4)
 
-1. One noticing rule for every thing at a spot, hidden ways included, as in §3?
-2. Roads split into one stretch per day of their length?
-3. `leave` and `hide` at a spot, with hiding as work and concealment by cover and effort?
-4. Finding something worth taking on the road gives a short call (a fuse event); anything else is remembered on arrival?
-5. A left thing held by nobody, the leaver's claim only social?
-6. Spoilage and scavenging in the open, and how long a body and traces last?
+1. ~~One noticing rule~~ decided: D2-85.
+2. Roads: one stretch per day, or a layout with landmarks (a pass, a bridge, a ford) like a node's parcels? To explore:
+   [road_layout.md](road_layout.md).
+3. Hiding: a separate `hide`, or a modifier on `leave` that people know or learn? To explore:
+   [verb_modifiers.md](verb_modifiers.md).
+4. ~~A short call for a find on the road~~ decided: D2-86.
+5. ~~Left things held by nobody~~ decided: D2-87.
+6. Decay by item and condition, scavengers, rot and disease (§6): the table's numbers and conditions.
 
 ## History
 
@@ -126,6 +153,11 @@ run (38.23) people died on the road, some carrying grain. Until roads hold thing
   taken, and observations on the road? These should be a special case of leaving objects somewhere, within a parcel, so people can
   place or hide something in the forest with different saliences. Checked: only D2-5's mechanism is in spec (conflict/defence.md);
   meetings, journeys and objects in the world are proposals; the engine drops the goods of those who die on the road. Written.
+
+- 23 Oct: Zach decided D2-85 (one noticing rule, through spontaneous observation, attending and salience), D2-86 (a short call
+  only if the find is noticed at all), D2-87 (left things anyone's; the dead leave everything; open spoilage much faster, rot,
+  disease risk). Asked to explore landmarks along roads (road_layout.md), hiding as an optional modifier on `leave` rather than a
+  verb (verb_modifiers.md), and decay with each item defining how it decays by condition (§6 rewritten).
 
 ## Sources
 
