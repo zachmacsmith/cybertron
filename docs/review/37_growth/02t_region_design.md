@@ -26,7 +26,7 @@ Four villages and five roads, 24 days from late summer (the harvest under way) t
 | **Barleyfield** (farms) | 10/3/3 in four households: Reed, Barrow, Hale, Lowe | 16 plots, 760 grain standing, a granary of 150, two herds (15 head) on an open Common beside the fields | wood: a copse of 12 and woodpiles of 24 for 4 hearths that burn 84 | the granary (Barrow), the ox team and bull (Reed) |
 | **Ashwood** (wood) | 6/1/2: Fenn, Ash | Deep Wood (400 timber felled sustainably), game and forage (about 2.4 food a day), charcoal burning | grain: 113 food against 216 eaten | wood and charcoal (Fenn) |
 | **Coppergate** (ore) | 5/1/2: Moor, Cole | the seam, the quarry, the forge; copper tools (felling x2, last 4x as long); a store of 120 grain | fuel for its hearths, charcoal for smelting; some grain | the seam and the forge (Moor) |
-| **Millford** (market) | 9/2/3: Miller, Merchant, Bell (the inn), Smith | the water mill (40 grain a unit against a hand mill's 8), the inn's beds, the merchant's two handcarts, 5 plots | wood (10 there, woodpiles 20 for 4 hearths), some grain | the mill, the handcarts and the inn (Merchant, Miller) |
+| **Millford** (market) | 9/2/3: Miller, Merchant, Bell (the inn), Smith | the water mill (40 grain a unit against a hand mill's 8), the inn's beds, the merchant's pack ox and handcart, 5 plots | wood (10 there, woodpiles 20 for 4 hearths), some grain | the mill, the handcarts and the inn (Merchant, Miller) |
 
 **Roads** (every road has a terrain, D2-122):
 
@@ -62,7 +62,7 @@ others' crafts are known only as awareness); seeded specialists start skilled (D
 | **Moor** (Coppergate) | 3/1/1 | grain 80, dried meat 8; timber 6; ore 6, stone 6; the forge: charcoal 2 | copper tools 2, crude tool 1 | **mine, smelt, copper tool, quarry, hearth** (mason) | 8 |
 | **Cole** | 2/0/1 | grain 40, dried meat 4; timber 4 | crude tools 2 | mine, quarry | 2 |
 | **Miller** (Millford) | 2/1/1 | the mill: grain 8, flour 16; house bread 8; timber 5 | crude tool 1 | **the water mill** | 10 |
-| **Merchant** | 3/0/1 | the store: grain 30, bread 10, dried meat 4, hides 4, stone 2, crude tools 2; house bread 8; timber 5 | handcarts 2, a pack, bedrolls 2, a tent | none | 40 |
+| **Merchant** | 3/0/1 | the store: grain 30, bread 10, dried meat 4, hides 4, stone 2, crude tools 2; house bread 8; timber 5; hay 10 | **a pack ox and a harness** (D2-133; carries 60 on any road) and one handcart; a pack, bedrolls 2, a tent | none | 40 |
 | **Bell** (the inn) | 2/1/0 | bread 16, grain 14; timber 5 | crude tool 1 | none | 12 |
 | **Smith** | 2/0/1 | bread 8, grain 8; copper 2, charcoal 1; timber 5 | copper tool 1, crude tool 1 | **copper tool, coin, wooden plough** | 15 |
 
@@ -149,6 +149,12 @@ the end state: who holds the grain, the timber and the tools, what prices were w
 and the market day became the centre.
 
 **Cost:** the region run cost $23.64 for 51 people over 20 days; about $25 a run here, $50 for one seed of each arm, $100 for two.
+
+## 5a. Carrying capacities
+
+Checked in [02u](02u_transport_check.md): foot 10, pack 20, pack ox 60 and handcart 40 give the right economic radii (timber
+about one edge by pack, grain two or three, dense goods anywhere) and each rung pays back quickly at this region's traffic. With
+the pack ox, Barleyfield's grain to Ashwood over the Holloway is 2 trips instead of 6.
 
 ## 6. Open (for Zach)
 

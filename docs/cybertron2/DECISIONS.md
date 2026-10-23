@@ -201,6 +201,8 @@ and correct them in place.**
 | D2-130 | 24 Oct | **Fences go round a parcel for now: a parcel is fenced or not** (wood, or stone), keeping its herd in and strays out (amends D2-126); fences on the borders between parcels later (OPEN L-24) | conversation ("a plot is just fenced or not") | fences on borders now |
 | D2-131 | 24 Oct | **When a herd splits, the share that breaks off** is most often about a quarter, falling off exponentially toward smaller groups and toward half (in doublings from a quarter, with a spread of about one doubling), and at least one head | conversation | a uniform quarter to half |
 | D2-132 | 24 Oct | **Gates open and close by themselves** when people or a driven herd pass; nobody acts on them to move. **Opening a gate and leaving it open is an act** anyone can do, seen by whoever is present, so it can be sabotage | conversation | gates as something to work every time |
+| D2-133 | 24 Oct | **The merchant in the next region run starts with a pack ox, not an ox cart**; the pack ox (an ox with a harness carrying about 60, on any road, led) is to be built; the ox cart later | conversation; 02u §6 | an ox cart in this run |
+| D2-134 | 24 Oct | **Riders in a cart** sleep as in a damaged house: a night on the road costs 1.2 food (1.5 in the cold) | proposals/transport_and_lodging.md | |
 
 ## Directions (Zach's stated aims recorded in the notes; designs follow them; checked by 37.2, 22 Oct)
 
