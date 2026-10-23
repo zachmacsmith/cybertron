@@ -406,7 +406,7 @@ FENCES = {
 HERDS = {
     "steps": {"fed": 1, "drawn": 8},             # a day: a fed herd on good pasture 0 to 1 steps; hungry or drawn up to 8 (D2-123)
     "good_grass": 0.3,                           # grazing above this share of the pasture's best counts as good
-    "draw": {"ripe": 1.0, "water": 0.3, "home": 0.5},   # beyond the food a parcel offers: a ripe crop's pull, water, home for cows in milk
+    "draw": {"ripe": 1.0, "water": 0.3},         # beyond the food a parcel offers: a ripe crop's pull, water when hungry
     "trample": 0.01,                             # of the standing crop, a head a day
     "onto_road": 0.1,                            # a step from a parcel where a road leaves
     "own": 0.95,                                 # a herd's own conspicuousness (information/noticing.md)

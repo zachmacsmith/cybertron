@@ -88,8 +88,8 @@ def held(w, h) -> bool:
 
 
 def value(w, h, pid) -> float:
-    """How strongly a parcel draws this herd: the share of its need it would eat there (grazing, or a crop at the trampling rate), a
-    ripe crop's pull beyond that, water when hungry, and home for cows in milk at dusk."""
+    """How strongly a parcel draws this herd by day: the share of its need it would eat there (grazing, or a crop at the trampling
+    rate), a ripe crop's pull beyond that, and water when hungry. Cows in milk go home at dusk (`home_at_dusk`)."""
     dr = HERDS["draw"]
     par = w.s["parcels"][pid]
     n = max(1, FM.head(h))
@@ -106,8 +106,6 @@ def value(w, h, pid) -> float:
         v += float(dr["ripe"]) * v                                             # a ripe crop pulls while there is much of it left
     if hungry and par["cover"] == "water":
         v += float(dr["water"])
-    if pid == h.get("home") and float(h.get("in_milk", 0.0)) >= 0.5 and not hungry:
-        v += float(dr["home"])
     return v
 
 
@@ -160,7 +158,25 @@ def wander(w, hid, rec) -> list:
         w.apply("set", node, ref=("herd", hid), field="parcel", value=pid)
         rec["herds"].append((hid, "wandered", way))
     trample(w, hid, rec)
+    home_at_dusk(w, hid, rec, rng)
     return way
+
+
+def home_at_dusk(w, hid, rec, rng) -> bool:
+    """Cows in milk, fed, drift home at dusk (livestock.md), after a day where they wandered; a shut fence round home lets them back
+    in only at its odds."""
+    h = w.s["herds"][hid]
+    home = h.get("home")
+    if h.get("parcel") in (None, home) or home not in w.s["parcels"] or w.s["parcels"][home]["node"] != h["node"]:
+        return False
+    if float(h.get("in_milk", 0.0)) < 0.5 or int(h.get("hungry", 0)) > 0:
+        return False
+    way = LY.path(w, h["parcel"], home, (hid, "dusk"))
+    if not way or (through(w, home) < 1.0 and rng.random() >= through(w, home)):
+        return False
+    w.apply("set", h["node"], ref=("herd", hid), field="parcel", value=home)
+    rec["herds"].append((hid, "home at dusk", way[1:]))
+    return True
 
 
 def trample(w, hid, rec) -> float:
