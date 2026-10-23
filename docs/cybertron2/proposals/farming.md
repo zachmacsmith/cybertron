@@ -94,6 +94,12 @@ with about 30% less work per person than a household alone.
 
 - 23 Oct: Zach moved crops and the cold (D2-53) and sowing per seed (D2-54) from proposal to spec.
 
+- 23 Oct (analyses): [02n_labour.md](../../review/37_growth/02n_labour.md): a plot as D4-23 defines it is about 5.4 of 02l's
+  small plots (about 16 seed a sowing); by hoe and weeding one adult works 1.0 plot; the ox reaches 1.5-2 plots an adult only
+  without weeding (weeding and reaping dominate). At the engine's rates a net ration costs about 0.5 units (the critique's 8% holds);
+  food reaches 25-30% only with grinding (0.2-0.25 a ration), grain costing about 0.85 units a ration (a lower return than the
+  engine's 5x), and a real dependency ratio. Recommended for Zach: the plot unit, grain's cost, grain spoiling about 1% a day.
+
 ## Sources
 
 [02l_farming.md](../../review/37_growth/02l_farming.md), [02l_farm_model.py](../../review/37_growth/02l_farm_model.py),

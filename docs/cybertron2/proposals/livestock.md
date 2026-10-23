@@ -66,6 +66,12 @@ answer.
 - 23 Oct: harness and saddle accepted as tools (D2-23); 02j found the animal, not its gear, is the burden (about 48 units a year for
   an ox kept alone, 65 for a horse).
 
+- 23 Oct (analysis): [02o_livestock.md](../../review/37_growth/02o_livestock.md) proposes the numbers: cattle as one kind with
+  roles (cows, bulls, oxen as trained steers, calves), teams of two for plough and cart, breeding (cattle 0.7 young a year, work at
+  3 years), herds not growing up within a run (seeding sets them), about 1.2-1.3 plots of land a head, horses eating a ration of
+  grain each working day, milk 0.8 food a day for 0.6 of the year, slaughter 40-50 meat and 2 hides, herding at least 1 unit a
+  day, prices (cow 40-60 coin, ox 50-100, horse 90-150). 02l's and 02m's ox costs need a team of two.
+
 ## Sources
 
 [02g_resources_and_transport.md](../../review/37_growth/02g_resources_and_transport.md) §2, §2b, §2c,

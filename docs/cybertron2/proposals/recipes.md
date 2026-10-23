@@ -335,6 +335,16 @@ within a run. A full-time woodsman's 14 days is within one.
 - 23 Oct (d): Zach: cheese yes (D2-47); specialised tools yes (D2-48); how agents see great trees; what "2.7 years" means.
   Added great trees and beams to §15 and the reading of the payback columns.
 
+- 23 Oct (analyses): [02n](../../review/37_growth/02n_labour.md) and [02p](../../review/37_growth/02p_chains.md): with bread only
+  (D2-44 as decided) the mill never pays (a loaf's grinding costs 0.19-0.42 units for 0.055 more food); if all grain must be ground
+  (quern 0.2-0.25 a ration, hand millstones 0.08, water mill 0.025) a mill pays from about 2 people, a toll of 3-5% covers it at
+  15, and it is a real chokepoint (rent about 2.6% of a region's work). Proposed revision of D2-44 for Zach. Also from 02p:
+  charcoal back as a good (made at the wood, 5 times lighter than its timber; Coppergate has no wood); cheese at 2.5 food from 6
+  milk (it loses a third at 2); beds of timber and straw, not hides (a hall's 25 beds took 12 slaughters' hides); hearths needing 4
+  stone tie every house to a quarry (fieldstone from fields, or a quarry in every settled kind); shore salt sun-dried, inland
+  springs boiled; tools worth 3-8x their cost, so prices are bargained among few smiths; the copper seam the dominant chokepoint
+  (about 14% of the region's work at a monopoly price); striking coin nearly free (a stamp later).
+
 ## Sources
 
 [02m_recipes_model.py](../../review/37_growth/02m_recipes_model.py), [02j](../../review/37_growth/02j_end_uses.md),
