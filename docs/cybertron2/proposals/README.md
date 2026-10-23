@@ -62,6 +62,7 @@ Newest first. Ideas decided or rejected in conversation before 23 Oct are backfi
 | 23 Oct | The verbs (a lean set of 24) and what each agent is shown; force always shown | ready for a decision | [verbs.md](verbs.md) |
 | 23 Oct | Detecting what was told by reading the meaning of free speech | rejected in the proposal: name mentions, an `about` field and explicit `explain`/`teach` instead | [knowledge.md](knowledge.md) §4e |
 | 23 Oct | Know-how as a continuous score (0-1) | replaced in the proposal by four levels moved by counts (Zach) | [knowledge.md](knowledge.md) §4c |
+| 23 Oct | The lean first-world set: copper, salt, documents, hides and timber with the goods already decided | accepted: D2-24 | spec/economy/goods.md |
 | 23 Oct | Private notes with one pinned, the rest opened by choice; memory, not documents | discussion | [notes.md](notes.md) |
 | 23 Oct | Knowing what you can do: few verbs, options computed from place and knowledge, know-how as personal knowledge | discussion | [knowledge.md](knowledge.md) |
 | 23 Oct | Blind crafting (Minecraft's grid) for discovering recipes | rejected in the proposal, Zach to confirm | [knowledge.md](knowledge.md) §6 |

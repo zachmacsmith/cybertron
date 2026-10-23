@@ -15,6 +15,7 @@ rule) is still a proposal; this file lists only what decisions have fixed.
 - D2-10: no clothing (parked).
 - D2-19: a short metal ladder in first worlds.
 - D2-23: the tool set (production.md).
+- D2-24: copper, salt, documents, hides and timber are in the first worlds.
 - D4-9: every good crosses between nodes only by being carried.
 
 ## Mechanics
@@ -27,6 +28,11 @@ rule) is still a proposal; this file lists only what decisions have fixed.
 | stone | a quarry | large and tall buildings, walls | D2-3, D2-20 |
 | coin | (to decide: its metal) | payment | D2-1 |
 | tools, plough, harness, saddle, cart, weapons, traps | made (production.md) | production, transport, fighting | D2-23 |
+| timber | felling at a forest | fuel, building, carts, tools, fittings | D2-24 |
+| copper | mining a seam, then smelting | tools, blades, fittings, coin | D2-24 |
+| salt | a spring or the coast | keeping meat and fish; cattle | D2-24 |
+| hides | slaughter and the hunt | harness, saddles, packs, parchment | D2-24 |
+| documents | written on parchment (from hides) | letters, records, deeds, ledgers (information/) | D2-24 |
 
 Every good is an item with a quantity, held by someone or stored in a container at a place, with a weight for carrying
 (transport.md) and, where it decays, a spoilage rate.
@@ -48,7 +54,7 @@ past tomorrow").
 
 ## Open
 
-- The rest of the first-world set (timber, copper, salt, hides, documents), the pruning rule, unlocks: proposals/resources_and_goods.md.
+- Recipes and numbers for each good; the pruning rule; unlocks: proposals/resources_and_goods.md.
 - Goods kept for later: proposals/economy_later.md.
 
 ## Sources
@@ -56,4 +62,4 @@ past tomorrow").
 [02g §1-§1f](../../../review/37_growth/02g_resources_and_transport.md), [02j](../../../review/37_growth/02j_end_uses.md);
 proposals/resources_and_goods.md.
 
-*Current as of 23 Oct 2026: H-6, D2-1, D2-3, D2-6, D2-10, D2-11, D2-13, D2-17, D2-18, D2-19, D2-23, D4-9.*
+*Current as of 23 Oct 2026: H-6, D2-1, D2-3, D2-6, D2-10, D2-11, D2-13, D2-17, D2-18, D2-19, D2-23, D2-24, D4-9.*

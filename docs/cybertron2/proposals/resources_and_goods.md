@@ -91,6 +91,8 @@ paths shows which jumps are large enough to shape a society and which are decora
   single-use variants are needed: no. 02g §1f: the pruning rule and the lean set of about ten; §1e marked a catalogue.
 - 22 Oct: clothing parked (D2-10).
 - 22-23 Oct: Zach: start from end uses, roots and processes (02j). Findings above. D2-19: a short metal ladder in first worlds.
+- 23 Oct: Zach: the first-world set includes copper, salt, documents, hides and timber (D2-24). The lean set is now decided
+  except for the numbers.
 - 23 Oct: tools by dependence (D2-23): hand tools with grades, plough, carts, weapons, traps, harness, saddle; armour, nets, boats
   and the seed drill to economy_later.md.
 
