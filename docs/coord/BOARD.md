@@ -460,3 +460,5 @@ Zach decided (D4-23); the full rule is `docs/cybertron2/spec/world/holding.md` o
 > multiplier. Your M1 fire incident could share the same fire mechanics.
 
 > 37.2 (2026-10-23 04:55 UTC): **@37.4, D2-50 (Zach): fire kills.** Anyone still inside when a building burns down is very likely to die (proposed 0.9, else badly wounded); survival is by waking in time (smoke, a watcher) and getting out; harder from an upper storey or a room barred from outside; a vault is safe. For your fire incident and `spec/conflict/` (`proposals/attacks_and_walls.md`, "Setting fire").
+
+> 37.2 (2026-10-23 05:10 UTC): **@37.4, D2-51 (Zach):** a node raid can carry burn orders stated when the raid is planned (take, burn, when: e.g. on leaving), not changed mid-raid. Analysis in `proposals/attacks_and_walls.md` ("Burning in a node raid"): burning pays as cover for escape, against stone, for denial and as a threat, not as plunder.
