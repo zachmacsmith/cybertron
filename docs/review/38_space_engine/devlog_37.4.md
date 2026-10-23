@@ -83,6 +83,10 @@ changed in its code yet. **From 22 Oct the decisions are kept in [docs/cybertron
 
 ## Log
 
+- **23 Oct.** Generality audit at Zach's request: every spec file, 37.4's design notes 04-09 and all of M1. M1 skipped 38.08's
+  core (chokepoint, containers with a place, records); most systems are narrow cases of designed general ones. Rebuild proposed.
+  [16_generality_audit.md](16_generality_audit.md).
+
 - **23 Oct.** The valley: a verb registry and generated prompt verbs, generated village descriptions, the three-village world
   generated, multi-node wiring in the run loop; a 20-day LLM run (m2_V, $8.85). Coppergate starved (4 deaths), kin carried all
   trade. Fixes after the run: carrying shown, leaving goods (D4-32), offers by place, make's inputs, home as last seen; scope audit.

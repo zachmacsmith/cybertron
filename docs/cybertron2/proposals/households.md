@@ -80,10 +80,16 @@ With membership, use and home as data:
 
 ## History
 
+- **23 Oct 2026.** Found that 38.09 and 38.05 already designed joining and hosting; this proposal follows them (38.16).
+
 - **23 Oct 2026.** Proposed by 37.4 after the valley run (38.15). Zach: joining another household, taking up an empty home and
   building one should all be supported, not a migration feature.
 
 ## Sources
+
+- 38.09 §2d-2e (joining: the head's consent and living there; membership by partnership, birth, adoption, leaving, death; a
+  new household needs a new house); 38.05 §3 (hosting: `host` by the head or whoever the household allows, a standing `welcome`,
+  beds).
 
 - 38.15 §2 and §5;
 - D2-9, D4-18, D4-23, D4-30;
