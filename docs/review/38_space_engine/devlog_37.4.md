@@ -83,6 +83,8 @@ changed in its code yet. **From 22 Oct the decisions are kept in [docs/cybertron
 
 ## Log
 
+- **23 Oct.** Zach: a limited private notes directory, one pinned. Wrote proposals/notes.md.
+
 - **23 Oct.** Zach: how agents know what they can do, make and build. Wrote proposals/knowledge.md.
 
 - **23 Oct.** Zach: how law comes over, and whether it can still be manipulated; a place for what we are thinking over, apart
