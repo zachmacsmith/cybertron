@@ -70,31 +70,52 @@ def settle_fights(w, today) -> list:
         if not w.s["people"][t]["alive"] or w.at(t) != node:
             continue
         helpers = [g for g in guards if g not in (t, by) and w.at(g) == node]
-        D = strength(t, "defence") + (cc["guard"] if t in guards else 0.0) + sum(strength(g, "defence") for g in helpers)
-        wear_weapon(t)
-        X = 2 * (D + 1)
-        p_kill = P ** 2 / (P ** 2 + X ** 2) if f["aim"] == "hurt" else 0.0
-        p_wound = P ** 2 / (P ** 2 + (X / 2) ** 2)
-        u = rng.random()
-        if u < p_kill:
-            w.apply("die", node, person=t, cause="attack", to=by)
-            rec = {"kind": "attack", "by": by, "target": t, "outcome": "killed", "killed": t}
-            w.event(node, "death", f"{t} was killed by {by}", actor=by, target=t, salience=1.0, tags=["danger", "death"])
-        elif u < p_wound:
-            took = 0.0
-            for item in EDIBLE:
-                q = w.goods(w.hands(t)).get(item, 0.0)
-                if q > 1e-9:
-                    w.apply("transfer", node, src=w.hands(t), dst=w.hands(by), item=item, qty=q)
-                    took += q * ITEMS[item]["food"]
-            w.apply("harm", node, person=t, wounded=True, hunger=-2)
-            rec = {"kind": "attack", "by": by, "target": t, "outcome": "wounded", "took": round(took, 2)}
-            w.event(node, "fight", f"{by} beat {t} and took what food {t} carried", actor=by, target=t, salience=0.95, tags=["danger"], concerns=[t])
-        else:
-            rec = {"kind": "attack", "by": by, "target": t, "outcome": "repelled"}
-            w.event(node, "fight", f"{by} set on {t} and was beaten off", actor=by, target=t, salience=0.9, tags=["danger"], concerns=[t])
-        out.append(rec)
+        out.append(duel(w, node, by, t, f["aim"], helpers=helpers, guarding=t in guards, rng=rng, wear_attacker=False))
     return out
+
+
+def duel(w, place, by, t, aim, helpers=(), guarding=False, rng=None, wear_attacker=True) -> dict:
+    """One sets on another (the M1 harm model): at a node, or on the road (world/roads.md, D2-110). Kills only with aim hurt; a
+    wound takes the food the victim carried."""
+    cc = w.p["combat"]
+    rng = rng or w.rng("fight", w.d, by, t)
+
+    def strength(n, base):
+        x = w.s["people"][n]
+        wpn = w.weapon(n)
+        return x[base] * w.yield_mult(n) + (ITEMS[wpn]["weapon"] if wpn else 0.0)
+
+    def wear_weapon(n):
+        wpn = w.weapon(n)
+        if wpn:
+            w.apply("wear", place, container=w.hands(n), item=wpn, uses=cc["fight_wear"])
+    P = strength(by, "attack")
+    if wear_attacker:
+        wear_weapon(by)
+    D = strength(t, "defence") + (cc["guard"] if guarding else 0.0) + sum(strength(g, "defence") for g in helpers)
+    wear_weapon(t)
+    X = 2 * (D + 1)
+    p_kill = P ** 2 / (P ** 2 + X ** 2) if aim == "hurt" else 0.0
+    p_wound = P ** 2 / (P ** 2 + (X / 2) ** 2)
+    u = rng.random()
+    if u < p_kill:
+        w.apply("die", place, person=t, cause="attack", to=by)
+        rec = {"kind": "attack", "by": by, "target": t, "outcome": "killed", "killed": t}
+        w.event(place, "death", f"{t} was killed by {by}", actor=by, target=t, salience=1.0, tags=["danger", "death"])
+    elif u < p_wound:
+        took = 0.0
+        for item in EDIBLE:
+            q = w.goods(w.hands(t)).get(item, 0.0)
+            if q > 1e-9:
+                w.apply("transfer", place, src=w.hands(t), dst=w.hands(by), item=item, qty=q)
+                took += q * ITEMS[item]["food"]
+        w.apply("harm", place, person=t, wounded=True, hunger=-2)
+        rec = {"kind": "attack", "by": by, "target": t, "outcome": "wounded", "took": round(took, 2)}
+        w.event(place, "fight", f"{by} beat {t} and took what food {t} carried", actor=by, target=t, salience=0.95, tags=["danger"], concerns=[t])
+    else:
+        rec = {"kind": "attack", "by": by, "target": t, "outcome": "repelled"}
+        w.event(place, "fight", f"{by} set on {t} and was beaten off", actor=by, target=t, salience=0.9, tags=["danger"], concerns=[t])
+    return rec
 
 
 def settle_teaching(w, today) -> dict:

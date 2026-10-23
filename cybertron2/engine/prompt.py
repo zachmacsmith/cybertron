@@ -21,7 +21,8 @@ SCHEMA = {
             "aim": {"type": "string"}, "offer": {"type": "string"}, "person": {"type": "string"}, "thing": {"type": "string"},
             "household": {"type": "string"}, "name": {"type": "string"}, "for": {"type": "string"}, "feed": {"type": "boolean"},
             "days": {"type": "number"}, "lots": {"type": "number"}, "agreement": {"type": "string"}, "hidden": {"type": "string"},
-            "method": {"type": "string"}},
+            "method": {"type": "string"}, "on trouble": {"type": "string"}, "stop at": {"type": "string"}, "gather": {"type": "boolean"},
+            "text": {"type": "string"}},
             "required": ["do"]}},
         "say": {"type": "array", "items": {"type": "object", "properties": {"to": {"type": "string"}, "text": {"type": "string"}},
                                             "required": ["to", "text"]}},
@@ -63,7 +64,8 @@ def schema_for(here, mind) -> dict:
     techs = sorted(t for t in TECHNIQUES if KN.level(mind, t) is not None and t not in MODIFIERS) or sorted(t for t in TECHNIQUES if t not in MODIFIERS)
     s = copy.deepcopy(SCHEMA)
     a = s["properties"]["actions"]["items"]["properties"]
-    a["do"]["enum"] = [v for v in V.VERBS if V.verb_here(here, v)] + sorted({c for d in FUSE.values() for c in d["choices"]})
+    a["do"]["enum"] = list(dict.fromkeys([v for v in V.VERBS if V.verb_here(here, v)] + sorted({c for d in FUSE.values() for c in d["choices"] + d.get("also", [])})))
+    a["on trouble"]["enum"] = TECHNIQUES["on trouble"]["values"]
     # the night's choices are in the one schema, so an urgent call continues the agent's conversation (D2-84; a new schema restarts it)
     a["item"]["enum"] = list(ITEMS)
     a["what"]["enum"] = techs + [x for x in ("shelter", "shelter and food") if x not in techs]
@@ -359,14 +361,21 @@ def turn_prompt(here, mind, opening=True) -> str:
           + (", ".join(here.people(me=False)) or "nobody else") + "."]
     if a.get("arrived") == here.day:
         hl.append("You arrived this morning.")
+        way = mind.store.get("on_the_way") or {}
+        if way.get("day") == here.day and way.get("lines"):
+            hl.append("On the way: " + "; ".join(way["lines"]) + ".")       # D2-97
     hl += _place_lines(here, mind)
     ways = []                                                                # the roads from here, known or not (D4-47)
     for nid, name, days, track in here.roads():
         known = nid in mind.places()
+        lms = here.landmarks_known(nid)
         ways.append(f"{name} ({days} day{'s' if days != 1 else ''}" + (", a cart track" if track else "")
-                    + ("" if known else ": a way nobody you know has followed; travel along it by naming it") + ")")
+                    + ("" if known else ": a way nobody you know has followed; travel along it by naming it")
+                    + (f"; on the way you know {', '.join(lms)}" if lms else "") + ")")
     if ways:
-        hl.append("Roads from here: " + "; ".join(ways) + ".")
+        hl.append("Roads from here: " + "; ".join(ways) + f". Each night on the road you eat {here.p['camping']['out'][0]:g} "
+                  f"food ({here.p['camping']['out'][1]:g} on a cold night) from what you carry, and a day waiting out trouble on the "
+                  "road is one more such night.")
     lying = _things_lines(here, mind)
     if lying:
         hl.append("Lying about, that you know of: " + "; ".join(lying) + ".")
@@ -428,11 +437,46 @@ def fuse_prompt(here, mind, x) -> str:
              "hand over": "hand food out of the store to them so they go ({\"do\": \"hand over\", \"item\", \"qty\"})",
              "alarm": "shout and wake the house", "stay": "lie still", "move": "move something between your hands and the store",
              "take": "take something (a weapon) from a store", "give": "give something to someone"}
-    L = ["## In the night", "You are woken: " + "; ".join(x["signs"]) + ".",
+    words.update({"go on": "go on your way", "turn back": "go back the way you came", "change course": "turn and travel on with the "
+                  "other party, to where they are going", "attack": "set on them ({\"do\": \"attack\", \"target\", \"aim\": rob | hurt})",
+                  "flee": "get away from them", "accept": "take an offer made in this meeting ({\"do\": \"accept\", \"offer\": id})",
+                  "take": "take what you can carry of it ({\"do\": \"take\", \"item\"?, \"qty\"?})", "bury": "bury the dead",
+                  "push on": "cross anyway", "wait": "wait a day for it to pass", "go round": "go round by another way, a day longer"})
+    road = here.node is None
+    head = "## On the road" if road else "## In the night"
+    L = [head, ("Something happens: " if road else "You are woken: ") + "; ".join(x["signs"]) + ".",
          f"You carry: {hold}. With you: {', '.join(x.get('with') or []) or 'nobody'}.",
          f"There is time for {x['acts']} thing{'s' if x['acts'] > 1 else ''}, no more. You can: "
-         + "; ".join(f"{c} ({words.get(c, c)})" for c in choices) + ".",
-         "Reply with JSON only: \"actions\" (at most " + str(x["acts"]) + "), and a short \"why\"."]
+         + "; ".join(f"{c} ({words.get(c, c)})" for c in choices) + "."]
+    if "meeting" in kinds:
+        L.append("You may also speak (\"say\": [{\"to\": \"everyone\", \"text\"}]) and make offers of goods for goods "
+                 "(\"offers\": [{\"to\", \"give\": \"2 grain\", \"get\": \"1 timber\"}]), settled from what each carries. "
+                 "Everyone in the meeting hears it, and may answer, before what each chooses is done.")
+    L.append("Reply with JSON only: \"actions\" (at most " + str(x["acts"]) + "), and a short \"why\".")
+    return "\n\n".join(L)
+
+
+def meeting_wave_prompt(here, mind, said, offers, acts) -> str:
+    L = ["## On the road, the meeting goes on"]
+    if said:
+        L.append("Said:\n" + "\n".join(f"- {x}" for x in said))
+    if offers:
+        L.append("Offers made (accept with {\"do\": \"accept\", \"offer\": id}):\n" + "\n".join(f"- {x}" for x in offers))
+    L.append(f"You may answer and change what you mean to do: give your actions again (at most {acts}; they replace the ones "
+             "before). Reply with JSON only.")
+    return "\n\n".join(L)
+
+
+def road_opening(here, mind) -> str:
+    """What a traveller's conversation opens with when it has none running (a new stretch of days began on the road)."""
+    mem = mind.store.get("seeded", []) + mind.store["lasting"]
+    own = mind.store.get("own", [])
+    L = []
+    if mem:
+        L.append("## What you remember\n" + "\n".join(f"- {x}" for x in mem))
+    if own:
+        L.append("## Your own memory of recent days (written by you)\n" + "\n".join(f"- {x['span']}: {x['text']}" for x in own))
+    L.append("## Now\nYou are on the road, travelling.")
     return "\n\n".join(L)
 
 

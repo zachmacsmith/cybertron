@@ -11,11 +11,11 @@ from cybertron2.engine.world import CONDITION, STAGES, Refused, show  # noqa: F4
 
 
 class Here:
-    def __init__(self, w, name):
+    def __init__(self, w, name, transit=False):
         self._w = w
         self.name = name
         self.node = w.at(name)
-        if self.node is None:
+        if self.node is None and not transit:                                  # on the road: only for an urgent call (D2-81)
             raise Refused(f"{name} is on the road")
 
     # ------------------------------------------------------------------ time and rules
@@ -240,6 +240,12 @@ class Here:
             if any(c["claimant"] == party and "withdrawal" in c["rights"] for c in self._w.claims_on(("building", bid))):
                 return b["stock"]
         return None
+
+    def landmarks_known(self, nid) -> list:
+        """The landmarks one knows on the road from here to `nid` (world/roads.md)."""
+        r = next((rid for rid, x in self._w.s["roads"].items() if {x["a"], x["b"]} == {self.node, nid}), None)
+        lm = self._w.s["mind"][self.name].get("landmarks") or {}
+        return [f"{v['words']} (crossed {v['crossed']} time{'s' if v['crossed'] != 1 else ''})" for v in lm.values() if v.get("road") == r]
 
     def weather_words(self, day=None) -> str:
         from cybertron2.engine import environment as EV

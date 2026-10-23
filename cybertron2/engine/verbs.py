@@ -50,7 +50,10 @@ VERB = {
               "when": "herds", "doc": "move beasts to another place here (a bull kept apart from the cows does not breed)"},
     "sleep": {"args": '{"at": building}', "cost": 0, "doc": "sleep there tonight, if you can get in and a bed is free"},
     "set": {"args": '{"thing": door, "to": open | barred, "at"?: building}', "cost": 0, "doc": "the door of a building you manage"},
-    "travel": {"args": '{"to": a place, or a way from here as the roads name it}', "cost": 0, "when": "roads", "doc": "the day's last act: you leave at nightfall and arrive on a later morning"},
+    "travel": {"args": '{"to": a place, or a way from here as the roads name it, "on trouble"?: push on | wait | turn back | go round, "days"?: how long to wait or stop, "stop at"?: a good place you know on the way, "gather"?: true}',
+               "cost": 0, "when": "roads", "doc": "the day's last act: you leave at nightfall and arrive on a later morning. On the road "
+                                                 "you decide nothing unless something happens (trouble, a meeting, a find); what you "
+                                                 "choose here is what you do if the road gives trouble"},
     "watch": {"args": '{"person"}', "cost": ["watch", "units"], "doc": "spend the day working beside them: you see how they do things"},
     "teach": {"args": '{"to", "what"}', "cost": ["teach", "units_teacher"], "doc": "one session, if they set aside time to learn the same day"},
     "learn": {"args": '{"from", "what"}', "cost": ["teach", "units_learner"], "doc": "one session, if they set aside time to teach the same day"},
@@ -834,6 +837,9 @@ def _travel(here, mind, a, party):
                       f"at least {math.ceil((load - cap) * 10 - 1e-9) / 10:g}"
                       + (" (a cart needs a road with a track, and this one has none)" if cart and not track else ""))
     here.today()["travel"][here.name] = to
+    choices = {k: a[k] for k in ("on trouble", "stop at", "gather", "days") if a.get(k) not in (None, "", False)}
+    if choices:                                                               # the choices for the road (D2-105, D2-109, D2-113)
+        here.today().setdefault("travel_choices", {})[here.name] = choices
     here.event("depart", f"{here.name} set off on the road", actor=here.name, salience=0.6, tags=["travel"])
     return (f"You set off at the end of the day: {days} day{'s' if days > 1 else ''} on the road, sleeping out; you arrive on the morning "
             f"of day {here.day + days + 1}. Nothing more is done today.")

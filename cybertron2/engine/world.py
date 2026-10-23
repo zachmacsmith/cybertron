@@ -123,8 +123,10 @@ class World:
         for i, e in enumerate(spec.get("roads") or spec.get("edges") or []):
             a, b, k = e[0], e[1], int(e[2]) if len(e) > 2 else 1
             extra = next((x for x in e[3:] if isinstance(x, dict)), {})
+            from cybertron2.engine import roads as RD
             s["roads"][f"road:{a}-{b}"] = {"a": a, "b": b, "days": k, "track": "track" in e[3:],     # a track lets carts pass
-                                           "way": extra.get("way", "an unexplored way")}             # seen from the known end (D4-47)
+                                           "way": extra.get("way", "an unexplored way"),             # seen from the known end (D4-47)
+                                           **RD.build(extra, k)}                                    # terrain, stretches (D2-104)
         for bid, b in (spec.get("buildings") or {}).items():
             self._new_building(bid, b)
         for hid, h in (spec.get("herds") or {}).items():                       # cattle by role (D2-63); a bare count is cows
@@ -605,13 +607,19 @@ def p_die(w, person, cause, to=None):
         w.s["seq"] += 1
         cid = f"remains:{w.s['seq']}"
         w.s["containers"][cid] = {"kind": "remains", "of": person, "node": place, "parcel": spot, "goods": dict(left), "wear": {},
-                                  "on_road": place not in w.s["nodes"], "body": True, "died": w.d, "in": house}
+                                  "on_road": place not in w.s["nodes"], "body": True, "died": w.d, "in": house,
+                                  "stretch": _stretch_of(w, a) if place not in w.s["nodes"] else None}
     for i in list(hands):
         hands[i] = 0.0
     for iid, h in w.s["institutions"].items():
         if h["offices"].get("head") == person:
             h["offices"]["head"] = w._eldest(w.members(iid))
     return place
+
+
+def _stretch_of(w, a):
+    from cybertron2.engine import roads as RD
+    return RD.position(w, a["transit"]) if a.get("transit") else None
 
 
 def p_new_thing(w, node, parcel, kind, **fields):

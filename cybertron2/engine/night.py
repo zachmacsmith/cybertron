@@ -22,18 +22,7 @@ def night(w) -> dict:
     from cybertron2.engine import settle as ST
     rec["fights"] = ST.settle_fights(w, today)
     rec["deaths"] += [f["killed"] for f in rec["fights"] if f.get("killed")]
-    for name, to in sorted((today.get("travel") or {}).items()):              # departures at nightfall (D4-8)
-        a = s["people"][name]
-        if a["alive"] and a["at"] is not None:
-            here = a["at"]
-            road = next(r for r, x in s["roads"].items() if {x["a"], x["b"]} == {here, to})
-            homes = w.homes(name)
-            h = next((b for b in homes if s["buildings"][b]["node"] == here), None)
-            if h:                                                            # the house as last seen (D4-35: not watched from afar)
-                a["home_seen"] = {"day": w.d, "building": h, "stock": dict(w.goods(s["buildings"][h]["stock"])),
-                                  "condition": s["buildings"][h]["condition"], "door": s["buildings"][h]["door"]}
-            w.apply("depart", here, person=name, road=road, to=to)
-            rec["departed"].append({"agent": name, "from": here, "to": to})
+    rec["departed"] = today["_departed"] if "_departed" in today else departures(w, today)
     where = sleeping_places(w, today)
     rec["slept"] = {n: (s["buildings"][b]["name"] if b else "out") for n, b in where.items()}
     fuel = float(p["fuel"]["cold" if cold else "normal"])
@@ -64,13 +53,18 @@ def night(w) -> dict:
             gear = "camp"
         elif state == "unsheltered":                                            # out, with what one carries (D2-68)
             gear = _gear(w, name, where, tents)
+        road = today.get("road") or {}
+        if state == "unsheltered" and name in (road.get("camp") or {}):         # stopped at a good place: as in a camp (D2-109)
+            gear = gear or "camp"
         if gear:
             out_ = p["camping"][gear]
             need = float(p["ration"]) * float(out_[1] if cold else out_[0])
             fall = float(out_[2])
-            if gear == "camp" and cold and not b["fire"]:
+            if gear == "camp" and cold and b is not None and not b["fire"]:
                 need, fall = float(p["ration"]) * float(p["camping"]["out"][1]), 0.0
             rec.setdefault("camped", {})[name] = gear
+        if state == "unsheltered" and name in (road.get("fed") or {}):          # fed on the way at a good place (D2-109)
+            need = min(need, float(p["ration"]) * float(road["fed"][name]))
         place = w.place_of(("person", name))
         stores = [a["hands"]]
         if place in s["nodes"]:
@@ -99,7 +93,8 @@ def night(w) -> dict:
                 rec.setdefault("uncooked", {})[name] = raw
             if ate:
                 rec["ate"][name] = round(ate, 2)
-        if cold and state == "unsheltered" and w.rng("cold", w.d, name).random() < float(p["cold_starving"]) * fall:
+        soaked = name in (today.get("soaked") or [])                           # soaked at a ford: the cold's fall (world/roads.md)
+        if (cold or soaked) and state == "unsheltered" and w.rng("cold", w.d, name).random() < float(p["cold_starving"]) * max(fall, 0.5 if soaked else 0):
             a["hunger"] = -2
             rec["cold_falls"].append(name)
     if w.d < w.days - 1:
@@ -145,6 +140,28 @@ def night(w) -> dict:
             o["open"] = False                                                  # the offerer stays, or until its day
     s["log"].append(rec)
     return rec
+
+
+def departures(w, today) -> list:
+    """Departures at nightfall (D4-8), with the traveller's choices for the road (world/roads.md, D2-105). Run before the roads'
+    night and the fuse sub-step, so those leaving tonight are on their first stretch."""
+    s = w.s
+    out = []
+    for name, to in sorted((today.get("travel") or {}).items()):
+        a = s["people"][name]
+        if a["alive"] and a["at"] is not None:
+            here = a["at"]
+            road = next(r for r, x in s["roads"].items() if {x["a"], x["b"]} == {here, to})
+            homes = w.homes(name)
+            h = next((b for b in homes if s["buildings"][b]["node"] == here), None)
+            if h:                                                            # the house as last seen (D4-35: not watched from afar)
+                a["home_seen"] = {"day": w.d, "building": h, "stock": dict(w.goods(s["buildings"][h]["stock"])),
+                                  "condition": s["buildings"][h]["condition"], "door": s["buildings"][h]["door"]}
+            w.apply("depart", here, person=name, road=road, to=to)
+            a["transit"]["choices"] = dict((today.get("travel_choices") or {}).get(name) or {})
+            out.append({"agent": name, "from": here, "to": to})
+    today["_departed"] = out
+    return out
 
 
 def decay_rate(w, c, item) -> tuple:

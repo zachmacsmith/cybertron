@@ -1,0 +1,564 @@
+"""Roads: stretches, landmarks, crossing, daily notices, meetings and finds (world/roads.md, information/noticing.md "On the road";
+D2-81, D2-86, D2-97, D2-104 to D2-110, D2-113).
+
+A road with a terrain is one place with parts: one stretch a day of its length, each with a terrain and 0 to 2 landmarks. Each
+night, after the departures, `night` places every party on its stretch, settles minor trouble by its choices at departure (or the
+default), feeds those passing good places, gathers what each notices, and finds the meetings and the finds worth taking, which the
+fuse sub-step turns into urgent calls (fuse.py: kinds "meeting", "find", "crossing", registered here). A road with no terrain and no
+landmarks is as before: nothing happens on it (D2-104), so a world's roads can be switched off for a comparison arm.
+
+Positions are counted from the road's `a` end: a party on its k-th stretch from its own start is at k (from a) or n+1-k (from b).
+"""
+from __future__ import annotations
+
+from cybertron2.engine import environment as EV, fuse as FU, things as TH
+from cybertron2.engine.data import ITEMS, LANDMARKS, ROADS, TERRAIN, WEATHER
+from cybertron2.engine.world import Refused
+
+
+# ---------------------------------------------------------------------- the road's parts
+def active(road) -> bool:
+    return bool(road.get("terrain")) or any(s.get("landmarks") for s in road.get("stretches") or [])
+
+
+def build(extra: dict, days: int) -> dict:
+    """A road's terrain and stretches from its spec (`terrain`, `stretches`: {k: {terrain, landmarks}} counted from its first node)."""
+    terrain = extra.get("terrain")
+    st = []
+    given = {int(k): v for k, v in (extra.get("stretches") or {}).items()}
+    for k in range(1, days + 1):
+        x = given.get(k) or {}
+        lms = [({"kind": l} if isinstance(l, str) else dict(l)) for l in x.get("landmarks") or []]
+        st.append({"terrain": x.get("terrain") or terrain, "landmarks": lms})
+    return {"terrain": terrain, "stretches": st}
+
+
+def stretch_of(w, t) -> int:
+    """The stretch a traveller is on tonight, from its own start (1 the first night)."""
+    n = w.s["roads"][t["road"]]["days"]
+    return max(1, min(n, n - (t["arrive"] - w.d) + 1))
+
+
+def position(w, t) -> int:
+    """Its stretch counted from the road's `a` end."""
+    r = w.s["roads"][t["road"]]
+    k = stretch_of(w, t)
+    return k if t["from"] == r["a"] else r["days"] + 1 - k
+
+
+def stretch(w, road_id, pos) -> dict:
+    return w.s["roads"][road_id]["stretches"][pos - 1]
+
+
+def stretch_name(w, road_id, pos) -> str:
+    r = w.s["roads"][road_id]
+    st = stretch(w, road_id, pos)
+    lm = [LANDMARKS[l["kind"]]["words"] for l in st["landmarks"]]
+    a, b = w.s["nodes"][r["a"]]["name"], w.s["nodes"][r["b"]]["name"]
+    return (" and ".join(lm) + f" on the road between {a} and {b}") if lm else f"the {st['terrain'] or 'road'} between {a} and {b}"
+
+
+def landmark_key(road_id, pos, kind) -> str:
+    return f"{road_id}#{pos}#{kind}"
+
+
+# ---------------------------------------------------------------------- landmark states (from the weather: environment.py)
+def challenge(w, road_id, pos, lm) -> str:
+    """'' or the trouble this landmark gives tonight: a ford high, a bridge down, a pass snowed."""
+    kind = LANDMARKS[lm["kind"]].get("challenge")
+    if kind == "high":
+        since = EV.since_heavy_rain(w)
+        wet_week = EV.spell(w) == "wet" and any(EV.spell(w, d) == "wet" for d in range(max(0, w.d - 7), w.d - 5))
+        return "high" if (since is not None and since < 2) or wet_week or lm.get("state") == "high" else ""
+    if kind == "down":
+        return "down" if lm.get("state") == "down" else ""
+    if kind == "snowed":
+        return "snowed" if (w.calendar()["season"] == "winter" and (EV.weather(w) == "snow" or EV.snow_lying(w))) \
+            or lm.get("state") == "snowed" else ""
+    return ""
+
+
+CHALLENGE_WORDS = {"high": "the ford was high", "down": "the bridge was down", "snowed": "the pass was snowed up"}
+
+
+# ---------------------------------------------------------------------- parties on the roads tonight
+def parties(w) -> dict:
+    """Travellers on active roads, grouped: those who left one end the same day for the same place travel together."""
+    out = {}
+    for n, a in w.s["people"].items():
+        t = a.get("transit")
+        if not a["alive"] or not t or not active(w.s["roads"][t["road"]]):
+            continue
+        key = (t["road"], t["from"], t["to"], t["left"], t["arrive"])
+        out.setdefault(key, []).append(n)
+    return {k: sorted(v) for k, v in out.items()}
+
+
+def experience(w, name, key) -> float:
+    """Trouble at a landmark halves after about five crossings (D2-106)."""
+    n = float((w.s["mind"][name].get("landmarks") or {}).get(key, {}).get("crossed", 0))
+    return 0.5 ** (n / float(ROADS["experience"]))
+
+
+def knows(w, name, key) -> bool:
+    return key in (w.s["mind"][name].get("landmarks") or {})
+
+
+def _learn(w, name, road_id, pos, lm, crossed=True):
+    k = landmark_key(road_id, pos, lm["kind"])
+    rec = w.s["mind"][name].setdefault("landmarks", {}).setdefault(k, {"crossed": 0, "words": LANDMARKS[lm["kind"]]["words"],
+                                                                         "road": road_id, "pos": pos, "kind": lm["kind"]})
+    if crossed:
+        rec["crossed"] += 1
+
+
+def _note(w, name, text):
+    t = w.s["people"][name]["transit"]
+    if t is not None:
+        t.setdefault("notices", [])
+        if text not in t["notices"]:
+            t["notices"].append(text)
+
+
+def night(w, today) -> dict:
+    """The roads tonight (D2-97, D2-104 to D2-110, D2-113): positions, trouble, good places, notices, meetings and finds."""
+    rec = {"trouble": [], "meetings": [], "finds": [], "good": []}
+    today["road"] = {"meetings": [], "finds": [], "crossings": [], "fed": {}}
+    ps = parties(w)
+    for key, members in ps.items():
+        t = w.s["people"][members[0]]["transit"]
+        pos = position(w, t)
+        st = stretch(w, t["road"], pos)
+        for lm in st["landmarks"]:
+            _landmark(w, today, rec, members, t, pos, lm)
+        _notices(w, members, t, pos, ps)
+        _finds(w, today, rec, members, t, pos)
+    _meetings(w, today, rec, ps)
+    return rec
+
+
+def _landmark(w, today, rec, members, t, pos, lm):
+    d = LANDMARKS[lm["kind"]]
+    road_id = t["road"]
+    lkey = landmark_key(road_id, pos, lm["kind"])
+    if d.get("good"):
+        stop = str((t.get("choices") or {}).get("stop at") or "").lower()
+        if stop and stop in (d["words"].lower(), lm["kind"]) and not t.get("stopped") and knows(w, members[0], lkey):
+            days = max(1, int((t.get("choices") or {}).get("days") or 1))   # stopping only by choice, only where known (D2-109)
+            for n in members:
+                tt = w.s["people"][n]["transit"]
+                tt.update(stopped=True, stop_until=w.d + days - 1, arrive=tt["arrive"] + days)
+                _note(w, n, f"you stopped {days} day{'s' if days > 1 else ''} at {d['words']}")
+        if t.get("stop_until") is not None and w.d <= t["stop_until"]:
+            for n in members:
+                today["road"].setdefault("camp", {})[n] = True
+                q = round(float(ROADS["good"]["gather"][1]) if w.calendar()["season"] in d.get("seasons", []) else 0.5, 2)
+                w.apply("create", road_id, dst=w.hands(n), item="wild food", qty=q, why="gathered at a stop")
+        if w.calendar()["season"] in d.get("seasons", []):
+            g = ROADS["good"]
+            for n in members:
+                mult = float(g["known"]) if knows(w, n, lkey) else 1.0
+                if (t.get("choices") or {}).get("gather"):
+                    q = round(min(2.0, float(g["gather"][0]) * mult), 2)
+                    w.apply("create", road_id, dst=w.hands(n), item="wild food", qty=q, why="gathered on the way")
+                    _note(w, n, f"you gathered {q:g} wild food at {d['words']}")
+                else:
+                    today["road"]["fed"][n] = float(g["fed"])
+                    _note(w, n, f"you ate well on the way, at {d['words']}")
+                rec["good"].append(n)
+        for n in members:
+            _learn(w, n, road_id, pos, lm, crossed=True)
+        return
+    ch = challenge(w, road_id, pos, lm)
+    for n in members:
+        _learn(w, n, road_id, pos, lm, crossed=not ch)
+    if not ch:
+        for n in members:
+            _note(w, n, f"you passed {d['words']}")
+        return
+    choice = str((t.get("choices") or {}).get("on trouble") or d.get("default") or "wait").lower()
+    lead = members[0]
+    exp = experience(w, lead, lkey)
+    risk = _risk(w, members, lm, ch, exp)
+    serious = risk["death"] >= float(ROADS["call"]["death"]) or risk["loss"] >= float(ROADS["call"]["loss"])
+    minor_call = w.rng("road-call", w.d, lead, lkey).random() < float(ROADS["call"]["minor"])
+    noticed = w.rng("road-notice", w.d, lead, lkey).random() < min(1.0, TH.eye(w, lead) * EV.visibility(w, None, sense="sight",
+                                                                                                         cover=st_cover(w, road_id, pos)) + 0.5)
+    if (serious or minor_call) and noticed:
+        today["road"]["crossings"].append({"id": f"crossing:{lead}:{lkey}", "kind": "crossing", "road": road_id, "pos": pos, "lm": lm,
+                                           "challenge": ch, "members": members, "risk": risk, "label": d["words"],
+                                           "default": choice})
+        return
+    apply_choice(w, rec, members, t, pos, lm, ch, choice, exp)
+
+
+def st_cover(w, road_id, pos):
+    return stretch(w, road_id, pos)["terrain"] or "plain"
+
+
+def _risk(w, members, lm, ch, exp) -> dict:
+    d = LANDMARKS[lm["kind"]]
+    push = d.get("push") or {}
+    loss = 0.0
+    if "cart_loss" in push and any(w.goods(w.hands(n)).get("handcart", 0) >= 1 for n in members):
+        loss = push["cart_loss"][0] * push["cart_loss"][1] * exp
+    blizzard = ch == "snowed" and EV.weather(w) == "snow"
+    return {"death": float(push.get("death", 0.0)) * exp if blizzard else 0.0, "loss": loss}
+
+
+def apply_choice(w, rec, members, t, pos, lm, ch, choice, exp=1.0, by_call=False):
+    """Minor trouble settled by the party's choice (D2-105, D2-113)."""
+    d = LANDMARKS[lm["kind"]]
+    road_id = t["road"]
+    words = CHALLENGE_WORDS.get(ch, ch)
+    if choice.startswith("go round") and ch == "down":
+        other = any(l["kind"] == "ford" for s in w.s["roads"][road_id]["stretches"] for l in s["landmarks"])
+        choice = "go round" if other else "turn back"
+    if choice.startswith("wait"):
+        for n in members:
+            w.s["people"][n]["transit"]["arrive"] += 1
+            _note(w, n, f"{words}: you waited a day")
+        rec["trouble"].append({"members": members, "at": d["words"], "what": ch, "did": "waited"})
+    elif choice.startswith("go round"):
+        for n in members:
+            w.s["people"][n]["transit"]["arrive"] += 1
+            _note(w, n, f"{words}: you went round by another way, a day longer")
+        rec["trouble"].append({"members": members, "at": d["words"], "what": ch, "did": "went round"})
+    elif choice.startswith("turn back"):
+        for n in members:
+            turn_back(w, n)
+            _note(w, n, f"{words}: you turned back")
+        rec["trouble"].append({"members": members, "at": d["words"], "what": ch, "did": "turned back"})
+    else:                                                                      # push on: cross anyway
+        push = d.get("push") or {}
+        lost = []
+        for n in members:
+            g = w.goods(w.hands(n))
+            if "cart_loss" in push and g.get("handcart", 0) >= 1:
+                p, share = push["cart_loss"]
+                if w.rng("road-loss", w.d, n, road_id, pos).random() < p * exp:
+                    for item, q in list(g.items()):
+                        if ITEMS[item]["weight"] > 0 and item != "handcart" and q > 1e-9:
+                            w.apply("destroy", road_id, src=w.hands(n), item=item, qty=round(q * share, 6), why="lost at the ford")
+                    lost.append(n)
+                    _note(w, n, f"{words}: you crossed anyway, and the water took part of your load")
+            elif push.get("foot") == "soaked":
+                today_soaked = w.s["today"].setdefault("soaked", [])
+                today_soaked.append(n)
+                _note(w, n, f"{words}: you crossed anyway and were soaked to the skin")
+            if push.get("death") and EV.weather(w) == "snow" and w.rng("road-death", w.d, n).random() < float(push["death"]) * exp:
+                w.apply("die", road_id, person=n, cause="the cold on the pass")
+                lost.append(n)
+            _learn(w, n, road_id, pos, lm, crossed=True)
+        rec["trouble"].append({"members": members, "at": d["words"], "what": ch, "did": "pushed on", "lost": lost})
+
+
+def turn_back(w, name):
+    """Back over the stretches covered: a party on its k-th stretch tonight spends k-1 more nights going back and is home at the
+    dawn after (D2-110)."""
+    t = w.s["people"][name]["transit"]
+    k = stretch_of(w, t)
+    t.update({"from": t["to"], "to": t["from"], "arrive": w.d + k, "turned": True})
+
+
+def travel_with(w, name, other):
+    """Change course: go with the other party, the same way, to its destination (D2-110)."""
+    t, o = w.s["people"][name]["transit"], w.s["people"][other]["transit"]
+    t.update({"from": o["from"], "to": o["to"], "arrive": o["arrive"], "left": o["left"], "with": other})
+
+
+# ---------------------------------------------------------------------- daily notices (D2-97)
+def _notices(w, members, t, pos, ps):
+    road_id = t["road"]
+    st = stretch(w, road_id, pos)
+    cover = st["terrain"] or "plain"
+    sight = EV.visibility(w, None, sense="sight", cover=cover)
+    wx = EV.weather(w)
+    for n in members:
+        if wx != "clear":
+            _note(w, n, WEATHER[wx]["words"])
+        for c in things_on(w, road_id, pos).values():
+            x = TH.own(w, c) * sight * TH.eye(w, n)
+            if w.rng("road-thing", w.d, n, id(c) % 997).random() < min(1.0, x):
+                _note(w, n, TH.describe(w, c).replace(" at the road", " by the road"))
+        for key, others in ps.items():                                  # other travellers seen far off on the same stretch
+            if others == members or key[0] != road_id:
+                continue
+            o = w.s["people"][others[0]]["transit"]
+            if position(w, o) == pos and (o["from"], o["to"]) == (t["from"], t["to"]):
+                continue
+            if position(w, o) == pos and w.rng("road-far", w.d, n, others[0]).random() < sight:
+                _note(w, n, f"{len(others)} traveller{'s' if len(others) > 1 else ''} on the road")
+
+
+def things_on(w, road_id, pos) -> dict:
+    return {cid: c for cid, c in w.s["containers"].items() if c["kind"] in TH.KINDS and c.get("node") == road_id
+            and int(c.get("stretch") or 1) == pos and (c.get("body") or any(q > 1e-9 for q in c["goods"].values()))}
+
+
+# ---------------------------------------------------------------------- finds on the road (D2-86)
+def _finds(w, today, rec, members, t, pos):
+    road_id = t["road"]
+    sight = EV.visibility(w, None, sense="sight", cover=st_cover(w, road_id, pos))
+    for cid, c in things_on(w, road_id, pos).items():
+        if c.get("by") in members or c.get("of") in members:
+            continue
+        worth = any(q > 1e-9 for q in c["goods"].values()) or (c.get("body") and c.get("buried") is None)
+        if not worth:
+            continue
+        finder = next((n for n in members if w.rng("road-find", w.d, n, cid).random() < min(1.0, TH.own(w, c) * sight * TH.eye(w, n))), None)
+        if finder:
+            today["road"]["finds"].append({"id": f"find:{cid}:{w.d}", "kind": "find", "road": road_id, "pos": pos, "thing": cid,
+                                           "members": members, "finder": finder, "label": TH.describe(w, c)})
+            rec["finds"].append({"by": finder, "thing": cid})
+
+
+# ---------------------------------------------------------------------- meetings (D2-110)
+def _meetings(w, today, rec, ps):
+    keys = list(ps)
+    for i, ka in enumerate(keys):
+        for kb in keys[i + 1:]:
+            if ka[0] != kb[0]:
+                continue
+            ta, tb = w.s["people"][ps[ka][0]]["transit"], w.s["people"][ps[kb][0]]["transit"]
+            if (ta["from"], ta["to"]) == (tb["from"], tb["to"]):
+                continue                                                    # the same way: not a meeting
+            pa, pb = position(w, ta), position(w, tb)
+            prev_a, prev_b = ta.get("last_pos"), tb.get("last_pos")
+            crossed = prev_a is not None and prev_b is not None and (prev_a - prev_b) * (pa - pb) < 0
+            if pa != pb and not crossed:
+                continue
+            pos = pa if ta["from"] == w.s["roads"][ka[0]]["a"] else pb      # where they cross: the a-end party's stretch tonight
+            st = stretch(w, ka[0], pos)
+            p = max([float(LANDMARKS[l["kind"]].get("meet", 0.0)) for l in st["landmarks"]] or [0.0]) or \
+                float(TERRAIN.get(st["terrain"] or "plain", {}).get("meet", 0.6))
+            if EV.weather(w) == "fog":
+                p *= 0.5
+            if w.rng("meet", w.d, ps[ka][0], ps[kb][0]).random() < p:
+                m = {"id": f"meeting:{ps[ka][0]}:{ps[kb][0]}:{w.d}", "kind": "meeting", "road": ka[0], "pos": pos,
+                     "parties": [ps[ka], ps[kb]], "label": stretch_name(w, ka[0], pos)}
+                today["road"]["meetings"].append(m)
+                rec["meetings"].append({"parties": m["parties"], "at": m["label"]})
+    for key, members in ps.items():
+        for n in members:
+            t = w.s["people"][n]["transit"]
+            if t is not None:
+                t["last_pos"] = position(w, t)
+
+
+# ---------------------------------------------------------------------- fuse kinds on the road (fuse.py)
+@FU.source("meeting")
+def _src_meetings(w, today):
+    return [dict(m, structure="road") for m in (today.get("road") or {}).get("meetings", [])]
+
+
+@FU.source("find")
+def _src_finds(w, today):
+    return [dict(f, structure="road") for f in (today.get("road") or {}).get("finds", [])]
+
+
+@FU.source("crossing")
+def _src_crossings(w, today):
+    return [dict(c, structure="road") for c in (today.get("road") or {}).get("crossings", [])]
+
+
+def _party_words(w, members) -> str:
+    bits = []
+    for m in members:
+        g = w.goods(w.hands(m))
+        seen = [i for i, q in g.items() if q >= 1 and (ITEMS[i].get("seen") or ITEMS[i]["weight"] >= 2)]
+        armed = any(ITEMS[i].get("weapon") for i in seen)
+        bits.append(m + (" (armed)" if armed else "") + (f", with {', '.join(sorted(seen)[:3])}" if seen else ""))
+    return "; ".join(bits)
+
+
+@FU.detector("meeting")
+def _det_meeting(w, today, e):
+    out = {}
+    for i, party in enumerate(e["parties"]):
+        other = e["parties"][1 - i]
+        for n in party:
+            out[n] = f"on the road, at {e['label']}, you meet {len(other)} traveller{'s' if len(other) > 1 else ''} coming the other way: " \
+                     + _party_words(w, other)
+    return out
+
+
+@FU.detector("find")
+def _det_find(w, today, e):
+    return {e["finder"]: f"by the road, at {stretch_name(w, e['road'], e['pos'])}, you come upon this: {e['label']}"}
+
+
+@FU.detector("crossing")
+def _det_crossing(w, today, e):
+    words = CHALLENGE_WORDS.get(e["challenge"], e["challenge"])
+    danger = " A night on it in this weather could kill you." if e["risk"]["death"] else ""
+    loss = " Crossing with a laden cart could cost you part of the load." if e["risk"]["loss"] else ""
+    return {n: f"on the road: {words} at {e['label']}.{danger}{loss}" for n in e["members"]}
+
+
+def _members(e, name):
+    if e["kind"] == "meeting":
+        return next(p for p in e["parties"] if name in p)
+    return e["members"]
+
+
+@FU.choice("crossing", "push on")
+@FU.choice("crossing", "wait")
+@FU.choice("crossing", "turn back")
+@FU.choice("crossing", "go round")
+def _ch_crossing(w, today, name, e, a):
+    if e.get("settled"):
+        return "The party had already chosen."
+    e["settled"] = True
+    do = str(a.get("do")).lower()
+    t = w.s["people"][name]["transit"]
+    rec = {"trouble": []}
+    apply_choice(w, rec, e["members"], t, e["pos"], e["lm"], e["challenge"], do, experience(w, name, landmark_key(e["road"], e["pos"], e["lm"]["kind"])))
+    return f"You chose to {do}."
+
+
+@FU.choice("find", "take")
+def _ch_take(w, today, name, e, a):
+    c = w.s["containers"].get(e["thing"])
+    if not c:
+        raise Refused("it is gone")
+    cap = w.capacity(name, w.s["roads"][e["road"]].get("track", False))
+    took = []
+    for item, q in sorted(c["goods"].items(), key=lambda kv: ITEMS[kv[0]]["weight"]):
+        if q <= 1e-9:
+            continue
+        want = str(a.get("item") or "").lower()
+        if want and want != item:
+            continue
+        load = sum(qq * ITEMS[i]["weight"] for i, qq in w.goods(w.hands(name)).items())
+        room = (cap - load) / max(1e-9, ITEMS[item]["weight"]) if ITEMS[item]["weight"] else q
+        x = round(min(q, float(a.get("qty") or q), max(0.0, room)), 6)
+        if x > 1e-9:
+            w.apply("transfer", e["road"], src=e["thing"], dst=w.hands(name), item=item, qty=x)
+            took.append(f"{x:g} {item}")
+    w.s["mind"][name].setdefault("found", []).append(e["thing"])
+    return ("You took " + ", ".join(took) + ".") if took else "You could carry nothing more."
+
+
+@FU.choice("find", "bury")
+def _ch_bury(w, today, name, e, a):
+    c = w.s["containers"].get(e["thing"])
+    if not c or not c.get("body"):
+        raise Refused("there is no body to bury")
+    w.apply("set_thing", e["road"], cid=e["thing"], field="buried", value=w.d)
+    return f"You buried {c['of']} by the road."
+
+
+@FU.choice("find", "go on")
+@FU.choice("meeting", "go on")
+def _ch_go_on(w, today, name, e, a):
+    return "You went on your way."
+
+
+@FU.choice("meeting", "turn back")
+def _ch_turn(w, today, name, e, a):
+    for n in _members(e, name):
+        if not w.s["people"][n]["transit"].get("turned") or n == name:
+            turn_back(w, n)
+    return "You turned back the way you came."
+
+
+@FU.choice("meeting", "change course")
+def _ch_change(w, today, name, e, a):
+    other = next(p for p in e["parties"] if name not in p)
+    for n in _members(e, name):
+        travel_with(w, n, other[0])
+    return f"You turned and went on with {', '.join(other)}."
+
+
+@FU.choice("meeting", "attack")
+def _ch_attack(w, today, name, e, a):
+    other = next(p for p in e["parties"] if name not in p)
+    tgt = str(a.get("target") or other[0])
+    tgt = next((x for x in other if x.lower() == tgt.lower()), other[0])
+    e.setdefault("attacks", []).append({"by": name, "target": tgt, "aim": str(a.get("aim") or "rob")})
+    return f"You set on {tgt}."
+
+
+@FU.choice("meeting", "flee")
+def _ch_flee(w, today, name, e, a):
+    e.setdefault("fled", []).append(name)
+    return "You tried to get away."
+
+
+@FU.choice("meeting", "give")
+def _ch_give(w, today, name, e, a):
+    other = [x for p in e["parties"] for x in p if x != name]
+    to = next((x for x in other if x.lower() == str(a.get("to") or "").lower()), None)
+    if not to:
+        raise Refused(f"there is nobody called {a.get('to')!r} in the meeting")
+    item, q = str(a.get("item") or "").lower(), float(a.get("qty") or 0)
+    if w.goods(w.hands(name)).get(item, 0.0) + 1e-9 < q or q <= 0:
+        raise Refused(f"you carry only {w.goods(w.hands(name)).get(item, 0.0):g} {item}")
+    w.apply("transfer", e["road"], src=w.hands(name), dst=w.hands(to), item=item, qty=q)
+    return f"You gave {q:g} {item} to {to}."
+
+
+@FU.choice("meeting", "accept")
+def _ch_accept(w, today, name, e, a):
+    o = (e.get("offers") or {}).get(str(a.get("offer") or ""))
+    if not o or o["to"] not in (name, "anyone") or o["by"] == name:
+        raise Refused("no such offer to you in this meeting")
+    giver, taker = o["by"], name
+    for who, item, q in ((giver, o["give"][0], o["give"][1]), (taker, o["get"][0], o["get"][1])):
+        if w.goods(w.hands(who)).get(item, 0.0) + 1e-9 < q:
+            raise Refused(f"{who} does not carry {q:g} {item}")
+    w.apply("transfer", e["road"], src=w.hands(giver), dst=w.hands(taker), item=o["give"][0], qty=o["give"][1])
+    w.apply("transfer", e["road"], src=w.hands(taker), dst=w.hands(giver), item=o["get"][0], qty=o["get"][1])
+    o["taken"] = name
+    return f"You took {giver}'s offer: {o['give'][1]:g} {o['give'][0]} for {o['get'][1]:g} {o['get'][0]}."
+
+
+def meeting_talk(w, e, replies) -> tuple:
+    """A wave of a meeting's conversation (D2-110): what each said (to all in the meeting: speech is free in transit) and the offers
+    made, as goods for goods settled from what each carries (D2-25). Returns (lines, offers) for the next wave."""
+    from cybertron2.engine.agreements import parse_legs
+
+    def parse_goods(text):
+        legs = [l for l in parse_legs(text, w.d) if "item" in l and l["when"].get("now")]
+        return (legs[0]["item"], float(legs[0]["qty"])) if legs else None
+    said, offers = [], []
+    everyone = [n for p in e["parties"] for n in p]
+    for n, r in replies.items():
+        for x in [x for x in (r.get("say") or []) + (r.get("tell") or []) if isinstance(x, dict) and str(x.get("text", "")).strip()][:3]:
+            said.append(f"{n}: {str(x['text'])[:400]}")
+        for o in [o for o in (r.get("offers") or []) if isinstance(o, dict)][:2]:
+            try:
+                give, get = parse_goods(o.get("give")), parse_goods(o.get("get"))
+            except Exception:
+                continue
+            if not give or not get:
+                continue
+            to = next((m for m in everyone if m.lower() == str(o.get("to") or "").lower()), "anyone")
+            oid = f"R{len(e.setdefault('offers', {})) + 1}"
+            e["offers"][oid] = {"by": n, "to": to, "give": give, "get": get}
+            offers.append(f"{oid}: {n} offers {give[1]:g} {give[0]} for {get[1]:g} {get[0]}" + ("" if to == "anyone" else f" (to {to})"))
+    return said, offers
+
+
+def settle_meeting(w, e) -> list:
+    """Attacks on the road, fought as at a node (conflict/combat.md); the other side's choice is its response (flee: a chance to
+    get away). Returns lines for the record."""
+    from cybertron2.engine import settle as ST
+    out = []
+    for at in e.get("attacks", []):
+        tgt = at["target"]
+        if tgt in e.get("fled", []) and w.rng("flee", w.d, tgt).random() < float(ROADS["flee"]):
+            out.append({"by": at["by"], "target": tgt, "outcome": "fled"})
+            continue
+        out.append(ST.duel(w, e["road"], at["by"], tgt, at["aim"]))
+    return out
+
+
+# ---------------------------------------------------------------------- arrival (D2-97)
+def arrived(w, name, t) -> None:
+    """On arrival its notices become memories: "On the way: ..." at the top of its next turn."""
+    lines = list(t.get("notices") or [])
+    if len(lines) > int(ROADS["notices"]):
+        lines = lines[: int(ROADS["notices"]) - 1] + [f"and {len(lines) - int(ROADS['notices']) + 1} other things"]
+    w.s["mind"][name]["on_the_way"] = {"day": w.d, "lines": lines}

@@ -81,7 +81,11 @@ def plan(w, today) -> dict:
     where = sleeping_places(w, today)
     for name, x in out.items():
         called[name] = w.d
-        x["with"] = [m for m in w.present(w.at(name)) if m != name and where.get(m) and where.get(m) == where.get(name)]
+        if w.at(name) is None:                                                 # on the road: one's own party
+            party = next((p for e in x["events"] for p in (e.get("parties") or [e.get("members") or []]) if name in p), [])
+            x["with"] = [m for m in party if m != name]
+        else:
+            x["with"] = [m for m in w.present(w.at(name)) if m != name and where.get(m) and where.get(m) == where.get(name)]
     return out
 
 

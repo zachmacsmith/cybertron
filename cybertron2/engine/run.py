@@ -14,7 +14,7 @@ import os
 import time
 from pathlib import Path
 
-from cybertron2.engine import agreements as AG, fuse as FU, knowledge as KN, night as N, perceive as PC, prompt as PR, settle as ST, verbs as V
+from cybertron2.engine import agreements as AG, fuse as FU, knowledge as KN, night as N, perceive as PC, prompt as PR, roads as RD, settle as ST, verbs as V
 from cybertron2.engine.converse import Conversations
 from cybertron2.engine.data import EDIBLE, TECHNIQUES
 from cybertron2.engine.here import Here, Mind
@@ -56,8 +56,16 @@ def bot_plan(w, name, talk=None) -> dict:
 
 
 def bot_fuse(w, name, x) -> dict:
-    """A scripted bot's answer to an urgent call: those inside defend and raise the alarm; neighbours come to help."""
+    """A scripted bot's answer to an urgent call: those inside defend and raise the alarm, neighbours come to help; on the road it
+    takes what it finds, keeps to its choice at trouble, and goes on after a meeting (offering a trade)."""
     e = x["events"][0]
+    if e["kind"] == "meeting":
+        return {"actions": [{"do": "go on"}], "say": [{"to": "everyone", "text": f"{name} greets you."}],
+                "offers": [{"to": "anyone", "give": "1 wild food", "get": "1 timber"}]}
+    if e["kind"] == "find":
+        return {"actions": [{"do": "take"}]}
+    if e["kind"] == "crossing":
+        return {"actions": [{"do": e.get("default") or "wait"}]}
     inside = e.get("building") in w.homes(name)
     return {"actions": ([{"do": "alarm"}, {"do": "defend"}] if inside else [{"do": "defend"}])[: x["acts"]]}
 
@@ -241,6 +249,7 @@ def dawn(w) -> None:
     for name in w.living():
         t = w.s["people"][name]["transit"]
         if t and t["arrive"] <= w.d:
+            RD.arrived(w, name, t)                                          # its notices on the way, remembered (D2-97)
             w.apply("arrive", t["to"], person=name)
             w.s["people"][name]["arrived"] = w.d
             w.event(t["to"], "arrive", f"{name} arrived from {w.s['nodes'][t['from']]['name']}", actor=name, salience=0.7, tags=["travel"], dawn=True)
@@ -287,6 +296,42 @@ def night_lines(w, rec) -> dict:
     return out
 
 
+# ---------------------------------------------------------------------- urgent calls (fuse events: D2-80 to D2-84, D2-110)
+def fuse_calls(w, today, woke, results, talk_log, openings, systems, backend, conv, workers, extra_cost):
+    """One call each for the woken, appended to its own conversation; a meeting on the road has up to 3 waves of talk among everyone
+    in it (D2-110), each wave's speech and offers shown to all in the next; the last reply's acts are done."""
+    def ask(texts):
+        def one(n):
+            here, mind = Here(w, n, transit=True), Mind(w, n)
+            op = openings.get(n) or PR.road_opening(here, mind)
+            return decide(w, n, texts[n], op + "\n\n" + texts[n], conv.system(n, systems.get(n) or ""), backend, conv, fuse=woke[n])
+        r, m, e = _parallel(one, {n: (n,) for n in texts}, workers)
+        for n in texts:
+            extra_cost[0] += float(((m.get(n) or {}).get("usage") or {}).get("cc_equiv_usd") or 0.0) if n not in openings else 0.0
+            talk_log.setdefault(n, []).append({"wave": "fuse", "prompt": texts[n], "reply": r.get(n) or {},
+                                               "usage": (m.get(n) or {}).get("usage"), "error": e.get(n)})
+        return r
+    texts = {n: PR.fuse_prompt(Here(w, n, transit=True), Mind(w, n), x) for n, x in woke.items()}
+    replies = ask(texts)
+    meetings = {e["id"]: e for x in woke.values() for e in x["events"] if e["kind"] == "meeting"}
+    for e in meetings.values():
+        members = [n for p in e["parties"] for n in p if n in woke]
+        for wave in range(1, int(RD.ROADS["waves"])):
+            said, offers = RD.meeting_talk(w, e, {n: replies.get(n) or {} for n in members})
+            if not said and not offers:
+                break
+            texts = {n: PR.meeting_wave_prompt(Here(w, n, transit=True), Mind(w, n), said, offers, woke[n]["acts"]) for n in members}
+            replies.update(ask(texts))
+    for n, x in woke.items():
+        lines = FU.answer(w, today, n, x, replies.get(n) or {})
+        results.setdefault(n, []).extend([("On the road: " if w.at(n) is None else "In the night: ") + y for y in lines])
+    for e in meetings.values():
+        for f in RD.settle_meeting(w, e):
+            for n in (f.get("by"), f.get("target")):
+                if n:
+                    results.setdefault(n, []).append(f"On the road: {f['by']} set on {f['target']}: {f['outcome']}.")
+
+
 # ---------------------------------------------------------------------- the run
 def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, seed=None) -> Path:
     spec = load_spec(spec_path)
@@ -308,6 +353,8 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
     files = {k: open(out / f"{k}.jsonl", "w") for k in ("turns", "days", "perception", "memory")}
     conv = Conversations(out, chunk=int((spec.get("memory") or {}).get("chunk", 3)), backend=backend)
     cost = 0.0
+    last_system = dict(systems)
+    extra_cost = [0.0]
     for day in range(w.days):
         w.s["day"] = day
         w.s["events"] = []
@@ -412,19 +459,15 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
             results.setdefault(n, []).extend(lines)
         ST.settle_thefts(w, today, attend)
         w.s["left"] = [x for x in w.s.get("left", []) if x["day"] >= day - 1] + [{**x, "day": day} for x in today["left"]]
+        N.departures(w, today)                                              # nightfall: those leaving are on their first stretch
+        road_rec = RD.night(w, today)                                       # the roads tonight (world/roads.md)
         woke = FU.plan(w, today)                                            # fuse events: the urgent calls (D2-80 to D2-84)
+        last_system.update(systems)
         if woke:
-            texts = {n: PR.fuse_prompt(Here(w, n), Mind(w, n), x) for n, x in woke.items()}
-            fr, fm, fe = _parallel(lambda n: decide(w, n, texts[n], openings.get(n, "") + "\n\n" + texts[n], systems.get(n) or
-                                                    PR.system_prompt(Here(w, n), Mind(w, n)), backend, conv, fuse=woke[n]),
-                                   {n: (n,) for n in woke}, workers)
-            for n, x in woke.items():
-                lines = FU.answer(w, today, n, x, fr.get(n) or {})
-                results.setdefault(n, []).extend(["In the night: " + y for y in lines])
-                talk_log.setdefault(n, []).append({"wave": "fuse", "prompt": texts[n], "reply": fr.get(n) or {},
-                                                   "usage": (fm.get(n) or {}).get("usage"), "error": fe.get(n)})
+            fuse_calls(w, today, woke, results, talk_log, openings, last_system, backend, conv, workers, extra_cost)
         rec = N.night(w)
         rec["fuse"] = FU.record(today)
+        rec["road"] = road_rec
         per = PC.evening(w, attend, today)
         nights = night_lines(w, rec)
         for n in names:
@@ -458,6 +501,11 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
                    agreements_made=[k for k, v in w.s["agreements"].items() if v.get("day") == day and not v.get("seeded")], settled=settled,
                    teaching=today["teach"], learning=today["learn"], joins=today["joins"], admits=today["admits"], watch=today["watch"],
                    thefts=today["thefts"], attend=attend, errors=errors)
+        cost += extra_cost[0]
+        extra_cost[0] = 0.0
+        for n in set(talk_log) - set(names):                                # calls to travellers on the road
+            files["turns"].write(json.dumps({"day": day, "agent": n, "model": w.s["people"][n]["model"], "on_road": True,
+                                             "talk": talk_log[n], "results": results.get(n, [])}) + "\n")
         files["days"].write(json.dumps(rec, default=str) + "\n")
         for f in files.values():
             f.flush()

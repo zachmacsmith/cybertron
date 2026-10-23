@@ -396,3 +396,55 @@ FUSE = {
              "choices": ["defend", "flee", "hand over", "alarm", "stay"],
              "also": ["move", "take", "give"]},
 }
+
+# ---------------------------------------------------------------------------------------------------------- roads (world/roads.md)
+# Terrain of a road's stretches (D2-104): sight and sound (environment/visibility.md) and the chance two parties on it meet (D2-110).
+TERRAIN = {
+    "plain": {"sight": 1.0, "sound": 1.0, "meet": 0.6}, "farmland": {"sight": 1.0, "sound": 1.0, "meet": 0.9},
+    "woodland": {"sight": 0.35, "sound": 0.7, "meet": 0.7}, "marsh": {"sight": 0.6, "sound": 1.0, "meet": 0.6},
+    "hills": {"sight": 0.5, "sound": 0.9, "meet": 0.6}, "mountain": {"sight": 0.5, "sound": 0.9, "meet": 0.6},
+    "river valley": {"sight": 1.0, "sound": 1.0, "meet": 0.8},
+}
+# Landmarks (D2-107, D2-109): what each is, the trouble it can give (`challenge`: when, the default, what crossing anyway costs), the
+# chance parties meet there, and good places' effect on a traveller. New kinds are rows here and, for a new kind of trouble, one
+# function in roads.CHALLENGES.
+LANDMARKS = {
+    "ford": {"words": "a ford", "meet": 0.95, "challenge": "high", "default": "wait",
+             "push": {"cart_loss": [0.3, 0.2], "herd_loss": 0.05, "foot": "soaked"}},
+    "bridge": {"words": "a bridge", "meet": 0.95, "challenge": "down", "default": "go round"},
+    "pass": {"words": "a pass", "meet": 0.95, "challenge": "snowed", "default": "turn back", "cold_night": True,
+             "push": {"death": 0.1}},
+    "narrows": {"words": "a narrows", "meet": 0.95, "sight": 0.2},
+    "spring": {"words": "a spring", "meet": 0.8},
+    "meadow": {"words": "a meadow by the road", "good": True, "seasons": ["summer", "autumn"]},
+    "fruit trees": {"words": "wild fruit trees", "good": True, "seasons": ["autumn"]},
+    "hollow": {"words": "a sheltered hollow", "good": True, "seasons": ["spring", "summer", "autumn", "winter"]},
+}
+ROADS = {
+    "experience": 5.0,                      # crossings of a landmark that halve one's trouble there (D2-106)
+    "call": {"death": 0.05, "loss": 0.5, "minor": 0.1},   # the thresholds for an urgent call (D2-105)
+    "good": {"fed": 1.0, "gather": [1.0, 2.0], "known": 2.0, "camp": 1.2},   # D2-109
+    "flee": 0.5,
+    "waves": 3,                             # a meeting's conversation (D2-110)
+    "notices": 5,                           # "On the way" lines on arrival (D2-97)
+    "trace_days": {"tracks": 3, "ashes": 10, "ruts": 60},   # D2-88
+}
+FUSE.update({
+    "meeting": {"sense": "sight", "label": "a meeting on the road", "acts": {"road": 3},
+                "choices": ["go on", "turn back", "change course", "attack", "flee"], "also": ["give", "accept"]},
+    "find": {"sense": "sight", "label": "something lying by the road", "acts": {"road": 2},
+             "choices": ["take", "bury", "go on"], "also": []},
+    "crossing": {"sense": "sight", "label": "trouble on the road", "acts": {"road": 1},
+                 "choices": ["push on", "wait", "turn back", "go round"], "also": []},
+})
+# Travel's choices at departure (D2-105, D2-109, D2-113) are modifiers known to all.
+TECHNIQUES.update({
+    "on trouble": {"verb": "modifier", "label": "what to do if the road gives trouble", "basic": True, "modifies": ["travel"],
+                   "key": "on trouble", "value": "*", "changes": {}, "units": 0, "gives": "", "tags": ["travel"],
+                   "values": ["push on", "wait", "turn back", "go round"]},
+    "stop at": {"verb": "modifier", "label": "stopping at a good place one knows on the way", "basic": True, "modifies": ["travel"],
+                "key": "stop at", "value": "*", "changes": {}, "units": 0, "gives": "", "tags": ["travel"]},
+    "gather on the way": {"verb": "modifier", "label": "gathering at good places one passes", "basic": True, "modifies": ["travel"],
+                          "key": "gather", "value": "*", "changes": {}, "units": 0, "gives": "", "tags": ["travel"]},
+})
+MODIFIERS = {t for t, d in TECHNIQUES.items() if d.get("modifies")}

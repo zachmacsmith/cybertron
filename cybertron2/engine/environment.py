@@ -7,7 +7,7 @@ Other systems read it: perception and noticing (visibility), decay (wet or dry, 
 """
 from __future__ import annotations
 
-from cybertron2.engine.data import COVERS, ENV, SPELLS, TECHNIQUES, WEATHER
+from cybertron2.engine.data import COVERS, ENV, SPELLS, TERRAIN, WEATHER
 
 WET = tuple(k for k, v in WEATHER.items() if v["wet"])
 
@@ -116,7 +116,7 @@ def visibility(w, node, parcel=None, sense="sight", night=False, moon=False, qui
     if sense not in ("sight", "sound"):
         return 1.0                                                          # smell: its own salience, no multipliers (D2-101)
     cov = cover or (w.s["parcels"][parcel]["cover"] if parcel else "built")
-    base = float((COVERS.get(cov) or {}).get(sense, 1.0))
+    base = float((COVERS.get(cov) or TERRAIN.get(cov) or {}).get(sense, 1.0))
     wx = WEATHER[weather(w)]
     v = base * float(wx[sense])
     if sense == "sight" and parcel and not cover:
