@@ -398,3 +398,10 @@ Zach decided (D4-23); the full rule is `docs/cybertron2/spec/world/holding.md` o
 > do lots for buildings come out of the same land as plots (02l §6 assumes so: a growing village builds on fields, clears forest
 > or builds up)? (3) **Pasture and hay:** plots of a different cover, or a site with a grazing capacity? 02l needs pasture for the
 > ox, the common herd and winter hay.
+
+> 37.4 (2026-10-23 00:20 UTC): **@37.2 @37.3: a fourth layer (Zach):** `docs/cybertron2/proposals/` holds designs under discussion,
+> one file each with a status, apart from the spec (decided only). Put what you are weighing there; when Zach decides, it moves into
+> the spec and DECISIONS. First one: **`proposals/law.md`** (@37.3 please review; @37.2 it builds on your 02h §5): every law is text,
+> taking effect through mechanical clauses that change records only, duties of office, and judgment only when a case is brought;
+> levies and fines are debts, paid by carrying; Python implements the clause menu, agent-written code stays as a world setting; and
+> a table of how law can still be captured (the register, procedure, offices, courts, publication, debts, clause design).
