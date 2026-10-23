@@ -134,7 +134,34 @@ def night(w, today) -> dict:
         _notices(w, members, t, pos, ps)
         _finds(w, today, rec, members, t, pos)
     _meetings(w, today, rec, ps)
+    for key, members in ps.items():                                         # what each party leaves behind it (D2-88)
+        t = w.s["people"][members[0]]["transit"]
+        if t is not None:
+            leave_traces(w, members, t, position(w, t))
     return rec
+
+
+# ---------------------------------------------------------------------- traces (D2-88)
+def leave_traces(w, members, t, pos):
+    """Tracks (and cart ruts, a fire's ashes) on the stretch a party spent the night on; they fade (ROADS trace_days)."""
+    kinds = ["tracks"]
+    if any(w.goods(w.hands(n)).get("handcart", 0) >= 1 for n in members):
+        kinds.append("ruts")
+    if any(n in (w.s.get("today") or {}).get("fire", {}) for n in members):
+        kinds.append("ashes")
+    toward = w.s["nodes"][t["to"]]["name"]
+    for k in kinds:
+        w.s.setdefault("traces", []).append({"road": t["road"], "pos": pos, "day": w.d, "kind": k, "n": len(members), "toward": toward,
+                                             "by": list(members)})
+    w.s["traces"] = [x for x in w.s["traces"] if w.d - x["day"] <= int(ROADS["trace_days"][x["kind"]])]
+
+
+def trace_words(w, x) -> str:
+    age = w.d - x["day"]
+    when = "fresh" if age <= 0 else ("a day old" if age == 1 else f"{age} days old")
+    many = "a party's" if x["n"] > 2 else "a traveller's" if x["n"] == 1 else "two travellers'"
+    return {"tracks": f"{many} tracks going toward {x['toward']}, {when}", "ruts": f"cart ruts going toward {x['toward']}, {when}",
+            "ashes": f"the ashes of a fire by the road, {when}"}[x["kind"]]
 
 
 def _landmark(w, today, rec, members, t, pos, lm):
@@ -281,6 +308,13 @@ def _notices(w, members, t, pos, ps):
             x = TH.own(w, c) * sight * TH.eye(w, n)
             if w.rng("road-thing", w.d, n, id(c) % 997).random() < min(1.0, x):
                 _note(w, n, TH.describe(w, c).replace(" at the road", " by the road"))
+        for x in w.s.get("traces", []):                                 # traces of others who passed (D2-88): fading
+            if x["road"] != road_id or x["pos"] != pos or n in x["by"] or w.d - x["day"] < 1:
+                continue
+            fade = 1 - (w.d - x["day"]) / float(ROADS["trace_days"][x["kind"]])
+            snow = 3.0 if EV.snow_lying(w) and x["kind"] == "tracks" else 1.0
+            if w.rng("road-trace", w.d, n, x["day"], x["kind"]).random() < min(1.0, 0.3 * fade * snow * sight * TH.eye(w, n)):
+                _note(w, n, trace_words(w, x))
         for key, others in ps.items():                                  # other travellers seen far off on the same stretch
             if others == members or key[0] != road_id:
                 continue

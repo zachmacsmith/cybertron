@@ -175,3 +175,18 @@ def test_an_edge_with_no_landmarks_behaves_exactly_as_before(tmp_path, monkeypat
     strip = lambda f: [json.dumps({k: v for k, v in json.loads(l).items() if k != "road"}) for l in open(f)]
     assert strip(tmp_path / "a" / "days.jsonl") == strip(tmp_path / "b" / "days.jsonl")
     assert any(d["departed"] for d in map(json.loads, open(tmp_path / "a" / "days.jsonl")))
+
+
+def test_traces_left_by_a_party_fade_and_are_read_by_a_later_traveller(monkeypatch):
+    w = world(roads=[["millbrook", "ashwood", 2, {"terrain": "plain"}]], weather={1: "clear", 2: "clear", 3: "clear"})
+    w.s["containers"][w.hands("Edric")]["goods"]["handcart"] = 1.0
+    depart(w, "Edric", "ashwood")
+    N.departures(w, w.s["today"])
+    RD.night(w, w.s["today"])
+    assert {x["kind"] for x in w.s["traces"]} == {"tracks", "ruts"}
+    next_night(w)
+    depart(w, "Sibyl", "ashwood")
+    monkeypatch.setattr(RD.TH, "eye", lambda w, n, on="things": 3.0)
+    N.departures(w, w.s["today"])
+    RD.night(w, w.s["today"])
+    assert any("going toward Ashwood, a day old" in x for x in w.s["people"]["Sibyl"]["transit"]["notices"])
