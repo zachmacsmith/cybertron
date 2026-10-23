@@ -83,6 +83,10 @@ changed in its code yet. **From 22 Oct the decisions are kept in [docs/cybertron
 
 ## Log
 
+- **23 Oct.** Valley rerun on the rebuilt engine (v3, $10.27): 1 death against 4, 38 journeys, 15 agreements all completed, a
+  disputed field settled by custom, credit across the road; nobody built or joined. Faults found and fixed during the run; D4-37
+  (release). [18_valley_rebuilt.md](18_valley_rebuilt.md).
+
 - **23 Oct.** Zach: rebuild everything (D4-34); every event in a place (D4-35); moving is general (D4-36). 37.4's decisions
   compiled into spec files (core, world, environment, signs, agents, life, seeding, institutions). `cybertron2/engine/` written on
   the designed core (38.17): place, containers, the chokepoint, Here and Mind, verbs from data, households, claims, hosting,
