@@ -117,3 +117,13 @@ def test_say_in_any_building_by_access():
     assert all(any("the Hall" in x for x in quiet[m]) for m in names if m != "Osric")
     assert any(x.startswith("Refused: say: you have no access to Fenn House") for x in res["Osric"])
     assert any("home" in x for x in quiet["Wat"]) and any("home" in x for x in quiet["Ivy"]) and not any("home" in x for x in quiet["Maud"])
+
+
+def test_milking_needs_a_cow_in_milk_and_the_craft():
+    from cybertron2.m1 import act as AC, run as R
+    w = World(load_spec(SPEC))
+    today = R._blank_today()
+    assert w.s["herds"]["cattle"]["in_milk"] == 2
+    assert "milk" in " ".join(KN.options(w, "Maud")[0])
+    assert AC.do(w, "Maud", {"do": "work", "what": "milk"}, today).startswith("You milked")
+    assert AC.do(w, "Osric", {"do": "work", "what": "milk"}, today).startswith("Refused")      # does not know it

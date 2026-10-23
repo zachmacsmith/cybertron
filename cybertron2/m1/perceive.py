@@ -476,6 +476,9 @@ def apply_notes(w, name, reply) -> list:
             if a["pinned"] == title:
                 a["pinned"] = None
     pin = reply.get("pin")
+    written = [str(n["title"]).strip()[:60] for n in (reply.get("note") or []) if isinstance(n, dict) and n.get("title")]
+    if pin and str(pin) not in a["notes"] and len(written) == 1 and written[0] in a["notes"]:
+        pin = written[0]                                                 # "pin" named the note's text, not its title
     if pin:
         if str(pin) in a["notes"]:
             a["pinned"] = str(pin)

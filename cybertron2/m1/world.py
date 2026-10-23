@@ -82,7 +82,8 @@ class World:
         s["buildings"] = {bid: {"name": b.get("name", bid), "parcel": b["parcel"], "access": b.get("access", "public")}
                           for bid, b in (spec.get("buildings") or {}).items()}   # other buildings (a hall); houses are buildings too
         for hid, h in (spec.get("herds") or {}).items():
-            s["herds"][hid] = {"name": h.get("name", hid), "parcel": h["parcel"], "count": int(h.get("count", 6)), "home": h["parcel"]}
+            s["herds"][hid] = {"name": h.get("name", hid), "parcel": h["parcel"], "count": int(h.get("count", 6)), "home": h["parcel"],
+                               "in_milk": int(h.get("in_milk", 0))}
         house_of = {h["household"]: hid for hid, h in s["houses"].items()}
         lo, hi = self.p["frailty"]
         blo, bhi = self.p["combat"]["base"]

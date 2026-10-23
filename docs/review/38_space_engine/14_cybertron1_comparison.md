@@ -113,3 +113,26 @@ about half, the rest written and never reused). Woken: only agents told or offer
 Speech: 21 of 23 `say`s were in a house. Morning messages about 2.6k characters (run D: 7-16k). Written memories are specific and
 useful (Agnes: "when I went to store the grain, none was in my hands... if it isn't there, the debt may still stand and I should ask
 her gently"). Thinking: on every call except one Sonnet call; text withheld by the CLI.
+
+## 7. Run F: the village on the new systems (23 Oct)
+
+`runs/m1_F`: the generated village (m1_village_s8: 12 people in three houses, 4 Opus, 7 Haiku, a child), 10 days, after D4-25 to
+D4-30 and the decided economy. **$3.83** (run D, the same village before: $7.13). Everyone lived; no missed meal.
+
+| System | Result |
+|---|---|
+| Sessions and cache | 44 conversations started, 245 calls continued, no fallbacks; 83% of input read from the cache for both models; Opus $3.57, Haiku $0.26 |
+| Thinking | withheld thinking blocks on 233 of 256 calls (the CLI does not return the text) |
+| Waking | 8 to 11 of 11 woken every day; half needed a second wave. 290 tells, **180 of them within the speaker's own house** (often repeating what was just said in the house) |
+| Speech scopes | 117 to everyone, 74 in a house |
+| Morning messages | grow from 1.1k to about 9k characters by day 9; most of it is "What happened yesterday", i.e. the town's 117 broadcasts heard the next morning |
+| Written memories | 33 of 33 asked for were written; specific (store counts, trades, who owes what) |
+| Said and did | the debt was right this time: Piers gave 3 grain on day 3, Hamo confirmed it paid, both records agree |
+| Notes | Haiku 19 written, 47 pins; Opus 20 written, no pins |
+| Rejections | 80 of 1,178 results (7%) |
+
+Faults found and fixed after the run: **milking could never happen** (the world dropped the herd's cows in milk; one attempt, refused;
+a test now covers it); `pin` given a note's text instead of its title was refused six times (it now pins the note written in the same
+reply). Behaviour: foraging 227 of 600 planned acts, hunting 71, reaping 34, felling 32; 5 trades and 6 gifts across houses; Hamo
+ended with 28 timber and 10 grain. Open for Zach: whether a tell to one's own household should wake (house speech already reaches
+them), and whether the town's broadcasts should be capped or summarised in the next morning's message.
