@@ -27,7 +27,7 @@ WAVES = 2
 
 def blank_today() -> dict:
     return {"worked": {}, "thefts": [], "left": [], "joins": [], "admits": [], "sleep": {}, "travel": {}, "watch": {}, "teach": [],
-            "learn": [], "fights": [], "guards": {}}
+            "learn": [], "fights": [], "guards": {}, "fire": {}}
 
 
 # ---------------------------------------------------------------------- a scripted bot (smoke tests only)
@@ -251,6 +251,8 @@ def night_lines(w, rec) -> dict:
             L.append("You slept out" + (" on the road." if a["transit"] else ", with no roof over you."))
         elif slept and slept not in homes:
             L.append(f"You slept at {slept}.")
+        if n in rec.get("open_fire", []):
+            L.append(f"You lit a fire in the open with {float(w.p['fuel']['open']):g} timber.")
         if n in rec["missed"]:
             L.append("You went to bed without enough to eat: a missed meal.")
             raw = rec.get("uncooked", {}).get(n)

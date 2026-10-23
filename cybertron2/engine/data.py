@@ -257,7 +257,8 @@ PHYSICS = {
     "shelter": {"housed": 1.0, "damaged": 1.2, "unsheltered": 1.5},     # D4-12, H-5
     "shelter_cold": {"housed": 1.0, "no_fuel": 1.3, "damaged": 1.5, "unsheltered": 2.0},
     "cold_starving": 0.3,                                                # H-5
-    "fuel": {"normal": 0.5, "cold": 2.0},
+    "fuel": {"normal": 0.5, "cold": 2.0, "camp": 1.0, "open": 2.0},     # D4-49: a camp's fire 1 a night; a fire in the open 2 (calibrate)
+    "land_blind": 0.25,                                                  # D4-50: share with no eye for how bare a place is (calibrate)
     "house_spoil": 0.3,
     "cellar_spoil": 0.25,                                                # D2-45: a quarter of the house rate
     "breaks": {"p": 0.02, "cold": 0.08},

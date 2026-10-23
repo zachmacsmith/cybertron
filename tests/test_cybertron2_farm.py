@@ -358,3 +358,52 @@ def test_a_missed_meal_with_grain_but_no_fire_says_why_and_the_carry_refusal_is_
     give(w, "Warin", stone=20)
     r = do(w, "Warin", do="travel", to="the goat path up into the crags")
     assert "set down at least" in r
+
+
+# ---------------------------------------------------------------------- how bare a place is (D4-50) and fires in the open (D4-49)
+def test_a_bare_place_is_a_sign_some_never_read_and_trying_it_tells_anyone():
+    w = world()
+    r = w.s["parcels"]["mb_meadow"]["res"]["plants"]
+    r["S"] = r["K"] * w.p["refuge"]
+    F = PC.facts(Here(w, "Edric"))
+    bare = [f for f in F if f.get("land") == ("wild food", "bare") and "parcel:mb_meadow" in f["about"]]
+    assert bare and bare[0]["eye"]
+    people = list(w.s["people"])
+    blind = [n for n in people if PC.eye(Here(w, n), n) == 0.0]
+    sharp = [n for n in people if PC.eye(Here(w, n), n) > 0.0]
+    assert sharp                                                                       # most have an eye for the land
+    n = (blind or sharp)[0]
+    if w.at(n) != "millbrook":
+        w.s["people"][n]["at"] = "millbrook"
+    if blind:                                                                          # one with no eye never sees it, over many days
+        for d in range(10):
+            w.s["today"] = R.blank_today()
+            PC.evening(w, {}, w.s["today"])
+        assert not any(k.startswith("mb_meadow|") and v["how"] == "saw" for k, v in (Mind(w, n).store.get("land") or {}).items())
+    assert "picked bare" in do(w, n, do="gather", what="forage", at="Brook Meadow")
+    from cybertron2.engine import prompt as PR
+    lines = PR._place_lines(Here(w, n), Mind(w, n))
+    assert any("Brook Meadow" in x and "you found it picked bare of wild food" in x for x in lines)
+
+
+def test_a_fire_in_the_open_cooks_for_two_timber_and_a_camp_burns_one():
+    w = world()
+    w.s["people"]["Edric"]["at"] = "grey_crag"
+    hands = w.s["containers"][w.hands("Edric")]["goods"]
+    for k in list(hands):
+        hands[k] = 0.0
+    give(w, "Edric", grain=5, timber=1)
+    assert "takes 2 timber" in do(w, "Edric", do="fire")
+    give(w, "Edric", grain=5, timber=2.5)
+    assert "fire tonight" in do(w, "Edric", do="fire")
+    rec = N.night(w)
+    assert "Edric" in rec["open_fire"] and rec["ate"].get("Edric", 0) > 0 and "Edric" not in rec["missed"]
+    assert abs(w.goods(w.hands("Edric"))["timber"] - 0.5) < 1e-6
+    w2 = world()
+    give(w2, "Edric", timber=3)
+    do(w2, "Edric", do="build", what="camp", at="Alder Copse")
+    bid = next(b for b, x in w2.s["buildings"].items() if x["structure"] == "camp")
+    w2.s["containers"][w2.s["buildings"][bid]["stock"]]["goods"]["timber"] = 3.0
+    w2.s["today"]["sleep"]["Edric"] = bid
+    N.night(w2)
+    assert abs(w2.goods(w2.s["buildings"][bid]["stock"])["timber"] - 2.0) < 1e-6

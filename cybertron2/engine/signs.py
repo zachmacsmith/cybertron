@@ -148,25 +148,49 @@ SKY = [
 ]
 
 # ---------------------------------------------------------------------- what grows wild on a parcel (forage, game, wood, the seam)
+def _bare(x, key) -> bool:
+    """As bare as the gathering refusal finds it (knowledge.ready)."""
+    r = x.p["res"].get(key)
+    if not r or r["K"] <= 0:
+        return False
+    return r["S"] <= 0.5 if key == "wood" else r["S"] <= (x.here.p["refuge"] + 0.02) * r["K"]
+
+
+def _thin(r, at=0.35, lo=0.1, hi=0.5) -> float:
+    """The chance of noticing grows with how bare the place is (D4-50)."""
+    return lo + (hi - lo) * max(0.0, min(1.0, (at - r) / at))
+
+
+# `land` marks a sign that tells how bare a place is: the noticer remembers it against the place (D4-50); `eye` makes it depend on
+# the person's eye for the land, which for some is none: they find out only by failing.
 WILD = [
-    dict(when=lambda x: x.r("plants") is not None and x.r("plants") < 0.35, sense="sight", p=0.2, tags=["food"],
+    dict(when=lambda x: _bare(x, "plants"), sense="sight", p=0.5, tags=["food"], eye=True, land=("wild food", "bare"),
+         text=lambda x: f"{x.nm} is picked bare: nothing left worth gathering"),
+    dict(when=lambda x: x.r("plants") is not None and x.r("plants") < 0.35 and not _bare(x, "plants"), sense="sight",
+         p=lambda x: _thin(x.r("plants")), tags=["food"], eye=True, land=("wild food", "thin"),
          text=lambda x: f"{x.nm} has been picked over: little wild food left"),
-    dict(when=lambda x: x.r("plants") is not None and x.r("plants") < 0.35, sense="sight", p=0.15, tags=["food"], knack="forage",
+    dict(when=lambda x: x.r("plants") is not None and x.r("plants") < 0.35, sense="sight", p=lambda x: _thin(x.r("plants"), lo=0.05, hi=0.3),
+         tags=["food"], knack="forage", eye=True, land=("wild food", "thin"),
          text=lambda x: f"bare stems where the berries were in {x.nm}: it will take days to come back"),
-    dict(when=lambda x: x.r("plants") is not None and x.r("plants") > 0.75, sense="sight", p=0.08, tags=["food"],
+    dict(when=lambda x: x.r("plants") is not None and x.r("plants") > 0.75, sense="sight", p=0.08, tags=["food"], land=("wild food", "good"),
          text=lambda x: f"{x.nm} is thick with berries, nuts and greens"),
-    dict(when=lambda x: x.r("game") is not None and x.r("game") < 0.35, sense="sight", p=0.2, tags=["food", "hunting"], knack="hunt",
+    dict(when=lambda x: x.r("game") is not None and x.r("game") < 0.35, sense="sight", p=lambda x: _thin(x.r("game")),
+         tags=["food", "hunting"], knack="hunt", eye=True, land=("game", "thin"),
          text=lambda x: f"few fresh tracks in {x.nm}: the game is thin"),
-    dict(when=lambda x: x.r("game") is not None and x.r("game") < 0.2, sense="sound", p=0.15, tags=["food", "hunting"],
+    dict(when=lambda x: x.r("game") is not None and x.r("game") < 0.2, sense="sound", p=lambda x: _thin(x.r("game"), at=0.2, lo=0.1, hi=0.4),
+         tags=["food", "hunting"], eye=True, land=("game", "thin"),
          text=lambda x: f"{x.nm} is quiet: nothing moves at dusk"),
     dict(when=lambda x: x.r("game") is not None and x.r("game") > 0.75, sense="sight", p=0.08, tags=["food", "hunting"], knack="hunt",
-         text=lambda x: f"fresh deer slots and droppings along the rides of {x.nm}"),
+         land=("game", "good"), text=lambda x: f"fresh deer slots and droppings along the rides of {x.nm}"),
     dict(when=lambda x: x.r("game") is not None and x.r("game") > 0.75, sense="sight", p=0.06, tags=["food", "hunting"],
          text=lambda x: f"a hare starts from the bracken in {x.nm}"),
-    dict(when=lambda x: x.r("wood") is not None and x.r("wood") < 0.35, sense="sight", p=0.2, tags=["timber"],
+    dict(when=lambda x: _bare(x, "wood"), sense="sight", p=0.6, tags=["timber"], eye=True, land=("timber", "bare"),
+         text=lambda x: f"no standing timber left in {x.nm}: stumps and brush only"),
+    dict(when=lambda x: x.r("wood") is not None and x.r("wood") < 0.35 and not _bare(x, "wood"), sense="sight", p=lambda x: _thin(x.r("wood")),
+         tags=["timber"], eye=True, land=("timber", "thin"),
          text=lambda x: f"{x.nm} is thinned out: stumps where the big trees stood"),
-    dict(when=lambda x: x.r("wood") is not None and x.r("wood") < 0.5, sense="sight", p=0.15, tags=["timber"], knack="fell",
-         text=lambda x: f"the good straight trees in {x.nm} are gone; what is left is crooked and small"),
+    dict(when=lambda x: x.r("wood") is not None and x.r("wood") < 0.5 and not _bare(x, "wood"), sense="sight", p=0.15, tags=["timber"],
+         knack="fell", land=("timber", "thin"), text=lambda x: f"the good straight trees in {x.nm} are gone; what is left is crooked and small"),
     dict(when=lambda x: x.r("seam") is not None and 0 < x.r("seam") < 0.35, sense="sight", p=0.25, tags=["mining"], knack="mine",
          text=lambda x: f"the seam at {x.nm} is nearly worked out"),
     dict(when=lambda x: x.r("seam") is not None and x.r("seam") >= 0.35, sense="sight", p=0.05, tags=["mining"],
@@ -312,9 +336,11 @@ def facts(here, add) -> None:
                 ok = False
             if ok:
                 kw = {"knack": row.get("knack"), "sign": f"{about[0]}#{names[id(rows)]}{i}"}
-                if row.get("peek"):
-                    kw["peek"] = True
-                add(about, row["text"](x), row["p"], row.get("tags", []), row.get("sense", "sight"), concerns=list(concerns), **kw)
+                for k in ("peek", "eye", "land"):
+                    if row.get(k):
+                        kw[k] = row[k]
+                p = row["p"](x) if callable(row["p"]) else row["p"]
+                add(about, row["text"](x), p, row.get("tags", []), row.get("sense", "sight"), concerns=list(concerns), **kw)
     cal = here.calendar()
     emit(SKY, SimpleNamespace(cold=here.cold(), first_cold=here.cold() and (here.day == 0 or not here.cold(here.day - 1)),
                               season=cal["season"], left=cal["left"]), ["sky"])

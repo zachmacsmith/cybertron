@@ -18,6 +18,7 @@ the crafts of the lines born there.
 - D4-6: hidden change shows only as signs (signs.md).
 - D4-48: a state shows itself as a bundle of signs, each with its own sense, chance and conditions; each observer meets each sign
   on its own.
+- D4-50: how bare a place is, is a sign like any other; some notice only by failing.
 
 ## Mechanics
 
@@ -34,6 +35,10 @@ the crafts of the lines born there.
   carries several possible signs. Each sign has a sense, a base chance of being noticed, a condition on the state and on what else
   is there (who worked there today, beasts near, the season, the cold), and may have a knack: the work whose practice makes one read
   it more often. Each observer rolls for each sign separately; attention to a thing raises the chances.
+- **How bare a place is** (D4-50): wild food, game and standing timber running out show as signs whose chance grows with how
+  bare the place is. Each person has an eye for the land, drawn once; some have none and learn it only by working the place and
+  finding nothing. What one has seen or found (and when) shows in one's own description of the place; trying a bare place tells
+  anyone. Parameters: the chances and the share with no eye (0.25), calibrate.
 - **Places found** (D4-47): an unexplored place is seen only as the way to it from where its road starts; whoever goes there learns
   it; hearing it named by someone who knows it tells one of it and the way.
 
@@ -53,4 +58,4 @@ The node in words, never as engine numbers; other places as they knew them, with
 
 38.02; proposals/place.md, knowledge.md, seeing.md.
 
-*Current as of 23 Oct 2026: H-7, D2-4, D2-29, D4-6, D4-33, D4-35, D4-47, D4-48.*
+*Current as of 23 Oct 2026: H-7, D2-4, D2-29, D4-6, D4-33, D4-35, D4-47, D4-48, D4-50.*

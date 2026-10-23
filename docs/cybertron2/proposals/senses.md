@@ -88,6 +88,8 @@ to the sky or the place in general; season and weather signs reach them only in 
 
 ## History
 
+- 23 Oct: one observer term decided for one system (D4-50): an eye for the land, drawn once per person, some with none, applied to
+  how bare a place is; the signs' chances grow with bareness. The rest of §1 stays open.
 - 23 Oct: §4 added from the first runs (which signs are acted on, which ignored).
 - 23 Oct: written for Zach after D4-48 ("note down somewhere for me to build out and extend the sensory system"), with his remark
   that what one notices should depend on the person.

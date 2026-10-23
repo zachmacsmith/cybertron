@@ -42,8 +42,9 @@ def night(w) -> dict:
         lit = False
         if sleepers and any(b["fittings"].get(f_) for f_ in FIRE):
             g = w.goods(b["stock"])
-            if g.get("timber", 0.0) + 1e-9 >= fuel:
-                w.apply("destroy", b["node"], src=b["stock"], item="timber", qty=fuel, why="fire")
+            burn = float(p["fuel"]["camp"]) if b["structure"] == "camp" else fuel   # a camp's fire (D4-49)
+            if g.get("timber", 0.0) + 1e-9 >= burn:
+                w.apply("destroy", b["node"], src=b["stock"], item="timber", qty=burn, why="fire")
                 lit = True
         w.apply("set", b["node"], ref=("building", bid), field="fire", value=lit)
         if sleepers:
@@ -76,6 +77,12 @@ def night(w) -> dict:
             mine = w.takeable(name, place)
             stores += sorted((c for c in mine if c != a["hands"]), key=lambda c: 0 if b is not None and c == b["stock"] else 1)
         hearth = b is not None and any(b["fittings"].get(f_) for f_ in FIRE) and bool(b["fire"])   # grain boiled at a lit fire (D2-60)
+        if state == "unsheltered" and (today.get("fire") or {}).get(name):    # a fire in the open (D4-49)
+            burn = float(p["fuel"]["open"])
+            if w.goods(a["hands"]).get("timber", 0.0) + 1e-9 >= burn:
+                w.apply("destroy", place, src=a["hands"], item="timber", qty=burn, why="fire")
+                hearth = True
+                rec.setdefault("open_fire", []).append(name)
         ate = _eat(w, place, stores, need, hearth)
         if ate + 1e-9 >= need:
             a["hunger"], a["missed"] = min(0, a["hunger"] + 1), 0

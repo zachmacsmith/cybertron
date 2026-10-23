@@ -161,6 +161,11 @@ def _place_lines(here, mind=None) -> list:
         bs = [b["name"] + (" (half built)" if b.get("unfinished") else "") for b in here.buildings().values() if b["parcel"] == pid]
         if bs:
             bits.append("buildings: " + ", ".join(bs))
+        if mind is not None:                                                   # how bare it is, as far as one has seen or found (D4-50)
+            for k, v in sorted((mind.store.get("land") or {}).items()):
+                q, what = k.split("|", 1)
+                if q == pid:
+                    bits.append(_land_words(what, v) + f" ({_daystr(mind, v['day'])})")
         out.append(f"- {p['name']} ({'; '.join(bits)}): {p['text']}" + (f". Next to {adj}." if adj else "."))
     for bid, b in here.buildings().items():
         if b.get("unfinished"):
@@ -169,6 +174,15 @@ def _place_lines(here, mind=None) -> list:
         held = _holders(here, ("building", bid))
         out.append(f"- {b['name']}: {b['structure']}, for {b['size']}" + (f"; {fits}" if fits else "; no fittings") + (f"; held by {held}" if held else ""))
     return out
+
+
+def _land_words(what, v) -> str:
+    saw = v["how"] == "saw"
+    return {"bare": f"you {'saw' if saw else 'found'} it picked bare of {what}" if what != "timber" else
+                    f"you {'saw' if saw else 'found'} no standing timber left",
+            "thin": f"you {'saw' if saw else 'found'} little {what} left",
+            "nothing caught": "you hunted there and caught nothing",
+            "good": f"you {'saw' if saw else 'found'} {what} plentiful"}.get(v["state"], f"{what}: {v['state']}")
 
 
 def _holders(here, thing) -> str:
@@ -227,7 +241,8 @@ def system_prompt(here, mind) -> str:
               + ". Spoils fastest in your hands: " + ", ".join(i for i, v in sorted(ITEMS.items(), key=lambda kv: -kv[1]["spoil"])
                                                            if v["food"] > 0 and v["spoil"] >= 0.15)
               + f"; a store keeps food {1 / p['house_spoil']:.0f} times better. A hearth burns {p['fuel']['normal']:g} timber a night "
-              f"({p['fuel']['cold']:g} on a cold one) from its building's store; a cold night without a fire is hard.",
+              f"({p['fuel']['cold']:g} on a cold one) from its building's store, a camp's fire {p['fuel']['camp']:g}; a fire in the open takes "
+              f"{p['fuel']['open']:g} timber carried, for one night; a cold night without a fire is hard.",
               "- Buildings are what is in them: beds, a hearth, bins, a quern, an anvil. Anyone can build a small room and put in beds and "
               "bins; a hearth or an anvil takes a trade. Buildings fall into disrepair; repair takes timber.",
               "- What is whose: land, buildings and herds are held by claims that people know of. Anyone can use anything they can reach, "

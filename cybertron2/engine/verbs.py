@@ -7,7 +7,7 @@ Each handler: (here, mind, a) -> result line. Refusals name what is short and co
 from __future__ import annotations
 
 import math
-from cybertron2.engine import farm as FM, knowledge as KN
+from cybertron2.engine import farm as FM, knowledge as KN, perceive as PC
 from cybertron2.engine.data import BLUEPRINTS, COVERS, FITTINGS, ITEMS, TECHNIQUES, TRY
 from cybertron2.engine.here import Refused, show
 
@@ -54,6 +54,8 @@ VERB = {
     "learn": {"args": '{"from", "what"}', "cost": ["teach", "units_learner"], "doc": "one session, if they set aside time to teach the same day"},
     "attack": {"args": '{"target": person or building, "aim": rob | hurt}', "cost": ["combat", "units"], "doc": "settled tonight"},
     "guard": {"args": '{"at"?: building}', "cost": 1, "doc": "stand guard tonight over a building here and anyone set upon"},
+    "fire": {"args": "", "cost": 0, "doc": "light a fire in the open tonight if you sleep out (on the road, or with no bed), from timber in your "
+                                            "hands, so grain and flour can be boiled; say it before you set off"},
     "rest": {"args": "", "cost": 0, "doc": ""},
 }
 VERBS = tuple(VERB)
@@ -213,7 +215,11 @@ def _site(here, mind, tech, at):
             raise Refused(f"{KN.label(tech)} is not done at {at}")
     ok = [s for s in sites if not KN.ready(here, tech, s[0], s[1])]
     if not ok:
-        raise Refused(KN.ready(here, tech, sites[0][0], sites[0][1]) if sites else f"there is nowhere here for {KN.label(tech)}")
+        why = KN.ready(here, tech, sites[0][0], sites[0][1]) if sites else f"there is nowhere here for {KN.label(tech)}"
+        what = PC.LAND_DRAWS.get(TECHNIQUES[tech].get("draws"))
+        if sites and what and sites[0][0] == "parcel" and ("picked bare" in why or "no standing timber" in why):
+            PC.remember_land(mind, here.day, sites[0][1], what, "bare", "found")         # found out by trying (D4-50)
+        raise Refused(why)
     return ok[0]
 
 
@@ -301,6 +307,12 @@ def _technique(here, mind, a, party, verb):
         here.apply("set", ref=("building", key), field="condition", value=b["condition"] + 1)
         word = f"You repaired {b['name']}: it is now {('ruined', 'damaged', 'sound')[b['condition']]}."
         thing = ("building", key)
+    what = PC.LAND_DRAWS.get(t.get("draws")) if kind == "parcel" and y["kind"] in ("stock", "chance") else None
+    if what:                                                                    # what working it showed of the place (D4-50)
+        if y["kind"] == "chance":
+            PC.remember_land(mind, here.day, key, what, "good" if got > 0 else "nothing caught", "found")
+        else:
+            PC.remember_land(mind, here.day, key, what, "thin" if got < 0.5 * y["base"] else "good", "found")
     if got > 0 and gives:
         here.apply("create", dst=out, item=gives, qty=got, why=tech)
     if tool and t.get("wear"):
@@ -779,6 +791,15 @@ def _rest(here, mind, a, party):
     return "You rested."
 
 
+def _fire(here, mind, a, party):
+    """A fire in the open for one night (D4-49): cooking where one sleeps out, from carried timber."""
+    need, have = float(here.p["fuel"]["open"]), here.carried().get("timber", 0.0)
+    if have + 1e-9 < need:
+        raise Refused(f"a fire in the open takes {need:g} timber in your hands; you carry {show(have)}")
+    here.today().setdefault("fire", {})[here.name] = True
+    return f"You mean to light a fire tonight if you sleep out ({need:g} timber)."
+
+
 def _accept(here, mind, a, party):
     from cybertron2.engine import agreements as AG
     return AG.accept(here, mind, a, party)
@@ -797,6 +818,6 @@ def _withdraw(here, mind, a, party):
 HANDLERS = {"gather": _gather, "work": _work, "make": _make, "build": _build, "move": _move, "take": _take, "give": _give, "leave": _leave,
             "accept": _accept, "withdraw": _withdraw, "release": _release, "host": _host, "grant": _grant, "revoke": _revoke, "join": _join, "admit": _admit,
             "leave_household": _leave_household, "found": _found, "claim": _claim, "sleep": _sleep, "set": _set, "travel": _travel,
-            "watch": _watch, "teach": _teach, "learn": _learn, "attack": _attack, "guard": _guard, "rest": _rest,
+            "watch": _watch, "teach": _teach, "learn": _learn, "attack": _attack, "guard": _guard, "fire": _fire, "rest": _rest,
             "drive": lambda here, mind, a, party: FM.drive(here, a, party)}
 assert set(HANDLERS) == set(VERB)

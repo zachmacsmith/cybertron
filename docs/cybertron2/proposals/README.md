@@ -192,3 +192,4 @@ Newest first. Ideas decided or rejected in conversation before 23 Oct are backfi
 | 23 Oct | Life: partners, children by choice, growing up in rounds, death of old age, inheritance | discussion | [life.md](life.md) |
 | 23 Oct | Objects placed in the world: leave on a parcel, noticed by anyone, whose they are | discussion (to explore) | [objects_in_world.md](objects_in_world.md) |
 | 23 Oct | Fences, hedges and stone walls as field works that keep beasts in or out | discussion | [fences.md](fences.md) |
+| 23 Oct | The senses: an eye for the land (some have none) and signs of bareness scaled by how bare | partly accepted: D4-50 | [senses.md](senses.md) |

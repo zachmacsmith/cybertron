@@ -192,6 +192,21 @@ def knack(mind, f) -> float:
     return 1.0 if KN.basic(k) else 0.5                                        # ordinary hands read basic work's signs as usual
 
 
+def eye(here, name) -> float:
+    """One's eye for the land, drawn once (D4-50): some never read how bare a place is and learn it only by finding nothing."""
+    u = here.rng("eye", name).random()
+    blind = float(here.p["land_blind"])
+    return 0.0 if u < blind else 0.5 + (u - blind) / (1 - blind)
+
+
+LAND_DRAWS = {"plants": "wild food", "wood": "timber", "game": "game"}
+
+
+def remember_land(mind, day, pid, what, state, how) -> None:
+    """What one knows of how bare a place is: seen as a sign, or found by working it (D4-50)."""
+    mind.store.setdefault("land", {})[f"{pid}|{what}"] = {"day": day, "state": state, "how": how}
+
+
 def _can_read(mind, f) -> bool:
     sk = f.get("skill")
     return not sk or sk in mind.person.get("interests", [])
@@ -254,6 +269,8 @@ def evening(w, attend: dict, today: dict) -> dict:
                 continue
             rel = relevance(here, mind, f)
             p = 1.0 if f["salience"] >= SALIENT else min(1.0, f["salience"] * (0.3 + rel) * (1.8 if place else 1.0) * knack(mind, f))
+            if f.get("eye"):
+                p *= eye(here, name)
             if rng.random() < p:
                 cand.append((f["salience"] + rel, f))
         cand.sort(key=lambda x: -x[0])
@@ -316,6 +333,10 @@ def evening(w, attend: dict, today: dict) -> dict:
             if rose:
                 t["learned"].append(f"From watching {actor} you now have a rough idea of {KN.label(tech)}.")
         for f in con + notice + att:
+            if f.get("land"):
+                for sub in f["about"]:
+                    if sub.startswith("parcel:"):
+                        remember_land(mind, here.day, sub[7:], f["land"][0], f["land"][1], "saw")
             for sub in f["about"]:
                 b = mind.store["beliefs"].setdefault(sub, {"day": here.day, "lines": [], "ids": []})
                 if b["day"] != here.day:
