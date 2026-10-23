@@ -236,7 +236,10 @@ def turn_prompt(w, name) -> str:
     mem = PC.memory_lines(w, name)
     ml = []
     for r in mem["full"]:
-        ml.append(f"{PC._day(w, r['day'])}: " + " ".join(r["did"]))
+        ml.append(f"{PC._day(w, r['day'])}:")
+        ml.append("  You did: " + (" ".join(r["did"]) or "nothing"))
+        if r.get("said"):
+            ml.append("  You said (words, not deeds): " + " | ".join(x[:160] for x in r["said"]))
         if r["heard"]:
             ml += [f"  heard: {x}" for x in r["heard"]]
     if mem["earlier"]:

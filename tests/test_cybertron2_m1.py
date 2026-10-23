@@ -63,3 +63,16 @@ def test_move_to_named_own_house_stores():
     assert w.s["houses"]["reed_house"]["stock"]["bread"] == before + 3
     assert AC.do(w, "Osric", {"do": "move", "item": "bread", "qty": 1, "to": "hands"}, today).startswith("You took")
     assert AC.do(w, "Osric", {"do": "move", "item": "bread", "qty": 1, "to": "Fenn House"}, today).startswith("Refused")
+
+
+def test_accept_pays_from_own_store():
+    from cybertron2.m1 import act as AC, run as R
+    w = World(load_spec(SPEC))
+    w.s["today"] = R._blank_today()
+    names = w.agents_acting()
+    w.s["agents"]["Agnes"]["holdings"]["meat"] = 2
+    R.talk(w, names, {**{n: {} for n in names}, "Agnes": {"offers": [{"to": "Osric", "give": "2 meat", "get": "3 grain"}]}}, {n: [] for n in names})
+    oid = next(iter(w.s["offers"]))
+    assert w.s["agents"]["Osric"]["holdings"].get("grain", 0) < 3 <= w.s["agents"]["Osric"]["holdings"].get("grain", 0) + w.s["houses"]["reed_house"]["stock"]["grain"]
+    assert AC.do(w, "Osric", {"do": "accept", "offer": oid}, w.s["today"]).startswith("You accepted")
+    assert w.s["agents"]["Osric"]["holdings"]["meat"] == 2

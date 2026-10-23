@@ -346,9 +346,15 @@ def _accept(w, name, a, today):
     for item, q in o["give"].items():
         if not o.get("held") and A.get(item, 0.0) + 1e-9 < q:
             raise Refused(f"{by} no longer has {q:g} {item}; nothing was exchanged")
+    mine = (w.home(name) or {}).get("stock", {})                         # the taker pays from hand, then its own house's store
     for item, q in o["get"].items():
-        if B.get(item, 0.0) + 1e-9 < q:
-            raise Refused(f"you have only {show(B.get(item, 0.0))} {item}; nothing was exchanged")
+        if B.get(item, 0.0) + mine.get(item, 0.0) + 1e-9 < q:
+            raise Refused(f"you and your house's store have only {show(B.get(item, 0.0) + mine.get(item, 0.0))} {item}; nothing was exchanged")
+    for item, q in o["get"].items():
+        short = q - B.get(item, 0.0)
+        if short > 1e-9:
+            mine[item] = round(mine[item] - short, 6)
+            _add(B, item, short)
     for item, q in o["give"].items():
         if not o.get("held"):
             A[item] = round(A[item] - q, 6)

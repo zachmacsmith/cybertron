@@ -100,3 +100,22 @@ of the cost.
    deaths, fights, thefts; not routine gives inside a household.
 5. **Attending one's own house** (11 §6 Q4): Opus chose it 15 times even after being told it is shown daily. Allow it, giving the
    comings and goings and the store's changes.
+
+## 5. After Zach's answers (23 Oct)
+
+- **Done (proposal 1):** a day in memory now shows "You did" (engine results only) apart from "You said (words, not deeds)"; one's
+  own `say` lines are now kept at all (they were not). The earlier one-liners show acts only.
+- **Proposal 2 (ledger): not built.** Zach: forgetting is the agent's fault unless it was shown badly. What Hamo was shown: the true
+  payments in "Yesterday" (one day each) and, by chance of the keyword filter, two lines in "What you remember"; his own "Debts &
+  feuds" note unpinned, so only its title showed. Piers stated a running total aloud. So: shown, scattered, never totalled; with
+  the did/said split, Piers's own record is now right.
+- **Fixed:** seeded memories (history, feud, debts) could be pushed out of "What you remember" by the 14-line cap on run memories;
+  they are now kept apart from it. One's own house can be attended (the block was a special case; see 11 §6 Q4). An offer's result
+  says the goods are set aside and cannot be used or eaten meanwhile (the Hales offered their only lines every morning and then
+  could not fish). `accept` pays from hand, then one's own store (offers already drew on it; Joan's accepts failed).
+- **Samples** of full prompts and replies (two agents drawn at random, Maud and Joan, both Haiku, and one Opus, Wat; three days
+  each): `runs/samples_D.md` (local). What they show: "Recent days" is mostly broadcast speech, much of it ritual repeated by
+  the Haiku agents ("keep to the middle of Alder Wood, away from the wolves", "greens first", "keep the door barred if strangers
+  come"); agents want to lend and borrow tools (Maud offered meat, then timber, for "the loan of your sickle for a day", which no
+  offer can express); Maud kept trying to learn reaping, which she had known since day 1 (her aim says "learn reaping", and she
+  wrote "I know the craft already"); agents offer goods they then need (Wat's own timber offers made his accepts fail).

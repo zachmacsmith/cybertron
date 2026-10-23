@@ -180,7 +180,8 @@ def talk(w, names, replies, results) -> dict:
                 if q - a_ > 1e-9:
                     store[i] = round(store[i] - (q - a_), 6)
             w.s["offers"][oid] = {"by": n, "to": to, "give": give, "get": get, "day": w.d, "open": True, "held": True}
-            results[n].append("You offered " + PR._offer_text(w, oid, w.s["offers"][oid]))
+            results[n].append("You offered " + PR._offer_text(w, oid, w.s["offers"][oid]) + " (set aside until taken or nightfall: "
+                              "you cannot use or eat it meanwhile)")
             for m in ([to] if to else [m for m in names if m != n]):
                 box[m]["offers"].append(PR._offer_text(w, oid, w.s["offers"][oid]))
         a = w.s["agents"][n]
@@ -286,7 +287,8 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False) -> 
                 "talk_thinking": tm.get("thinking"), "plan": plans[n], "attend": attend.get(n), "results": results[n],
                 "night": nights.get(n, []), "usage": m.get("usage"), "talk_usage": tm.get("usage"), "seconds": m.get("seconds"),
                 "error": errors.get(n)}) + "\n")
-            PC.close_day(w, n, results[n], nights.get(n, []))
+            says = [x for r in (first[n], talk_replies.get(n) or {}) for x in (r.get("say") or []) if isinstance(x, str) and x.strip()]
+            PC.close_day(w, n, results[n], nights.get(n, []), says[:2 * MAX_SAY])
         for n, lg in per["agents"].items():
             files["perception"].write(json.dumps({"day": day, "agent": n, **lg}) + "\n")
         files["perception"].write(json.dumps({"day": day, "facts": per["facts"]}) + "\n")

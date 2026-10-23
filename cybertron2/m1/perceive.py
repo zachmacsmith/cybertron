@@ -28,7 +28,8 @@ TRADE_TAGS = {"farm": ["farming", "harvest", "food"], "hunt": ["hunting", "anima
 
 
 def seed(w, name, spec_agent) -> None:
-    w.s["mind"][name] = {"days": [], "lasting": list(spec_agent.get("memories") or []), "beliefs": {}, "today": _blank(), "log": []}
+    w.s["mind"][name] = {"days": [], "seeded": list(spec_agent.get("memories") or []), "lasting": [], "beliefs": {}, "today": _blank(),
+                         "log": []}
     a = w.s["agents"][name]
     a["notes"] = {str(k)[:60]: str(v) for k, v in (spec_agent.get("notes") or {}).items()}
     a["pinned"] = spec_agent.get("pinned")
@@ -360,8 +361,6 @@ def resolve_target(w, name, x):
     if who and who != name:
         return f"a:{who}", who
     hid = w.house_by_name(s)
-    if hid and hid == w.s["agents"][name]["house"]:
-        return "place", "the place in general (your own house you see every day)"
     if hid:
         return f"h:{hid}", w.s["houses"][hid]["name"]
     pid = w.parcel_by_name(s)
@@ -400,13 +399,21 @@ def steals(w, today, attend) -> None:
                      tags=["food", "danger"], concerns=owners, extra={"house": st["house"]})
 
 
-def close_day(w, name, did: list, night_lines: list) -> None:
+SPEECH = ("You told ", "You said", "You noted", "You let go of the note")
+
+
+def close_day(w, name, did: list, night_lines: list, says=()) -> None:
+    """The day into memory. What it did (the engine's results) is kept apart from what it said, so its own words never stand in
+    the record for its acts."""
     m = store(w, name)
     t = m["today"]
     saw = t["dawn"] + t["concerned"] + t["notice"] + t["felt"] + t["learned"]
     if t["attended"]:
         saw.append(f"(attending to {t['attended']['target']}) " + "; ".join(t["attended"]["lines"]))
-    m["days"].append({"day": w.d, "did": did + night_lines, "heard": list(t["heard"]), "saw": saw, "glimpse": list(t["glimpse"])})
+    acts = [x for x in did if not x.startswith(SPEECH)]
+    said = [f"to everyone: {x}" for x in says] + [x[len("You told "):] for x in did if x.startswith("You told ")]
+    m["days"].append({"day": w.d, "did": acts + night_lines, "said": said, "heard": list(t["heard"]), "saw": saw,
+                      "glimpse": list(t["glimpse"])})
     for line in t["concerned"] + t["learned"] + night_lines:
         low = line.lower()
         if any(k in low for k in ("killed", "died", "beat", "raided", "taught you", "missed meal", "gave", "missing", "slipped into",
@@ -429,10 +436,10 @@ def memory_lines(w, name) -> dict:
     earlier = days[-10:-2]
     one = []
     for r in earlier:
-        did = [x for x in r["did"] if not x.startswith("Refused")][:3]
+        did = [x for x in r["did"] if not x.startswith(("Refused", "Not done", "You left"))][:4]
         heard = r["heard"][:1]
         one.append(f"{_day(w, r['day'])}: " + " ".join(did) + (f" Heard: {heard[0][:140]}" if heard else ""))
-    return {"full": full, "earlier": one, "lasting": m["lasting"]}
+    return {"full": full, "earlier": one, "lasting": m.get("seeded", []) + m["lasting"]}
 
 
 def beliefs_lines(w, name, limit=6) -> list:
