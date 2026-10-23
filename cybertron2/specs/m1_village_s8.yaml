@@ -86,11 +86,6 @@ node:
       text: a clear brook with a clay bank
       adj:
       - meadow
-      state:
-        fish:
-          K: 24
-          S: 20
-          r: 0.3
     meadow:
       name: Brook Meadow
       cover: meadow
@@ -128,7 +123,7 @@ houses:
     beds: 6
     stock:
       meat: 6.0
-      greens: 2.0
+      wild food: 2.0
       timber: 10.0
   hale_house:
     name: Hale House
@@ -136,14 +131,14 @@ houses:
     household: Hale
     beds: 4
     stock:
-      fish: 2.7
-      greens: 2.7
+      wild food: 2.7
       timber: 4.0
 herds:
   cattle:
     name: the village cattle
     parcel: pasture
     count: 8
+    in_milk: 3
 incidents:
 - day: 4
   kind: stray
@@ -558,34 +553,17 @@ agents:
     - Son Godwin married into Ashby, two days' walk away.
     - 12 winters ago you and Wat came to blows over who has the right to Long Field; it was never settled.
     knows:
-      bread:
-        level: known
-        skill: 1.8
-      pottage:
-        level: known
-        skill: 1.8
-      reap:
-        level: known
-        skill: 1.8
-      fell: rough
-      pot: rough
-      firing pit: rough
-    aware_of:
-      hunt: you have seen the Fenns at it all your life
-      fish: you have seen the Hales at it all your life
-      line: you have seen the Hales at it all your life
-      basket: you have seen the Hales at it all your life
+      milk: rough
+    aware_of: {}
     holdings:
-      sickle: 1
+      copper tool: 1
       grain: 1
     concerns:
     - food
-    - cooking
-    - farming
-    - harvest
+    - animals
     role: head
     model: claude-opus-5-5
-    trade: reaping grain and baking bread
+    trade: ''
     aim: See the Reed household through the winter, fed and warm. You will not be shamed by Wat again.
   Joan:
     household: Reed
@@ -609,33 +587,14 @@ agents:
     - Daughter Hawise married into Ashby, two days' walk away.
     - Son Godwin married into Ashby, two days' walk away.
     - Last winter Wat lent you 1 meat when your store ran low; you have not paid it back.
-    knows:
-      bread:
-        level: known
-        skill: 1.8
-      pottage:
-        level: known
-        skill: 1.8
-      reap:
-        level: known
-        skill: 1.8
-      fell: rough
-      hunt: rough
-      basket: rough
-      pot: rough
-      firing pit: rough
+    knows: {}
     aware_of:
-      fish: you have seen the Hales at it all your life
-      line: you have seen the Hales at it all your life
+      milk: you have seen the Hales at it all your life
     holdings: {}
-    concerns:
-    - food
-    - cooking
-    - farming
-    - harvest
+    concerns: []
     model: claude-haiku-5-5
-    trade: reaping grain and baking bread
-    aim: Live through one more winter, and be a burden to nobody.
+    trade: ''
+    aim: See your grandchildren settled and provided for before you die.
   Piers:
     household: Fenn
     stage: elder
@@ -656,31 +615,14 @@ agents:
     - 'Your line''s founders: Piers and Mariot Fenn came to Millbrook and built the first Fenn house.'
     - 'Hard winters you remember, when the frost came early and the stores ran out: 42 winters ago, 29 winters ago, 7 winters ago, 2 winters ago.'
     - Last winter Hamo lent you 3 grain when your store ran low; you have not paid it back.
-    knows:
-      fell:
-        level: known
-        skill: 1.8
-      hunt:
-        level: known
-        skill: 1.8
-      bread: rough
-      pottage: rough
-      fish: rough
-      line: rough
-      basket: rough
+    knows: {}
     aware_of:
-      reap: you have seen the Reeds at it all your life
-      pot: you have seen the Hales at it all your life
-      firing pit: you have seen the Hales at it all your life
+      milk: you have seen the Hales at it all your life
     holdings: {}
-    concerns:
-    - timber
-    - woodland
-    - food
-    - hunting
+    concerns: []
     model: claude-haiku-5-5
-    trade: felling timber and hunting game
-    aim: Keep the family's good name, and see that what is owed to it is paid.
+    trade: ''
+    aim: Pass on what you know before your strength goes.
   Mariot:
     household: Fenn
     stage: elder
@@ -700,31 +642,14 @@ agents:
     memories:
     - 'Your line''s founders: Piers and Mariot Fenn came to Millbrook and built the first Fenn house.'
     - 'Hard winters you remember, when the frost came early and the stores ran out: 42 winters ago, 29 winters ago, 7 winters ago, 2 winters ago.'
-    knows:
-      fell:
-        level: known
-        skill: 1.8
-      hunt:
-        level: known
-        skill: 1.8
+    knows: {}
     aware_of:
-      reap: you have seen the Reeds at it all your life
-      bread: you have seen the Reeds at it all your life
-      pottage: you have seen the Reeds at it all your life
-      fish: you have seen the Hales at it all your life
-      line: you have seen the Hales at it all your life
-      basket: you have seen the Hales at it all your life
-      pot: you have seen the Hales at it all your life
-      firing pit: you have seen the Hales at it all your life
+      milk: you have seen the Hales at it all your life
     holdings: {}
-    concerns:
-    - timber
-    - woodland
-    - food
-    - hunting
+    concerns: []
     model: claude-haiku-5-5
-    trade: felling timber and hunting game
-    aim: Live through one more winter, and be a burden to nobody.
+    trade: ''
+    aim: Keep the family's good name, and see that what is owed to it is paid.
   Letice:
     household: Hale
     stage: adult
@@ -749,41 +674,16 @@ agents:
     - Sister Hawise married into Ashby, two days' walk away.
     - Brother Godwin married into Ashby, two days' walk away.
     knows:
-      basket:
+      milk:
         level: known
         skill: 1.65
-      bread:
-        level: known
-        skill: 1.65
-      firing pit:
-        level: known
-        skill: 1.65
-      fish:
-        level: known
-        skill: 1.65
-      line:
-        level: known
-        skill: 1.65
-      pot:
-        level: known
-        skill: 1.65
-      pottage:
-        level: known
-        skill: 1.65
-      reap:
-        level: known
-        skill: 1.65
-    aware_of:
-      fell: you have seen the Fenns at it all your life
-      hunt: you have seen the Fenns at it all your life
+    aware_of: {}
     holdings: {}
     concerns:
-    - craft
     - food
-    - cooking
-    - pottery
+    - animals
     model: claude-opus-5-5
-    trade: fishing the brook and twisting a fishing line
+    trade: milking
     aim: Keep your household fed and its house sound.
   Ivo:
     household: Hale
@@ -809,39 +709,17 @@ agents:
     - Sister Tiffany married into Ashby, two days' walk away.
     - Brother Osric married into Ashby, two days' walk away.
     knows:
-      basket:
+      milk:
         level: known
         skill: 1.65
-      firing pit:
-        level: known
-        skill: 1.65
-      fish:
-        level: known
-        skill: 1.65
-      line:
-        level: known
-        skill: 1.65
-      pot:
-        level: known
-        skill: 1.65
-      pottage: rough
-    aware_of:
-      reap: you have seen the Reeds at it all your life
-      bread: you have seen the Reeds at it all your life
-      fell: you have seen the Fenns at it all your life
-      hunt: you have seen the Fenns at it all your life
-    holdings:
-      line: 1
-      clay: 2
-      withies: 3
+    aware_of: {}
+    holdings: {}
     concerns:
-    - craft
-    - pottery
-    - building
     - food
+    - animals
     role: head
     model: claude-opus-5-5
-    trade: fishing the brook and twisting a fishing line
+    trade: milking
     aim: See the Hale household through the winter, fed and warm.
   Wat:
     household: Fenn
@@ -863,33 +741,17 @@ agents:
     - 'Your line''s founders: Piers and Mariot Fenn came to Millbrook and built the first Fenn house.'
     - 'Hard winters you remember, when the frost came early and the stores ran out: 29 winters ago, 7 winters ago, 2 winters ago.'
     - 12 winters ago Hamo struck you in a quarrel over who has the right to Long Field; you have not forgotten.
-    knows:
-      fell:
-        level: known
-        skill: 1.33
-      hunt:
-        level: known
-        skill: 1.33
+    knows: {}
     aware_of:
-      reap: you have seen the Reeds at it all your life
-      bread: you have seen the Reeds at it all your life
-      pottage: you have seen the Reeds at it all your life
-      fish: you have seen the Hales at it all your life
-      line: you have seen the Hales at it all your life
-      basket: you have seen the Hales at it all your life
-      pot: you have seen the Hales at it all your life
-      firing pit: you have seen the Hales at it all your life
+      milk: you have seen the Hales at it all your life
     holdings:
-      axe: 1
+      crude tool: 1
+      crude weapon: 1
       meat: 1
-    concerns:
-    - timber
-    - woodland
-    - food
-    - hunting
+    concerns: []
     role: head
     model: claude-opus-5-5
-    trade: felling timber and hunting game
+    trade: ''
     aim: See the Fenn household through the winter, fed and warm. You will not be shamed by Hamo again.
   Isolde:
     household: Hale
@@ -914,35 +776,16 @@ agents:
     - Grandmother Ivy died last winter (old age).
     - Brother Hob married into Ashby, two days' walk away.
     knows:
-      basket:
+      milk:
         level: known
         skill: 0.9
-      firing pit:
-        level: known
-        skill: 0.9
-      fish:
-        level: known
-        skill: 0.9
-      line:
-        level: known
-        skill: 0.9
-      pot:
-        level: known
-        skill: 0.9
-      pottage: rough
-      fell: rough
-    aware_of:
-      reap: you have seen the Reeds at it all your life
-      bread: you have seen the Reeds at it all your life
-      hunt: you have seen the Fenns at it all your life
+    aware_of: {}
     holdings: {}
     concerns:
-    - craft
-    - pottery
-    - building
     - food
+    - animals
     model: claude-haiku-5-5
-    trade: fishing the brook and twisting a fishing line
+    trade: milking
     aim: Keep your household fed and its house sound.
   Mabel:
     household: Fenn
@@ -964,29 +807,14 @@ agents:
     - 'Your line''s founders: Piers and Mariot Fenn came to Millbrook and built the first Fenn house.'
     - 'Hard winters you remember, when the frost came early and the stores ran out: 29 winters ago, 7 winters ago, 2 winters ago.'
     knows:
-      fell:
-        level: known
-        skill: 1.38
-      hunt:
-        level: known
-        skill: 1.38
-      reap: rough
-      bread: rough
-    aware_of:
-      pottage: you have seen the Reeds at it all your life
-      fish: you have seen the Hales at it all your life
-      line: you have seen the Hales at it all your life
-      basket: you have seen the Hales at it all your life
-      pot: you have seen the Hales at it all your life
-      firing pit: you have seen the Hales at it all your life
+      milk: rough
+    aware_of: {}
     holdings: {}
     concerns:
-    - timber
-    - woodland
     - food
-    - hunting
+    - animals
     model: claude-haiku-5-5
-    trade: felling timber and hunting game
+    trade: ''
     aim: Keep your household fed and its house sound.
   Alys:
     household: Hale
@@ -1011,26 +839,15 @@ agents:
     - Grandmother Ivy died last winter (old age).
     - Brother Hob married into Ashby, two days' walk away.
     knows:
-      basket: capable
-      firing pit: capable
-      fish: capable
-      line: capable
-      pot: capable
-    aware_of:
-      reap: you have seen the Reeds at it all your life
-      bread: you have seen the Reeds at it all your life
-      pottage: you have seen the Reeds at it all your life
-      fell: you have seen the Fenns at it all your life
-      hunt: you have seen the Fenns at it all your life
+      milk: capable
+    aware_of: {}
     holdings: {}
     concerns:
-    - craft
-    - pottery
-    - building
     - food
+    - animals
     model: claude-haiku-5-5
     trade: ''
-    aim: Prove yourself to your family, and learn felling timber as the Fenns do it.
+    aim: Prove yourself to your family.
   Maud:
     household: Fenn
     stage: youth
@@ -1050,27 +867,14 @@ agents:
     memories:
     - 'Your line''s founders: Piers and Mariot Fenn came to Millbrook and built the first Fenn house.'
     - 'Hard winters you remember, when the frost came early and the stores ran out: 7 winters ago, 2 winters ago.'
-    knows:
-      fell: rough
-      hunt: rough
+    knows: {}
     aware_of:
-      reap: you have seen the Reeds at it all your life
-      bread: you have seen the Reeds at it all your life
-      pottage: you have seen the Reeds at it all your life
-      fish: you have seen the Hales at it all your life
-      line: you have seen the Hales at it all your life
-      basket: you have seen the Hales at it all your life
-      pot: you have seen the Hales at it all your life
-      firing pit: you have seen the Hales at it all your life
+      milk: you have seen the Hales at it all your life
     holdings: {}
-    concerns:
-    - timber
-    - woodland
-    - food
-    - hunting
+    concerns: []
     model: claude-haiku-5-5
     trade: ''
-    aim: Prove yourself to your family, and learn reaping grain as the Reeds do it.
+    aim: Prove yourself to your family, and learn milking as the Hales do it.
   Edric:
     household: Fenn
     stage: child

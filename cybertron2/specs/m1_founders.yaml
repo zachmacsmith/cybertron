@@ -1,47 +1,169 @@
-# M1 run A: one node, planted founders (docs/review/38_space_engine/11_m1_slice.md). Millbrook, a hamlet of two households.
-#
-# Leverage (scenario_design): the only sickle and the reaping are Osric Reed's; the only axe and the felling are Agnes Fenn's, so the
-# Reeds need timber for bread and their fire, and the Fenns need grain. Tam Fenn knows pots and how to build a firing pit, but there is
-# no pit, and a pit takes clay and timber. Pottage needs a pot. Fishing needs a line; Ivy can twist one but does not know how to fish.
-# The barley in Long Field ripens on day 3; the cattle break into it on day 4; the first frost comes on day 7 and the cold from day 8.
-# Wild food regrows slowly: it cannot feed six people for long, so the grain and the hunting matter.
-# Cast: Opus heads, Sonnet in the middle, Haiku youths.
+# M1 run A: one node, planted founders (11_m1_slice.md). Re-based on 23 Oct on the decided economy (D2-23 tools, D2-42 milk,
+# D2-43 the basic set, D2-44 bread): everyone can forage, hunt, fell and reap; the Reeds hold the copper tool (felling x2, reaping
+# x1.5 against a crude tool), the Fenns a crude tool and a crude weapon; only Maud knows milking. Aims are not shown (D4-29).
 name: m1_founders
 seed: 7
 days: 10
-calendar: {season: summer, day: 5, season_days: 6}
-cold_days: [8, 9, 10]
+calendar:
+  season: summer
+  day: 5
+  season_days: 6
+cold_days:
+- 8
+- 9
+- 10
 node:
   name: Millbrook
-  text: "Millbrook is a hamlet of two houses on a green above a brook, with its fields, a common pasture and Alder Wood around it. The next settlement is two days' walk."
+  text: Millbrook is a hamlet of two houses on a green above a brook, with its fields, a common pasture and Alder Wood around it. The next settlement
+    is two days' walk.
   parcels:
-    green: {name: the Green, cover: built, size: 2, text: "the green with the two houses", adj: [long_field, pasture, brook]}
-    long_field: {name: Long Field, cover: field, size: 3, side: west, text: "the main barley field", adj: [alder_wood],
-                 state: {crop: {kind: barley, left: 30, ripe_day: 2}}}
-    brook_field: {name: Brook Field, cover: field, size: 1, side: south, text: "a small oat field by the brook", adj: [brook],
-                  state: {crop: {kind: oats, left: 12, ripe_day: 5}}}
-    pasture: {name: Common Pasture, cover: pasture, size: 3, side: north, text: "the common grazing", adj: [alder_wood],
-              state: {plants: {K: 6, S: 5, r: 0.3}}}
-    alder_wood: {name: Alder Wood, cover: forest, size: 4, side: north-west, text: "old woodland of alder, oak and hazel",
-                 state: {plants: {K: 16, S: 13, r: 0.3}, game: {K: 20, S: 16, r: 0.25}}}
-    brook: {name: the Brook, cover: water, size: 1, side: south, text: "a clear brook with a clay bank", adj: [meadow],
-            state: {fish: {K: 14, S: 11, r: 0.3}}}
-    meadow: {name: Brook Meadow, cover: meadow, size: 2, side: south-east, text: "wet meadow with willow along the water",
-             state: {plants: {K: 8, S: 6, r: 0.3}}}
+    green:
+      name: the Green
+      cover: built
+      size: 2
+      text: the green with the two houses
+      adj:
+      - long_field
+      - pasture
+      - brook
+    long_field:
+      name: Long Field
+      cover: field
+      size: 3
+      side: west
+      text: the main barley field
+      adj:
+      - alder_wood
+      state:
+        crop:
+          kind: barley
+          left: 30
+          ripe_day: 2
+    brook_field:
+      name: Brook Field
+      cover: field
+      size: 1
+      side: south
+      text: a small oat field by the brook
+      adj:
+      - brook
+      state:
+        crop:
+          kind: oats
+          left: 12
+          ripe_day: 5
+    pasture:
+      name: Common Pasture
+      cover: pasture
+      size: 3
+      side: north
+      text: the common grazing
+      adj:
+      - alder_wood
+      state:
+        plants:
+          K: 6
+          S: 5
+          r: 0.3
+    alder_wood:
+      name: Alder Wood
+      cover: forest
+      size: 4
+      side: north-west
+      text: old woodland of alder, oak and hazel
+      state:
+        plants:
+          K: 16
+          S: 13
+          r: 0.3
+        game:
+          K: 20
+          S: 16
+          r: 0.25
+    brook:
+      name: the Brook
+      cover: water
+      size: 1
+      side: south
+      text: a clear brook with a clay bank
+      adj:
+      - meadow
+    meadow:
+      name: Brook Meadow
+      cover: meadow
+      size: 2
+      side: south-east
+      text: wet meadow with willow along the water
+      state:
+        plants:
+          K: 8
+          S: 6
+          r: 0.3
   features:
-    north_hill: {name: the north hill, text: "a bare hill to the north; the track to the next settlement goes over it"}
-    ford: {name: the ford, parcels: [brook], text: "a stony ford where the track crosses the brook"}
+    north_hill:
+      name: the north hill
+      text: a bare hill to the north; the track to the next settlement goes over it
+    ford:
+      name: the ford
+      parcels:
+      - brook
+      text: a stony ford where the track crosses the brook
 houses:
-  reed_house: {name: Reed House, parcel: green, household: Reed, beds: 4, stock: {grain: 5, bread: 2, timber: 2}}
-  fenn_house: {name: Fenn House, parcel: green, household: Fenn, beds: 4, stock: {meat: 3, greens: 1, timber: 5}}
+  reed_house:
+    name: Reed House
+    parcel: green
+    household: Reed
+    beds: 4
+    stock:
+      grain: 5
+      bread: 2
+      timber: 2
+  fenn_house:
+    name: Fenn House
+    parcel: green
+    household: Fenn
+    beds: 4
+    stock:
+      meat: 3
+      wild food: 1
+      timber: 5
 herds:
-  cattle: {name: the village cattle, parcel: pasture, count: 8}
+  cattle:
+    name: the village cattle
+    parcel: pasture
+    count: 8
+    in_milk: 2
 incidents:
-  - {day: 4, kind: stray, herd: cattle, into: Long Field, eats: 3, concerns: []}
+- day: 4
+  kind: stray
+  herd: cattle
+  into: Long Field
+  eats: 3
+  concerns: []
 signs:
-  - {day: 2, about: sky, sense: sight, text: "skeins of geese going south over the north hill, early for the time of year", salience: 0.25, tags: [season, animals]}
-  - {day: 5, about: sky, sense: sight, text: "a thin line of smoke beyond the north hill, where nobody lives", salience: 0.5, tags: [danger]}
-  - {day: 7, about: sky, sense: touch, text: "a white frost on the grass at dawn, weeks before its time", salience: 0.6, tags: [season, farming]}
+- day: 2
+  about: sky
+  sense: sight
+  text: skeins of geese going south over the north hill, early for the time of year
+  salience: 0.25
+  tags:
+  - season
+  - animals
+- day: 5
+  about: sky
+  sense: sight
+  text: a thin line of smoke beyond the north hill, where nobody lives
+  salience: 0.5
+  tags:
+  - danger
+- day: 7
+  about: sky
+  sense: touch
+  text: a white frost on the grass at dawn, weeks before its time
+  salience: 0.6
+  tags:
+  - season
+  - farming
 agents:
   Osric:
     household: Reed
@@ -49,61 +171,119 @@ agents:
     stage: adult
     role: head
     trade: farmer
-    relations: {Maud: your wife, Wat: your son, Agnes: the Fenn widow; you and her late husband quarrelled over Long Field, Tam: Agnes's brother, Ivy: Agnes's daughter}
-    knows: {reap: {level: known, skill: 1.5}, bread: known}
-    holdings: {sickle: 1, grain: 1}
-    aim: "Get the barley in before the weather turns and see the Reeds through the winter. You would rather not be beholden to the Fenns."
-    concerns: [farming, harvest, season]
-    memories: ["Two years ago a frost came early and half the barley was lost in the field."]
+    relations:
+      Maud: your wife
+      Wat: your son
+      Agnes: the Fenn widow; you and her late husband quarrelled over Long Field
+      Tam: Agnes's brother
+      Ivy: Agnes's daughter
+    knows: {}
+    holdings:
+      copper tool: 1
+      grain: 1
+    aim: Get the barley in before the weather turns and see the Reeds through the winter. You would rather not be beholden to the Fenns.
+    concerns:
+    - farming
+    - harvest
+    - season
+    memories:
+    - Two years ago a frost came early and half the barley was lost in the field.
+    aware_of: {}
   Maud:
     household: Reed
     model: claude-sonnet-5-5
     stage: adult
     trade: cook and keeper of the house
-    relations: {Osric: your husband, Wat: your son, Agnes: neighbour; you owe her 2 grain from last winter, Tam: neighbour, Ivy: neighbour}
-    knows: {bread: {level: known, skill: 1.4}, pottage: known, basket: known}
-    aware_of: {pot: "you have seen pots fired at the market town"}
-    holdings: {greens: 1}
-    aim: "Keep your household fed through the winter. You would like a pot of your own, for pottage stretches food further than bread."
-    concerns: [food, cooking]
-    memories: ["Last winter you borrowed 2 grain from Agnes Fenn and have not yet paid it back."]
+    relations:
+      Osric: your husband
+      Wat: your son
+      Agnes: neighbour; you owe her 2 grain from last winter
+      Tam: neighbour
+      Ivy: neighbour
+    knows:
+      milk: known
+    aware_of: {}
+    holdings: {}
+    aim: Keep your household fed through the winter. You would like a pot of your own, for pottage stretches food further than bread.
+    concerns:
+    - food
+    - cooking
+    memories:
+    - Last winter you borrowed 2 grain from Agnes Fenn and have not yet paid it back.
   Wat:
     household: Reed
     model: claude-haiku-5-5
     stage: youth
-    relations: {Osric: your father, Maud: your mother, Ivy: your closest friend, Agnes: Ivy's mother, Tam: Ivy's uncle}
-    aware_of: {hunt: "you have seen Agnes Fenn come back from Alder Wood with a deer"}
-    aim: "Prove yourself to your father, and learn to hunt."
-    concerns: [hunting]
+    relations:
+      Osric: your father
+      Maud: your mother
+      Ivy: your closest friend
+      Agnes: Ivy's mother
+      Tam: Ivy's uncle
+    aware_of: {}
+    aim: Prove yourself to your father, and learn to hunt.
+    concerns:
+    - hunting
+    holdings: {}
+    knows: {}
   Agnes:
     household: Fenn
     model: claude-opus-5-5
     stage: adult
     role: head
     trade: woodcutter and hunter
-    relations: {Tam: your brother, Ivy: your daughter, Osric: the Reed head; he and your late husband quarrelled over Long Field, Maud: Osric's wife; she owes you 2 grain, Wat: the Reeds' boy, Ivy's friend}
-    knows: {fell: {level: known, skill: 1.4}, hunt: {level: known, skill: 1.3}}
-    holdings: {axe: 1, meat: 1}
-    aim: "Keep the Fenns fed and warm through the winter. The Reeds have had the best of the land for too long."
-    concerns: [timber, hunting, danger]
-    memories: ["Your husband Edric died in the hard winter two years ago."]
+    relations:
+      Tam: your brother
+      Ivy: your daughter
+      Osric: the Reed head; he and your late husband quarrelled over Long Field
+      Maud: Osric's wife; she owes you 2 grain
+      Wat: the Reeds' boy
+      Ivy's friend: null
+    knows: {}
+    holdings:
+      crude tool: 1
+      meat: 1
+      crude weapon: 1
+    aim: Keep the Fenns fed and warm through the winter. The Reeds have had the best of the land for too long.
+    concerns:
+    - timber
+    - hunting
+    - danger
+    memories:
+    - Your husband Edric died in the hard winter two years ago.
+    aware_of: {}
   Tam:
     household: Fenn
     model: claude-sonnet-5-5
     stage: adult
     trade: potter
-    relations: {Agnes: your sister, Ivy: your niece, Osric: neighbour, Maud: neighbour, Wat: neighbour's boy}
-    knows: {pot: {level: known, skill: 1.3}, firing pit: known, line: known}
-    holdings: {clay: 2}
-    aim: "Build a firing pit and make pots that every house in Millbrook wants, so that the Fenns have something to trade."
-    concerns: [pottery, craft]
+    relations:
+      Agnes: your sister
+      Ivy: your niece
+      Osric: neighbour
+      Maud: neighbour
+      Wat: neighbour's boy
+    knows: {}
+    holdings: {}
+    aim: Build a firing pit and make pots that every house in Millbrook wants, so that the Fenns have something to trade.
+    concerns:
+    - pottery
+    - craft
+    aware_of: {}
   Ivy:
     household: Fenn
     model: claude-haiku-5-5
     stage: youth
-    relations: {Agnes: your mother, Tam: your uncle, Wat: your closest friend, Osric: Wat's father, Maud: Wat's mother}
-    knows: {line: known, basket: known}
-    aware_of: {fish: "your father used to fish the brook"}
-    holdings: {withies: 3}
-    aim: "Learn to fish the brook as your father did, and keep your friend Wat close."
-    concerns: [water]
+    relations:
+      Agnes: your mother
+      Tam: your uncle
+      Wat: your closest friend
+      Osric: Wat's father
+      Maud: Wat's mother
+    knows: {}
+    aware_of:
+      milk: you have watched Maud Reed milk the cows
+    holdings: {}
+    aim: Learn to fish the brook as your father did, and keep your friend Wat close.
+    concerns:
+    - water

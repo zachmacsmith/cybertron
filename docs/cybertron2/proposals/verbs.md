@@ -143,6 +143,9 @@ beacon). Nothing found so far needs a new verb.
 - 23 Oct: built as a subset in M1 with `learn` kept as a verb; the same-day teach and learn match failed often in run B (Q5 in
   [11_m1_slice.md](../../review/38_space_engine/11_m1_slice.md)), which supports the offer-and-accept form proposed here.
 
+- 23 Oct: in M1, `say` now has a scope (a building one has access to, or the town) and only `tell` and direct offers wake
+  (D4-25); `build` dropped from M1 with the firing pit; no lend or return yet (38.14 §3.3: an omission of this proposal).
+
 ## Sources
 
 38.06 (all cybertron 1 actions), knowledge.md, 02g §5b (raids at scale), 02i (fittings, locks), 02k (fuse events, gates),

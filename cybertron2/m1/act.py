@@ -1,10 +1,9 @@
 """The verbs (docs/cybertron2/proposals/verbs.md), the single-node subset. Each action is a verb and its object; techniques are data
 (data.TECHNIQUES). Every refusal says what is short and costs nothing.
 
-    gather {what, at}            forage, cut withies, dig clay, glean, hunt, fell, fish, at a parcel
-    make {what, qty?}            a recipe (bread, pottage, pot, basket, line, club)
-    build {what, at}             a fitting on built ground (a firing pit)
-    work {what, at}              reap (a ripe field), repair (your house)
+    gather {what, at}            forage, hunt, fell, at a parcel (felling and reaping by tool: recipes.md §9)
+    make {what, qty?}            grind (grain to flour at the house's quern), bread, crude weapon
+    work {what, at}              reap (a ripe field), milk (a cow in milk), repair (your house)
     move {item, qty, to}         between your hands and your house's stock ("house" or "hands")
     give {to, item, qty}         to someone here
     accept {offer}               an open offer made to you (or to anyone): both sides at once, or nothing
@@ -19,10 +18,10 @@
 from __future__ import annotations
 
 from cybertron2.m1 import knowledge as KN
-from cybertron2.m1.data import EDIBLE, ITEMS, TECHNIQUES, TRY, WEAPONS
+from cybertron2.m1.data import EDIBLE, ITEMS, TECHNIQUES, TOOL_MULT, TOOLS, TRY, WEAPONS
 from cybertron2.m1.world import World, show
 
-VERBS = ("gather", "make", "build", "work", "move", "give", "accept", "set", "attack", "guard", "steal", "watch", "teach", "learn",
+VERBS = ("gather", "make", "work", "move", "give", "accept", "set", "attack", "guard", "steal", "watch", "teach", "learn",
          "rest")
 FREE = ("move", "give", "accept", "set", "rest")
 
@@ -45,7 +44,8 @@ def _qty(x, default=1.0) -> float:
 
 def _item(x) -> str:
     i = str(x or "").strip().lower()
-    i = {"pots": "pot", "baskets": "basket", "clubs": "club", "loaves": "bread", "loaf": "bread", "lines": "line"}.get(i, i)
+    i = {"loaves": "bread", "loaf": "bread", "greens": "wild food", "food": "wild food", "weapon": "crude weapon",
+         "tool": "crude tool", "tools": "crude tool"}.get(i, i)
     if i not in ITEMS:
         raise Refused(f"there is no such thing as {x!r} here (goods: {', '.join(ITEMS)})")
     return i
@@ -99,6 +99,12 @@ def _level_or_refuse(w, name, tech):
     return lvl
 
 
+def tool_of(me, tech):
+    """The best hand tool it carries, and its multiplier for this method (recipes.md §9; bare hands below a crude tool)."""
+    tool = next((t for t in TOOLS if me["holdings"].get(t, 0.0) >= 1), None)
+    return tool, TOOL_MULT[tech][tool or "bare"]
+
+
 def _add(store, item, q):
     store[item] = round(store.get(item, 0.0) + q, 6)
 
@@ -107,7 +113,7 @@ def _add(store, item, q):
 def _gather(w, name, a, today):
     tech = KN.resolve(a.get("what"))
     if tech is None or TECHNIQUES[tech]["verb"] != "gather":
-        raise Refused(f"{a.get('what')!r} is not something you gather (gathering: forage, cut withies, dig clay, glean, hunt, fell, fish)")
+        raise Refused(f"{a.get('what')!r} is not something you gather (gathering: forage, hunt, fell)")
     lvl = _level_or_refuse(w, name, tech)
     pid = _parcel(w, a.get("at") or "", tech) if a.get("at") else None
     if pid is None:
@@ -133,53 +139,26 @@ def _gather(w, name, a, today):
         y = pp["forage"]["yield"] * pl["S"] / pl["K"] * m
         got = round(max(0.0, min(y, pl["S"] - pp["forage"]["refuge"] * pl["K"])), 2)
         pl["S"] = round(pl["S"] - got, 4)
-        _add(me["holdings"], "greens", got)
-        word = f"You foraged {show(got)} greens at {p['name']}."
+        _add(me["holdings"], "wild food", got)
+        word = f"You foraged {show(got)} wild food at {p['name']}."
     elif tech == "hunt":
         g = st.get("game")
         if not g:
             raise Refused(f"there is no game at {p['name']}")
+        armed = any(me["holdings"].get(x, 0) >= 1 for x in WEAPONS)
         if rng.random() < pp["hunt"]["p"] * g["S"] / g["K"]:
-            got = round(min(g["S"], rng.uniform(*pp["hunt"]["food"]) * m), 2)
+            got = round(min(g["S"], rng.uniform(*pp["hunt"]["food"]) * m * (1.0 if armed else 0.3)), 2)   # recipes.md §9
             g["S"] = round(g["S"] - got, 4)
             _add(me["holdings"], "meat", got)
             word = f"You hunted in {p['name']} and brought down game: {show(got)} meat."
         else:
             word = f"You hunted in {p['name']} and caught nothing."
     elif tech == "fell":
-        got = round(pp["fell"]["timber"] * m, 2)
+        tool, tm = tool_of(me, "fell")
+        got = round(pp["fell"]["timber"] * m * tm, 2)
         _add(me["holdings"], "timber", got)
         st["felled"] = int(st.get("felled", 0)) + 1
-        word = f"You felled {show(got)} timber in {p['name']}."
-    elif tech == "fish":
-        f = st.get("fish")
-        if not f:
-            raise Refused(f"there are no fish at {p['name']}")
-        if rng.random() < pp["fish"]["p"] * f["S"] / f["K"]:
-            got = round(min(f["S"], rng.uniform(*pp["fish"]["food"]) * m), 2)
-            f["S"] = round(f["S"] - got, 4)
-            _add(me["holdings"], "fish", got)
-            word = f"You fished {p['name']}: {show(got)} fish."
-        else:
-            word = f"You fished {p['name']} and caught nothing."
-    elif tech == "dig clay":
-        got = pp["clay"]
-        _add(me["holdings"], "clay", got)
-        word = f"You dug {show(got)} clay from the bank of {p['name']}."
-    elif tech == "cut withies":
-        got = pp["withies"]
-        _add(me["holdings"], "withies", got)
-        word = f"You cut {show(got)} withies at {p['name']}."
-    elif tech == "glean":
-        c = st.get("crop")
-        if not c or not c.get("reaped"):
-            raise Refused(f"{p['name']} has not been reaped; there is nothing to glean")
-        got = round(min(pp["glean"]["grain"] * m, float(c.get("gleanings", 0.0))), 2)
-        if got <= 0:
-            raise Refused(f"{p['name']} has been gleaned bare")
-        c["gleanings"] = round(c["gleanings"] - got, 4)
-        _add(me["holdings"], "grain", got)
-        word = f"You gleaned {show(got)} grain from {p['name']}."
+        word = f"You felled {show(got)} timber in {p['name']}" + (f" with your {tool}." if tool else " with your bare hands.")
     KN.tried(w, name, tech, got > 0)
     w.happen("work", f"{name} was {TECHNIQUES[tech]['label'].split(' (')[0]} at {p['name']}", actor=name, parcel=pid,
              salience=0.15, tags=TECHNIQUES[tech]["tags"], extra={"tech": tech})
@@ -188,9 +167,26 @@ def _gather(w, name, a, today):
 
 def _work(w, name, a, today):
     tech = KN.resolve(a.get("what"))
-    if tech not in ("reap", "repair"):
-        raise Refused(f"{a.get('what')!r} is not work you can do (work: reap a ripe field, repair your house)")
+    if tech not in ("reap", "repair", "milk"):
+        raise Refused(f"{a.get('what')!r} is not work you can do (work: reap a ripe field, milk a cow in milk, repair your house)")
     me = w.s["agents"][name]
+    if tech == "milk":
+        _level_or_refuse(w, name, tech)
+        hd = next((h for h in w.s["herds"].values() if int(h.get("in_milk", 0)) > 0
+                   and w.parcels()[h["parcel"]]["cover"] == "pasture"), None)
+        if hd is None:
+            raise Refused("there is no cow in milk on the pasture")
+        if hd.get("milked_day") != w.d:
+            hd["milked_day"], hd["milked"] = w.d, 0
+        if hd["milked"] >= int(hd["in_milk"]):
+            raise Refused(f"the cows in milk have all been milked today ({hd['in_milk']} of them)")
+        hd["milked"] += 1
+        got = round(float(w.p["milk"]) * _skill_mult(w, name, tech), 2)
+        _add(me["holdings"], "milk", got)
+        KN.tried(w, name, tech, True)
+        w.happen("work", f"{name} was milking a cow on {w.parcels()[hd['parcel']]['name']}", actor=name, parcel=hd["parcel"],
+                 salience=0.2, tags=["animals", "food"], extra={"tech": tech})
+        return f"You milked a cow: {show(got)} milk (it will not keep past tonight)."
     if tech == "repair":
         h = w.home(name)
         if h is None:
@@ -215,24 +211,24 @@ def _work(w, name, a, today):
     if why:
         raise Refused(why)
     c = w.parcels()[pid]["state"]["crop"]
-    got = round(min(float(c["left"]), w.p["reap"]["grain"] * _skill_mult(w, name, tech)), 2)
+    tool, tm = tool_of(me, "reap")
+    got = round(min(float(c["left"]), w.p["reap"]["grain"] * _skill_mult(w, name, tech) * tm), 2)
     c["left"] = round(c["left"] - got, 4)
     c["reaped"] = True
-    c["gleanings"] = round(float(c.get("gleanings", 0.0)) + got * 0.08, 4)
     _add(me["holdings"], "grain", got)
     today["worked"].setdefault(name, []).append(pid)
     KN.tried(w, name, tech, True)
     w.happen("work", f"{name} was reaping {w.parcels()[pid]['name']}", actor=name, parcel=pid, salience=0.25,
              tags=["farming", "harvest", "food"], extra={"tech": tech})
     left = " That field is now reaped bare." if c["left"] <= 1e-9 else ""
-    return f"You reaped {show(got)} grain from {w.parcels()[pid]['name']}.{left}"
+    return f"You reaped {show(got)} grain from {w.parcels()[pid]['name']}" + (f" with your {tool}" if tool else " by hand") + f".{left}"
 
 
 # ---------------------------------------------------------------------- make and build
 def _make(w, name, a, today):
     tech = KN.resolve(a.get("what"))
     if tech is None or TECHNIQUES[tech]["verb"] != "make":
-        raise Refused(f"{a.get('what')!r} is not something you make (recipes: bread, pottage, pot, basket, line, club)")
+        raise Refused(f"{a.get('what')!r} is not something you make (recipes: grind, bread, crude weapon)")
     lvl = _level_or_refuse(w, name, tech)
     qty = max(1, int(_qty(a.get("qty"), 1)))
     t = TECHNIQUES[tech]
@@ -343,8 +339,9 @@ def _accept(w, name, a, today):
     if by == name:
         raise Refused("that is your own offer")
     A, B = w.s["agents"][by]["holdings"], w.s["agents"][name]["holdings"]
+    theirs = (w.home(by) or {}).get("stock", {})                        # an offer not set aside is paid from hand, then store
     for item, q in o["give"].items():
-        if not o.get("held") and A.get(item, 0.0) + 1e-9 < q:
+        if not o.get("held") and A.get(item, 0.0) + theirs.get(item, 0.0) + 1e-9 < q:
             raise Refused(f"{by} no longer has {q:g} {item}; nothing was exchanged")
     mine = (w.home(name) or {}).get("stock", {})                         # the taker pays from hand, then its own house's store
     for item, q in o["get"].items():
@@ -357,7 +354,10 @@ def _accept(w, name, a, today):
             _add(B, item, short)
     for item, q in o["give"].items():
         if not o.get("held"):
-            A[item] = round(A[item] - q, 6)
+            a_ = min(q, A.get(item, 0.0))
+            A[item] = round(A.get(item, 0.0) - a_, 6)
+            if q - a_ > 1e-9:
+                theirs[item] = round(theirs[item] - (q - a_), 6)
         _add(B, item, q)
     for item, q in o["get"].items():
         B[item] = round(B[item] - q, 6)

@@ -83,6 +83,10 @@ changed in its code yet. **From 22 Oct the decisions are kept in [docs/cybertron
 
 ## Log
 
+- **23 Oct.** Zach: speech by scope with only direct speech waking (D4-25), thinking and past reasoning (D4-26), conversation memory
+  (D4-27), agent-written memory at set times (D4-28), no aims (D4-29). Built in M1 (`converse.py`); M1 re-based on the decided
+  economy (undecided crafts removed); check run E. Comparison with cybertron 1 and the content history: [14](14_cybertron1_comparison.md).
+
 - **23 Oct.** Run D: a three-household generated village, 4 Opus and 7 Haiku, with an enum-constrained reply schema; audit of
   memory, notes, perception and knowledge: [13_m1_village_memory.md](13_m1_village_memory.md).
 

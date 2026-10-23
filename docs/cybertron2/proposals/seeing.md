@@ -347,6 +347,9 @@ wrong fact on purpose; false beliefs come only from what people say, rumour and 
   more than anything (Q4 there); low-salience signs reach few, as designed; felt-watched and sightings read naturally. Not
   revised yet.
 
+- 23 Oct: memory bands (two full days, one-line days, lasting memories by keyword) replaced by conversation memory and
+  agent-written memory (D4-27, D4-28; spec/information/memory.md); attending one's own house allowed (38.13 §5).
+
 ## Sources
 
 cybertron2/prompt.py and perceive.py (as built), 38.02, knowledge.md, notes.md, verbs.md, D4-6, D4-11, D4-19, D4-21, D2-4.

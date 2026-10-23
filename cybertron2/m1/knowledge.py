@@ -16,10 +16,9 @@ from __future__ import annotations
 from cybertron2.m1.data import ITEMS, LEVELS, SKILL_WORDS, TECHNIQUES, TRY
 
 ALIASES = {
-    "hunt": ["hunt", "hunting"], "fell": ["fell", "felling", "chop timber"], "fish": ["fish", "fishing"],
-    "reap": ["reap", "reaping", "harvest"], "bread": ["bread", "baking", "bake"], "pottage": ["pottage", "stew"],
-    "pot": ["pot", "pots", "pottery", "firing pots"], "basket": ["basket", "baskets", "basketry", "weave"],
-    "line": ["fishing line", "line"], "firing pit": ["firing pit", "kiln", "pit"], "club": ["club"],
+    "hunt": ["hunt", "hunting"], "fell": ["fell", "felling", "chop timber"], "reap": ["reap", "reaping", "harvest"],
+    "milk": ["milk", "milking"], "grind": ["grind", "grinding", "flour"], "bread": ["bread", "baking", "bake"],
+    "crude weapon": ["crude weapon", "club", "spear"], "forage": ["forage", "foraging"],
 }
 
 
@@ -159,7 +158,7 @@ def mentions(w, speaker, hearers, text) -> list:
 
 
 def resolve(x):
-    """A technique from what an agent wrote ("pots", "baking", "firing pit")."""
+    """A technique from what an agent wrote ("baking", "milking", "a club")."""
     x = str(x or "").strip().lower()
     if x in TECHNIQUES:
         return x
@@ -222,6 +221,8 @@ def shortfall(w, name, tech, mult=1.0, at=None) -> str:
         pids = [at] if at else [x[1] for x in where]
         if not any(_crop_ripe(w, pid) for pid in pids):
             return "no crop there is ripe"
+    if nd.get("herd") == "in milk" and not any(int(h.get("in_milk", 0)) > 0 for h in w.s["herds"].values()):
+        return "there is no cow in milk"
     if nd.get("crop") == "reaped":
         pids = [at] if at else [x[1] for x in where]
         if not any(_gleanable(w, pid) for pid in pids):

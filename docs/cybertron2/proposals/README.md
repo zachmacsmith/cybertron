@@ -53,6 +53,11 @@ Newest first. Ideas decided or rejected in conversation before 23 Oct are backfi
 
 | Date | Idea | Outcome | Where |
 |---|---|---|---|
+| 23 Oct | Re-ask everyone who heard anything in the talk step (M1) | rejected (Zach): only direct speech wakes | D4-25 |
+| 23 Oct | Speech in a building reaches those with access on the node that day, not those inside at talk time | accepted: D4-25 | spec/information/speech.md |
+| 23 Oct | Thinking, past reasoning and conversation memory back from cybertron 1; agent-written memory at the end of each stretch | accepted: D4-26 to D4-28 | spec/information/memory.md |
+| 23 Oct | Engine-written memory bands (two full days, one-line days); a ledger of transfers | replaced by D4-27, D4-28; ledger not adopted (Zach: forgetting is the agent's, unless shown badly) | [seeing.md](seeing.md), 38.13 |
+| 23 Oct | In-world aims in every prompt | turned off: D4-29 | spec/agents/aims.md |
 | 23 Oct | A per-node layout: parcels, features, structures, movables | discussion | [layout.md](layout.md) |
 | 23 Oct | Deliberate misperception by the engine (a seeded wrong fact) | rejected (Zach) | [seeing.md](seeing.md) §4 |
 | 23 Oct | Two channels: a daily notice of the most salient facts (templates, by chance and relevance) and attending (detail, model description); signs of shifts by salience and relevance | discussion (Zach's direction) | [seeing.md](seeing.md) §3c |

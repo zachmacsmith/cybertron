@@ -21,6 +21,7 @@ import time
 from pathlib import Path
 
 from cybertron2.m1 import act as AC, knowledge as KN, perceive as PC, prompt as PR
+from cybertron2.m1.converse import Conversations
 from cybertron2.m1.data import EDIBLE, ITEMS, TECHNIQUES
 from cybertron2.m1.world import World, load_spec
 
@@ -62,18 +63,23 @@ def bot_plan(w, name, talk=None) -> dict:
                      and not KN.basic(t)), None)
         if tech:
             acts.append({"do": "learn", "from": elder, "what": tech})
-    if any(KN._crop_ripe(w, pid) for pid in w.parcels()) and KN.level(w, name, "reap") == "known" and a["holdings"].get("sickle", 0) >= 1:
+    if any(KN._crop_ripe(w, pid) for pid in w.parcels()):
         acts += [{"do": "work", "what": "reap"}] * 2
-    if KN.level(w, name, "fell") == "known" and a["holdings"].get("axe", 0) >= 1 and h and h["stock"].get("timber", 0) < 4:
+    if any(a["holdings"].get(t, 0) >= 1 for t in ("copper tool", "crude tool")) and h and h["stock"].get("timber", 0) < 4:
         acts.append({"do": "gather", "what": "fell", "at": "Alder Wood"})
+    if KN.level(w, name, "milk") == "known":
+        acts.append({"do": "work", "what": "milk"})
     acts += [{"do": "gather", "what": "forage", "at": "Alder Wood"}, {"do": "gather", "what": "forage", "at": "Brook Meadow"}]
-    if a["holdings"].get("grain", 0) >= 2.5 and a["holdings"].get("timber", 0) >= 0.5 and KN.level(w, name, "bread") == "known":
-        acts.append({"do": "make", "what": "bread"})
-    for item in ("greens", "grain", "timber", "meat", "fish", "bread"):
+    if a["holdings"].get("grain", 0) >= 4:
+        acts.append({"do": "make", "what": "grind"})
+    for item in ("wild food", "grain", "timber", "meat", "bread"):
         acts.append({"do": "move", "item": item, "qty": 1, "to": "house"})
-    out = {"why": "bot", "actions": acts, "attend": attend, "say": [f"{name} is out foraging today."] if w.d % 2 == 0 else []}
+    out = {"why": "bot", "actions": acts, "attend": attend,
+           "say": [{"to": "everyone", "text": f"{name} is out foraging today."}] if w.d % 2 == 0 else []}
+    if w.d % 3 == 2 and youth:
+        out["tell"] = [{"to": youth[0], "text": "Come and learn with me today."}]
     if w.d == 1 and name == min(w.agents_acting()):
-        out["offers"] = [{"to": "anyone", "give": "1 greens", "get": "1 timber"}]
+        out["offers"] = [{"to": "anyone", "give": "1 wild food", "get": "1 timber"}]
         out["note"] = [{"title": "plan", "text": "keep the store full before the frost"}]
         out["pin"] = "plan"
     if talk and talk.get("offers"):
@@ -82,15 +88,26 @@ def bot_plan(w, name, talk=None) -> dict:
     return out
 
 
-def decide(w, name, system, user, backend, talk=None) -> tuple[dict, dict]:
+def decide(w, name, text, opening, system, backend, conv, talk=None) -> tuple[dict, dict]:
+    """One model call in the agent's conversation (converse.py): the message continues it, or `opening` starts it."""
     model = w.s["agents"][name]["model"]
     if model == "bot":
-        return bot_plan(w, name, talk), {"model": "bot"}
+        return bot_plan(w, name, talk), {"model": "bot", "sent": text}
     from cybertron import llm
     t0 = time.monotonic()
     attempts = []
-    out, reasoning, usage = llm.call(backend, model, system, user, PR.schema_for(w, name), attempts=attempts)
-    return out or {}, {"model": model, "usage": usage, "seconds": round(time.monotonic() - t0, 1), "thinking": reasoning}
+    schema = PR.schema_for(w, name)
+    sent, ctx = conv.message(name, w.d, system, schema, text, opening)
+    out, reasoning, usage = llm.call(backend, model, ctx["conv"]["system"], sent, schema, thinking_budget=THINKING(w),
+                                     attempts=attempts)
+    raw = attempts[-1].get("raw") if attempts and attempts[-1].get("ok") and not (out or {}).get("_error") else None
+    usage = conv.after(ctx, raw, usage)
+    return out or {}, {"model": model, "usage": usage, "seconds": round(time.monotonic() - t0, 1), "thinking": reasoning,
+                       "sent": ctx["text"], "opening": ctx["text"] is opening}
+
+
+def THINKING(w) -> int:
+    return int((w.spec.get("llm") or {}).get("thinking_budget", 2000))
 
 
 def _parallel(fn, jobs: dict, workers) -> tuple[dict, dict, dict]:
@@ -109,43 +126,42 @@ def _parallel(fn, jobs: dict, workers) -> tuple[dict, dict, dict]:
     return replies, meta, errors
 
 
-def household(w, x, names) -> list:
-    """The people of a household named as 'the Reeds', 'Reeds', 'Reed House' or 'Reed'."""
-    x = str(x or "").strip().lower().removeprefix("the ").removesuffix(" house").removesuffix(" household")
-    for hh in {a["household"] for a in w.s["agents"].values()}:
-        if x in (hh.lower(), hh.lower() + "s", hh.lower() + "es"):
-            return [n for n in names if w.s["agents"][n]["household"] == hh]
-    return []
-
-
 # ---------------------------------------------------------------------- the talk step
-def talk(w, names, replies, results) -> dict:
-    """Deliver say, tell, explain and offers from the plans. Returns {name: {heard, offers, opened, cards}} for whoever is asked
-    again (received something, opened a note, or looked up a craft)."""
-    box = {n: {"heard": [], "offers": [], "opened": [], "cards": []} for n in names}
+WAVES = 2
+
+
+def talk(w, names, replies, results) -> tuple[dict, dict]:
+    """Deliver what was said and offered (D2-7): a `tell` or an offer made to one person reaches them before work and wakes them
+    (they are asked again and may answer); `say` to everyone, or in a house (everyone with access to it who is here today), is
+    heard without waking; an explanation teaches without waking; opening a note or looking up a craft wakes the agent itself.
+    Returns ({name: box} for whoever is woken, {name: lines heard without waking})."""
+    box = {n: {"heard": [], "also": [], "offers": [], "opened": [], "cards": []} for n in names}
     for n in names:
         r = replies[n]
-        says = [str(x)[:600] for x in (r.get("say") or []) if isinstance(x, str) and x.strip()][:MAX_SAY]
-        for text in says:
-            hearers = [m for m in names if m != n]
+        for x in [x for x in (r.get("say") or []) if isinstance(x, dict) and str(x.get("text", "")).strip()][:MAX_SAY]:
+            text, to = str(x["text"])[:600], str(x.get("to") or "everyone")
+            hid = w.house_by_name(to)
+            if hid and hid not in PR.access(w, n):
+                results[n].append(f"Refused: say: you have no access to {w.s['houses'][hid]['name']}")
+                continue
+            hearers = [m for m in names if m != n and (not hid or w.s["agents"][m]["house"] == hid)]
+            where = f"in {w.s['houses'][hid]['name']}" if hid else "to everyone"
             for m in hearers:
-                box[m]["heard"].append(f"{n} said: {text}")
-                PC.store(w, m)["today"]["heard"].append(f"{n} said: {text}")
+                box[m]["also"].append(f"{n} said ({where}): {text}")
+                PC.store(w, m)["today"]["heard"].append(f"{n} said ({where}): {text}")
             for h, tech in KN.mentions(w, n, hearers, text):
                 PC.store(w, h)["today"]["heard"].append(f"(You had not heard of {TECHNIQUES[tech]['label'].split(' (')[0]} before.)")
-            w.happen("speech", f"{n} spoke to everyone", actor=n, salience=0.1, sense="sound")
+            results[n].append(f"You said ({where}): {text}")
+            w.happen("speech", f"{n} spoke {where}", actor=n, salience=0.1, sense="sound")
         for t in [t for t in (r.get("tell") or []) if isinstance(t, dict)][:MAX_SAY]:
-            text = str(t.get("text", ""))[:600]
-            to = [w.person(t.get("to"))] if w.person(t.get("to")) else household(w, t.get("to"), names)
-            to = [x for x in to if x and x in names and x != n]
-            if not to:
+            text, to = str(t.get("text", ""))[:600], w.person(t.get("to"))
+            if not to or to not in names or to == n:
                 results[n].append(f"Refused: tell: nobody called {t.get('to')!r} is here to hear you")
                 continue
-            for x in to:
-                box[x]["heard"].append(f"{n} told you" + (f" and the rest of your household" if len(to) > 1 else "") + f": {text}")
-                PC.store(w, x)["today"]["heard"].append(f"{n} told you: {text}")
-            KN.mentions(w, n, to, text)
-            results[n].append(f"You told {', '.join(to)}: {text}")
+            box[to]["heard"].append(f"{n}: {text}")
+            PC.store(w, to)["today"]["heard"].append(f"{PC.DIRECT}{n} told you: {text}")
+            KN.mentions(w, n, [to], text)
+            results[n].append(f"You told {to}: {text}")
         for x in [x for x in (r.get("explain") or []) if isinstance(x, dict)][:2]:
             to, tech = w.person(x.get("to")), KN.resolve(x.get("what"))
             if not to or to not in names or tech is None:
@@ -157,7 +173,7 @@ def talk(w, names, replies, results) -> dict:
                 results[n].append(f"Refused: explain: {why}")
             else:
                 results[n].append(f"You explained {label} to {to}.")
-                box[to]["heard"].append(f"{n} explained {label} to you: you now have a rough idea of it.")
+                box[to]["also"].append(f"{n} explained {label} to you: you now have a rough idea of it.")
                 PC.store(w, to)["today"]["heard"].append(f"{n} explained {label} to you.")
         for o in [o for o in (r.get("offers") or []) if isinstance(o, dict)][:3]:
             give, get = _goods(o.get("give")), _goods(o.get("get"))
@@ -174,16 +190,24 @@ def talk(w, names, replies, results) -> dict:
                 continue
             w.s["seq"] += 1
             oid = f"O{w.s['seq']}"
-            for i, q in give.items():                                    # set aside until taken or nightfall: from hand, then store
-                a_ = min(q, hold.get(i, 0.0))
-                hold[i] = round(hold.get(i, 0.0) - a_, 6)
-                if q - a_ > 1e-9:
-                    store[i] = round(store[i] - (q - a_), 6)
-            w.s["offers"][oid] = {"by": n, "to": to, "give": give, "get": get, "day": w.d, "open": True, "held": True}
-            results[n].append("You offered " + PR._offer_text(w, oid, w.s["offers"][oid]) + " (set aside until taken or nightfall: "
-                              "you cannot use or eat it meanwhile)")
-            for m in ([to] if to else [m for m in names if m != n]):
-                box[m]["offers"].append(PR._offer_text(w, oid, w.s["offers"][oid]))
+            if to:                                                       # to one person: set aside, open today, wakes them
+                for i, q in give.items():
+                    a_ = min(q, hold.get(i, 0.0))
+                    hold[i] = round(hold.get(i, 0.0) - a_, 6)
+                    if q - a_ > 1e-9:
+                        store[i] = round(store[i] - (q - a_), 6)
+                w.s["offers"][oid] = {"by": n, "to": to, "give": give, "get": get, "day": w.d, "until": w.d, "open": True, "held": True}
+                results[n].append("You offered " + PR._offer_text(w, oid, w.s["offers"][oid]) + " (set aside until taken or nightfall: "
+                                  "you cannot use or eat it meanwhile)")
+                box[to]["offers"].append(PR._offer_text(w, oid, w.s["offers"][oid]))
+            else:                                                        # to anyone: open today and tomorrow, not set aside
+                w.s["offers"][oid] = {"by": n, "to": None, "give": give, "get": get, "day": w.d, "until": w.d + 1, "open": True,
+                                      "held": False}
+                results[n].append("You offered " + PR._offer_text(w, oid, w.s["offers"][oid]) + " (open today and tomorrow, while you "
+                                  "still have the goods)")
+                for m in names:
+                    if m != n:
+                        box[m]["also"].append(PR._offer_text(w, oid, w.s["offers"][oid]))
         a = w.s["agents"][n]
         for title in (r.get("open") or [])[:int(w.p["notes"]["open"])]:
             if title in a["notes"]:
@@ -191,7 +215,8 @@ def talk(w, names, replies, results) -> dict:
         for x in (r.get("look_up") or [])[:3]:
             tech = KN.resolve(x)
             box[n]["cards"].append(KN.card(w, n, tech) if tech else f"{x}: you know nothing of it")
-    return {n: b for n, b in box.items() if any(b.values())}
+    woken = {n: b for n, b in box.items() if b["heard"] or b["offers"] or b["opened"] or b["cards"]}
+    return woken, {n: box[n]["also"] for n in names}
 
 
 # ---------------------------------------------------------------------- the run
@@ -209,7 +234,8 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False) -> 
     systems = {n: PR.system_prompt(w, n) for n in w.living()}
     (out / "run.json").write_text(json.dumps({"spec": spec, "backend": backend, "systems": systems,
                                               "models": {n: a["model"] for n, a in w.s["agents"].items()}}, indent=1))
-    files = {k: open(out / f"{k}.jsonl", "w") for k in ("turns", "days", "perception")}
+    files = {k: open(out / f"{k}.jsonl", "w") for k in ("turns", "days", "perception", "memory")}
+    conv = Conversations(out, chunk=int((spec.get("memory") or {}).get("chunk", 3)), backend=backend)
     cost = 0.0
     for day in range(w.days):
         w.s["day"] = day
@@ -218,28 +244,40 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False) -> 
         dawn(w)
         PC.dawn(w)
         names = w.agents_acting()
-        systems = {n: PR.system_prompt(w, n) for n in names}                  # rebuilt: what it knows may have changed
-        users = {n: PR.turn_prompt(w, n) for n in names}
-        replies, meta, errors = _parallel(lambda n: decide(w, n, systems[n], users[n], backend), {n: (n,) for n in names}, workers)
+        systems = {n: PR.system_prompt(w, n) for n in names}                  # used when a conversation starts
+        openings = {n: PR.turn_prompt(w, n, opening=True) for n in names}
+        users = {n: PR.turn_prompt(w, n, opening=False) for n in names}
+        replies, meta, errors = _parallel(lambda n: decide(w, n, users[n], openings[n], systems[n], backend, conv),
+                                          {n: (n,) for n in names}, workers)
         first = {n: dict(replies[n]) for n in names}
         results = {n: ([f"(Your reply could not be used, so you did nothing: {errors[n][:160]})"] if n in errors else []) for n in names}
         for n in names:
             results[n] += PC.apply_notes(w, n, replies[n])
-        box = talk(w, names, replies, results)
-        talk_users, talk_replies, talk_meta = {}, {}, {}
-        if box:
-            talk_users = {n: PR.talk_prompt(w, n, b["heard"], b["offers"], b["opened"], b["cards"], first[n]) for n, b in box.items()}
-            talk_replies, talk_meta, terr = _parallel(lambda n: decide(w, n, systems[n], talk_users[n], backend, box[n]),
-                                                      {n: (n,) for n in box}, workers)
-            for n in box:
-                r2 = talk_replies[n]
-                if n in terr or not isinstance(r2.get("actions"), list):
+        woken, _ = talk(w, names, replies, results)
+        talk_log = {n: [] for n in names}
+        talked = set()
+        for wave in range(WAVES):                                       # only those spoken or offered to directly are asked again
+            if not woken:
+                break
+            texts = {n: PR.talk_prompt(w, n, b["heard"], b["also"], b["offers"], b["opened"], b["cards"]) for n, b in woken.items()}
+            rr, mm, ee = _parallel(lambda n: decide(w, n, texts[n], openings[n] + "\n\n" + texts[n], systems[n], backend, conv, woken[n]),
+                                   {n: (n,) for n in woken}, workers)
+            late = {}
+            for n in woken:
+                talked.add(n)
+                r2 = rr[n]
+                talk_log[n].append({"wave": wave, "prompt": texts[n], "reply": r2, "usage": (mm.get(n) or {}).get("usage"),
+                                    "thinking": (mm.get(n) or {}).get("thinking"), "error": ee.get(n)})
+                if n in ee or not isinstance(r2.get("actions"), list):
                     continue
                 replies[n] = {**replies[n], **{k: v for k, v in r2.items() if v not in (None, "", [])}, "actions": r2["actions"]}
                 results[n] += PC.apply_notes(w, n, {k: r2.get(k) for k in ("note", "pin", "forget")})
-                late = {k: r2.get(k) for k in ("say", "tell", "explain", "offers")}
-                if any(late.values()):                                       # replies: delivered, not asked again (one wave)
-                    talk(w, names, {**{m: {} for m in names}, n: late}, results)
+                late[n] = {k: r2.get(k) for k in ("say", "tell", "explain", "offers")}
+            if not late:
+                break
+            woken, _ = talk(w, names, {**{m: {} for m in names}, **late}, results)
+            if wave == WAVES - 1:                                       # the last replies are delivered, not answered today
+                break
         attend = {n: replies[n].get("attend") for n in names if replies[n].get("attend")}
         # work: interleaved
         plans = {n: [x for x in (replies[n].get("actions") or []) if isinstance(x, dict)][:MAX_ACTIONS] for n in names}
@@ -278,32 +316,47 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False) -> 
         nights = night_lines(w, rec)
         for n in names:
             m = meta.get(n, {})
-            tm = talk_meta.get(n, {})
-            for u in (m.get("usage") or {}, tm.get("usage") or {}):
+            for u in [m.get("usage") or {}] + [x["usage"] or {} for x in talk_log[n]]:
                 cost += float(u.get("cc_equiv_usd") or 0.0)
             files["turns"].write(json.dumps({
-                "day": day, "agent": n, "model": w.s["agents"][n]["model"], "units": budget[n], "used": used[n], "prompt": users[n],
-                "reply": first[n], "thinking": m.get("thinking"), "talk_prompt": talk_users.get(n), "talk_reply": talk_replies.get(n),
-                "talk_thinking": tm.get("thinking"), "plan": plans[n], "attend": attend.get(n), "results": results[n],
-                "night": nights.get(n, []), "usage": m.get("usage"), "talk_usage": tm.get("usage"), "seconds": m.get("seconds"),
+                "day": day, "agent": n, "model": w.s["agents"][n]["model"], "units": budget[n], "used": used[n],
+                "prompt": m.get("sent", users[n]), "opening": m.get("opening"), "reply": first[n], "thinking": m.get("thinking"),
+                "talk": talk_log[n], "talk_prompt": talk_log[n][0]["prompt"] if talk_log[n] else None,
+                "talk_reply": talk_log[n][-1]["reply"] if talk_log[n] else None, "plan": plans[n], "attend": attend.get(n),
+                "results": results[n], "night": nights.get(n, []), "usage": m.get("usage"),
+                "talk_usage": talk_log[n][0]["usage"] if talk_log[n] else None, "seconds": m.get("seconds"),
                 "error": errors.get(n)}) + "\n")
-            says = [x for r in (first[n], talk_replies.get(n) or {}) for x in (r.get("say") or []) if isinstance(x, str) and x.strip()]
-            PC.close_day(w, n, results[n], nights.get(n, []), says[:2 * MAX_SAY])
+            PC.close_day(w, n, results[n], nights.get(n, []))
+        ending = [n for n in names if w.s["agents"][n]["alive"] and conv.ends(n, day) and day < w.days - 1]
+        if ending:                                                      # the end of a stretch: each writes its own memory
+            spans = {n: f"{PC._day(w, conv.c[n]['day0'] if n in conv.c else day)} to {PC._day(w, day)}" for n in ending}
+            texts = {n: PR.memory_prompt(w, n, results[n], nights.get(n, []), spans[n]) for n in ending}
+            mr, mm, me = _parallel(lambda n: decide(w, n, texts[n], openings[n] + "\n\n" + texts[n], systems[n], backend, conv),
+                                   {n: (n,) for n in ending}, workers)
+            for n in ending:
+                text = str((mr.get(n) or {}).get("memory") or "").strip()
+                if text:
+                    PC.own_memory(w, n, spans[n], text)
+                u = (mm.get(n) or {}).get("usage") or {}
+                cost += float(u.get("cc_equiv_usd") or 0.0)
+                files["memory"].write(json.dumps({"day": day, "agent": n, "span": spans[n], "memory": text, "prompt": texts[n],
+                                                  "usage": u, "thinking": (mm.get(n) or {}).get("thinking"), "error": me.get(n)}) + "\n")
         for n, lg in per["agents"].items():
             files["perception"].write(json.dumps({"day": day, "agent": n, **lg}) + "\n")
         files["perception"].write(json.dumps({"day": day, "facts": per["facts"]}) + "\n")
-        rec.update(cost_usd=round(cost, 4), talked=sorted(box), offers={k: v for k, v in w.s["offers"].items() if v["day"] == day},
+        rec.update(cost_usd=round(cost, 4), talked=sorted(talked), offers={k: v for k, v in w.s["offers"].items() if v["day"] == day},
                    teaching=[t for t in today["teach"]], learning=[t for t in today["learn"]], watch=today["watch"], steals=today["steals"],
                    attend=attend, errors=errors)
         files["days"].write(json.dumps(rec) + "\n")
         for f in files.values():
             f.flush()
-        print(f"day {day + 1}: alive {len(w.living())}, missed {rec['missed']}, deaths {rec['deaths']}, talked {len(box)}, "
+        print(f"day {day + 1}: alive {len(w.living())}, missed {rec['missed']}, deaths {rec['deaths']}, talked {len(talked)}, "
               f"offers {len(rec['offers'])}, taught {len([t for t in today['teach']])}, steals {len(today['steals'])}, "
               f"errors {len(errors)}, cost ${cost:.2f}", flush=True)
         if not w.living():
             break
     w.save(out / "state.json")
+    sessions = conv.close()
     for f in files.values():
         f.close()
     return out

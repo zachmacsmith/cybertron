@@ -1,7 +1,7 @@
-# M1 run D: a village of three households, generated (cybertron2.m1.generate), base spec. Three lines with interlocking leverage:
-# the Reeds the sickle, reaping and baking; the Fenns the axe, felling and hunting; the Hales fishing, lines, baskets and pottery
-# (no firing pit yet). Land scaled for about a dozen mouths. Cast: Opus for the three heads and the adult who knows most,
-# Haiku for everyone else (the bulk). Same incidents and signs as runs A-C.
+# M1 village (run D onward), base spec for cybertron2.m1.generate. Three lines on the decided economy (D2-23, D2-42, D2-43, D2-44):
+# all can forage, hunt, fell and reap; the Reeds hold the one copper tool, the Fenns a crude tool and a crude weapon, the Hales
+# know milking (the village's three cows in milk). Leverage at one node is thin by design of the decided set: trades live at
+# other nodes (recipes.md §5). Aims are not shown (D4-29).
 name: m1_village
 seed: 7
 days: 10
@@ -89,11 +89,6 @@ node:
       text: a clear brook with a clay bank
       adj:
       - meadow
-      state:
-        fish:
-          K: 24
-          S: 20
-          r: 0.3
     meadow:
       name: Brook Meadow
       cover: meadow
@@ -131,7 +126,7 @@ houses:
     beds: 4
     stock:
       meat: 3
-      greens: 1
+      wild food: 1
       timber: 5
   hale_house:
     name: Hale House
@@ -139,14 +134,14 @@ houses:
     household: Hale
     beds: 4
     stock:
-      fish: 2
-      greens: 2
+      wild food: 2
       timber: 3
 herds:
   cattle:
     name: the village cattle
     parcel: pasture
     count: 8
+    in_milk: 3
 incidents:
 - day: 4
   kind: stray
@@ -180,34 +175,23 @@ signs:
   - farming
 lines:
   Reed:
-    crafts:
-    - reap
-    - bread
-    - pottage
+    crafts: []
     tools:
-    - sickle
+    - copper tool
     holdings:
       grain: 1
   Fenn:
-    crafts:
-    - fell
-    - hunt
+    crafts: []
     tools:
-    - axe
+    - crude tool
+    - crude weapon
     holdings:
       meat: 1
   Hale:
     crafts:
-    - fish
-    - line
-    - basket
-    - pot
-    - firing pit
-    tools:
-    - line
-    holdings:
-      clay: 2
-      withies: 3
+    - milk
+    tools: []
+    holdings: {}
 bounds:
   acting:
   - 10

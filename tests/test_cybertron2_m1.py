@@ -16,20 +16,21 @@ def test_bot_run_deterministic(tmp_path):
     turns = [json.loads(x) for x in open(a / "turns.jsonl")]
     assert any(t["talk_prompt"] for t in turns)
     assert any("taught you" in " ".join(t["results"]) for t in turns)
-    assert any(t["prompt"].count("## Yesterday") for t in turns if t["day"] > 0)
+    assert any("## What happened yesterday" in t["prompt"] for t in turns if t["day"] > 0)
 
 
 def test_knowledge_paths():
     w = World(load_spec(SPEC))
-    assert KN.level(w, "Wat", "hunt") == "aware"
+    assert KN.level(w, "Ivy", "milk") == "aware" and KN.level(w, "Wat", "milk") is None
+    assert KN.level(w, "Wat", "hunt") == "known"                               # basic (D2-43)
     for _ in range(3):
-        KN.saw(w, "Wat", "hunt", "Agnes")
-    assert KN.level(w, "Wat", "hunt") == "rough"
-    assert KN.explained(w, "Maud", "Tam", "bread") == ""
-    assert KN.level(w, "Tam", "bread") == "rough"
-    KN.taught(w, "Tam", "Ivy", "pot")
-    assert KN.level(w, "Ivy", "pot") == "known"                      # a youth learns faster
-    assert KN.shortfall(w, "Wat", "fell") == "you need an axe; you have none"
+        KN.saw(w, "Wat", "milk", "Maud")
+    assert KN.level(w, "Wat", "milk") == "rough"
+    assert KN.explained(w, "Maud", "Tam", "milk") == ""
+    assert KN.level(w, "Tam", "milk") == "rough"
+    KN.taught(w, "Maud", "Ivy", "milk")
+    assert KN.level(w, "Ivy", "milk") == "known"                              # a youth learns faster
+    assert KN.rec(w, "Ivy", "milk")["source"] == "Maud taught you"
 
 
 def test_offer_goods_set_aside_and_returned():
@@ -40,17 +41,22 @@ def test_offer_goods_set_aside_and_returned():
     names = w.agents_acting()
     res = {n: [] for n in names}
     R.talk(w, names, {**{n: {} for n in names}, "Osric": {"offers": [{"to": "Agnes", "give": "4 grain", "get": "1 timber"}],
-                                                          "tell": [{"to": "the Fenns", "text": "grain for timber"}]}}, res)
+                                                          "say": [{"to": "Reed House", "text": "grain for timber"}],
+                                                          "tell": [{"to": "Agnes", "text": "grain for timber"}]}}, res)
     assert w.s["agents"]["Osric"]["holdings"]["grain"] == 0                  # set aside
-    assert any(x.startswith("You told Agnes, Ivy, Tam") for x in res["Osric"])
+    assert any(x.startswith("You said (in Reed House)") for x in res["Osric"]) and any(x.startswith("You told Agnes") for x in res["Osric"])
     oid = next(iter(w.s["offers"]))
     w.s["agents"]["Agnes"]["holdings"]["timber"] = 1
     assert AC.do(w, "Agnes", {"do": "accept", "offer": oid}, w.s["today"]).startswith("You accepted")
     assert w.s["agents"]["Agnes"]["holdings"]["grain"] == 4 and w.s["agents"]["Osric"]["holdings"]["timber"] == 1
     R.talk(w, names, {**{n: {} for n in names}, "Agnes": {"offers": [{"to": "anyone", "give": "2 grain", "get": "1 bread"}]}}, res)
-    assert w.s["agents"]["Agnes"]["holdings"]["grain"] == 2
+    assert w.s["agents"]["Agnes"]["holdings"]["grain"] == 4                  # an offer to anyone is not set aside
+    oid2 = [k for k, o in w.s["offers"].items() if o["to"] is None][0]
     w.night()
-    assert w.s["agents"]["Agnes"]["holdings"]["grain"] > 3                  # returned at nightfall (less what she ate)
+    assert w.s["offers"][oid2]["open"]                                       # open today and tomorrow
+    w.s["day"] += 1
+    w.night()
+    assert not w.s["offers"][oid2]["open"]
 
 
 def test_move_to_named_own_house_stores():
@@ -71,8 +77,23 @@ def test_accept_pays_from_own_store():
     w.s["today"] = R._blank_today()
     names = w.agents_acting()
     w.s["agents"]["Agnes"]["holdings"]["meat"] = 2
+    w.s["houses"]["reed_house"]["stock"]["grain"] = 5
     R.talk(w, names, {**{n: {} for n in names}, "Agnes": {"offers": [{"to": "Osric", "give": "2 meat", "get": "3 grain"}]}}, {n: [] for n in names})
     oid = next(iter(w.s["offers"]))
     assert w.s["agents"]["Osric"]["holdings"].get("grain", 0) < 3 <= w.s["agents"]["Osric"]["holdings"].get("grain", 0) + w.s["houses"]["reed_house"]["stock"]["grain"]
     assert AC.do(w, "Osric", {"do": "accept", "offer": oid}, w.s["today"]).startswith("You accepted")
     assert w.s["agents"]["Osric"]["holdings"]["meat"] == 2
+
+
+def test_only_direct_speech_wakes():
+    from cybertron2.m1 import run as R
+    w = World(load_spec(SPEC))
+    w.s["today"] = R._blank_today()
+    names = w.agents_acting()
+    res = {n: [] for n in names}
+    woken, quiet = R.talk(w, names, {**{n: {} for n in names}, "Osric": {
+        "say": [{"to": "everyone", "text": "the barley is ripe"}, {"to": "Reed House", "text": "reap with me"}],
+        "tell": [{"to": "Agnes", "text": "timber for grain?"}]}}, res)
+    assert set(woken) == {"Agnes"}                                       # told directly
+    assert any("in Reed House" in x for x in quiet["Maud"]) and not any("in Reed House" in x for x in quiet["Tam"])
+    assert any("to everyone" in x for x in quiet["Tam"])

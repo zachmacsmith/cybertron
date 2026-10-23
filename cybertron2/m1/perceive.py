@@ -28,8 +28,8 @@ TRADE_TAGS = {"farm": ["farming", "harvest", "food"], "hunt": ["hunting", "anima
 
 
 def seed(w, name, spec_agent) -> None:
-    w.s["mind"][name] = {"days": [], "seeded": list(spec_agent.get("memories") or []), "lasting": [], "beliefs": {}, "today": _blank(),
-                         "log": []}
+    w.s["mind"][name] = {"days": [], "seeded": list(spec_agent.get("memories") or []), "lasting": [], "own": [], "beliefs": {},
+                         "today": _blank(), "log": []}
     a = w.s["agents"][name]
     a["notes"] = {str(k)[:60]: str(v) for k, v in (spec_agent.get("notes") or {}).items()}
     a["pinned"] = spec_agent.get("pinned")
@@ -126,9 +126,9 @@ def facts(w) -> list:
         if pl:
             r = pl["S"] / pl["K"]
             if r < 0.35:
-                add([f"p:{pid}"], f"{nm} has been picked over: few greens left", 0.2, ["food"])
+                add([f"p:{pid}"], f"{nm} has been picked over: little wild food left", 0.2, ["food"])
             elif r > 0.75:
-                add([f"p:{pid}"], f"{nm} is thick with greens and berries", 0.1, ["food"])
+                add([f"p:{pid}"], f"{nm} is thick with berries, nuts and greens", 0.1, ["food"])
         g = st.get("game")
         if g:
             r = g["S"] / g["K"]
@@ -400,9 +400,17 @@ def steals(w, today, attend) -> None:
 
 
 SPEECH = ("You told ", "You said", "You noted", "You let go of the note")
+DIRECT = "(to you) "                                                     # heard lines said to the agent itself: it was asked at the time
+OWN_MAX = 6                                                              # memories the agent wrote itself, kept (the oldest drop)
 
 
-def close_day(w, name, did: list, night_lines: list, says=()) -> None:
+def own_memory(w, name, span, text) -> None:
+    """The memory an agent wrote at the end of a stretch of days (converse.py), in its own words."""
+    m = store(w, name)
+    m["own"] = (m.get("own", []) + [{"span": span, "day": w.d, "text": " ".join(str(text).split()[:150])}])[-OWN_MAX:]
+
+
+def close_day(w, name, did: list, night_lines: list) -> None:
     """The day into memory. What it did (the engine's results) is kept apart from what it said, so its own words never stand in
     the record for its acts."""
     m = store(w, name)
@@ -411,7 +419,7 @@ def close_day(w, name, did: list, night_lines: list, says=()) -> None:
     if t["attended"]:
         saw.append(f"(attending to {t['attended']['target']}) " + "; ".join(t["attended"]["lines"]))
     acts = [x for x in did if not x.startswith(SPEECH)]
-    said = [f"to everyone: {x}" for x in says] + [x[len("You told "):] for x in did if x.startswith("You told ")]
+    said = [x.removeprefix("You ") for x in did if x.startswith(("You told ", "You said "))]
     m["days"].append({"day": w.d, "did": acts + night_lines, "said": said, "heard": list(t["heard"]), "saw": saw,
                       "glimpse": list(t["glimpse"])})
     for line in t["concerned"] + t["learned"] + night_lines:
@@ -426,20 +434,6 @@ def close_day(w, name, did: list, night_lines: list, says=()) -> None:
 def _day(w, d) -> str:
     c = w.calendar(d)
     return f"{c['season']} day {c['day']}"
-
-
-def memory_lines(w, name) -> dict:
-    """The bands shown in the turn prompt: the last 2 days in full, 8 earlier as one line each, lasting memories."""
-    m = store(w, name)
-    days = m["days"]
-    full = days[-2:]
-    earlier = days[-10:-2]
-    one = []
-    for r in earlier:
-        did = [x for x in r["did"] if not x.startswith(("Refused", "Not done", "You left"))][:4]
-        heard = r["heard"][:1]
-        one.append(f"{_day(w, r['day'])}: " + " ".join(did) + (f" Heard: {heard[0][:140]}" if heard else ""))
-    return {"full": full, "earlier": one, "lasting": m.get("seeded", []) + m["lasting"]}
 
 
 def beliefs_lines(w, name, limit=6) -> list:
