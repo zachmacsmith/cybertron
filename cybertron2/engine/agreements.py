@@ -213,6 +213,31 @@ def withdraw(here, a) -> str:
     return f"You withdrew offer {oid}."
 
 
+def release(here, mind, a) -> str:
+    """Whoever is owed may count a debt paid (D4-37): the person owed, or one of the household owed. What is still owing to them on
+    the agreement ends; it closes when nothing is owed either way."""
+    aid = str(a.get("agreement") or a.get("offer") or "").strip()
+    ag = here.agreements().get(aid)
+    if ag is None:
+        raise Refused(f"you are party to no agreement {aid!r}")
+    mine = {here.name, here.household()}
+    legs = [(i, l) for i, l in enumerate(ag["legs"]) if l["to"] in mine and not _met(l)]
+    if not legs:
+        raise Refused(f"nothing is owed to you on {aid}")
+    for i, l in legs:
+        if "work" in l:
+            here.apply("leg", agreement=aid, leg=i, done=l["work"], released_by=here.name)
+        else:
+            w_ = l["when"]
+            here.apply("leg", agreement=aid, leg=i, arrears=0.0, paid=(w_.get("times", 1) if w_.get("every") else 1), released_by=here.name)
+    if all(_met(l) for l in ag["legs"]):
+        here.apply("close_agreement", agreement=aid, status="done")
+    debtor = sorted({l["from"] for _, l in legs})
+    here.event("release", f"{here.name} counted what {', '.join(debtor)} owed on {aid} as paid", actor=here.name, salience=0.4,
+               tags=["trade"], concerns=[d for d in debtor if d in here.people()])
+    return f"You counted {aid} as paid: {', '.join(debtor)} owe{'s' if len(debtor) == 1 else ''} you nothing more on it."
+
+
 def lines(here, mind) -> list:
     """Each open agreement one is party to, in words (agreements.md: what agents see)."""
     out = []

@@ -13,6 +13,7 @@ the world, not from a complete manual. Moving house is one of the things agents 
 - D4-29: no aims (agents/aims.md).
 - D4-32: too heavy to set off: choose what to leave (economy/transport.md).
 - D4-36: a person can join another household, take up an empty house, or build one (institutions/membership.md).
+- D4-37: whoever is owed may count a debt paid (`release`); goods given or left to a creditor are credited against what is owed.
 
 ## Mechanics
 
@@ -29,4 +30,4 @@ the world, not from a complete manual. Moving house is one of the things agents 
 
 proposals/verbs.md, proposals/knowledge.md; 38.06.
 
-*Current as of 23 Oct 2026: D4-24, D4-29, D4-32, D4-35, D4-36.*
+*Current as of 23 Oct 2026: D4-24, D4-29, D4-32, D4-35, D4-36, D4-37.*

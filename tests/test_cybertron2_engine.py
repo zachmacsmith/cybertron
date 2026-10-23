@@ -294,3 +294,17 @@ def test_promises_read_season_dates():
     legs = AG.parse_legs("1 copper tool by autumn day 3", 0, w.calendar)
     c = w.calendar(legs[0]["when"]["by"])
     assert (c["season"], c["day"]) == ("autumn", 3)
+
+
+def test_the_one_owed_can_count_a_debt_paid():
+    w = world()
+    w.s["people"]["Simkin"]["at"] = "coppergate"
+    aid = w.apply("agree", None, node="coppergate", rec={"parties": ["Simkin", "Elena"], "status": "open",
+                  "legs": [{"from": "Simkin", "to": "Elena", "item": "wild food", "qty": 8, "when": {"by": 0}, "paid": 1, "arrears": 8.0}]})
+    assert do(w, "Simkin", do="release", agreement=aid).startswith("Refused")           # the debtor cannot release itself
+    assert do(w, "Warin", do="release", agreement=aid).startswith("Refused")           # owed to Elena herself, not the household
+    assert do(w, "Elena", do="release", agreement=aid).startswith("You counted")
+    assert w.s["agreements"][aid]["status"] == "done"
+    hh = w.apply("agree", None, node="coppergate", rec={"parties": ["Simkin", "Smith"], "status": "open",
+                 "legs": [{"from": "Simkin", "to": "Smith", "item": "timber", "qty": 2, "when": {"by": 0}, "paid": 1, "arrears": 2.0}]})
+    assert do(w, "Warin", do="release", agreement=hh).startswith("You counted")         # owed to the household: a member may

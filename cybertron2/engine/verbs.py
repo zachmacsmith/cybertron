@@ -28,6 +28,8 @@ VERB = {
               "doc": "put something you carry into a building's store here, for its household (they find it in the morning)"},
     "accept": {"args": '{"offer": id, "lots"?: n, "for"?: party}', "cost": 0, "doc": "an open offer here: both sides at once, or nothing"},
     "withdraw": {"args": '{"offer": id}', "cost": 0, "doc": "take back an offer of yours"},
+    "release": {"args": '{"agreement": id}', "cost": 0,
+                "doc": "count what is owed to you (or your household) on an agreement as paid, however it was paid, or forgive it"},
     "host": {"args": '{"person", "at"?: building, "feed"?: true}', "cost": 0,
              "doc": "let someone sleep in a house you may let people into, tonight (and eat from its store, if you feed them)"},
     "grant": {"args": '{"to": person or household or anyone, "at": building, "what": shelter | shelter and food, "days"?: n}', "cost": 0,
@@ -772,13 +774,18 @@ def _accept(here, mind, a, party):
     return AG.accept(here, mind, a, party)
 
 
+def _release(here, mind, a, party):
+    from cybertron2.engine import agreements as AG
+    return AG.release(here, mind, a)
+
+
 def _withdraw(here, mind, a, party):
     from cybertron2.engine import agreements as AG
     return AG.withdraw(here, a)
 
 
 HANDLERS = {"gather": _gather, "work": _work, "make": _make, "build": _build, "move": _move, "take": _take, "give": _give, "leave": _leave,
-            "accept": _accept, "withdraw": _withdraw, "host": _host, "grant": _grant, "revoke": _revoke, "join": _join, "admit": _admit,
+            "accept": _accept, "withdraw": _withdraw, "release": _release, "host": _host, "grant": _grant, "revoke": _revoke, "join": _join, "admit": _admit,
             "leave_household": _leave_household, "found": _found, "claim": _claim, "sleep": _sleep, "set": _set, "travel": _travel,
             "watch": _watch, "teach": _teach, "learn": _learn, "attack": _attack, "guard": _guard, "rest": _rest}
 assert set(HANDLERS) == set(VERB)

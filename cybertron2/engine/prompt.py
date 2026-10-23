@@ -19,7 +19,7 @@ SCHEMA = {
             "item": {"type": "string"}, "qty": {"type": "number"}, "from": {"type": "string"}, "target": {"type": "string"},
             "aim": {"type": "string"}, "offer": {"type": "string"}, "person": {"type": "string"}, "thing": {"type": "string"},
             "household": {"type": "string"}, "name": {"type": "string"}, "for": {"type": "string"}, "feed": {"type": "boolean"},
-            "days": {"type": "number"}, "lots": {"type": "number"}},
+            "days": {"type": "number"}, "lots": {"type": "number"}, "agreement": {"type": "string"}},
             "required": ["do"]}},
         "say": {"type": "array", "items": {"type": "object", "properties": {"to": {"type": "string"}, "text": {"type": "string"}},
                                             "required": ["to", "text"]}},
