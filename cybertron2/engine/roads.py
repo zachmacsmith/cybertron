@@ -379,6 +379,11 @@ def _meetings(w, today, rec, ps):
             if w.rng("meet", w.d, ps[ka][0], ps[kb][0]).random() < p:
                 m = {"id": f"meeting:{ps[ka][0]}:{ps[kb][0]}:{w.d}", "kind": "meeting", "road": ka[0], "pos": pos,
                      "parties": [ps[ka], ps[kb]], "label": stretch_name(w, ka[0], pos)}
+                passing = [i for i, party in enumerate(m["parties"]) if passes(w, party)]
+                if passing:                                                  # one side will not stop: no call, both told (D4-51)
+                    pass_by(w, m, passing)
+                    rec["meetings"].append({"parties": m["parties"], "at": m["label"], "passed": True})
+                    continue
                 today["road"]["meetings"].append(m)
                 rec["meetings"].append({"parties": m["parties"], "at": m["label"]})
     for key, members in ps.items():
@@ -386,6 +391,22 @@ def _meetings(w, today, rec, ps):
             t = w.s["people"][n]["transit"]
             if t is not None:
                 t["last_pos"] = position(w, t)
+
+
+def passes(w, party) -> bool:
+    """A party that chose at departure not to stop for others (D4-51)."""
+    return any(str((w.s["people"][n]["transit"].get("choices") or {}).get("meeting", "")).lower() == "pass by" for n in party)
+
+
+def pass_by(w, m, passing):
+    """A meeting that passes on its own: each side is told what it saw, from signs.PASSING (D4-51)."""
+    from cybertron2.engine import signs as SG
+    for i, party in enumerate(m["parties"]):
+        other = m["parties"][1 - i]
+        x = SG.passing_context(w, party, other, m, we_passed=i in passing, they_passed=(1 - i) in passing)
+        for n in party:
+            for text in SG.roll(SG.PASSING, x, w.rng("pass", w.d, n, m["id"]), least=True)[:2]:
+                _note(w, n, text, first=True)
 
 
 # ---------------------------------------------------------------------- fuse kinds on the road (fuse.py)

@@ -444,6 +444,9 @@ TECHNIQUES.update({
                    "values": ["push on", "wait", "turn back", "go round"]},
     "stop at": {"verb": "modifier", "label": "stopping at a good place one knows on the way", "basic": True, "modifies": ["travel"],
                 "key": "stop at", "value": "*", "changes": {}, "units": 0, "gives": "", "tags": ["travel"]},
+    "meeting": {"verb": "modifier", "label": "whether to stop for others met on the road", "basic": True, "modifies": ["travel"],
+                "key": "meeting", "value": "*", "changes": {}, "units": 0, "gives": "", "tags": ["travel"],
+                "values": ["stop", "pass by"]},                                                                      # D4-51
     "gather on the way": {"verb": "modifier", "label": "gathering at good places one passes", "basic": True, "modifies": ["travel"],
                           "key": "gather", "value": "*", "changes": {}, "units": 0, "gives": "", "tags": ["travel"]},
 })

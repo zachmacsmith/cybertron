@@ -997,3 +997,43 @@ def roll(rows, x, rng, mult=1.0, know=(), near=False, at_node=True, least=False)
     if least and not got and best is not None:
         got.append(best[1]["text"](x))
     return list(dict.fromkeys(got))
+
+
+# ---------------------------------------------------------------------- a meeting that passes (D4-51): one side chose not to stop
+PASSING = [
+    # we went by
+    dict(when=lambda x: x.we_passed and not x.fog, sense="sight", p=1.0, tags=["travel"],
+         text=lambda x: f"you passed {x.names} at {x.where}, going the other way, and did not stop"),
+    dict(when=lambda x: x.we_passed and not x.fog and not x.they_passed, sense="sound", p=0.5, tags=["travel"],
+         text=lambda x: f"{x.names} called a greeting at {x.where}; you kept walking"),
+    dict(when=lambda x: x.we_passed and x.armed, sense="sight", p=0.6, tags=["travel", "danger"],
+         text=lambda x: f"{x.names} watched you go by at {x.where}, with weapons to hand"),
+    dict(when=lambda x: x.we_passed and x.cart, sense="sound", p=0.5, tags=["travel"],
+         text=lambda x: f"you stood aside at {x.where} to let {x.names} and their cart go by, then went on"),
+    dict(when=lambda x: x.we_passed and x.fog, sense="sight", p=1.0, tags=["travel"],
+         text=lambda x: f"shapes in the fog at {x.where}: {x.n_words} going the other way; you kept on"),
+    # they went by
+    dict(when=lambda x: x.they_passed and not x.we_passed and not x.fog, sense="sight", p=1.0, tags=["travel"],
+         text=lambda x: f"{x.names} passed you at {x.where} without stopping"),
+    dict(when=lambda x: x.they_passed and not x.we_passed and not x.fog, sense="sight", p=0.5, tags=["travel"],
+         text=lambda x: f"{x.names} kept to the far side of the road at {x.where} and would not be drawn into talk"),
+    dict(when=lambda x: x.they_passed and not x.we_passed, sense="sound", p=0.4, tags=["travel"],
+         text=lambda x: f"you called out to {x.names} at {x.where}, but they did not stop"),
+    dict(when=lambda x: x.they_passed and not x.we_passed and x.laden, sense="sight", p=0.5, tags=["travel"],
+         text=lambda x: f"{x.names} went by at {x.where} bent under heavy loads"),
+    dict(when=lambda x: x.they_passed and not x.we_passed and x.fog, sense="sound", p=1.0, tags=["travel"],
+         text=lambda x: f"footsteps went past you in the fog at {x.where}; whoever it was did not stop"),
+]
+
+
+def passing_context(w, party, other, m, we_passed, they_passed):
+    from cybertron2.engine import environment as EV, roads as RD
+    from cybertron2.engine.data import ITEMS, LANDMARKS
+    st = RD.stretch(w, m["road"], m["pos"])
+    where = LANDMARKS[st["landmarks"][0]["kind"]]["words"] if st["landmarks"] else f"the {st['terrain'] or 'road'}"
+    load = sum(q * ITEMS[i]["weight"] for n in other for i, q in w.goods(w.hands(n)).items() if q > 1e-9)
+    names = ", ".join(other) if len(other) <= 3 else f"{len(other)} travellers"
+    return SimpleNamespace(names=names, n=len(other), n_words=f"{len(other)} traveller{'s' if len(other) > 1 else ''}", where=where,
+                           we_passed=we_passed, they_passed=they_passed, fog=EV.weather(w) == "fog",
+                           armed=any(w.weapon(n) for n in other), cart=any(w.goods(w.hands(n)).get("handcart", 0) >= 1 for n in other),
+                           laden=load >= 8 * len(other), weather=EV.weather(w), terrain=st["terrain"] or "plain")

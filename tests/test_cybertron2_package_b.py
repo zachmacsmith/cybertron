@@ -238,3 +238,16 @@ def test_in_one_call_a_take_goes_to_the_find_not_the_meeting(monkeypatch):
     n = next(k for k, x in woke.items() if len(x["events"]) == 2)
     out = FU.answer(w, w.s["today"], n, woke[n], {"actions": [{"do": "take"}, {"do": "go on"}]})
     assert out[0].startswith("You took") and w.goods(w.hands(n)).get("grain", 0) >= 4.0
+
+
+def test_a_party_that_chose_not_to_stop_passes_a_meeting_on_its_own(monkeypatch):
+    monkeypatch.setitem(RD.TERRAIN["woodland"], "meet", 1.0)
+    w = world(roads=[["millbrook", "ashwood", 1, WOOD]], weather={1: "clear"})
+    depart(w, "Edric", "ashwood", meeting="pass by")
+    depart(w, "Simkin", "millbrook")
+    N.departures(w, w.s["today"])
+    RD.night(w, w.s["today"])
+    assert w.s["today"]["road"]["meetings"] == [] and FU.plan(w, w.s["today"]) == {}         # no call (D4-51)
+    e, s = w.s["people"]["Edric"]["transit"]["notices"], w.s["people"]["Simkin"]["transit"]["notices"]
+    assert any("you passed Simkin" in x or "Simkin" in x for x in e)
+    assert any("Edric" in x and ("without stopping" in x or "did not stop" in x or "far side" in x or "loads" in x) for x in s)

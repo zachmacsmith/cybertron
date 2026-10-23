@@ -93,11 +93,16 @@ D2-71), and its sight and cover (environment/visibility.md). A stretch has 0 to 
 | `on trouble` | `push on` (cross anyway), `wait up to N days` (then the next choice, default turn back), `turn back`, `go round` |
 | `stop at` | a good place it knows, for N days (D2-109) |
 | `gather` | gather at good places passed (a little food, no day lost) |
+| `meeting` | `stop` (the default: a meeting is a call, D2-110) or `pass by`: a meeting passes on its own, described to both sides (D4-51) |
 
 **Waiting out a block (D2-113):** each day waited is a night out (lodging.md: 1.5 food, 2 in winter, and the cold; less with gear
 or a camp); the departure prompt states what N days of waiting would cost in food.
 
 ### Meetings (D2-110)
+
+- **Passing by (D4-51):** if either party chose `meeting: pass by` at departure, the meeting passes on its own: no call for anyone,
+  no talk or trade; each side is told what it saw in its "On the way" lines (signs.py PASSING: who went by, armed or laden, in fog
+  only shapes). Bandits and ambushes will act differently (later).
 
 - **Who meets:** parties going opposite ways on one edge meet on the night they are on the same stretch, or cross between
   stretches; then where they meet is drawn between the two stretches (keyed), three times likelier on one with a landmark (D2-121). Parties going the same way that left the same day already travel together.
@@ -171,4 +176,4 @@ party and the conversation.
 [proposals/road_layout.md](../../proposals/road_layout.md), [road_encounters.md](../../proposals/road_encounters.md),
 [hidden_ways.md](../../proposals/hidden_ways.md), [journeys.md](../../proposals/journeys.md); world/edges.md.
 
-*Current as of 24 Oct 2026: D2-81, D2-90, D2-92, D2-98, D2-104 to D2-110, D2-113, D2-120 to D2-122, D2-125.*
+*Current as of 24 Oct 2026: D2-81, D2-90, D2-92, D2-98, D2-104 to D2-110, D2-113, D2-120 to D2-122, D2-125, D4-51.*

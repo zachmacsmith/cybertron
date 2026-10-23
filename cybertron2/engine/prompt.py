@@ -66,6 +66,7 @@ def schema_for(here, mind) -> dict:
     a = s["properties"]["actions"]["items"]["properties"]
     a["do"]["enum"] = list(dict.fromkeys([v for v in V.VERBS if V.verb_here(here, v)] + sorted({c for d in FUSE.values() for c in d["choices"] + d.get("also", [])})))
     a["on trouble"]["enum"] = TECHNIQUES["on trouble"]["values"]
+    a["meeting"] = {"type": "string", "enum": TECHNIQUES["meeting"]["values"]}
     # the night's choices are in the one schema, so an urgent call continues the agent's conversation (D2-84; a new schema restarts it)
     a["item"]["enum"] = list(ITEMS)
     a["what"]["enum"] = techs + [x for x in ("shelter", "shelter and food") if x not in techs]
