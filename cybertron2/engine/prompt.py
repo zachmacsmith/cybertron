@@ -236,7 +236,7 @@ def system_prompt(here, mind) -> str:
               f"- Each night everyone eats {p['ration']:g} food: what they carry first, then from the stores they may take from where "
               "they are (their household's, or a host's who feeds them). Without a sound, warm house you need more. Missed meals make "
               "you hungry, then starving; starving people work less and can die.",
-              "- Food, in meals a unit: " + "; ".join(f"{i} {v['food']:g}" + (" (as porridge at a hearth)" if i == "grain" else "")
+              "- Food, in meals a unit: " + "; ".join(f"{i} {v['food']:g}" + (" (as porridge, only at a lit fire)" if v.get("cook") else "")
                                                       for i, v in ITEMS.items() if v["food"] > 0)
               + ". Spoils fastest in your hands: " + ", ".join(i for i, v in sorted(ITEMS.items(), key=lambda kv: -kv[1]["spoil"])
                                                            if v["food"] > 0 and v["spoil"] >= 0.15)
