@@ -58,6 +58,23 @@ unenclosed, it wanders: strays into crops (the M1 stray incident), gets lost, an
   village's quarrel, which the engine leaves to people.
 - Seeded worlds start with old hedges and walls where the land has long been farmed.
 
+**Tracking where a herd wanders (Zach: would we track its path, so it hits other people's crops or goes into the woods?).** Yes,
+at the level of parcels, which the engine already has (a herd is on a parcel in M1; parcels know their neighbours: layout.md):
+
+- **Fences sit on borders between parcels**, not around a parcel, so one fence keeps a herd in and other herds out, and a border
+  with nothing on it is open.
+- **An unherded herd moves** up to about two steps a day across the parcel graph. Each step picks a neighbour by what draws it (a
+  ripe crop, water when it is thirsty, good grazing, the way home at dusk for cows in milk) and crosses the border only with the
+  border's odds (open 1; hurdles 0.3; a hedge 0.15; a wall 0.05; scaled by the fence's condition). Draws are keyed (D2-70).
+- **Where it goes, things happen:** in a field it eats and tramples the crop (a `draw` on the crop, recorded with the herd as the
+  cause and its holder known); in the woods it can be lost or meet wolves (higher hazard); at the edge of the node it can, rarely,
+  wander along an edge into the next node.
+- **People see it** where they are: "the Fenn cattle are in the Long Field, trampling the barley" (high salience to the field's
+  holder), tracks and dung on a path after (low), a herd seen heading for the wood. Whose crop and whose herd are known, so
+  damages are a claim people can press (custom, an arbiter, a court).
+- **The same walk serves wild animals:** deer coming out of the wood into the next field, a wolf pack's track (D2-78).
+- Cost: small: a handful of herds a node, a few steps each a day, at parcel resolution (no paths within a parcel).
+
 ## Why
 
 - One entity creates many dependence edges at once (food, transport, farming, fighting, credit), which is what the scenario design
@@ -97,6 +114,8 @@ unenclosed, it wanders: strays into crops (the M1 stray incident), gets lost, an
   grain each working day, milk 0.8 food a day for 0.6 of the year, slaughter 40-50 meat and 2 hides, herding at least 1 unit a
   day, prices (cow 40-60 coin, ox 50-100, horse 90-150). 02l's and 02m's ox costs need a team of two.
 
+- 23 Oct: Zach: would we track the parcels a herd wanders through? Yes: fences on parcel borders, a walk of about two steps a day
+  drawn by crops, water, grazing and home, crossing borders by the fence's odds; crops eaten, losses in the woods, damages known.
 - 23 Oct: Zach: are herds kept by fences or herding; timber fences round plots, upgraded to stone for fewer escapes and wolves.
   Added: herded or enclosed; hurdles, post and rail, hedge, dry-stone wall, a fold; costs, upkeep, effects, paybacks; enclosure as a
   claim. For later.
