@@ -129,6 +129,7 @@ tracks), whether it lasts or is momentary, and, hidden, whether it is true (sign
 | **a notice or document posted** | its text, if it can read |
 | **a road out** (each edge) | who came along it today, tracks, its condition, and at dusk anything approaching |
 | **the land and sky** | weather, the season's signs, the horizon: smoke, a glow at night, birds |
+| **the place in general** (eyes open all day) | the less subtle facts spread around the node (a few, here and there), its ambience (sounds, smells, the mood), and a better chance at anything salient; no detail about any one thing |
 | **a body, or a scene** (where a fight was, a burnt house) | what can be seen of what happened |
 
 These are instances of four general kinds (a parcel, a feature, a structure or room, a movable) plus gatherings and the sky:

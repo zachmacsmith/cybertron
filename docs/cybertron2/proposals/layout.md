@@ -19,7 +19,7 @@ Moving within a node stays free; the layout is for **where things are relative t
 | **Parcel** | a patch of land of one cover | the Long Field, Alder Wood, the common pasture, the green, the brook meadow | cover, size (in plots), soil, what it gives (plants, game, timber), neighbours, side of the node, claims (world/holding.md) |
 | **Feature** | something running across or set in parcels | the brook, the north road, the well, the copper seam, the ford | its course (which parcels), its state (the brook's level) |
 | **Structure** | something built on built ground or on a feature | houses, a smithy, a store, a mill on the brook, a fence, a wall | parts (02i), condition, rooms, claims |
-| **Movable** | something that is somewhere and moves | people, a herd, a cart, a pack of goods, a body | where it is (a parcel or a room), its state |
+| **Movable** | something that is somewhere and moves | a herd, a cart, a pack of goods, a body (people are not placed: see below) | where it is (a parcel or a room), its state |
 
 - **Plots** are the divisions of a field parcel (world/holding.md: land counted in plots); **lots** are the divisions of built
   ground.
@@ -38,11 +38,24 @@ Moving within a node stays free; the layout is for **where things are relative t
 | **Attention** | every target is a thing in a state at a place: attend to a parcel (and whatever is on it), a feature, a structure or room, or a movable (a person, a herd, a cart), or the sky |
 | **Claims** | a claim is on a parcel, a plot, a lot or a structure (world/holding.md) |
 
+## People are not placed on parcels (Zach, 23 Oct)
+
+An agent is at the node, not on a parcel. Its **actions** say where its day was spent (sowing the Long Field, felling in Alder
+Wood, a day at the smithy), and that is all the engine needs: facts about the parcels an agent worked on today are a little more
+likely to be noticed by it. Herds, carts and goods do have a parcel (a herd in the wrong field is a fact; a cart left in the yard is
+a fact).
+
+**Senses are broad.** Most sounds, smoke and smells carry across most of the node: everyone in a hamlet hears the forge, a scream,
+the church bell, the cattle; everyone smells a fire. Adjacency matters only at the edges: a quiet sound (a door forced at night)
+reaches the neighbouring parcels and whoever is awake or on watch; a sound in the deep wood reaches those working near it.
+
 ## Attending, generalised
 
 With the four kinds, the attention targets of seeing.md §3b reduce to: **a parcel** (with what grows and stands on it), **a
-feature**, **a structure or one of its rooms**, **a movable** (a person, a herd, a cart, goods, a body), **a gathering** (the people
-together on one parcel or in one room), and **the land and sky**. What attending gives comes from the thing's kind and state, and
+feature**, **a structure or one of its rooms**, **a movable** (a herd, a cart, goods, a body), **a person**, **a gathering** (people
+together in one place or room), **the land and sky**, and **the place in general**: keeping one's eyes open all day, which picks up
+the less subtle facts spread around the node (a few, here and there), its ambience (sounds, smells, the mood of the place), and a
+better chance at anything salient, but no detail about any one thing. What attending gives comes from the thing's kind and state, and
 the fact rules are written per kind (cover, feature, fitting, animal), not per named place.
 
 ## Size and cost
@@ -54,8 +67,7 @@ None of it costs a model call.
 ## Open questions
 
 1. How many parcels a node has (5-15?), and whether a parcel's size matters beyond plots and capacity.
-2. Whether presence within a node is tracked per parcel (who was in the field today) for witnessing and noticing by distance, or
-   stays node-wide with the day's activity telling where an agent was.
+2. ~~Whether presence is tracked per parcel~~: no (Zach): agents are at the node; their actions say where they worked.
 3. Whether features like the brook and the road continue from node to node (the brook leaves by the south side and is the same
    brook downstream: 38.04 §6's rivers).
 
@@ -64,6 +76,10 @@ None of it costs a model call.
 - 23 Oct: proposed (37.4, with Zach), after Zach noted that fields, herds and the rest are things in different states and asked for
   a general per-node abstraction of space, with a layout (the town next to the fields next to the forest) even if moving within a
   node is free.
+
+- 23 Oct: Zach: agents should be able to attend to everything in general (less subtle things spread around, ambience); senses not
+  restricted much (sounds across most of the node); no tracking of agents' parcels, since actions say where they happen. Added:
+  people are not placed; senses broad, adjacency only for quiet sounds; "the place in general" as an attention target.
 
 ## Sources
 
