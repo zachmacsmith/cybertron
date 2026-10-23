@@ -49,6 +49,7 @@ Newest first. Ideas decided or rejected in conversation before 23 Oct are backfi
 
 | Date | Idea | Outcome | Where |
 |---|---|---|---|
+| 23 Oct | Two channels: a daily notice of the most salient facts (templates, by chance and relevance) and attending (detail, model description); signs of shifts by salience and relevance | discussion (Zach's direction) | [seeing.md](seeing.md) §3c |
 | 23 Oct | The engine keeps facts about the world as dated beliefs with a source; the agent keeps interpretations and plans | discussion | [knowledge.md](knowledge.md) §7 |
 | 23 Oct | Opening a note shown only the next round | rejected (Zach): opening is a talk-step action, shown at once | [notes.md](notes.md) |
 | 23 Oct | Every act at the node shown to everyone present (phase 0) | replaced in the proposal by attention tiers | [seeing.md](seeing.md) §2 |

@@ -150,6 +150,47 @@ by range, salience, skill and the agent's day, with seeded draws; the event log 
 content: the fact rules per kind of thing, the sense table, salience and skill thresholds, and the phrasing pools (§4). That grows
 with the world, as data (D4-24), and can start small: a dozen kinds of thing, a few facts each.
 
+## 3c. Two channels: the daily notice and attending (Zach, 23 Oct)
+
+| | **The daily notice** (every agent, every round) | **Attending** (one target a day, chosen) |
+|---|---|---|
+| What | only the **most salient** facts in range: a fire, a fight, a stranger, smoke on the horizon, the first frost, a sign of a coming change | every fact about the target above a low threshold, plus what the observer's skill reads |
+| Who | each fact reaches an agent **with a chance**, weighted by how salient it is and **how relevant it is to that agent** | the attender |
+| Rendering | **templates only**, a line or two | detail; a **model description** through the observer's eyes (Sonnet's level), or templates |
+| On a quiet day | often nothing: quiet days are quiet, and the engine does not invent things to notice | whatever the target holds |
+
+**Relevance to an agent** is a score the engine computes from tags on the fact against the agent's record:
+
+| Source | Example |
+|---|---|
+| trade and skill | a fowler or hunter notices the geese; a farmer the frost on the stubble; a herder the cattle's thick coats; a builder a sagging roof |
+| experience | it has seen this kind of sign before: the hard winter twenty years ago, a raid that began with smoke on the road; a man once robbed notices locks |
+| state and concerns | the hungry notice food; whoever worries about the stores notices the season's signs; a guard notices movement on the road |
+| where it spent the day | in the fields it sees the sky; on the road, travellers; on watch, the approaches |
+| what it knows | it can only see "the fires of Millford" if it knows Millford and which way it lies; otherwise "a glow in the east at night" |
+| ties | its kin, its land, its house |
+
+The chance of noticing is roughly salience times relevance: the most salient facts reach nearly everyone in range; low-salience
+ones reach only the agents they bear on.
+
+**Signs for environmental shifts.** Every change from outside (an era, a season's severity, an incident, an event at a distant
+place: D4-4, D4-5) is defined with two parts: **its effects on the mechanisms** (regrowth, the cold, danger, yields) and **its signs**,
+each with a sense, a salience, a range, a lead or lag, a reliability and relevance tags. For a hard winter coming:
+
+| Sign | Salience | Noticed by |
+|---|---|---|
+| geese leaving early | low | fowlers, hunters, the almanac keeper, the old who remember the last hard winter |
+| first frost two weeks early | medium | farmers, anyone out at dawn |
+| cattle growing thick coats | low | herders |
+| a hard, cold wind from the north for days | high | everyone |
+
+For a city burning two days away: a glow on the horizon at night and smoke by day (high salience, seen from nodes within sight of
+it), named only by those who know the city; then travellers' news.
+
+**Is there enough to notice?** For the daily notice, it depends on the world: quiet days give little and should; a world with
+seasons, incidents, eras and neighbours gives a steady trickle, which is what the environment design (D4-4 to D4-7) supplies. For
+attending, each kind of target holds 5-15 facts once the fact rules exist (§3b), which is plenty for a detailed look.
+
 ## 4. Generating descriptions: templates or a model?
 
 | | Templates from the engine's facts | A model drafting from the state |
@@ -269,6 +310,12 @@ does.
   clause without a fact) but takes more small liberties than Sonnet (6 stretches, e.g. ordering the deer prints and the boots in a
   way the facts do not give, which a hunter would act on) and costs twice as much. For the observer's eye Sonnet is enough; any
   narrator needs a check that catches facts joined into new causes or orders, not only new facts.
+
+- 23 Oct: Zach: every agent sees a few templated, most salient facts each round, with a chance and only where relevant; attending
+  gives detail and the model description; environmental shifts each have mechanical effects and signs of different salience,
+  low ones noticed only by the relevant (a fowler sees the geese); distant events seen as signs (a city's fires) by those who know
+  of the place. Added §3c: two channels, relevance from trade, experience, state, the day's place, knowledge and ties; signs for
+  shifts with salience and relevance tags.
 
 ## Sources
 
