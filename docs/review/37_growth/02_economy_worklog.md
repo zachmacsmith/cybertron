@@ -35,6 +35,14 @@ byte-identical replays, apply to cybertron2 only once its runs start to matter.)
 
 ## Log
 
+### 23 Oct (exchange, agreements, recipes)
+
+- Exchange decided (D2-25 to D2-30), agreements and hiring decided (D2-31 to D2-40); spec/economy/money_and_markets.md and
+  agreements.md written; board posts to 37.4 and 37.3.
+- Recipes: 02m_recipes_model.py and proposals/recipes.md: about 40 techniques for 37.4's four verbs, costed in work units; basics
+  and ten trades; fittings re-costed without clay, fibre, iron or leather; tool wear; smelting at the seam (weight 17 to 1); what
+  travels by cost per weight; price anchors (a coin about a food, a day about 6 coin).
+
 ### 23 Oct (spec and proposals)
 
 - Zach and 37.4: the spec holds only decided, current rules (each citing its decision, each file ending "Current as of");

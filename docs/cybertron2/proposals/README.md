@@ -37,6 +37,7 @@ proposal**; **Why**; **Alternatives considered**; **Open questions**; **Affects*
 | [resources_and_goods.md](resources_and_goods.md) | the base resources, the lean first-world set and the pruning rule, unlocks, end uses | 37.2 | discussion (D2-10, D2-19, D2-23 accepted) |
 | [economy_later.md](economy_later.md) | options kept out of the first worlds (armour, nets, boats, seed drill, irrigation, clay, iron, the press, ...) | 37.2 | deferred |
 | [transport_and_lodging.md](transport_and_lodging.md) | the transport ladder, capacities, danger by edge and season, inns and hosts | 37.2 (37.4 the mechanism) | partly accepted: D4-9, D4-12, D2-4 |
+| [recipes.md](recipes.md) | the first worlds' recipes as technique cards: gathering, making, building, working; basics and ten trades; tool wear; what travels; price anchors | 37.2 (37.4: verbs, knowledge) | discussion |
 | [hiring.md](hiring.md) | work for someone: `for` on work actions puts output into the employer's container; day labour, piece rate, wages, sharecropping, tenancy, apprenticeship, shopkeepers, guards, carriers | 37.2 (37.4, 37.3) | accepted: D2-36 to D2-40 |
 | [agreements.md](agreements.md) | one system of agreements made of legs (cybertron 1's Standing Contract): trade, credit, subscriptions, wages, rent, dues; paid where there is a path, else arrears; ledgers; currency wanted, not required | 37.2 (37.4, 37.3) | accepted: D2-31 to D2-36 |
 | [exchange_and_money.md](exchange_and_money.md) | exchange at a node, coin, debts, credit, tolls | 37.2 | accepted: D2-1, D2-2, D2-25 to D2-30, D4-17 |
@@ -64,6 +65,7 @@ Newest first. Ideas decided or rejected in conversation before 23 Oct are backfi
 | 23 Oct | The verbs (a lean set of 24) and what each agent is shown; force always shown | ready for a decision | [verbs.md](verbs.md) |
 | 23 Oct | Detecting what was told by reading the meaning of free speech | rejected in the proposal: name mentions, an `about` field and explicit `explain`/`teach` instead | [knowledge.md](knowledge.md) §4e |
 | 23 Oct | Know-how as a continuous score (0-1) | replaced in the proposal by four levels moved by counts (Zach) | [knowledge.md](knowledge.md) §4c |
+| 23 Oct | Recipes for the first worlds in work units (about 40 techniques, ten trades; a coin about a food; smelting at the seam; copper tools as the step up) | discussion | [recipes.md](recipes.md) |
 | 23 Oct | Agreements of legs, the settlement rule, ledgers, legs in any good, porting standing.py and credit.py, work as a leg, acting for others, engine-checked duties, the presets | accepted: D2-31 to D2-40 | spec/economy/agreements.md |
 | 23 Oct | Hiring as agreements with a work leg; `for` on work actions sends output to the employer's container | accepted: D2-36 to D2-40 | [hiring.md](hiring.md) |
 | 23 Oct | Offers free of work units; stalls as offers to anyone; promise legs; copper coin struck by smiths; prices only as witnessed; markets as custom | accepted: D2-25 to D2-30 | spec/economy/money_and_markets.md |
