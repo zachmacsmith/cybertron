@@ -1,0 +1,42 @@
+[
+ {"id": "building",
+  "target": "the miller's house",
+  "visible_facts": {"storeys": 2, "material": "timber frame on stone", "condition": "worn", "chimney": "cold, no smoke", "door": "locked", "shutters": "closed", "season": "late autumn", "time": "evening", "beam": "the ridge beam over the door is rotten at one end"},
+  "observer": {"name": "Brenna", "skill": "builder", "attention": "attending closely"},
+  "hidden_facts": {"store": "34 grain", "owner_debt": "owes Gil 6 grain", "inside": "nobody; the miller has been away three nights"},
+  "questions": [
+    {"q": "Is anyone likely to be at home in the miller's house right now?", "a": "No (cold chimney, locked door, shutters closed in the evening)"},
+    {"q": "Is the house in good repair, or does it need work?", "a": "Needs work (worn, a rotten beam over the door)"}]},
+ {"id": "person",
+  "target": "Gil",
+  "visible_facts": {"look": "hungry, thin in the face", "wound": "a cut on the left forearm, bound with a rag, still seeping", "carrying": "a load of split timber on his back", "came_from": "the deep wood", "gait": "walking slowly, favouring the arm", "time": "midday"},
+  "observer": {"name": "Ash", "skill": "none", "attention": "glancing"},
+  "hidden_facts": {"hunger": "has eaten nothing for two days", "how_wounded": "fought Rook over the timber", "timber_owner": "the timber was cut on Rook's plot"},
+  "questions": [
+    {"q": "Is Gil fit for a full day of heavy work today?", "a": "No (hungry and wounded)"},
+    {"q": "Where has Gil just come from?", "a": "The deep wood"}]},
+ {"id": "field",
+  "target": "the barley field by the stream",
+  "visible_facts": {"crop": "barley", "ripeness": "half ripe, heads still green at the tips", "weeds": "thistle and dock thick along the rows", "damage": "trampled flat along the eastern edge", "tracks_in_damage": "hoof prints, cattle", "season": "late summer"},
+  "observer": {"name": "Tam", "skill": "farmer", "attention": "attending closely"},
+  "hidden_facts": {"owner": "Rook's field", "whose_cattle": "Ash's cattle broke through the fence", "yield": "expected 40 grain"},
+  "questions": [
+    {"q": "Is the barley ready to reap now?", "a": "No (half ripe)"},
+    {"q": "What damaged part of the field?", "a": "Cattle trampled the eastern edge"}]},
+ {"id": "land",
+  "target": "the sky and the land",
+  "visible_facts": {"wind": "cold, from the north", "birds": "geese flying south, earlier than usual", "smoke": "a thick column of smoke rising from the next valley", "sky": "clear, pale", "season": "early autumn", "time": "morning"},
+  "observer": {"name": "Old Wren", "skill": "keeps the almanac", "attention": "attending to the land"},
+  "hidden_facts": {"smoke_cause": "the hill farm is burning", "winter": "the winter will be long and hard"},
+  "questions": [
+    {"q": "Are there signs that winter may come early?", "a": "Yes (cold north wind, geese leaving early)"},
+    {"q": "Is anything happening in the next valley?", "a": "Yes, a thick column of smoke is rising there (cause unknown)"}]},
+ {"id": "tracks",
+  "target": "the edge of the forest above the village",
+  "visible_facts": {"deer_tracks": "deer prints, fresh, heading out of the wood toward the field", "boot_tracks": "one set of boot prints, large, going into the wood, none coming out", "freshness": "since the rain last night", "ground": "soft mud", "time": "early morning"},
+  "observer": {"name": "Kell", "skill": "hunter", "attention": "attending closely"},
+  "hidden_facts": {"who": "Rook went in before dawn", "why": "to check his snares", "where_now": "Rook is at the snare line by the old oak"},
+  "questions": [
+    {"q": "Did someone enter the forest recently, and have they come back out?", "a": "Yes, one person (large boots) went in since last night's rain; no prints coming out"},
+    {"q": "Which way were the deer moving?", "a": "Out of the wood toward the field"}]}
+]
