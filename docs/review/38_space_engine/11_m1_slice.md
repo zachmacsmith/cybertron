@@ -57,7 +57,8 @@ clay, **built a firing pit**, fired a pot, failed three times to coordinate a te
 6, and cooked; her notes tracked the plan ("my notes say I already know how to cook pottage"). The feud was never named; it showed
 as strictness: Roger "Just don't owe Osric anything", Osric's note "Bar the door around Roger in hard times", "a fair trade isn't a
 shame". Roger claimed a custom unprompted: "The gleanings come to Fenn House, as gleanings always have." Trade settled at **4 grain
-for 3 timber**, better for the Fenns than run A's rate, and ran six times; it fed the Reeds' fire but not the Fenns: Osric sold
+for 3 timber** (1.3 grain a timber), worse for the Fenns than run A's 2, though they were the hungry side: a
+distress price. It ran six times; it fed the Reeds' fire but not the Fenns: Osric sold
 grain for timber while noting "Wymarc is gaunt; give her bread if we can spare it", and never did.
 
 **A against B.** B has more mouths on the same land (9 against 6) and the same wild food, so it is hungrier; the comparison of
