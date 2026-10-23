@@ -35,6 +35,21 @@ byte-identical replays, apply to cybertron2 only once its runs start to matter.)
 
 ## Log
 
+### 23 Oct (farming; move to wp/cybertron2)
+
+- Post 5 (37.4 for Zach): cybertron2 notes now continue on `wp/cybertron2`; the spec is `docs/cybertron2/spec/`, decisions in
+  `docs/cybertron2/DECISIONS.md`. This log continues here; `econ/37.2-thicker-economy` is for old-engine work only.
+- Zach answered the farming, tools and attack questions. Wrote 02l_farming.md and 02l_farm_model.py: optional stages (sow and reap
+  the minimum; breaking the soil, weeding on a curve, manure, rotation, grazed fallow), crops counted from the day sown with the
+  cold as the season's limit, soil that settles by rotation. Findings: the further stages raise food per plot about fivefold but
+  by hand lower food per unit (Boserup); cattle raise both; where land is plentiful the minimum wins, where it is short a village
+  with a common herd farms with about 30% less work per person than a household alone; staggered sowing triples the harvest a
+  household can bring in.
+- 02k: Zach's answers recorded (building raids, walls multiplying defenders, the watch skipping sleep and rotated, children on
+  watch, node raids by any party).
+- DECISIONS.md: checked D2-1 to D2-5 (correct); added D2-6 to D2-22; corrected the directions list (clothing parked; four
+  promoted to decisions).
+
 ### 22 Oct (night, fuses and gates)
 
 - Zach on raids: a stone house should also be less likely to be picked in a node raid, not only stronger; three kinds of attack (a

@@ -46,16 +46,34 @@ and correct them in place.**
 | D2-3 | 22 Oct | Large buildings and buildings of 2-3 storeys must have stone; building up costs more | 02i §2b-2c | |
 | D2-4 | 22 Oct | **Agents are never told someone is missing**: the household saw the departure and remembers the stated plan; a death on the road is never announced | 02g §3c, board | the phase-0 "not seen for N rounds" line |
 | D2-5 | 22 Oct | **Fuse events** are worth adding (rare; only a subset of people woken); **gates** check arrivals automatically first, otherwise the keeper and the arrivals talk on the day they arrive | 02k | |
+| D2-6 | 22 Oct | **One livestock system, bred not made**: cattle and horses are kinds of livestock that breed from a herd; wild herds live on grassland ("fields where horses just naturally are") | 02g §2b-2c | 02g §2's separate horse good |
+| D2-7 | 22 Oct | **Speech at a node:** the square is everyone there; private messages to anyone at the node; everyone sees what is said in the buildings they have access to at their node, and can speak in several in one day | 02h §4a | |
+| D2-8 | 22 Oct | **Wide reach costs more:** rumour travels with merchants for free; letters, and later papers that are centralised and delivered, have costs and charges | 02h §4b | |
+| D2-9 | 22 Oct | **Buildings are made from parts** (structures, rooms and fittings, each with resource costs), not from template buildings; rooms can be booked (a room is a channel); capacity can be extended, larger and adjoining rooms costing less per person | 02i §1-§2b, §4 | template buildings |
+| D2-10 | 22 Oct | **Clothing is parked**; shelter (houses) carries the cold instead | 02 worklog (parked) | the direction "clothing as a worn stock" |
+| D2-11 | 22 Oct | **Farming's minimum is short, the other stages optional:** sow and reap give a crop; breaking the soil, weeding, manure, rotation and grazing the fallow each cost work and give a better return (more food per plot, or soil that does not wear out), worth most to those who can do them and at scale | 02l §1-§2 | the old engine's fixed sow, tend, reap |
+| D2-12 | 22 Oct | **A harvest window:** a ripe crop not reaped in time rots | 02l §2 | |
+| D2-13 | 22 Oct | **Worlds start with farming under way:** crops in the ground, last year's grain (and seed) in store | 02l §8 | |
+| D2-14 | 22 Oct | First worlds farm with **the hoe and the ox plough** only (slash and burn, irrigation and the rest later) | 02l §1 | |
+| D2-15 | 22 Oct | **More hands on a plot raise its yield** on a saturating curve; cattle add to it; part of the return to labour comes from doing the further stages | 02l §2 | the old engine's two tends |
+| D2-16 | 22 Oct | **Nodes differ in land pressure:** some short of land, some of people | 02l §5 | |
+| D2-17 | 22 Oct | **Seed is kept back** from each harvest | 02l §2 | |
+| D2-18 | 22 Oct | **Cattle on the farm:** the plough needs an ox, fodder takes land, dung keeps the soil. Households need **land to live on**, with a capacity | 02l §5-§6 | |
+| D2-19 | 22 Oct | **First worlds start with a short metal ladder** (not both bronze and iron) | 02j §3 | |
+| D2-20 | 22 Oct | **Three kinds of attack:** on a person; on a building (a break-in whose work depends on the structure, then a fight with whoever defends); on a whole node (targets drawn by exposure, value and hardness, so a stone building is less likely to be picked and stronger when it is). **Walls multiply the defence of those inside** | 02k §3 | combat.py's raid on a house only |
+| D2-21 | 22 Oct | **The watch:** a watcher skips the night's sleep and eats more for it, detects first and can wake the others; households rotate it; children can keep it | 02k §3 | |
+| D2-22 | 22 Oct | **Any party may raid a node:** no minimum size; a small party usually fails and the outcome depends on the defences; a single rider may attack, at greater risk | 02k §3 | 02k's proposal (riders and large parties only) |
 
-## Directions (Zach's stated aims recorded in the notes; designs follow them; 37.2 to confirm which are decisions)
+## Directions (Zach's stated aims recorded in the notes; designs follow them; checked by 37.2, 22 Oct)
 
-- Buildings from parts (structures, rooms, fittings) rather than template buildings; rooms bookable as channels; capacity that
-  scales (02i).
-- Private messages to anyone at the same node; buildings as access to information; institutions meet in buildings (02h §4a, §6b).
-- Wide reach costs more: rumour through merchants, then letters, then papers (02h §4b).
+Promoted to decisions by 37.2's check: buildings from parts (D2-9), speech at a node (D2-7), wide reach costs more (D2-8), one
+livestock system (D2-6); clothing was parked, not adopted (D2-10).
+
 - Resources that unlock new capabilities, not only more output (02g §1d); some resources hard to get but valuable (02g §1c).
+- **Information comes first** among the new capabilities: maps, parchment, writing (02h).
+- Fewer goods: a good or step stays only if several things use it, it makes a chokepoint or a trade, it changes weight or shelf
+  life enough to matter, or it unlocks something (02g §1f).
 - Edges differ in danger by terrain and season (02g §3c); carts lower danger; the transport ladder also carries people and rest
   (02g §3b).
-- Horses for speed and fighting, bred not made (02g §2b: proposed as one livestock system).
-- Clothing as a worn stock made from fibre (02_economy_worklog, 22 Oct).
-- Start the economy from end uses, roots and processes (02j).
+- Horses for speed and fighting (02g §2b); whether riders may arrive and strike in one day is open (OPEN C-5).
+- Start the economy from end uses, roots and processes; ladders whose better rungs need a new resource, a long chain or scale (02j).

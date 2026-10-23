@@ -5,7 +5,10 @@ is the economics (what walls, gates and stone buy, tolls) and the information (p
 for 37.4. Nothing built.*
 
 **Decided (Zach, 22 Oct):** fuse events are worth adding (rare, and only a subset of people are woken, so cheap); gates check
-arrivals automatically first, and otherwise the keeper and the arrivals talk in the day they arrive.
+arrivals automatically first, and otherwise the keeper and the arrivals talk in the day they arrive. Later the same night: a
+building raid is a break-in and then a fight, with walls multiplying the defenders; defenders can respond first if someone is on
+watch; a watch skips a night's sleep and costs food, so households rotate it, and children can keep it; anyone can raid a whole
+node, a small party usually fails and the outcome depends on the defences, and a single rider may attack at greater risk (§3).
 
 ## 1. Fuse events
 
@@ -86,9 +89,10 @@ decides.
 - **A toll is the town's revenue:** the wall pays for its upkeep and its keeper. Market towns paid for their walls this way. It ties
   the institution, its revenue, its gate and its documents together. The keeper is an office (37.3).
 
-## 3. Attacks and buildings (proposals still open)
+## 3. Attacks and buildings
 
-From the same discussion; for Zach and 37.4 to settle.
+From the same discussion. **Decided (Zach):** the three kinds below; the building raid as break-in then fight; walls multiply
+defenders; node raids open to any party (no minimum size). Numbers are proposals.
 
 | Kind | Target | How it resolves |
 |---|---|---|
@@ -110,12 +114,17 @@ stone house is defended only by its lock.
   nine raids on a 20-food household, one or two on a 120-food store. The rich household's tower, the stone granary, the church as
   refuge.
 - **A refuge is leverage:** in a node raid, people flee to the strongest building, and whoever controls its door can charge for it.
-- **Horses fit the node raid:** strike on arrival, drive herds off, carry loot, leave before pursuit. Proposal: node raids only by
-  riders or large parties; building raids by small groups.
+- **Horses fit the node raid:** strike on arrival, drive herds off, carry loot, leave before pursuit. **Any party may raid a node
+  (Zach):** a small one usually fails against any defence, and a single rider can try, at high risk; the outcome follows from the
+  contest and the defences, not from a rule on size.
+
+**The watch (Zach).** A watcher stays awake: it skips the night's sleep (it eats as if it worked late, 38.06: x1.5) and so it
+detects a fuse event first and can wake the others (§1). A household rotates the watch to spread the cost; children can keep it
+(37.1, D4-19's menial tasks), which makes the watch a child's job as herding is. A town's night watch is an office (37.3).
 
 ## 4. Open
 
 1. Fuse events: the cap on urgent calls per agent per night; which events have a fuse in the first worlds (raids on stone, fire,
    arrivals at a shut gate).
 2. Gates: whether an admitted arrival's re-ask counts as one of the talk waves; tolls as a payment rule now or with coin (E5).
-3. §3's attack kinds, the wall multipliers, and node raids for riders and large parties only.
+3. §3's numbers: the break-in work by structure, the wall multipliers (x1 timber, x2 stone), the watch's food cost.
