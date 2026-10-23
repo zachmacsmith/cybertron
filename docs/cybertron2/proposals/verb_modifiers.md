@@ -1,6 +1,7 @@
 # Proposal: modifiers on verbs (ways of doing an act that people know or learn)
 
-**Status:** discussion (23 Oct). Design only. **Owner:** 37.2 (author); verbs and knowledge are 37.4's (verbs.md, knowledge.md,
+**Status:** partly accepted: D2-93, D2-94 (23 Oct); one verb for putting things down (§5), searching, and whether modifiers are
+techniques (§4) still open. Design only. **Owner:** 37.2 (author); verbs and knowledge are 37.4's (verbs.md, knowledge.md,
 D4-24), so this goes to them. **Affects:** spec/agents/actions.md; verbs.md; knowledge.md; information/prompts.md; things in
 places (hiding), road_encounters.md (searching), attacks_and_walls.md (burning), farming (sowing methods).
 
@@ -34,14 +35,51 @@ A **modifier** is data: a name, the verbs it attaches to, what it changes, and w
   or wear. Hiding is leaving, done so as not to be seen.
 - **A new verb is a different act:** a different object or result (bury a body is `work` on remains, not `leave`).
 
-### 3. Knowing and showing
+### 3. Knowing, showing and trying (D2-93)
 
 - Default nothing: a verb without a modifier does what it does now.
-- Each modifier is **common knowledge** (in every prompt's verb line, as now for `for`) or **know-how** (taught, apprenticed,
-  read, practised: knowledge.md), shown only in the verb lines of those who know it, so the prompt grows only with what the
-  agent knows.
-- Using one you do not know is refused with a reason ("you do not know how to hide it well").
-- How well a modifier works can rise with the eye for the land or skill by practice (D2-52, D2-91): a keen eye hides better.
+- Those an agent knows are **shown in its verb lines**; they are learned, explained and taught like other know-how (knowledge.md),
+  so the prompt grows only with what the agent knows.
+- **Trying one you do not know** depends on the modifier, as data (`untaught`):
+  - **tryable** (hiding, going quietly, searching): anyone could think of it, so it is done at the lowest level (a pack hidden
+    untaught is half as well hidden as by someone who knows how) and the agent becomes **aware** of it, with rough knowledge; doing
+    it again raises the level by practice (D2-52);
+  - **not tryable** (dibbling, which takes being shown): refused with a reason, and the agent becomes aware it exists.
+- How well a modifier works rises with skill by practice and, for hiding and spotting, the eye for the land (D2-91).
+
+### 4. Are modifiers techniques? (37.2's view)
+
+Yes: **a modifier is a technique that changes another act** rather than making something of its own. A technique (knowledge.md)
+is know-how with levels, learned by teaching, watching, reading or practice; most are a recipe (make bread), a blueprint (build a
+mill) or a site (work a seam). A modifier technique has the same record, the same levels and the same ways of being learned, plus
+the verbs it attaches to and what it changes. So nothing new is needed in knowledge: one more field on a technique (`modifies:
+leave`). The difference that matters is only in the prompt: a recipe shows as something one can make, a modifier as an option on
+a verb one already has.
+
+### 5. One verb for putting things somewhere: `give` (Zach's question)
+
+Today the engine has `give` (to a person or a household's store) and `leave` (at a building, found by its household in the
+morning). Proposed: one verb, **`give {item, qty, to}`**, where `to` is a person, a household, a building, or **a place** (a
+parcel, a spot on the road); leaving is giving to a place, and hiding is giving to a place with `hidden` (aliases `leave`, `put`,
+`drop`, `hide` read as `give`, so agents can write what comes naturally).
+
+| Giving to | What happens |
+|---|---|
+| a person here | into their hands |
+| a household, or a building one may use | into its store, as now |
+| a building one may not use, or someone not here | **left at its door, in the open** (held by nobody, D2-87; noticed by D2-85; spoils as in the open) |
+| a place | left there, in the open; with `hidden`, hidden |
+
+This covers the departure prompt (the "too heavy to set off" call, D4-32, which is appended to the agent's cached conversation of
+that day like every other call): a give there to someone not at home, or to a house one has no access to, leaves the goods outside
+that house. One consequence to accept: a gift left at the door of someone else's house is no longer safe until morning; someone
+passing can take it.
+
+### 6. Searching
+
+`travel {to, searching: <herd or person>}`: someone travels along an edge looking for a lost herd (livestock.md, once herds wander
+onto edges) or a missing person, which raises the daily chance of finding them from about 0.15 to about 0.5 and lets them turn back
+on the way (road_encounters.md §3). It is a modifier on `travel`, known to all.
 
 ## Why
 
@@ -65,15 +103,22 @@ A **modifier** is data: a name, the verbs it attaches to, what it changes, and w
 
 ## Open questions (for Zach, and 37.4)
 
-1. Modifiers as data on verbs, nothing by default, some common and some learned?
-2. Hiding as `leave` with `hidden: under brush | buried`, known to all, better with the eye for the land?
-3. Fold the existing ones (`for`, `aim: burn`, the sowing method, searching) into this?
+1. ~~Modifiers as data~~ decided: D2-93.
+2. One verb `give` for putting things anywhere, with `leave` and `hide` as its variants, and a give that cannot reach its recipient
+   left at the door (§5)?
+3. ~~`for`, the sowing method~~ decided: D2-94. `searching` on travel (§6) and `aim: burn` on attack: modifiers too?
+4. Modifiers as techniques with one more field (§4)?
 
 ## History
 
 - 23 Oct: Zach: should hiding be an optional extra input on `leave` that people have to know, nothing by default, so they can
   learn things, with modifiers on verbs that change their behaviour rather than different verbs? Written, with 37.2's view (yes,
   with the rule in §2 and the risks).
+
+- 23 Oct: Zach decided D2-93 (trying an unknown modifier does it worse and makes one aware, by modifier; known ones shown; learned
+  and explained like techniques) and D2-94 (`for`, sowing method). Asked whether modifiers differ from techniques (§4: 37.2's view,
+  no), whether `leave` can fold into `give` with leave and hide as variants and a give in the departure prompt left outside the
+  house (§5), and what searching meant (§6).
 
 ## Sources
 

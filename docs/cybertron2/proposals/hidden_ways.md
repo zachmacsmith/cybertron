@@ -1,6 +1,6 @@
 # Proposal: hidden ways (edges no one knows until they are found)
 
-**Status:** partly accepted: D2-90 to D2-92 (23 Oct); finding by the noticing rule (D2-85) to confirm. Design only. **Owner:** 37.2 (author); edges, places and knowledge are 37.4's (world/edges.md,
+**Status:** accepted: D2-90 to D2-92, D2-98 (23 Oct); numbers to calibrate. Design only. **Owner:** 37.2 (author); edges, places and knowledge are 37.4's (world/edges.md,
 layout.md, knowledge.md, D4-47), so this goes to them. **Affects:** spec/world/edges.md, places.md, generation.md;
 spec/information/ (knowledge of ways); seeding; conflict/ (raids by hidden ways).
 
@@ -64,7 +64,7 @@ For each person who spends time in a parcel a hidden way starts from, each day (
 ## Open questions (for Zach, and 37.4)
 
 1. ~~Edges tied to a side and parcels~~ decided: D2-90.
-2. Finding by the noticing rule (D2-85) with the numbers in §2: Zach "probably yes"; elaborated 23 Oct, to confirm.
+2. ~~Finding by the noticing rule~~ decided: D2-98 (numbers to calibrate).
 3. ~~Woodcraft~~ decided: the eye for the land (D2-91).
 4. ~~Growing back~~ decided: follows the land (D2-92).
 
@@ -80,6 +80,9 @@ For each person who spends time in a parcel a hidden way starts from, each day (
 - 23 Oct: Zach decided D2-90 (side and parcels; road or hidden), D2-91 (one knack, the eye for the land, for spotting ways and
   noticing in general), D2-92 (hiding follows the land: cover, use, felling and regrowth). Finding by the noticing rule: "probably
   yes", to confirm.
+
+- 23 Oct: D2-98: finding by the noticing rule (Zach: "probably yes" after the elaboration; felling as one case of a place's
+  visibility, visibility.md).
 
 ## Sources
 

@@ -36,10 +36,11 @@ something gives a choice (take it, leave it, bury, tell), and a left thing is wh
 
 ### 2. Putting things down and hiding them
 
-- **`leave {item, qty, at}`**: puts goods down at a spot here (a parcel, or the stretch of road one is on). It costs nothing more
-  than any give.
-- **`hide {item, qty, at}`**: work (about 1 unit for a pack under brush, 2 to bury it; more for more) lowers the conspicuousness as
-  in the table. Woodland and rock hide better than a field.
+- **Putting down** is `give` to a place (verb_modifiers.md §5): goods left at a spot here (a parcel, or the stretch of road one is
+  on). It costs nothing more than any give.
+- **Hiding** is the `hidden` modifier on it (D2-93): work (about 1 unit for a pack under brush, 2 to bury it; more for more)
+  lowers the conspicuousness as in the table; untaught it hides half as well. Woodland and rock hide better than a field, through
+  the place's visibility (visibility.md).
 - **Being seen putting it there:** leaving and hiding are acts like any other, seen by those present by attention (seeing.md). A
   cache is only secret if nobody watched. The hider remembers where it is; telling is a choice (as for ways).
 
@@ -97,15 +98,18 @@ water), the season (warm faster, frozen almost not at all), and wet (rain, a flo
 | tools, coin, ore, stone | none | none (tools rust a little if wet) | | | | | |
 | a body | | "dead some days" about 10 days, "bones" to the season's end | faster | kept | faster | kept | bones, then nothing |
 
-**Scavengers** are what I meant: wild animals and pests that eat what is left exposed (crows and foxes anywhere, wolves and
+**Scavengers: later (D2-95)**, with wild animals that attack herds and hunters and are drawn to food. What is meant: wild animals and pests that eat what is left exposed (crows and foxes anywhere, wolves and
 boar in wild land, rats and dogs near houses). Separately from spoiling, an exposed item loses a share each day by how much it
 draws them (meat and bodies most, grain and bread next, cheese, hides little, tools none), how many there are where it lies (the
 parcel's wildlife; more in forest, rats at a settlement), and what protects it (buried, sealed, in a building: none). Scavengers
 also make a thing **easier to notice** (crows circling a body, a fox at the grain), and may draw predators (wolves near a carcass,
 a risk to herds and people).
 
-**Rot and disease:** rotting meat, spoiled food and bodies are things with a disease risk (D2-71), higher near a well, a
-stream or houses (environment_state.md: the water cascade); a burial removes it.
+**Rot and disease (D2-96):** a rotting body or rotting food lies at a spot, so once disease exists (OPEN Q-16) its risk reaches
+what is near it: water (a well or stream downhill: environment_state.md's water cascade), food stored nearby, and people working
+or living close. A death in a settlement is highly salient (the smell within days). **Burying** is work on the body, an option
+shown only where a body lies: about 2 units in soft ground, 4 in stony ground, 6 or more in frozen ground (or wait for the thaw, a
+cairn of stones instead); a burial ends the risk and the body's signs.
 
 Traces fade over days (D2-88). How a hidden way hides again follows its land (D2-92).
 
@@ -158,6 +162,10 @@ run (38.23) people died on the road, some carrying grain. Until roads hold thing
   only if the find is noticed at all), D2-87 (left things anyone's; the dead leave everything; open spoilage much faster, rot,
   disease risk). Asked to explore landmarks along roads (road_layout.md), hiding as an optional modifier on `leave` rather than a
   verb (verb_modifiers.md), and decay with each item defining how it decays by condition (§6 rewritten).
+
+- 23 Oct: Zach decided D2-95 (scavengers later, with wild animals) and D2-96 (rot near water, food and people; a death in a
+  settlement highly salient; burying as work on the body, shown only where one lies, by ground and cold). Putting down and hiding
+  become `give` to a place with the `hidden` modifier (verb_modifiers.md §5); cover as the place's visibility (visibility.md).
 
 ## Sources
 

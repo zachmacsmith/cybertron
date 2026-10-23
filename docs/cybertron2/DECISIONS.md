@@ -160,6 +160,12 @@ and correct them in place.**
 | D2-90 | 23 Oct | **Each edge end is tied to a side of the node and one or more parcels**, and is either a road (known to all there) or hidden; a "path known to some" is a hidden way some know of | hidden_ways.md §1 | a third visibility, path |
 | D2-91 | 23 Oct | **One knack for spotting things: the eye for the land** (D4-50), raised by practice, for finding ways and noticing things in general; no separate woodcraft | hidden_ways.md §2 | woodcraft as its own skill |
 | D2-92 | 23 Oct | **How hidden a way is follows its land:** its parcel's cover (forest, scrub, rock hide; open ground does not), how much it is used, and changes to the land (felling exposes it; regrowth where the land regrows hides it again), not a fixed flag | hidden_ways.md §1-2 | a fixed visibility; growing back after a fixed time |
+| D2-93 | 23 Oct | **Modifiers on verbs**, as data: nothing by default; those an agent knows are shown in its verb lines; learned, explained and taught like other know-how. **Trying one you do not know**, where the modifier allows it (hiding does), does it worse and makes you aware of it, with rough knowledge | proposals/verb_modifiers.md | an unknown modifier refused outright |
+| D2-94 | 23 Oct | **`for` (D2-37) and the sowing method (D2-54) are modifiers** | verb_modifiers.md | |
+| D2-95 | 23 Oct | **Scavengers later**, flagged, together with wild animals (attacking herds and hunters, drawn to food) | things_in_places.md §6 | |
+| D2-96 | 23 Oct | **Rot and burial:** a rotting body or rotting food lies at a spot and, once disease exists (OPEN Q-16), carries a risk that can reach water, food and people acting nearby; a death in a settlement is highly salient; **burying is work on the body**, an option shown only where there is a body, its labour by the ground and the cold (frozen ground is harder) | things_in_places.md §6 | |
+| D2-97 | 23 Oct | **Daily notices on the road**, drawn as at home, remembered on arrival ("On the way: ...") | journeys.md §2 | |
+| D2-98 | 23 Oct | **Hidden ways are found by the noticing rule** (D2-85), with hidden_ways.md §2's factors (numbers to calibrate); felling is one case of a place's visibility changing (visibility.md) | hidden_ways.md §2 | |
 
 ## Directions (Zach's stated aims recorded in the notes; designs follow them; checked by 37.2, 22 Oct)
 

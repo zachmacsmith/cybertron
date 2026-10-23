@@ -1,6 +1,6 @@
 # Proposal: what travellers see on the way
 
-**Status:** partly accepted: D2-88, D2-89 (23 Oct); daily notices (Q1) to confirm. Design only. **Owner:** 37.2 (author); perception, roads and memory are 37.4's (place.md,
+**Status:** accepted: D2-88, D2-89, D2-97 (23 Oct). Design only. **Owner:** 37.2 (author); perception, roads and memory are 37.4's (place.md,
 seeing.md, senses.md, D4-48), so this goes to them. **Affects:** spec/information/perception.md, memory.md, signs.md;
 spec/world/edges.md; environment/ (signs of slow change).
 
@@ -58,7 +58,7 @@ seen it"; "farms along the valley stand empty"; "new ruts: more carts use this r
 
 ## Open questions (for Zach, and 37.4)
 
-1. Daily notices on the road, remembered on arrival (explained to Zach 23 Oct; to confirm)?
+1. ~~Daily notices~~ decided: D2-97.
 2. ~~Traces~~ decided: persist and fade (D2-88).
 3. ~~Slow change~~ decided: later, flagged; data in the shared sign registry (D2-89).
 
@@ -71,6 +71,8 @@ seen it"; "farms along the valley stand empty"; "new ruts: more carts use this r
 
 - 23 Oct: Zach decided D2-88 (traces that fade) and D2-89 (slow change later, as data in the shared registry). Asked what Q1
   means; explained.
+
+- 23 Oct: Zach decided D2-97 (daily notices on the road, remembered on arrival).
 
 ## Sources
 
