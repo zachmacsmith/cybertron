@@ -1,0 +1,242 @@
+"""What an agent is shown (seeing.md §1): the system prompt (who it is, how life works, the place, what it knows how to do, how to
+act), the turn prompt each morning, and the talk prompt when it is asked again before work. The reply schema."""
+from __future__ import annotations
+
+import json
+
+from cybertron2.m1 import knowledge as KN, perceive as PC
+from cybertron2.m1.data import COVERS, EDIBLE, ITEMS, TECHNIQUES
+from cybertron2.m1.world import CONDITION, STAGES, show
+
+SCHEMA = {
+    "type": "object",
+    "properties": {
+        "why": {"type": "string"},
+        "actions": {"type": "array", "items": {"type": "object", "properties": {
+            "do": {"type": "string"}, "what": {"type": "string"}, "at": {"type": "string"}, "to": {"type": "string"},
+            "item": {"type": "string"}, "qty": {"type": "number"}, "from": {"type": "string"}, "target": {"type": "string"},
+            "aim": {"type": "string"}, "offer": {"type": "string"}, "person": {"type": "string"}, "thing": {"type": "string"}},
+            "required": ["do"]}},
+        "say": {"type": "array", "items": {"type": "string"}},
+        "tell": {"type": "array", "items": {"type": "object", "properties": {"to": {"type": "string"}, "text": {"type": "string"}},
+                                             "required": ["to", "text"]}},
+        "explain": {"type": "array", "items": {"type": "object", "properties": {"to": {"type": "string"}, "what": {"type": "string"}},
+                                                "required": ["to", "what"]}},
+        "offers": {"type": "array", "items": {"type": "object", "properties": {
+            "to": {"type": "string"}, "give": {"type": "string"}, "get": {"type": "string"}}, "required": ["give", "get"]}},
+        "attend": {"type": "string"},
+        "note": {"type": "array", "items": {"type": "object", "properties": {"title": {"type": "string"}, "text": {"type": "string"}},
+                                             "required": ["title", "text"]}},
+        "pin": {"type": "string"},
+        "forget": {"type": "array", "items": {"type": "string"}},
+        "open": {"type": "array", "items": {"type": "string"}},
+        "look_up": {"type": "array", "items": {"type": "string"}},
+    },
+    "required": ["why", "actions"],
+}
+
+VERB_LINES = """- gather {"what": forage | cut withies | dig clay | glean | hunt | fell | fish, "at": place}
+- make {"what": a recipe, "qty"?: how many times}
+- build {"what": firing pit, "at": place}
+- work {"what": reap | repair, "at"?: place}           reap a ripe field; repair your own house
+- move {"item", "qty", "to": house | hands}            between your hands and your house's store (free)
+- give {"to": person, "item", "qty"}                    (free)
+- accept {"offer": id}                                  an open offer made to you or to anyone: both sides at once, or nothing (free)
+- set {"thing": door, "to": open | barred}              your house's door (free)
+- watch {"person"}                                      spend the day working beside them: you see how they do things (4 units)
+- teach {"to", "what"} / learn {"from", "what"}         one session, if both set aside the time the same day (2 units each)
+- attack {"target": person | house, "aim": rob | hurt}  settled tonight (3 units)
+- guard                                                 stand guard tonight over your house and anyone set upon (1 unit)
+- steal {"from": house, "item", "qty"}                  from a house whose door is not barred; you may be seen (1 unit)
+- rest"""
+
+REPLY_LINES = """Reply with JSON:
+- "why": a sentence or two on what you mean to do today and why.
+- "actions": today's plan, in order, each {"do": verb, ...}. Actions beyond your units are not done.
+- "say": things you say aloud; everyone here hears them before the day's work. "tell": [{"to", "text"}] said to one person alone.
+- "explain": [{"to", "what"}] explain a craft you know to someone (they get a rough idea of it; free).
+- "offers": [{"to": a person or "anyone", "give": "2 bread", "get": "1 timber"}] an exchange anyone named may accept today.
+- "attend": the one thing you pay close attention to today: a person, a house, a place, the cattle, the sky, or "the place in general".
+  You will see it in detail tomorrow morning. It costs nothing.
+- "note": [{"title", "text"}] write or replace one of your private notes (up to 8, about 150 words each); "pin": a title to show
+  in full every morning; "forget": [titles].
+- "open": [note titles] and "look_up": [crafts]: shown to you before the day's work, when you may change your plan."""
+
+
+def _kin(w, name) -> list:
+    a = w.s["agents"][name]
+    out = []
+    for x, b in w.s["agents"].items():
+        if x == name:
+            continue
+        rel = a["relations"].get(x)
+        same = b["household"] == a["household"]
+        if rel or same:
+            dead = "" if b["alive"] else " (dead)"
+            out.append(f"- {x}: {rel or 'of your household'}{dead}" + (f"; {b['trade']}" if b.get("trade") else ""))
+    for x, b in w.s["agents"].items():
+        if x != name and x not in a["relations"] and b["household"] != a["household"]:
+            out.append(f"- {x}: of {w.s['houses'][b['house']]['name'] if b['house'] else 'no house'}" + (f"; {b['trade']}" if b.get("trade") else ""))
+    return out
+
+
+def _place_lines(w) -> list:
+    out = []
+    for pid, p in w.parcels().items():
+        c = COVERS[p["cover"]]
+        can = [g for g in c["gather"]] + c["work"]
+        adj = ", ".join(w.parcels()[q]["name"] for q in p["adj"])
+        line = f"- {p['name']} ({p['cover']}{', ' + p['side'] if p['side'] else ''}): {p['text']}".rstrip(": ")
+        bits = []
+        if can:
+            bits.append("here one can " + ", ".join(can))
+        if c["lots"]:
+            bits.append("ground to build on")
+        if c["risks"]:
+            bits.append("risks: " + ", ".join(c["risks"]))
+        if c["becomes"]:
+            bits.append("becomes " + c["becomes"])
+        houses = [h["name"] for h in w.s["houses"].values() if h["parcel"] == pid]
+        if houses:
+            bits.append("houses: " + ", ".join(houses))
+        out.append(line + ". " + "; ".join(bits) + (f". Next to {adj}." if adj else "."))
+    for f in w.s["node"]["features"].values():
+        out.append(f"- {f['name']}: {f['text']}")
+    return out
+
+
+def system_prompt(w, name) -> str:
+    a = w.s["agents"][name]
+    h = w.home(name)
+    stage = {"youth": "a youth, not yet grown", "adult": "a grown adult", "elder": "an elder"}.get(a["stage"], a["stage"])
+    lines = [f"You are {name}, {stage}, of {h['name'] if h else 'no house'} in {w.s['node']['name']}."
+             + (f" You are the household's {a['role']}." if a.get("role") else "") + (f" By trade: {a['trade']}." if a.get("trade") else "")]
+    if w.s["node"]["text"]:
+        lines.append(w.s["node"]["text"])
+    lines += ["", "Your people:"] + _kin(w, name)
+    if a.get("aim"):
+        lines += ["", f"What you want: {a['aim']}"]
+    p = w.p
+    lines += ["", "How life works here:",
+              f"- A day: you plan in the morning, may talk before work, then work. Work is counted in units: {p['units']['summer']} in "
+              f"summer, {p['units']['autumn']} in autumn, {p['units']['winter']} in winter ({p['youth_units']} for a youth); fewer when "
+              "hungry or hurt. Any units you do not use are wasted.",
+              f"- Each night everyone eats {p['ration']:g} food, from what they carry first, then from their house's store. Without a "
+              "sound, warm house you need more. Missed meals make you hungry, then starving; starving people work less and can die.",
+              f"- Food: grain is half a meal; bread, pottage, greens, meat and fish a whole one. Fresh food spoils in the hand (greens, "
+              f"fish and pottage fastest); a house's store keeps it much better. A house's fire burns {p['fuel']['normal']:g} timber "
+              f"a night ({p['fuel']['cold']:g} on a cold one), taken from its store; a cold night without a fire is hard.",
+              "- Houses fall into disrepair; repair takes timber. Goods lie in your hands or in your house's store; anything you carry "
+              "you can give, and anything in a store with an open door can be taken.",
+              "- Knowing how: a craft you know you can do well. You can know of a craft without knowing how. You get a rough idea of "
+              "one by watching someone do it (a few days of seeing it done, or one day at their side), or by having it explained. "
+              "With a rough idea you can try it, at a cost in materials and a fair chance of failing; each try teaches you. A day "
+              "being taught by someone who knows it makes you capable (a youth learns faster). Practice makes you surer and better.",
+              "- What you notice: each morning you hear what concerned you and what stood out the day before. You see one thing "
+              "closely each day, whatever you chose to attend to; the rest you only glimpse.",
+              "", f"The place, {w.s['node']['name']}:"] + _place_lines(w)
+    lines += ["", "What you know how to do:"] + KN.crafts_lines(w, name)
+    lines += ["", "What you can do (each action is a verb and what it acts on):", VERB_LINES, "", REPLY_LINES]
+    return "\n".join(lines)
+
+
+def _house_lines(w, name) -> list:
+    h = w.home(name)
+    if h is None:
+        return ["You have no house."]
+    hid = w.s["agents"][name]["house"]
+    who = [x for x in w.living() if w.s["agents"][x]["house"] == hid and x != name]
+    stock = ", ".join(f"{show(q)} {i}" for i, q in sorted(h["stock"].items()) if q > 0.05) or "empty"
+    food = w.food_value(h["stock"])
+    need = len(who) + 1
+    return [f"{h['name']} is {CONDITION[h['condition']]}; door {h['door']}; fire {'lit' if h['fire'] else 'out'} last night. "
+            f"Sleeping there: you{', ' + ', '.join(who) if who else ''}.",
+            f"Its store: {stock} (food worth {show(food)} meals; the household eats about {need} a night, and the fire takes "
+            f"{w.p['fuel']['cold' if w.cold() else 'normal']:g} timber)."]
+
+
+def _offer_text(w, oid, o) -> str:
+    g = ", ".join(f"{q:g} {i}" for i, q in o["give"].items())
+    t = ", ".join(f"{q:g} {i}" for i, q in o["get"].items())
+    return f"{oid}: {o['by']} offers {g} for {t}" + ("" if o["to"] else " (to anyone)")
+
+
+def turn_prompt(w, name) -> str:
+    a = w.s["agents"][name]
+    cal = w.calendar()
+    m = PC.store(w, name)
+    t = m["today"]
+    L = [f"## Now\n{cal['season'].capitalize()}, day {cal['day']} of {w.season_len} ({cal['left']} left in the season)"
+         + (", and cold" if w.cold() else "") + f". You have {w.units_for(name)} units of work today."]
+    y = []
+    if t["felt"] or t["learned"]:
+        y += [f"- {x}" for x in t["felt"] + t["learned"]]
+    if t["concerned"]:
+        y += ["What concerned you:"] + [f"- {x}" for x in t["concerned"]]
+    if t["notice"]:
+        y += ["What stood out:"] + [f"- {x}" for x in t["notice"]]
+    if t["attended"]:
+        y += [f"You paid close attention to {t['attended']['target']}:"] + [f"- {x}" for x in t["attended"]["lines"]]
+    if t["glimpse"]:
+        y += ["In passing: " + "; ".join(t["glimpse"]) + "."]
+    if w.d > 0:
+        L.append("## Yesterday\n" + ("\n".join(y) if y else "A quiet day: nothing stood out."))
+    if t["dawn"]:
+        L.append("## This morning\n" + "\n".join(f"- {x}" for x in t["dawn"]))
+    hold = ", ".join(f"{show(q)} {i}" for i, q in sorted(a["holdings"].items()) if q > 0.05) or "nothing"
+    you = [f"You are {STAGES[a['hunger']]}" + (", and hurt" if a["wounded"] else "") + f". You carry: {hold}."]
+    L.append("## You\n" + "\n".join(you + _house_lines(w, name)))
+    can, near = KN.options(w, name)
+    opt = ["Today you could: " + "; ".join(can) + "." if can else "Of your crafts, none can be done today with what you have."]
+    if near:
+        opt.append("Not yet: " + "; ".join(near) + ".")
+    L.append("## Your crafts today\n" + "\n".join(opt))
+    owed = [_offer_text(w, oid, o) for oid, o in w.s["offers"].items() if o["open"] and o["by"] != name and o["to"] in (None, name)]
+    mine = [_offer_text(w, oid, o) for oid, o in w.s["offers"].items() if o["open"] and o["by"] == name]
+    if owed or mine:
+        L.append("## Offers open\n" + "\n".join([f"- {x}" for x in owed] + [f"- yours: {x}" for x in mine]))
+    mem = PC.memory_lines(w, name)
+    ml = []
+    for r in mem["full"]:
+        ml.append(f"{PC._day(w, r['day'])}: " + " ".join(r["did"]))
+        if r["heard"]:
+            ml += [f"  heard: {x}" for x in r["heard"]]
+    if mem["earlier"]:
+        ml = [f"- {x}" for x in mem["earlier"]] + ml
+    if ml:
+        L.append("## Recent days\n" + "\n".join(ml))
+    if mem["lasting"]:
+        L.append("## What you remember\n" + "\n".join(f"- {x}" for x in mem["lasting"]))
+    bl = PC.beliefs_lines(w, name)
+    if bl:
+        L.append("## As you last saw them\n" + "\n".join(f"- {x}" for x in bl))
+    if a["notes"]:
+        nl = []
+        if a["pinned"] and a["pinned"] in a["notes"]:
+            nl.append(f"Pinned, “{a['pinned']}”: {a['notes'][a['pinned']]}")
+        rest = [k for k in a["notes"] if k != a["pinned"]]
+        if rest:
+            nl.append("Other notes (open them to read): " + "; ".join(f"“{k}”" for k in rest))
+        L.append("## Your notes\n" + "\n".join(nl))
+    L.append("Plan your day. Reply with JSON only.")
+    return "\n\n".join(L)
+
+
+def talk_prompt(w, name, heard: list, offers: list, opened: list, cards: list, first: dict) -> str:
+    """Asked again before work: what was said to it, offers made to it, notes it opened, crafts it looked up. Its first plan."""
+    L = [turn_prompt(w, name).rsplit("\n\nPlan your day.", 1)[0], "## Before the day's work"]
+    if heard:
+        L.append("You hear:\n" + "\n".join(f"- {x}" for x in heard))
+    if offers:
+        L.append("Offers made to you (accept with {\"do\": \"accept\", \"offer\": id}):\n" + "\n".join(f"- {x}" for x in offers))
+    if opened:
+        L.append("Your notes:\n" + "\n".join(f"- “{k}”: {v}" for k, v in opened))
+    if cards:
+        L.append("What you know of:\n" + "\n".join(f"- {c}" for c in cards))
+    said = [x for x in (first.get("say") or []) if isinstance(x, str)] + [f"to {x.get('to')}: {x.get('text')}" for x in (first.get("tell") or []) if isinstance(x, dict)]
+    if said:
+        L.append("You have already said: " + " | ".join(said) + " Anything in \"say\" or \"tell\" now is said in addition.")
+    plan = "; ".join(json.dumps({k: v for k, v in x.items() if v not in (None, '')}) for x in first.get("actions") or []) or "nothing yet"
+    L.append(f"Your plan was: {plan}. You meant: {first.get('why', '')}")
+    L.append("Give your plan for the day again (it replaces the first), and anything you say in reply. Reply with JSON only.")
+    return "\n\n".join(L)
