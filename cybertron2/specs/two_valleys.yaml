@@ -1,0 +1,95 @@
+# World 2 of the ladder (review 38.21): two villages a day apart on a cart track, and a wood nobody has explored. About 16 people.
+# What it tests, on top of world 1: field works on both kinds of ground (D2-66), seed selection and master farmers (D2-64, D2-65),
+# trade over a road with a handcart, the hand mill against an ox mill (D2-61), charcoal or timber for smelting (D4-46), camps,
+# bedrolls and tents (D2-68), and an unexplored place found and told of (D4-47).
+#   Wetham, in the valley bottom: good soil but wet; three households. The Marshes have drained two plots and know ditching; the
+#     Reeves have not and do not; the Millers have an ox mill (dressed millstones and an ox) and grind for a share. Cattle on the
+#     water meadows. No stone, little wood.
+#   Highcombe, up the dale: thin hill fields; the Cragg household has terraced one field, knows terracing and selects its seed; a
+#     quarry (stone for terraces, hearths and millstones) and a small smithy (the Smiths: copper tools from bought copper, no ore
+#     here). Wood on the scarp. Little grain.
+#   The Old Wood, beyond Highcombe by a forest path nobody follows: good timber, game, and a clearing; unexplored.
+# Leverage: Wetham's grain against Highcombe's stone, tools and timber; the Marshes' ditching knowledge; the Millers' mill; the
+# handcart (the Reeves'); the Smiths' anvil. Food binds through the winter at Highcombe.
+name: two_valleys
+seed: 41
+days: 18
+calendar: {season: summer, day: 2, season_days: 5}
+cold_days: []
+nodes:
+  wetham:
+    name: Wetham
+    parcels:
+      w_green: {name: the Green, cover: built, size: 2, text: "three houses and a mill on a green by the river", adj: [marsh_field, reeve_field, w_meadow]}
+      marsh_field: {name: Marsh Field, cover: field, size: 3, ground: wet, text: "the Marshes' barley between deep ditches", adj: [w_meadow],
+                    state: {crop: {kind: barley, left: 120, ripe_day: 2}, works: {done: 2}, last_crop: legumes}}
+      reeve_field: {name: Reeve Field, cover: field, size: 3, ground: wet, text: "the Reeves' barley, rushes in the low parts", adj: [river],
+                    state: {crop: {kind: barley, left: 70, ripe_day: 3}, last_crop: grain}, fertility: 0.85}
+      mill_croft: {name: Mill Croft, cover: field, size: 1, text: "the Millers' bean plot", state: {crop: {kind: beans, left: 18, ripe_day: 4}}}
+      w_meadow: {name: Water Meadow, cover: meadow, size: 3, text: "lush meadow, flooded in winter", adj: [river]}
+      river: {name: the River, cover: water, size: 2, text: "a slow brown river"}
+      w_alders: {name: the Alders, cover: forest, size: 1, text: "a strip of alder by the river",
+                 state: {plants: {K: 4, S: 4, r: 0.3}, wood: {K: 15, S: 14, r: 0.03}}}
+  highcombe:
+    name: Highcombe
+    parcels:
+      h_street: {name: the Street, cover: built, size: 2, text: "stone houses and a smithy along a steep street", adj: [terrace_field, hill_field]}
+      terrace_field: {name: Terrace Field, cover: field, size: 2, ground: hill, text: "stone terraces stepping up the hill",
+                      state: {crop: {kind: oats, left: 50, ripe_day: 3}, works: {done: 2}, last_crop: legumes}}
+      hill_field: {name: Hill Field, cover: field, size: 2, ground: hill, text: "a steep field, stones in the furrows", adj: [scarp],
+                   state: {last_crop: grain}, fertility: 0.8}
+      quarry: {name: the Quarry, cover: rock, size: 1, text: "a grey limestone face", state: {quarry: {S: 0, K: 0}}}
+      sheepwalk: {name: the Sheepwalk, cover: pasture, size: 3, text: "thin high grazing", adj: [scarp]}
+      scarp: {name: the Scarp, cover: forest, size: 3, text: "beech hanging on the scarp",
+              state: {plants: {K: 8, S: 7, r: 0.3}, game: {K: 8, S: 7, r: 0.25}, wood: {K: 90, S: 85, r: 0.03}}}
+  old_wood:
+    name: the Old Wood
+    unexplored: true
+    parcels:
+      ow_clearing: {name: the Clearing, cover: meadow, size: 1, text: "a sunny clearing among huge oaks", adj: [ow_deep]}
+      ow_deep: {name: the Deep Oaks, cover: forest, size: 6, text: "old oak forest, untouched",
+                state: {plants: {K: 16, S: 16, r: 0.3}, game: {K: 30, S: 30, r: 0.25}, wood: {K: 300, S: 300, r: 0.03}}}
+roads:
+- [wetham, highcombe, 1, track]
+- [highcombe, old_wood, 1, {way: "a forest path over the scarp that nobody uses"}]
+buildings:
+  marsh_house: {name: Marsh House, parcel: w_green, household: Marsh, structure: timber, size: 5, fittings: {beds: 5, hearth: 1, bins: 1, hand mill: 1},
+                stock: {grain: 16, beans: 6, timber: 5}}
+  reeve_house: {name: Reeve House, parcel: w_green, household: Reeve, structure: wattle, size: 5, fittings: {beds: 5, hearth: 1, bins: 1},
+                stock: {grain: 10, timber: 4, handcart: 1}}
+  the_mill: {name: the Mill, parcel: w_green, household: Miller, structure: timber, size: 4, fittings: {millstones: 1, bins: 1},
+             stock: {grain: 10, flour: 6}}
+  miller_house: {name: Miller House, parcel: w_green, household: Miller, structure: wattle, size: 4, fittings: {beds: 4, hearth: 1, bins: 1},
+                 stock: {bread: 6, grain: 6, timber: 4, hay: 10}}
+  cragg_house: {name: Cragg House, parcel: h_street, household: Cragg, structure: stone, size: 5, fittings: {beds: 5, hearth: 1, bins: 1, hand mill: 1, cellar: 1},
+                stock: {grain: 12, timber: 8, stone: 4}}
+  smith_house: {name: Smith House, parcel: h_street, household: Smith, structure: stone, size: 4, fittings: {beds: 4, hearth: 1, bins: 1},
+                stock: {grain: 8, timber: 6}}
+  smithy: {name: the Smithy, parcel: h_street, household: Smith, structure: stone, size: 3, fittings: {hearth: 1, anvil: 1},
+           stock: {copper: 2, charcoal: 2, timber: 4}}
+herds:
+  wetham_cattle: {name: the Wetham cattle, kind: cattle, parcel: w_meadow, cows: 4, oxen: 2, bulls: 1, in_milk: 2}
+  miller_ox: {name: the Millers' ox, kind: cattle, parcel: w_meadow, oxen: 1}
+claims:
+- {thing: [herd, wetham_cattle], claimant: Marsh, rights: all, grounds: seeded}
+- {thing: [herd, miller_ox], claimant: Miller, rights: all, grounds: seeded}
+- {thing: [parcel, marsh_field], claimant: Marsh, rights: all, grounds: seeded}
+- {thing: [parcel, reeve_field], claimant: Reeve, rights: all, grounds: seeded}
+- {thing: [parcel, mill_croft], claimant: Miller, rights: all, grounds: seeded}
+- {thing: [parcel, terrace_field], claimant: Cragg, rights: all, grounds: seeded}
+- {thing: [parcel, hill_field], claimant: Cragg, rights: all, grounds: seeded}
+- {thing: [parcel, quarry], claimant: Cragg, rights: all, grounds: seeded}
+customs:
+- {text: "The Millers grind for anyone who brings grain to the Mill and keep a share of the grain for it.", nodes: all}
+- {text: "Barley sown after the middle of autumn will not ripen before the frost; rye will stand the winter.", nodes: all}
+- {text: "Nobody goes over the scarp into the old wood: the path is overgrown and nobody knows what is there.", nodes: [highcombe]}
+lines:
+  Marsh: {acting: [3, 5], min_adults: 2, crafts: [ditch, plough, milk, sow, reap], tools: {crude tool: 2}, holdings: {coin: 6, rye: 8}}
+  Reeve: {acting: [3, 4], min_adults: 2, crafts: [reap], tools: {crude tool: 1}, holdings: {coin: 4}}
+  Miller: {acting: [2, 4], min_adults: 1, crafts: [mill], tools: [crude tool], holdings: {coin: 8}}
+  Cragg: {acting: [3, 5], min_adults: 2, crafts: [terrace, select seed, quarry, hearth, sow, reap], tools: {crude tool: 2}, holdings: {coin: 4}}
+  Smith: {acting: [2, 4], min_adults: 1, crafts: [copper tool, coin, charcoal, wooden plough, harness], tools: {copper tool: 1, crude tool: 1},
+          holdings: {coin: 10, hide: 2}}
+bounds: {acting: [13, 20], children_max: 8, youths_min: 2, per_min: 2, per_spread: 4}
+sim: {start: -58, fertility: 0.15, leave: 0.6}
+cast: {head: claude-opus-5-5, opus_extra: 0, middle: claude-sonnet-5-5, sonnet_extra: 2, rest: claude-haiku-5-5, youth: claude-haiku-5-5}

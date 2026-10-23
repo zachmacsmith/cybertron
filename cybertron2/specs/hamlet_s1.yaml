@@ -30,7 +30,7 @@ nodes:
         state:
           crop:
             kind: barley
-            left: 40
+            left: 28
             ripe_day: 1
           last_crop: grain
       low_field:
@@ -54,7 +54,7 @@ nodes:
         state:
           crop:
             kind: barley
-            left: 90
+            left: 64
             ripe_day: 2
             broken: 2
           last_crop: legumes
@@ -132,8 +132,8 @@ buildings:
       bins: 1
       hand mill: 1
     stock:
-      grain: 18.7
-      beans: 8.0
+      grain: 13.3
+      beans: 5.3
       timber: 10.7
       hay: 16.0
       straw: 8.0
@@ -162,7 +162,7 @@ buildings:
       bins: 1
       hand mill: 1
     stock:
-      grain: 20.0
+      grain: 12.0
       timber: 12.0
 herds:
   thorne_cattle:

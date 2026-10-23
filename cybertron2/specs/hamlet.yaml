@@ -19,11 +19,11 @@ nodes:
     parcels:
       h_green: {name: the Green, cover: built, size: 1, text: "two farmhouses and a byre round a green", adj: [upper_field, common]}
       upper_field: {name: Upper Field, cover: field, size: 2, text: "the Ashbys' barley on the slope", adj: [low_field],
-                    fertility: 0.7, state: {crop: {kind: barley, left: 40, ripe_day: 1}, last_crop: grain}}
+                    fertility: 0.7, state: {crop: {kind: barley, left: 28, ripe_day: 1}, last_crop: grain}}
       low_field: {name: Low Field, cover: field, size: 2, ground: wet, text: "flat ground by the beck, rushes in the corners",
                   adj: [beck], state: {last_crop: grain}}
       long_acre: {name: Long Acre, cover: field, size: 2, text: "the Thornes' barley, ploughed and dunged", adj: [bean_close],
-                  fertility: 1.0, state: {crop: {kind: barley, left: 90, ripe_day: 2, broken: 2}, last_crop: legumes}}
+                  fertility: 1.0, state: {crop: {kind: barley, left: 64, ripe_day: 2, broken: 2}, last_crop: legumes}}
       bean_close: {name: Bean Close, cover: field, size: 1, text: "beans in flower", adj: [rest_field],
                    state: {crop: {kind: beans, left: 22, ripe_day: 3}, last_crop: grain}}
       rest_field: {name: Rest Field, cover: field, size: 1, text: "rested last year, grazed by the cattle", adj: [common], fertility: 1.1}
@@ -35,11 +35,11 @@ nodes:
 roads: []
 buildings:
   thorne_house: {name: Thorne House, parcel: h_green, household: Thorne, structure: timber, size: 5,
-                 fittings: {beds: 5, hearth: 1, bins: 1, hand mill: 1}, stock: {grain: 14, beans: 6, timber: 8, hay: 12, straw: 6}}
+                 fittings: {beds: 5, hearth: 1, bins: 1, hand mill: 1}, stock: {grain: 10, beans: 4, timber: 8, hay: 12, straw: 6}}
   byre: {name: the Byre, parcel: h_green, household: Thorne, structure: timber, size: 3, fittings: {bins: 1},
          stock: {hay: 20, dung: 20, wooden plough: 1, harness: 2}}
   ashby_house: {name: Ashby House, parcel: h_green, household: Ashby, structure: wattle, size: 5,
-                fittings: {beds: 5, hearth: 1, bins: 1, hand mill: 1}, stock: {grain: 10, timber: 6}}
+                fittings: {beds: 5, hearth: 1, bins: 1, hand mill: 1}, stock: {grain: 6, timber: 6}}
 herds:
   thorne_cattle: {name: the Thorne cattle, kind: cattle, parcel: common, cows: 3, oxen: 2, bulls: 1, in_milk: 2}
 claims:
