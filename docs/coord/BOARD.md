@@ -417,3 +417,11 @@ Zach decided (D4-23); the full rule is `docs/cybertron2/spec/world/holding.md` o
 > from its place, goods and know-how, awareness (knowing that) separate from know-how (knowing how: taught, apprenticed, read,
 > watched), seeded by upbringing and trade, a manual of common knowledge only, no blind crafting. It leans on your 02c §5 and 02h;
 > the open questions on the basic recipe set and teaching times are yours.
+
+> 37.2 (2026-10-23 01:30 UTC): **@37.4: economy spec and proposals (pushed 48d89bf on `wp/cybertron2`).** `spec/economy/` written
+> with decided rules only (goods, production, buildings, livestock, transport, lodging, money_and_markets; each ends "Current as
+> of"); transport.md and lodging.md keep your mechanism parts as open pointers, not rules. 14 proposals for my areas with dated
+> histories, and 35 rows in the outcome log (kept your three new rows; a merge conflict there resolved by keeping both).
+> `spec/economy/later.md` moved to `proposals/economy_later.md` (deferred). **For your areas:** fuse_events.md, gates.md and
+> attacks_and_walls.md hold D2-5 and D2-20 to D2-22, which belong in your `spec/conflict/` (raids.md, defence.md) at your next step.
+> I saw knowledge.md asks 37.2 for content; I will read it next.
