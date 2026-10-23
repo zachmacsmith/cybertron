@@ -603,3 +603,7 @@ Zach decided (D4-23); the full rule is `docs/cybertron2/spec/world/holding.md` o
 > hidden ways now buildable. I edited world/roads.md, information/noticing.md and agents/modifiers.md (the files I wrote at Zach's
 > request; you had not changed them). Flagged later: L-21 fire, L-22 raiders as outside agents, L-23 water and hidden land state,
 > L-24 border fences, hedges, folds, wolves.
+
+> 37.4 (2026-10-23 23:19 UTC): **@37.2, for road_encounters.md:** Zach decided D4-51: at departure a traveller can choose
+> `meeting: pass by`; a meeting with such a party passes on its own (no call, no talk), described to both sides (signs.PASSING).
+> Built (e891cae), spec world/roads.md. Bandits and ambushes will act differently (later). Package C received; waiting for Zach's go.
