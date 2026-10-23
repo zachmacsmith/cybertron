@@ -262,6 +262,8 @@ sim:
 cast:
   head: claude-opus-5-5
   opus_extra: 0
+  middle: claude-sonnet-5-5
+  sonnet_extra: 2
   rest: claude-haiku-5-5
   youth: claude-haiku-5-5
 generated:
@@ -744,8 +746,9 @@ agents:
     - food
     - animals
     model: claude-haiku-5-5
+    born_line: Reed
     trade: milking
-    aim: Keep the family's good name, and see that what is owed to it is paid.
+    aim: See your grandchildren settled and provided for before you die.
   Isolde:
     household: Reed
     stage: elder
@@ -784,8 +787,9 @@ agents:
     - food
     - animals
     model: claude-haiku-5-5
+    born_line: Reed
     trade: milking
-    aim: Keep the family's good name, and see that what is owed to it is paid.
+    aim: Live through one more winter, and be a burden to nobody.
   Hamo:
     household: Hale
     stage: elder
@@ -811,22 +815,20 @@ agents:
     - 'Your line''s founders: Hamo and Tiffany Hale came to Millbrook and built the first Hale house.'
     - 'Hard winters you remember, when the frost came early and the stores ran out: 42 winters ago, 39 winters ago, 4 winters ago, 2 winters ago.'
     - 4 winters ago Edric struck you in a quarrel over who has the right to Long Field; you have not forgotten.
-    knows:
-      smelt: rough
-      coin: rough
+    knows: {}
     aware_of:
       milk: you have seen the Reeds at it all your life
       mine: you have seen the Smiths at it all your life
+      smelt: you have seen the Smiths at it all your life
       copper tool: you have seen the Smiths at it all your life
+      coin: you have seen the Smiths at it all your life
     holdings:
       crude tool: 1
       coin: 6
-    concerns:
-    - mining
-    - craft
-    - smithing
+    concerns: []
     role: head
     model: claude-opus-5-5
+    born_line: Hale
     trade: ''
     aim: See the Hale household through the winter, fed and warm. You will not be shamed by Edric again.
   Tiffany:
@@ -853,18 +855,17 @@ agents:
     memories:
     - 'Your line''s founders: Hamo and Tiffany Hale came to Millbrook and built the first Hale house.'
     - 'Hard winters you remember, when the frost came early and the stores ran out: 42 winters ago, 39 winters ago, 4 winters ago, 2 winters ago.'
-    knows:
-      mine: rough
+    knows: {}
     aware_of:
       milk: you have seen the Reeds at it all your life
+      mine: you have seen the Smiths at it all your life
       smelt: you have seen the Smiths at it all your life
       copper tool: you have seen the Smiths at it all your life
       coin: you have seen the Smiths at it all your life
     holdings: {}
-    concerns:
-    - mining
-    - craft
+    concerns: []
     model: claude-haiku-5-5
+    born_line: Hale
     trade: ''
     aim: Live through one more winter, and be a burden to nobody.
   Aldric:
@@ -892,19 +893,17 @@ agents:
     - 'Your line''s founders: Aldric and Hawise Fenn came to Ashwood and built the first Fenn house.'
     - 'Hard winters you remember, when the frost came early and the stores ran out: 42 winters ago, 39 winters ago, 4 winters ago, 2 winters ago.'
     - Wife Hawise died last winter (old age).
-    knows:
-      smelt: rough
-      coin: rough
+    knows: {}
     aware_of:
       milk: you have seen the Reeds at it all your life
       mine: you have seen the Smiths at it all your life
+      smelt: you have seen the Smiths at it all your life
       copper tool: you have seen the Smiths at it all your life
+      coin: you have seen the Smiths at it all your life
     holdings: {}
-    concerns:
-    - mining
-    - craft
-    - smithing
+    concerns: []
     model: claude-haiku-5-5
+    born_line: Fenn
     trade: ''
     aim: See your grandchildren settled and provided for before you die.
   Elena:
@@ -947,15 +946,15 @@ agents:
       smelt:
         level: known
         skill: 1.8
-      milk: rough
-    aware_of: {}
+    aware_of:
+      milk: you have seen the Reeds at it all your life
     holdings: {}
     concerns:
     - craft
     - smithing
     - mining
-    - food
     model: claude-haiku-5-5
+    born_line: Smith
     trade: mining copper ore and smelting copper
     aim: See your grandchildren settled and provided for before you die.
   Rohese:
@@ -1007,7 +1006,8 @@ agents:
     - craft
     - smithing
     - mining
-    model: claude-haiku-5-5
+    model: claude-sonnet-5-5
+    born_line: Fenn
     trade: mining copper ore and smelting copper
     aim: Keep your household fed and its house sound; pay back Odo what you owe, if you can.
   Warin:
@@ -1063,6 +1063,7 @@ agents:
     - mining
     role: head
     model: claude-opus-5-5
+    born_line: Smith
     trade: mining copper ore and smelting copper
     aim: See the Smith household through the winter, fed and warm.
   Edith:
@@ -1113,7 +1114,8 @@ agents:
     - craft
     - smithing
     - mining
-    model: claude-haiku-5-5
+    model: claude-sonnet-5-5
+    born_line: Smith
     trade: ''
     aim: Keep your household fed and its house sound.
   Edric:
@@ -1146,8 +1148,8 @@ agents:
       milk:
         level: known
         skill: 1.43
-      mine: rough
     aware_of:
+      mine: you have seen the Smiths at it all your life
       smelt: you have seen the Smiths at it all your life
       copper tool: you have seen the Smiths at it all your life
       coin: you have seen the Smiths at it all your life
@@ -1158,10 +1160,9 @@ agents:
     concerns:
     - food
     - animals
-    - mining
-    - craft
     role: head
     model: claude-opus-5-5
+    born_line: Reed
     trade: milking
     aim: See the Reed household through the winter, fed and warm. You will not be shamed by Hamo again.
   Simkin:
@@ -1205,6 +1206,7 @@ agents:
     concerns: []
     role: head
     model: claude-opus-5-5
+    born_line: Fenn
     trade: ''
     aim: See the Fenn household through the winter, fed and warm.
   Sibyl:
@@ -1246,6 +1248,7 @@ agents:
     - food
     - animals
     model: claude-haiku-5-5
+    born_line: Reed
     trade: milking
     aim: Keep your household fed and its house sound.
   Osric:
@@ -1298,6 +1301,7 @@ agents:
     - smithing
     - mining
     model: claude-haiku-5-5
+    born_line: Smith
     trade: mining copper ore and smelting copper
     aim: Keep your household fed and its house sound; pay back Aldric what you owe, if you can.
   Cecily:
@@ -1337,8 +1341,9 @@ agents:
     - food
     - animals
     model: claude-haiku-5-5
+    born_line: Reed
     trade: ''
-    aim: Prove yourself to your family, and learn smelting copper as the Smiths do it.
+    aim: Prove yourself to your family, and learn striking coin as the Smiths do it.
   Alard:
     household: Fenn
     stage: youth
@@ -1375,8 +1380,9 @@ agents:
     holdings: {}
     concerns: []
     model: claude-haiku-5-5
+    born_line: Fenn
     trade: ''
-    aim: Prove yourself to your family, and learn making a copper hand tool as the Smiths do it.
+    aim: Prove yourself to your family, and learn mining copper ore as the Smiths do it.
   Piers:
     household: Smith
     stage: child
@@ -1410,6 +1416,7 @@ agents:
     holdings: {}
     concerns: []
     model: null
+    born_line: Smith
     trade: ''
   Hugh:
     household: Reed
@@ -1440,4 +1447,5 @@ agents:
     holdings: {}
     concerns: []
     model: null
+    born_line: Reed
     trade: ''

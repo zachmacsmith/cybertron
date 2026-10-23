@@ -190,7 +190,7 @@ def _place_lines(w, node) -> list:
 
 def describe_node(w, nid) -> str:
     """A node in one line, generated from what is there: houses and households, kinds of land and what they give, fittings, the
-    herd, and the trades of the people who live there (what is known of it by repute)."""
+    herd, and the trades of the lines born there (what is known of it by repute; not what married-in people brought)."""
     from cybertron2.m1.data import COVERS
     ps = w.parcels(nid)
     houses = [h for h in w.s["houses"].values() if w.node_of(h["parcel"]) == nid]
@@ -222,7 +222,8 @@ def describe_node(w, nid) -> str:
     milk = sum(int(hd.get("in_milk", 0)) for hd in w.s["herds"].values() if w.node_of(hd["home"]) == nid)
     if milk:
         bits.append(f"cows in milk ({milk})")
-    people = [x for x, a in w.s["agents"].items() if a["alive"] and a["house"] and w.node_of(w.s["houses"][a["house"]]["parcel"]) == nid]
+    people = [x for x, a in w.s["agents"].items() if a["alive"] and a["house"] and w.node_of(w.s["houses"][a["house"]]["parcel"]) == nid
+              and a.get("born_line", a["household"]) == a["household"]]          # repute: the crafts of the lines born here
     trades = sorted({TECHNIQUES[t]["label"].split(" (")[0] for x in people for t, r in w.s["know"].get(x, {}).items()
                      if r["level"] == "known" and not TECHNIQUES[t].get("basic")})
     if trades:

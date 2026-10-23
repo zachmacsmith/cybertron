@@ -96,7 +96,8 @@ class World:
         blo, bhi = self.p["combat"]["base"]
         for name, a in spec["agents"].items():
             s["agents"][name] = {
-                "household": a["household"], "house": house_of.get(a["household"]), "model": a.get("model"),
+                "household": a["household"], "born_line": a.get("born_line") or a["household"], "house": house_of.get(a["household"]),
+                "model": a.get("model"),
                 "stage": a.get("stage", "adult"), "sex": a.get("sex", ""), "trade": a.get("trade", ""), "role": a.get("role", ""),
                 "aim": a.get("aim", ""), "concerns": list(a.get("concerns") or []),
                 "holdings": {k: float(v) for k, v in (a.get("holdings") or {}).items()},

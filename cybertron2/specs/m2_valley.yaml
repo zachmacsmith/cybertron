@@ -59,4 +59,4 @@ lines:
   Smith: {crafts: [mine, smelt, copper tool, coin], tools: [copper tool, crude tool], holdings: {coin: 20}}
 bounds: {acting: [12, 15], children_max: 4, youths_min: 2, per_min: 2, per_spread: 3}
 sim: {start: -58, fertility: 0.15, leave: 0.6}
-cast: {head: claude-opus-5-5, opus_extra: 0, rest: claude-haiku-5-5, youth: claude-haiku-5-5}
+cast: {head: claude-opus-5-5, opus_extra: 0, middle: claude-sonnet-5-5, sonnet_extra: 2, rest: claude-haiku-5-5, youth: claude-haiku-5-5}

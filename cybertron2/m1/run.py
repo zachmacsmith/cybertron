@@ -240,8 +240,10 @@ def talk(w, names, replies, results) -> tuple[dict, dict]:
 
 
 # ---------------------------------------------------------------------- the run
-def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False) -> Path:
+def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, seed=None) -> Path:
     spec = load_spec(spec_path)
+    if seed is not None:                                                      # a replicate: same world, other draws
+        spec["seed"] = int(seed)
     if days:
         spec["days"] = int(days)
     if bots:
@@ -461,6 +463,7 @@ def main(argv=None):
     r.add_argument("--backend")
     r.add_argument("--workers", type=int, default=12)
     r.add_argument("--bots", action="store_true")
+    r.add_argument("--seed", type=int)
     args = ap.parse_args(argv)
     if args.cmd == "run":
-        print(run(args.spec, args.out, args.backend, args.days, args.workers, args.bots))
+        print(run(args.spec, args.out, args.backend, args.days, args.workers, args.bots, args.seed))

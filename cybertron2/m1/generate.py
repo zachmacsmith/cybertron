@@ -284,11 +284,8 @@ def build(base: dict, seed: int, tries=600) -> dict:
                 a["knows"][c] = {"level": "known", "skill": round(min(1.8, 0.8 + 0.025 * (age - 18)), 2)}
         for l, d in lines.items():
             for c in d["crafts"]:
-                if c not in a["knows"] and a["stage"] != "child":
-                    if a["stage"] in ("adult", "elder") and rng.random() < 0.3:
-                        a["knows"][c] = "rough"
-                    else:
-                        a["aware_of"][c] = f"you have seen the {l}s at it all your life"
+                if c not in a["knows"] and a["stage"] != "child":              # another line's craft: seen, not known
+                    a["aware_of"][c] = f"you have seen the {l}s at it all your life"
         for c in a["knows"]:
             a["concerns"] += [t for t in TECHNIQUES[c]["tags"] if t not in a["concerns"]]
         a["concerns"] = a["concerns"][:4]
@@ -296,12 +293,21 @@ def build(base: dict, seed: int, tries=600) -> dict:
         a["model"] = None if a["stage"] == "child" else (cast.get("head", "claude-opus-5-5") if a.get("role") == "head" else
                                                         cast.get("youth", "claude-haiku-5-5") if a["stage"] == "youth" else
                                                         cast.get("rest", "claude-sonnet-5-5"))
+        a["born_line"] = p.get("line_born") or p["line"]
         a["trade"] = " and ".join(TECHNIQUES[c]["label"].split(" (")[0] for c in own[:2]) if a["stage"] in ("adult", "elder") else ""
     extra = int((base.get("cast") or {}).get("opus_extra", 0))               # more strong players: the adults who know the most
     pool = sorted([n for n, a in agents.items() if a["stage"] == "adult" and a.get("role") != "head"],
                   key=lambda n: (-len([v for v in agents[n]["knows"].values() if not isinstance(v, str)]), T.p[n]["born"]))
     for n in pool[:extra]:
         agents[n]["model"] = (base.get("cast") or {}).get("head", "claude-opus-5-5")
+    pool = [n for n in pool[extra:]]                                          # a middle tier: one per household before a second
+    seen, spread = set(), []
+    for n in pool + pool:
+        if n not in spread and (agents[n]["household"] not in seen or len(seen) >= len({agents[x]["household"] for x in pool})):
+            spread.append(n)
+            seen.add(agents[n]["household"])
+    for n in spread[:int((base.get("cast") or {}).get("sonnet_extra", 0))]:
+        agents[n]["model"] = (base.get("cast") or {}).get("middle", "claude-sonnet-5-5")
     for l, d in lines.items():
         for tool in d.get("tools", []):
             agents[head[l]]["holdings"][tool] = 1
