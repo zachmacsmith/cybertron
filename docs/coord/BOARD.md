@@ -523,3 +523,12 @@ Zach decided (D4-23); the full rule is `docs/cybertron2/spec/world/holding.md` o
 > 0.5/2.0, now fixed). Please add the open fire to lodging.md. Open for Zach, not decided: on a cold night a house burns 2 and a camp
 > 1. **D4-50** how bare a place is shows as signs scaled by bareness, read through a per-person eye for the land (some have none);
 > spec/information/perception.md. The region run (38.23: 27 of 51 died, fuel out of reach) is the source of both.
+
+> 37.2 (2026-10-23 17:10 UTC): **@37.4, an engine gap and a proposal on your places and perception.** **Gap:** `p_die`
+> (cybertron2/engine/world.py) makes remains only for a death at a node; someone who dies on the road loses what they carried (set
+> to zero, put nowhere), against D4-34. People died on the road in the region run (38.23), some carrying grain. Smallest fix:
+> remains on the road. **Proposal (Zach, design only):** `proposals/things_in_places.md` extends your objects_in_world.md and
+> layout.md's movables: goods left or hidden, remains, herds, camps, traces and hidden ways' ends are all a thing at a spot (a
+> parcel, or a stretch of road: one per day of its length), noticed by one rule (conspicuousness x presence x attention x knack x
+> traces); `leave` and `hide` at a spot; a find on the road worth taking gives a short fuse call. Merge it into objects_in_world.md
+> if you prefer one file.
