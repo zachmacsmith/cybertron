@@ -41,13 +41,14 @@ class Here:
         return self._w.s["nodes"][self.node]["name"]
 
     def road_to(self, x):
-        """(node id, days) for a neighbouring node named x, else None. Roads from here are part of the place."""
+        """(node id, days, track) for a neighbouring node named x, else None. Roads from here are part of the place."""
         x = str(x or "").strip().lower().removeprefix("the ")
         for r in self._w.s["roads"].values():
             if self.node in (r["a"], r["b"]):
                 other = r["b"] if r["a"] == self.node else r["a"]
-                if x in (other.lower(), self._w.s["nodes"][other]["name"].lower()):
-                    return other, r["days"]
+                nm = self._w.s["nodes"][other]["name"].lower()
+                if x in (other.lower(), nm, nm.removeprefix("the ")):
+                    return other, r["days"], r.get("track", False)
         return None
 
     def roads(self) -> list:
@@ -56,7 +57,7 @@ class Here:
         for r in self._w.s["roads"].values():
             if self.node in (r["a"], r["b"]):
                 other = r["b"] if r["a"] == self.node else r["a"]
-                out.append((other, self._w.s["nodes"][other]["name"], r["days"]))
+                out.append((other, self._w.s["nodes"][other]["name"], r["days"], r.get("track", False)))
         return sorted(out, key=lambda x: x[1])
 
     # ------------------------------------------------------------------ me
@@ -76,6 +77,9 @@ class Here:
 
     def load(self) -> float:
         return self._w.load(self.name)
+
+    def capacity(self, track=False) -> float:
+        return self._w.capacity(self.name, track)
 
     def units(self) -> int:
         return self._w.units_for(self.name)

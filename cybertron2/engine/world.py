@@ -97,7 +97,7 @@ class World:
                 s["parcels"][b]["adj"].append(a)
         for i, e in enumerate(spec.get("roads") or spec.get("edges") or []):
             a, b, k = e[0], e[1], int(e[2]) if len(e) > 2 else 1
-            s["roads"][f"road:{a}-{b}"] = {"a": a, "b": b, "days": k}
+            s["roads"][f"road:{a}-{b}"] = {"a": a, "b": b, "days": k, "track": "track" in e[3:]}     # a track lets carts pass
         for bid, b in (spec.get("buildings") or {}).items():
             self._new_building(bid, b)
         for hid, h in (spec.get("herds") or {}).items():
@@ -270,6 +270,12 @@ class World:
 
     def food_value(self, goods) -> float:
         return sum(float(goods.get(i, 0.0)) * ITEMS[i]["food"] for i in EDIBLE)
+
+    def capacity(self, name, track=False) -> float:
+        """On foot, more with a pack, more again with a cart on a road with a track (transport.md, 02g §3; the best one counts)."""
+        g = self.goods(self.hands(name))
+        return float(self.p["carry"]["foot"]) + max((ITEMS[i].get("carry", 0) for i in g if g[i] >= 1 and ITEMS[i].get("carry")
+                                                     and (track or not ITEMS[i].get("track"))), default=0)
 
     def load(self, name) -> float:
         return sum(ITEMS[i]["weight"] * q for i, q in self.goods(self.hands(name)).items() if q > 1e-9)

@@ -18,9 +18,15 @@ import yaml
 from cybertron2.engine.data import TECHNIQUES
 
 MALE = ["Osric", "Wat", "Hob", "Aldric", "Edric", "Godwin", "Ralf", "Piers", "Hamo", "Simkin", "Tobin", "Alard", "Durand", "Hugh",
-        "Ivo", "Jory", "Lambert", "Odo", "Roger", "Warin"]
+        "Ivo", "Jory", "Lambert", "Odo", "Roger", "Warin", "Adam", "Baldwin", "Colin", "Drew", "Elias", "Fulk", "Gervase", "Hamon",
+        "Herbert", "Jocelin", "Martin", "Nicol", "Otes", "Payn", "Randal", "Robin", "Saer", "Thurstan", "Walter", "Wymond", "Absolon",
+        "Bennet", "Clement", "Daniel", "Everard", "Geoffrey", "Gilbert", "Henry", "Jordan", "Lucas", "Matthew", "Nigel", "Oliver",
+        "Peter", "Reynold", "Richard", "Stephen", "Thomas", "William", "Ancel"]
 FEMALE = ["Maud", "Agnes", "Ivy", "Edith", "Alys", "Mabel", "Joan", "Cecily", "Avice", "Emma", "Hawise", "Isolde", "Letice",
-          "Mariot", "Rohese", "Sibyl", "Tiffany", "Wymarc", "Beatrix", "Elena"]
+          "Mariot", "Rohese", "Sibyl", "Tiffany", "Wymarc", "Beatrix", "Elena", "Amice", "Christian", "Denise", "Eva", "Felice",
+          "Gunnild", "Helewise", "Idonea", "Juliana", "Lettice", "Margery", "Nichola", "Orabel", "Petronel", "Rose", "Sarra", "Thomasin",
+          "Ysolt", "Alice", "Godiva", "Annora", "Basilia", "Cassandra", "Dionisia", "Ellen", "Florence", "Gillian", "Isabel",
+          "Joyce", "Katherine", "Lucy", "Matilda", "Olive", "Philippa", "Richolda", "Sabina", "Susanna", "Ursula", "Wilmot", "Agatha"]
 OUTSIDE = "Ashby"                                    # where spouses who married in came from
 
 
@@ -58,9 +64,11 @@ class Tree:
         return x["born"] <= year and (x["died"] is None or x["died"] > year) and (x["left"] is None or x["left"] > year)
 
 
-def simulate(lines: dict, rng, start=-62, fertility=0.28, leave=0.3) -> tuple[Tree, list]:
-    """Forward from a founding couple per line, year by year to now (year 0). Returns the tree and the history."""
-    T = Tree(rng)
+def simulate(lines: dict, rng, start=-62, fertility=0.28, leave=0.3, T=None, hard=None) -> tuple[Tree, list]:
+    """Forward from a founding couple per line, year by year to now (year 0). Returns the tree and the history. A tree passed in
+    (another place's lines, already simulated) is extended with these lines; hard winters passed in are shared across places."""
+    T = T or Tree(rng)
+    T.rng = rng
     hist = []
     for line in lines:
         h = T.person("m", start - rng.randint(20, 26), line)
@@ -68,12 +76,12 @@ def simulate(lines: dict, rng, start=-62, fertility=0.28, leave=0.3) -> tuple[Tr
         T.p[h]["partner"], T.p[wf]["partner"] = wf, h
         place = (lines[line] or {}).get("place", "Millbrook")
         hist.append({"year": start, "text": f"{h} and {wf} {line} came to {place} and built the first {line} house", "who": [h, wf]})
-    hard = sorted(rng.sample(range(start + 5, -1), 3)) + [-2]
+    hard = hard or sorted(rng.sample(range(start + 5, -1), 3)) + [-2]
     for y in range(start, 1):
         winter = y in hard
         if winter:
             hist.append({"year": y, "text": "a hard winter: the frost came early and the stores ran out", "kind": "winter", "who": []})
-        for n in [n for n in T.p if T.alive(n, y)]:
+        for n in [n for n in T.p if T.alive(n, y) and T.p[n]["line"] in lines]:
             a = T.age(n, y)
             risk = 0.002 if a < 50 else 0.03 if a < 65 else 0.10 if a < 72 else 0.25
             risk = 0.02 if a < 5 else risk
@@ -83,13 +91,13 @@ def simulate(lines: dict, rng, start=-62, fertility=0.28, leave=0.3) -> tuple[Tr
                 T.p[n]["died"] = y
                 T.p[n]["cause"] = "the hard winter" if winter else ("a fever" if a < 50 else "old age")
                 hist.append({"year": y, "text": f"{n} died ({T.p[n]['cause']})", "kind": "death", "who": [n]})
-        for n in [n for n in T.p if T.alive(n, y) and T.p[n]["sex"] == "f"]:
+        for n in [n for n in T.p if T.alive(n, y) and T.p[n]["sex"] == "f" and T.p[n]["line"] in lines]:
             m = T.p[n]["partner"]
             if m and T.alive(m, y) and 19 <= T.age(n, y) <= 42 and rng.random() < fertility:
                 last = max([T.p[c]["born"] for c in T.p[n]["children"]] or [-999])
                 if y - last >= 2:
                     T.person(rng.choice("mf"), y, T.p[m]["line"], (m, n))
-        single = [n for n in T.p if T.alive(n, y) and not T.p[n]["partner"] and 18 <= T.age(n, y) <= 30]
+        single = [n for n in T.p if T.alive(n, y) and not T.p[n]["partner"] and 18 <= T.age(n, y) <= 30 and T.p[n]["line"] in lines]
         rng.shuffle(single)
         for n in single:
             if T.p[n]["partner"] or rng.random() > 0.35:
@@ -172,18 +180,44 @@ def build(base: dict, seed: int, tries=600) -> dict:
         hid = next((k for k, h in houses_of.items() if h["household"] == line), None)
         pid = houses_of[hid]["parcel"] if hid else None
         d["place"] = next((n["name"] for n in nodes.values() if pid in (n.get("parcels") or {})), "Millbrook")
+    bd = base.get("bounds") or {}
+    sim = dict(base.get("sim") or {})
+    places = {}                                                            # lines are simulated together within a place, and
+    for line, d in lines.items():                                          # places one after another (so a large region still fits)
+        places.setdefault(d["place"], []).append(line)
+
+    def fits(T, ls):
+        acting = [n for n in T.p if T.alive(n) and T.age(n) >= 12 and T.p[n]["line"] in ls]
+        per = [sum(1 for n in acting if T.p[n]["line"] == l) for l in ls]
+        size = lambda l: (lines[l] or {}).get("acting") or [0, 99]          # a line's own bounds on its working people, if given
+        return (all(any(T.p[n]["line"] == l and T.age(n) >= 18 for n in acting) for l in ls)
+                and all(size(l)[0] <= p <= size(l)[1] for l, p in zip(ls, per))
+                and min(per) >= bd.get("per_min", 2) and max(per) - min(per) <= bd.get("per_spread", 3)
+                and all(sum(1 for n in acting if T.p[n]["line"] == l and stage(T.age(n)) == "adult") >= int((lines[l] or {}).get("min_adults", 0))
+                        for l in ls))                                  # each trade has people of working age to do it
+
     for k in range(tries):
         rng = random.Random(f"{seed}|tree|{k}")
-        T, hist = simulate(lines, rng, **(base.get("sim") or {}))
+        start = int(sim.get("start", -62))
+        hard = sorted(rng.sample(range(start + 5, -1), 3)) + [-2]
+        T, hist, ok = Tree(rng), [], True
+        for place, ls in places.items():
+            for j in range(tries // 2):
+                T2 = copy.deepcopy(T)
+                T2, h = simulate({l: lines[l] for l in ls}, random.Random(f"{seed}|tree|{k}|{place}|{j}"), T=T2, hard=hard, **sim)
+                if fits(T2, ls):
+                    T, hist = T2, hist + [x for x in h if x.get("kind") != "winter" or place == next(iter(places))]
+                    break
+            else:
+                ok = False                                                 # this place never fit: start the region again
+                break
+        if not ok:
+            continue
         living = [n for n in T.p if T.alive(n)]
         acting = [n for n in living if T.age(n) >= 12]
-        heads = {l: [n for n in acting if T.p[n]["line"] == l and T.age(n) >= 18] for l in lines}
-        per = [sum(1 for n in acting if T.p[n]["line"] == l) for l in lines]
-        bd = base.get("bounds") or {}
         lo, hi = bd.get("acting", [6, 9])
-        if (lo <= len(acting) <= hi and len(living) - len(acting) <= bd.get("children_max", 3) and all(heads.values())
-                and sum(stage(T.age(n)) == "youth" for n in acting) >= bd.get("youths_min", 1)
-                and min(per) >= bd.get("per_min", 2) and max(per) - min(per) <= bd.get("per_spread", 3)):
+        if (lo <= len(acting) <= hi and len(living) - len(acting) <= bd.get("children_max", 3)
+                and sum(stage(T.age(n)) == "youth" for n in acting) >= bd.get("youths_min", 1)):
             break
     else:
         raise RuntimeError("no tree fits; widen the bounds")
@@ -299,7 +333,8 @@ def build(base: dict, seed: int, tries=600) -> dict:
             a["concerns"] += [t for t in TECHNIQUES[c]["tags"] if t not in a["concerns"]]
         a["concerns"] = a["concerns"][:4]
         cast = base.get("cast") or {}
-        a["model"] = None if a["stage"] == "child" else (cast.get("head", "claude-opus-5-5") if a.get("role") == "head" else
+        a["model"] = None if a["stage"] == "child" else ((lines[p["line"]] or {}).get("head_model") or cast.get("head", "claude-opus-5-5")
+                                                        if a.get("role") == "head" else
                                                         cast.get("youth", "claude-haiku-5-5") if a["stage"] == "youth" else
                                                         cast.get("rest", "claude-sonnet-5-5"))
         a["born_line"] = p.get("line_born") or p["line"]
@@ -318,8 +353,12 @@ def build(base: dict, seed: int, tries=600) -> dict:
     for n in spread[:int((base.get("cast") or {}).get("sonnet_extra", 0))]:
         agents[n]["model"] = (base.get("cast") or {}).get("middle", "claude-sonnet-5-5")
     for l, d in lines.items():
-        for tool in d.get("tools", []):
-            agents[head[l]]["holdings"][tool] = 1
+        tools = d.get("tools") or []                                      # a list: one each to the head; {tool: n}: one each to n
+        workers = [head[l]] + sorted((n for n in agents if T.p[n]["line"] == l and n != head[l] and agents[n]["stage"] in ("adult", "youth")),
+                                     key=lambda n: T.p[n]["born"])      # of the household's working people, the head first
+        for tool, k in (tools.items() if isinstance(tools, dict) else ((t, 1) for t in tools)):
+            for n in workers[:int(k)]:
+                agents[n]["holdings"][tool] = agents[n]["holdings"].get(tool, 0) + 1
         for i, (item, q) in enumerate((d.get("holdings") or {}).items()):
             agents[head[l]]["holdings"][item] = q
     for n, a in agents.items():

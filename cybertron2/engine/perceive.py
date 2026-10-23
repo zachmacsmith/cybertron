@@ -63,6 +63,9 @@ def seed_knowledge(w) -> None:
             lives = f"{w.s['buildings'][homes[0]]['name']}, {w.s['nodes'][w.s['buildings'][homes[0]]['node']]['name']}" if homes else "no house"
             m["kin"][x] = {"rel": rel, "lives": lives, "household": hh, "alive": True, "seen": None}
         home = next((w.s["buildings"][b]["node"] for b in w.homes(name)), a["at"])
+        for c in w.spec.get("customs") or []:                                   # seeded custom (D2-30: markets), as local knowledge
+            if c.get("nodes") in (None, "all") or home in c["nodes"]:
+                m["seeded"].append(c["text"])
         dist = {home: 0}
         todo = [home]
         while todo:
@@ -74,7 +77,8 @@ def seed_knowledge(w) -> None:
                         dist[y] = dist[x] + r["days"]
                         todo.append(y)
         for nid, n in w.s["nodes"].items():
-            ways = sorted((w.s["nodes"][r["b"] if r["a"] == nid else r["a"]]["name"], r["days"]) for r in w.s["roads"].values() if nid in (r["a"], r["b"]))
+            ways = sorted((w.s["nodes"][r["b"] if r["a"] == nid else r["a"]]["name"], r["days"], r.get("track", False))
+                          for r in w.s["roads"].values() if nid in (r["a"], r["b"]))
             v = views[nid]
             m["places"][nid] = {"name": n["name"], "days": dist.get(nid), "ways": ways, "text": texts[nid], "seen": None if nid != home else -1,
                                 "buildings": sorted(b["name"] for b in v.buildings().values()),

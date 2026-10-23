@@ -697,12 +697,14 @@ def _set(here, mind, a, party):
 def _travel(here, mind, a, party):
     r = here.road_to(a.get("to"))
     if r is None:
-        ways = ", ".join(f"{n} ({k} day{'s' if k > 1 else ''})" for _, n, k in here.roads())
+        ways = ", ".join(f"{n} ({k} day{'s' if k > 1 else ''})" for _, n, k, _t in here.roads())
         raise Refused(f"there is no way from here to {a.get('to')!r}; from here you can go to {ways or 'nowhere'}")
-    to, days = r
-    load, cap = here.load(), float(here.p["carry"]["foot"])
+    to, days, track = r
+    load, cap = here.load(), here.capacity(track)
     if load > cap + 1e-9:
-        raise Refused(f"you carry {show(load)} weight; on foot you can carry {cap:g}")
+        cart = any(ITEMS[i].get("track") for i, q in here.carried().items() if q >= 1)
+        raise Refused(f"you carry {show(load)} weight; you can carry {cap:g} on this road"
+                      + (" (a cart needs a road with a track, and this one has none)" if cart and not track else ""))
     here.today()["travel"][here.name] = to
     here.event("depart", f"{here.name} set off on the road", actor=here.name, salience=0.6, tags=["travel"])
     return (f"You set off at the end of the day: {days} day{'s' if days > 1 else ''} on the road, sleeping out; you arrive on the morning "

@@ -29,6 +29,8 @@ ITEMS = {
     "crude tool": {"weight": 1, "food": 0.0, "spoil": 0.0, "tool": "crude", "life": 10, "seen": True},      # D2-23; recipes.md §6
     "copper tool": {"weight": 1, "food": 0.0, "spoil": 0.0, "tool": "copper", "life": 40, "seen": True},
     "crude weapon": {"weight": 1, "food": 0.0, "spoil": 0.0, "weapon": 2.0, "life": 10, "seen": True},     # D2-46: about 3 fights
+    "pack": {"weight": 1, "food": 0.0, "spoil": 0.0, "carry": 10, "seen": True},      # on foot 10, with a pack 20 (02g §3; calibrate)
+    "handcart": {"weight": 0, "food": 0.0, "spoil": 0.0, "carry": 30, "track": True, "seen": True},   # 40 in all, on a track (02g §3)
 }
 EDIBLE = tuple(i for i, v in ITEMS.items() if v["food"] > 0)
 TOOLS = tuple(sorted((i for i, v in ITEMS.items() if v.get("tool")), key=lambda i: -("crude", "copper").index(ITEMS[i]["tool"])))
@@ -68,6 +70,8 @@ FITTINGS = {
               "basic": False, "trade": "smith", "does": "a smithy: smelting and smithing"},
     "cellar": {"label": "a cellar", "materials": {"stone": 8}, "units": 8, "basic": False, "trade": "mason",
                "does": "food keeps at a quarter of the house rate"},
+    "millstones": {"label": "millstones", "materials": {"stone": 10}, "units": 10, "basic": False, "trade": "mason",
+                   "does": "milling: grain to flour by the dozen (D2-44)"},
 }
 BLUEPRINTS = {
     "small room": {"label": "a small room, wattle and timber", "materials": {"timber": 8}, "units": 6, "size": 4, "structure": "wattle",
@@ -112,6 +116,12 @@ TECHNIQUES = {
                "yield": {"kind": "repair"}, "inputs": {"timber": 2}, "units": 2, "gives": "", "tags": ["building", "shelter"]},
     "grind": {"verb": "make", "label": "grinding flour at a quern", "aliases": ["grinding", "mill"], "basic": True, "at": {"fittings": ["quern"]},
               "inputs": {"grain": 4}, "units": 1, "gives": {"flour": 4}, "tags": ["food", "cooking"]},
+    "mill": {"verb": "make", "label": "milling grain at millstones", "aliases": ["milling"], "basic": True, "at": {"fittings": ["millstones"]},
+             "inputs": {"grain": 12}, "units": 1, "gives": {"flour": 12}, "tags": ["food", "cooking"]},                  # recipes.md §10
+    "pack": {"verb": "make", "label": "making a pack", "aliases": ["backpack"], "basic": True, "inputs": {"hide": 1, "timber": 1},
+             "units": 1, "gives": {"pack": 1}, "tags": ["travel"]},                                                    # recipes.md §2
+    "handcart": {"verb": "make", "label": "making a handcart", "aliases": ["cart"], "inputs": {"timber": 6}, "tools": {"crude": 1.0, "copper": 1.0},
+                 "units": 3, "gives": {"handcart": 1}, "tags": ["travel", "craft"], "trade": "carpenter"},              # recipes.md §2
     "bread": {"verb": "make", "label": "baking bread", "aliases": ["baking", "bake"], "basic": True, "at": {"fittings": ["hearth"]},
               "inputs": {"flour": 10, "timber": 1}, "units": 1, "gives": {"bread": 11}, "tags": ["food", "cooking"]},
     "crude tool": {"verb": "make", "label": "making a crude hand tool", "aliases": ["tool"], "basic": True, "inputs": {"timber": 1, "stone": 0.5},

@@ -182,7 +182,7 @@ def _map_lines(mind) -> list:
         if nid == home:
             continue
         far = f"{p['days']} day{'s' if p['days'] != 1 else ''} from home" if p["days"] is not None else "no way known"
-        ways = ", ".join(f"{n} ({k} day{'s' if k > 1 else ''})" for n, k in p["ways"])
+        ways = ", ".join(f"{w_[0]} ({w_[1]} day{'s' if w_[1] > 1 else ''}{', a cart track' if len(w_) > 2 and w_[2] else ''})" for w_ in p["ways"])
         seen = "" if p["seen"] is None else f" (as you saw it on {_daystr(mind, p['seen'])})" if p["seen"] >= 0 else ""
         out.append(f"- {p['name']}, {far}{seen}: {p['text']} Roads lead from it to {ways}.")
     return out
@@ -241,7 +241,7 @@ def system_prompt(here, mind) -> str:
     if len(mind.places()) > 1:
         lines += ["", f"Other places, as you know them (only what is carried goes between them; a night out costs "
                   f"{p['shelter']['unsheltered']:g} meals, {p['shelter_cold']['unsheltered']:g} in the cold, unless someone takes you in; "
-                  f"on foot you carry at most {p['carry']['foot']:g} weight; {weights_text()}):"] + _map_lines(mind)
+                  f"on foot you carry at most {p['carry']['foot']:g} weight, more with a pack, more again with a cart on a road with a track; {weights_text()}):"] + _map_lines(mind)
     lines += ["", "What you know how to do:"] + KN.crafts_lines(mind)
     lines += ["", "What you can do (each action is a verb and what it acts on):", verb_lines(here, mind), "", REPLY_LINES]
     return "\n".join(lines)
@@ -338,7 +338,8 @@ def turn_prompt(here, mind, opening=True) -> str:
     L.append("## Here\n" + "\n".join(hl))
     hold = ", ".join(f"{show(q)} {i}" for i, q in sorted(here.carried().items()) if q > 0.05) or "nothing"
     you = [f"You are {STAGES[a['hunger']]}" + (", and hurt" if a["wounded"] else "") + f". You carry: {hold}"
-           + (f" (weight {show(here.load())} of the {here.p['carry']['foot']:g} you can travel with)" if here.roads() else "") + "."]
+           + (f" (weight {show(here.load())} of the {here.capacity():g} you can travel with"
+              + (f", {here.capacity(True):g} on a road with a track" if here.capacity(True) > here.capacity() else "") + ")" if here.roads() else "") + "."]
     L.append("## You\n" + "\n".join(you + _house_lines(here, mind)))
     can, near = KN.options(here, mind)
     opt = ["Today you could: " + "; ".join(can) + "." if can else "Of your crafts, none can be done here today with what you have."]
@@ -390,8 +391,8 @@ def talk_prompt(here, mind, heard, also, offers, opened, cards, sent=0) -> str:
 def lighten_prompt(here, mind, a: dict, did: list) -> str:
     goods = ", ".join(f"{show(q)} {i} ({show(q * ITEMS[i]['weight'])} weight)" for i, q in sorted(here.carried().items()) if q > 0.05)
     L = ["## Setting off", "Today so far: " + (" ".join(x for x in did if not x.startswith(PC.SPEECH)) or "nothing"),
-         f"You meant to set off for {a.get('to')} tonight, but you carry {show(here.load())} weight and on foot you can carry "
-         f"{here.p['carry']['foot']:g}. You carry: {goods}.",
+         f"You meant to set off for {a.get('to')} tonight, but you carry {show(here.load())} weight and you can carry "
+         f"{here.capacity():g}. You carry: {goods}.",
          f"Before you go you may give things to someone here ({', '.join(here.people(me=False)) or 'nobody is here'}), put them in a store "
          f"you may use, or leave them at a building here ({', '.join(b['name'] for b in here.buildings().values()) or 'none'}): "
          "{\"do\": \"leave\", \"item\", \"qty\", \"at\": building}; what is left there is found by its household in the morning. Then "
