@@ -26,7 +26,7 @@ why it waits. An entry moves into the spec only when Zach decides it.
 | Option | What it adds | Needs | Why it waits |
 |---|---|---|---|
 | slash and burn | high returns on freshly burned forest for a few years, then move on (02l §4, "fresh land") | forest | D2-14 |
-| irrigation | much more food per plot, less blight | a river site; a crew to dig and keep ditches; an institution to share the water | D2-14 |
+| irrigation (D2-67: later, with the weather; designed in farming.md) | much more food per plot, less blight | a river site; a crew to dig and keep ditches; an institution to share the water | D2-14 |
 | heavy plough | breaks heavy clay soils; needs a team of oxen no household owns alone | iron share, many oxen | later era |
 | new crops | land that was useless becomes fields (poor soil, cold valleys) | seed from beyond the frontier | 37.5's frontier |
 

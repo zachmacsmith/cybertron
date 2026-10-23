@@ -26,6 +26,7 @@ is in proposals.
   unit of seed; broadcast or dibble.
 - D2-58: grain spoils a little (house, bins, cellar). D2-59: the plot takes about 16 seed a sowing.
 - D2-60: the food ladder (whole 0.7, ground 1.0, bread 1.3). D2-61: the mill ladder. D2-62: dried meat.
+- D2-66: field works (ditches and banks on wet ground, terraces on hills). D2-67: irrigation later.
 - D2-46: weapons wear, with a small chance of breaking. D2-47: cheese. D2-48: specialised tools.
 
 ## Mechanics
@@ -62,6 +63,21 @@ is in proposals.
 | cart | transport (transport.md) | | |
 | weapons | fighting and hunting | strength in a fight; a better catch hunting | crude, blade |
 | trap | at a forest site | catches game overnight while the trapper is elsewhere; checked by a visit; depletes game like hunting; can be emptied by whoever checks it | |
+
+### Field works (D2-66)
+
+| Work | Ground | Effect | Labour | Materials | Upkeep |
+|---|---|---|---|---|---|
+| ditches and banks | wet (valley floors, fen edges) | the plot yields x1.0 instead of x0.75 | about 40 units | none; hand tools | about 1.5 units a season |
+| terraces | hill | the plot yields x1.0 instead of x0.6 | about 60 units | about 6 stone (fieldstone) | about 1.5 units a season |
+
+- A field work is a **project on a plot**: work added over days by anyone (`work {what, at}`), with at least one person in the crew
+  who knows the technique (a farmer's: field works). When finished it is **part of the plot** and passes with it (world/holding.md).
+- **Upkeep:** each season the holder's side must put in the upkeep or the work loses half its effect, and all of it the season
+  after.
+- The fixed penalties for wet and hill ground stand in for weather: when 37.4's wet and dry spells, floods and erosion exist, the
+  works act on those instead (D2-66).
+- Agents see the ground and the works on the plot in words ("wet ground; ditched and banked; the banks need mending").
 
 ### Grain as food, mills and bread (D2-60, D2-61)
 
@@ -130,6 +146,7 @@ Per plot: fertility, the crop growing (kind, day sown), the last crop grown. Too
 |---|---|---|
 | seed a plot, harvest per seed, work per stage, fertility changes, the weeding curve | 02l model's values as the starting point | calibrate |
 | the harvest window and the loss a day after it | 2 days; a quarter of what is left a day | calibrate |
+| field works: labour, materials, upkeep; the wet and hill penalties | above | calibrate |
 | grain spoilage a day: house, bins, cellar or granary | 0.5%, 0.25%, 0.1% | decided (D2-58) |
 | seed a plot (one adult's season by hoe) | about 16; about a fifth of the harvest | decided (D2-59); yields calibrate |
 | crop cycles (days from sowing to ripe) | about a quarter of the year for grain, a third for winter grain, a sixth for legumes, a tenth for a garden | calibrate |
@@ -153,4 +170,4 @@ the soil in words ("tired", "good"), their seed in store, their tools and whethe
 [02l_farming.md](../../../review/37_growth/02l_farming.md), [02j_end_uses.md](../../../review/37_growth/02j_end_uses.md),
 [02d_ladders.md](../../../review/37_growth/02d_ladders.md); proposals/farming.md, proposals/tools.md.
 
-*Current as of 23 Oct 2026: H-6, D2-11 to D2-19, D2-23, D2-42, D2-43, D2-46, D2-47, D2-48, D2-52, D2-53, D2-54, D2-58, D2-59, D2-60, D2-61, D2-62, D2-64, D2-65.*
+*Current as of 23 Oct 2026: H-6, D2-11 to D2-19, D2-23, D2-42, D2-43, D2-46, D2-47, D2-48, D2-52, D2-53, D2-54, D2-58, D2-59, D2-60, D2-61, D2-62, D2-64, D2-65, D2-66, D2-67.*

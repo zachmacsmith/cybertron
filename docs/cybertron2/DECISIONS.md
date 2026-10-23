@@ -128,6 +128,9 @@ and correct them in place.**
 | D2-63 | 23 Oct | **Cattle are one kind with three roles:** cows (milk, calves), oxen (trained steers that pull) and bulls (needed for breeding; whoever holds the bull controls a herd's breeding); they share feeding, herding and slaughter rules; young are not a separate kind within a run | 02o; conversation | four kinds (cows, bulls, oxen, calves) as separate goods |
 | D2-64 | 23 Oct | **A master farmer's skill raises yield as well as cutting work:** yield about x1.2 and work about x0.7 at mastery | proposals/farming.md; conversation | skill only cutting work |
 | D2-65 | 23 Oct | **Seed selection** is a farming technique, learned by practice over several harvests: the sower's crops ripen about 15% sooner | farming.md | |
+| D2-66 | 23 Oct | **Field works in the first worlds, before weather exists:** ditches and banks on wet ground and terraces on hill ground, built as projects on a plot (led by someone who knows the technique), part of the plot thereafter, with upkeep each season. Until 37.4's weather exists, wet ground yields x0.75 and hill ground x0.6, and the works bring each to x1.0; weather replaces these fixed effects later | proposals/farming.md; conversation | |
+| D2-67 | 23 Oct | **Irrigation is for later** (with the weather): parts, finite water and turns, the headgate's controller, upkeep, water shares | farming.md | |
+| D2-68 | 23 Oct | **Camps and portable shelter:** a bedroll (1 hide; weight 1; about 40 nights; a night out about 1.35 food, 1.75 in winter; the cold's fall halved), a tent (3 hides, 2 poles; weight 6; about 30 nights; sleeps 2; 1.2 food, 1.4 in winter; no cold fall), and a camp built at a site (3 timber; stays where built; about 10 nights; sleeps 4; 1.2 food, 1.5 in winter with a fire; no cold fall) | proposals/transport_and_lodging.md; conversation | |
 
 ## Directions (Zach's stated aims recorded in the notes; designs follow them; checked by 37.2, 22 Oct)
 
