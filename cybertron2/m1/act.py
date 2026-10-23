@@ -92,7 +92,7 @@ def _skill_mult(w, name, tech) -> float:
 def _level_or_refuse(w, name, tech):
     lvl = KN.level(w, name, tech)
     if lvl is None:
-        raise Refused(f"you do not know how to {TECHNIQUES[tech]['label'].split(' (')[0]}")
+        raise Refused(f"{TECHNIQUES[tech]['label'].split(' (')[0]} is not among your crafts: you have never learned it")
     if lvl == "aware":
         raise Refused(f"you know of {TECHNIQUES[tech]['label'].split(' (')[0]}, but have no idea how it is done (watch someone, ask to "
                       f"be taught, or have it explained)")
@@ -292,16 +292,19 @@ def _move(w, name, a, today):
     h = w.home(name)
     if h is None:
         raise Refused("you have no house")
-    item, q = _item(a.get("item")), _qty(a.get("qty"))
+    item = _item(a.get("item"))
     to = str(a.get("to", "house")).lower()
     src, dst, verb = (me["holdings"], h["stock"], "put") if to.startswith("house") or to == "store" else (h["stock"], me["holdings"], "took")
-    if src.get(item, 0.0) + 1e-9 < q:
-        raise Refused(f"there is only {show(src.get(item, 0.0))} {item} " + ("in your hands" if verb == "put" else f"in {h['name']}"))
+    have = src.get(item, 0.0)
+    q = _qty(a.get("qty"), have)
+    if have <= 1e-9:
+        raise Refused(f"there is no {item} " + ("in your hands" if verb == "put" else f"in {h['name']}"))
+    q = round(min(q, have), 6)                                             # as much as there is
     src[item] = round(src[item] - q, 6)
     _add(dst, item, q)
     w.happen("store" if verb == "put" else "take", f"{name} {verb} {item} {'into' if verb == 'put' else 'from'} {h['name']}", actor=name,
-             parcel=h["parcel"], salience=0.1, tags=["food"] if item in EDIBLE else [])
-    return f"You {verb} {q:g} {item} {'into' if verb == 'put' else 'from'} {h['name']} (it holds {show(h['stock'].get(item, 0.0))})."
+             parcel=h["parcel"], salience=0.1, tags=["food"] if item in EDIBLE else [], extra={"house": w.s["agents"][name]["house"]})
+    return f"You {verb} {show(q)} {item} {'into' if verb == 'put' else 'from'} {h['name']} (it holds {show(h['stock'].get(item, 0.0))})."
 
 
 def _give(w, name, a, today):
@@ -447,7 +450,8 @@ def settle_fights(w) -> list:
                 took = rob(h["stock"], [f["by"]], cc["raid_share"])
                 rec = {"kind": "raid", "by": f["by"], "house": f["house"], "outcome": "taken", "took": took}
                 w.happen("raid", f"In the night {h['name']} was raided and food taken", actor=f["by"], parcel=h["parcel"], salience=0.95,
-                         tags=["danger", "food"], concerns=[n for n in w.living() if w.s["agents"][n]["house"] == f["house"]])
+                         tags=["danger", "food"], concerns=[n for n in w.living() if w.s["agents"][n]["house"] == f["house"]],
+                         extra={"house": f["house"]})
             else:
                 rec = {"kind": "raid", "by": f["by"], "house": f["house"], "outcome": "repelled"}
                 w.happen("raid", f"In the night someone tried to break into {h['name']} and was driven off by {', '.join(defenders) or 'nobody'}",
@@ -521,7 +525,11 @@ def settle_teaching(w, today) -> dict:
     for t in today["teach"]:
         match = next((l for l in today["learn"] if l["by"] == t["to"] and l["from"] == t["by"] and l["tech"] == t["tech"]), None)
         label = TECHNIQUES[t["tech"]]["label"].split(" (")[0]
-        if match:
+        target = "known" if w.s["agents"][t["to"]]["stage"] == "youth" else "capable"
+        if match and KN.LEVELS.index(KN.level(w, t["to"], t["tech"]) or "aware") >= KN.LEVELS.index(target):
+            out.setdefault(t["by"], []).append(f"{t['to']} already has {label} as well as a day's teaching can give; you lost the day's time.")
+            out.setdefault(t["to"], []).append(f"{t['by']} had nothing more to teach you of {label} that a day could give; practice is what you need.")
+        elif match:
             res = KN.taught(w, t["by"], t["to"], t["tech"])
             out.setdefault(t["by"], []).append(f"You taught {t['to']} {label}.")
             out.setdefault(t["to"], []).append(f"{t['by']} taught you {label} ({res}).")

@@ -94,6 +94,10 @@ def facts(w) -> list:
         first = not w.cold(w.d - 1) if w.d > 0 else True
         add(["sky"], "a hard frost lay on everything this morning" if first else "it stayed bitterly cold", 0.85 if first else 0.5,
             ["season", "shelter", "farming"], sense="touch")
+    if not w.cold():
+        wx = {"spring": "a mild day, showers on the wind", "summer": "a warm, settled day", "autumn": "a cool day, the nights drawing in",
+              "winter": "a grey, raw day"}[cal["season"]]
+        add(["sky"], wx, 0.05, ["season"])
     if cal["left"] == 0:
         add(["sky"], f"the last days of {cal['season']}: the light is changing", 0.1, ["season"])
     # parcels
@@ -175,16 +179,19 @@ def facts(w) -> list:
                 ["food"] if any(i in EDIBLE for i, _ in load) else [])
     # happenings
     for e in s["events"]:
-        if e.get("dawn") or e["kind"] == "speech":
-            continue                                                     # seen at dawn (dawn()); speech is heard, not seen
+        if e["kind"] == "speech":
+            continue                                                     # speech is heard, not seen
+        if e.get("dawn"):                                                # a dawn sign or incident lasts the day: seen again by
+            add([e.get("about") or "sky"], e["text"], e["salience"], e["tags"], e.get("sense", "sight"), e.get("concerns", []),
+                event=e["id"], kind=e["kind"], dawn=True)                # whoever attends to it, or notices it later
+            continue
         about = [f"a:{e['actor']}"] if e.get("actor") else []
         if e.get("target"):
             about.append(f"a:{e['target']}")
         if e.get("parcel"):
             about.append(f"p:{e['parcel']}")
-        for hid, h in s["houses"].items():
-            if e.get("parcel") == h["parcel"] and e["kind"] in ("store", "take", "raid", "steal"):
-                about.append(f"h:{hid}")
+        if e.get("house"):
+            about.append(f"h:{e['house']}")
         add(about, e["text"], e["salience"], e["tags"], e.get("sense", "sight"), e.get("concerns", []), event=e["id"],
             actor=e.get("actor"), tech=e.get("tech"), kind=e["kind"])
     return out
@@ -249,6 +256,11 @@ def evening(w, attend: dict, today: dict) -> dict:
         for f in F:
             if f["id"] in seen or _mine(name, f) or f.get("peek") or f.get("ambient") or not _can_read(w, name, f):
                 continue
+            own = f"h:{w.s['agents'][name]['house']}"
+            if f.get("dawn") and any(x in store(w, name)["today"]["dawn"] for x in [f["text"]]):
+                continue                                                 # already met it at dawn
+            if own in f["about"] and not f.get("event"):
+                continue                                                 # your own house is shown to you every morning
             if f["salience"] < 0.2 and name not in f["concerns"]:
                 continue                                                 # the notice is for what stands out
             if f.get("kind") in ROUTINE or (f["about"] and f["about"][0] == f"a:{name}"):
@@ -271,7 +283,11 @@ def evening(w, attend: dict, today: dict) -> dict:
             pool = [f for f in F if subject in f["about"] and f["id"] not in seen and not _mine(name, f) and _can_read(w, name, f)
                     and (not f.get("peek") or subject.startswith("h:"))]
             pool.sort(key=lambda f: -(f["salience"] + relevance(w, name, f)))
-            att = pool[:ATTEND_MAX]
+            att, texts = [], set()
+            for f in pool:                                               # the same sight several times is one line
+                if f["text"] not in texts and len(att) < ATTEND_MAX:
+                    att.append(f)
+                    texts.add(f["text"])
         if subject or place:
             t["attended"] = {"target": label, "lines": [f["text"] for f in att] or ["nothing out of the ordinary"]}
         seen |= {f["id"] for f in att}
@@ -344,6 +360,8 @@ def resolve_target(w, name, x):
     if who and who != name:
         return f"a:{who}", who
     hid = w.house_by_name(s)
+    if hid and hid == w.s["agents"][name]["house"]:
+        return "place", "the place in general (your own house you see every day)"
     if hid:
         return f"h:{hid}", w.s["houses"][hid]["name"]
     pid = w.parcel_by_name(s)
@@ -375,11 +393,11 @@ def steals(w, today, attend) -> None:
         owners = [x for x in w.living() if w.s["agents"][x]["house"] == st["house"]]
         if seen_by:
             w.happen("steal", f"{st['by']} slipped into {h['name']} and came out with {st['qty']:g} {st['item']}", actor=st["by"],
-                     parcel=h["parcel"], salience=0.9, tags=["danger", "food"], concerns=seen_by + owners)
+                     parcel=h["parcel"], salience=0.9, tags=["danger", "food"], concerns=seen_by + owners, extra={"house": st["house"]})
             store(w, st["by"])["today"].setdefault("heard", []).append("You think you were seen coming out of " + h["name"] + ".")
         else:
             w.happen("loss", f"some {st['item']} is missing from {h['name']}'s store", parcel=h["parcel"], salience=0.6,
-                     tags=["food", "danger"], concerns=owners)
+                     tags=["food", "danger"], concerns=owners, extra={"house": st["house"]})
 
 
 def close_day(w, name, did: list, night_lines: list) -> None:

@@ -220,7 +220,16 @@ def shortfall(w, name, tech, mult=1.0, at=None) -> str:
         pids = [at] if at else [x[1] for x in where]
         if not any(_crop_ripe(w, pid) for pid in pids):
             return "no crop there is ripe"
+    if nd.get("crop") == "reaped":
+        pids = [at] if at else [x[1] for x in where]
+        if not any(_gleanable(w, pid) for pid in pids):
+            return "no field here has been reaped, so there is nothing to glean" if not at else "that field has not been reaped, or is gleaned bare"
     return ""
+
+
+def _gleanable(w, pid) -> bool:
+    c = w.parcels()[pid]["state"].get("crop")
+    return bool(c) and bool(c.get("reaped")) and float(c.get("gleanings", 0)) > 0.05
 
 
 def _crop_ripe(w, pid) -> bool:
@@ -282,7 +291,8 @@ def options(w, name, limit=8) -> list:
             continue
         mult = TRY[lvl]["inputs"]
         why = shortfall(w, name, tech, mult)
-        places = ", ".join(sorted({x[2] for x in _where(w, name, tech) if tech != "reap" or _crop_ripe(w, x[1])}))
+        places = ", ".join(sorted({x[2] for x in _where(w, name, tech) if (tech != "reap" or _crop_ripe(w, x[1]))
+                                   and (tech != "glean" or _gleanable(w, x[1]))}))
         verb = t["verb"]
         tag = "" if lvl == "known" else (" (a try)" if lvl == "rough" else " (not yet sure of hand)")
         if not why:

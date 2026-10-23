@@ -156,7 +156,8 @@ def talk(w, names, replies, results) -> dict:
                 continue
             short = [i for i, q in give.items() if w.s["agents"][n]["holdings"].get(i, 0) + 1e-9 < q]
             if short:
-                results[n].append(f"Refused: offer: you do not carry enough {', '.join(short)}")
+                results[n].append(f"Refused: offer: you do not carry enough {', '.join(short)} (goods in your house's store must be "
+                                  "taken into your hands first, with move)")
                 continue
             w.s["seq"] += 1
             oid = f"O{w.s['seq']}"
@@ -227,6 +228,7 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False) -> 
         w.rng("order", day).shuffle(order)
         budget = {n: w.units_for(n) for n in names}
         used = {n: 0 for n in names}
+        rep = {n: {} for n in names}
         for i in range(max((len(p) for p in plans.values()), default=0)):
             for n in order:
                 if i >= len(plans[n]) or not w.s["agents"][n]["alive"]:
@@ -240,7 +242,15 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False) -> 
                 res = AC.do(w, n, a, today)
                 if not res.startswith("Refused"):
                     used[n] += c
-                results[n].append(res)
+                    results[n].append(res)
+                elif res in results[n]:                                  # the same refusal again: once is enough
+                    rep[n][res] = rep[n].get(res, 1) + 1
+                else:
+                    results[n].append(res)
+        for n in names:
+            results[n] = [f"{x} (x{rep[n][x]})" if x in rep[n] else x for x in results[n]]
+            if used[n] < budget[n]:
+                results[n].append(f"You left {budget[n] - used[n]} of your {budget[n]} units unused.")
         for n, lines in AC.settle_teaching(w, today).items():
             results.setdefault(n, []).extend(lines)
         PC.steals(w, today, attend)
