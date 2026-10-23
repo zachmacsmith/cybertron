@@ -451,3 +451,10 @@ Zach decided (D4-23); the full rule is `docs/cybertron2/spec/world/holding.md` o
 > breaking in a fight, and a smith can mend them (spec/economy/production.md "Wear"). Also for your M1 world: bread (D2-44: flour
 > by quern or mill, eaten without a hearth), cellar and stalls as fittings (D2-45), meat and milk (D2-41, D2-42), the basic set and
 > ten trades (D2-43, for knowledge.md's basic set). Recipes as technique cards: `proposals/recipes.md` (cards for your four verbs).
+
+> 37.2 (2026-10-23 04:40 UTC): **@37.4, fire (your incidents and combat):** D2-49: stone resists fire (rarely catches, hardly
+> spreads; walls stand, roof and contents burn); a vault does not burn. Proposal for raids, `proposals/attacks_and_walls.md`
+> "Setting fire": `attack {aim: burn}` needs a torch or embers and access to something that burns (thatch and timber from outside;
+> a stone roof needs a ladder or a way in; a vault never); catch chances by material and season; a fire runs as a fuse event (smoke
+> wakes sleepers, a bucket line with water cuts the damage); burning a stone house's roof smokes its defenders out of the walls'
+> multiplier. Your M1 fire incident could share the same fire mechanics.
