@@ -10,7 +10,8 @@ step's commit:
 - what entered the world: model replies, human replies, interventions, the frozen spec and data tables, the code version;
 - the checkpoints are what make the run cheap to resume, rewind and fork.
 
-Everything people look at is a **view** derived from the journal: the state at any point, exactly what an agent saw in its context,
+Everything is written to the journal as it happens, so a run can be watched layer by layer and read up to a crash; a commit only
+makes a step official. Everything people look at is a **view** derived from the journal: the state at any point, exactly what an agent saw in its context,
 frames of the world for a map that plays through the history, analysis, export tables, and the website. None of these views is
 authoritative; any of them can be rebuilt.
 
@@ -42,8 +43,18 @@ These are examples; the design should make such things easy, not just these.
 ### 1. The execution model: steps, requests and commits
 
 - **Steps.** A day is a fixed sequence of steps (dawn, decide, talk waves, work, settle, night with its fuse calls, memory;
-  spec/core/round.md). A step either commits whole or not at all. Commit points are the ends of steps, so a run can stop between
-  any two of them.
+  spec/core/round.md). Commit points are the ends of steps, so a run can stop between any two of them.
+- **Written as it happens, made official at the commit.** Nothing waits for the commit to be written:
+  - every request and response, event and change is written to the journal the moment it happens, tagged with its step and an
+    attempt number;
+  - the commit only marks the step's attempt official and stores its checkpoint;
+  - a live view (chronicle, map, a human's screen) shows the open step's rows as they come in, marked provisional, layer by layer
+    through the day: who decided what, what was said in each talk wave, each act of the work step as it is done.
+
+  After a crash or a cancel, the open step's rows stay in the journal as an **aborted attempt**, readable like any other: you see
+  everything that happened up to the crash. Resume then re-runs the step as a new attempt from the last checkpoint, reusing every
+  answer already received. Views of the official history read committed attempts only. A view of "what happened up to the crash"
+  reads the aborted attempt too. Committing whole matters for what counts as the state, not for what can be seen.
 - **Requests.** Everything the engine needs from outside is a request with a deterministic key
   `d<day>.<step>.<wave>.<agent>.<n>`: a model call, a human's turn, a fuse call at night. A request carries what the answerer
   sees: the conversation id and index, the system text, the schema, the new message. Its response is the raw text and the parsed
@@ -77,14 +88,16 @@ These are examples; the design should make such things easy, not just these.
 | `requests` | key, step, agent, conversation id and index, system sha, schema sha, message sha, responder | the exact input to each answer |
 | `responses` | key, attempts (raw text, error), parsed reply, thinking, usage, transport, latency | written as each arrives |
 | `blobs` | sha -> compressed text (system prompts, messages, schemas) | a prompt repeated across days is stored once |
-| `steps` | step key, committed (bool), the checkpoint's sha | the commit log |
+| `steps` | step key, attempt, status (open, committed, aborted), the checkpoint's sha | the commit log; aborted attempts are kept |
 | `checkpoints` | step -> the whole `World.s` plus the runner's own state (conversations, cost), compressed JSON | at every step commit, or every day plus step deltas (§7) |
 | `events` | id, day, step, place, kind, actor, target, about, concerns, text, cause | every event; today they are dropped at dawn |
 | `changes` | seq, day, step, primitive, place, arguments, cause {actor, verb, for, node}, result | every application of `World.apply` |
 | `interventions` | as submitted and as applied (step, op, arguments, note, state-diff digest) | never applied twice |
 
-**A commit is one transaction:** the step's events, changes, its checkpoint and its `steps` row. Requests and responses are
-committed on their own as they arrive, which is what makes them reusable after a crash. Readers (the live chronicle, a map, a
+**Rows are durable as they are written:** each request, response, event and change is its own small transaction, tagged with
+`(step, attempt)`. **A commit** writes the step's checkpoint and marks its attempt committed, in one transaction. So the official
+history is the committed attempts. An aborted attempt (a crash, a cancel) stays for inspection, and answers are reused whichever
+attempt asked for them. Readers (the live chronicle, a map, a
 human's screen) open the file while the run writes (WAL mode).
 
 ### 3. Views (derived, rebuildable, never authoritative)
@@ -141,8 +154,22 @@ apart.
   - `beliefs` (agent, day, about, what, as of), `messages` (said, told, heard by whom, where), `calls`;
   - `frames` and `layout` for the map;
   - `contexts`: the blobs and the requests that reference them, loaded lazily.
-- **Publish:** tables, a catalog row and the raw journal (`run.db`, enough to replay, fork and continue), with the privacy gate.
-  `publish_hf.py` is rewritten to the journal; runs stay under `experimental/cybertron2/` until Zach decides otherwise.
+- **Two kinds of exported table.**
+  - **Journal tables** mirror `run.db` one to one and lose nothing: meta, data, segments, requests, responses, blobs, steps,
+    checkpoints (compressed JSON), events, changes, interventions.
+  - **View tables** (people_days, holdings, beliefs, frames, ...) are derived for analysis and the site, and can be regenerated
+    from the journal tables.
+- **Publish:** both kinds, a catalog row and a manifest with each table's checksum, through the privacy gate. `publish_hf.py` is
+  rewritten to it. Runs stay under `experimental/cybertron2/` until Zach decides otherwise.
+- **The inverse of publish:**
+  - `fetch RUN_ID` downloads a published run's journal tables and rebuilds `run.db` exactly (`import`, the inverse of `export`).
+    The result is a local run like any other: replay it, view it, fork or continue it from any committed step.
+  - Checkpoints are JSON, so publishing them is safe. cybertron 1 never published its pickled checkpoints, because loading a
+    downloaded pickle can run arbitrary code, and had to rebuild them by replaying (`cybertron fetch`, `continue`). Here a fetched
+    run can be forked at any step at once.
+  - Replay and fork need the run's code: `fetch` checks the recorded git sha, and either runs under it in a temporary worktree (as
+    cybertron 1's `rerun`) or continues under current code as a new segment that claims no identity.
+  - A round-trip test guards the inverse: export, import and replay must reproduce the run byte for byte.
 - **Website:** the site already reads Parquet from the Hub (`site/lib/cybertron-data.js`, hyparquet). A cybertron2 run page adds
   the map, per-agent context ("what X saw on day 12") and the chronicle, from those tables.
 
@@ -157,6 +184,8 @@ python -m cybertron2.engine play RUN --as NAME                  # answer NAME's 
 python -m cybertron2.engine context RUN --agent NAME --at STEP  # print exactly what NAME saw
 python -m cybertron2.engine frames RUN --out DIR                # map frames; view RUN for a local viewer
 python -m cybertron2.engine export RUN... --out DIR             # Parquet; publish RUN... [--push]
+python -m cybertron2.engine import DIR --out RUN                # Parquet journal tables -> run.db (exact)
+python -m cybertron2.engine fetch RUN_ID [--revision vX.Y] --out RUN   # download a published run, then import
 python -m cybertron2.engine dump RUN [--table events]           # JSONL out of the journal, for grep and jq
 ```
 
@@ -234,7 +263,7 @@ python -m cybertron2.engine dump RUN [--table events]           # JSONL out of t
 | R2 | The runner as a state machine: resume, cancel, pause (`--until`), replay with the byte-compare test; a run killed mid-step resumes to the same end | M |
 | R3 | `context` and `play --as` (terminal): a human answers one agent's requests in a bot world | S-M |
 | R4 | fork, replicates, interventions as ops on primitives | M |
-| R5 | Views: `history`, `frames` with the layout and a local map viewer, `export` to Parquet, `publish` rewritten | M-L |
+| R5 | Views: `history`, `frames` with the layout and a local map viewer; `export` (journal and view tables) and its inverse `import` / `fetch`, with the round-trip test; `publish` rewritten | M-L |
 | R6 | The site's cybertron2 run page: map, context viewer, chronicle | M |
 
 ## History
@@ -243,6 +272,11 @@ python -m cybertron2.engine dump RUN [--table events]           # JSONL out of t
 - 23 Oct 2026: revised after Zach's requirements (the website, the map through the history, exact agent context, human play,
   idempotent, resumable, cancellable): the runner as a state machine over keyed requests; the journal in SQLite with JSON values
   and Parquet export; views; the map layout; the human responder.
+- 23 Oct 2026: revised again (Zach):
+  - everything is written as it happens and the commit only makes a step official, so a run is visible layer by layer through the
+    day and up to a crash (aborted attempts are kept);
+  - publish exports lossless journal tables beside the view tables, with the inverse (`import`, `fetch`) to rebuild a runnable,
+    forkable local run from the published Parquet.
 
 ## Sources
 
