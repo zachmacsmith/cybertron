@@ -324,7 +324,8 @@ def build(base: dict, seed: int, tries=600) -> dict:
             if a["stage"] == "youth":
                 a["knows"][c] = "capable" if age >= 15 else "rough"
             else:
-                a["knows"][c] = {"level": "known", "skill": round(min(1.8, 0.8 + 0.025 * (age - 18)), 2)}
+                a["knows"][c] = {"level": "known", "skill": round(min(1.5, 1.0 + 0.0125 * (age - 18)), 2) if TECHNIQUES[c].get("basic")
+                                 else round(min(1.8, 0.8 + 0.025 * (age - 18)), 2)}           # seeded specialists start skilled (D2-52)
         for l, d in lines.items():
             for c in d["crafts"]:
                 if c not in a["knows"] and a["stage"] != "child":              # another line's craft: seen, not known

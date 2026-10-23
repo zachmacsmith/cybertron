@@ -36,6 +36,9 @@ class Here:
     def rng(self, *parts):
         return self._w.rng(*parts)
 
+    def year_days(self) -> int:
+        return self._w.year_days()
+
     @property
     def node_name(self):
         return self._w.s["nodes"][self.node]["name"]

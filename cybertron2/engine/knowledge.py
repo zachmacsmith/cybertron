@@ -6,7 +6,9 @@ The views take `Here` and `Mind` only (D4-35); changing a level goes through the
 """
 from __future__ import annotations
 
-from cybertron2.engine.data import BLUEPRINTS, FITTINGS, ITEMS, LEVELS, SKILL_WORDS, TECHNIQUES, TRY
+import math
+
+from cybertron2.engine.data import BLUEPRINTS, FITTINGS, ITEMS, LEVELS, SKILL, SKILL_WORDS, TECHNIQUES, TRY
 
 
 def basic(tech) -> bool:
@@ -17,24 +19,45 @@ def label(tech) -> str:
     return TECHNIQUES[tech]["label"].split(" (")[0]
 
 
-def resolve(x):
-    """A technique from what an agent wrote: its name, an alias, or a word of its label."""
+def resolve(x, verb=None):
+    """A technique from what an agent wrote: its name, an alias, or a word of its label (one done by `verb` first)."""
     x = str(x or "").strip().lower()
-    if x in TECHNIQUES:
+    order = sorted(TECHNIQUES, key=lambda t: TECHNIQUES[t]["verb"] != verb) if verb else list(TECHNIQUES)
+    if x in TECHNIQUES and (verb is None or TECHNIQUES[x]["verb"] == verb):
         return x
-    for t, d in TECHNIQUES.items():
-        if x in d.get("aliases", []) or x == d["label"].lower() or x == label(t).lower():
+    for t in order:
+        d = TECHNIQUES[t]
+        if x == t or x in d.get("aliases", []) or x == d["label"].lower() or x == label(t).lower():
             return t
     return None
+
+
+# ---------------------------------------------------------------------- skill by practice (D2-52; 02n §4: calibrate)
+def curve(tech):
+    lo, hi = SKILL["basic" if basic(tech) else "trade"]
+    return float(lo), float(hi)
+
+
+def skill_of_practice(tech, p) -> float:
+    lo, hi = curve(tech)
+    return round(lo + (hi - lo) * (1 - math.exp(-max(0.0, p) / float(SKILL["tau"]))), 4)
+
+
+def practice_of_skill(tech, sk) -> float:
+    lo, hi = curve(tech)
+    share = min(0.999, max(0.0, (sk - lo) / (hi - lo)))
+    return -float(SKILL["tau"]) * math.log(1 - share)
 
 
 # ---------------------------------------------------------------------- the store (engine side: seeding and the learn primitive)
 def seed(w, name, spec_agent) -> None:
     k = w.s["know"].setdefault(name, {})
     for tech, v in (spec_agent.get("knows") or {}).items():
-        if tech in TECHNIQUES and not basic(tech):
-            lvl, sk = (v, 1.0) if isinstance(v, str) else (v.get("level", "known"), float(v.get("skill", 1.0)))
-            k[tech] = {"level": lvl, "skill": sk, "seen": 0, "wins": 0, "fails": 0, "source": "from your upbringing", "since": -1}
+        if tech in TECHNIQUES:                                                  # basic work too, for its practice (D2-52)
+            lvl, sk = (v, None) if isinstance(v, str) else (v.get("level", "known"), v.get("skill"))
+            sk = float(sk) if sk is not None else curve(tech)[0]
+            k[tech] = {"level": "known" if basic(tech) else lvl, "skill": sk, "seen": 0, "wins": 0, "fails": 0,
+                       "source": "from your upbringing", "since": -1}
     for tech, src in (spec_agent.get("aware_of") or {}).items():
         if tech in TECHNIQUES and not basic(tech):
             k.setdefault(tech, {"level": "aware", "skill": 0.6, "seen": 0, "wins": 0, "fails": 0, "source": src, "since": -1})
@@ -67,12 +90,16 @@ def level(mind, tech):
 
 
 def skill(mind, tech) -> float:
+    """The multiplier one's practice gives (D2-52): basic work 1.0 to 1.5, a trade 0.5 to 2.0."""
     r = rec(mind, tech)
-    return float(r.get("skill", 1.0)) if r else 1.0
+    return float(r.get("skill", curve(tech)[0])) if r else (curve(tech)[0] if basic(tech) else 1.0)
 
 
-def skill_word(x) -> str:
-    return next(word for lo, word in SKILL_WORDS if x >= lo)
+def skill_word(x, tech=None) -> str:
+    lo, hi = curve(tech) if tech else SKILL["trade"]
+    share = (x - lo) / (hi - lo)
+    word = next(word for t, word in SKILL_WORDS if share >= t)
+    return "ordinary" if word == "novice" and tech and basic(tech) else word
 
 
 def where(here, tech) -> list:
@@ -94,11 +121,20 @@ def ready(here, tech, kind, key) -> str:
     """'' if the site can be worked by this technique now, else why not (what it draws on, in its state)."""
     t = TECHNIQUES[tech]
     y = (t.get("yield") or {}).get("kind")
+    if t.get("seasons") and here.calendar()["season"] not in t["seasons"]:
+        return f"{label(tech)} is done in {' and '.join(t['seasons'])}"
+    if kind == "parcel" and y in ("sow", "break", "tend", "manure", "crop", "herd", "milk", "slaughter"):
+        from cybertron2.engine import farm as FM
+        return FM.ready(here, tech, key)
     if kind == "parcel":
         p = here.parcels()[key]
         d = t.get("draws")
-        if d in ("plants", "game", "wood", "seam", "quarry") and d not in p["res"]:
-            return f"there is no {d if d != 'plants' else 'wild food'} at {p['name']}"
+        if d in ("plants", "game", "wood", "seam", "quarry", "grass", "dung") and d not in p["res"]:
+            return f"there is no {({'plants': 'wild food', 'grass': 'grass to cut'}).get(d, d)} at {p['name']}"
+        if d == "grass" and p["res"][d]["S"] <= 0.2 * p["res"][d]["K"]:
+            return f"{p['name']} is grazed too short to cut"
+        if d == "dung" and p["res"][d]["S"] < 1:
+            return f"there is little dung on {p['name']}"
         if d in ("seam",) and p["res"][d]["S"] <= 1e-9:
             return f"the seam at {p['name']} is worked out"
         if d == "plants" and p["res"][d]["S"] <= (here.p["refuge"] + 0.02) * p["res"][d]["K"]:
@@ -159,6 +195,11 @@ def shortfall(here, mind, tech, mult=1.0, at=None, extra=None) -> str:
             near = next((cid for cid in here.takeable() if cid != here.hands and any(here.contents(cid).get(x, 0) >= 1 for x in TOOLS)), None)
             return f"you need a tool in your hands for {label(tech)}" + (
                 f"; there is one in {here.buildings()[near[len('stock:'):]]['name']}'s store: take it into your hands (move)" if near else "; you have none")
+    if t.get("animals") or t.get("uses"):
+        from cybertron2.engine import farm as FM
+        why = FM.team_shortfall(here, t)
+        if why:
+            return why
     for item, q in (t.get("inputs") or {}).items():
         need = round(q * mult, 2)
         have = available(here, item, extra=extra)
@@ -194,12 +235,15 @@ def card(here, mind, tech) -> str:
 
 def crafts_lines(mind) -> list:
     k = mind.know
-    known = [f"{TECHNIQUES[t]['label']} ({skill_word(r['skill'])})" for t, r in sorted(k.items()) if r["level"] == "known"]
+    known = [f"{TECHNIQUES[t]['label']} ({skill_word(r['skill'], t)})" for t, r in sorted(k.items()) if r["level"] == "known" and not basic(t)]
+    practised = [f"{label(t)} ({skill_word(r['skill'], t)})" for t, r in sorted(k.items()) if basic(t) and r.get("skill", 1.0) >= 1.1]
     capable = [f"{TECHNIQUES[t]['label']} ({r['source']})" for t, r in sorted(k.items()) if r["level"] == "capable"]
     rough = [f"{TECHNIQUES[t]['label']} ({r['source']})" for t, r in sorted(k.items()) if r["level"] == "rough"]
     aware = [f"{TECHNIQUES[t]['label']} ({r['source']})" for t, r in sorted(k.items()) if r["level"] == "aware"]
     basics = ", ".join(label(t) for t in TECHNIQUES if basic(t))
     out = [f"- Everyone knows: {basics}."]
+    if practised:
+        out.append("- Long practice has made you better than most at: " + "; ".join(practised) + ".")
     if known:
         out.append("- You know: " + "; ".join(known) + ".")
     if capable:
@@ -243,16 +287,17 @@ def mentions(text) -> list:
 
 
 # ---------------------------------------------------------------------- rising (through the learn primitive)
-def tried(here, mind, tech, ok) -> str:
-    """Practice: two successes a level (a failure counts half) from rough to capable to known; skill grows with use."""
-    if basic(tech):
-        return ""
+def tried(here, mind, tech, ok, units=1) -> str:
+    """Practice: two successes a level (a failure counts half) from rough to capable to known; skill grows with the units of work
+    spent at it, on all work (D2-52)."""
     r = rec(mind, tech)
+    if r is None and basic(tech):
+        mind.know[tech] = r = {"level": "known", "skill": curve(tech)[0], "seen": 0, "wins": 0, "fails": 0, "source": "", "since": here.day}
     if r is None:
         return ""
     r["wins" if ok else "fails"] = r.get("wins" if ok else "fails", 0) + 1
+    r["skill"] = skill_of_practice(tech, practice_of_skill(tech, float(r.get("skill", curve(tech)[0]))) + float(units))
     if r["level"] == "known":
-        r["skill"] = round(min(1.8, r["skill"] + 0.02), 3)
         return ""
     score = r.get("wins", 0) + 0.5 * r.get("fails", 0)
     nxt = {"rough": "capable", "capable": "known"}.get(r["level"])

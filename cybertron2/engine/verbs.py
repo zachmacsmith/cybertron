@@ -6,7 +6,7 @@ Each handler: (here, mind, a) -> result line. Refusals name what is short and co
 """
 from __future__ import annotations
 
-from cybertron2.engine import knowledge as KN
+from cybertron2.engine import farm as FM, knowledge as KN
 from cybertron2.engine.data import BLUEPRINTS, COVERS, FITTINGS, ITEMS, TECHNIQUES, TRY
 from cybertron2.engine.here import Refused, show
 
@@ -14,7 +14,8 @@ from cybertron2.engine.here import Refused, show
 # `when` (only in a world with roads). The prompt's verb list and the reply schema are generated from it.
 VERB = {
     "gather": {"args": '{"what", "at"?: place, "for"?: party}', "cost": "craft", "doc": "take from the land: {crafts}"},
-    "work": {"args": '{"what", "at"?: place or building, "for"?: party}', "cost": "craft", "doc": "{crafts}"},
+    "work": {"args": '{"what", "at"?: place or building, "item"?: the seed to sow, or the beast to slaughter (cow, ox, bull, calf), "for"?: party}',
+             "cost": "craft", "doc": "{crafts}"},
     "make": {"args": '{"what", "qty"?: times, "for"?: party}', "cost": "craft",
              "doc": "a recipe; the inputs come from what you carry, then from stores here you may take from: {crafts}"},
     "build": {"args": '{"what", "at": a place on built ground or scrub (a new building) or a building here (a fitting), "qty"?: beds, "name"?, "for"?: party}',
@@ -41,6 +42,8 @@ VERB = {
     "found": {"args": '{"name"}', "cost": 0, "doc": "start a household of your own, with you at its head"},
     "claim": {"args": '{"thing": a field, building or herd here, "for"?: your household}', "cost": 0,
               "doc": "claim it as yours: others will know, and may agree or dispute it"},
+    "drive": {"args": '{"thing": a herd here, "item"?: cows | oxen | bulls | calves | all, "qty"?, "to": a place here}', "cost": 1,
+              "when": "herds", "doc": "move beasts to another place here (a bull kept apart from the cows does not breed)"},
     "sleep": {"args": '{"at": building}', "cost": 0, "doc": "sleep there tonight, if you can get in and a bed is free"},
     "set": {"args": '{"thing": door, "to": open | barred, "at"?: building}', "cost": 0, "doc": "the door of a building you manage"},
     "travel": {"args": '{"to": a place}', "cost": 0, "when": "roads", "doc": "the day's last act: you leave at nightfall and arrive on a later morning"},
@@ -52,12 +55,13 @@ VERB = {
     "rest": {"args": "", "cost": 0, "doc": ""},
 }
 VERBS = tuple(VERB)
+FM_KINDS = ("sow", "break", "tend", "manure", "crop", "herd", "milk", "slaughter")
 FREE = tuple(v for v, d in VERB.items() if d["cost"] == 0)
 
 
 def verb_here(here, verb) -> bool:
     when = VERB[verb].get("when")
-    return not when or (when == "roads" and bool(here.roads()))
+    return not when or (when == "roads" and bool(here.roads())) or (when == "herds" and any(FM.head(h) > 0 for h in here.herds().values()))
 
 
 def verb_units(p, verb):
@@ -79,7 +83,7 @@ def cost(here, a) -> int:
     n = verb_units(here.p, v)
     if n is not None:
         return n
-    tech = KN.resolve(a.get("what"))
+    tech = KN.resolve(a.get("what"), a.get("do"))
     if tech is None:
         return 1
     n = int(TECHNIQUES[tech]["units"])
@@ -186,7 +190,7 @@ def _consume(here, needs: dict, mult=1.0, extra=None):
 
 
 def _skill_mult(here, mind, tech) -> float:
-    return (0.6 + 0.4 * KN.skill(mind, tech)) * here.yield_mult()
+    return KN.skill(mind, tech) * here.yield_mult()                           # skill by practice (D2-52), and hunger
 
 
 def _site(here, mind, tech, at):
@@ -236,7 +240,7 @@ def _work(here, mind, a, party):
 
 
 def _technique(here, mind, a, party, verb):
-    tech = KN.resolve(a.get("what"))
+    tech = KN.resolve(a.get("what"), verb)
     if tech is None or TECHNIQUES[tech]["verb"] != verb:
         names = [t for t, d in TECHNIQUES.items() if d["verb"] == verb]
         raise Refused(f"{a.get('what')!r} is not something you {verb} ({verb}: {', '.join(names)})")
@@ -254,7 +258,7 @@ def _technique(here, mind, a, party, verb):
     here.today()["worked"].setdefault(here.name, []).append(key)
     thing = (kind, key)
     note = _against(here, thing) if kind == "parcel" else ""
-    got, gives, word, extra_got = 0.0, t.get("gives"), "", ""
+    got, gives, word, extra_got, suffix = 0.0, t.get("gives"), "", "", ""
     if y["kind"] == "stock":
         r = here.parcels()[key]["res"][t["draws"]]
         want = y["base"] * r["S"] / r["K"] * m * tm
@@ -275,54 +279,12 @@ def _technique(here, mind, a, party, verb):
         q = y["base"] * m * tm
         got = here.apply("draw", parcel=key, key=t["draws"], qty=round(q, 2)) if t["draws"] in here.parcels()[key]["res"] and \
             here.parcels()[key]["res"][t["draws"]]["K"] > 0 and t["draws"] != "quarry" else round(q, 2)
-    elif y["kind"] == "crop":
-        c = here.parcels()[key]["crop"]
-        got = here.apply("draw", parcel=key, key="crop", qty=round(min(c["left"], y["base"] * m * tm), 2))
-        gives = "grain"
-    elif y["kind"] == "sow":
-        f = here.p["farming"]
-        par = here.parcels()[key]
-        c = par.get("crop") if par.get("crop") and par["crop"].get("left", 0) > 1e-9 else None
-        cap = par["size"] * f["seed_per_unit"] * 2 - (c["seed"] if c else 0)
-        seed = min(f["seed_per_unit"], cap, KN.available(here, "grain", extra=out if out != here.hands else None))
-        if seed <= 1e-9:
-            raise Refused("you have no grain to sow" if cap > 0 else f"{par['name']} is sown as thick as it will take")
-        _consume(here, {"grain": seed}, extra=out if out != here.hands else None)
-        crop = dict(c) if c else {"kind": "grain", "sown": here.day, "ripe_day": here.day + int(f["grow_days"]), "window": int(f["window"]),
-                                  "seed": 0.0, "weeded": 0.0, "left": 0.0, "sower": party or here.name}
-        crop["seed"] = round(crop["seed"] + seed, 4)
-        crop["left"] = round(crop["seed"] * f["return"] * par["fertility"] * (1 + crop["weeded"]), 4)
-        here.apply("set", ref=("parcel", key), field="crop", value=crop)
-        word = f"You sowed {show(seed)} grain in {place_name}; it should be ready to reap in about {crop['ripe_day'] - here.day} days."
-    elif y["kind"] == "tend":
-        f = here.p["farming"]
-        par = here.parcels()[key]
-        crop = dict(par["crop"])
-        crop.setdefault("base", crop["seed"] * f["return"] * par["fertility"] if crop.get("seed") else crop["left"])
-        before = crop.get("weeded", 0.0)
-        crop["weeded"] = round(min(f["weed_max"], before + f["weed_step"] * m), 4)      # a saturating gain (D2-11, D2-15)
-        crop["left"] = round(crop["left"] + crop["base"] * (crop["weeded"] - before), 4)
-        here.apply("set", ref=("parcel", key), field="crop", value=crop)
-        word = f"You weeded the {crop.get('kind', 'crop')} in {place_name}: it will bear more."
-    elif y["kind"] == "milk":
-        hid = next(h for h, x in here.herds().items() if x["parcel"] == key)
-        h = here.herds()[hid]
-        mk = h["milked"] if h["milked"]["day"] == here.day else {"day": here.day, "n": 0}
-        here.apply("set", ref=("herd", hid), field="milked", value={"day": here.day, "n": mk["n"] + 1})
-        got = round(y["base"] * m, 2)
-        thing = ("herd", hid)
-        note = _against(here, thing)
-    elif y["kind"] == "slaughter":
-        hid = next(h for h, x in here.herds().items() if x["parcel"] == key)
-        h = here.herds()[hid]
-        thing = ("herd", hid)
-        note = _against(here, thing)
-        here.apply("set", ref=("herd", hid), field="count", value=h["count"] - 1)
-        if h["in_milk"] > h["count"] - 1:
-            here.apply("set", ref=("herd", hid), field="in_milk", value=max(0, h["count"] - 1))
-        for item, q in y["gives"].items():
-            here.apply("create", dst=out, item=item, qty=q, why=tech)
-        word = f"You slaughtered a beast of {h['name']}{note}: " + ", ".join(f"{q:g} {i}" for i, q in y["gives"].items()) + "."
+    elif y["kind"] in FM_KINDS:                                                 # farming and cattle (farm.py)
+        got, g, word, thing = FM.act(here, mind, tech, key, place_name, out, m, tm, a)
+        gives = g or gives
+        note = _against(here, thing) if thing[0] in ("parcel", "herd") else note
+        if word and not word.startswith("You"):
+            suffix, word = word, ""                                             # a note to the plain result, below
     elif y["kind"] == "repair":
         b = here.buildings()[key]
         _consume(here, t.get("inputs") or {}, extra=b["stock"] if here.may_take(b["stock"]) else None)
@@ -333,7 +295,7 @@ def _technique(here, mind, a, party, verb):
         here.apply("create", dst=out, item=gives, qty=got, why=tech)
     if tool and t.get("wear"):
         here.apply("wear", container=here.hands, item=tool, uses=t["wear"])
-    KN.tried(here, mind, tech, got > 0 or y["kind"] in ("sow", "tend", "repair", "slaughter"))
+    KN.tried(here, mind, tech, got > 0 or y["kind"] in ("sow", "tend", "repair", "slaughter", "break", "manure", "herd"), units=t["units"])
     for_txt = f" for {here.households()[party]['name'] if party in here.households() else party}" if party and party != here.name else ""
     text = f"{here.name} was {KN.label(tech)} at {place_name}{for_txt}{note}"
     here.event("work", text, actor=here.name, about=[f"{thing[0]}:{thing[1]}"], salience=0.35 if note else 0.15, tags=t["tags"],
@@ -345,13 +307,13 @@ def _technique(here, mind, a, party, verb):
         return f"You hunted in {place_name}{note} and caught nothing{extra_got}."
     via = f" with your {tool}" if tool else (" with your bare hands" if t.get("tools") else "")
     dest = "" if out == here.hands else f" into {here.buildings()[out[len('stock:'):]]['name']}" if out.startswith("stock:") else f" to {party}"
-    return f"You {verb}ed {show(got)} {gives}{extra_got} at {place_name}{note}{via}{dest}.".replace("You gathered", "You took").replace(
-        "You worked", "You got")
+    return (f"You {verb}ed {show(got)} {gives}{extra_got} at {place_name}{note}{via}{dest}.{suffix}".replace("You gathered", "You took")
+            .replace("You worked", "You got"))
 
 
 # ---------------------------------------------------------------------- making
 def _make(here, mind, a, party):
-    tech = KN.resolve(a.get("what"))
+    tech = KN.resolve(a.get("what"), "make")
     if tech is None or TECHNIQUES[tech]["verb"] != "make":
         names = [t for t, d in TECHNIQUES.items() if d["verb"] == "make"]
         raise Refused(f"{a.get('what')!r} is not something you make (recipes: {', '.join(names)})")
@@ -369,7 +331,7 @@ def _make(here, mind, a, party):
         site = KN.where(here, tech)[0]
         _consume(here, t.get("inputs") or {}, TRY[lvl]["inputs"], extra)
         ok = here.rng("make", here.day, here.name, tech, i).random() < TRY[lvl]["chance"]
-        rose = KN.tried(here, mind, tech, ok)
+        rose = KN.tried(here, mind, tech, ok, units=t["units"])
         if ok:
             for item, q in t["gives"].items():
                 here.apply("create", dst=out, item=item, qty=q, why=tech)
@@ -424,6 +386,8 @@ def _build(here, mind, a, party):
         raise Refused(f"you cannot get into {b['name']}")
     if f.get("needs") and not b["fittings"].get(f["needs"]):
         raise Refused(f"{f['label']} needs {FITTINGS[f['needs']]['label']} first")
+    if f.get("site") and not any(here.parcels()[x]["cover"] == f["site"] for x in [b["parcel"]] + here.parcels()[b["parcel"]]["adj"]):
+        raise Refused(f"{f['label']} needs a building by {f['site']}")
     n = max(1, int(_qty(a.get("qty"), 1))) if f.get("per") else 1
     if f.get("per"):
         n = min(n, max(0, b["size"] - int(b["fittings"].get(what, 0))))
@@ -448,7 +412,7 @@ def _build(here, mind, a, party):
 def _build_work(here, mind, bid, lvl, started=False):
     b = here.buildings()[bid]
     u = dict(b["unfinished"])
-    done = round(2 * (0.6 + 0.4 * KN.skill(mind, u["blueprint"])) * here.yield_mult(), 2)
+    done = round(2 * KN.skill(mind, u["blueprint"]) * here.yield_mult(), 2)
     u["units_left"] = round(max(0.0, u["units_left"] - done), 2)
     here.record("build", u["blueprint"], None)
     if u["units_left"] <= 1e-9:
@@ -789,5 +753,6 @@ def _withdraw(here, mind, a, party):
 HANDLERS = {"gather": _gather, "work": _work, "make": _make, "build": _build, "move": _move, "take": _take, "give": _give, "leave": _leave,
             "accept": _accept, "withdraw": _withdraw, "release": _release, "host": _host, "grant": _grant, "revoke": _revoke, "join": _join, "admit": _admit,
             "leave_household": _leave_household, "found": _found, "claim": _claim, "sleep": _sleep, "set": _set, "travel": _travel,
-            "watch": _watch, "teach": _teach, "learn": _learn, "attack": _attack, "guard": _guard, "rest": _rest}
+            "watch": _watch, "teach": _teach, "learn": _learn, "attack": _attack, "guard": _guard, "rest": _rest,
+            "drive": lambda here, mind, a, party: FM.drive(here, a, party)}
 assert set(HANDLERS) == set(VERB)

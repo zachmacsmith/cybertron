@@ -8,7 +8,7 @@ import json
 import pytest
 
 from cybertron2.engine import agreements as AG, knowledge as KN, night as N, perceive as PC, prompt as PR, run as R, settle as ST
-from cybertron2.engine import verbs as V
+from cybertron2.engine import farm as FM, verbs as V
 from cybertron2.engine.here import Here, Mind
 from cybertron2.engine.world import PlaceError, World, load_spec
 
@@ -110,7 +110,9 @@ def test_gathering_and_making_from_data():
     w = world()
     assert do(w, "Warin", do="gather", what="mine").startswith("You took")
     assert do(w, "Warin", do="gather", what="mine", at="the Hillside").startswith("Refused")
-    r = do(w, "Osric", do="make", what="smelt")                          # ore and timber from the household's store
+    bid = next(b for b, x in w.s["buildings"].items() if x["fittings"].get("anvil"))
+    w.s["containers"][w.s["buildings"][bid]["stock"]]["goods"]["charcoal"] = 2.0
+    r = do(w, "Osric", do="make", what="smelt")                          # ore and charcoal (D2-56) from the household's store
     assert r.startswith("You made 1 copper"), r
     assert do(w, "Edric", do="make", what="smelt").startswith("Refused")  # not known, no anvil here
 
@@ -137,18 +139,18 @@ def test_farming_sow_ripen_reap_and_rot():
     w.s["containers"][w.hands("Hamo")]["goods"]["grain"] = 6
     assert do(w, "Hamo", do="work", what="sow", at="Brook Field").startswith("You sowed")
     c = w.s["parcels"]["brook_field"]["crop"]
-    assert c["ripe_day"] == w.d + int(w.p["farming"]["grow_days"])
+    assert c["ripe_day"] == w.d + FM.grow_days(w.year_days(), "grain")    # a share of the year from the day sown (D2-53)
     assert do(w, "Hamo", do="work", what="reap", at="Brook Field").startswith("Refused")
     left = c["left"]
     w.s["day"] = c["ripe_day"] + c["window"]
-    N._grow(w)
+    FM.night(w)
     assert w.s["parcels"]["brook_field"]["crop"]["left"] < left          # rotting after the window (D2-12)
 
 
 def test_building_a_house_and_living_in_it():
     w = world()
     me = w.hands("Osric")
-    w.s["containers"][me]["goods"].update({"timber": 20, "hide": 2})
+    w.s["containers"][me]["goods"].update({"timber": 20, "hide": 2, "straw": 4})
     assert do(w, "Osric", do="found", name="Osric").startswith("You are now the head")
     assert w.homes("Osric") == []
     r = do(w, "Osric", do="build", what="small room", at="the Yard", name="Osric's House")

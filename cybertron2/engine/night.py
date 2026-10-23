@@ -7,7 +7,7 @@ may take from, the one slept in first (38.17 §9: to confirm).
 """
 from __future__ import annotations
 
-from cybertron2.engine.data import EDIBLE, ITEMS
+from cybertron2.engine.data import EDIBLE, FITTINGS, ITEMS
 from cybertron2.engine.world import Refused
 
 
@@ -59,7 +59,8 @@ def night(w) -> dict:
         if place in s["nodes"]:
             mine = w.takeable(name, place)
             stores += sorted((c for c in mine if c != a["hands"]), key=lambda c: 0 if b is not None and c == b["stock"] else 1)
-        ate = _eat(w, place, stores, need)
+        hearth = b is not None and bool(b["fittings"].get("hearth")) and bool(b["fire"])    # grain is boiled at a lit hearth (D2-60)
+        ate = _eat(w, place, stores, need, hearth)
         if ate + 1e-9 >= need:
             a["hunger"], a["missed"] = min(0, a["hunger"] + 1), 0
             rec["ate"][name] = round(ate, 2)
@@ -88,9 +89,10 @@ def night(w) -> dict:
                     if place in s["nodes"]:
                         w.event(place, "death", f"{name} died in the night, of hunger", target=name, salience=1.0, tags=["death", "food"])
     for cid, c in s["containers"].items():                                    # spoilage
-        if c["kind"] == "stock":
+        if c["kind"] == "stock":                                               # the best keeping fitting in the building (D2-45, D2-58)
             bb = s["buildings"][c["of"]]
-            mult = float(p["house_spoil"]) * (float(p["cellar_spoil"]) if bb["fittings"].get("cellar") else 1.0)
+            mult = float(p["house_spoil"]) * min([1.0] + [float(FITTINGS[f_].get("spoil", 1.0)) for f_, n in bb["fittings"].items()
+                                                          if n and f_ in FITTINGS])
         else:
             mult = 1.0
         if c["kind"] == "hands" and not s["people"][c["of"]]["alive"]:
@@ -107,6 +109,8 @@ def night(w) -> dict:
             w.apply("set", b["node"], ref=("building", bid), field="condition", value=b["condition"] - 1)
             rec["breaks"].append(bid)
     _grow(w)
+    from cybertron2.engine import farm as FM
+    rec["farm"] = FM.night(w)
     for oid, o in s["offers"].items():                                          # offers lapse (money_and_markets.md)
         if not o["open"]:
             continue
@@ -156,12 +160,14 @@ def sleeping_places(w, today) -> dict:
     return out
 
 
-def _eat(w, place, stores, need) -> float:
-    """Up to `need` in food value, from the stores in order, most perishable first."""
+def _eat(w, place, stores, need, hearth=True) -> float:
+    """Up to `need` in food value, from the stores in order, most perishable first; what must be cooked only at a lit hearth."""
     got = 0.0
     for cid in stores:
         g = w.goods(cid)
         for item in sorted(EDIBLE, key=lambda i: -ITEMS[i]["spoil"]):
+            if ITEMS[item].get("cook") and not hearth:
+                continue
             v = ITEMS[item]["food"]
             if got + 1e-9 < need and g.get(item, 0.0) > 1e-9:
                 q = min(g[item], (need - got) / v)
@@ -175,17 +181,11 @@ def _grow(w):
     p = w.p
     for pid, par in w.s["parcels"].items():
         for key, r in par["res"].items():
-            reg = {"plants": "fast", "game": "threshold", "wood": "slow"}.get(key)
+            reg = {"plants": "fast", "grass": "fast", "game": "threshold", "wood": "slow"}.get(key)
             if not reg or r["K"] <= 0:
                 continue
             if reg == "threshold" and r["S"] < float(p["game_threshold"]) * r["K"]:
                 continue
             rate = r["r"] * (float(p["regrow_winter"]) if winter else 1.0)
             r["S"] = round(min(r["K"], r["S"] + rate * r["S"] * (1 - r["S"] / r["K"]) + (0.01 * (r["K"] - r["S"]) if reg == "fast" else 0)), 4)
-        c = par.get("crop")
-        if c and c.get("left", 0) > 1e-9:
-            ripe = int(c.get("ripe_day", 0))
-            window = int(c.get("window", p["farming"]["window"]))
-            if w.d >= ripe + window:
-                c["left"] = round(c["left"] * (1 - float(p["farming"]["rot"])), 4)
-                c["rotting"] = True
+        # crops: farm.night (D2-53, D4-39)

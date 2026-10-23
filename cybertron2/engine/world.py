@@ -34,7 +34,7 @@ import random
 
 import yaml
 
-from cybertron2.engine.data import EDIBLE, ITEMS, PHYSICS, RESOURCES, TOOLS, WEAPONS
+from cybertron2.engine.data import EDIBLE, FITTING_ALIAS, ITEMS, PHYSICS, RESOURCES, TOOLS, WEAPONS
 
 SEASONS = ("spring", "summer", "autumn", "winter")
 STAGES = {0: "fed", -1: "hungry", -2: "starving"}
@@ -89,9 +89,19 @@ class World:
                 res = {k: {"S": float(v["S"]), "K": float(v["K"]), "r": float(v.get("r", 0.3))} if k != "seam" else
                        {"S": float(v.get("S", v.get("left", 0))), "K": float(v.get("K", v.get("S", v.get("left", 0)))), "r": 0.0}
                        for k, v in st.items() if k in RESOURCES}
-                s["parcels"][pid] = {"node": nid, "name": p.get("name", pid), "cover": p["cover"], "size": int(p.get("size", 1)),
-                                     "adj": list(p.get("adj") or []), "text": p.get("text", ""), "res": res,
-                                     "crop": copy.deepcopy(st.get("crop")), "fertility": float(p.get("fertility", 1.0))}
+                if p["cover"] in ("pasture", "meadow") and "grass" not in res:            # grazing (D4-45; 02o: 2 head a plot)
+                    cp = self.p["cattle"]
+                    res["grass"] = {"S": float(cp["grass_per_plot"]) * int(p.get("size", 1)), "K": float(cp["grass_per_plot"]) * int(p.get("size", 1)),
+                                    "r": float(cp["grass_r"])}
+                par = {"node": nid, "name": p.get("name", pid), "cover": p["cover"], "size": int(p.get("size", 1)),
+                       "adj": list(p.get("adj") or []), "text": p.get("text", ""), "res": res, "crop": None,
+                       "fertility": float(p.get("fertility", 1.0)), "broken": float(st.get("broken", 0.0)),
+                       "last_crop": st.get("last_crop"), "last_kind": st.get("last_kind")}
+                if st.get("crop"):
+                    from cybertron2.engine import farm as FM
+                    fam = FM.CROP_OF.get(str(st["crop"].get("kind", "grain")).lower(), "grain")
+                    par["crop"] = FM.normalise_crop(par, st["crop"], 0, FM.grow_days(self.year_days(), fam))
+                s["parcels"][pid] = par
         for a, b in [(a, b) for a, p in s["parcels"].items() for b in p["adj"]]:
             if a not in s["parcels"][b]["adj"]:
                 s["parcels"][b]["adj"].append(a)
@@ -100,10 +110,14 @@ class World:
             s["roads"][f"road:{a}-{b}"] = {"a": a, "b": b, "days": k, "track": "track" in e[3:]}     # a track lets carts pass
         for bid, b in (spec.get("buildings") or {}).items():
             self._new_building(bid, b)
-        for hid, h in (spec.get("herds") or {}).items():
+        for hid, h in (spec.get("herds") or {}).items():                       # cattle by role (D2-63); a bare count is cows
+            roles = {r: int(h.get(r, 0)) for r in ("cows", "oxen", "bulls", "young")}
+            if not any(roles.values()):
+                roles["cows"] = int(h.get("count", 6))
             s["herds"][hid] = {"node": self.node_of(h["parcel"]), "parcel": h["parcel"], "home": h["parcel"], "name": h.get("name", hid),
-                               "kind": h.get("kind", "cattle"), "count": int(h.get("count", 6)), "in_milk": int(h.get("in_milk", 0)),
-                               "milked": {"day": -1, "n": 0}}
+                               "kind": h.get("kind", "cattle"), **roles, "count": sum(roles.values()),
+                               "in_milk": float(min(roles["cows"], int(h.get("in_milk", 0)))), "milked": {"day": -1, "n": 0},
+                               "births": 0.0, "hungry": 0, "watched": -1}
         for iid, h in (spec.get("households") or {}).items():
             s["institutions"][iid] = {"kind": "household", "name": h.get("name", f"the {iid}s"), "members": [],
                                       "offices": {"head": h.get("head")}, "rules": {"admit": "head", "grant": "members", **(h.get("rules") or {})}}
@@ -154,7 +168,8 @@ class World:
         s["containers"][cid] = {"kind": "stock", "of": bid, "goods": {k: float(v) for k, v in (b.get("stock") or {}).items()}, "wear": {}}
         s["buildings"][bid] = {"node": self.node_of(b["parcel"]), "parcel": b["parcel"], "name": b.get("name", bid),
                                "structure": b.get("structure", "wattle"), "size": int(b.get("size", b.get("beds", 4))),
-                               "fittings": dict(b.get("fittings") or {}), "condition": int(b.get("condition", 2)),
+                               "fittings": {FITTING_ALIAS.get(k, k): v for k, v in (b.get("fittings") or {}).items()},
+                               "condition": int(b.get("condition", 2)),
                                "door": b.get("door", "open"), "fire": False, "stock": cid, "unfinished": b.get("unfinished")}
 
     def _eldest(self, members):
@@ -181,6 +196,9 @@ class World:
         k = self.start[0] * self.season_len + self.start[1] + day
         at = k % self.season_len
         return {"season": SEASONS[(k // self.season_len) % 4], "day": at + 1, "left": self.season_len - at - 1, "year_day": k}
+
+    def year_days(self) -> int:
+        return 4 * self.season_len
 
     def cold(self, day=None) -> bool:
         day = self.d if day is None else day
@@ -424,9 +442,11 @@ def p_destroy(w, src, item, qty, why=""):
 
 
 def p_draw(w, parcel, key, qty):
-    if key == "crop":
+    if key == "crop":                                                          # taken from the standing crop: its ground with it
         c = w.s["parcels"][parcel]["crop"]
         q = min(qty, c["left"])
+        if c["left"] > 1e-9 and "area_left" in c:
+            c["area_left"] = round(c["area_left"] * (1 - q / c["left"]), 6)
         c["left"] = round(c["left"] - q, 4)
         c["reaped"] = True
         return q
@@ -452,6 +472,20 @@ def p_set(w, ref, field, value):
     table = {"building": "buildings", "parcel": "parcels", "herd": "herds", "person": "people", "offer": "offers"}[kind]
     w.s[table][key][field] = value
     return value
+
+
+def p_new_herd(w, like, parcel):
+    """A herd split off another (beasts driven apart: D4-44), at a parcel of the same node, with no beasts yet."""
+    h = w.s["herds"][like]
+    k = 2
+    while f"{like}-{k}" in w.s["herds"]:
+        k += 1
+    hid = f"{like}-{k}"
+    pname = w.s["parcels"][parcel]["name"]
+    w.s["herds"][hid] = {**{x: v for x, v in h.items() if x not in ("cows", "oxen", "bulls", "young", "in_milk", "count", "births")},
+                         "parcel": parcel, "home": parcel, "name": f"{h['name']} on {pname}", "cows": 0, "oxen": 0, "bulls": 0, "young": 0,
+                         "in_milk": 0.0, "count": 0, "births": 0.0, "milked": {"day": -1, "n": 0}, "hungry": 0, "watched": -1}
+    return hid
 
 
 def p_admit(w, person, inst):
@@ -601,6 +635,7 @@ PRIMITIVES = {
     "draw": (p_draw, _r("parcel", "parcel")),
     "wear": (p_wear, _rc("container")),
     "set": (p_set, lambda kw: [tuple(kw["ref"])]),
+    "new_herd": (p_new_herd, lambda kw: [("herd", kw["like"]), ("parcel", kw["parcel"])]),
     "admit": (p_admit, _r("person", "person")),
     "leave": (p_leave, _r("person", "person")),
     "found": (p_found, _r("person", "person")),
