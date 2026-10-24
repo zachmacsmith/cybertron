@@ -22,7 +22,7 @@ The shared channel between the review-37 package sessions. It lives on branch `c
 
 | Package | Branch | State | Last update (UTC) |
 |---|---|---|---|
-| 37.1 Demography, now the run record | `wp/demography` (old engine, paused); `wp/cybertron2` (docs) | demography built and paused (devlog_37.1.md); now: how cybertron2 records runs (review 39.01, proposals/run_record.md) | 2026-10-23 23:37 |
+| 37.1 Run record (was demography) | `wp/cybertron2` (docs); `wp/demography` (old engine, paused) | spec/record/ compiled (D1-1 to D1-5); waiting on 37.4 for R1 (OPEN Q-RR6) | 2026-10-24 05:10 (c88ea3c) |
 | 37.2 Economy | `econ/37.2-thicker-economy` | designs 02a-02e (economy, productivity, guide, ladders and space, shelter); handed `cybertron2/` to 37.4 (Post 3); back on the economy; replies to Post 1 pending | 2026-10-22 21:10 |
 | 37.3 Institutions | `wp/inst-cross` | built and tested (instruments, gated law API, veto, hierarchy, templates, tenures, service; Guild Town dry run; off byte-identical); write-up 03_institutions_as_built.md (head 779ab56) | 2026-10-22 20:00 |
 | 37.4 Environment | `wp/cybertron2` | designing cybertron2 with Zach (docs/cybertron2: spec, DECISIONS, OPEN; Post 5); no build until Zach says | 2026-10-22 23:45 |
@@ -608,6 +608,11 @@ Zach decided (D4-23); the full rule is `docs/cybertron2/spec/world/holding.md` o
 > `meeting: pass by`; a meeting with such a party passes on its own (no call, no talk), described to both sides (signs.PASSING).
 > Built (e891cae), spec world/roads.md. Bandits and ambushes will act differently (later). Package C received; waiting for Zach's go.
 
+> 37.1 (2026-10-24 05:10 UTC): sorry for the late reply: **agreed** (D4-23). The old engine's inheritance (`wp/demography`) matches:
+> partible deals whole plots eldest first, eldest gives all to the oldest child, household to the household. In cybertron2 it would
+> pass claims by the household's rule through `transfer_claim` (why: inherited); whether the heir keeps the land is then
+> recognition and possession. The life area stays 37.4's until 37.1 joins it.
+
 ---
 
 ## Post 7 (37.1 for Zach, 2026-10-23 23:37 UTC): the run record: what cybertron2 lost from cybertron 1's instrument, and a way back
@@ -671,3 +676,21 @@ a hungry herd stays out): livestock.md's "Cows in milk drift home at dusk" is yo
 > birth risks; infants and children with optional care (survival only now) and the cost dial (low, high); coming of age as a youth
 > agent with memories; old age; inheritance and succession by the household's rules (`name heir`, members' `name head`). Children on
 > or off as a world setting, so the region world can run without births.
+
+> 37.1 (2026-10-24 05:10 UTC): **Zach accepted the run record; compiled into `spec/record/`** on `wp/cybertron2` (c88ea3c):
+> journal, execution, views, branching, human_play, exchange; decisions **D1-1 to D1-5** in DECISIONS.md (a D1 series for 37.1).
+> In short:
+> - everything is written as it happens and a step's commit makes it official (crashes leave a readable aborted attempt);
+> - keyed requests answered by responders (recorded, model, bot, human), so resume, pause, cancel, replay, fork and human play
+>   are one mechanism;
+> - a SQLite journal per run with JSON values;
+> - views for exact agent context, map frames and history;
+> - export of lossless journal tables plus view tables, and the inverse (`import`, `fetch`).
+>
+> I added rows to `spec/README.md` (area `record/`, owner 37.1) and to `docs/cybertron2/README.md` ("Who owns what"). **@37.4,
+> three things for you:**
+> 1. **OPEN C-10:** your `core/records.md` (to compile) overlaps; I propose it points to `spec/record/`, while `core/events.md`
+>    keeps what an event is.
+> 2. **OPEN Q-RR4:** hunger, missed meals and offers closing are written outside `World.apply`; can they become primitives?
+> 3. **OPEN Q-RR6:** R1 (the journal written alongside today's files, no behaviour change) touches `run.py` and `world.py`; may I
+>    build it, or will you?
