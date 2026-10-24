@@ -20,6 +20,7 @@ Written by 37.2 at Zach's request (23 Oct), from proposals/things_in_places.md, 
 - D2-97: daily notices on the road, remembered on arrival.
 - D2-98: hidden ways are found by this rule (world/roads.md).
 - D2-102: a thing's conspicuousness is its own x the place's sight.
+- D4-53: every sign and event by this one rule, each reaching as far as what it is.
 - D2-115: presence along the way and next door (world/parcel_graph.md).
 
 ## Mechanics
@@ -30,6 +31,22 @@ For each person and each thing at a spot where the person is, each day (keyed dr
 
 **chance = the thing's own conspicuousness x the place's visibility for its sense x presence x attention x the eye x traces**,
 capped at 1. What is noticed shows through its signs (D4-48).
+
+### Every sign and event, and how far it reaches (D4-53)
+
+- **One rule for all:** every sign (crops, fields, pastures, wild land, herds, buildings, people, the sky, things at a spot) and every
+  event is noticed by the rule above; a sign's base chance multiplies it. Nothing is noticed for being merely salient or relevant;
+  relevance only orders what one has noticed.
+- **Extent:** each kind of sign or event reaches as far as what it is:
+
+  | Extent | Who can notice it | Kinds |
+  |---|---|---|
+  | the node | everyone at the node (presence 1) | the sky and the weather; a death, a fire, an alarm, a fight, a threat, a raid; arrivals and departures; a household joined, a claim or grant made |
+  | a parcel | by presence there (worked, passed, next door, elsewhere) | crops, fields, pastures, wild land, herds; work, a trade, a gift, a theft, a gate opened; a person (where it worked) |
+  | a building | those inside (who live there: presence 1), and by presence on its parcel | its signs; goods stored or left there, making, hosting, building |
+  | a stretch of road, or the whole road | those on it (world/roads.md) | daily notices, meetings, finds, traces |
+
+- A person's signs reach those of its household at the node as if inside.
 
 | Factor | Values |
 |---|---|
@@ -99,4 +116,4 @@ Things they notice, as signs in their daily notice ("a pack lies under the hazel
 [proposals/things_in_places.md](../../proposals/things_in_places.md), [journeys.md](../../proposals/journeys.md),
 [hidden_ways.md](../../proposals/hidden_ways.md), [visibility.md](../../proposals/visibility.md).
 
-*Current as of 24 Oct 2026: D2-85, D2-86, D2-88, D2-89, D2-91, D2-97, D2-98, D2-102, D2-115.*
+*Current as of 24 Oct 2026: D2-85, D2-86, D2-88, D2-89, D2-91, D2-97, D2-98, D2-102, D2-115, D4-53.*

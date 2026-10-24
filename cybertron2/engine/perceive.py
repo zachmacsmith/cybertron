@@ -164,8 +164,30 @@ def facts(here) -> list:
         if e.get("target"):
             about.append(f"person:{e['target']}")
         add(about or ["sky"], e["text"], e["salience"], e["tags"], e.get("sense", "sight"), e.get("concerns", []), event=e["id"],
-            actor=e.get("actor"), tech=e.get("tech"), kind=e["kind"], dawn=e.get("dawn", False))
+            actor=e.get("actor"), tech=e.get("tech"), kind=e["kind"], dawn=e.get("dawn", False), at=_event_at(here, e, about))
     return out
+
+
+def _event_at(here, e, about) -> dict:
+    """Where an event happens and how far it reaches (D4-53, data.EVENT_EXTENT): the whole node, a building (those inside it, and its
+    parcel), or a parcel (the one it names, else where its actor was)."""
+    from cybertron2.engine import things as TH
+    from cybertron2.engine.data import EVENT_EXTENT
+    w = here._w
+    ext = next((k for k, kinds in EVENT_EXTENT.items() if e["kind"] in kinds), "parcel")
+    parcel, inside = None, []
+    for sub in about:
+        kind, _, key = sub.partition(":")
+        if kind == "parcel" and key in w.s["parcels"]:
+            parcel = key
+            break
+        if kind == "building" and key in w.s["buildings"]:
+            parcel = w.s["buildings"][key]["parcel"]
+            inside = [x for x in here.people() if key in here.homes_here(x)] if ext == "building" else []
+            break
+    if parcel is None and e.get("actor") in w.s["people"] and w.at(e["actor"]) == here.node:
+        parcel = TH.spot_of(w, e["actor"])
+    return {"node": here.node, "parcel": parcel, "own": 1.0, "inside": inside, "everyone": ext == "node" or parcel is None}
 
 
 def relevance(here, mind, f) -> float:
@@ -293,13 +315,17 @@ def evening(w, attend: dict, today: dict) -> dict:
                 if rng.random() < min(1.0, p):
                     cand.append((1.0 + f["salience"], f))
                 continue
-            if f.get("spot"):                                                  # herds out, fences, gates: the noticing rule (D2-117)
+            if f.get("spot"):                                                  # every sign: the one noticing rule (D4-53)
                 if f.get("only") is not None and name not in f["only"]:
                     continue
-                if f["text"] in t["dawn"] or not SG.readable(f, practised(mind)):
+                if f["text"] in t["dawn"] or f.get("peek") or not SG.readable(f, practised(mind)) or not _can_read(mind, f):
                     continue
+                if f["about"] and f["about"][0] == f"person:{name}":
+                    continue                                                    # oneself
                 sp = f["spot"]
-                p = f["salience"] * TH.spot_chance(w, name, sp["node"], sp["parcel"], sp["own"], tgt_raw, f.get("sense", "sight")) * knack(mind, f)
+                p = f["salience"] * knack(mind, f) * TH.spot_chance(w, name, sp["node"], sp["parcel"], sp["own"], tgt_raw, f.get("sense", "sight"),
+                                                                    inside=sp.get("inside") or (), everyone=sp.get("everyone", False),
+                                                                    eye_on="bare" if f.get("eye") else "things")
                 if rng.random() < min(1.0, p):
                     cand.append((1.0 + f["salience"], f))
                 continue
@@ -315,8 +341,11 @@ def evening(w, attend: dict, today: dict) -> dict:
                 continue
             if f.get("kind") in ROUTINE or (f["about"] and f["about"][0] == f"person:{name}"):
                 continue
-            rel = relevance(here, mind, f)
-            p = 1.0 if f["salience"] >= SALIENT else min(1.0, f["salience"] * (0.3 + rel) * (1.8 if place else 1.0) * knack(mind, f))
+            rel = relevance(here, mind, f)                                     # orders what one notices; the chance is the rule's
+            at = f.get("at") or {"node": here.node, "parcel": None, "own": 1.0, "everyone": True}
+            p = min(1.0, f["salience"] * knack(mind, f) * TH.spot_chance(w, name, at["node"], at["parcel"], at["own"], tgt_raw,
+                                                                         f.get("sense", "sight"), inside=at.get("inside") or (),
+                                                                         everyone=at.get("everyone", False)))
             if f.get("eye"):
                 p *= eye(here, name)
             if rng.random() < p:

@@ -63,6 +63,8 @@ without a proposal.
 | [exchange_and_money.md](exchange_and_money.md) | exchange at a node, coin, debts, credit, tolls | 37.2 | accepted: D2-1, D2-2, D2-25 to D2-30, D4-17 |
 | [information_economics.md](information_economics.md) | writing materials, documents, the information ladder, libraries, archives, maps | 37.2 (37.4 owns information/) | partly accepted: D2-7, D2-8 |
 | [economy_plan.md](economy_plan.md) | the economy plan for cybertron2 (E1-E6, the first region) and society-scale layers | 37.2 | discussion |
+| [one_noticing_rule.md](one_noticing_rule.md) | every sign and event by the one noticing rule, each reaching as far as what it is: the node, a parcel, a building, a stretch or the road | 37.4 | retrospective, accepted: D4-53 |
+| [herds_at_dusk.md](herds_at_dusk.md) | a herd that wandered goes home at dusk by chance, less when well fed where it is | 37.2 (37.4 built it) | retrospective, accepted: D4-54 |
 | [carcasses.md](carcasses.md) | a beast that dies leaves a carcass: fit to eat about a day, then gone off, then bones; on a road maybe none or hidden; meat limited by how it died | 37.4 (37.2: livestock numbers) | retrospective, accepted: D4-52 |
 | [open_fire_and_camp.md](open_fire_and_camp.md) | a fire in the open 2 timber a night; a camp 3 timber to build, 1 a night to keep lit | 37.4 (37.2: shelter) | retrospective, accepted: D4-49 |
 | [passing_by.md](passing_by.md) | `travel {meeting: pass by}`: a meeting passes on its own, no call, described to both | 37.4 | retrospective, accepted: D4-51 |
@@ -76,6 +78,8 @@ Newest first. Ideas decided or rejected in conversation before 23 Oct are backfi
 
 | Date | Idea | Outcome | Where |
 |---|---|---|---|
+| 24 Oct | Every sign and event by the one noticing rule, with an extent by kind (built, then written down) | retrospective, accepted: D4-53 | [one_noticing_rule.md](one_noticing_rule.md) |
+| 24 Oct | Going home at dusk a chance, not a rule (built, then written down) | retrospective, accepted: D4-54 | [herds_at_dusk.md](herds_at_dusk.md) |
 | 24 Oct | A child's total cost as a world setting (the cost dial), to test low and high | accepted to explore: D2-145 | children.md |
 | 24 Oct | Children by choice with work spent trying; time in days only; partnering by both even when arranged; pregnancy food and a gap; care optional; succession by the household's rules; no loyalty mechanic, memories | accepted: D2-138 to D2-144 | children.md |
 | 24 Oct | Ages in calendar years in the generator; loyalty set by feeding | rejected: D2-139, D2-144 | children.md |

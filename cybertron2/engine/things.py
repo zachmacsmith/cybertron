@@ -223,13 +223,18 @@ def close(w, name, c, target=None) -> bool:
     return presence(w, name, pid, 1.0) >= 0.5 and spot_of(w, name) == pid or attention(w, name, pid, target) > 1.0
 
 
-def spot_chance(w, name, node, parcel, own_x, target=None, sense="sight") -> float:
-    """The noticing rule for anything at a parcel (information/noticing.md): own x visibility x presence x attention x eye. Used for
-    herds out, fences and gates (signs.py ASTRAY, FENCE)."""
-    if own_x <= 0 or parcel not in w.s["parcels"]:
+def spot_chance(w, name, node, parcel, own_x, target=None, sense="sight", inside=(), everyone=False, eye_on="things") -> float:
+    """The noticing rule (information/noticing.md, D4-53): own x visibility x presence x attention x eye, for every sign. `inside`:
+    those always there (who live in the house, the household); `everyone`: open to all at the node (the sky)."""
+    if own_x <= 0:
+        return 0.0
+    e = eye(w, name, on=eye_on)
+    if everyone or name in inside:
+        return min(1.0, own_x * e if eye_on != "things" else own_x)
+    if parcel not in w.s["parcels"]:
         return 0.0
     vis = EV.visibility(w, node, parcel, sense if sense in ("sight", "sound") else "sight")
-    return min(1.0, own_x * vis * presence(w, name, parcel, own_x) * attention(w, name, parcel, target) * eye(w, name))
+    return min(1.0, own_x * vis * presence(w, name, parcel, own_x) * attention(w, name, parcel, target) * e)
 
 
 def chance(w, name, c, target=None) -> float:

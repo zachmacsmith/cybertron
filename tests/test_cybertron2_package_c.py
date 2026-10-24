@@ -255,7 +255,7 @@ def test_a_hungry_unherded_herd_crosses_several_parcels_and_tramples_a_field_whi
     assert abs(before - c["left"] - before * 0.01 * 8) < 0.01 and c["trampled"]["by"] == "cattle"   # 1% a head (D2-123)
     w2 = barleyfield()
     w2.s["parcels"]["north_field"]["crop"]["ripe_day"] = 60
-    assert _escapes(w2, "cattle", 100, hungry=0) < 0.1                              # fed on good pasture: mostly stays
+    assert _escapes(w2, "cattle", 100, hungry=0) < 0.25                             # fed on good pasture: mostly stays (D2-123)
 
 
 def test_a_herd_on_a_road_drifts_loses_head_and_a_searcher_finds_it_far_more_often(monkeypatch):

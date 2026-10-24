@@ -163,13 +163,19 @@ def wander(w, hid, rec) -> list:
 
 
 def home_at_dusk(w, hid, rec, rng) -> bool:
-    """Cows in milk, fed, drift home at dusk (livestock.md), after a day where they wandered; a shut fence round home lets them back
-    in only at its odds."""
+    """A herd that wandered may walk home at dusk (livestock.md; D4-54): likely for cows in milk, less for others, and less the
+    better it is feeding where it stands, so a herd in good feed often stays the night; a shut fence round home lets it back in only at
+    its odds."""
     h = w.s["herds"][hid]
     home = h.get("home")
     if h.get("parcel") in (None, home) or home not in w.s["parcels"] or w.s["parcels"][home]["node"] != h["node"]:
         return False
-    if float(h.get("in_milk", 0.0)) < 0.5 or int(h.get("hungry", 0)) > 0:
+    if int(h.get("hungry", 0)) > 0:
+        return False                                                            # a hungry herd stays out after food
+    d = HERDS["dusk"]
+    base = float(d["milk"] if float(h.get("in_milk", 0.0)) >= 0.5 else d["dry"])
+    fed_here = min(1.0, value(w, h, h["parcel"]))
+    if rng.random() >= base * (1.0 - float(d["fed_here"]) * fed_here):
         return False
     way = LY.path(w, h["parcel"], home, (hid, "dusk"))
     if not way or (through(w, home) < 1.0 and rng.random() >= through(w, home)):

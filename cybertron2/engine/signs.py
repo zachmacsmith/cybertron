@@ -598,44 +598,54 @@ def _herds_out(here, add) -> None:
 
 
 def facts(here, add) -> None:
-    """Add every sign whose condition holds, at its base chance, for each field, pasture and herd here."""
+    """Add every sign whose condition holds, for each field, pasture, herd, building, person and the sky here. Every sign is read by
+    the one noticing rule (information/noticing.md, D4-53): each carries its spot (a parcel; the people inside a house or a household,
+    who are always there; the sky, open to everyone at the node) and its own conspicuousness (`own`, 1 unless a row sets it)."""
+    from cybertron2.engine import things as TH
+    w = here._w
     names = {id(SKY): "sky", id(WILD): "wild", id(CROP): "crop", id(FIELD): "field", id(PASTURE): "pasture", id(HERD): "herd", id(BUILDING): "building", id(PERSON): "person"}
 
-    def emit(rows, x, about, concerns=()):
+    def emit(rows, x, about, parcel=None, inside=(), everyone=False, concerns=()):
         for i, row in enumerate(rows):
             try:
                 ok = row["when"](x)
             except (KeyError, TypeError, ZeroDivisionError):
                 ok = False
             if ok:
-                kw = {"knack": row.get("knack"), "sign": f"{about[0]}#{names[id(rows)]}{i}"}
+                kw = {"knack": row.get("knack"), "sign": f"{about[0]}#{names[id(rows)]}{i}",
+                      "spot": {"node": here.node, "parcel": parcel, "own": float(row.get("own", 1.0)), "inside": list(inside),
+                               "everyone": everyone}}
                 for k in ("peek", "eye", "land", "knows", "lay"):
                     if row.get(k):
                         kw[k] = row[k]
                 p = row["p"](x) if callable(row["p"]) else row["p"]
                 add(about, row["text"](x), p, row.get("tags", []), row.get("sense", "sight"), concerns=list(concerns), **kw)
-    emit(SKY, sky_context(here), ["sky"])
+    emit(SKY, sky_context(here), ["sky"], everyone=True)
     for pid, p in here.parcels().items():
         x = context(here, pid)
-        emit(WILD, x, [f"parcel:{pid}"])
+        emit(WILD, x, [f"parcel:{pid}"], parcel=pid)
         if p["cover"] == "field":
             if p.get("crop"):
-                emit(CROP, x, [f"parcel:{pid}"])
-            emit(FIELD, x, [f"parcel:{pid}"])
+                emit(CROP, x, [f"parcel:{pid}"], parcel=pid)
+            emit(FIELD, x, [f"parcel:{pid}"], parcel=pid)
         if p["cover"] in ("pasture", "meadow") or (p["res"].get("dung") or {}).get("S", 0) > 5:
-            emit(PASTURE, x, [f"parcel:{pid}"])
+            emit(PASTURE, x, [f"parcel:{pid}"], parcel=pid)
     for hid, h in here.herds().items():
         if FM.head(h) > 0:
-            emit(HERD, context(here, h["parcel"], h), [f"herd:{hid}", f"parcel:{h['parcel']}"])
+            emit(HERD, context(here, h["parcel"], h), [f"herd:{hid}", f"parcel:{h['parcel']}"], parcel=h["parcel"])
     _herds_out(here, add)
     for bid, b in here.buildings().items():
+        live = [x for x in here.people() if bid in here.homes_here(x)]
         if b.get("unfinished"):
-            add([f"building:{bid}"], f"{b['name']} is half built", 0.3, ["building"])
+            add([f"building:{bid}"], f"{b['name']} is half built", 0.3, ["building"],
+                spot={"node": here.node, "parcel": b["parcel"], "own": 0.8, "inside": [], "everyone": False})
             continue
         x = building_context(here, bid)
-        emit(BUILDING, x, [f"building:{bid}"], concerns=x.live)
-    for who in here.people():
-        emit(PERSON, person_context(here, who), [f"person:{who}"], concerns=[who])
+        emit(BUILDING, x, [f"building:{bid}"], parcel=b["parcel"], inside=live, concerns=x.live)
+    for who in here.people():                                                     # where they were today; their household sees them
+        hh = w.household_of(who)
+        home = [m for m in here.people() if hh and w.household_of(m) == hh]
+        emit(PERSON, person_context(here, who), [f"person:{who}"], parcel=TH.spot_of(w, who), inside=home, concerns=[who])
 
 
 # =====================================================================================================================================

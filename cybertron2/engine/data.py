@@ -413,6 +413,8 @@ HERDS = {
     "steps": {"fed": 1, "drawn": 8},             # a day: a fed herd on good pasture 0 to 1 steps; hungry or drawn up to 8 (D2-123)
     "good_grass": 0.3,                           # grazing above this share of the pasture's best counts as good
     "draw": {"ripe": 1.0, "water": 0.3},         # beyond the food a parcel offers: a ripe crop's pull, water when hungry
+    "dusk": {"milk": 0.8, "dry": 0.3, "fed_here": 0.7},   # D4-54: the chance a herd that wandered walks home at dusk (cows in milk,
+                                                 # others), less by this share of how well it is feeding where it is (calibrate)
     "trample": 0.01,                             # of the standing crop, a head a day
     "onto_road": 0.1,                            # a step from a parcel where a road leaves
     "own": 0.95,                                 # a herd's own conspicuousness (information/noticing.md)
@@ -429,6 +431,13 @@ LAYOUT = {
     "height": ("down by the water", "on the valley floor", "on the slope", "up on the hilltop"),
     "seen": {"water wheel": "a water mill", "millstones": "a mill", "anvil": "a smithy", "oven": "a bake oven", "granary": "a granary"},
     "overview": (3, 5),
+}
+
+# How far an event reaches (D4-53): the whole node (everyone there can notice it), the parcel it happens on (noticed by the rule:
+# presence, visibility, attention, the eye), or a building (those inside, and by the rule on its parcel). Kinds not listed: the parcel.
+EVENT_EXTENT = {
+    "node": ["death", "fire", "alarm", "fight", "threat", "raid", "sign", "arrive", "depart", "household", "claim", "grant", "release"],
+    "building": ["store", "put", "left", "make", "host", "build"],
 }
 
 NOTICING = {
