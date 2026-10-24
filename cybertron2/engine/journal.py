@@ -100,6 +100,17 @@ class Journal:
         self.quiet = False
         self.committed = {}
         self.checked, self.mismatches = 0, []
+        self.after_commit = None               # called after each commit (branch.after_commit: a fork's settings, interventions)
+        row = self.db.execute("SELECT value FROM meta WHERE key = 'fork'").fetchone()
+        self.fork = json.loads(row[0]) if row else None
+
+    def interventions_after(self, step) -> list:
+        with self.lock:
+            rows = self.db.execute("SELECT id, submitted, applied FROM interventions ORDER BY id").fetchall()
+        return [(i, x, a) for i, x, a in ((i, json.loads(sub), app) for i, sub, app in rows) if x.get("after") == step]
+
+    def applied(self, iid, rec) -> None:
+        self._x("UPDATE interventions SET applied = ? WHERE id = ? AND applied IS NULL", (dumps(rec), iid))
 
     # ------------------------------------------------------------------ resume and replay (R2, execution.md)
     def resume(self, strict=False, until=None, kind="resume") -> None:
@@ -206,6 +217,8 @@ class Journal:
             if rec is None or dumps(rec["world"]) != dumps(now):
                 self.mismatches.append({"step": self.step, "what": "world state",
                                         "paths": differences(rec["world"], now)[:8] if rec else []})
+            if self.after_commit:
+                self.after_commit(self.step)
             if self.until == self.step:
                 raise Paused(f"paused after {self.step}")
             return
@@ -223,6 +236,8 @@ class Journal:
                 self.db.execute("ROLLBACK") if self.db.in_transaction else None
                 self.failures += 1
                 print(f"journal: commit {self.step}: {e}", flush=True)
+        if self.after_commit:
+            self.after_commit(self.step)
         if self.until == self.step:
             raise Paused(f"paused after {self.step}")
 
@@ -295,6 +310,17 @@ def read(path, sql, args=()) -> list:
 def unblob(path, h) -> str | None:
     rows = read(path, "SELECT z FROM blobs WHERE sha = ?", (h,))
     return zlib.decompress(rows[0][0]).decode() if rows else None
+
+
+def unslim(x, path):
+    """The runner's state with its blob references ({"$blob": sha}) read back."""
+    if isinstance(x, dict):
+        if set(x) == {"$blob"}:
+            return unblob(path, x["$blob"])
+        return {k: unslim(v, path) for k, v in x.items()}
+    if isinstance(x, list):
+        return [unslim(v, path) for v in x]
+    return x
 
 
 def checkpoint(path, step, attempt=None, conn=None, lock=None) -> dict:

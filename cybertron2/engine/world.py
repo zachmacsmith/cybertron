@@ -269,7 +269,8 @@ class World:
         return self.s["day"]
 
     def rng(self, *parts) -> random.Random:
-        return random.Random("|".join([str(self.seed)] + [str(p) for p in parts]))
+        salt = [self.s["salt"]] if self.s.get("salt") else []               # a replicate's draws after its fork point (branching.md)
+        return random.Random("|".join([str(self.seed)] + salt + [str(p) for p in parts]))
 
     def calendar(self, day=None) -> dict:
         day = self.d if day is None else day

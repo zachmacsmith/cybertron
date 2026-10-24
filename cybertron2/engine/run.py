@@ -16,7 +16,7 @@ import time
 from pathlib import Path
 
 from cybertron2.engine import agreements as AG, fuse as FU, knowledge as KN, life as LF, night as N, perceive as PC, prompt as PR, roads as RD, settle as ST, verbs as V
-from cybertron2.engine import journal as JN
+from cybertron2.engine import branch as BR, journal as JN
 from cybertron2.engine.converse import Conversations
 from cybertron2.engine.data import EDIBLE, TECHNIQUES
 from cybertron2.engine.here import Here, Mind
@@ -514,6 +514,9 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
             raise SystemExit(f"{src}: no journal to {mode} from")
         spec = json.loads(dict(JN.read(src, "SELECT key, value FROM meta"))["spec"])
         backend = backend or json.loads((Path(out_dir) / "run.json").read_text()).get("backend")
+        if mode == "continue":
+            at = json.loads(dict(JN.read(src, "SELECT key, value FROM meta"))["continue"])["at"]
+            restored = JN.checkpoint(src, at)
         if mode == "replay":                                                # never touch the run itself
             import shutil
             import tempfile
@@ -524,6 +527,10 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
             db.close()
             shutil.copy(src, out / "run.db")
     w = World(spec)
+    start_day = 0
+    if mode == "continue":                                                  # the world as it was at the end of that day
+        w.s = restored["world"]
+        start_day = int(at.split(".")[0][1:]) + 1
     backend = backend or os.environ.get("LLM_BACKEND") or "claude_code"
     out.mkdir(parents=True, exist_ok=True)
     systems = {n: PR.system_prompt(Here(w, n), Mind(w, n)) for n in w.agents_acting()}
@@ -538,8 +545,11 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
     if mode == "start":
         J.start(spec, w.seed, {n: (a["model"] if a.get("model") in (None, "bot") else f"model:{a['model']}") for n, a in w.s["people"].items()})
         J.until = until
+    elif mode == "continue":
+        J.until = until
     else:
         J.resume(strict=mode == "replay", until=until)
+    J.after_commit = lambda step: BR.after_commit(w, J, step)
     stopped = None
     if mode == "resume" and (out / "STOPPED.md").exists():               # a resumed run shows only a current stop
         with open(out / "stop_history.md", "a") as h:
@@ -548,8 +558,13 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
     cost = 0.0
     last_system = dict(systems)
     extra_cost = [0.0]
+    if mode == "continue":                                                  # the runner as it was: conversations, cost, systems
+        r = JN.unslim(restored["runner"], out / "run.db")
+        cost = float(r["cost"])
+        conv.c = {n: {**c, "session": None} for n, c in r["conversations"].items()}
+        last_system.update(r["carry"].get("last_system") or {})
     try:
-        for day in range(w.days):
+        for day in range(start_day, w.days):
             J.open_step(day, "dawn")
             w.s["day"] = day
             w.s["events"] = []
@@ -771,11 +786,48 @@ def main(argv=None):
     p = sub.add_parser("replay")
     p.add_argument("run")
     p.add_argument("--to", help="stop after this step")
+    x = sub.add_parser("rewind")
+    x.add_argument("run")
+    x.add_argument("--to", required=True)
+    x.add_argument("--out", required=True)
+    f = sub.add_parser("fork")
+    f.add_argument("run")
+    f.add_argument("--at", required=True)
+    f.add_argument("--out", required=True)
+    f.add_argument("--apply", help="a YAML list of interventions: {after, op, place, args, note}")
+    f.add_argument("--replicates", type=int)
+    f.add_argument("--as", dest="as_", action="append", default=[], help="NAME=model:<id>|bot|human")
+    f.add_argument("--backend")
+    f.add_argument("--workers", type=int, default=12)
+    f.add_argument("--no-play", action="store_true", help="make the fork without playing it on")
+    c = sub.add_parser("continue")
+    c.add_argument("run")
+    c.add_argument("--at", required=True)
+    c.add_argument("--out", required=True)
+    c.add_argument("--backend")
+    c.add_argument("--workers", type=int, default=12)
+    b = sub.add_parser("branches")
+    b.add_argument("run")
     args = ap.parse_args(argv)
     if args.cmd == "run":
         print(run(args.spec, args.out, args.backend, args.days, args.workers, args.bots, args.seed, until=args.until))
     elif args.cmd == "resume":
         print(run(None, args.run, args.backend, workers=args.workers, until=args.until, mode="resume"))
+    elif args.cmd == "rewind":
+        print(BR.rewind(args.run, args.to, args.out))
+    elif args.cmd == "fork":
+        import yaml
+        ivs = yaml.safe_load(open(args.apply)) if args.apply else None
+        who = dict(a.split("=", 1) for a in args.as_)
+        outs = (BR.replicates(args.run, args.at, args.out, args.replicates, ivs, who) if args.replicates
+                else [BR.fork(args.run, args.at, args.out, ivs, who)])
+        for o in outs:
+            print(o if args.no_play else run(None, o, args.backend, workers=args.workers, mode="resume"))
+    elif args.cmd == "continue":
+        BR.continue_(args.run, args.at, args.out)
+        print(run(None, args.out, args.backend, workers=args.workers, mode="continue"))
+    elif args.cmd == "branches":
+        print(json.dumps(BR.branches(args.run), indent=1))
     elif args.cmd == "replay":
         rep = run(None, args.run, until=args.to, mode="replay")
         print(json.dumps(rep, indent=1))
