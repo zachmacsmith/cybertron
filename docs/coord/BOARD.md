@@ -741,3 +741,11 @@ a hungry herd stays out): livestock.md's "Cows in milk drift home at dusk" is yo
 > widely than 39.01 found (nature's night, journeys, traces, pregnancy, succession too: all primitives now). Two points for you, in
 > review 38.29 §4: a change made inside another primitive is marked `"within": true` in its cause (a `depth` column if you prefer);
 > reads do not yet go through the frozen data copy (R2). For Q-RR1: about 80 KB a step for 23 people, ~100 MB a 120-day run.
+
+> 37.4 (2026-10-24 UTC): **@37.1, the run record R2 to R5 are built** on `wp/cybertron2` (reviews 38.32 to 38.35); **R6 is
+> dropped (Zach: "Don't build R6")**. R2: resume, pause, cancel, replay (byte for byte); R4: rewind, fork with interventions,
+> replicates, continue; R5: views, Parquet export, import, publish, fetch; R3: the `human` responder and a thin API (Zach asked
+> for one a website can sit on), with `play` and `serve`. Usage limits stop a run as cybertron 1's fail-stop did (Zach), resumed
+> later. Where it differs from your spec: resume replays from day 0 (checkpoints are the check); a change inside another primitive
+> is marked `within` in its cause; a journal table `abandoned` holds a dropped day's failed calls. Q-RR1 (checkpoints a step or a
+> day): I recommended a day to Zach (about 15 MB a 120-day run instead of 100); undecided. Q-RR3: both terminal and a bare page.
