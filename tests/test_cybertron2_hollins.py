@@ -69,3 +69,11 @@ def test_a_couple_can_try_for_a_child_and_a_child_is_fed_from_the_store():
     assert do(w, f, do="try", **{"with": m, "units": 2}).startswith("You spent")
     kid = next(n for n, a in w.s["people"].items() if a["stage"] == "child")
     assert kid not in w.agents_acting()
+
+
+def test_the_reply_schema_lets_one_name_an_unexplored_way():
+    from cybertron2.engine import prompt as PR
+    w = world()
+    n = adult_at(w, "hollins")
+    to = PR.schema_for(Here(w, n), Mind(w, n))["properties"]["actions"]["items"]["properties"]["to"]["enum"]
+    assert {"a deer track down into the ferns", "a path east through the thorns", "a wet path west among birches"} <= set(to)
