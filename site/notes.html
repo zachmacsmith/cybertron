@@ -4,23 +4,23 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Notes · Cybertron</title>
-<script>try{document.documentElement.dataset.theme=new URLSearchParams(location.search).get("theme")||localStorage.getItem("cybertron-theme")||"broadsheet"}catch(e){}</script>
-<link rel="stylesheet" href="assets/site.css">
+<meta name="description" content="Write-ups of what the Cybertron runs showed.">
+<link rel="stylesheet" href="assets/base.css">
+<link rel="stylesheet" href="assets/doc.css">
 </head>
 <body>
-<main class="wrap">
-  <div class="runs-head"><div class="label">Writing</div><h1 style="margin-top:10px">Notes</h1>
-    <p class="meta" style="margin-top:10px">Analysis of what happened in the runs.</p></div>
-  <div class="notes-list" id="list"></div>
+<main class="paper">
+  <article class="doc">
+    <header class="doc-head">
+      <div class="label">Cybertron</div>
+      <h1>Notes</h1>
+    </header>
+    <p class="soon">Coming soon…</p>
+  </article>
 </main>
 <script type="module">
-  import { chrome, esc } from "./assets/site.js";
-  chrome("notes");
-  const notes = await (await fetch("notes/index.json")).json();
-  const local = ["localhost", "127.0.0.1"].includes(location.hostname);
-  document.querySelector("#list").innerHTML = notes.filter((n) => local || !n.draft).map((n) =>
-    `<a class="note-row" href="note.html?slug=${n.slug}"><div class="meta">${esc(n.date)}<br>${n.minutes} min read${n.draft ? "<br>draft" : ""}</div>
-      <div><h3>${esc(n.title)}</h3><p>${esc(n.summary)}</p></div></a>`).join("");
+  import { chrome } from "./assets/chrome.js";
+  chrome({ active: "notes" });
 </script>
 </body>
 </html>

@@ -1,0 +1,120 @@
+/* The run page's shell: masthead, sticky run bar (sections + day clock) and hover tip. From the run-front mockup. */
+:root { --rs-sky0: #1b2444; --rs-sky1: #202b50; --rs-sky2: #26335c; --rs-far: #45417f; --rs-farS: #36346c; --rs-near: #35316c; --rs-nearS: #29265a;
+  --rs-rim: #c4507a; --rs-rim2: #d0607e; --rs-mauve: #8a4a86; --rs-cloud: #d6f0f2; --rs-cloud2: #9ccfe0;
+  --rs-cream: #f6ead0; --rs-muted: #b9bde0; --rs-wheat: #e8c060; --rs-roof: #c8553d; --rs-wood: #6b4423; --rs-woodD: #4a2f17; --rs-wood2: #8a5a2a;
+  --rs-meadow: #82b24a; --rs-lit: #ffd27a;
+  --rs-px: "Cyber Digits", "Pixelify Sans", ui-monospace, monospace; --rs-body: "Nunito", system-ui, sans-serif; }
+.run-mast { position: relative; overflow: hidden; min-height: 300px; display: flex; align-items: flex-end; }
+.run-mast .mast-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center bottom; }
+.run-mast .mast-in { position: relative; padding-top: 36px; padding-bottom: 26px; width: 100%; }
+.run-mast .crumbs { font: 500 14px var(--rs-px); color: var(--rs-cloud); }
+.run-mast .crumbs a { color: var(--rs-cream); }
+.run-mast .crumbs span { opacity: .8; }
+.run-mast .run-title { font: 700 clamp(34px, 6vw, 60px)/1.05 var(--rs-px); margin: 6px 0 12px; text-shadow: 3px 3px 0 var(--rs-nearS); }
+.run-mast .standfirst { max-width: 720px; font-size: 17px; line-height: 1.55; margin: 0; background: rgba(27, 36, 68, .82); padding: 10px 14px; border-left: 4px solid var(--rs-rim); }
+.run-mast .notice { display: inline-flex; align-items: center; gap: 8px; margin: 10px 0 0; font-size: 14px; background: var(--rs-woodD); padding: 5px 12px; border: 2px solid var(--rs-wood2); }
+.runbar { position: sticky; top: 0; z-index: 20; background: var(--rs-sky1); border-top: 4px solid var(--rs-rim); border-bottom: 4px solid var(--rs-nearS); }
+.runbar .secnav { display: flex; gap: 2px; padding-top: 6px; }
+.runbar .secnav a { flex: 1 1 0; min-width: 0; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 6px 4px 7px; text-decoration: none;
+  font: 500 16px var(--rs-px); color: var(--rs-muted); border-bottom: 3px solid transparent; }
+.runbar .secnav a:hover { color: var(--rs-cream); background: var(--rs-sky2); }
+.runbar .secnav a.on { color: var(--rs-cream); background: var(--rs-sky0); border-bottom-color: var(--rs-wheat); }
+.runbar .secnav .ico { width: 28px; height: 28px; display: grid; place-items: center; flex: none; }
+.runbar .secnav .bico { width: 28px; height: 28px; object-fit: contain; image-rendering: pixelated; }
+.runbar .secnav svg.bico, .runbar .secnav .ico svg { width: 26px; height: auto; }
+.runbar .secnav .short { display: none; }
+.runbar .clock { display: grid; grid-template-columns: auto auto 1fr; grid-template-areas: "day btn track" "tick tick tick"; align-items: center; gap: 4px 14px;
+  padding: 8px 0 6px; border-top: 2px solid var(--rs-sky2); }
+.runbar .ck-day { grid-area: day; display: flex; align-items: center; gap: 10px; min-width: 176px; }
+.runbar .moon { width: 30px; height: 30px; background: var(--rs-sky0); padding: 3px; box-shadow: 0 0 0 2px var(--rs-far); }
+.runbar .ck-n { font: 700 22px/1 var(--rs-px); display: block; }
+.runbar .ck-of { white-space: nowrap; font: 400 13px/1.3 var(--rs-px); color: var(--season, var(--rs-muted)); }
+.runbar .ck-btns { grid-area: btn; display: flex; gap: 4px; }
+.runbar .ck-btns button { width: 34px; height: 34px; border: 0; background: var(--rs-near); color: var(--rs-cream); font: 600 18px/1 var(--rs-px); cursor: pointer;
+  box-shadow: inset -3px -3px 0 var(--rs-nearS), inset 3px 3px 0 var(--rs-far); }
+.runbar .ck-btns button:hover { background: var(--rs-far); }
+.runbar .ck-btns button:active { box-shadow: inset 3px 3px 0 var(--rs-nearS); }
+.runbar .ck-btns .ck-play { background: var(--rs-roof); box-shadow: inset -3px -3px 0 #9a3a24, inset 3px 3px 0 #e07a5a; }
+.runbar .ck-track { grid-area: track; display: flex; align-items: flex-end; gap: 10px; min-width: 0; }
+.runbar .days { flex: 1; min-width: 0; height: 44px; display: flex; align-items: flex-end; gap: 1px; cursor: pointer; touch-action: none; padding-top: 12px; outline: none; }
+.runbar .days:focus-visible { box-shadow: 0 0 0 2px var(--rs-wheat); }
+.runbar .days button { flex: 1 1 0; min-width: 0; height: 100%; border: 0; padding: 0; background: transparent; position: relative; display: flex; align-items: flex-end; cursor: pointer; }
+.runbar .days button i { display: block; width: 100%; height: var(--h); background: var(--season); opacity: .95; box-shadow: inset 0 3px 0 rgba(0,0,0,.18); }
+.runbar .days button.later i { opacity: .28; }
+.runbar .days button:hover i { opacity: 1; background: var(--rs-cream); }
+.runbar .days button.on i { background: var(--rs-cream); opacity: 1; height: 100%; }
+.runbar .days button.on::before { content: ""; position: absolute; left: 50%; top: -12px; width: 8px; height: 8px; margin-left: -4px; background: var(--rs-lit);
+  box-shadow: 0 0 0 2px var(--rs-roof); }
+.runbar .days em { position: absolute; left: 50%; width: 4px; height: 4px; margin-left: -2px; pointer-events: none; }
+.runbar .days em.law { bottom: calc(var(--h) + 2px); background: var(--rs-wheat); }
+.runbar .days em.death { bottom: 3px; background: var(--rs-sky0); }
+.runbar .days button.on em.law { display: none; }
+.runbar .ck-rest { flex: none; font: 400 13px var(--rs-px); color: var(--rs-muted); white-space: nowrap; padding-bottom: 2px; display: flex; align-items: center; }
+.runbar .ck-rest svg { margin-right: 5px; }
+.runbar .ticker { grid-area: tick; font-size: 14px; color: var(--rs-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-height: 22px; }
+.runbar .ticker b { font: 600 14px var(--rs-px); color: var(--rs-cream); margin-right: 6px; }
+.runbar .tk-paper { font-style: italic; }
+.tip { position: fixed; z-index: 50; max-width: 280px; background: var(--rs-sky0); color: var(--rs-cream); padding: 10px 12px; font-size: 14px; line-height: 1.45;
+  box-shadow: 0 0 0 2px var(--rs-far), 4px 4px 0 2px var(--rs-nearS); pointer-events: none; }
+.tip b { display: block; font: 600 16px var(--rs-px); margin-bottom: 2px; }
+.tipv { float: left; margin: 0 10px 2px 0; }
+.tipfolk { display: flex; flex-wrap: wrap; gap: 2px; margin: 4px 0; }
+.tipgoal { display: block; clear: both; color: var(--rs-muted); font-size: 13px; margin-top: 4px; }
+@media (max-width: 960px) {
+  .runbar .secnav .long { display: none; }
+  .runbar .secnav .short { display: inline; }
+  .runbar .secnav a { flex-direction: column; gap: 2px; padding: 4px 0 5px; font-size: 13px; overflow: hidden; }
+}
+@media (max-width: 760px) {
+  .runbar .ticker { display: none; }
+  .runbar .clock { grid-template-columns: auto 1fr; grid-template-areas: "day btn" "track track"; }
+  .runbar .ck-btns { justify-self: end; }
+}
+@media (max-width: 600px) {
+  .run-mast { min-height: 260px; }
+  .run-mast .standfirst { font-size: 15.5px; }
+  .runbar .secnav { gap: 0; padding-top: 4px; }
+  .runbar .secnav a { flex-direction: column; gap: 2px; padding: 4px 0 5px; font-size: 12px; }
+  .runbar .secnav .ico, .runbar .secnav .bico { width: 22px; height: 22px; }
+  .runbar .secnav svg.bico, .runbar .secnav .ico svg { width: 20px; }
+  .runbar .clock { padding: 6px 0 6px; }
+  .runbar .ck-day { min-width: 0; }
+  .runbar .ck-n { font-size: 19px; }
+  .runbar .moon { width: 26px; height: 26px; }
+  .runbar .ck-btns button { width: 38px; height: 34px; }
+  .runbar .days { height: 40px; }
+  .runbar .ck-rest { font-size: 12px; }
+  .runbar .ck-rest svg { display: none; }
+}
+@media (max-width: 360px) {
+  .runbar .secnav .lab { display: none; }
+  .runbar .secnav a { padding: 6px 0; }
+  .runbar .ck-of { white-space: normal; }
+  .runbar .ck-btns button { width: 32px; }
+}
+.loading-run { padding: 48px 0; font: 500 18px var(--rs-px); color: var(--rs-cloud2); }
+body.run-page .site-foot { margin-top: 0; }
+
+/* the data section */
+.v-data { padding-top: 26px; padding-bottom: 40px; color: var(--rs-cream); }
+.v-data .panel { background: var(--rs-sky1); padding: 20px 22px 18px; box-shadow: inset 0 0 0 2px var(--rs-farS), 5px 5px 0 var(--rs-nearS); max-width: 860px; }
+.v-data .h { font: 600 24px/1.2 var(--rs-px); margin: 0 0 12px; }
+.v-data .h3 { font: 500 17px/1.2 var(--rs-px); margin: 22px 0 8px; color: var(--rs-wheat); }
+.v-data a { color: var(--rs-wheat); }
+.v-data .links { display: flex; gap: 10px; flex-wrap: wrap; }
+.v-data .btn { display: inline-block; font: 600 15px var(--rs-px); text-decoration: none; background: var(--rs-roof); color: var(--rs-cream); padding: 8px 14px 9px;
+  box-shadow: inset -3px -3px 0 #9a3a24, inset 3px 3px 0 #e07a5a; }
+.v-data .btn.ghost { background: var(--rs-near); box-shadow: inset -3px -3px 0 var(--rs-nearS), inset 3px 3px 0 var(--rs-far); }
+.v-data .tbl { border-collapse: collapse; margin: 14px 0; min-width: 280px; font-size: 15px; }
+.v-data .tbl th { text-align: left; font: 500 13px var(--rs-px); color: var(--rs-muted); border-bottom: 2px solid var(--rs-sky2); padding: 6px 12px 6px 0; }
+.v-data .tbl td { border-bottom: 2px solid var(--rs-sky2); padding: 6px 12px 6px 0; }
+.v-data .num { text-align: right; }
+.v-data .code { background: var(--rs-sky0); padding: 14px 16px; font: 14px/1.6 ui-monospace, Menlo, monospace; overflow-x: auto; }
+.v-data .meta { color: var(--rs-muted); font-size: 14px; }
+
+/* on a phone, once you scroll into a section the bar keeps only the day clock (the section links come back near the top) */
+@media (max-width: 600px) {
+  .runbar.compact .secnav { display: none; }
+  .runbar.compact .clock { border-top: 0; padding-top: 6px; }
+  .runbar .days { height: 34px; }
+}

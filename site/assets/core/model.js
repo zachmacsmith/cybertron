@@ -102,14 +102,16 @@ export function prepare(D) {
           items.push({ i, round, kind: "sys", type: e.type, who: e.agent, data: d });
     }
   });
-  // private reasoning, at the turn it belongs to
+  // private reasoning, at the turn it belongs to. In a split upload D.reasoning holds each call cut down (no text); an agent's calls
+  // in full come later through S.setReasoning, when its diary opens.
   const reas = new Map();
-  for (const x of D.reasoning || []) {
+  const place = (x) => {
     const key = `${x.round}|${x.agent}`, dm = String(x.phase || "").startsWith("dm");
     let i = dm ? (dmOutAt[key] || []).slice(-1)[0] : turnAt[key];
     if (i === undefined) i = turnAt[key] ?? roundEnd[x.round] ?? events.length - 1;
-    push(reas, x.agent, { ...x, i, dm });
-  }
+    return { ...x, i, dm };
+  };
+  for (const x of D.reasoning || []) push(reas, x.agent, place(x));
   // conversations: one per pair (true sender and recipient), with per-side notes for forgeries
   const convs = new Map();
   for (const m of dms) {
@@ -141,6 +143,9 @@ export function prepare(D) {
   const S = { inst, truth, events, snaps, snapBy, score, agents, A, items, dms, convs, lawEvents, laws, lawTL, roundAt, roundEnd, roundStart,
     lastRound, turns, reas, lookups, gchanges, departs, arrives, transfers, harvests, ballots, posts, heads,
     rounds: inst.rounds || lastRound + 1, name: D.name || inst.run_id || "run" };
+  S.split = !!D.reasoning_split;
+  S.fullReasoning = new Set(S.split ? [] : agents.map((a) => a.id));
+  S.setReasoning = (agent, xs) => { reas.set(agent, xs.map(place)); S.fullReasoning.add(agent); };
   S.titleLaw = new Map();
   for (const [id, l] of laws) if (l.title && l.title.length >= 6 && (!S.titleLaw.has(l.title) || l.enacted != null)) S.titleLaw.set(l.title, id);
   return S;

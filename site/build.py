@@ -3,14 +3,12 @@
     python site/build.py
 
 - site/notes/index.json  the notes list, from the front matter of site/notes/*.md (title, date, summary, draft)
-- site/assets/mascots.svg  a sprite of the mascots used on the site (the README header's drawing code)
 
 Everything else in site/ is hand-written static HTML, CSS and JS: no node, no bundler. Serve with
 `python3 -m http.server 8790 --directory site`.
 """
 from __future__ import annotations
 
-import importlib.util
 import json
 import re
 from pathlib import Path
@@ -42,23 +40,6 @@ def build_notes() -> None:
     (SITE / "notes" / "index.json").write_text(json.dumps(notes, indent=1))
 
 
-def build_mascots() -> None:
-    spec = importlib.util.spec_from_file_location("make_headers", ROOT / "docs" / "assets" / "make_headers.py")
-    mh = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mh)
-    cast = [("Bjorn", "legislator"), ("Fen", "worker"), ("Soren", "scientist"), ("Dara", "worker"), ("Cyrus", "worker"),
-            ("Greta", "media"), ("Kasper", "worker"), ("Ole", "scientist"), ("Zeno", "scientist"), ("Cora", "legislator"),
-            ("Hal", "fixer"), ("Cleo", "board"), ("Sena", "worker"), ("Yara", "legislator"), ("Gus", "observer"), ("Asta", "board")]
-    syms = []
-    for name, cls in cast:
-        mh.cast(name, cls)
-        for mood in ("ok", "happy", "sad"):
-            syms.append(mh.symbol(f"{name}-{mood}", name, cls, mh.HUE[name], mood))
-    svg = '<svg xmlns="http://www.w3.org/2000/svg" style="display:none">' + "".join(syms) + "</svg>"
-    (SITE / "assets" / "mascots.svg").write_text(svg)
-
-
 if __name__ == "__main__":
     build_notes()
-    build_mascots()
-    print("built site/notes/index.json, site/assets/mascots.svg")
+    print("built site/notes/index.json")

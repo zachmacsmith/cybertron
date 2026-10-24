@@ -433,3 +433,20 @@ def test_staging_guard_flags_cli_sessions_and_links(tmp_path):
     probs = P.check_staging(tmp_path)
     assert any("never published" in p and "claude_sessions" in p for p in probs)
     assert any("not a regular file" in p and "link.json" in p for p in probs)
+
+
+def test_viewer_split_keeps_placement_and_moves_each_agents_text(tmp_path):
+    import gzip
+    data = {"instance": {"agents": [{"id": "Ann"}]}, "events": [{"type": "dm"}], "reasoning": [
+        {"round": 0, "agent": "Ann", "phase": "decide", "saw": ["e1"], "reasoning": "long thought", "stated_reasoning": "plan",
+         "actions": [{"action": "dm", "args": {"to": "Bo", "text": "hi   there"}}], "final_actions": [], "lookup_results": ["x"]},
+        {"round": 0, "agent": "Bo/2", "phase": "dm_reply_1", "actions": [{"action": "dm", "args_json": '{"text": "yo"}'}]}]}
+    P.write_viewer_split(tmp_path, json.dumps(data))
+    core = json.loads(gzip.decompress((tmp_path / "viewer-core.json.gz").read_bytes()))
+    assert core["reasoning_split"] is True and core["events"] == data["events"]
+    ann, bo = core["reasoning"]
+    assert ann == {"round": 0, "agent": "Ann", "phase": "decide", "saw": ["e1"], "dm_texts": ["hi there"]}
+    assert bo["dm_texts"] == ["yo"]
+    full = json.loads(gzip.decompress((tmp_path / "reasoning" / "Ann.json.gz").read_bytes()))
+    assert full == [data["reasoning"][0]]
+    assert (tmp_path / "reasoning" / "Bo%2F2.json.gz").exists()          # agent names are made safe for file names

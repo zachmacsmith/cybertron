@@ -1,0 +1,124 @@
+/* Cybertron v2: shared tokens, base type, the site header and footer, and the shared building blocks (sign headings, navy
+   panels, pixel buttons). Every page links it; chrome.js adds the header and footer. Pages sit on the sand ground unless
+   their body has .night (the navy sky) or .indoor (a warm interior, for reading an agent). */
+@import url("https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Pixelify+Sans:wght@400;500;600;700&display=swap");
+/* Numbers: Pixelify's digits are hard to read (its 5 looks like an S), so every pixel-font stack starts with "Cyber Digits",
+   which is Nunito for the digits 0-9 only. */
+@font-face { font-family: "Cyber Digits"; font-style: normal; font-weight: 400 800; font-display: swap;
+  src: url(https://fonts.gstatic.com/s/nunito/v32/XRXV3I6Li01BKofINeaBTMnFcQ.woff2) format("woff2"); unicode-range: U+0030-0039; }
+
+:root {
+  --sky0: #1b2444; --sky1: #202b50; --sky2: #26335c;
+  --far: #45417f; --far-shade: #36346c; --near: #35316c; --near-shade: #29265a;
+  --rim: #c4507a; --rim2: #d0607e; --mauve: #8a4a86;
+  --cloud0: #d6f0f2; --cloud1: #9ccfe0; --cloud2: #6aa6c4;
+  --sand: #d9a25e; --sand-dark: #c78f4e; --sand-light: #e8b878; --sand-shadow: #a8723c;
+  --meadow: #6a9a3a; --meadow-light: #82b24a;
+  --cream: #f6ead0; --cream-dim: #cfc6b6; --wheat: #e8c060; --roof: #c8553d; --wood: #6b4423; --wood-dark: #4a2f17;
+  --soil: #3a2618; --ink: #1b2444;
+  --px: 4px;                         /* one chunky "pixel" for frames and offsets */
+  --wrap: 1120px; --gutter: 24px;
+  --f-pixel: "Cyber Digits", "Pixelify Sans", ui-monospace, monospace;
+  --f-body: "Nunito", system-ui, sans-serif;
+  --f-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (max-width: 720px) { :root { --gutter: 16px; } }
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; min-height: 100vh; display: flex; flex-direction: column;
+  font: 17px/1.65 var(--f-body); color: var(--ink);
+  /* the sand ground, with a sparse speckle of its darker and lighter tones */
+  background: var(--sand) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' shape-rendering='crispEdges'%3E%3Cg fill='%23c78f4e'%3E%3Crect x='6' y='8' width='4' height='4'/%3E%3Crect x='30' y='22' width='4' height='4'/%3E%3Crect x='14' y='38' width='8' height='4'/%3E%3C/g%3E%3Cg fill='%23e8b878'%3E%3Crect x='38' y='4' width='4' height='4'/%3E%3Crect x='22' y='28' width='4' height='4'/%3E%3C/g%3E%3C/svg%3E") repeat;
+}
+body > main { flex: 1; }
+img, canvas, svg { display: block; }
+canvas.pixel, .pixel { image-rendering: pixelated; image-rendering: crisp-edges; }
+a { color: inherit; }
+.wrap { max-width: var(--wrap); margin: 0 auto; padding: 0 var(--gutter); }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+:focus-visible { outline: 3px solid var(--wheat); outline-offset: 3px; }
+
+h1, h2, h3, h4, .pixel-font { font-family: var(--f-pixel); font-weight: 600; line-height: 1.15; letter-spacing: 0.01em; }
+h2 { font-size: 30px; margin: 0; }
+h3 { font-size: 22px; margin: 0 0 8px; }
+p { margin: 0 0 12px; }
+.label { font: 500 14px/1.2 var(--f-pixel); letter-spacing: 0.06em; text-transform: uppercase; color: var(--wheat); }
+code, pre { font-family: var(--f-mono); }
+@media (max-width: 720px) { body { font-size: 16px; } h2 { font-size: 24px; } h3 { font-size: 20px; } }
+
+/* ------------------------------------------------------------------ header */
+.site-head { background: var(--sky0); color: var(--cream); position: relative; z-index: 10;
+  box-shadow: 0 var(--px) 0 var(--far-shade); }
+.site-head .wrap { display: flex; align-items: center; justify-content: space-between; gap: 12px 24px; min-height: 64px; flex-wrap: wrap; padding-top: 10px; padding-bottom: 10px; }
+.site-head.over { position: absolute; top: 0; left: 0; right: 0; background: transparent; box-shadow: none; }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; font: 700 26px/1 var(--f-pixel); color: var(--cream);
+  text-shadow: 3px 3px 0 var(--ink); }
+.brand svg { width: 32px; height: 32px; flex: none; filter: drop-shadow(3px 3px 0 var(--ink)); }
+.nav { display: flex; flex-wrap: wrap; gap: 4px 22px; }
+.nav a { font: 500 18px/1 var(--f-pixel); color: var(--cream); text-decoration: none; padding: 8px 0 6px;
+  border-bottom: var(--px) solid transparent; text-shadow: 2px 2px 0 var(--ink); }
+.nav a:hover { border-bottom-color: var(--cloud2); }
+.nav a.on { border-bottom-color: var(--wheat); color: var(--wheat); }
+.nav a.ext::after { content: " ↗"; font-size: 0.8em; opacity: 0.7; }
+@media (max-width: 720px) {
+  .site-head .wrap { gap: 2px 16px; }
+  .brand { font-size: 22px; } .brand svg { width: 26px; height: 26px; }
+  .nav { gap: 2px 16px; width: 100%; } .nav a { font-size: 16px; }
+}
+
+/* ------------------------------------------------------------------ footer: a grass edge, then soil */
+.site-foot { margin-top: 72px; color: var(--cream); background: var(--soil); position: relative; }
+.site-foot::before { content: ""; position: absolute; left: 0; right: 0; top: -12px; height: 12px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='12' shape-rendering='crispEdges'%3E%3Crect y='4' width='32' height='8' fill='%236a9a3a'/%3E%3Crect x='4' y='0' width='4' height='4' fill='%236a9a3a'/%3E%3Crect x='20' y='0' width='4' height='4' fill='%2382b24a'/%3E%3Crect x='0' y='4' width='8' height='4' fill='%2382b24a'/%3E%3Crect x='16' y='4' width='12' height='4' fill='%2382b24a'/%3E%3C/svg%3E") repeat-x; }
+.site-foot .wrap { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 24px; padding-top: 36px; padding-bottom: 40px; }
+.site-foot h4 { font: 600 16px/1.2 var(--f-pixel); color: var(--wheat); margin: 0 0 10px; letter-spacing: 0.04em; }
+.site-foot .brand { font-size: 22px; margin-bottom: 10px; }
+.site-foot p { color: var(--cream-dim); font-size: 15px; max-width: 34ch; }
+.site-foot ul { list-style: none; margin: 0; padding: 0; font-size: 15px; }
+.site-foot li { margin: 0 0 6px; }
+.site-foot a { color: var(--cream); text-decoration: none; }
+.site-foot a:hover { color: var(--wheat); text-decoration: underline; text-underline-offset: 3px; }
+.site-foot .fine { grid-column: 1 / -1; border-top: var(--px) solid #4e3424; padding-top: 16px; font-size: 13px; color: var(--cream-dim); }
+@media (max-width: 720px) { .site-foot .wrap { grid-template-columns: 1fr 1fr; } .site-foot .about { grid-column: 1 / -1; } }
+
+/* ------------------------------------------------------------------ shared blocks */
+/* Navy panel with a notched pixel frame and a hard shadow onto the sand. Cream text inside. */
+.panel {
+  background: var(--sky1); color: var(--cream); padding: 22px 24px; position: relative;
+  box-shadow: 0 calc(-1 * var(--px)) 0 0 var(--sky1), 0 var(--px) 0 0 var(--sky1),
+    calc(-1 * var(--px)) 0 0 0 var(--sky1), var(--px) 0 0 0 var(--sky1),
+    0 calc(3 * var(--px)) 0 0 var(--sand-shadow), var(--px) calc(2 * var(--px)) 0 0 var(--sand-shadow);
+}
+.panel p, .panel li { color: #e8dfcc; }
+.panel a { color: var(--wheat); text-underline-offset: 3px; }
+.panel a:hover { color: var(--cream); }
+.panel .meta { color: #b8b6c8; font-size: 14px; }
+@media (max-width: 720px) { .panel { padding: 18px 16px; } }
+
+/* A section heading on a wooden sign, with an optional link to the right */
+.section { margin-top: 64px; }
+.section-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+.sign { display: inline-block; background: var(--wood); color: var(--cream); padding: 10px 18px 8px; position: relative;
+  box-shadow: 0 calc(-1 * var(--px)) 0 0 var(--wood), 0 var(--px) 0 0 var(--wood), calc(-1 * var(--px)) 0 0 0 var(--wood),
+    var(--px) 0 0 0 var(--wood), 0 calc(2 * var(--px)) 0 0 var(--wood-dark), var(--px) var(--px) 0 0 var(--wood-dark);
+  text-shadow: 2px 2px 0 var(--wood-dark); }
+.section-head .more { font: 600 17px/1 var(--f-pixel); color: var(--ink); text-decoration: none; padding: 6px 0; }
+.section-head .more:hover { text-decoration: underline; text-underline-offset: 4px; }
+.section-intro { max-width: 62ch; font-size: 18px; margin: -8px 0 24px; color: #2a2238; }
+
+/* Chunky pixel buttons: wheat (primary) or navy, notched corners, hard shadow, press-down on click */
+.btn { display: inline-block; font: 600 19px/1 var(--f-pixel); text-decoration: none; padding: 14px 22px 12px; cursor: pointer; border: 0;
+  background: var(--wheat); color: var(--ink); position: relative; margin: var(--px);
+  box-shadow: 0 calc(-1 * var(--px)) 0 0 var(--wheat), 0 var(--px) 0 0 var(--wheat), calc(-1 * var(--px)) 0 0 0 var(--wheat),
+    var(--px) 0 0 0 var(--wheat), 0 calc(2 * var(--px)) 0 0 #a8782a, var(--px) var(--px) 0 0 #a8782a; }
+.btn:hover { background: #f0d078; }
+.btn:active { transform: translateY(var(--px)); }
+.btn.navy { background: var(--sky0); color: var(--cream);
+  box-shadow: 0 calc(-1 * var(--px)) 0 0 var(--sky0), 0 var(--px) 0 0 var(--sky0), calc(-1 * var(--px)) 0 0 0 var(--sky0),
+    var(--px) 0 0 0 var(--sky0), 0 calc(2 * var(--px)) 0 0 #0e1428, var(--px) var(--px) 0 0 #0e1428; }
+.btn.navy:hover { background: var(--sky2); }
+
+/* page grounds */
+body.night { background: var(--sky0); color: var(--cream); }

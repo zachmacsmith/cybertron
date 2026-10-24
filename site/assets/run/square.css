@@ -1,0 +1,43 @@
+/* The square (the old run page's society map) in the night palette. Scoped to .v-square. */
+.v-square { --ink: #f6ead0; --bg: #1b2444; --surface: #26335c; --line: #35316c; --accent: #e8c060; --muted: #b9bde0; --radius: 0px;
+  --font: "Nunito", system-ui, sans-serif; --display: "Cyber Digits", "Pixelify Sans", ui-monospace, monospace; color: var(--ink); padding-top: 22px; padding-bottom: 40px; }
+.v-square .sq-intro { color: var(--muted); max-width: 72ch; margin: 0 0 14px; font-size: 15.5px; }
+.v-square .square { display: grid; grid-template-columns: minmax(0, 1fr) 300px; align-items: start; background: #202b50;
+  box-shadow: inset 0 0 0 2px #36346c, 5px 5px 0 #29265a; }
+.v-square .stagewrap { position: relative; display: flex; flex-direction: column; min-width: 0; }
+.v-square .stage { width: 100%; aspect-ratio: 10 / 7; max-height: calc(100vh - var(--runbar-h, 120px) - 60px); display: block; }
+.v-square .ctrl { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-top: 2px solid var(--line); }
+.v-square .ctrl input[type=range] { flex: 1; accent-color: var(--accent); }
+.v-square .ctrl .pb { width: 34px; height: 34px; border: 0; background: #c8553d; color: var(--ink); cursor: pointer; font: 600 16px var(--display); }
+.v-square .ctrl .rl { font: 15px var(--display); min-width: 110px; }
+.v-square .ctrl select { font: 13px var(--font); background: var(--bg); color: var(--ink); border: 2px solid var(--line); }
+.v-square .sq-side { border-left: 2px solid var(--line); padding: 4px 16px 20px; align-self: stretch; font-size: 14.5px; }
+.v-square .kicker { font: 600 17px var(--display); color: var(--accent); margin: 14px 0 8px; }
+.v-square .lawlist { list-style: none; padding: 0; margin: 0; }
+.v-square .lawlist li { padding: 3px 0; }
+.v-square .lawref { color: var(--accent); font-weight: 700; text-decoration: none; }
+.v-square .meta { color: var(--muted); font-size: 13px; }
+.v-square .ticker { list-style: none; padding: 0; margin: 0; font-size: 14px; }
+.v-square .ticker li { padding: 5px 0; border-bottom: 2px solid var(--line); }
+.v-square .ticker a, .v-square .who { color: var(--ink); }
+.v-square .node { transition: transform .7s cubic-bezier(.3,1.3,.5,1), opacity .6s; cursor: pointer; }
+.v-square .node .bob { animation: sqbob 2.6s steps(2) infinite alternate; transform-box: fill-box; transform-origin: 50% 100%; }
+@keyframes sqbob { from { transform: translateY(0); } to { transform: translateY(-3px); } }
+.v-square .node.gone { opacity: .35; }
+.v-square .node use { image-rendering: pixelated; }
+.v-square .node text { font: 700 12px var(--font); fill: var(--ink); paint-order: stroke; stroke: var(--bg); stroke-width: 3px; }
+.v-square .node .wv { font: 11px var(--font); fill: var(--muted); }
+.v-square .bubble rect { fill: #f6ead0; stroke: #6b4423; stroke-width: 1.2; }
+.v-square .bubble text { font: 12px var(--font); fill: #2b1d14; }
+.v-square .camp text { font: 700 11.5px var(--font); fill: var(--ink); }
+.v-square .camp .s { font: 10.5px var(--font); fill: var(--muted); }
+.v-square .camp.raid circle.rim { animation: sqraid .5s ease 3; }
+@keyframes sqraid { 50% { stroke: var(--accent); stroke-width: 6; } }
+.v-square .pz-big { font: 700 24px var(--display); fill: var(--ink); text-transform: capitalize; }
+.v-square .pz { font: 12px var(--font); fill: var(--muted); }
+.v-square .g-fx { pointer-events: none; }
+.v-square .toasts { position: absolute; left: 50%; top: 12px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 6px; pointer-events: none; }
+.v-square .toast { background: #f6ead0; color: #2b1d14; padding: 6px 14px; font: 14px var(--font); animation: sqtoast 3.2s ease forwards; white-space: nowrap; box-shadow: 0 0 0 2px #6b4423; }
+@keyframes sqtoast { 0% { opacity: 0; transform: translateY(-8px); } 10%, 80% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .v-square .node .bob { animation: none; } }
+@media (max-width: 860px) { .v-square .square { grid-template-columns: 1fr; } .v-square .sq-side { border-left: 0; border-top: 2px solid var(--line); } }
