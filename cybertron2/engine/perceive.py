@@ -69,7 +69,9 @@ def seed_knowledge(w) -> None:
         for hid, h in w.s["herds"].items():                                     # start (livestock.md "What agents see")
             if mine & {c["claimant"] for c in w.claims_on(("herd", hid))} and h.get("parcel") in w.s["parcels"]:
                 remember_beasts(w, name, hid, "known")
-        for c in w.spec.get("customs") or []:                                   # seeded custom (D2-30: markets), as local knowledge
+        for c in w.spec.get("customs") or []:                                   # seeded custom (D2-30: markets), as local knowledge;
+            if c.get("households") and not {w.household_of(name), a.get("born_line")} & set(c["households"]):   # or a household's own
+                continue
             if c.get("nodes") in (None, "all") or home in c["nodes"]:
                 m["seeded"].append(c["text"])
         dist = {home: 0}

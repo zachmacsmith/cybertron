@@ -1,0 +1,781 @@
+# Hollins 2 (Zach, 24 Oct: "design a similar run to this one ... with a few households, and one having custom to explore and expand
+# out, and another to have all the children expansion etc., and one to just improve and build out the farms"), on Package F
+# (D2-156 to D2-161: woods by kind, firewood, fuel in heat, eating raw; seeded below what the land gives back a year) and Package D
+# (children on). 48 days, lifespan 48 (a world setting, D2-153). Three households, each with its own way, held as a custom:
+#   the Thornes (Ockley): improve the farms; the Webbs (Ockley): grow the family and send it out; the Hunts (the hut at Hollins, a
+#   day into the wood): explore further and settle where the land is good.
+# Ockley has a copse and a coppiced wood (the Hanger); Hollins a copse; beyond Hollins the forests of hollins.yaml, by kind.
+name: hollins2
+seed: 41
+days: 48
+calendar:
+  season: summer
+  day: 4
+  season_days: 6
+cold_days: []
+children:
+  true: true
+  dial: low
+lifespan: 48
+nodes:
+  ockley:
+    name: Ockley
+    parcels:
+      ok_green:
+        name: the Green
+        cover: built
+        size: 2
+        side: centre
+        height: 1
+        text: two houses, a byre and the granary round a green
+        adj:
+        - long_field
+        - ok_common
+        - middle_field
+      long_field:
+        name: Long Field
+        cover: field
+        size: 5
+        side: north
+        height: 1
+        holder: Thorne
+        fertility: 1.1
+        text: the Thornes' barley, long strips, well dunged
+        adj:
+        - ok_common
+        - fallow_field
+        state:
+          crop:
+            kind: barley
+            left: 260
+            ripe_day: 2
+          last_crop: legumes
+      fallow_field:
+        name: Fallow Field
+        cover: field
+        size: 4
+        side: north
+        height: 1
+        holder: Thorne
+        fertility: 1.05
+        text: the Thornes' field resting this year under grass
+        state:
+          last_crop: fallow
+      middle_field:
+        name: Middle Field
+        cover: field
+        size: 3
+        side: east
+        height: 1
+        holder: Webb
+        text: the Webbs' barley
+        adj: []
+        state:
+          crop:
+            kind: barley
+            left: 150
+            ripe_day: 3
+          last_crop: legumes
+      ok_common:
+        name: the Common
+        cover: pasture
+        size: 3
+        side: west
+        height: 1
+        text: common grazing by the fields
+        adj:
+        - ok_copse
+        - ok_hanger
+        state:
+          plants:
+            K: 4
+            S: 4
+            r: 0.3
+          grass:
+            K: 90
+            S: 70
+            r: 0.32
+      ok_copse:
+        name: Ockley Copse
+        cover: forest
+        size: 1
+        side: west
+        height: 2
+        text: ash and hazel on the slope
+        state:
+          wood:
+            kind: copse
+          plants:
+            K: 3
+            S: 3
+            r: 0.3
+      ok_hanger:
+        name: the Hanger
+        cover: forest
+        size: 3
+        side: north
+        height: 2
+        adj:
+        - ok_copse
+        - long_field
+        text: a coppiced wood of hazel and oak standards on the hill above the fields
+        state:
+          wood:
+            kind: managed wood
+          plants:
+            K: 4
+            S: 4
+            r: 0.3
+          game:
+            K: 4
+            S: 4
+            r: 0.25
+  hollins:
+    name: Hollins
+    parcels:
+      hl_clearing:
+        name: the Clearing
+        cover: built
+        size: 1
+        side: centre
+        height: 1
+        text: a hut of wattle and turf in a clearing
+        adj:
+        - hollin_wood
+        - hl_glade
+        - hl_hazels
+      hollin_wood:
+        name: Hollin Wood
+        cover: forest
+        size: 2
+        side: north
+        height: 2
+        text: holly and oak, much cut over
+        state:
+          wood:
+            kind: copse
+          plants:
+            K: 8
+            S: 7
+            r: 0.3
+          game:
+            K: 12
+            S: 10
+            r: 0.25
+      hl_glade:
+        name: the Glade
+        cover: meadow
+        size: 1
+        side: south
+        height: 1
+        text: a small grassy glade by a spring
+        state:
+          plants:
+            K: 3
+            S: 3
+            r: 0.3
+      hl_hazels:
+        name: the Hazels
+        cover: forest
+        size: 1
+        side: east
+        height: 1
+        text: a hazel coppice the Hunts cut for poles and firewood
+        state:
+          wood:
+            kind: managed wood
+          plants:
+            K: 3
+            S: 3
+            r: 0.3
+  blackthorn:
+    name: Blackthorn Wood
+    unexplored: true
+    parcels:
+      bt_wood:
+        name: the Blackthorn
+        cover: forest
+        size: 3
+        side: centre
+        height: 1
+        text: dense blackthorn and oak, sloes on the bushes
+        state:
+          wood:
+            kind: copse
+          game:
+            K: 10
+            S: 10
+            r: 0.25
+          plants:
+            K: 8
+            S: 8
+            r: 0.3
+      bt_brook:
+        name: Black Brook
+        cover: water
+        size: 1
+        side: south
+        height: 0
+        text: a dark brook under the thorns
+        adj:
+        - bt_wood
+  thornend:
+    name: Thornend
+    unexplored: true
+    parcels:
+      te_wood:
+        name: the Thorn End
+        cover: forest
+        size: 4
+        side: centre
+        height: 1
+        text: where the thorns give way to tall ash
+        state:
+          wood:
+            kind: managed wood
+          game:
+            K: 14
+            S: 14
+            r: 0.25
+          plants:
+            K: 6
+            S: 6
+            r: 0.3
+      te_lawn:
+        name: the Lawn
+        cover: meadow
+        size: 2
+        side: south
+        height: 1
+        text: an open lawn grazed short by deer
+        adj:
+        - te_wood
+        state:
+          plants:
+            K: 4
+            S: 4
+            r: 0.3
+          grass:
+            K: 50
+            S: 50
+            r: 0.32
+  greyhanger:
+    name: Greyhanger
+    unexplored: true
+    parcels:
+      gh_wood:
+        name: the Grey Wood
+        cover: forest
+        size: 5
+        side: north
+        height: 3
+        text: a high wood of grey beech over a stony valley
+        state:
+          wood:
+            kind: old forest
+          game:
+            K: 16
+            S: 16
+            r: 0.25
+          plants:
+            K: 5
+            S: 5
+            r: 0.3
+      gh_scree:
+        name: the Stones
+        cover: rock
+        size: 1
+        side: south
+        height: 2
+        text: a stony valley floor, flat stones that split clean
+        adj:
+        - gh_wood
+        state:
+          quarry:
+            S: 0
+            K: 0
+  fern_hollow:
+    name: Fern Hollow
+    unexplored: true
+    parcels:
+      fh_hollow:
+        name: the Hollow
+        cover: forest
+        size: 3
+        side: centre
+        height: 0
+        text: a deep fern-filled hollow, full of deer sign
+        state:
+          wood:
+            kind: old forest
+          game:
+            K: 24
+            S: 24
+            r: 0.25
+          plants:
+            K: 6
+            S: 6
+            r: 0.3
+      fh_spring:
+        name: the Spring
+        cover: water
+        size: 1
+        side: east
+        height: 0
+        text: a cold spring at the hollow's foot
+        adj:
+        - fh_hollow
+  oakhanger:
+    name: Oakhanger
+    unexplored: true
+    parcels:
+      oh_oaks:
+        name: the Hanger
+        cover: forest
+        size: 6
+        side: north
+        height: 2
+        text: great oaks on a hanging slope, never cut
+        adj:
+        - oh_glade
+        state:
+          wood:
+            kind: old forest
+          game:
+            K: 20
+            S: 20
+            r: 0.25
+          plants:
+            K: 8
+            S: 8
+            r: 0.3
+      oh_glade:
+        name: the Long Glade
+        cover: meadow
+        size: 4
+        side: south
+        height: 1
+        fertility: 1.2
+        text: a long open glade of deep soil below the oaks, never ploughed
+        state:
+          plants:
+            K: 6
+            S: 6
+            r: 0.3
+          grass:
+            K: 100
+            S: 100
+            r: 0.32
+  beckside:
+    name: the Beckside
+    unexplored: true
+    parcels:
+      bs_meadow:
+        name: the Beck Meadows
+        cover: meadow
+        size: 8
+        side: centre
+        height: 0
+        fertility: 1.3
+        text: a broad valley of meadow along a beck, deep soil, never ploughed
+        adj:
+        - bs_beck
+        - bs_alders
+        state:
+          plants:
+            K: 10
+            S: 10
+            r: 0.3
+          grass:
+            K: 200
+            S: 200
+            r: 0.32
+      bs_beck:
+        name: the Beck
+        cover: water
+        size: 2
+        side: south
+        height: 0
+        text: a quick clear beck with trout in it
+      bs_alders:
+        name: the Alders
+        cover: forest
+        size: 3
+        side: north
+        height: 1
+        text: alder and willow along the valley side
+        state:
+          wood:
+            kind: copse
+          game:
+            K: 10
+            S: 10
+            r: 0.25
+          plants:
+            K: 6
+            S: 6
+            r: 0.3
+  birchmoss:
+    name: Birchmoss
+    unexplored: true
+    parcels:
+      bm_birches:
+        name: the Birches
+        cover: forest
+        size: 4
+        side: north
+        height: 1
+        text: birch wood on wet ground
+        state:
+          wood:
+            kind: managed wood
+          game:
+            K: 8
+            S: 8
+            r: 0.25
+          plants:
+            K: 6
+            S: 6
+            r: 0.3
+      bm_moss:
+        name: the Moss
+        cover: water
+        size: 2
+        side: south
+        height: 0
+        text: a bog pool with fish and wildfowl
+        adj:
+        - bm_birches
+  fen_edge:
+    name: the Fen Edge
+    unexplored: true
+    parcels:
+      fe_reeds:
+        name: the Reed Beds
+        cover: water
+        size: 4
+        side: west
+        height: 0
+        text: reeds to the horizon, wildfowl rising
+      fe_holm:
+        name: the Holm
+        cover: meadow
+        size: 2
+        side: centre
+        height: 1
+        text: a dry island of grass in the fen
+        adj:
+        - fe_reeds
+        - fe_carr
+        state:
+          plants:
+            K: 8
+            S: 8
+            r: 0.3
+          grass:
+            K: 60
+            S: 60
+            r: 0.32
+      fe_carr:
+        name: the Carr
+        cover: forest
+        size: 2
+        side: east
+        height: 0
+        text: wet willow carr
+        state:
+          wood:
+            kind: copse
+          game:
+            K: 12
+            S: 12
+            r: 0.25
+          plants:
+            K: 6
+            S: 6
+            r: 0.3
+roads:
+- - ockley
+  - hollins
+  - 1
+  - terrain: woodland
+    way: the cart way into the wood
+    stretches:
+      1:
+        landmarks:
+        - ford
+    ends:
+      ockley:
+        parcels:
+        - ok_copse
+        side: west
+      hollins:
+        parcels:
+        - hl_clearing
+        side: south
+- - hollins
+  - blackthorn
+  - 1
+  - terrain: woodland
+    way: a path east through the thorns
+    ends:
+      hollins:
+        parcels:
+        - hollin_wood
+        side: east
+- - blackthorn
+  - thornend
+  - 1
+  - terrain: woodland
+    way: a fainter path on east, where the thorns thin
+- - thornend
+  - greyhanger
+  - 1
+  - terrain: hills
+    way: a climb up toward grey trees on the skyline
+- - hollins
+  - fern_hollow
+  - 1
+  - terrain: woodland
+    way: a deer track down into the ferns
+    stretches:
+      1:
+        landmarks:
+        - spring
+    ends:
+      hollins:
+        parcels:
+        - hollin_wood
+        side: north
+- - fern_hollow
+  - oakhanger
+  - 1
+  - terrain: woodland
+    way: a climb north out of the hollow under big trees
+- - oakhanger
+  - beckside
+  - 1
+  - terrain: woodland
+    way: a way down through the oaks toward the sound of water
+    stretches:
+      1:
+        landmarks:
+        - fruit trees
+- - hollins
+  - birchmoss
+  - 1
+  - terrain: woodland
+    way: a wet path west among birches
+    ends:
+      hollins:
+        parcels:
+        - hl_glade
+        side: west
+- - birchmoss
+  - fen_edge
+  - 2
+  - terrain: marsh
+    way: a causeway of roots west into the reeds
+- - blackthorn
+  - birchmoss
+  - 2
+  - terrain: woodland
+    way: a long way round through the thickets
+buildings:
+  thorne_house:
+    name: Thorne House
+    parcel: ok_green
+    household: Thorne
+    structure: timber
+    size: 6
+    fittings:
+      beds: 6
+      hearth: 1
+      bins: 1
+      hand mill: 1
+    stock:
+      grain: 20
+      beans: 10
+      timber: 4
+      firewood: 20
+  byre:
+    name: the Byre
+    parcel: ok_green
+    household: Thorne
+    structure: timber
+    size: 4
+    fittings:
+      bins: 1
+    stock:
+      hay: 20
+      straw: 10
+      dung: 20
+      grain: 20
+      wooden plough: 1
+      harness: 2
+  granary:
+    name: the Granary
+    parcel: ok_green
+    household: Thorne
+    structure: timber
+    size: 4
+    fittings:
+      bins: 1
+      granary: 1
+    stock:
+      grain: 160
+  webb_house:
+    name: Webb House
+    parcel: ok_green
+    household: Webb
+    structure: timber
+    size: 8
+    fittings:
+      beds: 8
+      hearth: 1
+      bins: 1
+      hand mill: 1
+    stock:
+      grain: 30
+      timber: 3
+      firewood: 20
+  hunt_hut:
+    name: Hunt Hut
+    parcel: hl_clearing
+    household: Hunt
+    structure: wattle
+    size: 5
+    fittings:
+      beds: 5
+      hearth: 1
+      bins: 1
+    stock:
+      grain: 12
+      dried meat: 8
+      timber: 4
+      firewood: 20
+      hide: 3
+herds:
+  thorne_cattle:
+    name: the Thorne cattle
+    kind: cattle
+    parcel: ok_common
+    cows: 4
+    oxen: 2
+    bulls: 1
+    young: 1
+    in_milk: 2
+    holder: Thorne
+claims: []
+customs:
+- text: Every hearth wants about twelve timber to see a house through the six nights of winter's cold.
+  nodes: all
+- text: At harvest Ockley takes on reapers from wherever it can get them, and pays them in grain.
+  nodes: all
+- text: 'Travellers carry bread or dried meat: grain is no use without a fire to boil it.'
+  nodes: all
+- text: Barley sown after the middle of autumn will not ripen before the frost; rye will stand the winter.
+  nodes: all
+- text: In Hollins they say the wood has been cut over too long; the old men talk of deeper woods past the thorns and the ferns.
+  nodes:
+  - hollins
+- text: Hunters say the deer come up out of a fern hollow north of Hollin Wood, and that past it the oaks are bigger than any here, and past them
+    again a valley with water in it.
+  nodes:
+  - hollins
+- text: Whoever clears new ground and sows it holds it, by the old custom, and so do their children.
+  nodes: all
+- text: Ockley has always had its game and hides from the Hunts of Hollins, and paid them in grain.
+  nodes: all
+- text: 'The Thornes hold that land well kept is the only wealth that lasts: break the fallow, dung every field, pick the best seed, ditch the
+    wet ground and keep the plough going; a field improved this year feeds your grandchildren.'
+  households:
+  - Thorne
+- text: 'The Webbs hold that a house is as strong as its children: take a partner young, have children and raise them well, and send your grown
+    sons and daughters out to clear ground and build houses of their own; a family that grows is still standing when others are gone.'
+  households:
+  - Webb
+- text: 'The Hunts hold that the wood beyond the wood is where a family''s future lies: go further than anyone has gone, learn the ways and the
+    places, make camps and huts where the game and the timber are good, and bring others after you.'
+  households:
+  - Hunt
+incidents: []
+signs:
+- day: 7
+  node: all
+  about: sky
+  sense: touch
+  text: a white frost on the grass at dawn, the first of the year
+  salience: 0.6
+  tags:
+  - season
+  - farming
+lines:
+  Thorne:
+    acting:
+    - 4
+    - 7
+    min_adults: 2
+    crafts:
+    - sow
+    - select seed
+    - reap
+    - weed
+    - hoe
+    - milk
+    - plough
+    - ditch
+    tools:
+      crude tool: 3
+    holdings:
+      coin: 8
+  Webb:
+    acting:
+    - 4
+    - 7
+    min_adults: 2
+    crafts:
+    - reap
+    - hoe
+    - small room
+    - beds
+    tools:
+      crude tool: 2
+    holdings:
+      coin: 4
+  Hunt:
+    acting:
+    - 3
+    - 6
+    min_adults: 2
+    crafts:
+    - hunt
+    - pack
+    - camp
+    - fell
+    - charcoal
+    tools:
+      crude weapon: 2
+      crude tool: 2
+    holdings:
+      coin: 3
+      bedroll: 2
+bounds:
+  acting:
+  - 11
+  - 18
+  children_max: 7
+  youths_min: 2
+  per_min: 3
+  per_spread: 5
+sim:
+  start: -58
+  fertility: 0.24
+  leave: 0.5
+cast:
+  head: claude-opus-5-5
+  opus_extra: 0
+  middle: claude-sonnet-5-5
+  sonnet_extra: 2
+  rest: claude-haiku-5-5
+  youth: claude-haiku-5-5

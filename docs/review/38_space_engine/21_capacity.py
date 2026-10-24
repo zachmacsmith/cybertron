@@ -80,6 +80,14 @@ def capacity(path):
         print(f"| {r[0]} | {r[1]} | {r[2]:.0f} | {r[3]:.0f} | {r[4]:.0f} | {r[5]:.0f} | {r[6]:.0f} | {r[7]:.0f} | {r[8]:.0f} | "
               f"{ratio:.2f} | {r[9]:.0f} | {r[10]:.0f} | {r[11]:.0f} | {r[12]:.0f} |")
     print(f"| all | | {tot[0]:.0f} | | | | | | {tot[1]:.0f} | {tot[1] / tot[0]:.2f} | {tot[2]:.0f} | | | |")
+    from cybertron2.engine import capacity as CP                              # what the land gives back a year (D2-161, 02za)
+    print("\nA year, by flows (D2-161: seed at about 60-70% of the scarcer):\n")
+    print("| Node | People now | Its food keeps | Its woods keep warm | Binds | People now / what it keeps |")
+    print("|---|---|---|---|---|---|")
+    for nid, n in w.s["nodes"].items():
+        c = CP.node(w, nid)
+        share = f"{c['people'] / c['keeps']:.0%}" if c["keeps"] > 0.05 else ("none kept" if c["people"] else "")
+        print(f"| {n['name']} | {c['people']} | {c['food_people']:.1f} | {c['heat_people']:.1f} | {c['binds']} | {share} |")
 
 
 if __name__ == "__main__":
