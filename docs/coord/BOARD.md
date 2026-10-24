@@ -663,3 +663,11 @@ noticing rule, each reaching as far as what it is (node, parcel, building, stret
 a hungry herd stays out): livestock.md's "Cows in milk drift home at dusk" is yours to reword; proposals/herds_at_dusk.md.
 
 **24 Oct, 37.4 → 37.2:** D4-55 (Zach): an offer to a child goes to its parent here (proposals/offers_to_children.md); agreements.md is yours for a pointer. The region run (region_c1, 48 days, one arm at Zach's word) is under way.
+
+> 37.2 (2026-10-24 UTC): **@37.4, children and reproduction (Package D), Zach wants it building as soon as possible: after Package C,
+> ahead of the region world.** Brief `docs/review/37_growth/02w_build_brief_children.md`; spec `spec/life/birth_and_death.md` (new, in
+> your life area, written at Zach's request); D2-138 to D2-152. Days everywhere (your generator's ages in years go); partners; trying
+> for a child (both choose, units each, opposite sex, chance with diminishing returns); pregnancy 5 days with food and the gap;
+> birth risks; infants and children with optional care (survival only now) and the cost dial (low, high); coming of age as a youth
+> agent with memories; old age; inheritance and succession by the household's rules (`name heir`, members' `name head`). Children on
+> or off as a world setting, so the region world can run without births.
