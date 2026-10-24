@@ -321,12 +321,12 @@ def night_lines(w, rec) -> dict:
         elif slept and slept not in homes:
             L.append(f"You slept at {slept}.")
         if n in rec.get("open_fire", []):
-            L.append(f"You lit a fire in the open with {float(w.p['fuel']['open']):g} timber.")
+            L.append(f"You lit a fire in the open ({float(w.p['heat']['open']):g} heat from what you carried); up to {w.p['heat']['share']} slept by it.")
         if n in rec["missed"]:
             L.append("You went to bed without enough to eat: a missed meal.")
             raw = rec.get("uncooked", {}).get(n)
             if raw:
-                L.append(f"You had {' and '.join(raw)} but no lit fire to boil it, so it did not feed you.")
+                L.append(f"With no lit fire your {' and '.join(raw)} went down raw and fed you little.")
         elif n in rec["short"]:
             L.append(f"You ate {rec['ate'][n]:g}, less than a cold night asks.")
         if n in rec["cold_falls"]:

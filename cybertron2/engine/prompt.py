@@ -7,7 +7,7 @@ from __future__ import annotations
 import copy
 import math
 
-from cybertron2.engine import agreements as AG, farm as FM, knowledge as KN, modifiers as MOD, perceive as PC, verbs as V
+from cybertron2.engine import forests as FO, agreements as AG, farm as FM, knowledge as KN, modifiers as MOD, perceive as PC, verbs as V
 from cybertron2.engine.data import BLUEPRINTS, FITTINGS, FUSE, ITEMS, MODIFIERS, TECHNIQUES
 from cybertron2.engine.here import CONDITION, STAGES, show
 
@@ -272,13 +272,17 @@ def system_prompt(here, mind) -> str:
               f"- Each night everyone eats {p['ration']:g} food: what they carry first, then from the stores they may take from where "
               "they are (their household's, or a host's who feeds them). Without a sound, warm house you need more. Missed meals make "
               "you hungry, then starving; starving people work less and can die.",
-              "- Food, in meals a unit: " + "; ".join(f"{i} {v['food']:g}" + (" (as porridge, only at a lit fire)" if v.get("cook") else "")
+              "- Food, in meals a unit: " + "; ".join(f"{i} {v['food']:g}" + (f" at a lit fire, {v.get('raw', 0):g} raw" if v.get("cook") else "")
                                                       for i, v in ITEMS.items() if v["food"] > 0)
               + ". Spoils fastest in your hands: " + ", ".join(i for i, v in sorted(ITEMS.items(), key=lambda kv: -kv[1]["spoil"])
                                                            if v["food"] > 0 and v["spoil"] >= 0.15)
-              + f"; a store keeps food {1 / p['house_spoil']:.0f} times better. A hearth burns {p['fuel']['normal']:g} timber a night "
-              f"({p['fuel']['cold']:g} on a cold one) from its building's store, a camp's fire {p['fuel']['camp']:g}; a fire in the open takes "
-              f"{p['fuel']['open']:g} timber carried, for one night; a cold night without a fire is hard.",
+              + f"; a store keeps food {1 / p['house_spoil']:.0f} times better.",
+              "- Fuel, as heat: " + ", ".join(f"{i} {ITEMS[i]['heat']:g}" for i in p["heat"]["order"]) + " a unit (firewood is dead wood "
+              f"gathered by hand, or young growth cut with a tool; timber is felled). A hearth needs {p['heat']['normal']:g} heat a night "
+              f"to cook, {p['heat']['cold']:g} on a cold one, from its building's store, burning firewood first, then timber, then "
+              f"charcoal; it warms {p['heat']['hearth_spaces']} spaces of floor, a fire ring {p['heat']['ring_spaces']} and only half in "
+              f"the cold. A camp's fire takes {p['heat']['camp']:g}; a fire in the open {p['heat']['open']:g}, from what you carry, and up "
+              f"to {p['heat']['share']} sleeping there share it. A cold night without a fire is hard.",
               "- Buildings are what is in them: beds, a hearth, bins, a quern, an anvil. Anyone can build a small room and put in beds and "
               "bins; a hearth or an anvil takes a trade. Buildings fall into disrepair; repair takes timber.",
               "- What is whose: land, buildings and herds are held by claims that people know of. Anyone can use anything they can reach, "
@@ -348,7 +352,7 @@ def _house_lines(here, mind) -> list:
                    if b['fittings'].get('hearth') else "; no hearth")
                    + f". Sleeping there: you{', ' + ', '.join(who) if who else ''} ({b['fittings'].get('beds', 0)} beds).")
         out.append(f"Its store: {stock} (food worth {show(food)} meals; those who eat from it eat about {len(who) + 1} a night"
-                   + (f", and the fire takes {here.p['fuel']['cold' if here.cold() else 'normal']:g} timber" if b['fittings'].get('hearth') else "") + ").")
+                   + (f", and the fire takes {here.p['heat']['cold' if here.cold() else 'normal']:g} heat ({FO.fuel_words(here.p['heat']['cold' if here.cold() else 'normal'])})" if b['fittings'].get('hearth') else "") + ").")
     return out
 
 

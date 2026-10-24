@@ -382,6 +382,22 @@ WILD = [
          land=("timber", "good"), text=lambda x: f"tall, straight timber standing in {x.nm}"),
     dict(when=lambda x: x.r("wood") is not None and x.r("wood") > 0.3 and x.weather == "gale", sense="sound", p=0.15, tags=["timber"],
          text=lambda x: f"the trees of {x.nm} roar and creak in the gale"),
+    # dead wood and young growth (D2-156): firewood
+    dict(when=lambda x: x.r("dead") is not None and x.r("dead") < 0.2, sense="sight", p=lambda x: _thin(x.r("dead"), at=0.2, lo=0.2, hi=0.6),
+         tags=["timber", "fuel"], eye=True, land=("firewood", "bare"),
+         text=lambda x: f"the ground in {x.nm} is picked clean of sticks: no dead wood within reach"),
+    dict(when=lambda x: x.r("dead") is not None and 0.2 <= x.r("dead") < 0.45, sense="sight", p=0.2, tags=["timber", "fuel"], eye=True,
+         land=("firewood", "thin"), text=lambda x: f"dead wood is getting scarce in {x.nm}: you have to go further in for it"),
+    dict(when=lambda x: x.r("dead") is not None and x.r("dead") > 0.8, sense="sight", p=0.08, tags=["timber", "fuel"], knack="firewood",
+         land=("firewood", "good"), text=lambda x: f"fallen branches and dead wood lie thick in {x.nm}"),
+    dict(when=lambda x: x.r("dead") is not None and x.r("wood") is not None and x.weather == "gale", sense="sight", p=0.3,
+         tags=["timber", "fuel"], text=lambda x: f"branches down all through {x.nm} after the gale: firewood for the taking"),
+    dict(when=lambda x: x.r("young") is not None and x.r("young") < 0.5 and x.herds_on(x.pid), sense="sight", p=0.25, tags=["timber", "animals"],
+         eye=True, text=lambda x: f"the young shoots in {x.nm} are browsed to stubs where the beasts get in"),
+    dict(when=lambda x: x.r("young") is not None and x.r("young") > 0.75 and x.r("wood") is not None and x.r("wood") < 0.5, sense="sight",
+         p=0.1, tags=["timber"], text=lambda x: f"hazel and ash shoots springing thick from the stumps in {x.nm}"),
+    dict(when=lambda x: x.pid in x.axes, sense="sound", p=0.6, tags=["timber"], own=0.2,
+         text=lambda x: f"the ring of axes from {x.nm}"),
     dict(when=lambda x: x.r("seam") is not None and 0 < x.r("seam") < 0.35, sense="sight", p=0.25, tags=["mining"], knack="mine",
          text=lambda x: f"the seam at {x.nm} is nearly worked out"),
     dict(when=lambda x: x.r("seam") is not None and x.r("seam") >= 0.35, sense="sight", p=0.05, tags=["mining"],
@@ -484,6 +500,8 @@ def context(here, pid, h=None):
                         weather=EV.weather(here._w), snow=EV.snow_lying(here._w))
     x.worked = {s.split(":", 1)[1] for e in here.events() if e.get("kind") == "work" for s in e.get("about") or [] if s.startswith("parcel:")}
     x.herds_on = lambda q: [k for k, g in here.herds().items() if g["parcel"] == q and FM.head(g) > 0]
+    x.axes = {s.split(":", 1)[1] for e in here.events() if e.get("kind") == "work" and "fell" in str(e.get("tech") or e.get("text", ""))
+              for s in e.get("about") or [] if s.startswith("parcel:")}
     standing = [here.parcels()[q]["name"] for q in p["adj"] if (here.parcels()[q].get("crop") or {}).get("area_left", 0) > 1e-6]
     x.adj_crop = standing[0] if standing else None
     fc = p.get("fence") or {}                                                  # the parcel's own fence (livestock.md, D2-130)

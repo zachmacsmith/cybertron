@@ -26,19 +26,28 @@ def night(w) -> dict:
     rec["departed"] = today["_departed"] if "_departed" in today else departures(w, today)
     where = sleeping_places(w, today)
     rec["slept"] = {n: (s["buildings"][b]["name"] if b else "out") for n, b in where.items()}
-    fuel = float(p["fuel"]["cold" if cold else "normal"])
-    for bid, b in s["buildings"].items():
+    from cybertron2.engine import forests as FO
+    hp = p["heat"]
+    for bid, b in s["buildings"].items():                                     # fires in heat (D2-157, D2-159)
         sleepers = [n for n, x in where.items() if x == bid]
-        lit = False
+        lit, warm = False, 0.0
         if sleepers and any(b["fittings"].get(f_) for f_ in FIRE):
-            g = w.goods(b["stock"])
-            burn = float(p["fuel"]["camp"]) if b["structure"] == "camp" else fuel   # a camp's fire (D4-49)
-            if g.get("timber", 0.0) + 1e-9 >= burn:
-                w.apply("destroy", b["node"], src=b["stock"], item="timber", qty=burn, why="fire")
+            hearths, rings = int(b["fittings"].get("hearth") or 0), int(b["fittings"].get("fire ring") or 0)
+            if b["structure"] == "camp":                                      # a camp's fire (D4-49)
+                heat = float(hp["camp"])
+            else:
+                heat = float(hp["cold" if cold else "normal"]) * max(1, hearths + rings)
+            if FO.burn(w, b["node"], b["stock"], heat):
                 lit = True
+                spaces = float(hp["hearth_spaces"]) * hearths + float(hp["ring_spaces"]) * rings
+                warm = 1.0 if b["structure"] == "camp" else min(1.0, spaces / max(1.0, float(b.get("size") or 1)))
+                if not hearths and b["structure"] != "camp":
+                    warm = min(warm, 0.5)                                     # a fire ring half-warms a house in the cold
         w.apply("set", b["node"], ref=("building", bid), field="fire", value=lit)
+        b["warm"] = warm
         if sleepers:
-            rec["hearth"][bid] = {"sleepers": len(sleepers), "lit": lit}
+            rec["hearth"][bid] = {"sleepers": len(sleepers), "lit": lit, "warm": round(warm, 2)}
+    fires = open_fires(w, today, where, rec)                                  # fires in the open, shared by 4 (D2-159)
     tents = {}                                                                  # a tent sleeps two (D2-68): who shares whose
     for name in w.living():
         a = s["people"][name]
@@ -48,6 +57,12 @@ def night(w) -> dict:
         if cold and state == "housed" and not b["fire"]:
             state = "no_fuel"
         need = float(p["ration"]) * float((p["shelter_cold"] if cold else p["shelter"]).get(state, 1.0))
+        if cold and state == "housed" and b["structure"] != "camp" and b.get("warm", 1.0) < 1.0:   # partly warmed (D2-159)
+            ww = b.get("warm", 1.0)
+            if not b["fittings"].get("hearth"):
+                need = float(p["ration"]) * float(hp["ring_cold"])
+            else:
+                need = float(p["ration"]) * (ww + float(p["shelter_cold"]["no_fuel"]) * (1 - ww))
         fall = 1.0
         gear = None
         if state == "housed" and b["structure"] == "camp":                     # a camp (D2-68)
@@ -61,6 +76,8 @@ def night(w) -> dict:
             out_ = p["camping"][gear]
             need = float(p["ration"]) * float(out_[1] if cold else out_[0])
             fall = float(out_[2])
+            if cold and name in fires and gear != "camp":                    # a fire in the open warms (D2-159)
+                need, fall = float(p["ration"]) * float(p["camping_fire"].get(gear, out_[1])), 0.0
             if gear == "camp" and cold and b is not None and not b["fire"]:
                 need, fall = float(p["ration"]) * float(p["camping"]["out"][1]), 0.0
             rec.setdefault("camped", {})[name] = gear
@@ -76,13 +93,12 @@ def night(w) -> dict:
         if a["stage"] in LF.MINOR:                                             # then from its carers' hands (D2-141)
             stores += [w.hands(x) for x in LF.feeders(w, name) if w.hands(x) not in stores]
         hearth = b is not None and any(b["fittings"].get(f_) for f_ in FIRE) and bool(b["fire"])   # grain boiled at a lit fire (D2-60)
-        if state == "unsheltered" and (today.get("fire") or {}).get(name):    # a fire in the open (D4-49)
-            burn = float(p["fuel"]["open"])
-            if w.goods(a["hands"]).get("timber", 0.0) + 1e-9 >= burn:
-                w.apply("destroy", place, src=a["hands"], item="timber", qty=burn, why="fire")
-                hearth = True
-                rec.setdefault("open_fire", []).append(name)
+        if state == "unsheltered" and name in fires:                          # at a fire in the open (D4-49, D2-159)
+            hearth = True
+        rawf = sorted({i for cid in stores for i, q in w.goods(cid).items() if q > 1e-9 and ITEMS.get(i, {}).get("cook")}) if not hearth else []
         ate = _eat(w, place, stores, need, hearth)
+        if rawf and ate + 1e-9 < need:                                         # food that wants a fire, eaten raw or not (D2-160)
+            rec.setdefault("uncooked", {})[name] = rawf
         full = float(p["ration"]) * mult + extra                                # a short meal is a ration's worth at least
         if ate + 1e-9 >= need:
             a["hunger"], a["missed"] = min(0, a["hunger"] + 1), 0
@@ -94,9 +110,6 @@ def night(w) -> dict:
         else:
             a["hunger"], a["missed"] = max(-2, a["hunger"] - 1), a["missed"] + 1
             rec["missed"].append(name)
-            raw = sorted({i for cid in stores for i, q in w.goods(cid).items() if q > 1e-9 and ITEMS.get(i, {}).get("cook")})
-            if raw and not hearth:                                             # had food that needs a fire (D2-60)
-                rec.setdefault("uncooked", {})[name] = raw
             if ate:
                 rec["ate"][name] = round(ate, 2)
         soaked = name in (today.get("soaked") or [])                           # soaked at a ford: the cold's fall (world/roads.md)
@@ -273,15 +286,47 @@ def sleeping_places(w, today) -> dict:
     return out
 
 
+def open_fires(w, today, where, rec) -> set:
+    """Fires in the open (D4-49, D2-159): those sleeping out at one place (a node, or a party on the road) share a fire; whoever chose
+    to light one burns 4 heat from their hands (2 timber, or firewood or charcoal by the order), and it warms up to 4 there, those
+    who chose a fire first. Returns who slept by a fire."""
+    from cybertron2.engine import forests as FO
+    hp = w.p["heat"]
+    want = today.get("fire") or {}
+    out = [n for n in w.living() if where.get(n) is None]
+    groups = {}
+    for n in out:
+        a = w.s["people"][n]
+        key = ("node", a["at"]) if a["at"] is not None else ("road",) + tuple((a["transit"] or {}).get(k) for k in ("road", "from", "to", "left", "arrive"))
+        groups.setdefault(key, []).append(n)
+    warmed = set()
+    for key, ppl in groups.items():
+        lighters = [n for n in ppl if want.get(n)]
+        rest = [n for n in ppl if not want.get(n)]
+        queue = lighters + rest
+        for n in lighters:
+            if not queue or n in warmed:
+                continue
+            place = w.place_of(("person", n))
+            if FO.burn(w, place, w.hands(n), float(hp["open"]), why="fire"):
+                rec.setdefault("open_fire", []).append(n)
+                by = [n] + [x for x in queue if x != n and x not in warmed][: int(hp["share"]) - 1]
+                warmed.update(by)
+                queue = [x for x in queue if x not in warmed]
+    return warmed
+
+
 def _eat(w, place, stores, need, hearth=True) -> float:
-    """Up to `need` in food value, from the stores in order, most perishable first; what must be cooked only at a lit hearth."""
+    """Up to `need` in food value, from the stores in order, most perishable first; what is better cooked is eaten raw, for less,
+    without a lit fire (D2-160: grain 0.2, flour 0.5, beans nothing, fresh meat 0.8), after what needs no fire."""
     got = 0.0
+    raw = lambda i: float(ITEMS[i].get("raw", ITEMS[i]["food"])) if ITEMS[i].get("cook") and not hearth else ITEMS[i]["food"]
     for cid in stores:
         g = w.goods(cid)
-        for item in sorted(EDIBLE, key=lambda i: -ITEMS[i]["spoil"]):
-            if ITEMS[item].get("cook") and not hearth:
+        for item in sorted(EDIBLE, key=lambda i: (raw(i) < ITEMS[i]["food"], -ITEMS[i]["spoil"])):
+            v = raw(item)
+            if v <= 0:
                 continue
-            v = ITEMS[item]["food"]
             if got + 1e-9 < need and g.get(item, 0.0) > 1e-9:
                 q = min(g[item], (need - got) / v)
                 got += w.apply("destroy", place, src=cid, item=item, qty=q, why="eaten") * v
@@ -294,7 +339,7 @@ def _grow(w):
     p = w.p
     for pid, par in w.s["parcels"].items():
         for key, r in par["res"].items():
-            reg = {"plants": "fast", "grass": "fast", "game": "threshold", "wood": "slow"}.get(key)
+            reg = {"plants": "fast", "grass": "fast", "game": "threshold"}.get(key)     # woods: forests.night (D2-156)
             if not reg or r["K"] <= 0:
                 continue
             if reg == "threshold" and r["S"] < float(p["game_threshold"]) * r["K"]:
@@ -302,3 +347,5 @@ def _grow(w):
             rate = r["r"] * (float(p["regrow_winter"]) if winter else 1.0)
             r["S"] = round(min(r["K"], r["S"] + rate * r["S"] * (1 - r["S"] / r["K"]) + (0.01 * (r["K"] - r["S"]) if reg == "fast" else 0)), 4)
         # crops: farm.night (D2-53, D4-39)
+    from cybertron2.engine import forests as FO
+    FO.night(w)

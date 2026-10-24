@@ -333,7 +333,7 @@ def _technique(here, mind, a, party, verb):
     rng = here.rng("act", here.day, here.name, len(here.today()["worked"].get(here.name, [])))
     here.today()["worked"].setdefault(here.name, []).append(key)
     thing = (kind, key)
-    note = _against(here, thing) if kind == "parcel" else ""
+    note = _against(here, thing) if kind == "parcel" and t.get("draws") != "dead" else ""   # dead wood is anyone's (D2-158)
     got, gives, word, extra_got, suffix = 0.0, t.get("gives"), "", "", ""
     if y["kind"] == "stock":
         r = here.parcels()[key]["res"][t["draws"]]
@@ -355,6 +355,12 @@ def _technique(here, mind, a, party, verb):
         q = y["base"] * m * tm
         got = here.apply("draw", parcel=key, key=t["draws"], qty=round(q, 2)) if t["draws"] in here.parcels()[key]["res"] and \
             here.parcels()[key]["res"][t["draws"]]["K"] > 0 and t["draws"] != "quarry" else round(q, 2)
+        if tech == "fell" and got > 0:                                         # its branches left as dead wood (D2-156)
+            here.apply("add_res", parcel=key, key="dead", qty=got)
+    elif y["kind"] == "pool":                                                 # dead wood: less to find as it thins (D2-156)
+        r = here.parcels()[key]["res"][t["draws"]]
+        q = y["base"] * m * min(1.0, r["S"] / max(r["K"], 1e-9)) ** 0.5
+        got = here.apply("draw", parcel=key, key=t["draws"], qty=round(min(q, r["S"]), 2))
     elif y["kind"] in FM_KINDS:                                                 # farming and cattle (farm.py)
         got, g, word, thing = FM.act(here, mind, tech, key, place_name, out, m, tm, a)
         gives = g or gives

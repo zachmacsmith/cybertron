@@ -95,9 +95,14 @@ class World:
             s["nodes"][nid] = {"name": n["name"], "text": n.get("text", ""), "unexplored": bool(n.get("unexplored"))}      # D4-47
             for pid, p in (n.get("parcels") or {}).items():
                 st = copy.deepcopy(p.get("state") or {})
+                from cybertron2.engine import forests as FO
+                woods = FO.seed(p["cover"], int(p.get("size", 1)), st)                 # trees, young growth, dead wood (D2-156)
+                if isinstance(st.get("wood"), dict) and st["wood"].get("kind"):
+                    st.pop("wood")
                 res = {k: {"S": float(v["S"]), "K": float(v["K"]), "r": float(v.get("r", 0.3))} if k != "seam" else
                        {"S": float(v.get("S", v.get("left", 0))), "K": float(v.get("K", v.get("S", v.get("left", 0)))), "r": 0.0}
                        for k, v in st.items() if k in RESOURCES}
+                res.update(woods)
                 if p["cover"] in ("pasture", "meadow") and "grass" not in res:            # grazing (D4-45; 02o: 2 head a plot)
                     cp = self.p["cattle"]
                     res["grass"] = {"S": float(cp["grass_per_plot"]) * int(p.get("size", 1)), "K": float(cp["grass_per_plot"]) * int(p.get("size", 1)),
@@ -705,6 +710,16 @@ def p_die(w, person, cause, to=None):
     return place
 
 
+def p_add_res(w, parcel, key, qty):
+    """A resource stock added to (brash left as dead wood: D2-156)."""
+    r = w.s["parcels"][parcel]["res"].get(key)
+    if r is None:
+        return 0.0
+    r["S"] = round(r["S"] + float(qty), 4)
+    r["K"] = max(r["K"], r["S"])
+    return qty
+
+
 def p_born(w, mother, father=None):
     """A child born (spec/life/birth_and_death.md, D2-141): a new person, an infant, where its mother is, in her household, named
     from its line's names (one of its forebears' not in use, else a name nobody here has), with both parents in the family tree."""
@@ -845,6 +860,7 @@ PRIMITIVES = {
     "create": (p_create, _rc("dst")),
     "destroy": (p_destroy, _rc("src")),
     "draw": (p_draw, _r("parcel", "parcel")),
+    "add_res": (p_add_res, _r("parcel", "parcel")),
     "wear": (p_wear, _rc("container")),
     "set": (p_set, lambda kw: [tuple(kw["ref"])]),
     "new_herd": (p_new_herd, lambda kw: [("herd", kw["like"]), ("parcel", kw["parcel"])]),

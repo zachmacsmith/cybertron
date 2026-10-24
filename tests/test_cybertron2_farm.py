@@ -218,11 +218,11 @@ def test_milking_and_slaughter_by_role():
 
 
 # ---------------------------------------------------------------------- food, fuel, camps
-def test_grain_is_eaten_only_at_a_lit_fire_but_bread_anywhere():
-    got = N._eat(w := world(), "millbrook", [w.hands("Edric")], 1.0, hearth=False)
-    assert got == 0.0 or "grain" not in w.goods(w.hands("Edric"))
+def test_grain_feeds_little_raw_and_bread_anywhere():
+    w = world()                                                                 # D2-160 (replacing D2-60's nothing without a fire)
     give(w, "Edric", grain=5, bread=0)
-    assert N._eat(w, "millbrook", [w.hands("Edric")], 1.0, hearth=False) == 0.0
+    assert abs(N._eat(w, "millbrook", [w.hands("Edric")], 1.0, hearth=False) - 1.0) < 1e-6
+    assert abs(w.goods(w.hands("Edric"))["grain"]) < 1e-6                       # 5 raw grain is one meal
     give(w, "Edric", bread=2)
     assert N._eat(w, "millbrook", [w.hands("Edric")], 1.0, hearth=False) > 0.9
 
@@ -352,7 +352,7 @@ def test_a_missed_meal_with_grain_but_no_fire_says_why_and_the_carry_refusal_is_
     w = world()
     for k in list(w.s["containers"][w.hands("Edric")]["goods"]):
         w.s["containers"][w.hands("Edric")]["goods"][k] = 0.0
-    give(w, "Edric", grain=5)
+    give(w, "Edric", grain=2)                                                      # raw, 0.4 of a meal (D2-160)
     w.s["people"]["Edric"]["at"] = "grey_crag"                                     # nowhere to sleep but the open
     rec = N.night(w)
     assert rec["slept"]["Edric"] == "out" and "Edric" in rec["missed"] and rec["uncooked"]["Edric"] == ["grain"]

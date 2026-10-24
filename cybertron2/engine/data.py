@@ -16,11 +16,11 @@ PHYSICS     the numbers of the day and the night
 from __future__ import annotations
 
 ITEMS = {
-    "grain": {"weight": 1, "food": 0.7, "spoil": 0.0167, "cook": True, "decay": "grain"},  # boiled whole at a hearth (D2-60); seed (D2-17); spoils
+    "grain": {"weight": 1, "food": 0.7, "spoil": 0.0167, "cook": True, "raw": 0.2, "decay": "grain"},  # boiled whole at a hearth (D2-60); seed (D2-17); spoils
                                                                        # 0.5% a day in a house, less in bins, a cellar, a granary (D2-58)
-    "rye": {"weight": 1, "food": 0.7, "spoil": 0.0167, "cook": True, "decay": "grain"},    # winter grain (D2-53)
-    "beans": {"weight": 1, "food": 0.6, "spoil": 0.0167, "cook": True, "decay": "grain"},  # legumes: less food, restore the soil (D2-53)
-    "flour": {"weight": 1, "food": 1.0, "spoil": 0.0167, "cook": True, "decay": "grain"},  # ground grain, eaten as porridge (D2-60)
+    "rye": {"weight": 1, "food": 0.7, "spoil": 0.0167, "cook": True, "raw": 0.2, "decay": "grain"},    # winter grain (D2-53)
+    "beans": {"weight": 1, "food": 0.6, "spoil": 0.0167, "cook": True, "raw": 0.0, "decay": "grain"},  # legumes: less food, restore the soil (D2-53)
+    "flour": {"weight": 1, "food": 1.0, "spoil": 0.0167, "cook": True, "raw": 0.5, "decay": "grain"},  # ground grain, eaten as porridge (D2-60)
     "bread": {"weight": 1, "food": 1.3, "spoil": 0.05, "decay": "bread"},                # keeps, eaten without a hearth (D2-60)
     "dried meat": {"weight": 1, "food": 3.0, "spoil": 0.02, "decay": "dried meat"},           # meat dried to half its weight (D2-62)
     "cheese": {"weight": 1, "food": 2.5, "spoil": 0.02, "decay": "cheese"},               # 6 milk (D2-47, D2-56)
@@ -28,11 +28,12 @@ ITEMS = {
     "hay": {"weight": 1, "food": 0.0, "spoil": 0.0, "fodder": 1.0},    # cut from pasture in summer (D4-42)
     "straw": {"weight": 1, "food": 0.0, "spoil": 0.0, "fodder": 1.0},  # from the grain harvest (D4-42)
     "dung": {"weight": 1, "food": 0.0, "spoil": 0.0},                  # manure (D2-18, D4-39)
-    "charcoal": {"weight": 2, "food": 0.0, "spoil": 0.0},              # from 5 timber, made at the wood (D2-56)
+    "charcoal": {"weight": 2, "food": 0.0, "spoil": 0.0, "heat": 6.0},  # from 5 timber, made at the wood (D2-56); burns in a hearth (D2-157)
+    "firewood": {"weight": 1, "food": 0.0, "spoil": 0.0, "heat": 0.5},  # dead wood or young growth; burns only (D2-157)
     "wild food": {"weight": 1, "food": 1.0, "spoil": 0.15},
-    "meat": {"weight": 1, "food": 1.5, "spoil": 0.30, "decay": "fresh meat"},                 # dense, spoils fresh (D2-41)
+    "meat": {"weight": 1, "food": 1.5, "spoil": 0.30, "cook": True, "raw": 0.8, "decay": "fresh meat"},                 # dense, spoils fresh (D2-41)
     "milk": {"weight": 1, "food": 0.5, "spoil": 1.0},                  # the same day (D2-42)
-    "timber": {"weight": 2, "food": 0.0, "spoil": 0.0},                # D2-24
+    "timber": {"weight": 2, "food": 0.0, "spoil": 0.0, "heat": 2.0},   # D2-24; 2 heat (D2-157)
     "stone": {"weight": 3, "food": 0.0, "spoil": 0.0},                 # D2-3, D2-24
     "hide": {"weight": 1, "food": 0.0, "spoil": 0.0, "decay": "hide"},                  # D2-24
     "copper ore": {"weight": 3, "food": 0.0, "spoil": 0.0},
@@ -96,11 +97,31 @@ COVERS = {
 RESOURCES = {
     "plants": {"regime": "fast", "low": "{name} has been picked over: little wild food left", "high": "{name} is thick with berries, nuts and greens"},
     "game": {"regime": "threshold", "low": "few fresh tracks in {name}: the game is thin", "high": "fresh deer slots and droppings along the rides of {name}"},
-    "wood": {"regime": "slow", "low": "{name} is thinned out: stumps where the big trees stood", "high": ""},
+    "wood": {"regime": "slow", "low": "{name} is thinned out: stumps where the big trees stood", "high": ""},     # the trees (D2-156)
+    "young": {"regime": "young", "low": "", "high": ""},                 # young growth: cut for firewood (D2-156)
+    "dead": {"regime": "dead", "low": "", "high": ""},                   # dead wood: gathered for firewood (D2-156)
     "seam": {"regime": "finite", "low": "the seam at {name} is nearly worked out", "high": "a green-stained seam in {name}"},
     "quarry": {"regime": "endless", "low": "", "high": "a face of good stone at {name}"},
     "grass": {"regime": "fast", "low": "{name} is grazed bare", "high": "good grass on {name}"},             # D4-45
     "dung": {"regime": "accrues", "low": "", "high": "dung lies thick where the beasts have been on {name}"},
+}
+
+# Forests (environment/resources.md "Forests", D2-156): three stocks a unit of size, as timber (trees) and firewood (young growth,
+# dead wood); yearly rates. A world file gives `wood: {kind, ...}` on a forest or scrub parcel; an older world's `wood` stock is
+# read as its trees, with young growth and dead wood in a copse's proportions.
+FORESTS = {
+    "kinds": {
+        "old forest": {"trees": 2500, "young": 50, "dead": 300, "grow": 0.005, "regrow": 0.5},
+        "managed wood": {"trees": 600, "young": 400, "dead": 100, "grow": 0.01, "regrow": 1.0},
+        "copse": {"trees": 300, "young": 40, "dead": 50, "grow": 0.01, "regrow": 0.6},
+        "scrub": {"trees": 0, "young": 60, "dead": 10, "grow": 0.0, "regrow": 0.6},
+    },
+    "shed": 0.01,                  # of the trees' timber a year, as dead wood
+    "per_timber": 4,               # firewood to a timber's mass
+    "rot": 0.3,                    # of the dead wood a year
+    "brash": 1.0,                  # firewood left as dead wood for each timber felled
+    "scrub_below": 0.4,            # under this share of its trees a forest's cover is scrub
+    "gale": 0.002,                 # of the trees thrown in a gale (as dead wood: a windfall, D2-79)
 }
 
 # Fittings and blueprints: recipes.md §3 (a proposal; calibrate). A building is its structure and its fittings (D2-9).
@@ -151,6 +172,14 @@ TECHNIQUES = {
     "fell": {"verb": "gather", "label": "felling timber", "aliases": ["felling", "chop timber", "cut wood"], "basic": True,
              "at": {"covers": ["forest"]}, "draws": "wood", "yield": {"kind": "fixed", "base": 3.0},
              "tools": {"bare": 0.25, "crude": 1.0, "copper": 2.0}, "wear": 1, "units": 2, "gives": "timber", "tags": ["timber", "woodland"]},
+    "firewood": {"verb": "gather", "label": "gathering firewood (dead wood, by hand)", "basic": True,
+                 "aliases": ["gather firewood", "gathering firewood", "sticks", "dead wood", "kindling"],
+                 "at": {"covers": ["forest", "scrub"]}, "draws": "dead", "yield": {"kind": "pool", "base": 3.0}, "units": 1,
+                 "gives": "firewood", "tags": ["timber", "woodland", "fuel"]},                                   # D2-156, D2-157
+    "cut": {"verb": "gather", "label": "cutting young growth for firewood", "basic": True,
+            "aliases": ["cut young growth", "coppice", "coppicing", "cut brush", "cut poles"],
+            "at": {"covers": ["forest", "scrub"]}, "draws": "young", "yield": {"kind": "fixed", "base": 5.0},
+            "tools": {"crude": 1.0, "copper": 1.5}, "wear": 0.5, "units": 1, "gives": "firewood", "tags": ["timber", "woodland", "fuel"]},
     "mine": {"verb": "gather", "label": "mining copper ore", "aliases": ["mining", "dig ore"], "at": {"covers": ["rock"]}, "draws": "seam",
              "yield": {"kind": "fixed", "base": 2.0}, "tools": {"crude": 1.0, "copper": 1.5}, "wear": 2, "units": 2, "gives": "copper ore",
              "tags": ["mining", "craft"], "trade": "miner"},
@@ -314,7 +343,10 @@ PHYSICS = {
     "shelter": {"housed": 1.0, "damaged": 1.2, "unsheltered": 1.5},     # D4-12, H-5
     "shelter_cold": {"housed": 1.0, "no_fuel": 1.3, "damaged": 1.5, "unsheltered": 2.0},
     "cold_starving": 0.3,                                                # H-5
-    "fuel": {"normal": 0.5, "cold": 2.0, "camp": 1.0, "open": 2.0},     # D4-49: a camp's fire 1 a night; a fire in the open 2 (calibrate)
+    "fuel": {"normal": 0.5, "cold": 2.0, "camp": 1.0, "open": 2.0},     # in timber; in heat (D2-157): below
+    "camping_fire": {"out": 1.6, "bedroll": 1.5, "tent": 1.25},            # in the cold by a fire in the open (D2-159)
+    "heat": {"normal": 1.0, "cold": 4.0, "camp": 2.0, "open": 4.0, "order": ["firewood", "timber", "charcoal"],
+             "share": 4, "hearth_spaces": 12, "ring_spaces": 6, "ring_cold": 1.15},   # D2-157, D2-159     # D4-49: a camp's fire 1 a night; a fire in the open 2 (calibrate)
     "land_blind": 0.25,                                                  # D4-50: share with no eye for how bare a place is (calibrate)
     "house_spoil": 0.3,
     "cellar_spoil": 0.25,                                                # D2-45: a quarter of the house rate
@@ -560,6 +592,6 @@ LIFE = {
              "high": {"infant_care": 3, "child_eats": 1.0, "child_works": 0.5, "child_minding": 1}},   # D2-145, D2-151
     "old_age": {"adult": 0.001, "elder": 0.01, "doubling": 20},            # D2-149; the doubling scaled
     "succession_days": 2,                                                           # D2-143
-    "children_work": ["forage", "herd", "hay"],      # D2-148: what a head may set children to (the watch, D2-21, is not built)
+    "children_work": ["forage", "herd", "hay", "firewood"],   # D2-148, D2-156: what a head may set children to (the watch, D2-21, is not built)
     "child_skill": 0.5,                                                             # a child's skill at that work, to start
 }

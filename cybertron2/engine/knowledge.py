@@ -150,8 +150,10 @@ def ready(here, tech, kind, key) -> str:
     if kind == "parcel":
         p = here.parcels()[key]
         d = t.get("draws")
-        if d in ("plants", "game", "wood", "seam", "quarry", "grass", "dung") and d not in p["res"]:
-            return f"there is no {({'plants': 'wild food', 'grass': 'grass to cut'}).get(d, d)} at {p['name']}"
+        if d in ("plants", "game", "wood", "seam", "quarry", "grass", "dung", "dead", "young") and d not in p["res"]:
+            return f"there is no {({'plants': 'wild food', 'grass': 'grass to cut', 'dead': 'dead wood', 'young': 'young growth'}).get(d, d)} at {p['name']}"
+        if d in ("dead", "young") and p["res"][d]["S"] < 0.5:
+            return f"there is no {'dead wood' if d == 'dead' else 'young growth'} left to take at {p['name']}"
         if d == "grass" and p["res"][d]["S"] <= 0.2 * p["res"][d]["K"]:
             return f"{p['name']} is grazed too short to cut"
         if d == "dung" and p["res"][d]["S"] < 1:
