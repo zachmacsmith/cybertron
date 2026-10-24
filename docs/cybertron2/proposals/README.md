@@ -79,6 +79,7 @@ Newest first. Ideas decided or rejected in conversation before 23 Oct are backfi
 
 | Date | Idea | Outcome | Where |
 |---|---|---|---|
+| 24 Oct | Beliefs, values and customs held by people and passed on | flagged for later: OPEN L-25 | beliefs_and_values.md |
 | 24 Oct | An offer to a child goes to its parent (built, then written down) | retrospective, accepted: D4-55 | [offers_to_children.md](offers_to_children.md) |
 | 24 Oct | Every sign and event by the one noticing rule, with an extent by kind (built, then written down) | retrospective, accepted: D4-53 | [one_noticing_rule.md](one_noticing_rule.md) |
 | 24 Oct | Going home at dusk a chance, not a rule (built, then written down) | retrospective, accepted: D4-54 | [herds_at_dusk.md](herds_at_dusk.md) |
@@ -241,6 +242,7 @@ Newest first. Ideas decided or rejected in conversation before 23 Oct are backfi
 | 23 Oct | The senses across every system: what the observer brings, and coverage by system (Zach's worklist) | discussion | [senses.md](senses.md) |
 | 23 Oct | Life: partners, children by choice, growing up in rounds, death of old age, inheritance | discussion | [life.md](life.md) |
 | [children.md](children.md) | children only by choice, trying costs work; everything in days; pregnancy's food and the nursing gap; care optional; what a child costs and gives (nearly free when compressed: a cost dial); old age; succession by the household's rules | 37.2 (37.4 owns life) | partly accepted: D2-138 to D2-149 |
+| [beliefs_and_values.md](beliefs_and_values.md) | customs and values held by people and passed on (to children, by exposure), distinct from know-how; cultural evolution | 37.2 (with 37.3, 37.4) | flagged for later (OPEN L-25) |
 | 23 Oct | Objects placed in the world: leave on a parcel, noticed by anyone, whose they are | discussion (to explore) | [objects_in_world.md](objects_in_world.md) |
 | 23 Oct | Fences, hedges and stone walls as field works that keep beasts in or out | discussion | [fences.md](fences.md) |
 | 23 Oct | The senses: an eye for the land (some have none) and signs of bareness scaled by how bare | partly accepted: D4-50 | [senses.md](senses.md) |
