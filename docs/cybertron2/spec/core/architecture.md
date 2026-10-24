@@ -27,6 +27,11 @@ form.
 - **The chokepoint.** Every change of state is a primitive applied through one function: it checks that everything the primitive
   touches is at the place where it acts, runs the hooks registered before the primitive (which may refuse it), makes the change,
   and runs the hooks registered after it. Each application records its cause: the act, the actor, and for whom it was done (D4-34).
+  Nothing physical is written any other way: eating and hunger, nature's night (regrowth, woods, dung), hearths, journeys, traces,
+  growing up, pregnancy, succession and offers lapsing are primitives too (`set`, `harm`, `set_res`, `transit`, `traces`, `office`,
+  `close_offer`). Only the knowledge stores (`mind`, `know`) and the logs are written by perception (D1-4).
+- **The record.** When a run keeps a journal, every application and every event is written to it with its cause and step as it
+  happens; an application made inside another primitive is marked so (spec/record/journal.md, D1-2, D1-4).
 - **Containers.** Goods are always in a container with a place: a person's hands, a building's stock, what the dead left (D4-34).
 - **The agent's view.** The code that builds an agent's prompt, carries out its acts and records what it perceives reads only a view
   of the node the agent is at (`Here`) and the agent's own mind (`Mind`). It cannot read another node (D4-35).
@@ -44,4 +49,4 @@ The tables of the state and the primitives are listed in the engine reference, r
 
 38.07 §2-§5, 38.08 M1, 38.16, 38.17; proposals/place.md.
 
-*Current as of 23 Oct 2026: H-1, H-2, D4-1, D4-24, D4-34, D4-35.*
+*Current as of 24 Oct 2026: H-1, H-2, D4-1, D4-24, D4-34, D4-35, D1-2, D1-4.*

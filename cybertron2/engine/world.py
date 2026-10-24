@@ -88,6 +88,8 @@ class World:
         self.cold_days = {int(d) - 1 for d in spec.get("cold_days") or ()}
         self.hooks = {}                                                    # (when, primitive) -> [fn]
         self._cause = []
+        self.journal = None                                                # the run's journal, if one is kept (spec/record)
+        self._depth = 0
         s = self.s = {"day": 0, "seq": 0, "nodes": {}, "roads": {}, "parcels": {}, "buildings": {}, "herds": {}, "containers": {},
                       "people": {}, "institutions": {}, "claims": {}, "offers": {}, "agreements": {}, "know": {}, "mind": {},
                       "events": [], "acts": [], "log": [], "left": []}
@@ -353,9 +355,17 @@ class World:
         call = {"prim": prim, "place": place, "kw": kw, "cause": self._cause[-1] if self._cause else None, "day": self.d}
         for h in self.hooks.get(("before", prim), []):
             h(self, call)
-        out = fn(self, **kw)
+        self._depth += 1
+        try:
+            out = fn(self, **kw)
+        finally:
+            self._depth -= 1
         for h in self.hooks.get(("after", prim), []):
             h(self, call, out)
+        if self.journal is not None:                                       # every change, with its cause (journal.md); one made
+            if self._depth:                                                # inside another primitive is marked so, for replay
+                call = {**call, "cause": {**(call["cause"] or {}), "within": True}}
+            self.journal.change(call, out)
         return out
 
     def event(self, place, kind, text, actor=None, target=None, about=(), salience=0.3, tags=(), sense="sight", concerns=(), **extra):
@@ -367,6 +377,8 @@ class World:
              "about": list(about), "text": text, "salience": salience, "tags": list(tags), "sense": sense, "concerns": sorted(set(concerns))}
         e.update(extra)
         self.s["events"].append(e)
+        if self.journal is not None:
+            self.journal.event(e, self._cause[-1] if self._cause else None)
         return e
 
     def record(self, actor, verb, tech=None, for_=None, node=None, **extra):

@@ -3,7 +3,8 @@ talk (D2-7, D4-25, D4-31: messages to one person wake them; speech in a building
 interleaved, travel last), settlement of agreements (D2-32), teaching and membership matched, thefts seen or not, the night, then
 perception and memory (D4-26 to D4-28).
 
-Logs in the run directory: run.json, turns.jsonl, days.jsonl, perception.jsonl, memory.jsonl, state.json.
+Logs in the run directory: run.json, turns.jsonl, days.jsonl, perception.jsonl, memory.jsonl, state.json; and the journal, run.db
+(spec/record: every request and answer by key, every event and change, a checkpoint at each committed step).
 """
 from __future__ import annotations
 
@@ -15,6 +16,7 @@ import time
 from pathlib import Path
 
 from cybertron2.engine import agreements as AG, fuse as FU, knowledge as KN, life as LF, night as N, perceive as PC, prompt as PR, roads as RD, settle as ST, verbs as V
+from cybertron2.engine import journal as JN
 from cybertron2.engine.converse import Conversations
 from cybertron2.engine.data import EDIBLE, TECHNIQUES
 from cybertron2.engine.here import Here, Mind
@@ -74,21 +76,39 @@ def bot_fuse(w, name, x) -> dict:
     return {"actions": ([{"do": "alarm"}, {"do": "defend"}] if inside else [{"do": "defend"}])[: x["acts"]]}
 
 
-def decide(w, name, text, opening, system, backend, conv, talk=None, schema=None, fuse=None, transit=False) -> tuple[dict, dict]:
+def decide(w, name, text, opening, system, backend, conv, talk=None, schema=None, fuse=None, transit=False, kind="decision") -> tuple[dict, dict]:
+    """One request to an agent's responder (execution.md): keyed, and written with its answer to the journal as they exist."""
     model = w.s["people"][name]["model"]
+    J = w.journal
+    key = J.request_key(name) if J else None
     if model == "bot":
-        return (bot_fuse(w, name, fuse) if fuse else bot_plan(w, name, talk)), {"model": "bot", "sent": text}
+        if J:
+            J.request(key, name, kind, None, None, system, None, text, "bot")
+        try:
+            out = bot_fuse(w, name, fuse) if fuse else bot_plan(w, name, talk)
+        except Exception as e:                                             # the failure is the answer on record
+            if J:
+                J.response(key, [{"error": repr(e)[:500]}], None, None, {}, "bot")
+            raise
+        if J:
+            J.response(key, [], out, None, {}, "bot")
+        return out, {"model": "bot", "sent": text, "key": key}
     from cybertron import llm
     t0 = time.monotonic()
     attempts = []
     schema = schema or PR.schema_for(Here(w, name, transit=transit or fuse is not None), Mind(w, name))
     sent, ctx = conv.message(name, w.d, system, schema, text, opening)
+    if J:
+        c = ctx["conv"]
+        J.request(key, name, kind, f"{name}@{c['day0']}", len(c["messages"]) // 2, c["system"], schema, ctx["text"], f"model:{model}")
     out, reasoning, usage = llm.call(backend, model, ctx["conv"]["system"], sent, schema,
                                      thinking_budget=int((w.spec.get("llm") or {}).get("thinking_budget", 2000)), attempts=attempts)
     raw = attempts[-1].get("raw") if attempts and attempts[-1].get("ok") and not (out or {}).get("_error") else None
     usage = conv.after(ctx, raw, usage)
+    if J:
+        J.response(key, attempts, out, reasoning, usage, usage.get("history") or ctx["transport"])
     return out or {}, {"model": model, "usage": usage, "seconds": round(time.monotonic() - t0, 1), "thinking": reasoning,
-                       "sent": ctx["text"], "opening": ctx["text"] is opening}
+                       "sent": ctx["text"], "opening": ctx["text"] is opening, "key": key}
 
 
 def _parallel(fn, jobs: dict, workers) -> tuple[dict, dict, dict]:
@@ -351,7 +371,8 @@ def fuse_calls(w, today, woke, results, talk_log, openings, systems, backend, co
         def one(n):
             here, mind = Here(w, n, transit=True), Mind(w, n)
             op = openings.get(n) or PR.road_opening(here, mind)
-            return decide(w, n, texts[n], op + "\n\n" + texts[n], conv.system(n, systems.get(n) or ""), backend, conv, fuse=woke[n])
+            return decide(w, n, texts[n], op + "\n\n" + texts[n], conv.system(n, systems.get(n) or ""), backend, conv, fuse=woke[n],
+                          kind="fuse")
         r, m, e = _parallel(one, {n: (n,) for n in texts}, workers)
         for n in texts:
             extra_cost[0] += float(((m.get(n) or {}).get("usage") or {}).get("cc_equiv_usd") or 0.0) if n not in openings else 0.0
@@ -382,6 +403,26 @@ def fuse_calls(w, today, woke, results, talk_log, openings, systems, backend, co
 
 
 # ---------------------------------------------------------------------- the run
+CARRY = ("today", "names", "at_day", "systems", "openings", "users", "replies", "meta", "errors", "first", "results", "woken", "talk_log",
+         "talked", "attend", "plans", "budget", "used", "rep", "heavy", "settled", "road_rec", "woke", "rec", "nights", "last_system",
+         "extra_cost")                                                    # what one step of the day hands the next
+
+
+def _runner(J, cost, conv, scope) -> dict:
+    """The runner's own state at a commit (journal.md, Checkpoints): each agent's running conversation, the cost so far, and what the
+    day's steps carry between them. Long texts are stored once as blobs and referred to by sha."""
+    def slim(x):
+        if isinstance(x, str) and len(x) > 200:
+            return {"$blob": J.blob(x)}
+        if isinstance(x, dict):
+            return {str(k): slim(v) for k, v in x.items()}
+        if isinstance(x, (list, tuple, set)):
+            return [slim(v) for v in x]
+        return x
+    convs = {n: {**{k: v for k, v in c.items() if k != "messages"}, "messages": slim(c["messages"])} for n, c in conv.c.items()}
+    return {"cost": cost, "conversations": convs, "carry": slim({k: scope[k] for k in CARRY if k in scope})}
+
+
 def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, seed=None) -> Path:
     spec = load_spec(spec_path)
     if seed is not None:
@@ -402,15 +443,22 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
                                               "models": {n: a["model"] for n, a in w.s["people"].items()}}, indent=1))
     files = {k: open(out / f"{k}.jsonl", "w") for k in ("turns", "days", "perception", "memory")}
     conv = Conversations(out, chunk=int((spec.get("memory") or {}).get("chunk", 3)), backend=backend)
+    for f in ("run.db", "run.db-wal", "run.db-shm"):                       # a fresh run: a fresh journal
+        (out / f).unlink(missing_ok=True)
+    J = w.journal = JN.Journal(out / "run.db")
+    J.start(spec, w.seed, {n: (a["model"] if a.get("model") in (None, "bot") else f"model:{a['model']}") for n, a in w.s["people"].items()})
     cost = 0.0
     last_system = dict(systems)
     extra_cost = [0.0]
     for day in range(w.days):
+        J.open_step(day, "dawn")
         w.s["day"] = day
         w.s["events"] = []
         today = w.s["today"] = blank_today()
         dawn(w)
         PC.dawn(w)
+        J.commit(w.s, _runner(J, cost, conv, locals()))
+        J.open_step(day, "decide")
         names = w.agents_acting()
         at_day = {n: w.at(n) for n in names}
         systems = {n: PR.system_prompt(Here(w, n), Mind(w, n)) for n in names}
@@ -422,15 +470,21 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
         results = {n: ([f"(Your reply could not be used, so you did nothing: {errors[n][:160]})"] if n in errors else []) for n in names}
         for n in names:
             results[n] += PC.apply_notes(Mind(w, n), replies[n])
+        J.commit(w.s, _runner(J, cost, conv, locals()))
+        J.open_step(day, "talk.0")
         woken = talk(w, names, replies, results)
         talk_log = {n: [] for n in names}
         talked = set()
         for wave in range(WAVES):
             if not woken:
                 break
+            if wave:
+                J.commit(w.s, _runner(J, cost, conv, locals()))
+                J.open_step(day, f"talk.{wave}")
             texts = {n: PR.talk_prompt(Here(w, n), Mind(w, n), b["heard"], b["also"], b["offers"], b["opened"], b["cards"],
                                        sum(1 for x in results[n] if x.startswith("You told "))) for n, b in woken.items()}
-            rr, mm, ee = _parallel(lambda n: decide(w, n, texts[n], openings[n] + "\n\n" + texts[n], systems[n], backend, conv, woken[n]),
+            rr, mm, ee = _parallel(lambda n: decide(w, n, texts[n], openings[n] + "\n\n" + texts[n], systems[n], backend, conv, woken[n],
+                                                    kind="talk"),
                                    {n: (n,) for n in woken}, workers)
             late = {}
             for n in woken:
@@ -448,6 +502,8 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
             woken = talk(w, names, {**{m: {} for m in names}, **late}, results)
             if wave == WAVES - 1:
                 break
+        J.commit(w.s, _runner(J, cost, conv, locals()))
+        J.open_step(day, "work")
         attend = {n: replies[n].get("attend") for n in names if replies[n].get("attend")}
         plans = {n: [x for x in (replies[n].get("actions") or []) if isinstance(x, dict)][:MAX_ACTIONS] for n in names}
         scripted = {}
@@ -487,7 +543,8 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
                     results[n].append(res)
         if heavy:                                                        # too heavy to set off: what to leave, and with whom (D4-32)
             texts = {n: PR.lighten_prompt(Here(w, n), Mind(w, n), heavy[n], results[n]) for n in heavy}
-            lr, lm, le = _parallel(lambda n: decide(w, n, texts[n], openings[n] + "\n\n" + texts[n], systems[n], backend, conv),
+            lr, lm, le = _parallel(lambda n: decide(w, n, texts[n], openings[n] + "\n\n" + texts[n], systems[n], backend, conv,
+                                                    kind="lighten"),
                                    {n: (n,) for n in heavy}, workers)
             for n in heavy:
                 talk_log[n].append({"wave": "lighten", "prompt": texts[n], "reply": lr.get(n) or {}, "usage": (lm.get(n) or {}).get("usage")})
@@ -504,6 +561,8 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
             results[n] = [f"{x} (x{rep[n][x]})" if x in rep[n] else x for x in results[n]]
             if used[n] < budget[n]:
                 results[n].append(f"You left {budget[n] - used[n]} of your {budget[n]} units unused.")
+        J.commit(w.s, _runner(J, cost, conv, locals()))
+        J.open_step(day, "settle")
         today["partners"] = LF.settle(w, today)                             # partnerships both chose (D2-140)
         today["children_work"] = LF.children_work(w)                        # the head's standing order (D2-148)
         settled = AG.settle(w)
@@ -511,6 +570,8 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
             results.setdefault(n, []).extend(lines)
         ST.settle_thefts(w, today, attend)
         w.s["left"] = [x for x in w.s.get("left", []) if x["day"] >= day - 1] + [{**x, "day": day} for x in today["left"]]
+        J.commit(w.s, _runner(J, cost, conv, locals()))
+        J.open_step(day, "night")
         N.departures(w, today)                                              # nightfall: those leaving are on their first stretch
         road_rec = RD.night(w, today)                                       # the roads tonight (world/roads.md)
         woke = FU.plan(w, today)                                            # fuse events: the urgent calls (D2-80 to D2-84)
@@ -532,13 +593,15 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
                 "thinking": m.get("thinking"), "talk": talk_log[n], "plan": plans[n], "attend": attend.get(n), "results": results[n],
                 "night": nights.get(n, []), "usage": m.get("usage"), "seconds": m.get("seconds"), "error": errors.get(n)}) + "\n")
             PC.close_day(w, n, results[n], nights.get(n, []))
+        J.commit(w.s, _runner(J, cost, conv, locals()))
+        J.open_step(day, "memory")
         ending = [n for n in names if w.s["people"][n]["alive"] and conv.ends(n, day) and day < w.days - 1]   # set off tonight too
         if ending:
             spans = {n: f"{PC._day(w, conv.c[n]['day0'] if n in conv.c else day)} to {PC._day(w, day)}" for n in ending}
             texts = {n: PR.memory_prompt(Mind(w, n), results[n], nights.get(n, []), spans[n]) for n in ending}
             keep = {n: json.loads(conv.c[n]["schema"]) for n in ending if n in conv.c}   # the stretch's own schema: it continues
             mr, mm, me = _parallel(lambda n: decide(w, n, texts[n], openings[n] + "\n\n" + texts[n], systems[n], backend, conv,
-                                                    schema=keep.get(n), transit=True),
+                                                    schema=keep.get(n), transit=True, kind="memory"),
                                    {n: (n,) for n in ending}, workers)
             for n in ending:
                 text = str((mr.get(n) or {}).get("memory") or "").strip()
@@ -563,6 +626,7 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
         files["days"].write(json.dumps(rec, default=str) + "\n")
         for f in files.values():
             f.flush()
+        J.commit(w.s, _runner(J, cost, conv, locals()))
         print(f"day {day + 1}: alive {len(w.living())}, missed {rec['missed']}, deaths {rec['deaths']}, talked {len(talked)}, "
               f"agreements {len(rec['agreements_made'])}, taught {len(today['teach'])}, thefts {len(today['thefts'])}, "
               + (f"born {[b['child'] for b in rec['life']['births']]}, " if rec["life"]["births"] else "") +
@@ -570,6 +634,9 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
         if not w.living():
             break
     w.save(out / "state.json")
+    J.meta("ended", {"day": w.d, "alive": len(w.living()), "cost_usd": round(cost, 4)})
+    J.close()
+    w.journal = None
     conv.close()
     for f in files.values():
         f.close()

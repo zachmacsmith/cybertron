@@ -16,7 +16,7 @@ Each item has an owner (README "Who owns what") who resolves it, with Zach where
 | C-7 | The handoff README's next steps and document list | 38 README §2, §7 | superseded by this folder; README gets a pointer | 37.4 |
 | C-8 | Environment design for the old engine (calendar, micro-events, foresight) | `wp/environment`: 04_environment_design.md, cybertron/environment.py | redesigned for cybertron2 in spec/environment.md; the old branch marked superseded | 37.4 |
 | C-9 | Ages: calendar years | 38.09 §2a-2b vs D4-19 | D4-19 wins | 37.4 |
-| C-10 | Run files, checkpoints, replay, versioning | spec/core/README `records.md` (37.4, to compile) vs spec/record/ (37.1, D1-4) | `core/records.md` becomes a pointer to spec/record/; `core/events.md` keeps what an event is, record/journal.md how events are stored | 37.4 to confirm |
+| ~~C-10~~ | Run files, checkpoints, replay, versioning | spec/core/README `records.md` (37.4, to compile) vs spec/record/ (37.1, D1-4) | `core/records.md` becomes a pointer to spec/record/; `core/events.md` keeps what an event is, record/journal.md how events are stored | 37.4 to confirm | resolved 24 Oct: confirmed by 37.4; spec/core/README points to spec/record/ |
 
 ## Open questions
 
@@ -47,9 +47,9 @@ Each item has an owner (README "Who owns what") who resolves it, with Zach where
 | Q-RR1 | Checkpoint at every step, or every day plus the step's changes (measure on the region world) | spec/record/journal.md | 37.1 |
 | Q-RR2 | On resume, restore each agent's running conversation exactly (default) or restart conversations at the resume day | spec/record/execution.md | 37.1 |
 | Q-RR3 | The human player's first interface: the terminal or a local web page | spec/record/human_play.md | 37.1 |
-| Q-RR4 | The physical writes outside `World.apply` (hunger, missed meals, offers closing; review 39.01 §5) become primitives | spec/record/journal.md | 37.4 |
+| ~~Q-RR4~~ | The physical writes outside `World.apply` (hunger, missed meals, offers closing; review 39.01 §5) become primitives | spec/record/journal.md | 37.4 | resolved 24 Oct (37.4): every physical write is a primitive (spec/core/architecture.md); bot runs byte-identical |
 | Q-RR5 | A replay test with shuffled completion order of model calls (nothing may depend on arrival order) | spec/record/execution.md | 37.1 |
-| Q-RR6 | Who builds R1 (the journal written alongside today's files) in `cybertron2/engine/` (README rule 6) | board Post 7 | 37.4 with 37.1 |
+| ~~Q-RR6~~ | Who builds R1 (the journal written alongside today's files) in `cybertron2/engine/` (README rule 6) | board Post 7 | 37.4 with 37.1 | resolved 24 Oct: 37.4 built R1 (board; review 38.29) |
 
 ## Flagged for later
 
