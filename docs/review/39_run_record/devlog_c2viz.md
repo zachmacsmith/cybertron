@@ -47,7 +47,7 @@ engine's state and imports nothing it changes.
   - The region at one scale for every place; people as the small figures; places' character by biome; no fog.
   - Checked with screenshots of region_s1 (bots, 12 days); no console errors. The places are small in their territories on the
     region's map: at one scale, a day's travel is far wider than a village.
-- 18:50 UTC: rebuilt on the engine, at Zach's instruction that visuals be grounded in how the engine works, from the general model
+- 18:25 UTC: rebuilt on the engine, at Zach's instruction that visuals be grounded in how the engine works, from the general model
   up. Five read-throughs of the engine (land and environment, buildings and goods, people and herds, actions, senses) gave
   `c2viz/ENGINE.md`; CLAUDE.md now carries the rule. Buildings follow the spec's end state (rooms, spaces, ground), derived from
   today's state by the spec's seeding rule until the engine stores rooms.
