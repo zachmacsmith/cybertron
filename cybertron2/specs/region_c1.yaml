@@ -32,3 +32,43 @@ agents:
       - "Your grandmother's people came out of a starving valley and found Ashwood empty and full of game; it fed three households for fifty years. You believe that finding new land is the best thing anyone can do for the people they care about, and that a valley that only trades with itself goes hungry in the end."
       - "You followed the deer path north out of Deep Wood for most of a day once, to where the trees thinned onto open moor, and turned back at dusk; you have never gone further."
       - "Your father told you an old way leaves Barleyfield through its copse to the west, older than any road; nobody has found it in your lifetime."
+
+  # the Merchant household knows its ox and what it is for, as part of its past (Zach: "the merchants should start maybe with some
+  # knowledge of them"); the rest of their memories as generated
+  Elias:
+    memories:
+      - 'Your line''s founders: Elias and Rohese Merchant came to Millford and built the first Merchant house.'
+      - 'Hard winters you remember, when the frost came early and the stores ran out: 50 winters ago, 38 winters ago, 28 winters ago, 2 winters ago.'
+      - Daughter Elena married into Ashby, two days' walk away.
+      - 'The household''s ox carries the Store''s goods: in a harness, led by one of you, it takes about sixty weight along any road, three packs'' worth, where the handcart needs a track; it grazes as it goes, or eats a little hay from the load.'
+  Rohese:
+    memories:
+      - 'Your line''s founders: Elias and Rohese Merchant came to Millford and built the first Merchant house.'
+      - 'Hard winters you remember, when the frost came early and the stores ran out: 50 winters ago, 38 winters ago, 28 winters ago, 2 winters ago.'
+      - Daughter Elena married into Ashby, two days' walk away.
+      - 'The household''s ox carries the Store''s goods: in a harness, led by one of you, it takes about sixty weight along any road, three packs'' worth, where the handcart needs a track; it grazes as it goes, or eats a little hay from the load.'
+  Everard:
+    memories:
+      - 'Your line''s founders: Elias and Rohese Merchant came to Millford and built the first Merchant house.'
+      - 'Hard winters you remember, when the frost came early and the stores ran out: 38 winters ago, 28 winters ago, 2 winters ago.'
+      - Father-in-law Lambert died last winter (old age).
+      - Mother-in-law Isabel died last winter (old age).
+      - Sister Elena married into Ashby, two days' walk away.
+      - Son Ivo married into Ashby, two days' walk away.
+      - 'The household''s ox carries the Store''s goods: in a harness, led by one of you, it takes about sixty weight along any road, three packs'' worth, where the handcart needs a track; it grazes as it goes, or eats a little hay from the load.'
+  Katherine:
+    memories:
+      - 'Your line''s founders: Lambert and Isabel Smith came to Millford and built the first Smith house.'
+      - 'Hard winters you remember, when the frost came early and the stores ran out: 28 winters ago, 2 winters ago.'
+      - Father Lambert died last winter (old age).
+      - Mother Isabel died last winter (old age).
+      - Son Ivo married into Ashby, two days' walk away.
+      - 'The household''s ox carries the Store''s goods: in a harness, led by one of you, it takes about sixty weight along any road, three packs'' worth, where the handcart needs a track; it grazes as it goes, or eats a little hay from the load.'
+  Ysolt:
+    memories:
+      - 'Your line''s founders: Elias and Rohese Merchant came to Millford and built the first Merchant house.'
+      - 'Hard winters you remember, when the frost came early and the stores ran out: 2 winters ago.'
+      - Grandfather Lambert died last winter (old age).
+      - Grandmother Isabel died last winter (old age).
+      - Brother Ivo married into Ashby, two days' walk away.
+      - 'The household''s ox carries the Store''s goods: in a harness, led by one of you, it takes about sixty weight along any road, three packs'' worth, where the handcart needs a track; it grazes as it goes, or eats a little hay from the load.'

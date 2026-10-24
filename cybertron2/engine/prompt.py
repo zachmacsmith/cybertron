@@ -190,22 +190,14 @@ def _place_lines(here, mind=None) -> list:
     return out
 
 
-def _beast_lines(here) -> list:
-    """One's household's beasts here (livestock.md "What agents see"), and a pack ox one could lead (transport.md, D2-136)."""
-    mine = {here.name, here.household()}
-    own = [(hid, h) for hid, h in here.herds().items() if FM.head(h) > 0 and mine & {c["claimant"] for c in here.claims(("herd", hid))}]
-    if not own:
+def _beast_lines(here, mind) -> list:
+    """One's household's beasts as one last knew of them (memory: livestock.md "What agents see", D4-35), not as they are."""
+    k = mind.store.get("beasts") or {}
+    if not k:
         return []
-    out = ["Your household's beasts here: " + "; ".join(f"{h['name']} ({FM.herd_words(h)}) on {here.parcels()[h['parcel']]['name']}"
-                                                      for _, h in own if h.get("parcel") in here.parcels()) + "."]
-    ox = here.pack_ox()
-    if ox and here.roads():
-        out.append(f"You could lead an ox of {here.herds()[ox]['name']} as a pack ox ({{\"do\": \"travel\", \"to\", \"lead\": "
-                   f"\"{here.herds()[ox]['name']}\"}}): with your harness it carries {here.capacity(oxen=1):g} on any road, grazing as it goes "
-                   "or eating a hay a night from the load.")
-    elif any(int(h.get("oxen", 0)) > 0 for _, h in own) and here.roads():
-        out.append("An ox of yours could carry 60 on any road as a pack ox, if you had a harness in your hands.")
-    return out
+    when = lambda r: "as you have long known" if r["day"] < 0 else ("seen today" if r["day"] == here.day else _daystr(mind, r["day"]))
+    return ["Your household's beasts, as you last knew of them: " + "; ".join(
+        f"{r['name']} ({r['words']}), {r['where']} ({'found missing' if r['how'] == 'missing' else when(r)})" for r in k.values()) + "."]
 
 
 def _fence_words(fc) -> str:
@@ -419,7 +411,7 @@ def turn_prompt(here, mind, opening=True) -> str:
     you = [f"You are {STAGES[a['hunger']]}" + (", and hurt" if a["wounded"] else "") + f". You carry: {hold}"
            + (f" (weight {show(here.load())} of the {here.capacity():g} you can travel with"
               + (f", {here.capacity(True):g} on a road with a track" if here.capacity(True) > here.capacity() else "") + ")" if here.roads() else "") + "."]
-    beasts = _beast_lines(here)
+    beasts = _beast_lines(here, mind)
     L.append("## You\n" + "\n".join(you + beasts + _house_lines(here, mind)))
     can, near = KN.options(here, mind)
     opt = ["Today you could: " + "; ".join(can) + "." if can else "Of your crafts, none can be done here today with what you have."]

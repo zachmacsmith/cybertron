@@ -589,7 +589,7 @@ def _herds_out(here, add) -> None:
             continue
         holders = [cl["claimant"] for cl in w.claims_on(("herd", hid))]
         people = sorted({m for x in holders for m in ([x] if x in w.s["people"] else w.members(x) if x in w.s["institutions"] else [])})
-        spot_rows(here, EMPTY, herd_context(w, hid), [f"parcel:{h['home']}"], here.node, h["home"], add, only=people)
+        spot_rows(here, EMPTY, herd_context(w, hid), [f"parcel:{h['home']}"], here.node, h["home"], add, only=people, missing=hid)
     for pid, p in here.parcels().items():
         if p.get("fence"):
             spot_rows(here, FENCE, fence_context(w, pid), [f"parcel:{pid}"], here.node, pid, add)

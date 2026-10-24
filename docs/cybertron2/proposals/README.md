@@ -63,6 +63,7 @@ without a proposal.
 | [exchange_and_money.md](exchange_and_money.md) | exchange at a node, coin, debts, credit, tolls | 37.2 | accepted: D2-1, D2-2, D2-25 to D2-30, D4-17 |
 | [information_economics.md](information_economics.md) | writing materials, documents, the information ladder, libraries, archives, maps | 37.2 (37.4 owns information/) | partly accepted: D2-7, D2-8 |
 | [economy_plan.md](economy_plan.md) | the economy plan for cybertron2 (E1-E6, the first region) and society-scale layers | 37.2 | discussion |
+| [beasts_known.md](beasts_known.md) | one knows one's beasts by memory and noticing; a household's living seeded as experience | 37.4 (37.2: livestock) | retrospective, accepted: D4-56 |
 | [offers_to_children.md](offers_to_children.md) | an offer to a child goes to its parent here | 37.4 (37.2: agreements) | retrospective, accepted: D4-55 |
 | [one_noticing_rule.md](one_noticing_rule.md) | every sign and event by the one noticing rule, each reaching as far as what it is: the node, a parcel, a building, a stretch or the road | 37.4 | retrospective, accepted: D4-53 |
 | [herds_at_dusk.md](herds_at_dusk.md) | a herd that wandered goes home at dusk by chance, less when well fed where it is | 37.2 (37.4 built it) | retrospective, accepted: D4-54 |
@@ -81,6 +82,7 @@ Newest first. Ideas decided or rejected in conversation before 23 Oct are backfi
 |---|---|---|---|
 | 24 Oct | Care for survival only now; the cost dial built low and high; any two of opposite sex who both choose | accepted: D2-150 to D2-152 | children.md; spec/life/birth_and_death.md |
 | 24 Oct | Beliefs, values and customs held by people and passed on | flagged for later: OPEN L-25 | beliefs_and_values.md |
+| 24 Oct | One's beasts known by memory and noticing, not listed; the merchants' ox as seeded experience (built, then written down) | retrospective, accepted: D4-56 | [beasts_known.md](beasts_known.md) |
 | 24 Oct | An offer to a child goes to its parent (built, then written down) | retrospective, accepted: D4-55 | [offers_to_children.md](offers_to_children.md) |
 | 24 Oct | Every sign and event by the one noticing rule, with an extent by kind (built, then written down) | retrospective, accepted: D4-53 | [one_noticing_rule.md](one_noticing_rule.md) |
 | 24 Oct | Going home at dusk a chance, not a rule (built, then written down) | retrospective, accepted: D4-54 | [herds_at_dusk.md](herds_at_dusk.md) |

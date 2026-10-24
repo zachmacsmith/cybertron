@@ -65,6 +65,10 @@ def seed_knowledge(w) -> None:
             lives = f"{w.s['buildings'][homes[0]]['name']}, {w.s['nodes'][w.s['buildings'][homes[0]]['node']]['name']}" if homes else "no house"
             m["kin"][x] = {"rel": rel, "lives": lives, "household": hh, "alive": True, "seen": None}
         home = next((w.s["buildings"][b]["node"] for b in w.homes(name)), a["at"])
+        mine = {name, w.household_of(name)}                                     # one's household's beasts, as one knows them at the
+        for hid, h in w.s["herds"].items():                                     # start (livestock.md "What agents see")
+            if mine & {c["claimant"] for c in w.claims_on(("herd", hid))} and h.get("parcel") in w.s["parcels"]:
+                remember_beasts(w, name, hid, "known")
         for c in w.spec.get("customs") or []:                                   # seeded custom (D2-30: markets), as local knowledge
             if c.get("nodes") in (None, "all") or home in c["nodes"]:
                 m["seeded"].append(c["text"])
@@ -240,6 +244,22 @@ def eye(here, name) -> float:
 
 
 LAND_DRAWS = {"plants": "wild food", "wood": "timber", "game": "game"}
+
+
+def remember_beasts(w, name, hid, how) -> None:
+    """What one knows of one's household's beasts: how many, where, when last seen (memory, not the state: D4-35). Updated when one
+    notices them or works with them; their home pasture found empty says only that they are not there."""
+    from cybertron2.engine import farm as FM
+    h = w.s["herds"][hid]
+    k = w.s["mind"][name].setdefault("beasts", {})
+    if how == "missing":
+        r = k.get(hid) or {"name": h["name"], "words": FM.herd_words(h)}
+        home = w.s["parcels"].get(h.get("home") or "", {}).get("name", "their pasture")
+        k[hid] = {**r, "where": f"not on {home}; where they are you do not know", "day": w.d, "how": "missing"}
+        return
+    where = w.s["parcels"][h["parcel"]]["name"] if h.get("parcel") in w.s["parcels"] else "on the road"
+    k[hid] = {"name": h["name"], "words": FM.herd_words(h), "where": f"on {where}" if h.get("parcel") else where,
+              "day": -1 if how == "known" else w.d, "how": how}
 
 
 def remember_land(mind, day, pid, what, state, how) -> None:
@@ -429,6 +449,17 @@ def evening(w, attend: dict, today: dict) -> dict:
                     rows = [g for g in F if g.get("thing") == f["thing"] and g.get("reach") == "near" and g.get("sense") != "smell"]
                     text = min(rows, key=lambda g: int(str(g.get("sign", "#0")).rsplit("#", 1)[-1] or 0))["text"] if rows else text
                 TH.remember(w, name, f["thing"], "saw", text=text, close=f.get("reach") == "near")
+        mine = {name, w.household_of(name)}                                     # what one saw of one's own beasts
+        for f in con + notice + att:
+            if f.get("missing") and f["missing"] in w.s["herds"]:
+                remember_beasts(w, name, f["missing"], "missing")
+            for sub in f.get("about") or []:
+                if sub.startswith("herd:") and sub[5:] in w.s["herds"] and mine & {c["claimant"] for c in w.claims_on(("herd", sub[5:]))}:
+                    remember_beasts(w, name, sub[5:], "saw")
+        for key in today["worked"].get(name, []):                               # one worked with them: herding, milking, driving
+            for hid, h in w.s["herds"].items():
+                if h.get("parcel") == key and mine & {c["claimant"] for c in w.claims_on(("herd", hid))}:
+                    remember_beasts(w, name, hid, "with")
         for f in con + notice + att:
             if f.get("land"):
                 for sub in f["about"]:
