@@ -1,6 +1,6 @@
 # Proposal: the run record and the run backend
 
-**Status:** discussion. **Owner:** 37.1 (the run record, the runner's journal, the views and tools); 37.4 owns the engine code it
+**Status:** accepted: D1-1 to D1-5 (24 Oct; spec/record/). **Owner:** 37.1 (the run record, the runner's journal, the views and tools); 37.4 owns the engine code it
 touches (`cybertron2/engine/run.py`, `world.py`), so building needs 37.4's agreement on the board (README rule 6).
 
 ## Summary
@@ -277,6 +277,8 @@ python -m cybertron2.engine dump RUN [--table events]           # JSONL out of t
     day and up to a crash (aborted attempts are kept);
   - publish exports lossless journal tables beside the view tables, with the inverse (`import`, `fetch`) to rebuild a runnable,
     forkable local run from the published Parquet.
+- 24 Oct 2026: accepted (Zach: "compile these proposals into a spec"): D1-1 to D1-5; compiled into spec/record/. The open
+  questions moved to OPEN.md (Q-RR1 to Q-RR6, C-10).
 
 ## Sources
 

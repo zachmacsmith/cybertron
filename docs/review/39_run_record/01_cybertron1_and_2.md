@@ -3,7 +3,7 @@
 *23 Oct 2026, the 37.1 session at Zach's request ("compare how information is written to and stored in state in cybertron 2 and
 cybertron 1, exported, published; what has been lost; can we reintroduce forking, each point fully rebuildable, easy to
 analyse"). Read against `wp/cybertron2` at 42b258e (the engine in `cybertron2/engine/`) and the old engine as frozen on
-`bench/first-batch`. Measurements were made with scripted bots (no model calls); the scripts are described in §5. The proposal
+`bench/first-batch`. Measurements were made with scripted bots (no model calls); the scripts are described in §5. Re-checked at 9e4655d (24 Oct): the gaps in §2 still hold. Compiled into spec/record/ (D1-1 to D1-5). The proposal
 that follows from this is [proposals/run_record.md](../../cybertron2/proposals/run_record.md).*
 
 ## 1. In one paragraph

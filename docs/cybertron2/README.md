@@ -45,6 +45,7 @@ board. Something Zach asks to have built straight away is built first and writte
 | Shared | 37.4 (mechanism) and 37.2 (numbers) | carrying (economy/transport.md), lodging (economy/lodging.md); writing materials and papers in information/; walls and gates in conflict/ |
 | Life and kinship | 37.4 until 37.1 joins cybertron2 | spec area life |
 | Institutions | 37.4 until 37.3 joins cybertron2 | spec area institutions |
+| The run record | **37.1** | spec area record (storage, running, branching, views, human play, export and import); the engine code that writes it stays 37.4's (rule 6) |
 
 ## Rules
 

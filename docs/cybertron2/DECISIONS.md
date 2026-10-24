@@ -2,7 +2,7 @@
 
 Every decision Zach has made about cybertron2. Append only; a later decision that replaces an earlier one says so in its
 `Replaces` column, and the earlier row is marked `replaced by`. Number series by session (README rule 2): **H** the handoff
-(decisions Zach made in the 37.2 session before 37.4 took cybertron2 over), **D2** the 37.2 session, **D4** the 37.4 session.
+(decisions Zach made in the 37.2 session before 37.4 took cybertron2 over), **D1** the 37.1 session (the run record), **D2** the 37.2 session, **D4** the 37.4 session.
 Compiled 22 Oct 2026 from: `docs/review/38_space_engine/README.md` §3 (H), `devlog_37.4.md` and the 37.4 conversation (D4),
 `docs/review/37_growth/02*` and `02_economy_worklog.md` (D2). **37.2: please check the D2 rows and the "directions" list below,
 and correct them in place.**
@@ -227,6 +227,11 @@ and correct them in place.**
 | D2-151 | 24 Oct | **The cost dial is built with a low and a high setting;** a new world will be designed to test it once children are built | conversation | |
 | D2-152 | 24 Oct | **Any two people of opposite sex at the same node can try for a child if both choose** (the engine records sex); a partnership is not required | conversation | partners only |
 | D2-153 | 24 Oct | **The lifespan is a world setting that scales every part of a life:** the days to old age (default 32), with each stage a fixed share of it (infant 1/16, child 1/8, youth 3/16, adult 5/8), and pregnancy, the nursing gap and the rise of old age's risk scaling with it; D4-19's childhood spans are its default (amends D4-19 and D2-139's youth 12 and adult 50) | conversation ("Lifespans should be a setting for each run ... it scales all parts of their life") | youth 12 and adult 50 days fixed |
+| D1-1 | 23 Oct | **The run record supports everything cybertron 1's instrument did** (the website from published data, analysis, fork, pause, resume, rerun) **and also**: a map that plays through the world's history (places, buildings, acts, travel, each day); exactly what an agent saw in its context at any point; a human playing in-world as an agent with the same context, answering with the same verbs; running that is idempotent, resumable and cancellable | Zach, 37.1 conversation; spec/record/ | |
+| D1-2 | 23 Oct | **Everything is written as it happens**; a step's commit only makes it official; a run is visible layer by layer through the day, and what happened up to a crash stays readable (aborted attempts kept) | Zach, 37.1 conversation; spec/record/execution.md | the proposal's first form (a step written whole or not at all) |
+| D1-3 | 23 Oct | **The inverse of publishing**: a published run (Parquet) converts back into a local run that can be replayed, forked and continued from any point | Zach, 37.1 conversation; spec/record/exchange.md | |
+| D1-4 | 24 Oct | **proposals/run_record.md is adopted as the spec area `record/`**: the runner as a state machine over keyed requests answered by responders (recorded, model, bot, human); steps with attempts and commits; checkpoints, events and changes with causes; frozen data tables; views (state, beliefs, exact context, map frames, history); fork, replicates, interventions; export with lossless journal tables and view tables; import and fetch; replay promised within one code version | Zach, 37.1 conversation ("compile these proposals into a spec"); spec/record/ | |
+| D1-5 | 24 Oct | **Storage**: one SQLite journal per run (WAL), JSON values, content-addressed compressed texts; Parquet for export, publishing and the site. Adopted with D1-4; Zach was told it is a judgment call (a directory of JSONL files, as cybertron 1, also works) | Zach, 37.1 conversation; spec/record/journal.md | |
 
 ## Directions (Zach's stated aims recorded in the notes; designs follow them; checked by 37.2, 22 Oct)
 
