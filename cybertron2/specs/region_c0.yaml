@@ -1,14 +1,14 @@
-# The dependence null for region_c (02t §5, D2-137): the same people, land, roads and custom (paired by seed), but each village
-# able to keep itself: woodlots at Barleyfield, Millford and Coppergate (100 timber each, more than their hearths and charcoal need),
-# a field at Ashwood (4 plots, 160 standing), a larger store at Coppergate (210 grain), more barley at Millford (300). Region food is
-# 1.59 times what it eats (02t_region_model.py, arm 0). Trade here is optional: cross-village flows in region_c beyond these are what
-# dependence produced.
+# The dependence null for region_c1 (02t §5, D2-137): the same people, land, roads and custom (paired by seed), but each village
+# able to keep itself over the 48 days: woodlots at Barleyfield and Millford (200 timber) and Coppergate (130), more than two winters'
+# hearths and the charcoal need; a field at Ashwood (4 plots, 160 standing, resown); a store at Coppergate of 640 grain (it has no
+# field: 1.25 times what it eats); more barley at Millford (300, resown). Trade here is optional: cross-village flows in region_c1
+# beyond these are what dependence produced.
 base: cybertron2/specs/region_c1.yaml
 name: region_c0 (the dependence null)
 nodes:
   barleyfield:
     parcels:
-      bf_copse: {size: 2, text: "a woodlot of ash and hazel, coppiced", state: {wood: {K: 110, S: 100, r: 0.0}}}
+      bf_copse: {size: 2, text: "a woodlot of ash and hazel, coppiced", state: {wood: {K: 220, S: 200, r: 0.0}}}
   ashwood:
     parcels:
       aw_clearing: {adj: [deep_wood, aw_glade, aw_field]}
@@ -16,11 +16,11 @@ nodes:
                  state: {crop: {kind: barley, left: 160, ripe_day: 3}, last_crop: legumes}}
   coppergate:
     parcels:
-      cg_scrub: {state: {wood: {K: 110, S: 100, r: 0.0}}}
+      cg_scrub: {state: {wood: {K: 140, S: 130, r: 0.0}}}
   millford:
     parcels:
       mf_fields: {state: {crop: {kind: barley, left: 300, ripe_day: 3}}}
-      mf_copse: {size: 2, text: "a woodlot of willow and alder", state: {wood: {K: 110, S: 100, r: 0.0}}}
+      mf_copse: {size: 2, text: "a woodlot of willow and alder", state: {wood: {K: 220, S: 200, r: 0.0}}}
 buildings:
-  moor_house: {stock: {grain: 230}}
-  cole_house: {stock: {grain: 60}}
+  moor_house: {stock: {grain: 450}}
+  cole_house: {stock: {grain: 190}}
