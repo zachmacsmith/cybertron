@@ -347,10 +347,20 @@ Two halves, so that every rule stays in the engine:
 - **Where in a parcel** a building stands (its lot, spread through the parcel, kept from the day it first stands), a person
   stands (around the parcel the engine says they are on), a beast grazes.
 - **Height** (a word in the engine) as terraces and cliff faces: a parcel above its neighbours to the south shows a face.
-- **The region's map is a schematic, not to scale:** every place's plan is drawn large (the largest about a fifth of the map's
-  height), at one scale for all places so a big place still looks bigger; roads are short, about 14 pixels a day of travel
-  beyond the two places' land, with each day's stretch and its landmarks along it; the order of places comes from the road
-  graph (days), each in a territory of wild country by its character.
+- **The region's map is a schematic at a fixed scale, explored by panning:** each place's plan at half its close-up scale (its
+  houses drawn half as large again so a village stands out), roads about 60 pixels a day of travel beyond the two places' land,
+  places pulled together along their roads and pushed apart until their land clears. A larger world is a larger map, not a
+  smaller drawing.
+- **The landscape between places** is built from what the engine says, and only that: a place stands at its parcels' height
+  (0 to 3, or 4) or, where a world sets no heights, at a height from its rock and scrub and its name (a crag, a tor, a pass, a
+  fell: hills; a moor; a mere, a fen, a carr: wet); an upland place is ringed by peaks, clear of its roads; each day's stretch
+  of road stands at its terrain's height and carries its terrain (TERRAIN: woodland grows forest, marsh is wet, a river valley
+  is low, hills and mountain are high); a pass is a ridge of peaks with a saddle where the road goes over; narrows are rocks by
+  the road; a hollow a dip; a ford or a bridge is a river crossing the road, running from a short way above it down towards the
+  nearest water (a place's water, a marsh, the map's edge). Between these the land eases from one to the next with some noise;
+  its kind follows from its height and wetness (low ground, slopes, hills, mountain with snow on the heights and in winter,
+  marsh with pools and reeds), its colour is the places' characters blended by nearness, and it is shaded by its relief.
+  Worlds that say little (region_s1: every road farmland, every height 1) get a landscape from little: mostly the names.
 
 ## 10. Audit of the first renderer (before this model), fixed in the rebuild
 

@@ -54,16 +54,19 @@ $("#title").textContent = V.meta.name; $("#slider").max = V.days.length - 1;
 const q = new URLSearchParams(location.search);
 if (q.get("day")) S.day = Math.max(0, Math.min(V.days.length - 1, +q.get("day") - 1));
 if (q.get("node")) S.node = q.get("node");
-S.zoom = +q.get("z") || 5; S.full = q.has("full");
+S.zoom = +q.get("z") || 5; S.zoomW = +q.get("zw") || 0; S.full = q.has("full");
 let shown = null;
 function render() {
   const d = V.days[S.day], cal = d.calendar || {};
-  const r = S.node ? C2Pixel.node(cv, V, S.node, S.day) : C2Pixel.world(cv, V, S.day, { width: 400, height: 260 });
+  const r = S.node ? C2Pixel.node(cv, V, S.node, S.day) : C2Pixel.world(cv, V, S.day);
   S.hot = r.hotspots;
   // a place close up is drawn at a fixed pixel size and panned (drag, or scroll); the region fits the page
-  stage.style.width = S.node && !S.full ? r.width * S.zoom + "px" : "100%";
-  $("#hint").textContent = S.node ? "drag to pan · + / − to zoom · Esc for the region" : "click a place to go in";
-  if (shown !== (S.node || "")) { shown = S.node || ""; if (S.node && r.focus) { map.scrollLeft = r.focus[0] * S.zoom - map.clientWidth / 2; map.scrollTop = r.focus[1] * S.zoom - map.clientHeight / 2; } else { map.scrollLeft = 0; map.scrollTop = 0; } }
+  // both scales are drawn at a fixed pixel size and panned (drag, or scroll): a larger world is a larger map, not a smaller one
+  if (!S.zoomW) S.zoomW = Math.max(2, Math.min(4, Math.floor(map.clientWidth / r.width * 2) / 2));
+  stage.style.width = S.full ? "100%" : r.width * (S.node ? S.zoom : S.zoomW) + "px";
+  $("#hint").textContent = S.node ? "drag to pan · + / − to zoom · Esc for the region" : "drag to pan · + / − to zoom · click a place to go in";
+  if (shown !== (S.node || "")) { shown = S.node || ""; const z = S.node ? S.zoom : S.zoomW, fc = r.focus || [r.width / 2, r.height / 2];
+    map.scrollLeft = fc[0] * z - map.clientWidth / 2; map.scrollTop = fc[1] * z - map.clientHeight / 2; }
   $("#day").textContent = `Day ${d.day + 1}${cal.season ? " · " + cal.season : ""}${d.weather_words ? " · " + d.weather_words : ""}`;
   $("#slider").value = S.day; $("#back").hidden = !S.node; $("#where").textContent = S.node ? ST.nodes[S.node].name : `${Object.keys(ST.nodes).length} places`;
   stage.querySelectorAll(".lab,.mark").forEach((e) => e.remove());
@@ -97,8 +100,8 @@ $("#prev").onclick = () => { play(false); setDay(S.day - 1); }; $("#next").oncli
 $("#play").onclick = () => play(!S.playing); $("#slider").oninput = (e) => { play(false); setDay(+e.target.value); };
 $("#back").onclick = () => { S.node = null; render(); };
 document.addEventListener("keydown", (e) => { if (e.key === "ArrowRight") setDay(S.day + 1); else if (e.key === "ArrowLeft") setDay(S.day - 1); else if (e.key === "Escape") { S.node = null; render(); } else if (e.key === " ") { e.preventDefault(); play(!S.playing); }
-  else if ((e.key === "+" || e.key === "=" || e.key === "-") && S.node) { const cx = (map.scrollLeft + map.clientWidth / 2) / S.zoom, cy = (map.scrollTop + map.clientHeight / 2) / S.zoom;
-    S.zoom = Math.max(2, Math.min(10, S.zoom + (e.key === "-" ? -1 : 1))); render(); map.scrollLeft = cx * S.zoom - map.clientWidth / 2; map.scrollTop = cy * S.zoom - map.clientHeight / 2; } });
+  else if (e.key === "+" || e.key === "=" || e.key === "-") { const k = S.node ? "zoom" : "zoomW", z0 = S[k], cx = (map.scrollLeft + map.clientWidth / 2) / z0, cy = (map.scrollTop + map.clientHeight / 2) / z0;
+    S[k] = Math.max(1, Math.min(10, z0 + (e.key === "-" ? -0.5 : 0.5))); render(); map.scrollLeft = cx * S[k] - map.clientWidth / 2; map.scrollTop = cy * S[k] - map.clientHeight / 2; } });
 render();
 </script>
 </body>
