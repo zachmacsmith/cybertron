@@ -80,6 +80,14 @@ class Stopped(Exception):
     """The run cannot go on (a replay whose record ends): it stops."""
 
 
+class HumanTurn(Exception):
+    """A person is to answer (the `human` responder, R3): the request is written, and the run stops until it is answered."""
+
+    def __init__(self, turns):
+        self.turns = list(turns)                                           # [(key, agent)]
+        super().__init__(", ".join(f"{a} ({k})" for k, a in self.turns))
+
+
 class Abandoned(Exception):
     """Too many calls of the day failed (cybertron 1's fail-stop: a usage limit, auth, CLI errors): the day is dropped."""
 
@@ -137,6 +145,14 @@ def decide(w, name, text, opening, system, backend, conv, talk=None, schema=None
         if J:
             J.response(key, [], out, None, {}, "bot")
         return out, {"model": "bot", "sent": text, "key": key}
+    if model == "human":                                                   # human_play.md: shown exactly what a model would be
+        if J is None:
+            raise Stopped("a human responder needs the run's journal")
+        schema = schema or PR.schema_for(Here(w, name, transit=transit or fuse is not None), Mind(w, name))
+        sent, ctx = conv.message(name, w.d, system, schema, text, opening)
+        c = ctx["conv"]
+        J.request(key, name, kind, f"{name}@{c['day0']}", len(c["messages"]) // 2, c["system"], schema, ctx["text"], "human")
+        raise HumanTurn([(key, name)])
     from cybertron import llm
     t0 = time.monotonic()
     attempts = []
@@ -156,7 +172,7 @@ def decide(w, name, text, opening, system, backend, conv, talk=None, schema=None
 
 
 def _parallel(fn, jobs: dict, workers, tally=None) -> tuple[dict, dict, dict]:
-    replies, meta, errors = {}, {}, {}
+    replies, meta, errors, waiting = {}, {}, {}, []
     with cf.ThreadPoolExecutor(max_workers=workers) as ex:
         futs = {ex.submit(fn, *args): n for n, args in jobs.items()}
         for f in cf.as_completed(futs):
@@ -166,8 +182,12 @@ def _parallel(fn, jobs: dict, workers, tally=None) -> tuple[dict, dict, dict]:
                 if replies[n].get("_error"):
                     errors[n] = str(replies[n]["_error"])[:500]
                     replies[n] = {"actions": []}
+            except HumanTurn as e:
+                waiting += e.turns
             except Exception as e:
                 replies[n], meta[n], errors[n] = {"actions": []}, {}, repr(e)[:500]
+    if waiting:                                                            # the others' answers are kept; the run waits
+        raise HumanTurn(sorted(waiting))
     if tally is not None:
         tally.add(len(jobs), errors)
     return replies, meta, errors
@@ -491,7 +511,7 @@ def _abandon(J, out, day, days, tally, why) -> str:
     return f"day {day + 1}: {why}; the day was abandoned and the run kept as of {kept}. Resume to play day {day + 1} again."
 
 
-def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, seed=None, until=None, mode="start"):
+def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, seed=None, until=None, mode="start", responders=None):
     """mode "start": a new run from a world file; "resume": go on with the run in out_dir from its journal (every answered request
     reused, the first step not committed run again live); "replay": play the run in out_dir again from its record alone, in a
     scratch copy, checking every committed step's state against its checkpoint, and return what was found. `until`: pause after
@@ -508,6 +528,8 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
             for a in spec["agents"].values():
                 if a.get("model"):
                     a["model"] = "bot"
+        for name, who in (responders or {}).items():                        # --as NAME=human|bot|model:<id>
+            spec["agents"][name]["model"] = who.split(":", 1)[1] if who.startswith("model:") else who
     else:
         src = Path(out_dir) / "run.db"
         if not src.exists():
@@ -563,6 +585,7 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
         cost = float(r["cost"])
         conv.c = {n: {**c, "session": None} for n, c in r["conversations"].items()}
         last_system.update(r["carry"].get("last_system") or {})
+    finished = False
     try:
         for day in range(start_day, w.days):
             J.open_step(day, "dawn")
@@ -748,14 +771,18 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
                   f"errors {len(errors)}, cost ${cost:.2f}", flush=True)
             if not w.living():
                 break
+        finished = True
     except JN.Paused as e:
         print(str(e), flush=True)
     except Abandoned as e:
         stopped = _abandon(J, out, day, w.days, tally, str(e))
         print(stopped, flush=True)
+    except HumanTurn as e:
+        stopped = f"waiting for {e}: answer with `play {out} --as NAME` (or the api), then the run goes on"
+        print(stopped, flush=True)
     if stopped is None:
         w.save(out / "state.json")
-    if mode != "replay":
+    if mode != "replay" and finished:
         J.meta("ended", {"day": w.d, "alive": len(w.living()), "cost_usd": round(cost, 4)})
     report = {"checked": J.checked, "mismatches": J.mismatches, "at": J.step}
     J.close()
@@ -778,6 +805,7 @@ def main(argv=None):
     r.add_argument("--bots", action="store_true")
     r.add_argument("--seed", type=int)
     r.add_argument("--until", help="pause after this step's commit, e.g. d10.memory")
+    r.add_argument("--as", dest="as_", action="append", default=[], help="NAME=human|bot|model:<id>")
     g = sub.add_parser("resume")
     g.add_argument("run")
     g.add_argument("--until")
@@ -831,12 +859,21 @@ def main(argv=None):
     fr = sub.add_parser("frames")
     fr.add_argument("run")
     fr.add_argument("--out", required=True)
+    pl = sub.add_parser("play")
+    pl.add_argument("run")
+    pl.add_argument("--as", dest="agent", required=True)
+    pl.add_argument("--backend")
+    sv = sub.add_parser("serve")
+    sv.add_argument("run")
+    sv.add_argument("--port", type=int, default=8765)
+    sv.add_argument("--backend")
     dp = sub.add_parser("dump")
     dp.add_argument("run")
     dp.add_argument("--table", default="events")
     args = ap.parse_args(argv)
     if args.cmd == "run":
-        print(run(args.spec, args.out, args.backend, args.days, args.workers, args.bots, args.seed, until=args.until))
+        print(run(args.spec, args.out, args.backend, args.days, args.workers, args.bots, args.seed, until=args.until,
+                  responders=dict(a.split("=", 1) for a in args.as_)))
     elif args.cmd == "resume":
         print(run(None, args.run, args.backend, workers=args.workers, until=args.until, mode="resume"))
     elif args.cmd == "rewind":
@@ -876,6 +913,12 @@ def main(argv=None):
         (Path(args.out) / "layout.json").write_text(json.dumps(VW.layout(args.run)))
         (Path(args.out) / "frames.json").write_text(json.dumps(VW.frames(args.run)))
         print(args.out)
+    elif args.cmd == "play":
+        from cybertron2.engine import api as API
+        API.play(args.run, args.agent, args.backend)
+    elif args.cmd == "serve":
+        from cybertron2.engine import api as API
+        API.serve(args.run, args.port, args.backend)
     elif args.cmd == "dump":
         from cybertron2.engine import views as VW
         rows = {"events": VW.events, "changes": VW.changes, "calls": VW.calls, "steps": VW.steps}[args.table](args.run)
