@@ -424,7 +424,7 @@ def build(base: dict, seed: int, tries=600) -> dict:
         else:
             debt = next((b for b in rel if "you owe" in rel[b]), None)
             a["aim"] = "Keep your household fed and its house sound" + (f"; pay back {debt} what you owe, if you can." if debt else ".")
-        line_aim = (lines[T.p[n]["line"]] or {}).get("aim")                    # a line's own aim, if the world gives one: its adults' and youths'
+        line_aim = (lines[T.p[n]["line"]] or {}).get("aim")                    # a line's own aim for its adults and youths (data only: no aim is shown, D4-29)
         if line_aim and a["stage"] != "elder":
             a["aim"] = line_aim + (a["aim"][a["aim"].index(" You will not"):] if " You will not" in a["aim"] else "")
         a["memories"] = a["memories"][-8:]

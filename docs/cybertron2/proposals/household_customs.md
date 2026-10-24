@@ -44,6 +44,11 @@ information/memory.md (what is seeded); world files.
 ## History
 
 - 24 Oct 2026: built at Zach's request for Hollins 2 (37.4), with D4-57.
+- 24 Oct 2026: written into spec/seeding/populations.md (it had been left out). For the Wide Country, Zach: "Some of the new goals
+  should be more explicit about having many children as a goal". The Cotter and Fenwick customs now say it plainly ("the Cotter way
+  is to have as many as you can: take partners young, try for a child every day you can"). The generator also takes a line's own
+  `aim` for its adults and youths, but under D4-29 no aim reaches a prompt, so that is data only; the customs are what the agents
+  read.
 
 ## Sources
 
