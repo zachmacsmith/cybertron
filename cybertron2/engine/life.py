@@ -394,10 +394,11 @@ def _old_age(w, out):
             continue                                                            # a world not dated in days: only elders age
         if w.rng("old-age", w.d, name).random() < min(1.0, p):
             place = w.place_of(("person", name))
-            w.apply("die", place, person=name, cause="old age")
+            cause = "old age" if a["stage"] == "elder" else "a sudden illness"     # an adult's risk is not age (D2-149)
+            w.apply("die", place, person=name, cause=cause)
             out["old_age"].append(name)
             if place in w.s["nodes"]:
-                w.event(place, "death", f"{name} died in the night, of old age", target=name, salience=1.0, tags=["death"])
+                w.event(place, "death", f"{name} died in the night, of {cause}", target=name, salience=1.0, tags=["death"])
 
 
 def _childhood(w, today, rec):
