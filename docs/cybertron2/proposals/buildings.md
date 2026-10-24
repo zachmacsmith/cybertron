@@ -1,5 +1,7 @@
 # Proposal: buildings from parts
 
+> **Decided parts are in the spec:** spec/economy/buildings.md (24 Oct: space at every level, rooms, fittings, storage, structures).
+
 **Status:** partly accepted: D2-3, D2-9 (the numbers, the fitting list and the limits still discussion; 23 Oct). **Owner:** 37.2.
 **Affects:** spec/economy/buildings.md; world/ (lots, with 37.4: OPEN C-2); information/ (rooms as speech scopes); conflict/defence.md
 (walls).
@@ -94,6 +96,9 @@ per fitting and per room.
   are one fitting for any number up to the room's size; a room seats its size by day and sleeps it by night.
 
 - 23 Oct: Zach: stone resists fire but is not fireproof; add a vault that does not burn (D2-49).
+
+- 24 Oct: Zach: fittings should take space by kind; parcel space to room space to fitting space; storage enough for families;
+  a cheaper cellar. Decided D2-154, D2-155 (02x model); spec rewritten.
 
 ## Sources
 

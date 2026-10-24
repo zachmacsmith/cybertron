@@ -85,3 +85,26 @@ if __name__ == "__main__":
     row(["oven", f"{fitting('oven'):.0f}", f"{oven_save:.1f} a batch of 40 bread over a hearth's four of 10", f"{fitting('oven') / oven_save * 40:.0f} bread"])
     row(["hearth against a fire ring", f"{fitting('hearth'):.0f} against {fitting('fire ring'):.0f}", "nothing for warmth or cooking (the engine treats both as a fire); a hearth only adds baking and smithing", ""])
     print("\nA region of about 45 eats about 1,100 grain in 24 days.")
+
+    print("\n## 3. Storage with space (proposed: a space of floor holds 30 weight loose; bins 60 food a space; a granary floor 300 grain in 3")
+    print("spaces; a cellar 40 food for each space of footprint; a woodshed 40 timber in 2 spaces)\n")
+    # a farm household of 4 on 4 plots at the harvest: 4 x 45 grain, 64 seed kept within it, beans, timber for the winter
+    need = {"grain": 180 + 20, "beans": 10, "timber": 16, "tools and gear": 6}
+    print(f"A farm household of 4 at the harvest holds about {need['grain']} grain, {need['beans']} beans, {need['timber']} timber and "
+          f"{need['tools and gear']} weight of tools and gear.\n")
+    row(["House", "Floor", "Beds, hearth", "Left for storage", "Holds with bins only", "Holds with a granary floor", "Enough?"])
+    row(["---"] * 7)
+    for label, floor in [("cottage (small room)", 6), ("family house (medium room)", 12), ("cottage and a small store room", 12)]:
+        left = floor - 4 - 1
+        bins = left * 60
+        gran = 300 + (left - 3) * 60 if left >= 3 else None
+        enough = "yes" if (gran or bins) >= need["grain"] + need["beans"] else "no"
+        row([label, floor, 5, left, f"{bins} food", f"{gran} grain" if gran else "no room", enough])
+    print("\nTimber kept outside gets wet in rain (D2-87: no use as fuel until dried); a woodshed keeps it dry.")
+
+    print("\n## 4. A cellar at 4 stone and 6 units (10), by what it keeps\n")
+    row(["Kept in it", "Spoils in a house a day", "Saved a day (x0.25 in a cellar)", "Pays back"])
+    row(["---"] * 4)
+    for good, qty, rate, food in [("grain", 100, 0.005, 1.0), ("cheese", 10, 0.01, 2.5), ("fresh meat", 20, 0.15, 1.5), ("milk", 10, 0.30, 0.5)]:
+        save = qty * rate * 0.75 * food
+        row([f"{qty} {good}", f"{rate:.1%}", f"{save:.2f} food", f"{10 / save:.0f} days"])
