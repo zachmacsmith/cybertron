@@ -17,8 +17,11 @@
   .top button:active { transform: translateY(2px); box-shadow: 0 1px 0 #10162e; }
   .top input[type=range] { flex: 1; min-width: 160px; accent-color: var(--gold); }
   .day { font: 16px "Pixelify Sans", monospace; min-width: 9em; }
-  .map { position: relative; margin: 0 16px 16px; border: 3px solid #10162e; box-shadow: 0 0 0 3px #3a4680; }
-  .map canvas { display: block; width: 100%; height: auto; image-rendering: pixelated; cursor: pointer; }
+  .map { position: relative; margin: 0 16px 16px; border: 3px solid #10162e; box-shadow: 0 0 0 3px #3a4680; overflow: auto; max-height: calc(100vh - 78px); background: #10162e; }
+  .map.drag { cursor: grabbing; }
+  .stage { position: relative; }
+  .stage canvas { display: block; width: 100%; height: auto; image-rendering: pixelated; cursor: pointer; }
+  .hint { color: var(--muted); font-size: 13px; }
   .lab { position: absolute; transform: translate(-50%, 0); font: 14px "Pixelify Sans", monospace; color: var(--ink); text-shadow: 2px 2px 0 #10162e, -1px -1px 0 #10162e;
     white-space: nowrap; pointer-events: none; }
   .lab.place { font-size: 17px; }
@@ -36,8 +39,9 @@
   <button id="prev">◀</button><button id="play">▶</button><button id="next">▶|</button>
   <span class="day" id="day"></span>
   <input type="range" id="slider" min="0" value="0" aria-label="Day">
+  <span class="hint" id="hint"></span>
 </div>
-<div class="map" id="map"><canvas id="cv"></canvas></div>
+<div class="map" id="map"><div class="stage" id="stage"><canvas id="cv"></canvas></div></div>
 <div class="tip" id="tip"></div>
 <script>__PIXEL_JS__</script>
 <script id="vizdata" type="application/json">__VIZ_DATA__</script>
@@ -45,26 +49,32 @@
 "use strict";
 const V = JSON.parse(document.getElementById("vizdata").textContent), ST = V.static;
 const S = { day: 0, node: null, hot: [], playing: false, timer: null };
-const $ = (s) => document.querySelector(s), cv = $("#cv"), map = $("#map"), tip = $("#tip");
+const $ = (s) => document.querySelector(s), cv = $("#cv"), map = $("#map"), stage = $("#stage"), tip = $("#tip");
 $("#title").textContent = V.meta.name; $("#slider").max = V.days.length - 1;
 const q = new URLSearchParams(location.search);
 if (q.get("day")) S.day = Math.max(0, Math.min(V.days.length - 1, +q.get("day") - 1));
 if (q.get("node")) S.node = q.get("node");
+S.zoom = +q.get("z") || 5; S.full = q.has("full");
+let shown = null;
 function render() {
   const d = V.days[S.day], cal = d.calendar || {};
-  const r = S.node ? C2Pixel.node(cv, V, S.node, S.day, { width: 256, height: 160 }) : C2Pixel.world(cv, V, S.day, { width: 400, height: 260 });
+  const r = S.node ? C2Pixel.node(cv, V, S.node, S.day) : C2Pixel.world(cv, V, S.day, { width: 400, height: 260 });
   S.hot = r.hotspots;
+  // a place close up is drawn at a fixed pixel size and panned (drag, or scroll); the region fits the page
+  stage.style.width = S.node && !S.full ? r.width * S.zoom + "px" : "100%";
+  $("#hint").textContent = S.node ? "drag to pan · + / − to zoom · Esc for the region" : "click a place to go in";
+  if (shown !== (S.node || "")) { shown = S.node || ""; if (S.node && r.focus) { map.scrollLeft = r.focus[0] * S.zoom - map.clientWidth / 2; map.scrollTop = r.focus[1] * S.zoom - map.clientHeight / 2; } else { map.scrollLeft = 0; map.scrollTop = 0; } }
   $("#day").textContent = `Day ${d.day + 1}${cal.season ? " · " + cal.season : ""}${d.weather_words ? " · " + d.weather_words : ""}`;
   $("#slider").value = S.day; $("#back").hidden = !S.node; $("#where").textContent = S.node ? ST.nodes[S.node].name : `${Object.keys(ST.nodes).length} places`;
-  map.querySelectorAll(".lab,.mark").forEach((e) => e.remove());
+  stage.querySelectorAll(".lab,.mark").forEach((e) => e.remove());
   const k = 100 / r.width, kh = 100 / r.height;
   const lab = (cls, x, y, html) => { const e = document.createElement("div"); e.className = "lab " + cls; e.style.left = x * k + "%"; e.style.top = y * kh + "%"; e.innerHTML = html;
-    const f = x / r.width; e.style.transform = f < .14 ? "translate(0,0)" : f > .86 ? "translate(-100%,0)" : "translate(-50%,0)"; map.appendChild(e); };
+    const f = x / r.width; e.style.transform = f < .14 ? "translate(0,0)" : f > .86 ? "translate(-100%,0)" : "translate(-50%,0)"; stage.appendChild(e); };
   for (const h of r.hotspots) {
-    if (h.kind === "node") lab("place", h.cx, h.cy + 14, `${h.label}<small>${h.unexplored ? "unexplored" : h.pop + " here"}</small>`);
+    if (h.kind === "node") lab("place", h.cx, h.cy, `${h.label}<small>${h.pop} here${h.unexplored ? " · not yet found" : ""}</small>`);
     if (h.kind === "parcel") lab("", h.cx, h.cy - 4, h.label);
     if (h.kind === "exit") lab("exit", h.x + h.w / 2, Math.min(r.height - 12, h.y + h.w), h.label);
-    if (h.kind === "event" || (h.kind === "node" && h.deaths)) { const e = document.createElement("div"); e.className = "mark"; e.style.left = (h.cx ?? h.x + h.w / 2) * k + "%"; e.style.top = (h.cy ?? h.y + h.h / 2) * kh + "%"; map.appendChild(e); }
+    if (h.kind === "event" || (h.kind === "node" && h.deaths)) { const e = document.createElement("div"); e.className = "mark"; e.style.left = (h.cx ?? h.x + h.w / 2) * k + "%"; e.style.top = (h.cy ?? h.y + h.h / 2) * kh + "%"; stage.appendChild(e); }
   }
 }
 function at(e) {
@@ -74,15 +84,21 @@ function at(e) {
   hits.sort((a, b) => order.indexOf(a.kind) - order.indexOf(b.kind));
   return hits[0];
 }
-cv.addEventListener("mousemove", (e) => { const h = at(e); if (h) { tip.style.display = "block"; tip.textContent = h.label; tip.style.left = e.clientX + 14 + "px"; tip.style.top = e.clientY + 12 + "px"; } else tip.style.display = "none"; });
+let drag = null;
+map.addEventListener("mousedown", (e) => { drag = { x: e.clientX, y: e.clientY, sl: map.scrollLeft, st: map.scrollTop, moved: false }; });
+addEventListener("mousemove", (e) => { if (!drag) return; const dx = e.clientX - drag.x, dy = e.clientY - drag.y; if (Math.abs(dx) + Math.abs(dy) > 4) { drag.moved = true; map.classList.add("drag"); } map.scrollLeft = drag.sl - dx; map.scrollTop = drag.st - dy; });
+addEventListener("mouseup", () => { setTimeout(() => { drag = null; map.classList.remove("drag"); }, 0); });
+cv.addEventListener("mousemove", (e) => { const h = at(e); if (h) { tip.style.display = "block"; tip.innerHTML = ""; tip.textContent = h.label + (h.info ? " — " + h.info : ""); tip.style.left = e.clientX + 14 + "px"; tip.style.top = e.clientY + 12 + "px"; } else tip.style.display = "none"; });
 cv.addEventListener("mouseleave", () => (tip.style.display = "none"));
-cv.addEventListener("click", (e) => { const h = at(e); if (!h) return; if (h.kind === "node") { S.node = h.id; render(); } else if (h.kind === "exit") { S.node = h.to; render(); } });
+cv.addEventListener("click", (e) => { if (drag && drag.moved) return; const h = at(e); if (!h) return; if (h.kind === "node") { S.node = h.id; render(); } else if (h.kind === "exit") { S.node = h.to; render(); } });
 const setDay = (i) => { S.day = Math.max(0, Math.min(V.days.length - 1, i)); render(); };
 function play(on) { S.playing = on; $("#play").textContent = on ? "❚❚" : "▶"; clearTimeout(S.timer); const t = () => { if (!S.playing) return; if (S.day >= V.days.length - 1) return play(false); setDay(S.day + 1); S.timer = setTimeout(t, 900); }; if (on) S.timer = setTimeout(t, 900); }
 $("#prev").onclick = () => { play(false); setDay(S.day - 1); }; $("#next").onclick = () => { play(false); setDay(S.day + 1); };
 $("#play").onclick = () => play(!S.playing); $("#slider").oninput = (e) => { play(false); setDay(+e.target.value); };
 $("#back").onclick = () => { S.node = null; render(); };
-document.addEventListener("keydown", (e) => { if (e.key === "ArrowRight") setDay(S.day + 1); else if (e.key === "ArrowLeft") setDay(S.day - 1); else if (e.key === "Escape") { S.node = null; render(); } else if (e.key === " ") { e.preventDefault(); play(!S.playing); } });
+document.addEventListener("keydown", (e) => { if (e.key === "ArrowRight") setDay(S.day + 1); else if (e.key === "ArrowLeft") setDay(S.day - 1); else if (e.key === "Escape") { S.node = null; render(); } else if (e.key === " ") { e.preventDefault(); play(!S.playing); }
+  else if ((e.key === "+" || e.key === "=" || e.key === "-") && S.node) { const cx = (map.scrollLeft + map.clientWidth / 2) / S.zoom, cy = (map.scrollTop + map.clientHeight / 2) / S.zoom;
+    S.zoom = Math.max(2, Math.min(10, S.zoom + (e.key === "-" ? -1 : 1))); render(); map.scrollLeft = cx * S.zoom - map.clientWidth / 2; map.scrollTop = cy * S.zoom - map.clientHeight / 2; } });
 render();
 </script>
 </body>

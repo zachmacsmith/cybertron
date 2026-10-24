@@ -17,7 +17,7 @@ engine's state and imports nothing it changes.
 | 1 | `c2viz.capture`: the state at each day's end (a stand-in for the journal, spec/record) | done |
 | 2 | `c2viz.layout`: world positions from roads (days), parcel cells per node (side, height, adjacency, size) | done |
 | 3 | `c2viz.frames`: viz.json (static world, layout, one record a day) | done |
-| 4 | the pixel renderer (`pixel.js`): the region and a place, in the site-v2 look; a bare preview page | first version |
+| 4 | the pixel renderer (`pixel.js`): the region and a place, in the site-v2 look; a bare preview page | second version |
 | 5 | acts and events drawn (tools in hand, travel along roads, night events), changes from day to day | partly |
 | 6 | screenshots with Playwright on a bot run; README; a board post | |
 
@@ -36,3 +36,14 @@ engine's state and imports nothing it changes.
   Checked with screenshots of region_s1 (bots, 12 days); no console errors.
   - Known: water parcels draw as lakes even when they are brooks; the world's scrub and terrace detail is busy.
   - Not yet: animation within a day, a road view, night events beyond a marker, a run with model agents.
+- 17:57 UTC: second version, after Zach's review: the close-up was far too far out to see what happens on a parcel; the land
+  looked the same everywhere; houses did not follow how the world places them; fog hid unexplored places that exist.
+  - One ground plan per place, read from the parcels' sizes, neighbours and sides (no coordinates in the world): area by size,
+    neighbours share borders, non-neighbours get wild ground between them, a river chain is one band and one river.
+  - Buildings in lots (built ground 6 a unit of size, data.py), spread through the parcel. Checked against the engine and the
+    worlds: buildings share their village's built parcel (region_s1: 7 on the Square; wide_s7: 4 on wy_green); none takes a
+    parcel of its own.
+  - Close-up at a fixed scale with pan and zoom; people 5 x 9 with their state; herds head by head by kind; things lying about.
+  - The region at one scale for every place; people as the small figures; places' character by biome; no fog.
+  - Checked with screenshots of region_s1 (bots, 12 days); no console errors. The places are small in their territories on the
+    region's map: at one scale, a day's travel is far wider than a village.
