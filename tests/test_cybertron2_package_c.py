@@ -384,3 +384,16 @@ def test_an_arriving_traveller_gets_an_overview_in_its_turn():
     text = PR.turn_prompt(Here(w, "Edric"), Mind(w, "Edric"))
     line = next(x for x in text.splitlines() if "Arriving, what you see first" in x or "Arriving, what you see first" in x)
     assert 3 <= line.count(";") + 1 <= 5                                          # D2-116
+
+
+def test_a_finder_knows_its_own_beasts_and_its_neighbours_but_not_strangers():
+    from cybertron2.engine import roads as RD
+    w = world()
+    hid = "cattle"
+    holder = w.claims_on(("herd", hid))[0]["claimant"]
+    own = next(n for n in w.living() if holder in (n, w.household_of(n)))
+    assert "your own" in RD.whose_herd(w, own, hid)
+    neighbour = next(n for n in w.living() if w.at(n) == w.at(own) and holder not in (n, w.household_of(n)))
+    assert "You know them" in RD.whose_herd(w, neighbour, hid)
+    stranger = next(n for n in w.living() if w.at(n) != w.at(own))
+    assert "cannot tell" in RD.whose_herd(w, stranger, hid)

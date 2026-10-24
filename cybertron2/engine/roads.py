@@ -517,10 +517,26 @@ def _src_splits(w, today):
     return [dict(f, structure="road") for f in (today.get("road") or {}).get("splits", [])]
 
 
+def whose_herd(w, name, hid) -> str:
+    """What a finder makes of whose beasts these are: its own household's it knows; a neighbour's from its own village it knows by
+    sight; strangers' it cannot tell."""
+    h = w.s["herds"][hid]
+    holders = [c["claimant"] for c in w.claims_on(("herd", hid)) if c.get("grounds") != "found"]
+    if {name, w.household_of(name)} & set(holders):
+        return f" They are your own: {h.get('base_name') or h['name']}."
+    home = w.s["parcels"].get(h.get("home") or "", {}).get("node")
+    mine = {w.s["buildings"][b]["node"] for b in w.homes(name)}                # the village one lives in
+    if home and home in mine:
+        names = sorted({w.s["institutions"].get(c, {}).get("name", c) for c in holders})
+        return f" You know them: {h.get('base_name') or h['name']}" + (f", {' and '.join(names)}'s" if names else "") + "."
+    return " Whose they are you cannot tell."
+
+
 @FU.detector("herd")
 def _det_herd(w, today, e):
-    return {e["finder"]: f"by the road, at {stretch_name(w, e['road'], e['pos'])}, you come upon beasts with nobody minding them: "
-                         f"{e['label']}. A herd loose on the road soon dies or is lost for good"}
+    n = e["finder"]
+    return {n: f"by the road, at {stretch_name(w, e['road'], e['pos'])}, you come upon beasts with nobody minding them: "
+               f"{e['label']}.{whose_herd(w, n, e['herd'])} A herd loose on the road soon dies or is lost for good"}
 
 
 @FU.detector("split")
