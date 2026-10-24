@@ -74,7 +74,8 @@ def play(agent, variant, model, backend, system, born, lifespan, lo=M.DEFAULTS["
         req = "\n\n".join([st["close"], f"This is the end of a stretch of days ({st['span']}). Tomorrow you will remember only your "
                            "memory, your notes and what you have always known, not the detail of these days.",
                            "## Your memory as it stands\n" + (memory or "(nothing yet)"),
-                           M.PROMPTS[variant].format(limit=M.limit(words, last if growth else None))
+                           M.PROMPTS[variant].format(limit=M.limit(words, last if growth else None,
+                                                                         len(memory.split()) if growth and memory else None))
                            + ' Write it in "memory". Reply with JSON only.'])
         text = llm.flatten(conversation(st, memory) + [req])
         out, _, usage = llm.call(backend, model, system, text, SCHEMA, thinking_budget=0)

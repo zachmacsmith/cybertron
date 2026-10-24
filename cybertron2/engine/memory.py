@@ -32,6 +32,8 @@ PROMPTS = {
     "revise": "Rewrite your memory in at most {limit}: keep what still matters, correct what has changed, and add from these "
               "days only what you will want later.",
     "future_days": "What might you still want to know in the days to come? Rewrite your memory with that, in at most {limit}.",
+    "keep_future": "Rewrite your memory in at most {limit}: keep what still matters, and add what you might still want to know in the "
+                   "days to come.",
     "future_self": "Rewrite your memory in at most {limit}, for yourself in a season's time: what will you need to know?",
 }
 
@@ -59,10 +61,15 @@ def budget(w, name) -> dict:
     return {"tokens": tokens, "words": int(round(tokens * s["words_per_token"] / 10.0)) * 10, "age": age}
 
 
-def limit(words, last=None) -> str:
-    """"520 words (40 more than last time)", or "520 words" when the allowance has not grown."""
-    more = words - int(last) if last else 0
-    return f"{words} words" + (f" ({more} more than last time)" if more > 0 else "")
+def limit(words, last=None, wrote=None) -> str:
+    """"520 words (40 more than last time; last time you wrote 410 of 480)", or "520 words" when there is no last time
+    (Zach: say how much more, and how much of the last allowance was used)."""
+    if not last:
+        return f"{words} words"
+    more = words - int(last)
+    head = f"{more} more than last time" if more > 0 else "the same as last time"
+    used = f"; last time you wrote {int(wrote)} of {int(last)}" if wrote is not None else ""
+    return f"{words} words ({head}{used})"
 
 
 def current(mind) -> str:
@@ -79,8 +86,9 @@ def request(w, name, mind, did, night, span, variant=None) -> str:
     L.append(f"This is the end of a stretch of days ({span}). Tomorrow you will remember only your memory, your notes and what you "
              "have always known, not the detail of these days.")
     L.append("## Your memory as it stands\n" + (current(mind) or "(nothing yet)"))
-    last = (mind.store.get("memory") or {}).get("budget")
-    instr = PROMPTS[variant or settings(w)["prompt"]].format(limit=limit(b["words"], last))
+    mem = mind.store.get("memory") or {}
+    wrote = len(mem["text"].split()) if mem.get("text") else None
+    instr = PROMPTS[variant or settings(w)["prompt"]].format(limit=limit(b["words"], mem.get("budget"), wrote))
     L.append(f"{instr} Write it in \"memory\"; leave \"actions\" empty. Reply with JSON only.")
     return "\n\n".join(L)
 
