@@ -346,6 +346,8 @@ Two halves, so that every rule stays in the engine:
   by building when full, leaving lanes and yards.
 - **Where in a parcel** a building stands (its lot, spread through the parcel, kept from the day it first stands), a person
   stands (around the parcel the engine says they are on), a beast grazes.
+- **Roads' ways:** a curve through a few waypoints set off to either side of the straight line (deterministic per road); on the
+  region's map each day's stretch, its landmarks and any river at a ford or bridge sit on that way.
 - **Height** (a word in the engine) as terraces and cliff faces: a parcel above its neighbours to the south shows a face.
 - **The region's map is a schematic at a fixed scale, explored by panning:** each place's plan at half its close-up scale (its
   houses drawn half as large again so a village stands out), roads about 60 pixels a day of travel beyond the two places' land,

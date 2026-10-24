@@ -224,12 +224,17 @@
   }
   function smoke(P, x, y, sparks) { for (let k = 0; k < 6; k++) { const xx = x + Math.round(Math.sin(k * 0.9) * 1.2) + (k > 3 ? 1 : 0), yy = y - k; P.mix(xx, yy, "#e8e8e8", 0.75 - k * 0.09); }
     if (sparks) { P.put(x - 1, y + 1, "#f0c060"); P.put(x + 1, y, "#f08a3a"); } }
-  // a building on the region's map: its footprint, smaller: a roof over a wall line, a door
+  // a building on the region's map: a small house: a roof with its ridge and eaves, a wall with a door and windows, its shadow
   function hut(P, x, y, w, h, b) {
-    const roof = ROOF[b.structure] || ROOF.timber, wall = WALL[b.structure] || WALL.timber;
-    for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) P.put(x + i, y + j, j === h - 1 ? (b.unfinished ? "#a0662f" : i === (w >> 1) ? "#6b4423" : wall) : j === 0 ? roof[1] : roof[0]);
-    for (let i = 1; i <= w; i++) P.dark(x + i, y + h, .35); for (let j = 1; j < h; j++) P.dark(x + w, y + j, .35);
-    if (b.fire && b.condition !== 0) { P.put(x + w - 2, y - 1, "#e8e8e8"); P.put(x + w - 1, y - 2, "#f4f4f4"); }
+    const st = b.structure || "timber", roof = ROOF[st] || ROOF.timber, wall = WALL[st] || WALL.timber, rh = Math.max(2, h - 3);
+    for (let j = 1; j <= h; j++) P.dark(x + w, y + j, .35); for (let i = 1; i <= w; i++) P.dark(x + i, y + h, .35);
+    if (b.unfinished) { for (let i = 0; i < w; i += 2) for (let j = 1; j < h; j++) P.put(x + i, y + j, "#8a5a2a"); for (let i = 0; i < w; i++) P.put(x + i, y + h - 1, "#a0662f"); return; }
+    for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) {
+      let c; if (j < rh) c = j === 0 ? roof[1] : j === rh - 1 ? roof[2] : i === 0 ? roof[2] : roof[0];
+      else { c = i === 0 ? "#d8ccb4" : wall; if (j === rh && (i === 1 || i === w - 2) && w > 6) c = "#7aaabe"; if (j === h - 1 && i === (w >> 1)) c = b.door === "barred" ? "#6b4423" : "#2a1a10"; }
+      if (b.condition === 0 && j < rh && (i * 7 + j * 3) % 3 === 0) c = "#3a2a1c"; else if (b.condition === 1 && j < rh && (i * 5 + j * 11) % 9 === 0) c = "#2a1a10";
+      P.put(x + i, y + j, c); }
+    if (b.fire && b.condition !== 0) { P.put(x + w - 2, y - 1, "#d8d8d8"); P.put(x + w - 1, y - 2, "#e8e8e8"); P.put(x + w - 2, y - 3, "#f4f4f4"); }
   }
   // a beast close up, by its role in the herd (farm.py ROLES: cows, oxen, bulls, young); hungry ones show their ribs
   function beast(P, x, y, role, R, hungry) {
@@ -357,7 +362,8 @@
     const ox = W / 2 - (x0 + x1) / 2, oy = H / 2 - (y0 + y1) / 2, site = pos.map(([x, y]) => [x + ox, y + oy]);
     const wt = r.map((x) => x * x), jit = N.jit;
     const frame = pids.map((p, i) => dir[i] ? [dir[i][0], dir[i][1], STRETCH, 2] : ST.parcels[p].cover === "field" ? [Math.cos(fieldAngle(p)), Math.sin(fieldAngle(p)), 1.15, 5]
-      : ST.parcels[p].cover === "built" ? [1, 0, 1.2, 3] : null);
+      : ST.parcels[p].cover === "built" ? [1, 0, 1.2, 3] : ST.parcels[p].cover === "water" ? null
+      : [Math.cos((hstr(p) % 314) / 100), Math.sin((hstr(p) % 314) / 100), 1 + (hstr(p) % 30) / 100, 3]);
     const pdist = (i, x, y) => { let dx = x - site[i][0], dy = y - site[i][1]; const F = frame[i];
       if (!F) return dx * dx + dy * dy - wt[i];
       const a = Math.abs((dx * F[0] + dy * F[1]) / F[2]), b = Math.abs((-dx * F[1] + dy * F[0]) * F[2]), q = F[3];
@@ -526,7 +532,7 @@
     for (const [pid, pts] of Object.entries(area)) {
       const dp = d.parcels[pid] || {}, res = dp.res || {}, c = cov(pid), P0 = V.static.parcels[pid], N = M.nodes[P0.node], B = BIOMES[N.biome], pR = rng(hstr(pid + "|" + (opts.scale || "")));
       const land = pts.filter(([x, y]) => LV[y * W + x] > 0);
-      if (!small && !["field", "water"].includes(c)) for (const [x, y] of land) if (wildNext(x, y)) { P.dark(x, y, .28); P.dark(x, y + 1, .12); }
+      if (!small && ["meadow", "pasture", "built"].includes(c)) for (const [x, y] of land) if (wildNext(x, y)) P.dark(x, y, .14);
       if (c === "field") paintField(P, V, d, pid, dp, land, sc, small, border, n3, pR, trees, marks, sdays, day);
       else if (c === "pasture" || c === "meadow") {
         const g = res.grass ?? 1, flowers = c === "meadow" && (season === "summer" || season === "spring") && g > 0.5;
@@ -638,6 +644,19 @@
       if (ok) tree(P, x, y, r, R, kind, ctx.season);
     }
   }
+  // a road's way between two points: a curve through waypoints set off to either side (a presentation choice), every 0.7 px
+  function windPath(x0, y0, x1, y1, seed, amp) {
+    const R = rng(seed), L = Math.hypot(x1 - x0, y1 - y0) || 1, nx = -(y1 - y0) / L, ny = (x1 - x0) / L, k = Math.max(2, Math.min(7, Math.round(L / 40)));
+    const pts = [[x0, y0]];
+    for (let j = 1; j < k; j++) { const t = j / k, o = (R() - 0.5) * 2 * amp * L * Math.sin(Math.PI * t); pts.push([x0 + (x1 - x0) * t + nx * o, y0 + (y1 - y0) * t + ny * o]); }
+    pts.push([x1, y1]);
+    const out = [];
+    for (let j = 0; j + 1 < pts.length; j++) { const p0 = pts[Math.max(0, j - 1)], p1 = pts[j], p2 = pts[j + 1], p3 = pts[Math.min(pts.length - 1, j + 2)], seg = Math.hypot(p2[0] - p1[0], p2[1] - p1[1]) || 1;
+      for (let q = 0; q < seg; q += 0.7) { const t = q / seg, t2 = t * t, t3 = t2 * t, cr = (a, b, c, d) => 0.5 * (2 * b + (-a + c) * t + (2 * a - 5 * b + 4 * c - d) * t2 + (-a + 3 * b - 3 * c + d) * t3);
+        out.push([cr(p0[0], p1[0], p2[0], p3[0]), cr(p0[1], p1[1], p2[1], p3[1])]); } }
+    out.push([x1, y1]); return out;
+  }
+  function paintPath(paint, pts, wide, col, keep) { for (const [x, y] of pts) { if (keep && !keep(x, y)) continue; for (let a = 0; a <= wide; a++) for (let b = 0; b <= wide; b++) paint(x + a, y + b, col); } }
   const paintRoad = (P, occ, LV, W, H) => (x, y, col) => { x |= 0; y |= 0; if (x < 0 || y < 0 || x >= W || y >= H) return; const i = y * W + x; P.put(x, y, LV[i] === 0 ? "#a0662f" : col); occ[i] = 3; };
   function wind(paint, x, y, tx, ty, n, wide, col, dashed, out) {
     let hd = Math.atan2(ty - y, tx - x);
@@ -714,8 +733,9 @@
     const n2 = noise(M.seed ^ 5), paint = paintRoad(P, occ, ctx.LV, W, H);
     for (const e of G.exits) {                                                                       // roads leaving, from their ends' parcels
       const r = ST.roads[e.rid], worn = ((d.roads[e.rid] || {}).ends || {})[nid]?.worn || 0, faint = e.end.hidden && worn < 0.8;
-      if (faint) { const pr = paintRoad(P, occ, ctx.LV, W, H); wind((x, y, c) => { if ((x * 7 + y * 3) % 10 < 3 + worn * 8) pr(x, y, c); }, e.fx, e.fy, e.tx, e.ty, n2, 0, PAL.lane, false); }
-      else wind(paint, e.fx, e.fy, e.tx, e.ty, n2, r && r.track ? 2 : 1, r && r.track ? PAL.road : PAL.lane, false);
+      const way = windPath(e.fx, e.fy, e.tx, e.ty, hstr(e.rid + nid), 0.12);
+      if (faint) paintPath(paint, way, 0, PAL.lane, (x, y) => ((x | 0) * 7 + (y | 0) * 3) % 10 < 3 + worn * 8);
+      else paintPath(paint, way, r && r.track ? 2 : 1, r && r.track ? PAL.road : PAL.lane);
       const lx = Math.max(10, Math.min(W - 10, e.tx)), ly = Math.max(8, Math.min(H - 8, e.ty)), to = ST.nodes[e.to];
       out.hotspots.push({ kind: "exit", id: e.rid, to: e.to, x: lx - 8, y: ly - 8, w: 16, h: 16, label: "→ " + (to?.name || e.to) + " · " + (r?.days ?? "?") + " day" + ((r?.days ?? 1) > 1 ? "s" : "") + (e.end.hidden ? (faint ? " (a hidden way)" : " (a worn path)") : "") });
     }
@@ -874,11 +894,18 @@
           const rr = rad(n) + 26 + (hstr(n + k) % 20); A.push([pos[n][0] + Math.cos(t) * rr, pos[n][1] + Math.sin(t) * rr, 18, Math.min(1, e + 0.18), 0, 0]); }
       }
     }
-    const feats = [];                                                                       // drawn features on the roads' stretches
+    const feats = [], paths = {}, sidx = {};                                                 // each road's way, its stretches on it
+    const toW = (n, x, y) => [pos[n][0] + (x - G[n].mid[0]) * f, pos[n][1] + (y - G[n].mid[1]) * f];
+    const exitPt = (n, rid) => { const e = G[n].exits.find((q) => q.rid === rid); return e ? toW(n, e.fx, e.fy) : pos[n]; };
     for (const [rid, r] of rds) {
-      const a = pos[r.a], b = pos[r.b], dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy) || 1, ux = dx / L, uy = dy / L, ra = rad(r.a), rb = rad(r.b);
-      (r.stretches || [{ terrain: r.terrain }]).forEach((st, k, all) => {
-        const t = (ra + (L - ra - rb) * (k + 0.5) / all.length) / L, x = a[0] + dx * t, y = a[1] + dy * t, T = TERRAIN_LAND[st.terrain || r.terrain || "farmland"] || TERRAIN_LAND.farmland;
+      const A0 = exitPt(r.a, rid), B0 = exitPt(r.b, rid), way = paths[rid] = windPath(A0[0], A0[1], B0[0], B0[1], hstr(rid), 0.1);
+      let i0 = way.findIndex(([x, y]) => Math.hypot(x - pos[r.a][0], y - pos[r.a][1]) > rad(r.a)); if (i0 < 0) i0 = 0;
+      let i1 = way.length - 1; while (i1 > i0 && Math.hypot(way[i1][0] - pos[r.b][0], way[i1][1] - pos[r.b][1]) <= rad(r.b)) i1--;
+      const all = r.stretches && r.stretches.length ? r.stretches : [{ terrain: r.terrain }];
+      sidx[rid] = all.map((_, k) => Math.round(i0 + (i1 - i0) * (k + 0.5) / all.length));
+      all.forEach((st, k) => {
+        const j = sidx[rid][k], [x, y] = way[j], q0 = way[Math.max(0, j - 4)], q1 = way[Math.min(way.length - 1, j + 4)], L = Math.hypot(q1[0] - q0[0], q1[1] - q0[1]) || 1, ux = (q1[0] - q0[0]) / L, uy = (q1[1] - q0[1]) / L;
+        const T = TERRAIN_LAND[st.terrain || r.terrain || "farmland"] || TERRAIN_LAND.farmland;
         A.push([x, y, 28, T[0], T[1], T[2]]);
         for (const lm of st.landmarks || []) { const kd = lm.kind || lm, h = (hstr(rid + kd) % 2) ? 1 : -1;
           if (kd === "pass") { A.push([x - uy * 30, y + ux * 30, 20, 1.0, 0, 0], [x + uy * 30, y - ux * 30, 20, 1.0, 0, 0], [x - uy * 55, y + ux * 55, 18, 0.9, 0, 0], [x + uy * 55, y - ux * 55, 18, 0.9, 0, 0]); }
@@ -929,7 +956,7 @@
     for (let y = 0; y < H; y += 1) for (let x = 0; x < W; x += 1) { let sw = 0, r = 0, g = 0, b = 0;
       nids.forEach((n, k) => { const sg = rad(n) + 90, w = Math.exp(-((x - pos[n][0]) ** 2 + (y - pos[n][1]) ** 2) / (2 * sg * sg)) + 1e-6; sw += w; r += w * base[k][0]; g += w * base[k][1]; b += w * base[k][2]; });
       tint[y * W + x] = (Math.round(r / sw) << 16) | (Math.round(g / sw) << 8) | Math.round(b / sw); }
-    RP = { W, H, pos, f, G, nids, A, feats, E, F, Wt, kind, cellNode, cellPar, rivers, rad, tint };
+    RP = { W, H, pos, f, G, nids, A, feats, E, F, Wt, kind, cellNode, cellPar, rivers, rad, tint, paths, sidx };
     REGION.set(V, RP); return RP;
   }
   // a mountain peak (the night village's ranges: a lit side and a shaded one), snow on its top when high or in winter
@@ -954,17 +981,16 @@
     nids.forEach((n, ni) => { for (const c of G[n].courses) courses.push({ pid: c.pid, pids: c.pids, n: ni, half: Math.max(1, c.half * f), line: c.line.map(([x, y]) => toWorld(n, x, y)) }); });
     const ctx = paintLand(P, V, day, W, H, nids, cellNode, cellPar, f, R, occ, { scale: "world", courses, relief: RP });
     const n2 = noise(M.seed ^ 5), paint = paintRoad(P, occ, ctx.LV, W, H), roadPts = {};
-    const exitPt = (n, rid) => { const e = G[n].exits.find((q) => q.rid === rid); return e ? toWorld(n, e.fx, e.fy) : pos[n]; };
     for (const [rid, r] of Object.entries(ST.roads)) {
-      if (!pos[r.a] || !pos[r.b]) continue;
-      const a = exitPt(r.a, rid), b = exitPt(r.b, rid), pts = [], hid = Object.values(r.ends || {}).some((e) => e.hidden);
-      wind(hid ? (x, y, c) => { if ((Math.round(x) + Math.round(y)) % 3) paint(x, y, c); } : paint, a[0], a[1], b[0], b[1], n2, r.track ? 1 : 0, r.track ? PAL.road : PAL.lane, false, pts);
+      if (!RP.paths[rid]) continue;
+      const pts = RP.paths[rid], a = pts[0], hid = Object.values(r.ends || {}).some((e) => e.hidden);
+      paintPath(paint, pts, r.track ? 1 : 0, r.track ? PAL.road : PAL.lane, hid ? (x, y) => (Math.round(x) + Math.round(y)) % 3 : null);
       roadPts[rid] = pts;
       const mid = pts[pts.length >> 1] || a;
       out.hotspots.push({ kind: "road", id: rid, x: (mid[0] | 0) - 4, y: (mid[1] | 0) - 4, w: 8, h: 8, label: `${ST.nodes[r.a]?.name} — ${ST.nodes[r.b]?.name}: ${r.days} day${r.days > 1 ? "s" : ""}${r.track ? ", a cart track" : ""}${r.terrain ? ", " + r.terrain : ""}` });
       const ch = (d.roads[rid] || {}).challenges || {};
       (r.stretches || []).forEach((st, i, all) => (st.landmarks || []).forEach((lm, j) => {               // landmarks on their stretch
-        const p = pts[Math.min(pts.length - 1, Math.floor(pts.length * (i + .5) / all.length) + j * 5)]; if (!p) return;
+        const p = pts[Math.min(pts.length - 1, RP.sidx[rid][i] + j * 8)]; if (!p) return;
         const k = lm.kind || lm, x = p[0] | 0, y = p[1] | 0, c = ch[`${i + 1}:${k}`];
         if (k === "ford") { for (let a = -2; a <= 2; a++) { P.put(x + a, y, c ? "#4e94a8" : "#7cc0c8"); P.put(x + a, y + 1, c ? "#3e8498" : "#5aa2b4"); } }
         else if (k === "bridge") { for (let a = -2; a <= 2; a++) { P.put(x + a, y - 1, c ? "#6b4423" : "#8a5a2a"); P.put(x + a, y + 1, "#5aa2b4"); } P.put(x - 2, y, "#6b4423"); P.put(x + 2, y, "#6b4423"); if (c) P.put(x, y - 1, "#2a1a10"); }
@@ -977,8 +1003,12 @@
     const items = [];
     for (const n of nids) {
       const pl = plan(V, n, day); let tx = 0, ty = 0, tn = 0;
-      for (const [, p] of Object.entries(pl.buildings)) { const [x, y] = toWorld(n, p.x + p.w / 2, p.y + p.h / 2), w = Math.max(5, Math.round(p.w * f * 1.5)), h = Math.max(4, Math.round(p.h * f * 1.5)), bx = Math.round(x - w / 2), by = Math.round(y - h / 2);
-        items.push({ y: by + h, f: () => hut(P, bx, by, w, h, p.b) }); tx += x; ty += y; tn++;
+      const hs = Object.values(pl.buildings).map((p) => { const [x, y] = toWorld(n, p.x + p.w / 2, p.y + p.h / 2); return { x, y, x0: x, y0: y, w: Math.max(7, Math.round(p.w * f * 1.4)), h: Math.max(6, Math.round(p.h * f * 1.4)), b: p.b }; });
+      for (let it = 0; it < 60; it++) { for (const a of hs) for (const c of hs) { if (a === c) continue; const ox = (a.w + c.w) / 2 + 2 - Math.abs(a.x - c.x), oy = (a.h + c.h) / 2 + 2 - Math.abs(a.y - c.y);
+          if (ox > 0 && oy > 0) { if (ox < oy) { const s_ = Math.sign(a.x - c.x || 1) * ox / 2; a.x += s_; c.x -= s_; } else { const s_ = Math.sign(a.y - c.y || 1) * oy / 2; a.y += s_; c.y -= s_; } } }
+        for (const a of hs) { a.x += (a.x0 - a.x) * 0.02; a.y += (a.y0 - a.y) * 0.02; } }
+      for (const q of hs) { const bx = Math.round(q.x - q.w / 2), by = Math.round(q.y - q.h / 2), w = q.w, h = q.h, x = q.x, y = q.y;
+        items.push({ y: by + h, f: () => hut(P, bx, by, w, h, q.b) }); tx += x; ty += y; tn++;
         for (let yy = by - 1; yy < by + h + 2; yy++) for (let xx = bx - 1; xx < bx + w + 1; xx++) { const i = ctx.at(xx, yy); if (i >= 0) { occ[i] = 4; if (ctx.LV[i] > 0) P.put(xx, yy, ctx.snow ? PAL.snow[2] : PAL.ground[(xx + yy) & 1]); } } }
       for (const h of pl.herds) for (const [x0, y0, role] of h.pts.slice(0, 10)) { const [x, y] = toWorld(n, x0, y0), col = role === "oxen" ? "#a0663a" : role === "bulls" ? "#4a3428" : "#f4efe6";
         items.push({ y, f: () => { P.put(x, y, col); P.put(x + 1, y, col); P.dark(x + 2, y, .3); } }); }
@@ -997,7 +1027,7 @@
     items.sort((a, b) => a.y - b.y).forEach((it) => it.f());
     for (const [name, p] of Object.entries(d.people)) {                                             // travellers, at the middle of their stretch
       const t = p.transit; if (!t || !p.alive) continue; const r = ST.roads[t.road], pts = roadPts[t.road]; if (!r || !pts || !pts.length) continue;
-      const fr = (t.pos - 0.5) / Math.max(1, t.days), q = pts[Math.max(0, Math.min(pts.length - 1, Math.round(fr * (pts.length - 1))))], k = Object.keys(d.people).filter((m) => d.people[m].transit && d.people[m].transit.road === t.road && d.people[m].transit.pos === t.pos).indexOf(name);
+      const q = pts[RP.sidx[t.road][Math.max(0, Math.min(RP.sidx[t.road].length - 1, t.pos - 1))] ?? 0], k = Object.keys(d.people).filter((m) => d.people[m].transit && d.people[m].transit.road === t.road && d.people[m].transit.pos === t.pos).indexOf(name);
       person(P, q[0] + k * 4, q[1] - 1, name, { tool: "carry" });
       out.hotspots.push({ kind: "person", id: name, x: (q[0] | 0) - 2 + k * 4, y: (q[1] | 0) - 7, w: 6, h: 8, label: `${name} on the road to ${ST.nodes[t.to]?.name || t.to}, day ${t.pos} of ${t.days}` });
     }
