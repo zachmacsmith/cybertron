@@ -5,7 +5,10 @@ each person knows (its line's crafts, what it has seen of others'), each written
     python -m cybertron2.engine.generate <base spec> --seed N --out <spec.yaml>
 
 The base spec gives the node, the houses' places and the lines: lines: {Reed: {crafts: [reap, bread], tool: sickle}, ...}.
-Everything the generator writes can be edited by hand afterwards (README rule). Ages are internal; prompts name stages only.
+Everything the generator writes can be edited by hand afterwards (README rule). The tree is simulated in years (its demography), then
+dated in days with the world's lifespan (D2-139, D2-153): every date goes through one monotone map whose knots are the stages'
+starts (4, 12, 18 and 60 years to the infant, child, youth and adult spans), so each person's stage by days is its stage by years.
+Agents get `born` (a day, negative); memories count winters from the days.
 """
 from __future__ import annotations
 
@@ -15,6 +18,7 @@ import random
 
 import yaml
 
+from cybertron2.engine import life as LF
 from cybertron2.engine.data import TECHNIQUES
 
 MALE = ["Osric", "Wat", "Hob", "Aldric", "Edric", "Godwin", "Ralf", "Piers", "Hamo", "Simkin", "Tobin", "Alard", "Durand", "Hugh",
@@ -30,12 +34,34 @@ FEMALE = ["Maud", "Agnes", "Ivy", "Edith", "Alys", "Mabel", "Joan", "Cecily", "A
 OUTSIDE = "Ashby"                                    # where spouses who married in came from
 
 
-def stage(age) -> str:
-    return "child" if age < 12 else "youth" if age < 18 else "adult" if age < 60 else "elder"
+KNOTS = [0, 4, 12, 18, 60]                           # years at which each stage starts: infant, child, youth, adult, elder
 
 
-def winters(n) -> str:
-    return "last winter" if n <= 1 else f"{n} winters ago"
+def to_days(years, L=None) -> float:
+    """Years (an age, or how long ago) to days, by the stages' starts (D2-153); beyond old age a year is L/40 days."""
+    L = L or LF.lifespan()
+    at = [0]
+    for _, d in LF.spans(L):
+        at.append(at[-1] + d)
+    y = max(0.0, float(years))
+    for k in range(len(KNOTS) - 1):
+        if y <= KNOTS[k + 1]:
+            return at[k] + (y - KNOTS[k]) / (KNOTS[k + 1] - KNOTS[k]) * (at[k + 1] - at[k])
+    return at[-1] + (y - KNOTS[-1]) * L / 40.0
+
+
+def born_day(age, L=None) -> int:
+    return -int(round(to_days(age, L)))
+
+
+def stage(age, L=None) -> str:
+    return LF.stage_of(-born_day(age, L), L)
+
+
+def winters(n, L=None, year=24) -> str:
+    """How long ago, in winters, of something n years back in the tree, counted from its days."""
+    k = max(1, round(to_days(n, L) / float(year)))
+    return "last winter" if k <= 1 else f"{k} winters ago"
 
 
 class Tree:
@@ -193,7 +219,7 @@ def build(base: dict, seed: int, tries=600) -> dict:
         return (all(any(T.p[n]["line"] == l and T.age(n) >= 18 for n in acting) for l in ls)
                 and all(size(l)[0] <= p <= size(l)[1] for l, p in zip(ls, per))
                 and min(per) >= bd.get("per_min", 2) and max(per) - min(per) <= bd.get("per_spread", 3)
-                and all(sum(1 for n in acting if T.p[n]["line"] == l and stage(T.age(n)) == "adult") >= int((lines[l] or {}).get("min_adults", 0))
+                and all(sum(1 for n in acting if T.p[n]["line"] == l and stage(T.age(n), base.get("lifespan")) == "adult") >= int((lines[l] or {}).get("min_adults", 0))
                         for l in ls))                                  # each trade has people of working age to do it
 
     for k in range(tries):
@@ -217,21 +243,30 @@ def build(base: dict, seed: int, tries=600) -> dict:
         acting = [n for n in living if T.age(n) >= 12]
         lo, hi = bd.get("acting", [6, 9])
         if (lo <= len(acting) <= hi and len(living) - len(acting) <= bd.get("children_max", 3)
-                and sum(stage(T.age(n)) == "youth" for n in acting) >= bd.get("youths_min", 1)):
+                and sum(stage(T.age(n), base.get("lifespan")) == "youth" for n in acting) >= bd.get("youths_min", 1)):
             break
     else:
         raise RuntimeError("no tree fits; widen the bounds")
     rng = random.Random(f"{seed}|ties")
+    L = int(base.get("lifespan") or LF.lifespan())
+    year = 4 * int((base.get("calendar") or {}).get("season_days", 6))
+    stage_ = lambda age: stage(age, L)
+    wint = lambda n: winters(n, L, year)
     spec = copy.deepcopy({k: v for k, v in base.items() if k not in ("lines",)})
     spec["generated"] = {"seed": seed, "try": k}
-    spec["tree"] = [{**{x: v for x, v in p.items()}, "born": p["born"]} for p in T.p.values()]
-    spec["history"] = sorted(hist, key=lambda h: h["year"])
+    date = lambda y: None if y is None else -int(round(to_days(-y, L)))      # a year of the tree as a day (0 now)
+    spec["tree"] = [{**p, "born": date(p["born"]), "died": date(p["died"]), "left": date(p["left"])} for p in T.p.values()]
+    spec["history"] = [{**{k: v for k, v in h.items() if k != "year"}, "day": date(h["year"])} for h in sorted(hist, key=lambda h: h["year"])]
     agents = {}
     for n in living:
         p = T.p[n]
         line = p["line"]
-        agents[n] = {"household": line, "stage": stage(T.age(n)), "sex": p["sex"], "relations": {}, "memories": [], "knows": {},
-                     "aware_of": {}, "holdings": {}, "concerns": []}
+        agents[n] = {"household": line, "born": born_day(T.age(n), L), "stage": stage_(T.age(n)), "sex": p["sex"], "relations": {},
+                     "memories": [], "knows": {}, "aware_of": {}, "holdings": {}, "concerns": []}
+        if p["parents"]:
+            agents[n]["parents"] = list(p["parents"])
+        if p["partner"]:
+            agents[n]["partner"] = p["partner"]
     # heads: the eldest man of each line who is an adult, else the eldest adult
     head = {}
     for l in lines:
@@ -248,16 +283,16 @@ def build(base: dict, seed: int, tries=600) -> dict:
             if b in agents:
                 agents[a]["relations"][b] = r or f"of the {T.p[b]['line']} household"
             elif r and T.p[b]["died"] is not None and T.age(a, T.p[b]["died"]) >= 6:
-                agents[a]["memories"].append(f"{r[5:].capitalize()} {b} died {winters(-T.p[b]['died'])} ({T.p[b]['cause']}).")
+                agents[a]["memories"].append(f"{r[5:].capitalize()} {b} died {wint(-T.p[b]['died'])} ({T.p[b]['cause']}).")
             elif (r and T.p[b]["left"] is not None and r.split()[-1] in ("father", "mother", "son", "daughter", "brother", "sister")
                   and sum("married into" in m for m in agents[a]["memories"]) < 2):
                 agents[a]["memories"].append(f"{r[5:].capitalize()} {b} married into {OUTSIDE}, two days' walk away.")
-    hard = [h["year"] for h in spec["history"] if h.get("kind") == "winter"]
+    hard = [h["year"] for h in hist if h.get("kind") == "winter"]
     for a in agents:
-        seen = [-y for y in hard if T.age(a, y) >= 6]
+        seen = list(dict.fromkeys(wint(-y) for y in hard if T.age(a, y) >= 6))
         if seen:
             agents[a]["memories"].insert(0, "Hard winters you remember, when the frost came early and the stores ran out: "
-                                         + ", ".join(winters(x) for x in seen) + ".")
+                                         + ", ".join(seen) + ".")
     for h in [h for h in hist if h["year"] == min(x["year"] for x in hist)]:
         for a in agents:
             if f" {T.p[a].get('line_born') or T.p[a]['line']} " in f" {h['text']} ":
@@ -280,10 +315,11 @@ def build(base: dict, seed: int, tries=600) -> dict:
             other = (hh - {holder}).pop()
             spec.setdefault("claims", []).append({"thing": ["parcel", field], "claimant": other, "rights": "all", "grounds": "custom"})
         for x, y in ((a, b), (b, a)):
-            agents[x]["relations"][y] += f"; there is bad blood between your households since {yrs} winters ago, over {why}"
-        agents[a]["memories"].append(f"{yrs} winters ago you and {b} came to blows over {why}; it was never settled.")
-        agents[b]["memories"].append(f"{yrs} winters ago {a} struck you in a quarrel over {why}; you have not forgotten.")
-        spec["history"].append({"year": -yrs, "text": f"{a} and {b} came to blows over {why}", "kind": "feud", "who": [a, b]})
+            agents[x]["relations"][y] += f"; there is bad blood between your households since {wint(yrs)}, over {why}"
+        ago = wint(yrs)[0].upper() + wint(yrs)[1:]
+        agents[a]["memories"].append(f"{ago} you and {b} came to blows over {why}; it was never settled.")
+        agents[b]["memories"].append(f"{ago} {a} struck you in a quarrel over {why}; you have not forgotten.")
+        spec["history"].append({"day": date(-yrs), "text": f"{a} and {b} came to blows over {why}", "kind": "feud", "who": [a, b]})
     adults = [n for n in agents if agents[n]["stage"] in ("adult", "elder")]
     for _ in range(2):
         debtor = rng.choice(adults)
@@ -319,7 +355,7 @@ def build(base: dict, seed: int, tries=600) -> dict:
         born = lines.get(p.get("line_born") or p["line"], {}).get("crafts", [])
         age = T.age(n)
         for c in sorted(set(own) | set(born)):
-            if a["stage"] == "child":
+            if a["stage"] in LF.MINOR:
                 continue
             if a["stage"] == "youth":
                 a["knows"][c] = "capable" if age >= 15 else "rough"
@@ -328,13 +364,13 @@ def build(base: dict, seed: int, tries=600) -> dict:
                                  else round(min(1.8, 0.8 + 0.025 * (age - 18)), 2)}           # seeded specialists start skilled (D2-52)
         for l, d in lines.items():
             for c in d["crafts"]:
-                if c not in a["knows"] and a["stage"] != "child":              # another line's craft: seen, not known
+                if c not in a["knows"] and a["stage"] not in LF.MINOR:         # another line's craft: seen, not known
                     a["aware_of"][c] = f"you have seen the {l}s at it all your life"
         for c in a["knows"]:
             a["concerns"] += [t for t in TECHNIQUES[c]["tags"] if t not in a["concerns"]]
         a["concerns"] = a["concerns"][:4]
         cast = base.get("cast") or {}
-        a["model"] = None if a["stage"] == "child" else ((lines[p["line"]] or {}).get("head_model") or cast.get("head", "claude-opus-5-5")
+        a["model"] = None if a["stage"] in LF.MINOR else ((lines[p["line"]] or {}).get("head_model") or cast.get("head", "claude-opus-5-5")
                                                         if a.get("role") == "head" else
                                                         cast.get("youth", "claude-haiku-5-5") if a["stage"] == "youth" else
                                                         cast.get("rest", "claude-sonnet-5-5"))
@@ -363,7 +399,7 @@ def build(base: dict, seed: int, tries=600) -> dict:
         for i, (item, q) in enumerate((d.get("holdings") or {}).items()):
             agents[head[l]]["holdings"][item] = q
     for n, a in agents.items():
-        if a["stage"] == "child":
+        if a["stage"] in LF.MINOR:
             continue
         rel = a["relations"]
         others = [b for b in agents if T.p[b]["line"] != T.p[n]["line"]]
