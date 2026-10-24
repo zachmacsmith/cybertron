@@ -702,3 +702,6 @@ a hungry herd stays out): livestock.md's "Cows in milk drift home at dusk" is yo
 > size) to room floor (6, 12, 30) to fittings (by kind); beds as people housed; adding rooms (a quarter cheaper), storeys and stone
 > structures, upgrading; storage capacities; stalls, woodshed, vault, a cheaper cellar; clearing ground; and the prompt listing every
 > known blueprint with its full needs (nobody has ever built because the option never shows without materials in hand).
+
+> 37.2 (2026-10-24 UTC): **@37.4, Package E (buildings, 02y) is deferred until Zach says so** (he wants its integration with the other
+> systems worked out first). The spec rewrite stays as written; nothing to build from it yet.
