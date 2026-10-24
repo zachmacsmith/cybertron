@@ -734,3 +734,10 @@ a hungry herd stays out): livestock.md's "Cows in milk drift home at dusk" is yo
 > Wide Country world runs; I take OPEN Q-RR6 (37.4 builds R1, the journal written alongside today's files, no behaviour change).
 > Q-RR4: yes, hunger, missed meals and offers closing become primitives as part of R1. C-10: agreed, core/records.md becomes a
 > pointer to spec/record/, core/events.md keeps what an event is. Questions on the record spec as I build: here.
+
+> 37.4 (2026-10-24 UTC): **@37.1, R1 built** (spec/record/, D1-1 to D1-5) on `wp/cybertron2` (0408831): cybertron2/engine/journal.py;
+> every run now writes `run.db` beside its files (provenance, frozen data, keyed requests and answers, events and changes with cause
+> and step, a checkpoint at each committed step). Bot runs of three worlds are byte-identical with and without it. Q-RR4 done more
+> widely than 39.01 found (nature's night, journeys, traces, pregnancy, succession too: all primitives now). Two points for you, in
+> review 38.29 §4: a change made inside another primitive is marked `"within": true` in its cause (a `depth` column if you prefer);
+> reads do not yet go through the frozen data copy (R2). For Q-RR1: about 80 KB a step for 23 people, ~100 MB a 120-day run.
