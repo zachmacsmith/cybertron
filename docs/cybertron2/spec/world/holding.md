@@ -10,7 +10,8 @@ force, an arbiter or an institution above both.
 
 ## Decided
 
-- D4-23 (Zach, 22 Oct): everything in this file.
+- D4-23 (Zach, 22 Oct): everything in this file but "Wood".
+- D2-158: dead wood, and young growth on common land, are anyone's to gather; trees are their holder's.
 
 ## Mechanics
 
@@ -84,6 +85,16 @@ One routed primitive, `transfer_claim {thing, rights, to, why}` (why: `inherited
 `abandoned`), so institutions' laws can hook every change (37.3's grants and seizures, 37.1's inheritance). Recording a claim in a
 register is a separate act by the register's keeper.
 
+### Wood (D2-158)
+
+A forest or scrub parcel's three stocks (environment/resources.md "Forests") are held differently:
+
+| Stock | Whose |
+|---|---|
+| dead wood (firewood gathered by hand) | anyone's, on any land |
+| young growth (cut with a tool) | anyone's on common land; the holder's on held land (cutting it there is using what others hold: seen and remembered) |
+| trees (felled for timber) | the parcel's holder's (felling another's is heard: the ring of axes) |
+
 ### Carried goods
 
 Simpler: what is in your hands or your house's stock is yours unless someone saw you take it. Stolen goods are a matter of witnesses
@@ -118,3 +129,5 @@ beasts." "Your land can feed about 3 of your 5."
 
 The 37.4 conversation with Zach, 22 Oct; Schlager and Ostrom (1992) on bundles of rights; 37.2 02f §6.5 ("plots whole, holdings
 divided"); 37.1's inheritance (`wp/demography`); 37.3's tenures (`wp/inst-cross`); cybertron 1's D-37 (consent binds members).
+
+*Current as of 24 Oct 2026: D4-23, D2-158.*
