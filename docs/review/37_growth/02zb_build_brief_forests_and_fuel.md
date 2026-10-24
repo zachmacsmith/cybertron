@@ -2,7 +2,7 @@
 
 Session 37.2, 24 Oct 2026. Decisions D2-156 to D2-161. Spec: spec/environment/resources.md "Forests", spec/economy/goods.md "Fuel,
 in heat" and "Eating raw", spec/economy/production.md "Wood", spec/economy/lodging.md "Shelter and fire" (all 37.2's). Proposals
-forests.md, recipes.md §17; models 02z (forests), 02za (what a node keeps). 37.2 does not build; Zach decides when this is built.
+forests.md, recipes.md §17; models 02z (forests), 02za (what a node keeps). 37.2 does not build. **Zach (24 Oct): the next package to build, after D, ahead of E (deferred).**
 
 ## Why
 
