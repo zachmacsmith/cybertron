@@ -31,6 +31,7 @@ PROMPTS = {
                  "matters from before.",
     "revise": "Rewrite your memory in at most {words} words: keep what still matters, correct what has changed, and add from these "
               "days only what you will want later.",
+    "future_days": "What might you still want to know in the days to come? Rewrite your memory with that, in at most {words} words.",
     "future_self": "Rewrite your memory in at most {words} words, for yourself in a season's time: what will you need to know?",
 }
 
