@@ -287,9 +287,12 @@ def settle(w) -> list:
                 extra = here.party_container(leg["from"]) if leg["from"] != payer else None
                 q = min(KN.available(here, leg["item"], extra=extra), due)
                 if q > 1e-9:
-                    with w.cause(actor=payer, verb="settle", node=node):
-                        _pay(here, payer, leg["from"], leg["to"], leg["item"], q, extra)
-                    paid = q
+                    try:
+                        with w.cause(actor=payer, verb="settle", node=node):
+                            _pay(here, payer, leg["from"], leg["to"], leg["item"], q, extra)
+                        paid = q
+                    except Refused:                                         # no way to hand it over today: it stays owed
+                        paid = 0.0
             fields = {"arrears": round(due - paid, 6)}
             if inst:                                                        # an instalment fell due today: paid, or now owed
                 wh = leg["when"]
@@ -376,5 +379,5 @@ def _person_for(w, party):
 
 def _present_for(w, party, node) -> bool:
     if party in w.s["people"]:
-        return w.at(party) == node
+        return w.s["people"][party]["alive"] and w.at(party) == node             # nothing is paid to the dead
     return any(b["node"] == node and any(c["claimant"] == party for c in w.claims_on(("building", bid))) for bid, b in w.s["buildings"].items())

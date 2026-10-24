@@ -317,3 +317,15 @@ def test_couples_who_try_every_day_have_births_near_the_model():
                     births += 1
         n += len(COUPLES)
     assert 1.3 <= births / n <= 1.9                                                # 02v: 1.6 a couple at the low dial
+
+
+def test_nothing_is_paid_to_the_dead():
+    from cybertron2.engine import agreements as AG
+    w = world()
+    a, b = "Warin", "Edric"
+    w.s["containers"][w.hands(a)]["goods"]["grain"] = 5.0
+    w.apply("agree", w.at(a), node=w.at(a), rec={"parties": [a, b], "legs": [{"from": a, "to": b, "item": "grain", "qty": 2, "when": {"by": 0}, "paid": 0, "arrears": 0}]})
+    w.s["people"][b]["at"] = w.at(a)
+    w.apply("die", w.at(b), person=b, cause="old age")
+    AG.settle(w)
+    assert w.goods(w.hands(a))["grain"] == 5.0
