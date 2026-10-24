@@ -1,0 +1,10 @@
+# Package C, searching and meeting on a road (02s §4, D2-120, D2-121, D2-124, D2-125, D2-127): two_valleys_c.yaml for 4 days, with
+# two departures scripted on day 1 so the road holds two parties at once: Osric of the Craggs sets off for Wetham searching for the
+# Cragg cattle loose on the road, and Simkin sets off from Wetham for Highcombe. Read: whether Osric finds the herd (x5 for a searcher)
+# and what he does with it; whether the two meet, what they say, and any offer or promise made there (through agreements.py).
+base: cybertron2/specs/two_valleys_c.yaml
+name: The two valleys, a search on the road (Package C)
+days: 4
+script:
+  - {day: 1, who: Osric, do: {do: travel, to: Wetham, searching: the Cragg cattle}}
+  - {day: 1, who: Simkin, do: {do: travel, to: Highcombe}}
