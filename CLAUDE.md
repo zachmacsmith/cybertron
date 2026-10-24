@@ -42,6 +42,10 @@ Full rules: `docs/cybertron2/README.md`.
    - write the rule into the spec file you own, citing the decision number, and update the file's closing "Current as of" line;
    - mark the proposal `accepted: D-n` (or `partly accepted`), with a History entry;
    - add a row to the outcome log in `proposals/README.md`.
+3a. **Built at Zach's request before it was written down** (he asks in conversation for something to be built now): build it, then
+   in the same session write it up as a **retrospective proposal** (status `retrospective, accepted: D-n`): what was built, why (his
+   words and the problem it answered), alternatives, what is still open, a dated History entry; then do step 3's records (DECISIONS,
+   spec, outcome log). Nothing built is left without a proposal.
 4. **Rejected or deferred:** mark the proposal `rejected` or `deferred` with the reason, add a History entry and a log row. Ideas
    for later go to a `deferred` proposal (economy: `proposals/economy_later.md`), never into the spec.
 5. **Replaced by a later decision:** rewrite the spec text to the new rule (no struck-through history in the spec); mark the old

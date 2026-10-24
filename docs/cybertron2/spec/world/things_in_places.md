@@ -19,6 +19,7 @@ extends world/places.md, world/holding.md (D4-23) and core/architecture.md (cont
 - D2-96: rot near water, food and people; a death in a settlement is highly salient; burying is work on the body, shown only where
   one lies, its labour by the ground and the cold.
 - D2-111: `leave` folds into `give`; a give that cannot reach its recipient is left at its door.
+- D4-52: a beast that dies leaves a carcass where it fell, fit to eat for about a day; on a road it may leave none, or a hidden one.
 
 ## Mechanics
 
@@ -67,6 +68,17 @@ leaver's claim is social only. Taking is an act seen by whoever is present.
 
 Things in the open spoil much faster than in a house, by the item's own decay table (economy/goods.md, "Decay").
 
+### Dead beasts (D4-52)
+
+- A beast that dies (of hunger at a node, or on a road) leaves a **carcass** where it fell: a thing at a spot (the kind `carcass`),
+  holding meat and its hide; its holders are the herd's.
+- **Edible about a day:** the meat is good the day after the beast died; that night it goes off (rotting meat, no food). The hide keeps.
+  After some days only bones are left.
+- **On a road** each beast that dies leaves no carcass at all (it wandered off to die), a hidden one (off the road, out of sight), or
+  one by the road.
+- Found by the noticing rule like a body; its signs are signs.py CARCASS (a dead beast, crows, the stink once it has gone off, bones).
+- Meat in a carcass: a share of slaughter's, by how it died (parameters).
+
 ## Data
 
 Per thing at a spot: its place (parcel or stretch), contents, own conspicuousness, hidden (how, by whom), the day it was put there,
@@ -79,6 +91,10 @@ for remains whose they were and the day of death.
 | hiding work | under brush 1 unit, buried 2 | proposed; calibrate |
 | a body's signs | "dead some days" about 10 days, then bones to the season's end | proposed; calibrate |
 | burying | 2 units soft, 4 stony, 6 or more frozen; a cairn 3 stone and 2 units | proposed; calibrate |
+| a carcass fit to eat | about a day after the beast died | decided (D4-52) |
+| a carcass on a road | none 0.3, hidden 0.3 (own conspicuousness x 0.2), by the road 0.4 | proposed; calibrate |
+| meat in a carcass | slaughter's x 0.25 if it starved, x 0.5 otherwise; the whole hide | proposed; calibrate |
+| a carcass's own conspicuousness | 0.9; bones after 6 days, 0.3 | proposed; calibrate |
 
 ## What agents see
 
@@ -94,4 +110,4 @@ Things they notice where they are (information/noticing.md); the bury option whe
 [proposals/things_in_places.md](../../proposals/things_in_places.md), [verb_modifiers.md](../../proposals/verb_modifiers.md),
 [objects_in_world.md](../../proposals/objects_in_world.md).
 
-*Current as of 23 Oct 2026: D2-85, D2-87, D2-93, D2-95, D2-96, D2-111.*
+*Current as of 24 Oct 2026: D2-85, D2-87, D2-93, D2-95, D2-96, D2-111, D4-52.*

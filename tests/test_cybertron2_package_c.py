@@ -397,3 +397,45 @@ def test_a_finder_knows_its_own_beasts_and_its_neighbours_but_not_strangers():
     assert "You know them" in RD.whose_herd(w, neighbour, hid)
     stranger = next(n for n in w.living() if w.at(n) != w.at(own))
     assert "cannot tell" in RD.whose_herd(w, stranger, hid)
+
+
+# ---------------------------------------------------------------------- dead beasts (D4-52)
+def test_a_beast_that_starves_leaves_a_carcass_fit_to_eat_for_a_day_then_gone_off():
+    from cybertron2.engine import farm as FM, things as TH
+    w = world()
+    h = w.s["herds"]["cattle"]
+    h.update(hungry=9, watched=w.d)                                                # herded on a bare pasture: it starves there
+    w.s["parcels"][h["parcel"]]["res"]["grass"]["S"] = 0.0
+    FM.night(w)
+    cs = [c for c in w.s["containers"].values() if c["kind"] == "carcass"]
+    assert len(cs) == 1 and cs[0]["parcel"] == h["parcel"] and cs[0]["beast"] == "cow"
+    assert abs(cs[0]["goods"]["meat"] - 40 * 0.25) < 1e-9                         # starved: a quarter of slaughter's meat (calibrate)
+    assert cs[0]["kind"] in TH.KINDS and TH.carcass_fresh(w, cs[0])
+    w.s["day"] += 1
+    assert TH.carcass_fresh(w, cs[0])                                               # the next day: still good
+    N.night(w)
+    assert cs[0]["goods"].get("meat", 0) == 0 and cs[0]["goods"].get("rotting meat", 0) > 0 and not TH.carcass_fresh(w, cs[0])
+
+
+def test_beasts_dying_on_the_road_leave_nothing_a_hidden_carcass_or_one_by_the_road():
+    from cybertron2.engine import herds as HD
+    w = world(roads=[["millbrook", "ashwood", 2, {"terrain": "plain"}]])
+    rid = "road:millbrook-ashwood"
+    out = {"none": 0, "hidden": 0, "open": 0}
+    for k in range(600):
+        cid = HD._road_carcass(w, "cattle", "cows", rid, 1, w.rng("t-carcass", k))
+        if not cid:
+            out["none"] += 1
+        else:
+            out["hidden" if w.s["containers"][cid].get("hidden") else "open"] += 1
+    assert 0.25 < out["none"] / 600 < 0.35 and 0.25 < out["hidden"] / 600 < 0.35       # D4-52 (calibrate)
+    c = next(c for c in w.s["containers"].values() if c["kind"] == "carcass" and not c.get("hidden"))
+    h = next(c for c in w.s["containers"].values() if c["kind"] == "carcass" and c.get("hidden"))
+    from cybertron2.engine import things as TH
+    assert TH.own(w, h) < TH.own(w, c) * 0.3
+    assert c in RD_things(w, rid, 1)
+
+
+def RD_things(w, rid, pos):
+    from cybertron2.engine import roads as RD
+    return list(RD.things_on(w, rid, pos).values())

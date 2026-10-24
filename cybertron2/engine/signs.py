@@ -235,6 +235,31 @@ WAY = [
 ]
 
 
+# A dead beast (D4-52): fit to eat a day, then stinking, then bones; on a road it may lie off the road out of sight (its own
+# conspicuousness carries that). Context: carcass_context.
+CARCASS = [
+    dict(when=lambda x: x.fresh and not x.off_road, sense="sight", p=1.0, tags=["animals", "food"],
+         text=lambda x: f"a dead {x.beast} lies {x.at}"),
+    dict(when=lambda x: x.fresh and x.off_road, sense="sight", p=1.0, tags=["animals", "food"],
+         text=lambda x: f"something dead lies in the cover off the road: a {x.beast}, by the shape of it"),
+    dict(when=lambda x: x.fresh and x.meat, sense="sight", p=1.0, reach="near", tags=["animals", "food"],
+         text=lambda x: f"{x.of} lies dead {x.at}, not long dead: the meat would still be good today"),
+    dict(when=lambda x: x.fresh and x.starved, sense="sight", p=0.8, reach="near", tags=["animals", "food"], knack="herd",
+         text=lambda x: f"the dead {x.beast} {x.at} is all hide and bone: it starved, and there is little meat on it"),
+    dict(when=lambda x: x.fresh and not x.starved, sense="sight", p=0.5, reach="near", tags=["animals"], knack="herd",
+         text=lambda x: f"no mark on the dead {x.beast} {x.at}: it went down where it stood"),
+    dict(when=lambda x: (x.fresh or x.rotten) and x.weather != "fog", sense="sight", p=0.5, tags=["animals"],
+         text=lambda x: f"crows going down {x.at}, where something lies dead"),
+    dict(when=lambda x: x.rotten and x.warm, sense="smell", p=0.6, reach="node", tags=["animals", "danger"],
+         text=lambda x: f"the stink of a dead beast from {'the road' if x.on_road else x.where}"),
+    dict(when=lambda x: x.rotten, sense="sight", p=1.0, reach="near", tags=["animals", "food"],
+         text=lambda x: f"the dead {x.beast} {x.at} is bloated and gone off: past eating" + ("; the hide could still be taken" if x.hide else "")),
+    dict(when=lambda x: x.rotten and x.dogs, sense="sight", p=0.3, reach="node", tags=["animals"],
+         text=lambda x: f"the dogs keep going off to {x.where}, where a dead beast lies"),
+    dict(when=lambda x: x.bones, sense="sight", p=1.0, tags=["animals"], text=lambda x: f"the bones of a {x.beast} {x.at}, picked clean"),
+]
+
+
 # ---------------------------------------------------------------------- the sky and the season
 SKY = [
     dict(when=lambda x: x.cold and x.first_cold, sense="touch", p=0.85, tags=["season", "shelter", "farming"],
@@ -1046,6 +1071,23 @@ def spot_rows(here, rows, x, about, node, parcel, add, concerns=(), only=None, *
             sign=f"{about[0]}#spot{i}", **extra)
 
 
+def carcass_context(w, c):
+    """A dead beast at a spot (D4-52): how long dead, whether still fit to eat, how it died, the weather on it."""
+    from cybertron2.engine import environment as EV, things as TH
+    from cybertron2.engine.data import THINGS
+    where = TH.parcel_name(w, c)
+    on_road = c.get("node") not in w.s["nodes"]
+    age = w.d - int(c.get("died", w.d))
+    bones = age >= int(THINGS["carcass_bones_after"])
+    return SimpleNamespace(beast=c.get("beast", "beast"), of=c.get("of", "a beast"), where=where, on_road=on_road,
+                           at="by the road" if on_road else f"at {where}", off_road=c.get("hidden") == "off the road",
+                           age=age, fresh=TH.carcass_fresh(w, c) and not bones, rotten=not TH.carcass_fresh(w, c) and not bones,
+                           bones=bones, starved=c.get("cause") == "starved", hide=c["goods"].get("hide", 0) > 0,
+                           meat=c["goods"].get("meat", 0) > 0, cold=w.cold(), warm=not w.cold(), weather=EV.weather(w),
+                           snow=EV.snow_lying(w), dogs=not on_road and any(b["node"] == c.get("node") and b["fittings"].get("dog")
+                                                                            for b in w.s["buildings"].values()))
+
+
 def road_context(w, name, t, pos):
     from cybertron2.engine import environment as EV, roads as RD
     from cybertron2.engine.data import WEATHER
@@ -1116,6 +1158,11 @@ def true_rows(rows, x) -> list:
         if ok:
             out.append((i, row))
     return out
+
+
+def bundle(w, c):
+    """The bundle and context for a thing at a spot: a dead beast reads CARCASS, everything else THING."""
+    return (CARCASS, carcass_context(w, c)) if c.get("kind") == "carcass" else (THING, thing_context(w, c))
 
 
 def roll(rows, x, rng, mult=1.0, know=(), near=False, at_node=True, least=False) -> list:

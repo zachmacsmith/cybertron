@@ -7,7 +7,7 @@ may take from, the one slept in first (38.17 §9: to confirm).
 """
 from __future__ import annotations
 
-from cybertron2.engine.data import DECAY, EDIBLE, FITTINGS, ITEMS
+from cybertron2.engine.data import DECAY, EDIBLE, FITTINGS, ITEMS, THINGS
 
 FIRE = tuple(f for f, d in FITTINGS.items() if d.get("fire"))
 from cybertron2.engine.world import Refused
@@ -113,6 +113,12 @@ def night(w) -> dict:
         if c["kind"] == "hands" and not s["people"][c["of"]]["alive"]:
             continue
         for item, q in list(c["goods"].items()):
+            if c["kind"] == "carcass" and item == "meat":                      # a dead beast's meat keeps a day, then goes off (D4-52)
+                if q > 1e-9 and w.d - int(c.get("died", w.d)) >= int(THINGS["carcass_fresh_days"]):
+                    place = w.place_of(("container", cid))
+                    w.apply("destroy", place, src=cid, item="meat", qty=q, why="went off")
+                    w.apply("create", place, dst=cid, item="rotting meat", qty=q, why="rot")
+                continue
             r, becomes = decay_rate(w, c, item)
             if q > 1e-9 and r > 0:
                 place = w.place_of(("container", cid))

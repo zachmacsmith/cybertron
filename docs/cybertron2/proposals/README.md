@@ -15,9 +15,15 @@ decided or rejected in conversation before this folder existed.
 
 ## Layout of a proposal
 
-**Status** (discussion | ready for a decision | accepted: D-n | rejected | superseded by ...); **Owner**; **Summary**; **The
+**Status** (discussion | ready for a decision | accepted: D-n | rejected | superseded by ... | retrospective, accepted: D-n);
+**Owner**; **Summary**; **The
 proposal**; **Why**; **Alternatives considered**; **Open questions**; **Affects** (the spec files it would change); **History**
 (dated entries: proposed, revised and why, decided or rejected and why); **Sources**.
+
+**Retrospective proposals.** When Zach asks for something to be built straight away, in conversation, it is built first and written
+down afterwards: a proposal with the status `retrospective, accepted: D-n`, saying what was built, why (his words and the problem it
+answered), what else was considered, and what is still open, with a History entry dated the day it was built. Nothing built is left
+without a proposal.
 
 ## Proposals
 
@@ -57,6 +63,9 @@ proposal**; **Why**; **Alternatives considered**; **Open questions**; **Affects*
 | [exchange_and_money.md](exchange_and_money.md) | exchange at a node, coin, debts, credit, tolls | 37.2 | accepted: D2-1, D2-2, D2-25 to D2-30, D4-17 |
 | [information_economics.md](information_economics.md) | writing materials, documents, the information ladder, libraries, archives, maps | 37.2 (37.4 owns information/) | partly accepted: D2-7, D2-8 |
 | [economy_plan.md](economy_plan.md) | the economy plan for cybertron2 (E1-E6, the first region) and society-scale layers | 37.2 | discussion |
+| [carcasses.md](carcasses.md) | a beast that dies leaves a carcass: fit to eat about a day, then gone off, then bones; on a road maybe none or hidden; meat limited by how it died | 37.4 (37.2: livestock numbers) | retrospective, accepted: D4-52 |
+| [open_fire_and_camp.md](open_fire_and_camp.md) | a fire in the open 2 timber a night; a camp 3 timber to build, 1 a night to keep lit | 37.4 (37.2: shelter) | retrospective, accepted: D4-49 |
+| [passing_by.md](passing_by.md) | `travel {meeting: pass by}`: a meeting passes on its own, no call, described to both | 37.4 | retrospective, accepted: D4-51 |
 | [fuse_events.md](fuse_events.md) | events with a detection time and a completion time; urgent calls for those who notice in time | 37.2 (37.4 owns conflict/, core/) | accepted: D2-5, D2-80 to D2-84 |
 | [gates.md](gates.md) | boundaries with entry rules: names, passes, tolls, a keeper; admission in the talk step | 37.2 (37.4 owns conflict/) | accepted: D2-5 (details open) |
 | [attacks_and_walls.md](attacks_and_walls.md) | attacks on people, buildings and nodes; walls multiplying defenders; the watch | 37.2 (37.4 owns conflict/) | partly accepted: D2-20 to D2-22 |
@@ -67,6 +76,9 @@ Newest first. Ideas decided or rejected in conversation before 23 Oct are backfi
 
 | Date | Idea | Outcome | Where |
 |---|---|---|---|
+| 24 Oct | Dead beasts leave carcasses, edible about a day; on roads maybe none or hidden (built, then written down) | retrospective, accepted: D4-52 | [carcasses.md](carcasses.md) |
+| 24 Oct | Passing by on the road, chosen at departure (built, then written down) | retrospective, accepted: D4-51 | [passing_by.md](passing_by.md) |
+| 23 Oct | An open fire 2 timber; a camp 3 to build and 1 a night (built, then written down) | retrospective, accepted: D4-49 | [open_fire_and_camp.md](open_fire_and_camp.md) |
 | 24 Oct | Dibbling known to at least one person in the world; fences round a parcel; the split share peaked at a quarter; gates automatic, opening one an act | accepted: D2-129 to D2-132 | livestock.md |
 | 24 Oct | Fences on borders between parcels (for now); one farmer per village knowing dibbling | replaced: D2-130, D2-129; borders later (L-24) | livestock.md |
 | 24 Oct | Build choices confirmed or changed (Q-20); herds wandering, lost on roads, driven, split by size; fences wood then stone on borders; searching as a modifier | accepted: D2-118 to D2-128 | livestock.md, fences.md, OPEN Q-20 |

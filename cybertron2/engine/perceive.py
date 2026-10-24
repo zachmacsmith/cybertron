@@ -150,8 +150,8 @@ def facts(here) -> list:
     from cybertron2.engine import things as TH                                 # things at a spot: their bundles (D2-85, D4-48)
     for cid, c in TH.at_node(here._w, here.node).items():
         about = ([f"parcel:{c['parcel']}"] if c.get("parcel") else []) + [f"thing:{cid}"]
-        x = SG.thing_context(here._w, c)
-        for i, row in SG.true_rows(SG.THING, x):
+        rows, x = SG.bundle(here._w, c)
+        for i, row in SG.true_rows(rows, x):
             p = row["p"](x) if callable(row["p"]) else row["p"]
             add(about, row["text"](x), p, row.get("tags", []), row.get("sense", "sight"), thing=cid, reach=row.get("reach", "rule"),
                 knows=row.get("knows"), lay=row.get("lay"), sign=f"thing:{cid}#{i}")

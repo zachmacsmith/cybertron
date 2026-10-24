@@ -388,9 +388,15 @@ ENV = {
 # Own conspicuousness (information/noticing.md; calibrate); hiding multiplies it (taught, untaught).
 THINGS = {
     "body": 0.9, "body_built": 1.0, "heap": 0.9, "heap_min": 10, "pack": 0.4, "camp": 0.7, "trace": 0.3,
-    "hidden": {"under brush": [0.2, 0.4], "buried": [0.03, 0.06]},
     "body_days": 10,                                                # "dead some days", then bones to the season's end
     "rot_after": 2,                                                 # a body unburied this many days smells of rot
+    # a beast that dies (D4-52): its carcass is as conspicuous as a body, a little less once only bones; edible the day after it died,
+    # then the meat goes off; bones after some days. On a road it may leave nothing (it wandered off to die) or lie hidden off the
+    # road. Meat by how it died, as a share of slaughter's (calibrate)
+    "carcass": 0.9, "carcass_bones": 0.3, "carcass_bones_after": 6, "carcass_fresh_days": 1,
+    "carcass_road": {"none": 0.3, "hidden": 0.3},
+    "carcass_meat": {"starved": 0.25, "road": 0.5, "other": 0.5},
+    "hidden": {"under brush": [0.2, 0.4], "buried": [0.03, 0.06], "off the road": [0.2, 0.2]},
 }
 # Fences round a parcel (livestock.md, D2-130; calibrate): what a build takes for a parcel of size s (x the square root of s), the chance a
 # day a herd gets through by its level (whole, gappy; down is no fence), and its upkeep: a wood fence loses a level each season unless

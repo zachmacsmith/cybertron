@@ -679,6 +679,9 @@ def _herds(w, rec):
         if hungry >= int(cp["starve_nights"]):
             role = next(r for r in ("young", "cows", "oxen", "bulls") if int(h.get(r, 0)) > 0)
             w.apply("set", node, ref=("herd", hid), field=role, value=int(h[role]) - 1)
+            from cybertron2.engine import things as TH                         # it lies where it fell (D4-52)
+            TH.leave_carcass(w, node, ROLE_WORD[role][0], h["name"], [c["claimant"] for c in w.claims_on(("herd", hid))], "starved",
+                             TECHNIQUES["slaughter"]["yield"]["gives"][role], parcel=pid)
             milk = min(milk, float(w.s["herds"][hid]["cows"]))
             w.event(node, "herd", f"a {ROLE_WORD[role][0]} of {h['name']} died of hunger in the night", about=[f"herd:{hid}"],
                     salience=0.6, tags=["animals", "death"])

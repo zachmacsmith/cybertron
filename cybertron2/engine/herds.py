@@ -248,6 +248,8 @@ def _on_road(w, hid, rec):
         if dead:
             w.apply("set", rid, ref=("herd", hid), field=role, value=n - dead)
             rec["herds"].append((hid, "died on the road", role, dead))
+            for k in range(dead):                                               # by the road, off it out of sight, or nowhere (D4-52)
+                _road_carcass(w, hid, role, rid, int(h["pos"]), w.rng("carcass", w.d, hid, role, k))
     w.apply("set", rid, ref=("herd", hid), field="count", value=FM.head(w.s["herds"][hid]))
     if FM.head(w.s["herds"][hid]) <= 0:
         return
@@ -258,6 +260,20 @@ def _on_road(w, hid, rec):
         off_road(w, hid, r["b"], rec)
     else:
         w.apply("set", rid, ref=("herd", hid), field="pos", value=pos)
+
+
+def _road_carcass(w, hid, role, rid, pos, rng) -> str:
+    from cybertron2.engine import things as TH
+    from cybertron2.engine.data import TECHNIQUES, THINGS
+    cr = THINGS["carcass_road"]
+    u = rng.random()
+    if u < float(cr["none"]):
+        return ""                                                               # it wandered off to die where nobody will find it
+    h = w.s["herds"][hid]
+    holders = [c["claimant"] for c in w.claims_on(("herd", hid))]
+    return TH.leave_carcass(w, rid, FM.ROLE_WORD[role][0], h.get("base_name") or h["name"], holders, "road",
+                            TECHNIQUES["slaughter"]["yield"]["gives"][role], stretch=pos,
+                            hidden="off the road" if u < float(cr["none"]) + float(cr["hidden"]) else None)
 
 
 def on_stretch(w, rid, pos) -> dict:

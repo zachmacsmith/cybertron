@@ -320,7 +320,8 @@ def _notices(w, members, t, pos, ps):
         for text in SG.roll(SG.ROAD, SG.road_context(w, n, t, pos), rng, know=know):
             _note(w, n, text)
         for c in things_on(w, road_id, pos).values():
-            for text in SG.roll(SG.THING, SG.thing_context(w, c), rng, mult=TH.own(w, c) * sight * eye, know=know, at_node=False):
+            rows, x = SG.bundle(w, c)
+            for text in SG.roll(rows, x, rng, mult=TH.own(w, c) * sight * eye, know=know, at_node=False):
                 _note(w, n, text)
         for x in w.s.get("traces", []):                                 # traces of others who passed (D2-88): fading
             if x["road"] != road_id or x["pos"] != pos or n in x["by"] or w.d - x["day"] < 1:
@@ -341,7 +342,7 @@ def _notices(w, members, t, pos, ps):
 
 def things_on(w, road_id, pos) -> dict:
     return {cid: c for cid, c in w.s["containers"].items() if c["kind"] in TH.KINDS and c.get("node") == road_id
-            and int(c.get("stretch") or 1) == pos and (c.get("body") or any(q > 1e-9 for q in c["goods"].values()))}
+            and int(c.get("stretch") or 1) == pos and (c.get("body") or c.get("beast") or any(q > 1e-9 for q in c["goods"].values()))}
 
 
 # ---------------------------------------------------------------------- finds on the road (D2-86)
@@ -351,13 +352,15 @@ def _finds(w, today, rec, members, t, pos):
     for cid, c in things_on(w, road_id, pos).items():
         if c.get("by") in members or c.get("of") in members:
             continue
-        worth = any(q > 1e-9 for q in c["goods"].values()) or (c.get("body") and c.get("buried") is None)
+        worth = any(q > 1e-9 and ITEMS.get(i, {}).get("food", 1) > 0 or not ITEMS.get(i, {}).get("rot") and q > 1e-9
+                    for i, q in c["goods"].items()) or (c.get("body") and c.get("buried") is None)   # not rotting meat alone
         if not worth:
             continue
         finder = next((n for n in members if w.rng("road-find", w.d, n, cid).random() < min(1.0, TH.own(w, c) * sight * TH.eye(w, n))), None)
         if finder:
             from cybertron2.engine import signs as SG
-            look = SG.roll(SG.THING, SG.thing_context(w, c), w.rng("road-find-look", w.d, finder, cid), mult=0.0, near=True, at_node=False,
+            rows, x = SG.bundle(w, c)
+            look = SG.roll(rows, x, w.rng("road-find-look", w.d, finder, cid), mult=0.0, near=True, at_node=False,
                            least=True)                                       # the finder's close look, not the glimpse again
             today["road"]["finds"].append({"id": f"find:{cid}:{finder}:{w.d}", "kind": "find", "road": road_id, "pos": pos, "thing": cid,
                                            "members": members, "finder": finder, "label": "; ".join(look) or TH.describe(w, c)})

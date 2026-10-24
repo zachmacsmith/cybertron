@@ -22,7 +22,8 @@ under the rules below. Set up 22 Oct 2026 by the 37.4 session at Zach's request.
 history entry each time), then Zach decides. Accepted: the rule goes into the spec and DECISIONS.md in the same commit, and the
 proposal is marked accepted with the decision's number. Rejected: the proposal is marked rejected with why. Either way the file
 stays, and the log in `proposals/README.md` records the outcome. A proposal that touches another session's area is announced on the
-board.
+board. Something Zach asks to have built straight away is built first and written up afterwards, in the same session, as a
+**retrospective proposal** (status `retrospective, accepted: D-n`: what was built and why), with the same records.
 
 ## Files
 

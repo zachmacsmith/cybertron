@@ -11,7 +11,7 @@ from __future__ import annotations
 from cybertron2.engine import environment as EV, knowledge as KN
 from cybertron2.engine.data import COVERS, ITEMS, NOTICING, TECHNIQUES, THINGS
 
-KINDS = ("pile", "remains")
+KINDS = ("pile", "remains", "carcass")
 
 
 # ---------------------------------------------------------------------- where things are
@@ -46,7 +46,8 @@ def at_node(w, node) -> dict:
     """Things lying at a node: piles with goods, bodies (buried or not), remains with goods."""
     out = {}
     for cid, c in w.s["containers"].items():
-        if c["kind"] in KINDS and c.get("node") == node and (c.get("body") or any(q > 1e-9 for q in c["goods"].values())):
+        if c["kind"] in KINDS and c.get("node") == node and (c.get("body") or any(q > 1e-9 for q in c["goods"].values())
+                                                             or (c.get("beast") and w.d - int(c.get("died", w.d)) <= 3 * int(THINGS["carcass_bones_after"]))):
             out[cid] = c
     return out
 
@@ -88,6 +89,9 @@ def rotting(w, c) -> bool:
 def own(w, c) -> float:
     """A thing's own conspicuousness (information/noticing.md), times how it is hidden (taught, or tried untaught)."""
     x = 0.0
+    if c.get("beast") and c.get("buried") is None:                         # a dead beast (D4-52)
+        old = w.d - int(c.get("died", w.d)) >= int(THINGS["carcass_bones_after"])
+        x = float(THINGS["carcass_bones" if old else "carcass"])
     if c.get("body") and c.get("buried") is None:
         built = w.s["parcels"].get(c.get("parcel"), {}).get("cover") == "built"
         x = float(THINGS["body_built"] if built else THINGS["body"])
@@ -105,6 +109,8 @@ def describe(w, c) -> str:
     """The thing as one who notices it sees it (its signs, D4-48)."""
     where = parcel_name(w, c)
     g = goods_words(c["goods"])
+    if c.get("beast"):
+        return f"a dead {c['beast']} lies at {where}" + (": past eating" if not carcass_fresh(w, c) else "")
     if c.get("hidden") == "buried" and not c.get("body"):
         return f"a patch of turned earth at {where}, as if something were buried there"
     if c.get("hidden") == "under brush":
@@ -120,6 +126,27 @@ def describe(w, c) -> str:
         return f"bones lie at {where}: all that is left of {c['of']}"
     qty = sum(c["goods"].values())
     return (f"a heap of {g} lies at {where}" if qty >= float(THINGS["heap_min"]) else f"a pack lies at {where}, with {g} in it")
+
+
+def carcass_fresh(w, c) -> bool:
+    """A dead beast is fit to eat for about a day after it died (D4-52)."""
+    return w.d - int(c.get("died", w.d)) <= int(THINGS["carcass_fresh_days"]) and c["goods"].get("meat", 0.0) > 1e-9
+
+
+def leave_carcass(w, place, beast, herd_name, holders, cause, role_meat, parcel=None, stretch=None, hidden=None) -> str:
+    """A beast that died leaves its carcass where it fell (D4-52): meat by how it died (a share of slaughter's), its hide."""
+    share = float(THINGS["carcass_meat"].get(cause, THINGS["carcass_meat"]["other"]))
+    fields = {"beast": beast, "of": f"a {beast} of {herd_name}", "holders": list(holders), "cause": cause, "died": w.d}
+    if stretch is not None:
+        fields["stretch"] = stretch
+    if hidden:
+        fields["hidden"] = hidden
+    cid = w.apply("new_thing", place, node=place, parcel=parcel, kind="carcass", **fields)
+    for item, q in role_meat.items():
+        q = round(q * share, 2) if item == "meat" else q
+        if q > 0:
+            w.apply("create", place, dst=cid, item=item, qty=q, why=f"a dead {beast}")
+    return cid
 
 
 # ---------------------------------------------------------------------- the eye for the land (D4-50, D2-91)
