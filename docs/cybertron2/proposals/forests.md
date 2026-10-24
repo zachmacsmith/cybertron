@@ -53,6 +53,32 @@ So a hearth's year is **21 timber (14 units of felling) or 84 firewood (28 units
 fuel but needs no tool, no standing trees taken, and can be gathered by children. Timber is the efficient fuel and the building
 material, but it is the stand itself. A hearth burns what its household chooses (a standing order: firewood first by default).
 
+## 2a. Warmth: levels, and how many a fire warms (Zach, 24 Oct)
+
+**Today in the engine:** a building's fire (hearth or fire ring) burns 0.5 timber a night (2 cold) and warms **everyone sleeping
+in that building, however many**; a camp's fire burns 1 a night and warms the camp's 4; a fire in the open burns 2 from **each
+sleeper's own hands** (two travellers at one spot each burn their own: no sharing). A house with no fire on a cold night is 1.3 food.
+
+**Proposed: one ladder, by shelter and fire, in heat:**
+
+| Sleeping | Fire | Heat a night (normal / cold) | Warms | Food a night (normal / cold) |
+|---|---|---|---|---|
+| out | none | | | 1.5 / 2.0, and 0.3 of waking starving |
+| out | a fire in the open | 2 / 4 | **up to 4 sleeping at that spot** (shared) | 1.4 / 1.6 |
+| a tent | none | | 2 | 1.2 / 1.4 |
+| a camp (lean-to) | its fire ring | 2 / 2 | 4 | 1.2 / 1.5 |
+| a house | none | | | 1.0 / 1.3 |
+| a house | a fire ring | 1 / 4 | 6 spaces of floor, half-warm in the cold | 1.0 / 1.15 |
+| a house | a hearth | 1 / 4 | **12 spaces of floor** (about 10 sleepers); more floor needs another hearth or more heat | 1.0 / 1.0 |
+
+On normal nights a house's fire is for cooking (grain needs one, D2-60); in the cold it is for warmth.
+
+**What this gives:** fuel per person falls as more share a fire. On a cold night a hearth's 4 heat warms a cottage's 4 (1 each) or a
+full family house's 10 (0.4 each); a camp's fire 0.5 each; a fire in the open shared by 4, 1 each, alone, 4. So in winter it pays to
+crowd in: families sleeping together, hosting a neighbour at a lit fire (which saved lives in 38.23 and costs the host no fuel), a
+longhouse or a hall's hearth. Travellers do better camping together. This also fixes 2c of buildings_integration.md (a hall burning
+what a cottage does) by tying a hearth's reach to floor.
+
 ## 3. What it does over a run (02z)
 
 **A village of 3 hearths, 48 days (two winters), on a copse of size 1 (300 trees):**
@@ -134,12 +160,15 @@ near wood down faster.
 4. Poles from young growth for wattle rooms and wood fences, or keep those in timber for now?
 5. Real magnitudes (old forest 2,500 a unit of size), with the push set by how small and worn the near woods are in each world?
 6. Default rights: firewood anyone's, trees their holder's?
+7. The warmth ladder (2a): a fire in the open shared by up to 4; a fire ring half-warming 6 spaces; a hearth fully warming 12?
 
 ## History
 
 - 24 Oct: Zach: separate firewood and timber, both depending on the forest's health; timber for building and far better as fuel; how
   a forest should work as a system; and how it meets perception, other supply chains and labour. Written, with 02z (first pass at too
   small magnitudes, recalibrated to real ones).
+
+- 24 Oct: Zach: different levels of warming (hearths, campfires); does a hearth or campfire warm many people? Added 2a.
 
 ## Sources
 
