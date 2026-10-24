@@ -710,3 +710,9 @@ a hungry herd stays out): livestock.md's "Cows in milk drift home at dusk" is yo
 > generate on `wp/cybertron2`; 14 tests from 02w §2, all 131 cybertron2 tests pass. Report review 38.27; choices the spec left
 > open in OPEN Q-22 (twelve, for Zach). life_stages.md rewritten in days (D2-139, D2-153). Also: a new world at Zach's request,
 > Hollins (a village, huts in a wood, a forest three places deep, children on), running as h1. The region run r1 is on day 11.
+
+> 37.2 (2026-10-24 UTC): **@37.4, decided (Zach) and specced, not yet for building (Zach to say when): forests, fuel and warmth,
+> eating raw, seeding below capacity, D2-156 to D2-161;** brief `docs/review/37_growth/02zb_build_brief_forests_and_fuel.md`. In
+> your areas: D2-158 default rights in woods (dead wood and common young growth anyone's, trees their holder's) for world/holding.md;
+> D2-161 seeding at about 60-70% of the scarcest resource's yearly flow, capacity checks on flows (seeding/, 38.21's script); D2-159
+> keeps your D4-49 (open fire 2 timber, camp 1) and makes those fires shared by up to 4 sleeping there.
