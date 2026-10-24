@@ -21,18 +21,18 @@ from cybertron2.engine import life as LF
 
 DEFAULTS = {"lo": 150, "hi": 1200, "k": 3.0, "words_per_token": 0.75, "cap": 1.15, "prompt": "keep_change"}
 
-# Very short instructions, compared live (review 38.36). {words}: the length allowed; the agent's memory as it stands and the
-# stretch's own days are in front of it.
+# Very short instructions, compared live (review 38.36). {limit}: the length allowed, and how much more than last time (Zach:
+# "you should also say ... n more than last time"); the agent's memory as it stands and the stretch's own days are in front of it.
 PROMPTS = {
-    "plain": "Rewrite your memory to carry forward, in at most {words} words.",
-    "keep_change": "Rewrite your memory in at most {words} words: keep what still matters, add from these days only what you will want "
+    "plain": "Rewrite your memory to carry forward, in at most {limit}.",
+    "keep_change": "Rewrite your memory in at most {limit}: keep what still matters, add from these days only what you will want "
                    "later, and leave the rest.",
-    "most_days": "Rewrite your memory in at most {words} words. Most days are not worth keeping; some things are. Keep what still "
+    "most_days": "Rewrite your memory in at most {limit}. Most days are not worth keeping; some things are. Keep what still "
                  "matters from before.",
-    "revise": "Rewrite your memory in at most {words} words: keep what still matters, correct what has changed, and add from these "
+    "revise": "Rewrite your memory in at most {limit}: keep what still matters, correct what has changed, and add from these "
               "days only what you will want later.",
-    "future_days": "What might you still want to know in the days to come? Rewrite your memory with that, in at most {words} words.",
-    "future_self": "Rewrite your memory in at most {words} words, for yourself in a season's time: what will you need to know?",
+    "future_days": "What might you still want to know in the days to come? Rewrite your memory with that, in at most {limit}.",
+    "future_self": "Rewrite your memory in at most {limit}, for yourself in a season's time: what will you need to know?",
 }
 
 
@@ -59,6 +59,12 @@ def budget(w, name) -> dict:
     return {"tokens": tokens, "words": int(round(tokens * s["words_per_token"] / 10.0)) * 10, "age": age}
 
 
+def limit(words, last=None) -> str:
+    """"520 words (40 more than last time)", or "520 words" when the allowance has not grown."""
+    more = words - int(last) if last else 0
+    return f"{words} words" + (f" ({more} more than last time)" if more > 0 else "")
+
+
 def current(mind) -> str:
     return ((mind.store.get("memory") or {}).get("text")) or ""
 
@@ -73,7 +79,8 @@ def request(w, name, mind, did, night, span, variant=None) -> str:
     L.append(f"This is the end of a stretch of days ({span}). Tomorrow you will remember only your memory, your notes and what you "
              "have always known, not the detail of these days.")
     L.append("## Your memory as it stands\n" + (current(mind) or "(nothing yet)"))
-    instr = PROMPTS[variant or settings(w)["prompt"]].format(words=b["words"])
+    last = (mind.store.get("memory") or {}).get("budget")
+    instr = PROMPTS[variant or settings(w)["prompt"]].format(limit=limit(b["words"], last))
     L.append(f"{instr} Write it in \"memory\"; leave \"actions\" empty. Reply with JSON only.")
     return "\n\n".join(L)
 
