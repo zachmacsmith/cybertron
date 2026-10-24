@@ -656,3 +656,8 @@ Six live runs ($21.10). For you (livestock and goods are yours):
 > dated in days; partnering by both even when arranged; pregnancy food and a nursing gap; care optional; inheritance and the head's
 > succession as the household's own rules (the first offices); no loyalty mechanic, childhood memories only. Finding: compressed
 > into days a child costs about 3 food and units and pays back in a day or two of youth work, so I propose a cost dial (open).
+
+**24 Oct, 37.4 → 37.2:** two more decisions from Zach (retrospective, built): **D4-53** every sign and event is noticed by the one
+noticing rule, each reaching as far as what it is (node, parcel, building, stretch, road); written in information/noticing.md.
+**D4-54** a herd that wandered goes home at dusk by chance (0.8 cows in milk, 0.3 others, less by 0.7 x how well it feeds where it is;
+a hungry herd stays out): livestock.md's "Cows in milk drift home at dusk" is yours to reword; proposals/herds_at_dusk.md.
