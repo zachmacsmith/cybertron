@@ -9,7 +9,7 @@ from cybertron2.engine import verbs as V
 from cybertron2.engine.here import Here, Mind
 from cybertron2.engine.world import World, load_spec
 
-PATH = "cybertron2/specs/region_c_s24.yaml"
+PATH = "cybertron2/specs/region_c1.yaml"
 pytestmark = pytest.mark.skipif(not os.path.exists(PATH), reason="region_c not generated")
 
 

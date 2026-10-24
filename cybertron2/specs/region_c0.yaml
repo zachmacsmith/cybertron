@@ -3,7 +3,7 @@
 # a field at Ashwood (4 plots, 160 standing), a larger store at Coppergate (210 grain), more barley at Millford (300). Region food is
 # 1.59 times what it eats (02t_region_model.py, arm 0). Trade here is optional: cross-village flows in region_c beyond these are what
 # dependence produced.
-base: cybertron2/specs/region_c_s24.yaml
+base: cybertron2/specs/region_c1.yaml
 name: region_c0 (the dependence null)
 nodes:
   barleyfield:
@@ -22,5 +22,5 @@ nodes:
       mf_fields: {state: {crop: {kind: barley, left: 300, ripe_day: 3}}}
       mf_copse: {size: 2, text: "a woodlot of willow and alder", state: {wood: {K: 110, S: 100, r: 0.0}}}
 buildings:
-  moor_house: {stock: {grain: 150}}
+  moor_house: {stock: {grain: 230}}
   cole_house: {stock: {grain: 60}}

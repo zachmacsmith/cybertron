@@ -11,7 +11,7 @@
 # Coppergate-Millford 2 days over the Pass (snowed in deep winter). People, kin and their past are generated from the lines.
 name: region_c
 seed: 24
-days: 24
+days: 48
 calendar: {season: summer, day: 4, season_days: 6}
 cold_days: []
 nodes:
@@ -79,7 +79,38 @@ nodes:
                   adj: [mf_copse], state: {crop: {kind: barley, left: 170, ripe_day: 3}, last_crop: legumes}}
       mf_copse: {name: Willow Holt, cover: forest, size: 1, side: west, height: 1, text: "a thin stand of willow",
                  state: {plants: {K: 3, S: 3, r: 0.3}, game: {K: 2, S: 2, r: 0.25}, wood: {K: 12, S: 10, r: 0.0}}}
+  # three places nobody has been to (D4-47), no-one living there: new land for whoever finds and settles it
+  elmdale:
+    name: Elmdale
+    unexplored: true
+    parcels:
+      ed_bottom: {name: the Bottom, cover: meadow, size: 6, side: centre, height: 0, text: "a broad river bottom of deep black soil, never ploughed",
+                  adj: [ed_elms, ed_river], fertility: 1.3, state: {plants: {K: 8, S: 8, r: 0.3}, grass: {K: 150, S: 150, r: 0.32}}}
+      ed_elms: {name: the Elms, cover: forest, size: 4, side: north, height: 1, text: "tall elm and oak along the valley side",
+                state: {wood: {K: 300, S: 280, r: 0.03}, game: {K: 12, S: 12, r: 0.25}, plants: {K: 6, S: 6, r: 0.3}}}
+      ed_river: {name: Elm Water, cover: water, size: 2, side: south, height: 0, text: "a clear river full of fish"}
+  high_moor:
+    name: the High Moor
+    unexplored: true
+    parcels:
+      hm_moor: {name: the Moor, cover: pasture, size: 6, side: centre, height: 3, text: "open moor, heather and grass to the sky",
+                state: {plants: {K: 8, S: 8, r: 0.3}, grass: {K: 150, S: 150, r: 0.32}}}
+      hm_cleugh: {name: the Cleugh, cover: forest, size: 2, side: east, height: 2, text: "a wooded gully with deer in it", adj: [hm_moor],
+                  state: {plants: {K: 6, S: 6, r: 0.3}, game: {K: 24, S: 24, r: 0.25}, wood: {K: 40, S: 40, r: 0.03}}}
+  grey_crag:
+    name: Grey Crag
+    unexplored: true
+    parcels:
+      gc_face: {name: the Crag Face, cover: rock, size: 1, side: north, height: 3, text: "a cliff of fine grey stone that splits clean",
+                state: {quarry: {S: 0, K: 0}}}
+      gc_scree: {name: the Scree, cover: scrub, size: 2, side: south, height: 2, text: "scree and bilberry", adj: [gc_face],
+                 state: {plants: {K: 5, S: 5, r: 0.3}}}
 roads:
+- [millford, elmdale, 2, {terrain: river valley, way: "a track west along the river, overgrown", ends: {millford: {parcels: [mf_meadow], side: east}}}]
+- [barleyfield, elmdale, 1, {terrain: woodland, way: "an old way through the trees",
+                             ends: {barleyfield: {parcels: [bf_copse], side: west, hidden: true}}}]       # the hidden way (D2-90)
+- [ashwood, high_moor, 1, {terrain: hills, way: "a deer path north out of the wood", ends: {ashwood: {parcels: [deep_wood], side: north}}}]
+- [coppergate, grey_crag, 1, {terrain: hills, way: "a sheep track climbing toward grey crags", ends: {coppergate: {parcels: [cg_scrub], side: north}}}]
 - [barleyfield, millford, 1, track, {terrain: river valley, stretches: {1: {landmarks: [ford]}},
                                      ends: {barleyfield: {parcels: [bf_green], side: south}, millford: {parcels: [mf_square], side: west}}}]
 - [millford, ashwood, 1, track, {terrain: farmland, ends: {millford: {parcels: [mf_square], side: north}, ashwood: {parcels: [aw_clearing], side: east}}}]
@@ -138,22 +169,27 @@ customs:
 - {text: "Barley sown after the middle of autumn will not ripen before the frost; rye will stand the winter.", nodes: all}
 - {text: "Travellers carry bread or dried meat: grain is no use without a fire to boil it.", nodes: all}
 - {text: "Every hearth wants about twelve timber to see a house through the six nights of winter's cold.", nodes: all}
+- {text: "In Ashwood they say: whoever opens a way into new country shares it, and those who settle there owe the finder a share of
+    its first harvest.", nodes: [ashwood]}
+- {text: "Old people say there was a broad valley of black soil somewhere west along the river from Millford, never ploughed.", nodes: [millford, barleyfield]}
+- {text: "Hunters say deer come down in winter from open moor somewhere north of the wood, along a deer path nobody follows.", nodes: [ashwood]}
+- {text: "Old people say there was fine stone up the sheep track above Coppergate, past the grey crags, but nobody living has been.", nodes: [coppergate]}
 incidents: []
 signs:
 - {day: 7, node: all, about: sky, sense: touch, text: "a white frost on the grass at dawn, the first of the year", salience: 0.6, tags: [season, farming]}
 lines:
-  Reed: {acting: [3, 5], min_adults: 3, crafts: [plough, select seed, sow, reap, weed, hoe, milk], tools: {crude tool: 3}, holdings: {coin: 6}}
-  Barrow: {acting: [2, 4], min_adults: 3, crafts: [ditch, sow, reap, hoe], tools: {crude tool: 2}, holdings: {coin: 10}}
-  Hale: {acting: [2, 4], min_adults: 2, crafts: [hoe, reap], tools: {crude tool: 2}, holdings: {coin: 5}, head_model: claude-sonnet-5-5}
-  Lowe: {acting: [2, 4], min_adults: 2, crafts: [], tools: [], holdings: {coin: 1}, head_model: claude-sonnet-5-5}
-  Fenn: {acting: [3, 5], min_adults: 3, crafts: [fell, handcart, wooden plough, medium room, hall], tools: {crude tool: 3, crude weapon: 1}, holdings: {coin: 6}}
-  Ash: {acting: [2, 4], min_adults: 3, crafts: [charcoal, hunt, harness, pack], tools: {crude tool: 1, crude weapon: 2}, holdings: {coin: 4, hide: 1}, head_model: claude-sonnet-5-5}
-  Moor: {acting: [3, 5], min_adults: 3, crafts: [mine, smelt, copper tool, quarry, hearth], tools: {copper tool: 2, crude tool: 1}, holdings: {coin: 8}}
-  Cole: {acting: [2, 3], min_adults: 2, crafts: [mine, quarry], tools: {crude tool: 2}, holdings: {coin: 2}, head_model: claude-sonnet-5-5}
-  Miller: {acting: [2, 4], min_adults: 2, crafts: [water mill], tools: [crude tool], holdings: {coin: 10}, head_model: claude-sonnet-5-5}
-  Merchant: {acting: [2, 4], min_adults: 3, crafts: [], tools: {handcart: 1, pack: 1, bedroll: 2, harness: 1}, holdings: {coin: 40}}
-  Bell: {acting: [2, 4], min_adults: 2, crafts: [], tools: [crude tool], holdings: {coin: 12}, head_model: claude-sonnet-5-5}
-  Smith: {acting: [2, 3], min_adults: 2, crafts: [copper tool, coin, wooden plough], tools: {copper tool: 1, crude tool: 1}, holdings: {coin: 15}, head_model: claude-sonnet-5-5}
-bounds: {acting: [32, 44], children_max: 14, youths_min: 4, per_min: 2, per_spread: 9}
+  Reed: {acting: [3, 6], min_adults: 3, crafts: [plough, select seed, sow, reap, weed, hoe, milk], tools: {crude tool: 3}, holdings: {coin: 6}}
+  Barrow: {acting: [2, 5], min_adults: 2, crafts: [ditch, sow, reap, hoe], tools: {crude tool: 2}, holdings: {coin: 10}}
+  Hale: {acting: [2, 5], min_adults: 2, crafts: [hoe, reap], tools: {crude tool: 2}, holdings: {coin: 5}, head_model: claude-sonnet-5-5}
+  Lowe: {acting: [2, 5], min_adults: 2, crafts: [], tools: [], holdings: {coin: 1}, head_model: claude-sonnet-5-5}
+  Fenn: {acting: [3, 6], min_adults: 2, crafts: [fell, handcart, wooden plough, medium room, hall], tools: {crude tool: 3, crude weapon: 1}, holdings: {coin: 6}}
+  Ash: {acting: [2, 5], min_adults: 2, crafts: [charcoal, hunt, harness, pack], tools: {crude tool: 1, crude weapon: 2}, holdings: {coin: 4, hide: 1}, head_model: claude-sonnet-5-5}
+  Moor: {acting: [3, 6], min_adults: 2, crafts: [mine, smelt, copper tool, quarry, hearth], tools: {copper tool: 2, crude tool: 1}, holdings: {coin: 8}}
+  Cole: {acting: [2, 4], min_adults: 2, crafts: [mine, quarry], tools: {crude tool: 2}, holdings: {coin: 2}, head_model: claude-sonnet-5-5}
+  Miller: {acting: [2, 5], min_adults: 2, crafts: [water mill], tools: [crude tool], holdings: {coin: 10}, head_model: claude-sonnet-5-5}
+  Merchant: {acting: [2, 5], min_adults: 2, crafts: [], tools: {handcart: 1, pack: 1, bedroll: 2, harness: 1}, holdings: {coin: 40}}
+  Bell: {acting: [2, 5], min_adults: 2, crafts: [], tools: [crude tool], holdings: {coin: 12}, head_model: claude-sonnet-5-5}
+  Smith: {acting: [2, 4], min_adults: 2, crafts: [copper tool, coin, wooden plough], tools: {copper tool: 1, crude tool: 1}, holdings: {coin: 15}, head_model: claude-sonnet-5-5}
+bounds: {acting: [32, 45], children_max: 14, youths_min: 4, per_min: 2, per_spread: 9}
 sim: {start: -58, fertility: 0.12, leave: 0.6}
 cast: {head: claude-opus-5-5, opus_extra: 0, middle: claude-sonnet-5-5, sonnet_extra: 2, rest: claude-haiku-5-5, youth: claude-haiku-5-5}
