@@ -24,6 +24,7 @@ is in proposals.
 - D2-43: the basic techniques and the ten trades below.
 - D2-52: skill by practice on all work. D2-53: crops from the sowing day; the cold kills what is not hardy. D2-54: sowing work per
   unit of seed; broadcast or dibble.
+- D2-156, D2-157: wood: felling, cutting young growth, gathering firewood.
 - D2-58: grain spoils a little (house, bins, cellar). D2-59: the plot takes about 16 seed a sowing.
 - D2-60: the food ladder (whole 0.7, ground 1.0, bread 1.3). D2-61: the mill ladder. D2-62: dried meat.
 - D2-66: field works (ditches and banks on wet ground, terraces on hills). D2-67: irrigation later.
@@ -63,6 +64,15 @@ is in proposals.
 | cart | transport (transport.md) | | |
 | weapons | fighting and hunting | strength in a fight; a better catch hunting | crude, blade |
 | trap | at a forest site | catches game overnight while the trapper is elsewhere; checked by a visit; depletes game like hunting; can be emptied by whoever checks it | |
+
+### Wood (D2-156, D2-157)
+
+| Technique | Where | Takes | Work | Gives |
+|---|---|---|---|---|
+| gather firewood | a forest or scrub parcel | dead wood | 1 unit, no tool; basic; children may | about 3 firewood (fewer as the dead wood thins) |
+| cut young growth | a forest or scrub parcel | young growth | 1 unit, a tool | about 5 firewood |
+| fell | a forest parcel | trees | 2 units, a tool (crude 1.0, copper 2.0) | 3 timber; 3 firewood of brash left as dead wood |
+| burn charcoal | at a wood | 5 timber | 2 units (woodsman) | 1 charcoal |
 
 ### Field works (D2-66)
 
@@ -172,4 +182,4 @@ the soil in words ("tired", "good"), their seed in store, their tools and whethe
 [02l_farming.md](../../../review/37_growth/02l_farming.md), [02j_end_uses.md](../../../review/37_growth/02j_end_uses.md),
 [02d_ladders.md](../../../review/37_growth/02d_ladders.md); proposals/farming.md, proposals/tools.md.
 
-*Current as of 23 Oct 2026: H-6, D2-11 to D2-19, D2-23, D2-42, D2-43, D2-46, D2-47, D2-48, D2-52, D2-53, D2-54, D2-58, D2-59, D2-60, D2-61, D2-62, D2-64, D2-65, D2-66, D2-67, D2-130.*
+*Current as of 23 Oct 2026: H-6, D2-11 to D2-19, D2-23, D2-42, D2-43, D2-46, D2-47, D2-48, D2-52, D2-53, D2-54, D2-58, D2-59, D2-60, D2-61, D2-62, D2-64, D2-65, D2-66, D2-67, D2-130, D2-156, D2-157.*

@@ -16,6 +16,8 @@ rule) is still a proposal; this file lists only what decisions have fixed.
 - D2-19: a short metal ladder in first worlds.
 - D2-23: the tool set (production.md).
 - D2-24: copper, salt, documents, hides and timber are in the first worlds.
+- D2-157: fuel in heat; firewood a good (weight 1, 0.5 heat, burns only); timber 2 heat; charcoal 6 heat and burns in a hearth.
+- D2-160: each food's value raw (below).
 - D2-87: goods left in the open are held by nobody; food in the open spoils much faster than in a house (rates: calibrate).
 - D2-41: meat, dense but quick to spoil fresh. D2-42: milk, by a learned technique, from a cow in milk. D2-47: cheese.
 - D2-56: charcoal is a good; shore salt sun-dried, inland salt boiled; fields yield some fieldstone.
@@ -47,6 +49,27 @@ rule) is still a proposal; this file lists only what decisions have fixed.
 
 Every good is an item with a quantity, held by someone or stored in a container at a place, with a weight for carrying
 (transport.md) and, where it decays, a spoilage rate.
+
+## Fuel, in heat (D2-157)
+
+| Fuel | Heat | Weight | Got by |
+|---|---|---|---|
+| timber | 2 | 2 | felling standing trees, with a tool; also builds |
+| firewood | 0.5 | 1 | gathering dead wood by hand (children may), or cutting young growth with a tool; burns only |
+| charcoal | 6 | 2 | burning 5 timber at a wood (2 units, a woodsman); burns in a hearth or a forge |
+
+A hearth needs 1 heat a normal night (cooking) and 4 a cold one; a year is about 21 timber or 84 firewood. A fire draws from the
+household's fuel by its order (default: firewood, then timber, then charcoal). Fires in the open and in camps: lodging.md (D2-159).
+
+## Eating raw (D2-160)
+
+| Food | At a fire | Raw |
+|---|---|---|
+| bread, cheese, dried meat, milk, wild food | as listed | the same |
+| flour | 1.0 (porridge) | 0.5 |
+| grain, rye | 0.7 (boiled) | 0.2 |
+| fresh meat | 1.5 | 0.8 (a chance of sickness once disease exists, OPEN L-9) |
+| beans | 0.6 | 0 |
 
 ## Decay (D2-87)
 
@@ -92,4 +115,4 @@ past tomorrow").
 [02g §1-§1f](../../../review/37_growth/02g_resources_and_transport.md), [02j](../../../review/37_growth/02j_end_uses.md);
 proposals/resources_and_goods.md.
 
-*Current as of 23 Oct 2026: H-6, D2-1, D2-3, D2-6, D2-10, D2-11, D2-13, D2-17, D2-18, D2-19, D2-23, D2-24, D2-41, D2-42, D2-47, D2-56, D2-60, D2-62, D2-87, D4-9.*
+*Current as of 24 Oct 2026: H-6, D2-1, D2-3, D2-6, D2-10, D2-11, D2-13, D2-17, D2-18, D2-19, D2-23, D2-24, D2-41, D2-42, D2-47, D2-56, D2-60, D2-62, D2-87, D2-157, D2-160, D4-9.*

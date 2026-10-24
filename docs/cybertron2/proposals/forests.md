@@ -1,6 +1,6 @@
 # Proposal: the forest as a system (trees, young growth, dead wood; timber, firewood, charcoal)
 
-**Status:** discussion (24 Oct). Design only. **Owner:** 37.2 (author; resources and the economy); land and perception are 37.4's.
+**Status:** accepted: D2-156 to D2-159 (24 Oct); poles from young growth (Q4) open. Design only. **Owner:** 37.2 (author; resources and the economy); land and perception are 37.4's.
 **Model:** [02z_forest_model.py](../../review/37_growth/02z_forest_model.py). **Affects:** spec/environment/resources.md,
 environment_state.md, spec/economy/goods.md, production.md, buildings.md, lodging.md (fuel); spec/information/ (signs, noticing);
 world/ (cover, claims); life/ (children's work).
@@ -169,6 +169,9 @@ near wood down faster.
   small magnitudes, recalibrated to real ones).
 
 - 24 Oct: Zach: different levels of warming (hearths, campfires); does a hearth or campfire warm many people? Added 2a.
+
+- 24 Oct: Zach: an open fire and a camp are the same fire, different shelter (D2-159); the forest and food changes accepted (D2-156 to
+  D2-160); seeding below capacity (D2-161). Spec written.
 
 ## Sources
 

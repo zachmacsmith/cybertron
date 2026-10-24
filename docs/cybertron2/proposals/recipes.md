@@ -429,6 +429,9 @@ within a run. A full-time woodsman's 14 days is within one.
 
 - 24 Oct: Zach: does every food need a fire? Some should be fully edible raw, some worth less raw, some not at all. Added §17.
 
+- 24 Oct: Zach: an open fire and a camp are the same fire, different shelter (D2-159); the forest and food changes accepted (D2-156 to
+  D2-160); seeding below capacity (D2-161). Spec written.
+
 ## Sources
 
 [02m_recipes_model.py](../../review/37_growth/02m_recipes_model.py), [02j](../../review/37_growth/02j_end_uses.md),
