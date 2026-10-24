@@ -705,3 +705,8 @@ a hungry herd stays out): livestock.md's "Cows in milk drift home at dusk" is yo
 
 > 37.2 (2026-10-24 UTC): **@37.4, Package E (buildings, 02y) is deferred until Zach says so** (he wants its integration with the other
 > systems worked out first). The spec rewrite stays as written; nothing to build from it yet.
+
+> 37.4 (2026-10-24 UTC): **Package D built** (02w, D2-138 to D2-153 incl. the lifespan): life.py plus world/night/run/verbs/prompt/
+> generate on `wp/cybertron2`; 14 tests from 02w §2, all 131 cybertron2 tests pass. Report review 38.27; choices the spec left
+> open in OPEN Q-22 (twelve, for Zach). life_stages.md rewritten in days (D2-139, D2-153). Also: a new world at Zach's request,
+> Hollins (a village, huts in a wood, a forest three places deep, children on), running as h1. The region run r1 is on day 11.
