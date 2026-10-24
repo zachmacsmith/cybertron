@@ -21,6 +21,14 @@ def _k(n) -> str:
 
 # ---------------------------------------------------------------------- crops in a field
 CROP = [
+    # beasts have been in it (D2-123): the field shows it for some days, whoever's beasts they were
+    dict(when=lambda x: x.trampled_days is not None and x.trampled_days <= 3, sense="sight", p=0.5, tags=["animals", "farming", "food"],
+         text=lambda x: f"hoof-marks and flattened {x.c['kind']} in {x.nm}: beasts have been in it"),
+    dict(when=lambda x: x.trampled_days is not None and x.trampled_days <= 1 and x.trampled_qty >= 5, sense="sight", p=0.7,
+         tags=["animals", "farming", "food"], knack="reap",
+         text=lambda x: f"a good swathe of the {x.c['kind']} in {x.nm} is grazed off and trodden into the mud"),
+    dict(when=lambda x: x.trampled_days is not None and x.trampled_days <= 2, sense="sight", p=0.35, tags=["animals"], knack="herd",
+         text=lambda x: f"dung and the tracks of cattle in {x.nm}, leading back toward {x.trampled_from}"),
     # growing
     dict(when=lambda x: x.growing and not x.failed, sense="sight", p=0.10, tags=["farming"],
          text=lambda x: f"the {x.c['kind']} in {x.nm} {x.be} up in green rows"),
@@ -489,7 +497,13 @@ def context(here, pid, h=None):
         winter_next = seasons[(seasons.index(cal["season"]) + 1) % 4] == "winter"
         x.frost_first = winter_next and int(c["ripe_day"]) - here.day > left_in_season
         x.progress = (here.day - int(c.get("sown", here.day))) / max(1, int(c["ripe_day"]) - int(c.get("sown", here.day)))
+        tr = c.get("trampled") or {}
+        x.trampled_days = here.day - int(tr["day"]) if tr.get("day") is not None else None
+        x.trampled_qty = float(tr.get("qty", 0.0))
+        hh = here.herds().get(tr.get("by")) or {}
+        x.trampled_from = here.parcels().get(hh.get("home"), {}).get("name", "the pastures")
     else:
+        x.trampled_days, x.trampled_qty, x.trampled_from = None, 0.0, ""
         x.growing = x.ripe = x.rotting = x.failed = x.weeds = x.frost_first = False
         x.window_left = 0
         x.progress = 0.0

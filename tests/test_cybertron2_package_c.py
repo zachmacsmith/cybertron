@@ -439,3 +439,15 @@ def test_beasts_dying_on_the_road_leave_nothing_a_hidden_carcass_or_one_by_the_r
 def RD_things(w, rid, pos):
     from cybertron2.engine import roads as RD
     return list(RD.things_on(w, rid, pos).values())
+
+
+def test_a_trampled_field_shows_it_after_the_beasts_have_gone_home():
+    from cybertron2.engine import herds as HD, perceive as PC
+    w = barleyfield()
+    w.s["day"] = 3
+    w.s["parcels"]["bf_pasture"]["res"]["grass"]["S"] = 0.0
+    w.s["herds"]["cattle"]["hungry"] = 2
+    HD.wander(w, "cattle", {"herds": []})
+    assert w.s["parcels"]["north_field"]["crop"]["trampled"]["day"] == 3
+    texts = [f["text"] for f in PC.facts(Here(w, "Ancel"))]
+    assert any("hoof-marks and flattened barley in North Field" in t for t in texts)

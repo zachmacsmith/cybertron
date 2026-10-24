@@ -479,12 +479,15 @@ def fuse_prompt(here, mind, x) -> str:
     return "\n\n".join(L)
 
 
-def meeting_wave_prompt(here, mind, said, offers, acts) -> str:
+def meeting_wave_prompt(here, mind, said, offers, acts, last=False) -> str:
     L = ["## On the road, the meeting goes on"]
     if said:
         L.append("Said:\n" + "\n".join(f"- {x}" for x in said))
     if offers:
         L.append("Offers made (accept with {\"do\": \"accept\", \"offer\": id}):\n" + "\n".join(f"- {x}" for x in offers))
+    if last:
+        L.append("This is the last exchange before you part: an offer made now cannot be taken by anyone; accept one already made, "
+                 "or let it go.")
     L.append(f"You may answer and change what you mean to do: give your actions again (at most {acts}; they replace the ones "
              "before). Reply with JSON only.")
     return "\n\n".join(L)
