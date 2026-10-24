@@ -356,6 +356,21 @@ def _house_lines(here, mind) -> list:
     return out
 
 
+def saw_lines(mind) -> list:
+    """What the agent perceived on its last day (perceive.evening): felt, learned, what concerned it, what stood out, what it watched."""
+    t = mind.store["today"]
+    y = [f"- {x}" for x in t["felt"] + t["learned"]]
+    if t["concerned"]:
+        y += ["What concerned you:"] + [f"- {x}" for x in t["concerned"]]
+    if t["notice"]:
+        y += ["What stood out:"] + [f"- {x}" for x in t["notice"]]
+    if t["attended"]:
+        y += [f"You paid close attention to {t['attended']['target']}:"] + [f"- {x}" for x in t["attended"]["lines"]]
+    if t["glimpse"]:
+        y += ["In passing: " + "; ".join(t["glimpse"]) + "."]
+    return y
+
+
 def turn_prompt(here, mind, opening=True) -> str:
     a = mind.person
     cal = here.calendar()
@@ -369,15 +384,7 @@ def turn_prompt(here, mind, opening=True) -> str:
     rec = _yesterday_record(mind, opening)
     if rec:
         L.append("## What happened yesterday\n" + "\n".join(rec))
-    y = [f"- {x}" for x in t["felt"] + t["learned"]]
-    if t["concerned"]:
-        y += ["What concerned you:"] + [f"- {x}" for x in t["concerned"]]
-    if t["notice"]:
-        y += ["What stood out:"] + [f"- {x}" for x in t["notice"]]
-    if t["attended"]:
-        y += [f"You paid close attention to {t['attended']['target']}:"] + [f"- {x}" for x in t["attended"]["lines"]]
-    if t["glimpse"]:
-        y += ["In passing: " + "; ".join(t["glimpse"]) + "."]
+    y = saw_lines(mind)
     if here.day > 0:
         L.append("## What you saw yesterday\n" + ("\n".join(y) if y else "A quiet day: nothing stood out."))
     if t["dawn"]:

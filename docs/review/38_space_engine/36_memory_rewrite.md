@@ -20,7 +20,7 @@ replaced by the memory it has rewritten so far, then the end-of-stretch request.
 | 2 | Sonnet 5.5 | 600 (half) | keep_change, revise, most_days |
 | 2 | Haiku 4.5 | 1,200 | keep_change, revise |
 | 3 | Sonnet 5.5 (600), Haiku 4.5 (1,200) | | future_days (Zach's: "what might you still want to know") |
-| 4 | Haiku 4.5, Sonnet 5.5 (600) | | keep_change, future_days, keep_future, each with "(n more than last time; last time you wrote x of y)" (running) |
+| 4 | Haiku 4.5 (1,200), Sonnet 5.5 (600) | | keep_change, future_days, keep_future (Haiku); keep_change, keep_future (Sonnet); each with "(n more than last time; last time you wrote x of y)" |
 
 The instructions (each followed by `Write it in "memory". Reply with JSON only.`):
 
@@ -53,6 +53,11 @@ Helewise is born. Every memory below inherits that confusion; how each instructi
 | Haiku, full | keep_change | 67% | 79% | 72% | 0 / pregnancy dropped in 2 of 5 later memories |
 | Haiku, full | revise | 67% | 81% | 78% | 0 / pregnancy dropped in 4 of 5 |
 | Haiku, full | future_days | 90% | **92%** | **56%** | Payn's trip never written / pregnancy dropped in 1 of 5 |
+| Sonnet, half, with the length note | keep_change | 99% (Lucy over 3 times) | 56% | 84% | 0 / 0 |
+| Sonnet, half, with the length note | keep_future | 101% (Lucy over 3 times) | 62% | 86% | 0 / 0 |
+| Haiku, full, with the length note | keep_change | 74% | 88% | 69% | 0 / pregnancy dropped in 2 of 5 |
+| Haiku, full, with the length note | keep_future | 80% | 92% | 60% | 0 / pregnancy dropped in 2 of 5 |
+| Haiku, full, with the length note | future_days | 85% | 94% | 54% | Payn's trip never written / pregnancy dropped in 3 of 5 |
 
 (Key events: Lucy's pregnancy and the birth, Gunnild's clearing and Payn's trip, Gilbert's travels and agreements. "Names kept":
 of the people and places named in one memory, the share still named in the next.)
@@ -189,9 +194,30 @@ narrative of winter.
 7. **All instructions hoard mechanics**: store counts, offer IDs, unit costs, "offer syntax". Some of that is genuinely useful to
    an agent; much goes stale within a day.
 
-**Recommendation so far** (before round 4): keep_change; ceiling about 800 tokens; leave it to the agent (no forced events).
-Round 4 tests whether stating the growth and the last length ("n more than last time; last time you wrote x of y") makes Haiku edit
-rather than rewrite, and whether keep_future (keep_change's keeping with Zach's forward question) gets the planning without the
-churn.
+8. **Saying how much the length grew and how much was used last time** ("520 words (40 more than last time; last time you wrote
+   410 of 480)") **makes both models fill the budget** (Sonnet from about 93% to 100%, over it three times for Lucy) and **does not
+   make Haiku edit rather than rewrite** (its churn went up, 79% to 88% for keep_change). It reads as permission to write more.
+9. **keep_future** (keep_change's keeping with Zach's forward question) on Sonnet: as steady as keep_change, but it lost the
+   self-correction: Lucy's last memory says "I am WITH CHILD, time near", where keep_change with the same note says "Likely I am NOT
+   near birth or not with child at all. NEXT DAY: check my real state".
 
-*In progress, 24 Oct 2026.*
+Round 4's Lucy under keep_change with the note (Sonnet, half budget):
+
+> STATE: I have rested since winter day 5 believing my time was near, but as of spring day 2 there was still NO sign (no twinge,
+> no waters). I have wasted many units. Everyone (Roger, Jory, Ellen, Avice) is waiting on me. Likely I am NOT near birth or not
+> with child at all. NEXT DAY: check my real state; if I feel well, RESUME WORK, use all units, and resume daily trying with Roger.
+
+## 7. Recommendation
+
+- **Instruction: keep_change** ("keep what still matters, add from these days only what you will want later, and leave the rest").
+  Least churn, least padding, the only one that repeatedly caught its own stale belief.
+- **Length: the plain limit**, without "n more than last time"; the note makes agents fill the space.
+- **Budget: ceiling about 800 tokens** (about 600 words when old) instead of 1,200; the schedule's shape as built.
+- **Nothing forced by the engine**, as built.
+- **Weak models:** Haiku 4.5 does not keep a memory well under any instruction tried. Either keep the old queue for weak models,
+  or test a smaller budget and an explicit "edit, don't rewrite" instruction for them.
+- **Fixed alongside:** a mother is told she gave birth (17a8cda); the end-of-stretch request in rewrite mode now includes what the
+  agent saw that last day, which the old request left out.
+- **Next:** a short in-engine run in rewrite mode (the birth bug fixed) to see it working end to end, before deciding.
+
+*Current as of 24 Oct 2026.*
