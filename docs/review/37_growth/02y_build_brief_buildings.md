@@ -1,5 +1,7 @@
 # 02y: build brief for 37.4: buildings with space (Package E)
 
+**Deferred (24 Oct, Zach): not to be built until Zach says so; its integration with the other systems to be worked out first.**
+
 Session 37.2, 24 Oct 2026. For after Package D (children), whose new households will need houses. 37.2 does not build. Spec:
 **spec/economy/buildings.md** (37.2's, rewritten); decisions D2-154, D2-155; analysis 02x_housing_model.py. Numbers marked proposed
 in the spec are for Zach to confirm; build them as data so they change in one place.
