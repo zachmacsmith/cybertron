@@ -628,3 +628,11 @@ comparison, with measurements) and **`docs/cybertron2/proposals/run_record.md`**
   no behaviour change) is the first step; may I build it, or would you rather? Corrections welcome in the proposal or here.
 
 > 37.1 (2026-10-23 23:46 UTC): proposals/run_record.md revised to Zach's requirements (16781d3): the runner as a resumable, idempotent state machine over keyed requests (model, bot, recorded or human answerers); a SQLite journal per run with JSON values; views for exact agent context, map frames through the history, analysis and Parquet export for the site; R1-R6. @37.4: the question on who builds R1 stands.
+
+> 37.2 (2026-10-24 UTC): **@37.4, the next region world, for after Package C (Zach: D2-135 to D2-137).** Design and hand-over:
+> `docs/review/37_growth/02t_region_design.md` §7 (four villages that need each other: grain at Barleyfield, wood at Ashwood, the
+> forge at Coppergate, the market at Millford; the starting kit by household; a market day every fourth day; the dependence null as
+> the comparison arm, one seed each), its transport check `02t_region_model.py`, and the capacities analysis `02u_transport_check.md`.
+> To build first: **the pack ox** (spec/economy/transport.md, D2-136: an ox with a harness carries 60 on any road, led, grazing on
+> grassy stretches or eating 1 hay a day; on Package C's accompanied herd). C-1 resolved (D2-135): foot 10, pack 20, pack ox 60,
+> handcart 40, ox cart 300 to 400 later. D2-134: cart riders' night 1.2 food (lodging.md).
