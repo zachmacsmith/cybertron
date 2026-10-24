@@ -28,7 +28,7 @@ work. 106 cybertron2 tests pass (`tests/test_cybertron2_package_c.py` holds the 
 | c3 | barleyfield_gate: Randal (a Hale, an old quarrel with Bennet) opens the Barrows' gate on day 2, scripted | 18, 5 | $1.98 | Bennet saw it, shut it next morning and told Randal "Leave our gates alone" ("I'll leave your gates alone"); the cattle, fed on good grass with the barley next door unripe, stayed in |
 | c4 | barleyfield_c again (the dusk fix), 6 days | 18, 6 | $1.96 | both herds walked into the Reeds' ripe barley at night and home at dusk (about 20 of 210 trampled), the Barrows' through their fence; **nobody noticed**: found the cause (below) |
 | c5 | two_valleys_search: Osric sets off searching for the Cragg cattle, Simkin the other way, scripted | 26, 4 | $3.09 | Osric found the herd the first night, took it along "to give them back to their owners" (his own family's: below); a three-party meeting (Ancel, Osric, Simkin): three offers through agreements on the road, one with a promise ("5 rye now, 1 rye by day 6"), none taken; Simkin turned back to look for "the Wetham cattle" on Osric's word; at Wetham Simkin bought Ancel's copper tool for 8 grain |
-| c6 | barleyfield_c, 5 days (trampled-field signs) | 18, 5 | see §5 | see §5 |
+| c6 | barleyfield_c, 5 days (trampled-field signs) | 18, 5 | $1.84 | both herds in North Field on night 3, the Barrows' in East Field on night 4; the field's signs reached nearly everyone (fixed: §5); the Reeds fenced North Field and hurried the reaping; the Barrows knew their own cattle had been trampling and went to shut their gate |
 
 ## 3. Faults found by the runs and fixed
 
@@ -58,7 +58,12 @@ work. 106 cybertron2 tests pass (`tests/test_cybertron2_package_c.py` holds the 
 
 ## 5. c6
 
-(Filled in when the run ends.)
+The day after the herds were in North Field, 15 of 18 people saw both lines ("a good swathe of the barley in North Field is grazed off
+and trodden into the mud"; "hoof-marks and flattened barley"), wherever they had been: the rows were in the field's ordinary bundle,
+read by salience. Ancel told his son "Keep the cattle out of North Field; they trod down a good swathe"; Durand reaped the rest at
+once; Philippa, Annora and Ancel began a fence round North Field; Bennet told his household "Our cattle have been trampling" and
+Thurstan went to shut the Close's gate (already shut). Fixed after the run: the trampled field is a bundle read by the noticing rule
+(signs.py TRAMPLED), so those who work or pass there see it. Six runs, $21.10 in all.
 
 ## 6. Choices the spec left open
 
