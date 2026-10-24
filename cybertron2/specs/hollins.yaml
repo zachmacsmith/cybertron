@@ -158,6 +158,9 @@ customs:
 - {text: "Hunters say the deer come up out of a fern hollow north of Hollin Wood, and that past it the oaks are bigger than any here, and past
     them again a valley with water in it.", nodes: [hollins]}
 - {text: "Whoever clears new ground and sows it holds it, by the old custom, and so do their children.", nodes: all}
+# for the next run (Zach, 24 Oct: "seed the village with a custom for expanding their family and reach"); hollins_s7 / h1 had none
+- {text: "In Ockley they say a house is as strong as its children: a family that grows, and sends its grown sons and daughters out to
+    clear ground and build of their own, is still standing when others have gone.", nodes: all}
 incidents: []
 signs:
 - {day: 7, node: all, about: sky, sense: touch, text: "a white frost on the grass at dawn, the first of the year", salience: 0.6, tags: [season, farming]}
