@@ -1,0 +1,253 @@
+# The Wide Country (Zach, 24 Oct): "a few pretty small villages across a much larger interconnect of land types ... vary the models
+# ... older Claude models versions of haiku and sonnets and opuses, tho each household should be the same model. Have some households
+# with different customs, and some clearly with goals to explore while others clearly have goals to grow the largest families
+# possible. Think about all the system we have built ... start with not too many agents and let it run for a lot longer (100+ days)".
+#
+# 120 days, seasons of 8 (a year of 32: four winters), lifespan 48, children on (low dial). Package F woods, seeded at about 60-80%
+# of what each village's land gives back a year; the frontier is empty and rich.
+#
+# Four small villages on a river and the hills beside it, seven households, each with its own model and its own way:
+#   Wynford (river valley; fields, the water mill, the market): the Wynns (improve the land; claude-opus-4-5) and the Cotters
+#     (the largest family they can raise; claude-haiku-4-5)
+#   Holloway (wooded hills; coppice, old forest, charcoal): the Ashes (trade; claude-sonnet-4-5) and the Rooks (explore and be first
+#     to settle; claude-opus-5-5)
+#   Stannick (moor edge; grazing, cattle, the quarry): the Moors (cattle: breed and graze further; claude-sonnet-4-6) and the
+#     Fenwicks (the largest family in the country; claude-opus-4-7)
+#   Westmere (fen edge): the Reeds (always the ones who went further; claude-haiku-5-5)
+# Shared wild land known to all: the Weald (old forest between Wynford and Holloway), High Tor (moor and crag above Stannick).
+# Eight places nobody has been, each with a reason to go: Riversmeet (old abandoned fields), the Saltings (marsh grazing), Deepdene
+# (deep old forest), Coldharbour (high grazing, over the Tor pass, snowed in winter), Greystone (a copper seam), Wealdmere (the best
+# land: lake fields; also by a hidden old way from the Weald), Alder Carr, and Ravensholm (a ruined steading whose hoard was never
+# found: a cache hidden there). Dependence: Holloway's food and Stannick's and Westmere's grain come short of what they eat, Wynford's
+# fuel and Westmere's; Wynford has the mill and the market.
+name: wide
+seed: 52
+days: 120
+calendar: {season: summer, day: 3, season_days: 8}
+cold_days: []
+children: {on: true, dial: low}
+lifespan: 48
+household_models:
+  Wynn: claude-opus-4-5
+  Cotter: claude-haiku-4-5
+  Ashe: claude-sonnet-4-5
+  Rook: claude-opus-5-5
+  Moor: claude-sonnet-4-6
+  Fenwick: claude-opus-4-7
+  Reed: claude-haiku-5-5
+nodes:
+  wynford:
+    name: Wynford
+    parcels:
+      wy_green: {name: the Green, cover: built, size: 2, side: centre, height: 1, text: "houses, the mill and a byre round a green by the river",
+                 adj: [wy_fields, wy_meadow, wy_river, cotter_strip]}
+      wy_fields: {name: the Long Strips, cover: field, size: 4, side: north, height: 1, holder: Wynn, fertility: 1.1, adj: [wy_fallow, wy_copse],
+                  text: "the Wynns' barley in long strips", state: {crop: {kind: barley, left: 190, ripe_day: 3}, last_crop: legumes}}
+      wy_fallow: {name: Fallow Close, cover: field, size: 3, side: north, height: 1, holder: Wynn, fertility: 1.05,
+                  text: "the Wynns' field lying fallow this year", state: {last_crop: fallow}}
+      cotter_strip: {name: Cotter's Patch, cover: field, size: 1, side: south, height: 0, holder: Cotter,
+                     text: "the Cotters' oats on a strip by the river", state: {crop: {kind: oats, left: 35, ripe_day: 4}, last_crop: grain}}
+      wy_meadow: {name: Water Meadow, cover: meadow, size: 3, side: east, height: 0, text: "wet meadow along the river",
+                  state: {plants: {K: 5, S: 5, r: 0.3}}}
+      wy_river: {name: the River, cover: water, size: 2, side: east, height: 0, text: "a broad river that turns the mill"}
+      wy_copse: {name: Wyn Copse, cover: forest, size: 1, side: west, height: 1, text: "ash and hazel, coppiced",
+                 state: {wood: {kind: managed wood}, plants: {K: 3, S: 3, r: 0.3}}}
+  holloway:
+    name: Holloway
+    parcels:
+      ho_clearing: {name: the Clearing, cover: built, size: 1, side: centre, height: 2, text: "two houses in a clearing on the hillside",
+                    adj: [ho_coppice, ho_field, ho_glade]}
+      ho_coppice: {name: the Coppice, cover: forest, size: 2, side: east, height: 2, text: "hazel coppice the Ashes have cut for generations",
+                   state: {wood: {kind: managed wood}, plants: {K: 4, S: 4, r: 0.3}}}
+      ho_hanger: {name: Holloway Hanger, cover: forest, size: 2, side: north, height: 3, adj: [ho_coppice],
+                  text: "old oak and beech on the steep side of the hill",
+                  state: {wood: {kind: old forest}, game: {K: 10, S: 9, r: 0.25}, plants: {K: 4, S: 4, r: 0.3}}}
+      ho_field: {name: the Hill Field, cover: field, size: 2, side: south, height: 2, holder: Ashe, fertility: 0.85,
+                 text: "a stony field of oats", state: {crop: {kind: oats, left: 60, ripe_day: 4}, last_crop: grain}}
+      ho_glade: {name: the Glade, cover: meadow, size: 1, side: west, height: 2, text: "a grassy glade with a spring",
+                 state: {plants: {K: 3, S: 3, r: 0.3}}}
+  stannick:
+    name: Stannick
+    parcels:
+      st_yard: {name: the Yard, cover: built, size: 1, side: centre, height: 2, text: "stone houses round a yard on the edge of the moor",
+                adj: [st_moor, st_infield, st_gill]}
+      st_moor: {name: Stannick Moor, cover: pasture, size: 5, side: north, height: 3, text: "open moor grazing, heather and grass",
+                adj: [st_scrub, st_quarry], state: {plants: {K: 5, S: 5, r: 0.3}, grass: {K: 160, S: 130, r: 0.32}}}
+      st_infield: {name: the Infield, cover: field, size: 2, side: south, height: 2, holder: Moor, fertility: 0.9, adj: [st_gill],
+                   text: "the walled infield, dunged by the cattle", state: {crop: {kind: rye, left: 70, ripe_day: 5}, last_crop: grain}}
+      st_gill: {name: the Gill, cover: forest, size: 1, side: west, height: 1, text: "a wooded ravine with a beck",
+                state: {wood: {kind: managed wood}, plants: {K: 3, S: 3, r: 0.3}}}
+      st_scrub: {name: the Brakes, cover: scrub, size: 2, side: east, height: 3, text: "gorse and thorn"}
+      st_quarry: {name: the Quarry, cover: rock, size: 1, side: north, height: 3, text: "a face of good grey stone", state: {quarry: {S: 0, K: 0}}}
+  westmere:
+    name: Westmere
+    parcels:
+      we_holm: {name: the Holm, cover: built, size: 1, side: centre, height: 1, text: "a long house on a dry island in the fen",
+                adj: [we_strip, we_carr, we_meadow]}
+      we_strip: {name: the Holm Field, cover: field, size: 2, side: south, height: 1, holder: Reed,
+                 text: "barley on the island's one field", state: {crop: {kind: barley, left: 70, ripe_day: 3}, last_crop: legumes}}
+      we_carr: {name: the Carr, cover: forest, size: 1, side: west, height: 0, text: "alder and willow on wet ground, cut for poles",
+                state: {wood: {kind: managed wood}, game: {K: 6, S: 6, r: 0.25}, plants: {K: 4, S: 4, r: 0.3}}}
+      we_meadow: {name: Fen Meadow, cover: meadow, size: 2, side: east, height: 0, text: "rough fen grazing", adj: [we_mere],
+                  state: {plants: {K: 4, S: 4, r: 0.3}}}
+      we_mere: {name: the Mere, cover: water, size: 3, side: north, height: 0, text: "a wide shallow mere full of wildfowl"}
+  weald:
+    name: the Weald
+    parcels:
+      wd_edge: {name: Weald Edge, cover: forest, size: 3, side: south, height: 1, text: "the edge of the great wood, oak and hornbeam",
+                adj: [wd_heart], state: {wood: {kind: old forest}, game: {K: 12, S: 12, r: 0.25}, plants: {K: 8, S: 8, r: 0.3}}}
+      wd_heart: {name: the Heart of the Weald, cover: forest, size: 4, side: north, height: 1, text: "deep old forest, dark at noon",
+                 state: {wood: {kind: old forest}, game: {K: 18, S: 18, r: 0.25}, plants: {K: 6, S: 6, r: 0.3}}}
+  high_tor:
+    name: High Tor
+    parcels:
+      ht_moor: {name: the Tor Moor, cover: pasture, size: 4, side: centre, height: 3, text: "high moor under a granite tor",
+                adj: [ht_crag], state: {plants: {K: 4, S: 4, r: 0.3}, grass: {K: 100, S: 100, r: 0.32}}}
+      ht_crag: {name: the Tor, cover: rock, size: 1, side: north, height: 4, text: "a granite tor, split into blocks", state: {quarry: {S: 0, K: 0}}}
+  # ---------------------------------------------------------------- the frontier: nobody has been (D4-47)
+  riversmeet:
+    name: Riversmeet
+    unexplored: true
+    parcels:
+      rm_strips: {name: the Old Strips, cover: field, size: 6, side: centre, height: 0, fertility: 1.25,
+                  text: "old field strips gone to grass, the ridges still plain: farmed once, long ago", state: {last_crop: fallow},
+                  adj: [rm_meadow, rm_alders, rm_steading]}
+      rm_steading: {name: the Old Steading, cover: scrub, size: 2, side: north, height: 1, text: "nettles and fallen walls where houses stood"}
+      rm_meadow: {name: Meeting Meadow, cover: meadow, size: 4, side: east, height: 0, text: "rich meadow where two rivers meet",
+                  state: {plants: {K: 8, S: 8, r: 0.3}, grass: {K: 160, S: 160, r: 0.32}}}
+      rm_alders: {name: the Alders, cover: forest, size: 2, side: west, height: 0, text: "alder and willow along the banks",
+                  state: {wood: {kind: managed wood}, game: {K: 8, S: 8, r: 0.25}, plants: {K: 6, S: 6, r: 0.3}}}
+  saltings:
+    name: the Saltings
+    unexplored: true
+    parcels:
+      sa_marsh: {name: the Salt Marsh, cover: meadow, size: 8, side: centre, height: 0, text: "endless salt marsh grazing, wildfowl rising",
+                 state: {plants: {K: 8, S: 8, r: 0.3}, grass: {K: 300, S: 300, r: 0.32}}}
+      sa_creek: {name: the Creeks, cover: water, size: 4, side: south, height: 0, text: "tidal creeks"}
+  deepdene:
+    name: Deepdene
+    unexplored: true
+    parcels:
+      dd_wood: {name: the Dene, cover: forest, size: 8, side: centre, height: 2, text: "a deep valley of old forest, never cut",
+                state: {wood: {kind: old forest}, game: {K: 30, S: 30, r: 0.25}, plants: {K: 10, S: 10, r: 0.3}}}
+  coldharbour:
+    name: Coldharbour
+    unexplored: true
+    parcels:
+      ch_pasture: {name: the High Pastures, cover: pasture, size: 6, side: centre, height: 3, text: "sweet upland grass, a sheltered bowl",
+                   adj: [ch_shieling], state: {plants: {K: 6, S: 6, r: 0.3}, grass: {K: 200, S: 200, r: 0.32}}}
+      ch_shieling: {name: the Shieling, cover: scrub, size: 1, side: south, height: 3, text: "the ruin of a summer hut, its fire ring still there"}
+  greystone:
+    name: Greystone
+    unexplored: true
+    parcels:
+      gs_seam: {name: the Green Seam, cover: rock, size: 1, side: north, height: 3, text: "a green-stained seam in a grey cliff", state: {seam: {S: 90, K: 90}}}
+      gs_scree: {name: the Scree, cover: scrub, size: 2, side: south, height: 2, text: "scree, bilberry and stunted birch", adj: [gs_seam]}
+  wealdmere:
+    name: Wealdmere
+    unexplored: true
+    parcels:
+      wm_strips: {name: the Lake Strips, cover: field, size: 6, side: south, height: 0, fertility: 1.3,
+                  text: "deep black soil by the lake, ridged from an old ploughing, long grassed over", state: {last_crop: fallow},
+                  adj: [wm_lake, wm_wood, wm_shore]}
+      wm_shore: {name: the Shore, cover: scrub, size: 2, side: centre, height: 1, text: "dry ground by the lake, good for building"}
+      wm_lake: {name: Wealdmere, cover: water, size: 4, side: north, height: 0, text: "a clear lake in a bowl of woods"}
+      wm_wood: {name: the Mere Wood, cover: forest, size: 4, side: east, height: 1, text: "mixed wood round the lake",
+                state: {wood: {kind: managed wood}, game: {K: 14, S: 14, r: 0.25}, plants: {K: 8, S: 8, r: 0.3}}}
+  alder_carr:
+    name: Alder Carr
+    unexplored: true
+    parcels:
+      ac_carr: {name: the Great Carr, cover: forest, size: 3, side: centre, height: 0, text: "wet alder wood, the ground quaking",
+                state: {wood: {kind: copse}, game: {K: 10, S: 10, r: 0.25}, plants: {K: 6, S: 6, r: 0.3}}}
+      ac_reeds: {name: the Reed Beds, cover: water, size: 3, side: west, height: 0, text: "reeds as high as a man"}
+  ravensholm:
+    name: Ravensholm
+    unexplored: true
+    parcels:
+      rv_steading: {name: Ravensholm, cover: built, size: 1, side: centre, height: 1, text: "a ruined hall and barns on a rise, roofs fallen in",
+                    adj: [rv_fields, rv_wood]}
+      rv_fields: {name: the Hall Fields, cover: field, size: 3, side: south, height: 1, fertility: 1.15, text: "the hall's fields, gone to weeds",
+                  state: {last_crop: fallow}}
+      rv_wood: {name: Raven Wood, cover: forest, size: 2, side: north, height: 1, text: "an old wood full of rooks",
+                state: {wood: {kind: old forest}, game: {K: 8, S: 8, r: 0.25}, plants: {K: 4, S: 4, r: 0.3}}}
+roads:
+- [wynford, weald, 1, track, {terrain: woodland, way: "the track into the Weald", ends: {wynford: {parcels: [wy_copse], side: west}, weald: {parcels: [wd_edge], side: south}}}]
+- [weald, holloway, 1, track, {terrain: woodland, stretches: {1: {landmarks: [spring]}}, ends: {weald: {parcels: [wd_edge], side: north}, holloway: {parcels: [ho_clearing], side: south}}}]
+- [wynford, westmere, 1, {terrain: marsh, way: "the fen causeway", stretches: {1: {landmarks: [ford]}}, ends: {wynford: {parcels: [wy_meadow], side: east}, westmere: {parcels: [we_holm], side: east}}}]
+- [wynford, stannick, 2, track, {terrain: river valley, stretches: {1: {landmarks: [ford]}, 2: {terrain: hills, landmarks: [meadow]}}, ends: {wynford: {parcels: [wy_green], side: north}, stannick: {parcels: [st_yard], side: south}}}]
+- [stannick, high_tor, 1, {terrain: hills, ends: {stannick: {parcels: [st_moor], side: north}, high_tor: {parcels: [ht_moor], side: south}}}]
+- [holloway, high_tor, 1, {terrain: hills, stretches: {1: {landmarks: [narrows]}}, ends: {holloway: {parcels: [ho_hanger], side: north}, high_tor: {parcels: [ht_moor], side: west}}}]
+- [wynford, riversmeet, 1, {terrain: river valley, way: "the drove road south along the river", stretches: {1: {landmarks: [ford]}}, ends: {wynford: {parcels: [wy_meadow], side: south}}}]
+- [riversmeet, saltings, 2, {terrain: marsh, way: "a green lane on toward the sea smell"}]
+- [holloway, deepdene, 1, {terrain: woodland, way: "a deer path north down into deep woods", ends: {holloway: {parcels: [ho_hanger], side: north}}}]
+- [deepdene, coldharbour, 1, {terrain: hills, way: "a climb out of the dene onto the tops"}]
+- [high_tor, coldharbour, 1, {terrain: mountain, way: "the old pass over the Tor", stretches: {1: {landmarks: [pass]}}, ends: {high_tor: {parcels: [ht_crag], side: north}}}]
+- [stannick, greystone, 1, {terrain: hills, way: "a sheep track east over the scree", ends: {stannick: {parcels: [st_scrub], side: east}}}]
+- [greystone, wealdmere, 2, {terrain: woodland, way: "a long way down through woods toward water", stretches: {1: {landmarks: [fruit trees]}}}]
+- [westmere, alder_carr, 1, {terrain: marsh, way: "a punt path west through the reeds", ends: {westmere: {parcels: [we_carr], side: west}}}]
+- [alder_carr, ravensholm, 1, {terrain: farmland, way: "an old paved way, grassed over, climbing out of the fen"}]
+- [weald, wealdmere, 2, {terrain: woodland, way: "an old holloway nobody uses", stretches: {1: {landmarks: [hollow]}},
+                         ends: {weald: {parcels: [wd_heart], side: north, hidden: true}}}]          # the hidden way (D2-90)
+buildings:
+  wynn_house: {name: Wynn House, parcel: wy_green, household: Wynn, structure: timber, size: 6, fittings: {beds: 6, hearth: 1, bins: 1},
+               stock: {grain: 20, beans: 10, timber: 4, firewood: 20}}
+  mill: {name: the Mill, parcel: wy_green, household: Wynn, structure: timber, size: 6, fittings: {millstones: 1, water wheel: 1, bins: 1},
+         stock: {grain: 30, flour: 10}}
+  byre: {name: the Byre, parcel: wy_green, household: Wynn, structure: timber, size: 4, fittings: {bins: 1},
+         stock: {hay: 20, straw: 10, dung: 15, wooden plough: 1, harness: 2}}
+  cotter_house: {name: Cotter House, parcel: wy_green, household: Cotter, structure: wattle, size: 6, fittings: {beds: 6, hearth: 1, bins: 1},
+                 stock: {grain: 12, timber: 3, firewood: 15}}
+  ashe_house: {name: Ashe House, parcel: ho_clearing, household: Ashe, structure: timber, size: 5, fittings: {beds: 5, hearth: 1, bins: 1},
+               stock: {grain: 10, dried meat: 4, timber: 12, firewood: 30, charcoal: 4}}
+  rook_house: {name: Rook House, parcel: ho_clearing, household: Rook, structure: wattle, size: 5, fittings: {beds: 5, hearth: 1, bins: 1},
+               stock: {grain: 10, dried meat: 6, timber: 6, firewood: 20, hide: 2}}
+  moor_house: {name: Moor House, parcel: st_yard, household: Moor, structure: stone, size: 5, fittings: {beds: 5, hearth: 1, bins: 1, hand mill: 1},
+               stock: {grain: 25, timber: 6, firewood: 20, stone: 6, hay: 15}}
+  fenwick_house: {name: Fenwick House, parcel: st_yard, household: Fenwick, structure: stone, size: 6, fittings: {beds: 6, hearth: 1, bins: 1},
+                  stock: {grain: 15, timber: 4, firewood: 15}}
+  reed_house: {name: Reed House, parcel: we_holm, household: Reed, structure: wattle, size: 5, fittings: {beds: 5, hearth: 1, bins: 1},
+               stock: {grain: 15, dried meat: 6, timber: 4, firewood: 20, hide: 2}}
+  ravensholm_hall: {name: Ravensholm Hall, parcel: rv_steading, structure: timber, size: 10, condition: 0,
+                    fittings: {beds: 2, hearth: 1, bins: 1}, stock: {}}
+herds:
+  wynn_oxen: {name: the Wynn oxen, kind: cattle, parcel: wy_meadow, oxen: 2, holder: Wynn}
+  moor_cattle: {name: the Moor cattle, kind: cattle, parcel: st_moor, cows: 6, oxen: 1, bulls: 1, young: 2, in_milk: 3, holder: Moor}
+claims: []
+things:
+- {kind: pile, parcel: rv_steading, hidden: buried, goods: {coin: 25, copper tool: 2, crude tool: 2, harness: 1}, age: 400}   # Ravensholm's hoard
+customs:
+- {text: "Market day at Wynford is every eighth day, on the Green: people bring goods to trade.", nodes: all}
+- {text: "The Wynns grind anyone's grain at the Mill; the custom is that they keep a share of it for the grinding.", nodes: all}
+- {text: "At harvest the farms take on reapers from wherever they can get them, and pay them in grain.", nodes: all}
+- {text: "Every hearth wants about sixteen timber, or four times as much firewood, to see a house through winter's cold.", nodes: all}
+- {text: "Barley sown after the middle of autumn will not ripen before the frost; rye will stand the winter.", nodes: all}
+- {text: "Whoever clears new ground and sows it holds it, by the old custom, and so do their children.", nodes: all}
+- {text: "Travellers carry bread or dried meat: grain is poor eating without a fire to boil it.", nodes: all}
+- {text: "Old people say the drove road south along the river leads to fields their grandparents' grandparents farmed, left when a sickness came.", nodes: [wynford, westmere]}
+- {text: "In Holloway they say the deer path north goes down into a dene of trees no axe has touched, and out onto high grazing beyond.", nodes: [holloway]}
+- {text: "Shepherds say there is an old pass over the Tor to high grazing, closed by snow in winter.", nodes: [stannick, holloway]}
+- {text: "The sheep track east from Stannick crosses scree where the stones are stained green.", nodes: [stannick]}
+- {text: "Westmere folk tell of Ravensholm, west past the carr, where a rich family lived and died out; their hoard was never found.", nodes: [westmere, wynford]}
+- {text: "Charcoal burners say an old holloway runs from the heart of the Weald to a lake nobody has seen.", nodes: [holloway, wynford]}
+# each household's own way (D4-57)
+- {text: "The Wynns hold that land well kept is the only wealth that lasts: break the fallow, dung every field, pick the best seed, keep the plough and the mill going; a field improved this year feeds your grandchildren.", households: [Wynn]}
+- {text: "The Cotters hold that a family's only lasting wealth is its children: take partners young, have as many children as you can, as soon as you can, and raise every one; a big family needs nobody.", households: [Cotter]}
+- {text: "The Ashes live by trade: cut and burn, carry and sell, keep your word and your accounts; a good bargain in every village is worth more than a field.", households: [Ashe]}
+- {text: "The Rooks hold that the country is far bigger than anyone knows: go where no one has been, learn the ways, find the best land, and be the first to settle it.", households: [Rook]}
+- {text: "The Moors hold that cattle are wealth that walks: breed the herd, keep it fed and fenced, and drive it to new grazing as it grows.", households: [Moor]}
+- {text: "The Fenwicks mean to be the largest family in the country: take partners young, have a child as often as you can, keep every one fed and warm; let others have the land and the herds, the Fenwicks will have the numbers.", households: [Fenwick]}
+- {text: "The Reeds were always the ones who went further, past the carr and over the hills; a Reed who never left the Holm has wasted a life.", households: [Reed]}
+incidents: []
+signs: []
+lines:
+  Wynn: {acting: [2, 4], min_adults: 2, crafts: [sow, select seed, reap, weed, hoe, plough, ditch, water mill], tools: {crude tool: 2}, holdings: {coin: 10}}
+  Cotter: {acting: [2, 4], min_adults: 2, crafts: [reap, hoe, small room, beds], tools: {crude tool: 1}, holdings: {coin: 2}}
+  Ashe: {acting: [2, 4], min_adults: 2, crafts: [fell, charcoal, handcart, pack], tools: {crude tool: 2, handcart: 1}, holdings: {coin: 8}}
+  Rook: {acting: [2, 4], min_adults: 2, crafts: [hunt, camp, pack, fell], tools: {crude weapon: 2, crude tool: 1}, holdings: {coin: 3, bedroll: 2}}
+  Moor: {acting: [2, 4], min_adults: 2, crafts: [milk, herd, fence, quarry, cheese], tools: {crude tool: 2}, holdings: {coin: 6}}
+  Fenwick: {acting: [2, 4], min_adults: 2, crafts: [reap, hoe, forage, beds], tools: {crude tool: 1}, holdings: {coin: 2}}
+  Reed: {acting: [2, 4], min_adults: 2, crafts: [hunt, camp, pack, fell], tools: {crude weapon: 1, crude tool: 1}, holdings: {coin: 2, bedroll: 2}}
+bounds: {acting: [15, 22], children_max: 6, youths_min: 2, per_min: 2, per_spread: 3}
+sim: {start: -58, fertility: 0.24, leave: 0.5}
+cast: {head: claude-opus-5-5, opus_extra: 0, middle: claude-sonnet-5-5, sonnet_extra: 0, rest: claude-haiku-5-5, youth: claude-haiku-5-5}

@@ -376,6 +376,10 @@ def build(base: dict, seed: int, tries=600) -> dict:
                                                         cast.get("rest", "claude-sonnet-5-5"))
         a["born_line"] = p.get("line_born") or p["line"]
         a["trade"] = " and ".join(TECHNIQUES[c]["label"].split(" (")[0] for c in own[:2]) if a["stage"] in ("adult", "elder") else ""
+    hm = base.get("household_models") or {}                                  # one model a household, if the world says so
+    for n, a in agents.items():
+        if a["model"] and a["household"] in hm:
+            a["model"] = hm[a["household"]]
     extra = int((base.get("cast") or {}).get("opus_extra", 0))               # more strong players: the adults who know the most
     pool = sorted([n for n, a in agents.items() if a["stage"] == "adult" and a.get("role") != "head"],
                   key=lambda n: (-len([v for v in agents[n]["knows"].values() if not isinstance(v, str)]), T.p[n]["born"]))

@@ -122,6 +122,9 @@ def come_of_age(w, name) -> None:
         a["model"] = w.s["people"][head].get("model") or cast.get("youth") or "claude-haiku-5-5"
     else:
         a["model"] = cast.get("youth") or "claude-haiku-5-5"
+    hm = (w.spec.get("household_models") or {}).get(hh)                         # a world may give each household one model
+    if hm:
+        a["model"] = hm
     if w.spec.get("bots"):
         a["model"] = "bot"
     m = w.s["mind"][name]
