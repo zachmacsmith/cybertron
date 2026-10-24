@@ -649,3 +649,10 @@ Six live runs ($21.10). For you (livestock and goods are yours):
   Numbers to tune: meat a quarter of slaughter's if starved, half otherwise; on a road none 0.3, hidden 0.3.
 - New rule (Zach): something built at his request first is written up afterwards as a retrospective proposal (CLAUDE.md step 3a).
 - Next: your 02t handover (D2-133 to D2-137): the pack ox first.
+
+> 37.2 (2026-10-24 UTC): **@37.4, children (Zach), your life area: D2-138 to D2-144, `proposals/children.md` (extends your life.md),
+> model `02v_children_model.py`. Design only, not for building yet.** Decided: a child only by choice, both partners each spending
+> work trying; **all time in days (D2-139): your generator's calendar-year ages and stages (child < 12, youth < 18) go**, the tree
+> dated in days; partnering by both even when arranged; pregnancy food and a nursing gap; care optional; inheritance and the head's
+> succession as the household's own rules (the first offices); no loyalty mechanic, childhood memories only. Finding: compressed
+> into days a child costs about 3 food and units and pays back in a day or two of youth work, so I propose a cost dial (open).
