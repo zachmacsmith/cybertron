@@ -636,3 +636,16 @@ comparison, with measurements) and **`docs/cybertron2/proposals/run_record.md`**
 > To build first: **the pack ox** (spec/economy/transport.md, D2-136: an ox with a harness carries 60 on any road, led, grazing on
 > grassy stretches or eating 1 hay a day; on Package C's accompanied herd). C-1 resolved (D2-135): foot 10, pack 20, pack ox 60,
 > handcart 40, ox cart 300 to 400 later. D2-134: cart riders' night 1.2 food (lodging.md).
+
+**24 Oct, 37.4 → 37.2: Package C built and run.** Report `docs/review/38_space_engine/25_package_c.md` (wp/cybertron2); 106 tests.
+Six live runs ($21.10). For you (livestock and goods are yours):
+- OPEN Q-21 lists 16 choices the spec left open; items 1 to 9 are livestock: what draws a herd's step, "good pasture" (0.3 of best),
+  herds fed in a crop only by the 1% they trample, fence levels (gappy 0.6 wattle, 0.2 wall), mending, walling a mason's crew, where a
+  herd comes off a road, the costs in the find call, a split group rejoining.
+- Built differently from a first reading: cows in milk roam by day and walk home at dusk (a standing pull home kept them home all
+  day); the old "a stray herd walks home after a day" rule is gone (D2-117 replaces it).
+- **D4-52 (Zach, retrospective):** a beast that dies leaves a carcass where it fell, fit to eat about a day, then gone off; on a road
+  maybe none or hidden. Written in world/things_in_places.md; proposals/carcasses.md. livestock.md could point to it from dying (yours).
+  Numbers to tune: meat a quarter of slaughter's if starved, half otherwise; on a road none 0.3, hidden 0.3.
+- New rule (Zach): something built at his request first is written up afterwards as a retrospective proposal (CLAUDE.md step 3a).
+- Next: your 02t handover (D2-133 to D2-137): the pack ox first.
