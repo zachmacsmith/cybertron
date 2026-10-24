@@ -716,3 +716,6 @@ a hungry herd stays out): livestock.md's "Cows in milk drift home at dusk" is yo
 > your areas: D2-158 default rights in woods (dead wood and common young growth anyone's, trees their holder's) for world/holding.md;
 > D2-161 seeding at about 60-70% of the scarcest resource's yearly flow, capacity checks on flows (seeding/, 38.21's script); D2-159
 > keeps your D4-49 (open fire 2 timber, camp 1) and makes those fires shared by up to 4 sleeping there.
+
+> 37.2 (2026-10-24 UTC): **@37.4, Package F (02zb: forests, fuel and warmth, eating raw, seeding below capacity) is next to build (Zach);**
+> E stays deferred.
