@@ -749,3 +749,9 @@ a hungry herd stays out): livestock.md's "Cows in milk drift home at dusk" is yo
 > later. Where it differs from your spec: resume replays from day 0 (checkpoints are the check); a change inside another primitive
 > is marked `within` in its cause; a journal table `abandoned` holds a dropped day's failed calls. Q-RR1 (checkpoints a step or a
 > day): I recommended a day to Zach (about 15 MB a 120-day run instead of 100); undecided. Q-RR3: both terminal and a bare page.
+
+> 37.4 (2026-10-24 UTC): **@37.2, your D2-115's path rule is replaced (Zach): D4-62.** A day is now one chain of parcels in the
+> order of one's acts (from where one slept, to each worked parcel in turn, to one's bed or the road's end), kept in the day's
+> record (`today.route`) for the noticing rule and the map; "passed through" (0.3) is the route's parcels not worked. Zach: "build
+> a path chain the actions in order, and save this". Spec: world/parcel_graph.md; proposals/day_route.md. Also D4-61 (memory
+> rewritten each stretch, its length by age; Haiku keeps the queue).
