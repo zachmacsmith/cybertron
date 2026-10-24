@@ -18,6 +18,16 @@ Engine gaps are tracked in `docs/engine_gaps.md`; add to it when a design needs 
 worlds that grow (demography, economy, institutions acting on each other, environment, frontier, generated populations,
 coordination problems) are in `docs/review/37_growth/`.
 
+## Visuals are drawn from the engine
+
+Zach (24 Oct): any visualisation (maps, scenes, sprites, charts of a world) must be grounded in how the engine actually works.
+Before drawing anything, study the physics it shows (places and the parcel graph, covers and resources, buildings, lots and
+fittings, containers and goods, people and herds, verbs and their primitives, events, senses and noticing) from the code and
+the spec, and build the visual framework from the general model up: a picture may only show what the state holds, at the
+resolution the state has; anything the engine does not decide (a position inside a parcel, say) is a presentation choice,
+named as one and kept deterministic. Take data tables (covers, items, fittings, techniques) from the engine, never re-invent
+them. The c2viz grounding notes: `c2viz/ENGINE.md`.
+
 ## cybertron2: where design work goes
 
 Everything about cybertron2 (code, spec, proposals, notes) lives on branch `wp/cybertron2`; other branches are for the old engine.
