@@ -99,6 +99,8 @@ def night(w) -> dict:
         ate = _eat(w, place, stores, need, hearth)
         if rawf and ate + 1e-9 < need:                                         # food that wants a fire, eaten raw or not (D2-160)
             rec.setdefault("uncooked", {})[name] = rawf
+        if rawf and ate > 1e-9:
+            a["ate_raw"] = w.d                                                 # seen on them tomorrow (signs.PERSON)
         full = float(p["ration"]) * mult + extra                                # a short meal is a ration's worth at least
         if ate + 1e-9 >= need:
             a["hunger"], a["missed"] = min(0, a["hunger"] + 1), 0

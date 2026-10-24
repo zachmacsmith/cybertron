@@ -441,7 +441,7 @@ def _make(here, mind, a, party):
         else:
             res.append(f"Your try at {KN.label(tech)} failed and the materials are spoilt." + (f" (You are now {rose} at it.)" if rose else ""))
         here.event("make", f"{here.name} was {KN.label(tech)}" + ("" if ok else ", and it went wrong"), actor=here.name,
-                   about=[f"building:{site[1]}"] if site[0] == "building" else [], salience=0.2, tags=t["tags"], tech=tech)
+                   about=[f"{site[0]}:{site[1]}"] if site[0] in ("building", "parcel") else [], salience=0.2, tags=t["tags"], tech=tech)
         here.record("make", tech, party)
     return " ".join(res)
 
@@ -520,9 +520,13 @@ def _build_work(here, mind, bid, lvl, started=False):
     done = round(2 * KN.skill(mind, u["blueprint"]) * here.yield_mult(), 2)
     u["units_left"] = round(max(0.0, u["units_left"] - done), 2)
     here.record("build", u["blueprint"], None)
+    if u["units_left"] > 1e-9:                                                 # heard and seen at work (signs.BUILDING)
+        here.event("build", f"{here.name} was working on {b['name']}", actor=here.name, about=[f"building:{bid}"], salience=0.2,
+                   tags=["building"])
     if u["units_left"] <= 1e-9:
         bp = BLUEPRINTS[u["blueprint"]]
         here.apply("set", ref=("building", bid), field="unfinished", value=None)
+        here.apply("set", ref=("building", bid), field="built_day", value=here.day)
         if bp.get("fittings"):                                                 # a blueprint that comes fitted (a camp: D2-68)
             here.apply("set", ref=("building", bid), field="fittings", value=dict(bp["fittings"]))
         if bp.get("lasts"):

@@ -137,6 +137,8 @@ PASTURE = [
 HERD = [
     dict(when=lambda x: True, sense="sight", p=0.15, tags=["animals"],
          text=lambda x: f"{x.h['name']} on {x.nm}: {FM.herd_words(x.h)}"),
+    dict(when=lambda x: x.h.get("with") and x.h.get("pack"), sense="sight", p=0.5, tags=["animals", "travel"],
+         text=lambda x: f"{x.h['name']} on a halter on {x.nm}, kept close by {x.h['with']}"),
     dict(when=lambda x: x.h.get("last_calf") is not None and x.day - x.h["last_calf"] <= 1, sense="sight", p=0.45, tags=["animals"],
          text=lambda x: f"a new calf on unsteady legs among {x.h['name']}"),
     dict(when=lambda x: x.h.get("hungry", 0) >= 1, sense="sound", p=0.3, tags=["animals", "food"],
@@ -398,6 +400,14 @@ WILD = [
          p=0.1, tags=["timber"], text=lambda x: f"hazel and ash shoots springing thick from the stumps in {x.nm}"),
     dict(when=lambda x: x.pid in x.axes, sense="sound", p=0.6, tags=["timber"], own=0.2,
          text=lambda x: f"the ring of axes from {x.nm}"),
+    dict(when=lambda x: x.pid in x.axes, sense="sight", p=0.3, tags=["timber"],
+         text=lambda x: f"fresh white chips and new stumps in {x.nm}"),
+    dict(when=lambda x: x.p.get("was") == "forest" and x.p["cover"] == "scrub", sense="sight", p=0.3, tags=["timber", "fuel"], eye=True,
+         land=("timber", "bare"), text=lambda x: f"{x.nm} is a wood no longer: stumps and bramble where the trees stood"),
+    dict(when=lambda x: x.pid in x.charcoal, sense="smell", p=0.6, tags=["timber", "craft"],
+         text=lambda x: f"a sweet, heavy smoke from {x.nm}: someone is burning charcoal"),
+    dict(when=lambda x: x.pid in x.charcoal, sense="sight", p=0.3, tags=["timber", "craft"],
+         text=lambda x: f"a smoking mound of turf in {x.nm}: a charcoal burn"),
     dict(when=lambda x: x.r("seam") is not None and 0 < x.r("seam") < 0.35, sense="sight", p=0.25, tags=["mining"], knack="mine",
          text=lambda x: f"the seam at {x.nm} is nearly worked out"),
     dict(when=lambda x: x.r("seam") is not None and x.r("seam") >= 0.35, sense="sight", p=0.05, tags=["mining"],
@@ -439,10 +449,29 @@ BUILDING = [
          text=lambda x: f"wood smoke from {x.nm} on the cold air"),
     dict(when=lambda x: x.fire_place and not x.b["fire"] and x.was_cold and x.live, sense="sight", p=0.5, tags=["shelter", "danger"],
          text=lambda x: f"no smoke from {x.nm}'s roof after a cold night"),
-    dict(when=lambda x: x.timber < 2 and x.live, sense="sight", p=0.3, tags=["timber", "shelter"],
-         text=lambda x: f"the woodpile by {x.nm} is nearly gone"),
+    dict(when=lambda x: x.fuel < 4 and x.live and x.fire_place, sense="sight", p=0.3, tags=["timber", "shelter", "fuel"],
+         text=lambda x: f"the woodpile by {x.nm} is nearly gone: not a cold night's burning left"),
     dict(when=lambda x: x.timber >= 2, sense="sight", p=0.05, tags=["timber", "shelter"],
          text=lambda x: f"the woodpile by {x.nm}: {_amt(x.timber)}"),
+    dict(when=lambda x: x.firewood >= 2, sense="sight", p=0.06, tags=["timber", "shelter", "fuel"],
+         text=lambda x: f"bundles of sticks stacked against {x.nm}: {_amt(x.firewood)} firewood"),
+    # building and growing (D2-9): a frame going up, a house new or crowded, a house too big for its fire, a baby
+    dict(when=lambda x: x.b.get("unfinished"), sense="sight", p=0.5, tags=["building"],
+         text=lambda x: f"{x.nm} is going up: a frame of poles, the wattle half woven"),
+    dict(when=lambda x: x.b.get("unfinished") and x.worked_on, sense="sound", p=0.5, tags=["building"],
+         text=lambda x: f"mallets and the snap of withies from {x.nm}'s frame"),
+    dict(when=lambda x: x.new, sense="sight", p=0.4, tags=["building"],
+         text=lambda x: f"{x.nm} is new: the wattle still green, the daub not yet dry"),
+    dict(when=lambda x: x.crowded, sense="sight", p=0.35, tags=["shelter"],
+         text=lambda x: f"{x.nm} is crowded: people sleeping on the floor between the beds"),
+    dict(when=lambda x: x.half_cold, sense="touch", p=0.35, tags=["shelter", "fuel"],
+         text=lambda x: f"the far end of {x.nm} stayed cold in the night: one fire is not enough for it"),
+    dict(when=lambda x: x.ring_only and x.b["fire"], sense="smell", p=0.25, tags=["shelter"],
+         text=lambda x: f"smoke hangs in {x.nm}: an open fire ring, no hearth to draw it"),
+    dict(when=lambda x: x.babies, sense="sound", p=0.4, tags=["family"],
+         text=lambda x: f"a baby crying in {x.nm}"),
+    dict(when=lambda x: x.children, sense="sound", p=0.12, tags=["family"],
+         text=lambda x: f"children's voices about {x.nm}"),
     dict(when=lambda x: "bread" in x.made or "oven bread" in x.made, sense="smell", p=0.4, tags=["food"],
          text=lambda x: f"the smell of baking bread from {x.nm}"),
     dict(when=lambda x: {"grind", "mill", "water mill"} & x.made, sense="sound", p=0.3, tags=["food"],
@@ -486,6 +515,23 @@ PERSON = [
          text=lambda x: f"{x.who} has a load: " + ", ".join(f"{_amt(q)} {i}" for i, q in x.load)),
     dict(when=lambda x: x.travel_gear, sense="sight", p=0.25, tags=["travel"],
          text=lambda x: f"{x.who} has a {x.travel_gear} rolled on their back, as if for a journey"),
+    # what the newer systems show on a person: a pregnancy, a baby carried, a beast led, a journey's end, old age, a cold hearth
+    dict(when=lambda x: x.a.get("with_child"), sense="sight", p=0.5, tags=["family"],
+         text=lambda x: f"{x.who} moves slowly, heavy with child: her time is near"),
+    dict(when=lambda x: x.babies, sense="sight", p=0.4, tags=["family"],
+         text=lambda x: f"{x.who} carries a baby on her hip"),
+    dict(when=lambda x: x.led, sense="sight", p=0.6, tags=["animals"],
+         text=lambda x: f"{x.who} leads {x.led} on a halter"),
+    dict(when=lambda x: x.arrived, sense="sight", p=0.5, tags=["travel"],
+         text=lambda x: f"{x.who} has just come in, dusty and footsore from the road"),
+    dict(when=lambda x: x.arrived and x.weather in ("rain", "heavy rain", "snow"), sense="sight", p=0.4, tags=["travel"],
+         text=lambda x: f"{x.who} came in soaked through and shivering"),
+    dict(when=lambda x: x.failing, sense="sight", p=0.3, tags=["family", "death"],
+         text=lambda x: f"{x.who} is failing: thin and slow, sitting out more of the day than working"),
+    dict(when=lambda x: x.ate_raw, sense="sight", p=0.3, tags=["food", "fuel"],
+         text=lambda x: f"{x.who} was chewing raw grain: no fire to cook it on"),
+    dict(when=lambda x: x.partner, sense="sight", p=0.06, tags=["family"],
+         text=lambda x: f"{x.who} and {x.partner} keep close together"),
 ]
 
 
@@ -502,6 +548,8 @@ def context(here, pid, h=None):
     x.herds_on = lambda q: [k for k, g in here.herds().items() if g["parcel"] == q and FM.head(g) > 0]
     x.axes = {s.split(":", 1)[1] for e in here.events() if e.get("kind") == "work" and "fell" in str(e.get("tech") or e.get("text", ""))
               for s in e.get("about") or [] if s.startswith("parcel:")}
+    x.charcoal = {s.split(":", 1)[1] for e in here.events() if e.get("kind") == "make" and e.get("tech") == "charcoal"
+                  for s in e.get("about") or [] if s.startswith("parcel:")}
     standing = [here.parcels()[q]["name"] for q in p["adj"] if (here.parcels()[q].get("crop") or {}).get("area_left", 0) > 1e-6]
     x.adj_crop = standing[0] if standing else None
     fc = p.get("fence") or {}                                                  # the parcel's own fence (livestock.md, D2-130)
@@ -557,6 +605,15 @@ def building_context(here, bid):
                         fits=[FITTINGS[f]["label"] for f in b["fittings"] if f in FITTINGS and f not in ("beds",)])
     from cybertron2.engine.data import ITEMS
     x.food_left = sum(q * ITEMS[i]["food"] for i, q in st.items() if i in ITEMS)
+    x.firewood = st.get("firewood", 0.0)
+    x.fuel = sum(q * float(ITEMS[i].get("heat", 0.0)) for i, q in st.items() if i in ITEMS)
+    x.worked_on = any(e.get("kind") == "build" and f"building:{bid}" in (e.get("about") or []) for e in here.events())
+    x.new = not b.get("unfinished") and b.get("built_day") is not None and here.day - int(b["built_day"]) <= 3
+    x.crowded = len(live) > int(b["fittings"].get("beds") or 0) > 0
+    x.half_cold = x.was_cold and b.get("fire") and float(b.get("warm", 1.0)) < 0.9 and not x.camp
+    x.ring_only = bool(b["fittings"].get("fire ring")) and not b["fittings"].get("hearth") and not x.camp
+    stages = [w_.s["people"][n]["stage"] for w_ in (here._w,) for n in live]
+    x.babies, x.children = "infant" in stages, "child" in stages
     return x
 
 
@@ -569,6 +626,18 @@ def person_context(here, who):
                                 and n in w.s["institutions"][hh]["members"] for n, q in w.s["people"].items())
     x = SimpleNamespace(who=who, a=a, stage=w.s["people"][who].get("stage", "adult"), cold=here.cold(), bereaved=bereaved,
                         weapon=bool(w.weapon(who)))
+    from cybertron2.engine import herds as HD, life as LF
+    p = w.s["people"][who]
+    x.babies = bool(LF.infants_of(w, who)) and p.get("sex") == "f"
+    led = HD.led_by(w, who)
+    x.led = w.s["herds"][led[0]]["name"] if led else None
+    x.arrived = p.get("arrived") == here.day
+    from cybertron2.engine import environment as EV
+    x.weather = EV.weather(w)
+    d, L = LF.days_old(w, who), LF.lifespan(w)
+    x.failing = x.stage == "elder" and d is not None and d - LF.elder_from(L) >= L // 4
+    x.ate_raw = p.get("ate_raw") == here.day - 1
+    x.partner = a.get("partner") if a.get("partner") in here.people() else None
     x.gear = [i for i, q in a["carried"].items() if q >= 1 and ITEMS[i].get("seen") and not ITEMS[i].get("camp")]
     x.load = [(i, q) for i, q in a["carried"].items() if q >= 2 and ITEMS[i]["weight"] > 0]
     x.travel_gear = next((i for i, q in a["carried"].items() if q >= 1 and ITEMS[i].get("camp")), None)
@@ -984,6 +1053,10 @@ TRAVELLER = [
          text=lambda x: "figures far off on the road, hunched against the rain"),
     dict(when=lambda x: x.weather == "snow", sense="sight", p=0.5, tags=["travel"],
          text=lambda x: "dark figures far off against the snow"),
+    dict(when=lambda x: x.ox and x.weather != "fog", sense="sight", p=0.6, tags=["travel", "animals"],
+         text=lambda x: "an ox among the travellers far off, loaded with packs"),
+    dict(when=lambda x: x.baby and x.weather != "fog", sense="sight", p=0.3, tags=["travel", "family"],
+         text=lambda x: "one of the travellers far off carries a baby"),
 ]
 
 # What one woken in the night senses of a break-in (fuse._detect_raid: the watcher at the door, those asleep inside, neighbours).
@@ -1158,7 +1231,9 @@ def traveller_context(w, others, o, pos):
     load = sum(q * ITEMS[i]["weight"] for m in others for i, q in w.goods(w.hands(m)).items() if q > 1e-9)
     return SimpleNamespace(n=len(others), cart=any(w.goods(w.hands(m)).get("handcart", 0) >= 1 for m in others),
                            armed=any(w.weapon(m) for m in others), toward=w.s["nodes"][o["to"]]["name"], weather=EV.weather(w),
-                           terrain=st["terrain"] or "plain", snow=EV.snow_lying(w), laden=load >= 8 * len(others), season=w.calendar()["season"])
+                           terrain=st["terrain"] or "plain", snow=EV.snow_lying(w), laden=load >= 8 * len(others), season=w.calendar()["season"],
+                           ox=any(h.get("with") in others and h.get("pack") for h in w.s["herds"].values()),
+                           baby=any(w.s["people"][m]["stage"] == "infant" for m in others))
 
 
 def trace_context(w, x):

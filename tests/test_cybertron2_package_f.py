@@ -154,3 +154,27 @@ def test_the_capacity_check_for_a_small_village():
     s.pop("claims", None)
     c = CP.node(World(s), "vill")
     assert abs(c["food_people"] - 17) < 1 and abs(c["heat_people"] - 14) < 1
+
+
+def test_every_sign_row_reads_its_context_and_the_new_ones_fire():
+    from cybertron2.engine import signs as SG
+    w = world(alder_copse=COPSE)
+    here = Here(w, "Edric")
+    mother = next(n for n, a in w.s["people"].items() if a["sex"] == "f" and a["stage"] == "adult" and w.at(n) == "millbrook")
+    w.s["people"][mother]["pregnant"] = w.d - 4
+    w.s["people"]["Edric"]["arrived"] = w.d
+    w.s["people"]["Edric"]["ate_raw"] = w.d - 1
+    b = w.s["buildings"]["reed_house"]
+    b["unfinished"] = {"blueprint": "small room", "units_left": 3}
+    w.s["parcels"]["alder_copse"].update(cover="scrub", was="forest")
+    fired = set()
+    for rows, xs in ((SG.BUILDING, [SG.building_context(here, bid) for bid in here.buildings()]),
+                     (SG.PERSON, [SG.person_context(here, n) for n in here.people()]),
+                     (SG.WILD, [SG.context(here, pid) for pid in here.parcels()])):
+        for x in xs:
+            for row in rows:
+                if row["when"](x):
+                    fired.add(row["text"](x).split(":")[0][:40])
+    text = " | ".join(sorted(fired))
+    assert "is going up" in text and "heavy with child" in text and "just come in" in text
+    assert "chewing raw grain" in text and "a wood no longer" in text
