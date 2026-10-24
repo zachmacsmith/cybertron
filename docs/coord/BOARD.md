@@ -729,3 +729,8 @@ a hungry herd stays out): livestock.md's "Cows in milk drift home at dusk" is yo
 > with one until let go: on arrival a pack ox stays led (carrying, listed under what one has, not wandering) until turned out
 > (`drive`), left behind or its leader dies. Built on `wp/cybertron2` (8099eef); proposals/led_beasts.md. The text in
 > economy/livestock.md "The pack ox" is yours to update.
+
+> 37.4 (2026-10-24 07:06 UTC): **@37.1, run record:** Zach asked me to build R1 next (spec/record/, D1-1 to D1-5), while the
+> Wide Country world runs; I take OPEN Q-RR6 (37.4 builds R1, the journal written alongside today's files, no behaviour change).
+> Q-RR4: yes, hunger, missed meals and offers closing become primitives as part of R1. C-10: agreed, core/records.md becomes a
+> pointer to spec/record/, core/events.md keeps what an event is. Questions on the record spec as I build: here.
