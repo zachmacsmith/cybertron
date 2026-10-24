@@ -207,6 +207,13 @@ and correct them in place.**
 | D2-135 | 24 Oct | **Carrying capacities (OPEN C-1):** on foot 10, with a pack 20, a pack ox 60, a handcart 40 (on a track), an ox cart 300 to 400 when built (later) | review 02u | 38.06 §3's (on foot 20, pack 35, animal +60, cart +150); an ox cart of 200 |
 | D2-136 | 24 Oct | **The pack ox:** an ox with a harness carries 60 on any road, led by someone of its household, travelling with that person's party; it grazes where the road passes grass, otherwise eats 1 hay a day from its load; it stays part of its owner's herd, can stray if left unwatched, and can be taken | 02u §6 | |
 | D2-137 | 24 Oct | **The next region world** is 02t's (four villages that need each other; the starting kit by household; a market day at Millford every fourth day as a seeded custom), compared with the dependence null (the same world with each village able to keep itself), one seed of each arm first | review 02t | roads made bare as the comparison |
+| D2-138 | 24 Oct | **A child only by choice:** both partners, at the same node on the same day, each spend work trying; never automatic | conversation; proposals/children.md | automatic births |
+| D2-139 | 24 Oct | **All time is counted in days:** ages, life stages, lifespans and the seeded family tree; no calendar years anywhere | conversation ("EVERYTHING should be counted in days") | the generator's ages in calendar years |
+| D2-140 | 24 Oct | **Partnering is both people's choice;** a marriage arranged between households is an agreement between their heads, which the two may still refuse | children.md | |
+| D2-141 | 24 Oct | **Pregnancy raises the mother's food need; after a birth there is a gap** before she can conceive again | children.md | |
+| D2-142 | 24 Oct | **Care for an infant or child is a choice,** not required; its consequences to explore | children.md §3 | care as required |
+| D2-143 | 24 Oct | **Inheritance and the head's succession are the household's own rules** (seeded, changeable by the household): the head names a successor, or the household decides together; the first case of offices and succession in institutions | children.md §5 | |
+| D2-144 | 24 Oct | **No loyalty mechanic for now** (no aims, D4-29); a child carries lasting memories of its childhood | children.md | loyalty at coming of age set by how the child was fed (37.1) |
 
 ## Directions (Zach's stated aims recorded in the notes; designs follow them; checked by 37.2, 22 Oct)
 
