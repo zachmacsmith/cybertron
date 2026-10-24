@@ -70,3 +70,29 @@ def test_a_models_request_records_what_it_was_given(tmp_path, monkeypatch):
     assert "## " in JN.unblob(db, msg_sha) and JN.unblob(db, sys_sha) and json.loads(JN.unblob(db, schema_sha))["type"] == "object"
     parsed = JN.read(db, "SELECT parsed, attempts FROM responses WHERE key = ?", (key,))[0]
     assert json.loads(parsed[0])["why"] == "test" and json.loads(parsed[1])[0]["raw"]
+
+
+def test_a_usage_limit_is_waited_out_not_taken_for_an_answer(tmp_path, monkeypatch):
+    import datetime as dt
+    from cybertron import llm
+    now = dt.datetime(2026, 10, 24, 13, 10, tzinfo=dt.timezone.utc)
+    msg = 'CallError: claude -p error (exit 1): {"result": "You\'ve hit your session limit · resets 2:20pm (UTC)", "api_error_status": 429}'
+    assert R.limit_wait(msg, now) == 70 * 60 + 120
+    assert R.limit_wait("ValueError: no JSON in the reply", now) is None
+    calls, slept = [], []
+
+    def api(model, system, user, schema, thinking_budget, max_tokens):
+        calls.append(1)
+        if len(calls) <= 2:                                                # the first call and its own retry hit the limit
+            raise RuntimeError(msg)
+        raw = json.dumps({"why": "after the wait", "actions": []})
+        return raw, json.loads(raw), "", {}
+    monkeypatch.setattr(llm, "_api", api)
+    monkeypatch.setattr(R.time, "sleep", lambda s: slept.append(s))
+    from cybertron2.engine.world import World, load_spec
+    from cybertron2.engine.converse import Conversations
+    w = World(load_spec(SPEC))
+    w.s["today"] = R.blank_today()
+    n = w.agents_acting()[0]
+    out, meta = R.decide(w, n, "hello", "hello", "system", "api", Conversations(tmp_path, backend="api"))
+    assert out["why"] == "after the wait" and len(slept) == 1

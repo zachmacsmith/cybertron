@@ -76,6 +76,32 @@ def bot_fuse(w, name, x) -> dict:
     return {"actions": ([{"do": "alarm"}, {"do": "defend"}] if inside else [{"do": "defend"}])[: x["acts"]]}
 
 
+class Stopped(Exception):
+    """The run cannot go on (a usage limit that does not lift): it stops after saving, rather than play days nobody chose."""
+
+
+LIMIT_MAX_WAIT = 12 * 3600                                               # give up after half a day of waiting
+
+
+def limit_wait(error, now=None) -> float | None:
+    """Seconds to wait before asking again when a call failed for a usage or rate limit, not for its reply; None for any other
+    error. A limit is not an answer: a day must not go on as if everyone had chosen to do nothing (w1, day 25)."""
+    e = str(error or "")
+    if not any(k in e for k in ("hit your session limit", "usage limit", "rate limit", "rate_limit", '"api_error_status": 429', "429")):
+        return None
+    import datetime as dt
+    import re
+    now = now or dt.datetime.now(dt.timezone.utc)
+    m = re.search(r"resets (\d{1,2})(?::(\d{2}))?\s*(am|pm)\s*\(UTC\)", e)
+    if m:
+        h, mi = int(m.group(1)) % 12 + (12 if m.group(3) == "pm" else 0), int(m.group(2) or 0)
+        at = now.replace(hour=h, minute=mi, second=0, microsecond=0)
+        if at <= now:
+            at += dt.timedelta(days=1)
+        return (at - now).total_seconds() + 120
+    return 600.0
+
+
 def decide(w, name, text, opening, system, backend, conv, talk=None, schema=None, fuse=None, transit=False, kind="decision") -> tuple[dict, dict]:
     """One request to an agent's responder (execution.md): keyed, and written with its answer to the journal as they exist."""
     model = w.s["people"][name]["model"]
@@ -101,8 +127,18 @@ def decide(w, name, text, opening, system, backend, conv, talk=None, schema=None
     if J:
         c = ctx["conv"]
         J.request(key, name, kind, f"{name}@{c['day0']}", len(c["messages"]) // 2, c["system"], schema, ctx["text"], f"model:{model}")
-    out, reasoning, usage = llm.call(backend, model, ctx["conv"]["system"], sent, schema,
-                                     thinking_budget=int((w.spec.get("llm") or {}).get("thinking_budget", 2000)), attempts=attempts)
+    waited = 0.0
+    while True:
+        out, reasoning, usage = llm.call(backend, model, ctx["conv"]["system"], sent, schema,
+                                         thinking_budget=int((w.spec.get("llm") or {}).get("thinking_budget", 2000)), attempts=attempts)
+        pause = limit_wait((out or {}).get("_error"))
+        if pause is None:
+            break
+        if waited >= LIMIT_MAX_WAIT:
+            raise Stopped(f"the usage limit did not lift in {LIMIT_MAX_WAIT / 3600:.0f} hours")
+        print(f"usage limit on {name}'s call: waiting {pause / 60:.0f} min before asking again", flush=True)
+        time.sleep(pause)                                                  # the world waits: nothing happens until it is answered
+        waited += pause
     raw = attempts[-1].get("raw") if attempts and attempts[-1].get("ok") and not (out or {}).get("_error") else None
     usage = conv.after(ctx, raw, usage)
     if J:
@@ -466,6 +502,9 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
         users = {n: PR.turn_prompt(Here(w, n), Mind(w, n), opening=False) for n in names}
         replies, meta, errors = _parallel(lambda n: decide(w, n, users[n], openings[n], systems[n], backend, conv),
                                           {n: (n,) for n in names}, workers)
+        if any(str(e).startswith("Stopped(") for e in errors.values()):
+            print(f"run stopped on day {day + 1}: {next(e for e in errors.values() if str(e).startswith('Stopped('))}", flush=True)
+            break
         first = {n: dict(replies[n]) for n in names}
         results = {n: ([f"(Your reply could not be used, so you did nothing: {errors[n][:160]})"] if n in errors else []) for n in names}
         for n in names:
