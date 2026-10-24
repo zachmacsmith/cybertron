@@ -169,6 +169,10 @@ def talk(w, names, replies, results) -> dict:
             box[to]["also"].append(f"{n} explained {KN.label(tech)} to you: you now have a rough idea of it.")
             PC.store(w, to)["today"]["heard"].append(f"{n} explained {KN.label(tech)} to you.")
         for o in [o for o in (r.get("offers") or []) if isinstance(o, dict)][:3]:
+            kid = here.person(o.get("to"))
+            if kid and kid not in names and w.s["people"][kid]["stage"] == "child":
+                results[n].append(f"Refused: offer: {kid} is a child and takes no part in trade; make the offer to someone else")
+                continue
             try:
                 line = AG.make_offer(here, mind, o)
             except Refused as e:
@@ -180,7 +184,8 @@ def talk(w, names, replies, results) -> dict:
                 text = AG.offer_text(here, oid)
                 tgt = here.offer(oid)["to"]
                 for m in ([tgt] if tgt else [m for m in here.people(me=False) if m in names]):
-                    (box[m]["offers"] if tgt else box[m]["also"]).append(text)
+                    if m in box:                                               # only those taking part in the talk
+                        (box[m]["offers"] if tgt else box[m]["also"]).append(text)
         a = w.s["people"][n]
         for title in (r.get("open") or [])[:int(w.p["notes"]["open"])]:
             if title in a["notes"]:
