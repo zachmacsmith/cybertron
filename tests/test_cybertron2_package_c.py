@@ -478,6 +478,8 @@ def test_a_pack_ox_carries_60_goes_with_its_leader_grazes_or_eats_hay_and_comes_
     assert abs(w.goods(w.hands(lead))["hay"] - 1.0) < 1e-9
     next_day(w)
     assert w.at(lead) == "ashwood" and w.s["herds"][ox]["node"] == "ashwood" and w.s["herds"][ox]["pack_of"] == lead
+    assert ox in w.s["mind"][lead].get("beasts", {})                                # its leader knows it came in, and where it is
+    assert w.capacity(lead) < 60 and do(w, lead, do="travel", to="millbrook", lead="the cattle").startswith("You set off")   # to lead on
 
 
 def test_an_offer_to_a_child_goes_to_the_childs_parent():

@@ -329,6 +329,11 @@ def arrive_with(w, name, node) -> list:
                 for f in ("pos", "with"):
                     w.apply("set", node, ref=("herd", hid), field=f, value=None)
                 w.apply("set", node, ref=("herd", hid), field="pack_of", value=name)
+                from cybertron2.engine import perceive as PC                     # its leader knows where it is (r1: "the ox stayed
+                PC.remember_beasts(w, name, hid, "came with you")                 # behind", when it had come in and was grazing)
+                w.event(node, "arrive", f"{h['name']} came in with {name} and was turned out onto "
+                        f"{w.s['parcels'][w.s['herds'][hid]['parcel']]['name']}", actor=name, about=[f"herd:{hid}"], salience=0.5,
+                        tags=["animals", "travel"], concerns=[name], dawn=True)
             else:
                 off_road(w, hid, node, {"herds": []})
             out.append(hid)
