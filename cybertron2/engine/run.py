@@ -417,6 +417,15 @@ def night_lines(w, rec) -> dict:
             L.append(f"You ate {rec['ate'][n]:g}, less than a cold night asks.")
         if n in rec["cold_falls"]:
             L.append("The night in the cold left you starving.")
+        for b in (rec.get("life") or {}).get("births", []):                 # lived through, not merely seen (D2-141)
+            child = w.s["people"].get(b["child"]) or {}
+            kind = {"f": "a daughter", "m": "a son"}.get(child.get("sex"), "a child")
+            if n == b["mother"]:
+                L.append(f"In the night you gave birth to {kind}, {b['child']}" + ("." if child.get("alive", True) else ", who did not live."))
+            elif n == child.get("father") or n in (child.get("parents") or []):
+                L.append(f"In the night {b['mother']} gave birth to your {kind[2:] if kind != 'a child' else 'child'}, {b['child']}.")
+        if n in ((rec.get("life") or {}).get("lost") or []):
+            L.append("You lost the child you were carrying.")
         if n in rec["deaths"]:
             L.append("You died.")
         for b in w.homes(n):

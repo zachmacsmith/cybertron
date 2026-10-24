@@ -329,3 +329,21 @@ def test_nothing_is_paid_to_the_dead():
     w.apply("die", w.at(b), person=b, cause="old age")
     AG.settle(w)
     assert w.goods(w.hands(a))["grain"] == 5.0
+
+
+def test_the_mother_and_father_are_told_of_a_birth_and_a_mother_of_a_loss():
+    """Seen in w1: Lucy was never told she had given birth and went on believing she was with child (review 38.36)."""
+    import copy as _copy
+    from cybertron2.engine import run as _R
+    from cybertron2.engine.world import World as _World, load_spec as _load
+    w = _World(_copy.deepcopy(_load("cybertron2/specs/wide_s7.yaml")))
+    w.s["today"] = _R.blank_today()
+    mother = next(n for n, a in w.s["people"].items() if a["sex"] == "f" and a["stage"] == "adult" and a.get("partner"))
+    father = w.s["people"][mother]["partner"]
+    child = w.apply("born", w.at(mother), mother=mother, father=father)
+    rec = {"missed": [], "short": [], "ate": {}, "cold_falls": [], "deaths": [], "hearth": {}, "breaks": [],
+           "life": {"births": [{"mother": mother, "child": child}], "lost": [mother]}}
+    lines = _R.night_lines(w, rec)
+    assert any(f"you gave birth to" in x and child in x for x in lines[mother])
+    assert any(f"{mother} gave birth to your" in x for x in lines[father])
+    assert "You lost the child you were carrying." in lines[mother]

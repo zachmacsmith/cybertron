@@ -65,11 +65,11 @@ def conversation(st, memory):
     return msgs
 
 
-def play(agent, variant, model, backend, system, born, lifespan):
+def play(agent, variant, model, backend, system, born, lifespan, lo=M.DEFAULTS["lo"], hi=M.DEFAULTS["hi"]):
     from cybertron import llm
     memory, log = "", []
     for st in stretches(agent):
-        b = M.budget_tokens(st["end"] - born, lifespan)
+        b = M.budget_tokens(st["end"] - born, lifespan, lo, hi)
         words = int(round(b * 0.75 / 10.0)) * 10
         req = "\n\n".join([st["close"], f"This is the end of a stretch of days ({st['span']}). Tomorrow you will remember only your "
                            "memory, your notes and what you have always known, not the detail of these days.",
@@ -84,7 +84,7 @@ def play(agent, variant, model, backend, system, born, lifespan):
         log.append({"stretch": [st["start"], st["end"]], "budget_words": words, "written": len(new.split()), "memory": new,
                     "cost": (usage or {}).get("cc_equiv_usd")})
         memory = M.cut(new, words) if new else memory
-    return {"agent": agent, "variant": variant, "model": model, "log": log}
+    return {"agent": agent, "variant": variant, "model": model, "lo": lo, "hi": hi, "log": log}
 
 
 def main():
@@ -96,6 +96,8 @@ def main():
     ap.add_argument("--variants", nargs="+", default=list(M.PROMPTS))
     ap.add_argument("--out", required=True)
     ap.add_argument("--workers", type=int, default=6)
+    ap.add_argument("--lo", type=int, default=M.DEFAULTS["lo"])
+    ap.add_argument("--hi", type=int, default=M.DEFAULTS["hi"])
     a = ap.parse_args()
     run = json.loads((RUN / "run.json").read_text())
     spec = yaml.safe_load(SPEC.read_text())
@@ -103,7 +105,7 @@ def main():
     res = []
     with cf.ThreadPoolExecutor(a.workers) as ex:
         futs = {ex.submit(play, ag, v, a.model, a.backend, run["systems"][ag], int(spec["agents"][ag]["born"]),
-                          int(spec.get("lifespan") or 64)): (ag, v) for ag, v in jobs}
+                          int(spec.get("lifespan") or 64), a.lo, a.hi): (ag, v) for ag, v in jobs}
         for f in cf.as_completed(futs):
             r = f.result()
             res.append(r)

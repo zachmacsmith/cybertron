@@ -29,6 +29,8 @@ PROMPTS = {
                    "later, and leave the rest.",
     "most_days": "Rewrite your memory in at most {words} words. Most days are not worth keeping; some things are. Keep what still "
                  "matters from before.",
+    "revise": "Rewrite your memory in at most {words} words: keep what still matters, correct what has changed, and add from these "
+              "days only what you will want later.",
     "future_self": "Rewrite your memory in at most {words} words, for yourself in a season's time: what will you need to know?",
 }
 

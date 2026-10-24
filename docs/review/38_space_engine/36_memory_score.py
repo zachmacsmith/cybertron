@@ -54,14 +54,15 @@ def main(paths):
     by = defaultdict(list)
     for r in rows:
         s = score(r)
-        by[(r["model"], r["variant"])].append(s)
-        print(f"{r['model']:20s} {r['variant']:12s} {r['agent']:8s} len {s['len_ratio']:.2f} over {s['over']} churn {s['churn']:.2f} "
+        tag = f"{r['model']} hi{r.get('hi', 1200)}"
+        by[(tag, r["variant"])].append(s)
+        print(f"{tag:26s} {r['variant']:12s} {r['agent']:8s} len {s['len_ratio']:.2f} over {s['over']} churn {s['churn']:.2f} "
               f"persist {s['persistence']:.2f} {s['events']}")
     print("\nby variant (mean over agents):")
     for (m, v), ss in sorted(by.items()):
         f = lambda k: sum(s[k] for s in ss) / len(ss)
         kept = [e for s in ss for e in s["events"].values()]
-        print(f"{m:20s} {v:12s} len {f('len_ratio'):.2f} churn {f('churn'):.2f} persist {f('persistence'):.2f} "
+        print(f"{m:26s} {v:12s} len {f('len_ratio'):.2f} churn {f('churn'):.2f} persist {f('persistence'):.2f} "
               f"events never {sum(e == 'never' for e in kept)}/{len(kept)}")
 
 
