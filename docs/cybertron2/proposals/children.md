@@ -1,6 +1,6 @@
 # Proposal: children as a choice, counted in days (costs, care, growing up, old age, succession)
 
-**Status:** partly accepted: D2-138 to D2-145 (24 Oct); the rest to explore. Design only. **Owner:** 37.2 (author: the economics of
+**Status:** partly accepted: D2-138 to D2-149 (24 Oct); care (§3) open; the rest to explore. Design only. **Owner:** 37.2 (author: the economics of
 children); life, households and the engine's life step are 37.4's ([life.md](life.md), spec/life/), so this extends their proposal
 and goes to them. **Model:** [02v_children_model.py](../../review/37_growth/02v_children_model.py). **Affects:** spec/life/,
 spec/institutions/membership.md, spec/world/holding.md, spec/seeding/ (the tree in days), spec/agents/work.md.
@@ -98,13 +98,13 @@ law.md (37.3), so it should be built on them rather than as its own rule.
 
 ## Open questions
 
-1. Trying with more than one unit each, with diminishing returns (§2)?
+1. ~~Trying with more units~~ decided: D2-146.
 2. ~~The cost dial~~ decided as a world setting to explore (D2-145): a test with the dial low (about 3) and high (about 20) in the
    same world, reading whether and when couples choose to try, how many children are born and survive, and what it does to food.
-3. Care's consequences: survival, health and learning (§3)?
-4. Old age: 0.01 a day rising to double every 20 days (§4); when adulthood ends (in days)?
-5. The nursing gap (proposed 4 days) and the extra food in pregnancy (proposed 0.3 a day)?
-6. A child's menial work: by the household's standing order (D4-16), set by the head?
+3. Care's consequences: survival, health and learning (§3)? Zach to come back to it, with passing on customs to children.
+4. Old age: tuned to a chosen life expectancy under each health regime (D2-149); the numbers wait on choosing those expectancies.
+5. ~~The gap and pregnancy's food~~ decided: D2-147.
+6. ~~A child's menial work~~ decided: D2-148.
 
 ## History
 
@@ -116,6 +116,9 @@ law.md (37.3), so it should be built on them rather than as its own rule.
 
 - 24 Oct: Zach: the cost dial as something to explore, to see whether it works and how agents respond, and whether they decide to
   have children (D2-145).
+
+- 24 Oct: Zach decided D2-146 to D2-149; old age to be tuned by life expectancy under health regimes, extendable when disease comes;
+  care to come back to, possibly with passing on customs to children.
 
 ## Sources
 

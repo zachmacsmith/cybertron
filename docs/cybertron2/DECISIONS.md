@@ -217,6 +217,10 @@ and correct them in place.**
 | D2-143 | 24 Oct | **Inheritance and the head's succession are the household's own rules** (seeded, changeable by the household): the head names a successor, or the household decides together; the first case of offices and succession in institutions | children.md §5 | |
 | D2-144 | 24 Oct | **No loyalty mechanic for now** (no aims, D4-29); a child carries lasting memories of its childhood | children.md | loyalty at coming of age set by how the child was fed (37.1) |
 | D2-145 | 24 Oct | **A child's total cost before it becomes an agent is a world setting (the cost dial)**, the daily costs derived from it; to explore in runs whether and when agents choose children at a low and a high setting (about 3 and about 20 food and units) | children.md §2 | |
+| D2-146 | 24 Oct | **Trying for a child may take more than one unit from each partner,** with diminishing returns (about 0.20 a night for 1 unit each, 0.32 for 2, 0.39 for 3, 0.48 for 6) | children.md §2 | |
+| D2-147 | 24 Oct | **The nursing gap is about 4 days; pregnancy adds about 0.3 food a day** to the mother's need | children.md | |
+| D2-148 | 24 Oct | **A child's menial work is set by the household head's standing order** (D4-16) | children.md | |
+| D2-149 | 24 Oct | **Old age is tuned to a chosen life expectancy under each health regime:** death's daily hazard has an ageing term now, and disease (OPEN L-9, the scheduler's disease era) adds to it later | children.md §4 | fixed old-age numbers chosen for the run's length alone |
 
 ## Directions (Zach's stated aims recorded in the notes; designs follow them; checked by 37.2, 22 Oct)
 

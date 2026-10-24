@@ -238,7 +238,7 @@ Newest first. Ideas decided or rejected in conversation before 23 Oct are backfi
 | 23 Oct | Each state shows a bundle of signs, each with a sense, a chance, conditions and a knack; observers roll on their own | accepted: D4-48 | spec/information/perception.md |
 | 23 Oct | The senses across every system: what the observer brings, and coverage by system (Zach's worklist) | discussion | [senses.md](senses.md) |
 | 23 Oct | Life: partners, children by choice, growing up in rounds, death of old age, inheritance | discussion | [life.md](life.md) |
-| [children.md](children.md) | children only by choice, trying costs work; everything in days; pregnancy's food and the nursing gap; care optional; what a child costs and gives (nearly free when compressed: a cost dial); old age; succession by the household's rules | 37.2 (37.4 owns life) | partly accepted: D2-138 to D2-145 |
+| [children.md](children.md) | children only by choice, trying costs work; everything in days; pregnancy's food and the nursing gap; care optional; what a child costs and gives (nearly free when compressed: a cost dial); old age; succession by the household's rules | 37.2 (37.4 owns life) | partly accepted: D2-138 to D2-149 |
 | 23 Oct | Objects placed in the world: leave on a parcel, noticed by anyone, whose they are | discussion (to explore) | [objects_in_world.md](objects_in_world.md) |
 | 23 Oct | Fences, hedges and stone walls as field works that keep beasts in or out | discussion | [fences.md](fences.md) |
 | 23 Oct | The senses: an eye for the land (some have none) and signs of bareness scaled by how bare | partly accepted: D4-50 | [senses.md](senses.md) |
