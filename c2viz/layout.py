@@ -62,10 +62,9 @@ def world_layout(nodes, roads, seed=1) -> dict:
     scale = far / 2.0
     for a in ids:
         pos[a] = [pos[a][0] * scale, pos[a][1] * scale]
-    for it in range(600):                                          # stress majorisation by gradient steps, cooling
-        step = 0.1 * (1 - it / 600) + 0.01
+    for it in range(300):                                          # stress majorisation (localised SMACOF): stable for any size
         for a in ids:
-            gx = gy = 0.0
+            sw = sx_ = sy_ = 0.0
             for b in ids:
                 if a == b:
                     continue
@@ -73,10 +72,10 @@ def world_layout(nodes, roads, seed=1) -> dict:
                 cur = math.hypot(dx, dy) or 1e-6
                 want = dist[(a, b)]
                 wgt = 1.0 / (want * want)
-                gx += wgt * (cur - want) * dx / cur
-                gy += wgt * (cur - want) * dy / cur
-            pos[a][0] -= step * gx * far
-            pos[a][1] -= step * gy * far
+                sw += wgt
+                sx_ += wgt * (pos[b][0] + want * dx / cur)
+                sy_ += wgt * (pos[b][1] + want * dy / cur)
+            pos[a] = [sx_ / sw, sy_ / sw]
     xs, ys = [p[0] for p in pos.values()], [p[1] for p in pos.values()]
     if max(ys) - min(ys) > max(xs) - min(xs):                      # landscape: the long axis across
         pos = {a: [p[1], p[0]] for a, p in pos.items()}

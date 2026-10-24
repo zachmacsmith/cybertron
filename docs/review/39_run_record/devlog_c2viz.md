@@ -47,3 +47,16 @@ engine's state and imports nothing it changes.
   - The region at one scale for every place; people as the small figures; places' character by biome; no fog.
   - Checked with screenshots of region_s1 (bots, 12 days); no console errors. The places are small in their territories on the
     region's map: at one scale, a day's travel is far wider than a village.
+- 18:50 UTC: rebuilt on the engine, at Zach's instruction that visuals be grounded in how the engine works, from the general model
+  up. Five read-throughs of the engine (land and environment, buildings and goods, people and herds, actions, senses) gave
+  `c2viz/ENGINE.md`; CLAUDE.md now carries the rule. Buildings follow the spec's end state (rooms, spaces, ground), derived from
+  today's state by the spec's seeding rule until the engine stores rooms.
+  - `model.py` replaces `capture.py` and `frames.py`: it reads the run journal and asks the engine (signs.context and siblings,
+    spot_of, weather, roads.position, claims) for everything computed.
+  - `pixel.js` draws only that record. The audit of the first renderer (ENGINE.md §10) is fixed: reaped share from `area_left`,
+    sown share, the engine's crop stages, woods by S/K, cattle by role, buildings from rooms, scrub lots, spot_of, weather and snow
+    from the engine, roads from their ends.
+  - `layout.py`: the world layout diverged for 14 places (wide_s7); now a stable stress majorisation.
+  - Checked on two bot runs of the current engine (region_s1 and wide_s7, 14 days each, no model calls); no console errors.
+    Found by the model, not visible before: region_s1's Willow Holt starts as scrub and is cleared to a field by day 6; Deep Wood
+    is felled to scrub by day 12; Coppergate's yard is overfull under the spec's ground rule.

@@ -97,9 +97,9 @@
       P.put(x, y + 2, "#5a3a1c");
       return;
     }
-    if (snow) {                                                                   // bare branches in winter
-      P.put(x, y + 1, "#5a3a24"); P.put(x, y, "#5a3a24"); P.put(x - 1, y - 1, "#6b4a32"); P.put(x + 1, y - 1, "#6b4a32"); P.put(x, y - 2, "#6b4a32");
-      if (r > 2) { P.put(x - 2, y - 2, "#7a5a3c"); P.put(x + 2, y - 2, "#7a5a3c"); }
+    if (snow) {                                                                   // bare in winter: a haze of twigs over a trunk
+      for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) if (dx * dx + dy * dy <= r * r + 0.5) P.mix(x + dx, y + dy - 1, "#7a6656", 0.42);
+      P.put(x, y + 1, "#5a3a24"); P.put(x, y, "#6b4a32"); if (R() < 0.6) P.put(x + (R() < 0.5 ? -1 : 1), y - 1, "#6b4a32");
       return;
     }
     const pal = LEAF[season === "autumn" && kind !== "willow" ? "autumn" : season === "spring" ? "spring" : "summer"];
@@ -144,52 +144,112 @@
     dung: "carry", smelt: "make", charcoal: "make", coin: "make" };
   const toolFor = (a) => !a ? null : TECH_TOOL[a.tech] || (a.verb === "make" || a.verb === "build" ? "make" : a.verb === "gather" ? "forage" : a.verb === "work" ? "dig" : a.verb === "give" || a.verb === "take" ? "carry" : null);
   function tool(P, x, y, k) { for (const [dx, dy, c] of TOOLS[k] || []) P.put(x + dx, y + dy, c); }
-  function cow(P, x, y, R, kind) {
-    const body = kind === "oxen" || R() < 0.3 ? "#a0663a" : "#f4efe6", spot = body === "#f4efe6" ? "#2a2420" : "#6b4423";
-    for (let dx = 0; dx < 4; dx++) for (let dy = 0; dy < 2; dy++) P.put(x + dx, y + dy, (dx === 1 && dy === 0 && R() < .7) ? spot : body);
-    P.put(x + 4, y - 1, body); P.put(x + 4, y, body); P.put(x, y + 2, "#4a2f17"); P.put(x + 3, y + 2, "#4a2f17"); P.dark(x + 4, y + 2, .3); P.dark(x + 1, y + 2, .25);
+  // ---------------------------------------------------------------------------------------------------- buildings (the spec's model)
+  // A building is its rooms (economy/buildings.md, D2-154): each room's floor in spaces, drawn at SPACE pixels a space (a
+  // presentation choice: built ground full to its 24 spaces a unit is then half covered, leaving lanes and yards). Ground-floor
+  // rooms stand in a row, the largest first; upper storeys (stone only) raise the walls. Seen from outside: its structure, its
+  // condition, the frame of one being built, a fresh one, the door, smoke when its fire was lit, chimneys for its fires, a water
+  // wheel, a woodpile from what its store holds of timber and firewood, and the day's work at it (made).
+  const SPACE = 54;
+  function roomDims(floor) { const fw = Math.max(9, Math.round(Math.sqrt(floor * SPACE * 1.35))); return [fw, Math.max(7, Math.round(floor * SPACE / fw))]; }
+  function shape(b) {
+    const rooms = (b.rooms || [{ floor: 6, storey: 1 }]).filter((r) => (r.storey || 1) === 1).slice().sort((a, c) => c.floor - a.floor);
+    const up = (b.rooms || []).filter((r) => (r.storey || 1) > 1).length, parts = []; let x = 0, h = 0;
+    for (const r of rooms) { const [w, hh] = roomDims(r.floor); parts.push({ x, w, h: hh, floor: r.floor }); x += w - 1; h = Math.max(h, hh); }
+    const lift = up ? 4 * Math.min(2, up) : 0;
+    for (const p of parts) p.y = h - p.h + (p === parts[0] ? 0 : 0);
+    return { w: x + 1, h: h + lift, lift, parts, shed: !!(b.fittings || {}).woodshed };
   }
-  function grave(P, x, y) { P.put(x, y - 2, "#c8c4bc"); P.put(x - 1, y - 1, "#c8c4bc"); P.put(x, y - 1, "#c8c4bc"); P.put(x + 1, y - 1, "#c8c4bc"); P.put(x, y, "#a8a29a"); P.put(x - 1, y + 1, "#7a5a3a"); P.put(x, y + 1, "#7a5a3a"); P.put(x + 1, y + 1, "#7a5a3a"); }
-  function sack(P, x, y) { P.put(x, y - 1, "#a8946a"); P.put(x - 1, y, "#c9b38a"); P.put(x, y, "#c9b38a"); P.put(x + 1, y, "#b8a278"); P.dark(x + 2, y, .3); }
-  function bones(P, x, y) { P.put(x - 1, y, "#f0ece0"); P.put(x, y, "#f0ece0"); P.put(x + 1, y, "#f0ece0"); P.put(x, y - 1, "#e0dccc"); }
-  // a building: by structure, its fittings, smoke when the fire is lit, the damage, the frame of one being built
-  function building(P, x0, y0, w, h, b, R) {
-    const st = b.structure || "timber", roof = ROOF[st] || ROOF.timber, wall = WALL[st] || WALL.timber;
-    for (let y = y0 + 1; y <= y0 + h; y++) P.dark(x0 + w, y, 0.38);
-    for (let x = x0 + 1; x <= x0 + w; x++) P.dark(x, y0 + h, 0.38);
-    if (b.unfinished) { for (let x = x0; x < x0 + w; x++) { P.put(x, y0 + h - 1, "#8a5a2a"); if (x % 2 === 0) P.put(x, y0 + h - 3, "#a0662f"); } for (let y = y0 + 1; y < y0 + h; y++) { P.put(x0, y, "#8a5a2a"); P.put(x0 + w - 1, y, "#8a5a2a"); } return; }
-    if (st === "camp") { for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (Math.abs(x - (w - 1) / 2) <= y * w / (2 * h) + 0.3) P.put(x0 + x, y0 + y, x < w / 2 ? roof[1] : roof[0]); P.put(x0 + (w >> 1), y0 + h - 1, "#3a2414"); P.put(x0 + w + 1, y0 + h - 1, "#e8803a"); P.put(x0 + w + 1, y0 + h - 2, "#f0c060"); return; }
-    const wy = h - 2 - (h > 7 ? 1 : 0);
-    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-      if (st === "wattle" && y < wy && Math.abs(x - (w - 1) / 2) > (y + 1.5) * w / (2 * wy)) continue;
-      let c; if (y === 0) c = roof[2]; else if (y < wy) c = x === 0 ? roof[1] : roof[0]; else c = x === 0 ? "#d8ccb4" : wall;
-      if (st === "stone" && y >= wy && (x + y) % 3 === 0) c = "#c4beb2";
-      if (y === wy && (x === 1 || x === w - 2) && w > 4) c = "#7aaabe";
-      if (y === h - 1 && x === (w >> 1)) c = b.door === "open" ? "#2a1a10" : "#6b4423";
-      P.put(x0 + x, y0 + y, c);
+  const FIREPLACES = ["hearth", "fire ring", "oven", "anvil"];
+  function drawBuilding(P, x0, y0, b, R) {
+    const S = shape(b), st = b.structure || "timber", roof = ROOF[st] || ROOF.timber, wall = WALL[st] || WALL.timber, fit = b.fittings || {};
+    const ruined = b.condition === 0, damaged = b.condition === 1, made = new Set(b.made || []);
+    for (let y = y0 + 2; y <= y0 + S.h; y++) P.dark(x0 + S.w, y, 0.32);                       // shadow
+    for (let x = x0 + 2; x <= x0 + S.w; x++) P.dark(x, y0 + S.h, 0.32);
+    if (st === "camp") {                                                                          // a lean-to of branches by a fire ring
+      const w = S.w, h = S.h, sag = b.nights_left != null && b.nights_left <= 2 ? 2 : 0;
+      for (let y = sag; y < h - 2; y++) for (let x = 0; x < w - 5; x++) if (x <= (y - sag + 1) * (w - 5) / (h - 2 - sag)) P.put(x0 + x, y0 + y, (x + y) % 3 ? roof[0] : roof[2]);
+      const fx = x0 + w - 3, fy = y0 + h - 3;
+      for (const [a, c] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) P.put(fx + a, fy + c, "#8a8a8a");
+      if (b.fire) { P.put(fx, fy, "#f08a3a"); P.put(fx, fy - 1, "#f0c060"); smoke(P, fx, fy - 3); } else P.put(fx, fy, "#3a2a1a");
+      return S;
     }
-    const fit = b.fittings || {};
-    if (fit["water wheel"]) { const cx = x0 - 3, cy = y0 + h - 3; for (let a = 0; a < 8; a++) P.put(cx + Math.round(2 * Math.cos(a * .785)), cy + Math.round(2 * Math.sin(a * .785)), "#8a5a2a"); P.put(cx, cy, "#6b4423"); }
-    if (fit.anvil) { P.put(x0 + w - 2, y0 - 1, "#4a4a52"); P.put(x0 + w - 2, y0 - 2, "#4a4a52"); P.put(x0 + w - 1, y0 + h - 2, "#f08a3a"); }
-    if (fit.oven) { P.put(x0 + w, y0 + h - 2, "#9a6b47"); P.put(x0 + w + 1, y0 + h - 2, "#9a6b47"); P.put(x0 + w, y0 + h - 1, "#7a4b2f"); P.put(x0 + w + 1, y0 + h - 1, "#7a4b2f"); }
-    if (fit.granary) { P.put(x0 - 2, y0 + h - 4, "#c8a050"); P.put(x0 - 3, y0 + h - 4, "#c8a050"); P.put(x0 - 2, y0 + h - 3, "#8a5a2a"); P.put(x0 - 3, y0 + h - 1, "#8a5a2a"); P.put(x0 - 2, y0 + h - 1, "#8a5a2a"); }
-    if (fit.millstones && !fit["water wheel"]) { P.put(x0 - 2, y0 + h - 2, "#9a9aa0"); P.put(x0 - 3, y0 + h - 2, "#9a9aa0"); }
-    if (b.fire) { const sx = x0 + w - 2; P.put(sx, y0 - 1, "#6a6a72"); P.put(sx, y0 - 3, "#d8d8d8"); P.put(sx + 1, y0 - 4, "#e8e8e8"); P.put(sx, y0 - 5, "#f0f0f0"); P.put(sx + 1, y0 - 7, "#f4f4f4"); }
-    if (b.condition === 1) for (let k = 0; k < Math.max(2, w >> 1); k++) P.put(x0 + 1 + ((R() * (w - 2)) | 0), y0 + 1 + ((R() * Math.max(1, wy - 1)) | 0), "#2a1a10");
-    if (b.condition === 0) { for (let x = x0; x < x0 + w; x++) for (let y = y0; y < y0 + wy; y++) if (R() < 0.6) P.put(x, y, "#5a4a3a"); for (let k = 0; k < w; k++) P.put(x0 - 1 + ((R() * (w + 2)) | 0), y0 + h + ((R() * 2) | 0), "#8a8478"); }
+    const wallH = (p) => Math.max(4, Math.round(p.h * 0.42)) + (p === S.parts[0] ? S.lift : 0);
+    S.parts.forEach((p, k) => {
+      const px = x0 + p.x, py = y0 + p.y - (k === 0 ? 0 : 0), wh = wallH(p), rh = p.h - Math.max(4, Math.round(p.h * 0.42)), top = py + (k === 0 ? 0 : S.lift);
+      const ph = p.h + (k === 0 ? S.lift : 0), yW = top + rh;                                   // roof above, the front wall below
+      if (b.unfinished) {                                                                         // a frame, its walls up by the work done
+        const done = b.unfinished.done || 0, upto = top + ph - 1 - Math.round((ph - 1) * done);
+        for (let y = top; y < top + ph; y++) for (let x = 0; x < p.w; x++) {
+          const post = x === 0 || x === p.w - 1 || x % 5 === 0;
+          if (y >= upto && (post || y === top + ph - 1 || (st === "wattle" ? (x + y) % 2 === 0 : y % 3 === 0))) P.put(px + x, y, y >= upto ? (st === "stone" ? "#c4beb2" : "#a0662f") : "#8a5a2a");
+          else if (post && y >= top + 2) P.put(px + x, y, "#8a5a2a");
+        }
+        return;
+      }
+      for (let y = top; y < top + ph; y++) for (let x = 0; x < p.w; x++) {
+        let c;
+        if (y < yW) { c = y === top ? roof[1] : y === yW - 1 ? roof[2] : (x === 0 ? roof[2] : roof[0]); if ((y - top) % 3 === 2 && x % 2 === 0) c = roof[2]; }
+        else { c = x === 0 ? "#d8ccb4" : wall; if (st === "stone" && (x + 2 * y) % 4 === 0) c = "#c4beb2"; if (st === "wattle" && (x + y) % 3 === 0) c = "#d8c08c";
+          if (y === yW + 1 && x % 5 === 2 && x < p.w - 1) c = "#7aaabe"; if (S.lift && k === 0 && y === yW + 1 + S.lift && x % 5 === 2) c = "#7aaabe"; }
+        if (b.new && y < yW && (x + y) % 4 === 0) c = "#b8c870";
+        P.put(px + x, y, c);
+      }
+      if (damaged) { for (let n = 0; n < Math.max(3, p.w >> 2); n++) P.put(px + 1 + ((R() * (p.w - 2)) | 0), top + 1 + ((R() * (rh - 1)) | 0), "#2a1a10");
+        const cx = px + (p.w >> 1); for (let y = yW; y < top + ph - 1; y++) P.put(cx + ((y & 1) ? 1 : 0), y, "#8a7a62"); }
+      if (ruined) { for (let y = top; y < yW; y++) for (let x = 0; x < p.w; x++) if (R() < 0.7) P.put(px + x, y, (x % 3 === 0) ? "#5a3a24" : "#3a2a1c");
+        for (let n = 0; n < p.w; n++) P.put(px - 1 + ((R() * (p.w + 2)) | 0), top + ph + ((R() * 2) | 0), "#8a8478"); }
+      if (k === 0) {                                                                              // the door, on the main room
+        const dx = px + (p.w >> 1), dy = top + ph - 1;
+        P.put(dx, dy, b.door === "barred" ? "#6b4423" : "#2a1a10"); P.put(dx, dy - 1, b.door === "barred" ? "#6b4423" : "#2a1a10");
+        if (b.door === "barred") { P.put(dx - 1, dy - 1, "#3a2414"); P.put(dx + 1, dy - 1, "#3a2414"); }
+      }
+    });
+    if (b.unfinished) return S;
+    const main = S.parts[0], mx = x0 + main.x;
+    // chimneys for the fires it has, smoke from them if a fire was lit last night or there was fire work today
+    const fires = FIREPLACES.filter((f) => fit[f]);
+    fires.forEach((f, k) => { const cx = mx + main.w - 3 - k * 4, cy = y0 - 1; P.put(cx, cy, "#8a8a92"); P.put(cx, cy + 1, "#6a6a72"); P.put(cx + 1, cy, "#9a9aa2");
+      const working = (f === "anvil" && ["smelt", "copper tool", "coin"].some((t) => made.has(t))) || (f === "oven" && made.has("oven bread")) || (f === "hearth" && (made.has("bread") || made.has("dry meat")));
+      if (!ruined && (b.fire || working)) smoke(P, cx, cy - 2, working && f === "anvil"); });
+    if (fit["water wheel"]) { const cx = x0 - 4, cy = y0 + S.h - 5; for (let a = 0; a < 12; a++) P.put(cx + Math.round(3.4 * Math.cos(a * .52)), cy + Math.round(3.4 * Math.sin(a * .52)), "#8a5a2a"); P.put(cx, cy, "#6b4423");
+      for (let a = -2; a <= 2; a++) P.put(cx + a, cy, "#8a5a2a"); if (made.has("water mill")) { P.put(cx - 2, cy + 4, "#d8f0f0"); P.put(cx + 3, cy + 4, "#d8f0f0"); } }
+    if (fit.millstones && !fit["water wheel"]) { const cx = mx - 3, cy = y0 + S.h - 2; P.put(cx, cy, "#9a9aa0"); P.put(cx + 1, cy, "#b4b4ba"); P.put(cx, cy - 1, "#b4b4ba"); P.put(cx + 1, cy - 1, "#9a9aa0"); }
+    if (fit.anvil) { const ax = mx + main.w + 1, ay = y0 + S.h - 2; P.put(ax, ay, "#4a4a52"); P.put(ax + 1, ay, "#4a4a52"); P.put(ax, ay - 1, "#5a5a62"); if (made.has("copper tool") || made.has("coin")) { P.put(ax + 1, ay - 3, "#f0c060"); P.put(ax + 2, ay - 2, "#f08a3a"); } }
+    if (fit.granary) for (let x = 2; x < main.w - 2; x += 3) P.put(mx + x, y0 + 2, "#6b4423");                   // the granary's vents
+    const wood = (b.stock || {}).timber + (b.stock || {}).firewood;                                         // the woodpile
+    if (wood > 0.5) { const n = Math.min(10, Math.max(1, Math.round(Math.log2(1 + wood) * 2))), wx = x0 + S.w + 1, wy = y0 + S.h - 1;
+      for (let k = 0; k < n; k++) { const x = wx + (k % 5), y = wy - Math.floor(k / 5); P.put(x, y, k % 2 ? "#8a5a2a" : "#a0703a"); } }
+    return S;
   }
-  // a building on the region's map: a small roof over a wall, a door
+  function smoke(P, x, y, sparks) { for (let k = 0; k < 6; k++) { const xx = x + Math.round(Math.sin(k * 0.9) * 1.2) + (k > 3 ? 1 : 0), yy = y - k; P.mix(xx, yy, "#e8e8e8", 0.75 - k * 0.09); }
+    if (sparks) { P.put(x - 1, y + 1, "#f0c060"); P.put(x + 1, y, "#f08a3a"); } }
+  // a building on the region's map: its footprint, smaller: a roof over a wall line, a door
   function hut(P, x, y, w, h, b) {
     const roof = ROOF[b.structure] || ROOF.timber, wall = WALL[b.structure] || WALL.timber;
     for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) P.put(x + i, y + j, j === h - 1 ? (b.unfinished ? "#a0662f" : i === (w >> 1) ? "#6b4423" : wall) : j === 0 ? roof[1] : roof[0]);
     for (let i = 1; i <= w; i++) P.dark(x + i, y + h, .35); for (let j = 1; j < h; j++) P.dark(x + w, y + j, .35);
-    if (b.fire) { P.put(x + w - 2, y - 1, "#e8e8e8"); P.put(x + w - 1, y - 2, "#f4f4f4"); }
+    if (b.fire && b.condition !== 0) { P.put(x + w - 2, y - 1, "#e8e8e8"); P.put(x + w - 1, y - 2, "#f4f4f4"); }
   }
-  function dims(b) {
-    const s = Math.max(2, +b.size || 4), st = b.structure || "timber";
-    if (st === "camp") return [7, 6];
-    const w = Math.max(9, Math.min(18, Math.round(5 + Math.sqrt(s) * 2.6))), h = Math.max(7, Math.min(13, Math.round(4 + Math.sqrt(s) * 1.8)));
-    return st === "wattle" ? [w - 1, h - 1] : [w, h];
+  // a beast close up, by its role in the herd (farm.py ROLES: cows, oxen, bulls, young); hungry ones show their ribs
+  function beast(P, x, y, role, R, hungry) {
+    x |= 0; y |= 0;
+    const put = (pts, c) => { for (const [dx, dy] of pts) P.put(x + dx, y + dy, c); };
+    if (role === "young") {
+      for (let dx = 0; dx < 4; dx++) P.dark(x + dx + 1, y + 1, .25);
+      put([[0, -1], [1, -1], [2, -1], [0, -2], [1, -2], [2, -2]], "#d8b88a"); put([[3, -2], [3, -3]], "#d8b88a"); put([[0, 0], [2, 0]], "#6b4423"); return;
+    }
+    const body = role === "oxen" ? "#a0663a" : role === "bulls" ? "#4a3428" : (R() < 0.35 ? "#b8794a" : "#f4efe6"), spot = body === "#f4efe6" ? "#2a2420" : "#6b4423";
+    const L = role === "oxen" || role === "bulls" ? 6 : 5;
+    for (let dx = 0; dx < L + 2; dx++) P.dark(x + dx + 1, y + 1, .28);
+    for (let dx = 0; dx < L; dx++) for (let dy = -3; dy < 0; dy++) P.put(x + dx, y + dy, body);
+    for (let dx = 0; dx < L; dx++) P.dark(x + dx, y - 1, .12);
+    if (role === "cows" && body === "#f4efe6") { P.put(x + 1 + ((R() * 2) | 0), y - 3, spot); P.put(x + 3, y - 2, spot); }
+    if (hungry) for (let dx = 1; dx < L - 1; dx += 2) P.dark(x + dx, y - 2, .3);
+    put([[L, -4], [L, -3], [L + 1, -3]], body); P.dark(x + L + 1, y - 3, .2);
+    if (role !== "cows") { P.put(x + L - 1, y - 5, "#e8e0d0"); P.put(x + L + 1, y - 5, "#e8e0d0"); } else P.put(x + L - 1, y - 4, "#e8e0d0");
+    put([[0, 0], [1, 0], [L - 2, 0], [L - 1, 0]], "#4a2f17");
+    if (role === "cows") P.put(x + 2, y, "#f0b0a8");                                                   // the udder
   }
 
   // ---------------------------------------------------------------------------------------------------- close-up sprites
@@ -209,6 +269,8 @@
     const rows = o.child ? CHILD5 : BODY5, top = y - rows.length + 1;
     for (let dx = 0; dx < 5; dx++) P.dark(x + dx + 1, y + 1, 0.28);
     rows.forEach((r, j) => { for (let i = 0; i < 5; i++) if (r[i] !== ".") P.put(x + i, top + j, K[r[i]]); });
+    if (o.pregnant && !o.child) P.put(x + 3, top + 6, L.clothes), P.dark(x + 3, top + 6, .15);
+    if (o.load && !o.child) { P.put(x - 1, top + 4, "#a8946a"); P.put(x - 1, top + 5, "#c9b38a"); P.put(x - 1, top + 6, "#b8a278"); }
     if (o.wounded) { P.put(x + 1, top + (o.child ? 2 : 4), "#d83a3a"); P.put(x + 2, top + (o.child ? 2 : 5), "#d83a3a"); }
     if (o.hungry) { const c = o.hungry > 1 ? "#e85a5a" : "#f0c060"; P.put(x + 2, top - 5, c); P.put(x + 2, top - 4, c); P.put(x + 2, top - 2, c); }
     if (o.speak) bubble(P, x + 4, top - 4);
@@ -217,30 +279,6 @@
   function bubble(P, x, y) {
     for (let dy = 0; dy < 3; dy++) for (let dx = 0; dx < 5; dx++) if (!((dx === 0 || dx === 4) && (dy === 0 || dy === 2))) P.put(x + dx, y + dy, "#ffffff");
     P.put(x + 1, y + 1, "#6a6a7a"); P.put(x + 3, y + 1, "#6a6a7a"); P.put(x, y + 3, "#ffffff");
-  }
-  // a beast of a herd, by kind
-  function beast(P, x, y, kind, R) {
-    kind = String(kind || "cattle"); x |= 0; y |= 0;
-    const put = (pts, c) => { for (const [dx, dy] of pts) P.put(x + dx, y + dy, c); };
-    if (/sheep/.test(kind)) {
-      for (let dx = 0; dx < 5; dx++) P.dark(x + dx + 1, y + 1, .25);
-      put([[0, -2], [1, -2], [2, -2], [3, -2], [0, -1], [1, -1], [2, -1], [3, -1]], "#f4f2ea"); put([[1, -3], [2, -3]], "#e4e0d4");
-      put([[4, -2], [4, -1]], "#3a3430"); put([[0, 0], [3, 0]], "#3a3430"); return;
-    }
-    if (/goat/.test(kind)) {
-      for (let dx = 0; dx < 5; dx++) P.dark(x + dx + 1, y + 1, .25);
-      put([[0, -2], [1, -2], [2, -2], [3, -2], [0, -1], [1, -1], [2, -1], [3, -1]], "#c8b090"); put([[4, -3], [4, -2]], "#a89070"); put([[4, -4], [5, -4]], "#6a5a4a"); put([[0, 0], [3, 0]], "#5a4a3a"); return;
-    }
-    if (/pig|swine|hog/.test(kind)) {
-      for (let dx = 0; dx < 5; dx++) P.dark(x + dx + 1, y + 1, .25);
-      put([[0, -2], [1, -2], [2, -2], [3, -2], [0, -1], [1, -1], [2, -1], [3, -1]], "#f0b0a8"); put([[4, -1]], "#d88a84"); put([[0, 0], [3, 0]], "#c87a74"); return;
-    }
-    const body = /ox/.test(kind) || R() < 0.3 ? "#a0663a" : "#f4efe6", spot = body === "#f4efe6" ? "#2a2420" : "#6b4423";
-    for (let dx = 0; dx < 7; dx++) P.dark(x + dx + 1, y + 1, .28);
-    for (let dx = 0; dx < 5; dx++) for (let dy = -2; dy < 0; dy++) P.put(x + dx, y + dy, body);
-    if (R() < 0.8) { P.put(x + 1 + ((R() * 2) | 0), y - 2, spot); P.put(x + 3, y - 1, spot); }
-    put([[5, -3], [5, -2], [6, -2]], body); P.dark(x + 6, y - 2, .25); put([[4, -3], [6, -4]], "#d8d0c0");
-    put([[0, 0], [1, 0], [3, 0], [4, 0]], "#4a2f17");
   }
   function graveBig(P, x, y) { for (let dx = -2; dx <= 2; dx++) { P.put(x + dx, y, "#7a5a3a"); P.put(x + dx, y - 1, dx === -2 ? "#8a6a48" : "#7a5a3a"); } for (let dy = -5; dy <= -2; dy++) P.put(x, y + dy, "#c8c4bc"); P.put(x - 1, y - 4, "#c8c4bc"); P.put(x + 1, y - 4, "#c8c4bc"); P.dark(x + 1, y - 2, .3); }
   function sackBig(P, x, y, goods) {
@@ -251,7 +289,6 @@
 
   // ---------------------------------------------------------------------------------------------------- the land model
   const D = (V, day) => V.days[Math.max(0, Math.min(V.days.length - 1, day))];
-  const cropState = (c, day) => !c ? null : c.failed ? "failed" : c.ripe ? "ripe" : (day - (c.sown ?? day)) <= 1 ? "sprout" : "growing";
   const RIVER = /river|brook|stream|leat|beck|burn|creek|race/i;
   const MODEL = new WeakMap();
   function model(V) {
@@ -368,50 +405,77 @@
       line = line.slice(lo, hi + 1);
       courses.push({ pid: p, pids: chain.map((j) => pids[j]), line, half: Math.max(2.5, 2 + Math.sqrt(sz) * 2.2), n: 0 });
     });
-    // lots: every building the place ever has gets one, and keeps it
+    // buildings: each on its parcel at its footprint (shape(): the spec's rooms), placed once for the run in the order they first
+    // stand, nearest the parcel's middle where it fits with a margin; one that does not fit is shown overfull at the middle
     const ever = {};
-    V.days.forEach((d, day) => { for (const [bid, b] of Object.entries(d.buildings)) if (b.node === nid && !ever[bid]) ever[bid] = { day, b }; });
-    const byPar = {}; for (const [bid, e] of Object.entries(ever)) { let i = idx[e.b.parcel]; if (i == null || (ST.parcels[pids[i]].cover === "water")) i = pids.findIndex((p) => ST.parcels[p].cover === "built"); if (i < 0) i = 0; (byPar[i] = byPar[i] || []).push(bid); }
-    const lotOf = {}, lots = {};
-    for (const [ik, bids] of Object.entries(byPar)) {
-      const i = +ik, cov = ST.parcels[pids[i]].cover, count = Math.max(bids.length, Math.round((LOTS[cov] || 0) * size[i]));
-      let cells = inner(i, 8, 6); if (!cells.length) cells = area[i].length ? area[i] : [centre[i]];
-      const [cx, cy] = centre[i], got = [];
-      for (let k = 0; k < count; k++) { let best = null, bs = -1e18;
-        for (const [x, y] of cells) { let m = 1e9; for (const [gx, gy] of got) m = Math.min(m, (x - gx) ** 2 + (y - gy) ** 2); const s = got.length ? m - 0.02 * ((x - cx) ** 2 + (y - cy) ** 2) : -((x - cx) ** 2 + (y - cy) ** 2); if (s > bs) { bs = s; best = [x, y]; } }
-        got.push(best); }
-      lots[pids[i]] = got;
-      bids.sort((a, b) => ever[a].day - ever[b].day || (+ever[b].b.size || 0) - (+ever[a].b.size || 0) || (a < b ? -1 : 1)).forEach((bid, k) => (lotOf[bid] = got[k]));
+    V.days.forEach((d, day) => { for (const [bid, b] of Object.entries(d.buildings)) if (b.node === nid) { const sh = shape(b), e = ever[bid];
+      if (!e) ever[bid] = { day, b, w: sh.w, h: sh.h }; else { e.w = Math.max(e.w, sh.w); e.h = Math.max(e.h, sh.h); } } });
+    const taken = new Uint8Array(W * H), placeOf = {}, MG = 6;
+    const order = Object.keys(ever).sort((a, b) => ever[a].day - ever[b].day || (ever[b].w * ever[b].h) - (ever[a].w * ever[a].h) || (a < b ? -1 : 1));
+    for (const bid of order) {
+      const e = ever[bid]; let i = idx[e.b.parcel]; if (i == null) i = pids.findIndex((p) => ST.parcels[p].cover === "built"); if (i < 0) i = 0;
+      let [cx, cy] = centre[i]; const bR = rng(hstr(bid));
+      if ((e.b.fittings || {})["water wheel"]) {                                                   // its site is the water (FITTINGS site: water)
+        const wj = pids.findIndex((p, j) => ST.parcels[p].cover === "water" && (j === i || adj[i].has(j)));
+        if (wj >= 0) { let bd = 1e18; for (const [x, y] of area[i]) { const dd = (x - centre[wj][0]) ** 2 + (y - centre[wj][1]) ** 2; if (dd < bd) { bd = dd; cx = x; cy = y; } } }
+      }
+      const cand = area[i].filter(([x, y]) => (x + y) % 2 === 0).map(([x, y]) => [x, y, (x - cx) ** 2 + (y - cy) ** 2 + bR() * 400]).sort((p, q) => p[2] - q[2]);
+      let spot = null;
+      for (const [x, y] of cand) { const x0 = x - (e.w >> 1), y0 = y - (e.h >> 1); let ok = true;
+        for (let yy = y0; yy < y0 + e.h && ok; yy += 2) for (let xx = x0; xx < x0 + e.w; xx += 2) if (xx < 0 || yy < 0 || xx >= W || yy >= H || REG[yy * W + xx] !== i) { ok = false; break; }
+        for (let yy = y0 - MG; yy < y0 + e.h + MG && ok; yy++) for (let xx = x0 - MG; xx < x0 + e.w + MG; xx++) if (xx >= 0 && yy >= 0 && xx < W && yy < H && taken[yy * W + xx]) { ok = false; break; }
+        if (ok) { spot = [x0, y0]; break; } }
+      const fits = !!spot;
+      if (!spot) for (let r = 4; r < 120 && !spot; r += 3) for (let t = 0; t < 24 && !spot; t++) {          // overfull: next to its parcel
+        const a = t * 0.2618 + r * 0.1, x0 = Math.round(cx + Math.cos(a) * r - e.w / 2), y0 = Math.round(cy + Math.sin(a) * r * 0.8 - e.h / 2); let ok = x0 >= 0 && y0 >= 0 && x0 + e.w < W && y0 + e.h < H;
+        for (let yy = y0 - 3; yy < y0 + e.h + 3 && ok; yy++) for (let xx = x0 - 3; xx < x0 + e.w + 3; xx++) if (xx >= 0 && yy >= 0 && xx < W && yy < H && taken[yy * W + xx]) { ok = false; break; }
+        if (ok) spot = [x0, y0]; }
+      if (!spot) spot = [Math.round(cx - e.w / 2), Math.round(cy - e.h / 2)];
+      placeOf[bid] = { x: spot[0], y: spot[1], w: e.w, h: e.h, fits };
+      for (let yy = spot[1]; yy < spot[1] + e.h; yy++) for (let xx = spot[0]; xx < spot[0] + e.w; xx++) if (xx >= 0 && yy >= 0 && xx < W && yy < H) taken[yy * W + xx] = 1;
     }
-    // where each road leaves: from the parcel it leaves by, out to the edge of the map that way
-    const exits = Object.entries(L.exits || {}).map(([rid, ex]) => {
-      const i = ex.parcels && ex.parcels.length && idx[ex.parcels[0]] != null ? idx[ex.parcels[0]] : pids.findIndex((p) => ST.parcels[p].cover === "built");
-      const [fx, fy] = i >= 0 ? centre[i] : [W / 2, H / 2], [dx, dy] = ex.dir || [1, 0];
+    // where each road leaves: from its end's parcels (roads.ends), towards its end's side, or towards the other place if the side is
+    // the centre; out to the edge of the map
+    const Lw = V.static.layout.world || {}, me0 = Lw[nid] || [500, 350], SIDEV = { north: [0, -1], south: [0, 1], east: [1, 0], west: [-1, 0] };
+    const exits = Object.entries(ST.roads).filter(([, r]) => r.a === nid || r.b === nid).map(([rid, r]) => {
+      const other = r.a === nid ? r.b : r.a, end = (r.ends || {})[nid] || { side: "centre", parcels: [], hidden: false };
+      let i = (end.parcels || []).map((p) => idx[p]).find((k) => k != null); if (i == null) i = pids.findIndex((p) => ST.parcels[p].cover === "built");
+      const [fx, fy] = i >= 0 ? centre[i] : [W / 2, H / 2], o = Lw[other] || [500, 350];
+      let [dx, dy] = SIDEV[end.side] || [o[0] - me0[0], o[1] - me0[1]]; const tw = ((hstr(rid) % 7) - 3) * 0.08, l = Math.hypot(dx, dy) || 1;
+      [dx, dy] = [(dx * Math.cos(tw) - dy * Math.sin(tw)) / l, (dx * Math.sin(tw) + dy * Math.cos(tw)) / l];
       let t = 0; while (t < 4 * (W + H)) { const x = fx + dx * t, y = fy + dy * t; if (x < 1 || y < 1 || x > W - 2 || y > H - 2) break; t += 1; }
-      return { rid, ex, fx, fy, tx: Math.max(-2, Math.min(W + 1, fx + dx * t)), ty: Math.max(-2, Math.min(H + 1, fy + dy * t)) };
+      return { rid, to: other, end, fx, fy, tx: Math.max(-2, Math.min(W + 1, fx + dx * t)), ty: Math.max(-2, Math.min(H + 1, fy + dy * t)) };
     });
     let gx = 0, gy = 0, gs = 0; area.forEach((a) => { for (const [x, y] of a) { gx += x; gy += y; gs++; } }); if (gs) { gx /= gs; gy /= gs; } else { gx = W / 2; gy = H / 2; }
     let land = 0; area.forEach((a) => { for (const [x, y] of a) land = Math.max(land, Math.hypot(x - gx, y - gy)); });
-    const g = { W, H, REG, area, centre, adj, site, courses, lotOf, lots, exits, mid: [gx, gy], land: land || 40, reg, inner };
+    const g = { W, H, REG, area, centre, adj, site, courses, placeOf, exits, mid: [gx, gy], land: land || 40, reg, inner };
     cache[nid] = g; return g;
   }
 
-  // paint the land: ground, terraces, each parcel's surface, rivers, the wild country's trees. `cellNode` and `cellPar` give, per
+  // paint the land from the day's record (c2viz/model.py): each parcel by its cover that day and its stocks (S/K), crops by the
+  // engine's stage and their sown and reaped shares, works, fences, clearing; snow when it lies. `cellNode` and `cellPar` give, per
   // pixel, the place (an index into nids) and the parcel (an index into that place's parcels, -1 the wild); `sc` is pixels per
   // close-up pixel (1 close up, smaller on the region's map)
+  const CROP_PAL = {
+    grain: { new: ["#9a7a50", "#86b44a"], green: ["#a8d050", "#8cb83e"], high: ["#c0d050", "#a8b838"], ripe: ["#e8c840", "#d4ac30"] },
+    "winter grain": { new: ["#9a7a50", "#7aa848"], green: ["#98c858", "#80b048"], high: ["#b8c460", "#a0ac48"], ripe: ["#d8b850", "#c4a03c"] },
+    legumes: { new: ["#9a7a50", "#6aa040"], green: ["#5f9a3a", "#4e8a30"], high: ["#5f9a3a", "#4e8a30"], ripe: ["#8a8a3a", "#7a6e30"] },
+  };
+  const STAGE_PAL = { rotting: ["#a88a30", "#8a7028"], blighted: ["#a89c84", "#8f846e"], killed: ["#9aa0a0", "#868c8c"] };
   function paintLand(P, V, day, W, H, nids, cellNode, cellPar, sc, R, occ, opts) {
-    const M = model(V), d = D(V, day), season = (d.calendar || {}).season || "summer", snow = season === "winter";
+    const M = model(V), d = D(V, day), season = (d.calendar || {}).season || "summer", snow = !!d.snow, sdays = V.meta.season_days || 6;
     const n2 = noise(M.seed ^ 2), n3 = noise(M.seed ^ 3), small = sc < 0.5;
     const LV = new Int8Array(W * H), at = (x, y) => (x < 0 || y < 0 || x >= W || y >= H) ? -1 : (y | 0) * W + (x | 0);
     const parcelOf = (i) => { const n = cellNode[i]; if (n < 0 || cellPar[i] < 0) return null; return M.nodes[nids[n]].pids[cellPar[i]]; };
+    const cov = (pid) => (d.parcels[pid] || {}).cover || V.static.parcels[pid].cover;
     const area = {}; for (let i = 0; i < W * H; i++) { const p = parcelOf(i); if (p) (area[p] = area[p] || []).push([i % W, (i / W) | 0]); }
-    // rivers: water along each course, in its own parcel, other water and the wild; reeds along the banks
+    // rivers: water along each course, in its own chain, other water, and the wild; reeds on the banks
     const wet = new Uint8Array(W * H);
     for (const c of opts.courses || []) {
       const reed = small ? 0.6 : 1.8, rr = c.half + reed, e = Math.ceil(rr);
       for (const [lx, ly] of c.line) for (let dy = -e; dy <= e; dy++) for (let dx = -e; dx <= e; dx++) {
         const x = Math.round(lx + dx), y = Math.round(ly + dy), i = at(x, y); if (i < 0 || cellNode[i] !== c.n) continue;
-        const p = parcelOf(i); if (p && !(c.pids || [c.pid]).includes(p) && STOPS.has(V.static.parcels[p].cover)) continue;
+        const p = parcelOf(i); if (p && !(c.pids || [c.pid]).includes(p) && STOPS.has(cov(p))) continue;
         const dd = Math.hypot(x - lx, y - ly); if (dd <= c.half) wet[i] = 1; else if (dd <= rr && !wet[i]) wet[i] = 2;
       }
     }
@@ -419,87 +483,79 @@
       const p = parcelOf(i);
       if (!p) { LV[i] = wet[i] === 1 ? 0 : 1; continue; }
       const P0 = V.static.parcels[p], N = M.nodes[P0.node];
-      LV[i] = P0.cover === "water" ? (N.river[N.pids.indexOf(p)] ? (wet[i] === 1 ? 0 : 1) : 0) : wet[i] === 1 ? 0 : Math.max(1, Math.min(3, P0.height ?? 1));
+      LV[i] = cov(p) === "water" ? (N.river[N.pids.indexOf(p)] ? (wet[i] === 1 ? 0 : 1) : 0) : wet[i] === 1 ? 0 : Math.max(1, Math.min(3, P0.height ?? 1));
     }
     const lv = (x, y) => { const i = at(x, y); return i < 0 ? -1 : LV[i]; };
     const grassOf = (n, l, v) => { const B = BIOMES[n >= 0 ? M.nodes[nids[n]].biome : "meadow"]; return B.grass[Math.max(0, Math.min(2, l - 1))][v > 0.62 ? 1 : v < 0.36 ? 2 : 0]; };
     // ground
     for (let i = 0; i < W * H; i++) {
-      const x = i % W, y = (i / W) | 0, p = parcelOf(i), cov = p ? V.static.parcels[p].cover : "wild", v = n3(x / 3, y / 3, 2), l = LV[i], n = cellNode[i];
+      const x = i % W, y = (i / W) | 0, p = parcelOf(i), c = p ? cov(p) : "wild", v = n3(x / 3, y / 3, 2), l = LV[i], n = cellNode[i];
       let col;
       if (l === 0) { let shore = false; for (const [a, b] of [[2, 0], [-2, 0], [0, 2], [0, -2], [1, 1], [-1, -1]]) if (lv(x + a, y + b) > 0) shore = true;
         col = shore ? (n3(x / 2, y / 2, 1) > 0.6 ? PAL.water.foam : PAL.water.shore) : (n3(x / 6, y / 3, 2) > 0.6 ? PAL.water.deep2 : PAL.water.deep); }
-      else if (cov === "rock") col = PAL.rock[v > 0.7 ? 1 : v < 0.3 ? 2 : 0];
+      else if (c === "rock") col = PAL.rock[v > 0.7 ? 1 : v < 0.3 ? 2 : 0];
       else col = grassOf(n, l, v);
       if (wet[i] === 2 && l > 0) col = n3(x * 1.5, y * 1.5, 1) > 0.45 ? PAL.reed : col;
       P.put(x, y, col);
       if (!p && l > 0) { P.dark(x, y, 0.13 + 0.06 * (n2(x / 20, y / 20) > .5)); if (!small && n3(x * 1.9, y * 1.9, 1) > 0.8) P.dark(x, y, .16); }
-      else if (p && l > 0) { if (cov === "meadow") P.light(x, y, .07); else if (cov === "pasture") P.light(x, y, .03);
-        else if (cov === "built") { P.mix(x, y, PAL.ground[0], 0.16); if (n2(x / 6 + 3, y / 6, 2) > 0.62) P.mix(x, y, PAL.ground[(x + y) & 1], 0.55); } }
-      if (snow && l > 0) P.mix(x, y, PAL.snow[(x + y) % 3 === 0 ? 1 : 0], n3(x / 4 + 7, y / 4) > 0.3 ? 0.85 : 0.5);
+      else if (p && l > 0) { if (c === "meadow") P.light(x, y, .07); else if (c === "pasture") P.light(x, y, .03);
+        else if (c === "built") { P.mix(x, y, PAL.ground[0], 0.16); if (n2(x / 6 + 3, y / 6, 2) > 0.62) P.mix(x, y, PAL.ground[(x + y) & 1], 0.55); } }
     }
-    // terraces (scene.js): a lip and a cliff face where the ground steps down to the south
+    // terraces from height (a word in the engine; drawn as a step down to the south)
     if (!small) for (let y = 0; y < H - 1; y++) for (let x = 0; x < W; x++) {
       const l = LV[y * W + x]; if (l <= 1) continue;
-      if (lv(x, y + 1) < l && lv(x, y + 1) > 0) { P.put(x, y, snow ? PAL.snow[0] : PAL.rim); for (let k = 1; k <= 3; k++) { if (lv(x, y + k) >= l || y + k >= H) break; P.put(x, y + k, PAL.face[Math.min(3, k - 1 + (x % 3 === 0 ? 1 : 0))]); } }
+      if (lv(x, y + 1) < l && lv(x, y + 1) > 0) { P.put(x, y, PAL.rim); for (let k = 1; k <= 3; k++) { if (lv(x, y + k) >= l || y + k >= H) break; P.put(x, y + k, PAL.face[Math.min(3, k - 1 + (x % 3 === 0 ? 1 : 0))]); } }
     }
-    // each parcel's surface
-    const trees = [];
+    const trees = [], marks = [];
     const border = (x, y, p) => { for (const [a, b] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const j = at(x + a, y + b); if (j < 0 || parcelOf(j) !== p) return true; } return false; };
     const wildNext = (x, y) => { for (const [a, b] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const j = at(x + a, y + b); if (j >= 0 && cellPar[j] < 0 && LV[j] > 0) return true; } return false; };
     for (const [pid, pts] of Object.entries(area)) {
-      if (!small && !["field", "water"].includes(V.static.parcels[pid].cover)) for (const [x, y] of pts) if (LV[y * W + x] > 0 && wildNext(x, y)) { P.dark(x, y, .28); P.dark(x, y + 1, .12); }
-      const P0 = V.static.parcels[pid], dp = d.parcels[pid] || {}, res = dp.res || {}, c = P0.cover, N = M.nodes[P0.node], B = BIOMES[N.biome], pR = rng(hstr(pid + "|" + (opts.scale || "")));
-      if (c === "field") {
-        const st = cropState(dp.crop, day), left = dp.crop ? (dp.crop.left ?? 1) : 1, ang = fieldAngle(pid);
-        const ux = Math.cos(ang), uy = Math.sin(ang), sw = small ? Math.max(1.5, 7 * sc) : 7 + (hstr(pid) >>> 9) % 3;
-        let u0 = 1e9, u1 = -1e9; for (const [x, y] of pts) { const u = x * ux + y * uy; u0 = Math.min(u0, u); u1 = Math.max(u1, u); }
-        const nstrip = Math.max(1, Math.ceil((u1 - u0) / sw));
-        for (const [x, y] of pts) {
-          if (LV[y * W + x] === 0) continue;
-          if (border(x, y, pid)) { if (n3(x / 2 + 9, y / 2) < 0.75) P.put(x, y, PAL.hedge); if (!small && pR() < 0.025) trees.push([x, y, 1.5, "oak"]); continue; }
-          const u = x * ux + y * uy - u0, s = Math.floor(u / sw), v = -x * uy + y * ux;
-          if (!small && u - s * sw < 1) { P.put(x, y, PAL.balk); continue; }                                   // the balk between strips
-          let pal = st === "ripe" ? PAL.ripe : st === "growing" ? PAL.growing : st === "failed" ? PAL.failed : st === "sprout" ? PAL.sprout : PAL.soil;
-          if (st && (s + 0.5) / nstrip > left) pal = PAL.stubble;                                                  // strips already reaped
-          P.put(x, y, pal[Math.floor(v / (small ? 1 : 2)) & 1]);
-          if (!small && st === "ripe" && (Math.floor(v) % 3 === 0) && (x + y) % 2 === 0) P.dark(x, y, .12);        // ears
-          const sh = ((hstr(pid + s) % 5) - 2) * 0.03; if (sh > 0) P.dark(x, y, sh); else if (sh < 0) P.light(x, y, -sh);
-          if (snow) P.mix(x, y, PAL.snow[0], 0.7);
-        }
-      } else if (c === "pasture" || c === "meadow") {
-        for (const [x, y] of pts) { if (LV[y * W + x] === 0) continue; const v = n3(x * 1.3, y * 1.3, 1);
-          if (!snow && c === "meadow" && v > 0.84 && !small) P.put(x, y, PAL.flowers[(hstr(x + "," + y) >>> 3) % 4]);
+      const dp = d.parcels[pid] || {}, res = dp.res || {}, c = cov(pid), P0 = V.static.parcels[pid], N = M.nodes[P0.node], B = BIOMES[N.biome], pR = rng(hstr(pid + "|" + (opts.scale || "")));
+      const land = pts.filter(([x, y]) => LV[y * W + x] > 0);
+      if (!small && !["field", "water"].includes(c)) for (const [x, y] of land) if (wildNext(x, y)) { P.dark(x, y, .28); P.dark(x, y + 1, .12); }
+      if (c === "field") paintField(P, V, d, pid, dp, land, sc, small, border, n3, pR, trees, marks, sdays, day);
+      else if (c === "pasture" || c === "meadow") {
+        const g = res.grass ?? 1, flowers = c === "meadow" && (season === "summer" || season === "spring") && g > 0.5;
+        for (const [x, y] of land) { const v = n3(x * 1.3, y * 1.3, 1);
+          if (flowers && v > 0.84 && !small) P.put(x, y, PAL.flowers[(hstr(x + "," + y) >>> 3) % 4]);
           else if (v > 0.8 && !small) P.dark(x, y, .12);
-          if (c === "pasture" && !small && border(x, y, pid) && n3(x / 2, y / 2 + 5) < 0.5) P.dark(x, y, .18);
-          if (!snow && res.grass != null && res.grass < 0.35 && n3(x / 3 + 5, y / 3) < 0.6 - res.grass) P.mix(x, y, "#b8a868", 0.55); }
-      } else if (c === "forest") {
-        const w0 = ((V.days[0].parcels[pid] || {}).res || {}).wood, base = w0 > 0.05 ? Math.min(1, 0.45 + w0) : 0.4, wood = w0 > 0.05 ? Math.min(1, (res.wood ?? w0) / w0) * base : base;
-        const step = small ? 2 : 3, nz = small ? 3 : 7;
-        for (const [x, y] of pts) if (x % step === 0 && y % step === 0) { const tx = x + pR() * (step - 1), ty = y + pR() * (step - 1), v = n2(tx / nz, ty / nz);
-          if (v < 0.15 + 0.85 * wood) trees.push([tx, ty, small ? 1 : (pR() < 0.6 ? 2 : 3), B.trees[(pR() * B.trees.length) | 0]]);
-          else if (!small && v < 0.15 + 0.85 * base) { P.put(tx, ty, "#8a6a42"); P.put(tx + 1, ty, "#6b4423"); P.dark(tx, ty + 1, .25); } }   // stumps where it was felled
-        for (const [x, y] of pts) if (!small && n3(x * 1.1, y * 1.1, 1) > 0.8) P.dark(x, y, .15);
-      } else if (c === "scrub") {
-        for (const [x, y] of pts) { if (pR() > (small ? 0.12 : 0.05) || n2(x / 9 + 3, y / 9, 2) < 0.45) continue;
-          if (small) { P.put(x, y, PAL.bush[0]); continue; }
-          for (const [a, b] of [[0, 0], [1, 0], [-1, 0], [0, -1], [1, -1]]) P.put(x + a, y + b, (a + b) < 0 ? "#6c8a40" : PAL.bush[(a + 1) & 1]); P.dark(x + 2, y, .3); P.dark(x, y + 1, .3); P.dark(x + 1, y + 1, .3); }
+          if (g < 0.6 && n3(x / 3 + 5, y / 3) < 0.75 - g) P.mix(x, y, "#b8a868", 0.6 * (0.6 - g) / 0.6 + 0.15); }
+        if (!small && dp.dung > 5) for (const [x, y] of land) if (pR() < Math.min(0.02, dp.dung / 4000)) { P.put(x, y, "#6b4a2a"); P.put(x + 1, y, "#5a3a20"); }
+      } else if (c === "forest" || c === "scrub") {
+        // standing trees in proportion to the wood's stock (S/K); where it was felled, stumps; fallen wood by the dead stock;
+        // scrub's bushes by its young growth
+        const wood = res.wood ?? (c === "forest" ? 0.8 : 0), was = dp.was === "forest" || c === "forest", step = small ? 2 : 3, nz = small ? 3 : 7;
+        for (const [x, y] of land) if (x % step === 0 && y % step === 0) { const tx = x + pR() * (step - 1), ty = y + pR() * (step - 1), v = n2(tx / nz, ty / nz);
+          if (v < wood) trees.push([tx, ty, small ? 1 : (pR() < 0.6 ? 2 : 3), B.trees[(pR() * B.trees.length) | 0]]);
+          else if (!small && was && v < Math.max(wood, 0.85) && pR() < 0.5) { P.put(tx, ty, "#8a6a42"); P.put(tx + 1, ty, "#6b4423"); P.dark(tx, ty + 1, .25); } }
+        if (!small) { const dead = res.dead ?? 0, young = res.young ?? (c === "scrub" ? 0.5 : 0);
+          for (const [x, y] of land) { const r = pR();
+            if (r < 0.006 * dead) { P.put(x, y, "#7a5a3a"); P.put(x + 1, y, "#6b4a2a"); P.put(x + 2, y, "#7a5a3a"); }
+            else if (r < 0.006 * dead + (c === "scrub" ? 0.05 : 0.01) * (0.2 + young) && n2(x / 9 + 3, y / 9, 2) > 0.4) {
+              for (const [a, b] of [[0, 0], [1, 0], [-1, 0], [0, -1], [1, -1]]) P.put(x + a, y + b, (a + b) < 0 ? "#6c8a40" : PAL.bush[(a + 1) & 1]); P.dark(x + 2, y, .3); P.dark(x, y + 1, .3); } } }
+        else if (c === "scrub") for (const [x, y] of land) if (pR() < 0.1) P.put(x, y, PAL.bush[0]);
+        for (const [x, y] of land) if (!small && c === "forest" && n3(x * 1.1, y * 1.1, 1) > 0.8) P.dark(x, y, .15);
       } else if (c === "rock") {
         const st = small ? 3 : 6;
-        for (const [x, y] of pts) { if (x % st || y % st || pR() > 0.45) continue; const bx = x + (pR() * 3 | 0), by = y + (pR() * 3 | 0);
+        for (const [x, y] of land) { if (x % st || y % st || pR() > 0.45) continue; const bx = x + (pR() * 3 | 0), by = y + (pR() * 3 | 0);
           if (small) { P.put(bx, by, "#e8e8e0"); P.dark(bx + 1, by, .3); continue; }
           const bw = 3 + (pR() * 3 | 0), bh = 2 + (pR() * 2 | 0);
-          for (let dy = 0; dy < bh; dy++) for (let dx = 0; dx < bw; dx++) P.put(bx + dx, by + dy, dy === 0 ? "#e8e8e0" : dx === bw - 1 || dy === bh - 1 ? "#9a9a92" : "#c8c8c0");
-          for (let dx = 1; dx <= bw; dx++) P.dark(bx + dx, by + bh, .3); }
-        if (res.seam != null) for (const [x, y] of pts) if (n2(x / 3, y / 3) > 0.8 - 0.2 * res.seam) P.put(x, y, PAL.copper);
+          for (let yy = 0; yy < bh; yy++) for (let xx = 0; xx < bw; xx++) P.put(bx + xx, by + yy, yy === 0 ? "#e8e8e0" : xx === bw - 1 || yy === bh - 1 ? "#9a9a92" : "#c8c8c0");
+          for (let xx = 1; xx <= bw; xx++) P.dark(bx + xx, by + bh, .3); }
+        if (res.seam != null) for (const [x, y] of land) if (n2(x / 3, y / 3) > 0.92 - 0.25 * res.seam) P.put(x, y, PAL.copper);
       } else if (c === "water" && !N.river[N.pids.indexOf(pid)]) {
         for (const [x, y] of pts) if (n3(x / 2 + 3, y, 1) > 0.97) P.put(x, y, PAL.water.foam);
       }
-      if (dp.fence && dp.fence.built !== false && !small) {                                                      // a fence or a wall round it
-        const col = dp.fence.kind === "stone" ? PAL.fenceStone : PAL.fenceWood; let k = 0;
-        for (const [x, y] of pts) if (border(x, y, pid)) { k++; if (dp.fence.level === 0 || (dp.fence.level === 1 && k % 5 === 0)) continue; P.put(x, y, col[(x + y) & 1]); }
+      if (dp.clearing && !small) for (const [x, y] of land) if (n2(x / 5 + 11, y / 5) < dp.clearing) { P.mix(x, y, PAL.soil[(x + y) & 1], 0.6); if (pR() < 0.01) { P.put(x, y, "#8a6a42"); P.put(x + 1, y, "#6b4423"); } }
+      if (dp.fence && dp.fence.built && !small && dp.fence.level > 0) {                              // a fence or a wall round it, by its level
+        const col = dp.fence.kind === "stone" ? PAL.fenceStone : PAL.fenceWood; let k = 0, gate = null;
+        for (const [x, y] of pts) if (border(x, y, pid)) { k++; if (!gate) gate = [x, y]; if (dp.fence.level === 1 && k % 4 === 0) continue;
+          if (gate && Math.abs(x - gate[0]) + Math.abs(y - gate[1]) < 3) { if (dp.fence.gate === "open") continue; P.put(x, y, "#a0703a"); continue; }
+          P.put(x, y, col[(x + y) & 1]); }
       }
+      if (snow) for (const [x, y] of land) P.mix(x, y, PAL.snow[(x + y) % 3 === 0 ? 1 : 0], n3(x / 4 + 7, y / 4) > 0.3 ? 0.82 : 0.55);
     }
+    if (snow) for (let i = 0; i < W * H; i++) if (cellPar[i] < 0 && LV[i] > 0) { const x = i % W, y = (i / W) | 0; P.mix(x, y, PAL.snow[(x + y) % 3 === 0 ? 1 : 0], n3(x / 4 + 7, y / 4) > 0.3 ? 0.8 : 0.5); }
     // the wild country's trees, by each place's character
     const wildStep = small ? 2 : 4;
     for (let gy = 0; gy < H; gy += wildStep) for (let gx = 0; gx < W; gx += wildStep) {
@@ -508,7 +564,52 @@
       if (n2(x / z, y / z, 3) < 1 - wild) { if (!small && B === BIOMES.moor && R() < 0.15) { P.put(x, y, "#8a5a7a"); P.put(x + 1, y, "#9a6a8a"); } continue; }
       trees.push([x, y, small ? 1 : (R() < 0.6 ? 2 : 3), B.trees[(R() * B.trees.length) | 0] || "oak"]);
     }
-    return { LV, area, trees, season, snow, lv, at, parcelOf, wet };
+    return { LV, area, trees, marks, season, snow, lv, at, parcelOf, wet };
+  }
+  // a field: strips along its length; the sown share in the crop's colours by stage, the reaped share as stubble with stooks, the
+  // rest dug or lying fallow; ditches or terraces for the works done; hoof-marks where a herd trampled it lately
+  function paintField(P, V, d, pid, dp, land, sc, small, border, n3, pR, trees, marks, sdays, day) {
+    const ang = fieldAngle(pid), ux = Math.cos(ang), uy = Math.sin(ang), sw = small ? Math.max(1.5, 7 * sc) : 7 + (hstr(pid) >>> 9) % 3;
+    let u0 = 1e9, u1 = -1e9; for (const [x, y] of land) { const u = x * ux + y * uy; u0 = Math.min(u0, u); u1 = Math.max(u1, u); }
+    const n = Math.max(1, Math.ceil((u1 - u0) / sw)), crop = dp.crop, sownN = crop ? Math.round((crop.sown ?? 1) * n) : 0, reapN = crop ? Math.round((crop.reaped || 0) * sownN) : 0;
+    const brokenN = Math.round((dp.broken || 0) * n), stubble = !crop && dp.last_crop && dp.last_crop !== "fallow" && dp.fallow_since != null && day - dp.fallow_since <= sdays;
+    const pal = crop ? (STAGE_PAL[crop.stage] || (CROP_PAL[crop.family] || CROP_PAL.grain)[crop.stage] || CROP_PAL.grain.green) : null;
+    for (const [x, y] of land) {
+      if (border(x, y, pid)) { if (n3(x / 2 + 9, y / 2) < 0.75) P.put(x, y, PAL.hedge); if (!small && pR() < 0.02) trees.push([x, y, 1.5, "oak"]); continue; }
+      const u = x * ux + y * uy - u0, s = Math.min(n - 1, Math.floor(u / sw)), v = -x * uy + y * ux;
+      if (!small && u - s * sw < 1) { P.put(x, y, PAL.balk); continue; }                                     // the balk between strips
+      let c;
+      if (crop && s < reapN) { c = PAL.stubble[Math.floor(v / 2) & 1]; if (!small && (Math.floor(v) % 6 === 0) && Math.floor(u - s * sw) === 3) marks.push(["stook", x, y]); }
+      else if (crop && s < sownN) { c = pal[Math.floor(v / (small ? 1 : 2)) & 1];
+        if (!small && crop.stage === "new" && (x * 7 + y * 3) % 5) c = PAL.soil[Math.floor(v / 2) & 1];
+        if (!small && (crop.stage === "high" || crop.stage === "ripe") && Math.floor(v) % 3 === 0 && (x + y) % 2 === 0) c = null, P.put(x, y, pal[0]), P.dark(x, y, .14);
+        if (!small && crop.weeds && n3(x * 2.1, y * 2.1, 1) > 0.88) c = "#6a9a3a"; }
+      else if (s < (crop ? sownN : 0) + brokenN) c = PAL.soil[Math.floor(v / 2) & 1];
+      else if (stubble) c = PAL.stubble[Math.floor(v / 2) & 1];
+      else { c = n3(x / 2 + 5, y / 2, 1) > 0.5 ? "#9cb860" : "#a8a070"; }                                     // lying fallow: rough grass
+      if (c) P.put(x, y, c);
+      const sh = ((hstr(pid + s) % 5) - 2) * 0.03; if (sh > 0) P.dark(x, y, sh); else if (sh < 0) P.light(x, y, -sh);
+    }
+    if (crop && crop.trampled != null && crop.trampled <= 3 && !small) for (const [x, y] of land) if (pR() < 0.01) { P.dark(x, y, .35); P.dark(x + 1, y + 1, .3); }
+    const wk = dp.works;
+    if (wk && wk.done > 0 && !small) {                                                                      // ditches on wet ground, terraces on hill ground
+      const k = Math.round(wk.done * n);
+      for (const [x, y] of land) { const u = x * ux + y * uy - u0, s = Math.floor(u / sw);
+        if (s >= k) continue;
+        if (wk.ground === "wet" && Math.abs(u - s * sw - sw / 2) < 0.6) P.put(x, y, "#5a8aa0");
+        if (wk.ground === "hill" && u - s * sw < 1.2) P.put(x, y, "#b8b0a0"); }
+    }
+  }
+  // the day's weather over everything drawn (environment.weather; one for the whole world)
+  function weatherOver(P, W, H, kind, R, small) {
+    if (!kind || kind === "clear") return;
+    if (kind === "fog") { const nz = noise(77); for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) P.mix(x, y, "#e8ecf0", 0.28 + 0.22 * nz(x / 30, y / 18, 2)); return; }
+    const n = (W * H) / (kind === "heavy rain" ? 30 : kind === "snow" ? 40 : kind === "gale" ? 90 : 70);
+    if (kind === "heavy rain" || kind === "rain") for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) P.dark(x, y, kind === "heavy rain" ? 0.12 : 0.06);
+    for (let k = 0; k < n; k++) { const x = (R() * W) | 0, y = (R() * H) | 0;
+      if (kind === "snow") { P.put(x, y, "#ffffff"); continue; }
+      if (kind === "gale") { for (let j = 0; j < 4; j++) P.mix(x + j, y, "#ffffff", 0.35); continue; }
+      const L = small ? 2 : 3; for (let j = 0; j < L; j++) P.mix(x - j, y + j, "#c8dcf0", 0.4); }
   }
 
   function drawTrees(P, trees, ctx, occ, W, H, R) {
@@ -533,145 +634,189 @@
   }
 
   // ---------------------------------------------------------------------------------------------------- a place on a day
-  // where its buildings (in their lots), herds, things and people stand, in close-up pixels; the region's map shows them at the
-  // same spots, smaller
+  // where its buildings (placed for the run), herds, things and people stand on a day, in close-up pixels; the region's map shows
+  // them at the same spots, smaller. People stand on the parcel the engine says they are on (things.spot_of, in the record as
+  // `spot`); one who worked nowhere today stands at the door of their home.
   const PLAN = new WeakMap();
   function plan(V, nid, day) {
     let cache = PLAN.get(V); if (!cache) PLAN.set(V, cache = {});
     const key = nid + "|" + day; if (cache[key]) return cache[key];
-    const G = geom(V, nid), W = G.W, H = G.H, M = model(V), N = M.nodes[nid], d = D(V, day), ST = V.static, occ = new Uint8Array(W * H);
+    const G = geom(V, nid), W = G.W, H = G.H, M = model(V), N = M.nodes[nid], d = D(V, day), occ = new Uint8Array(W * H);
     const out = { W, H, buildings: {}, herds: [], things: [], people: [], occ };
     const mark = (x0, y0, w, h, v) => { for (let y = y0; y < y0 + h; y++) for (let x = x0; x < x0 + w; x++) if (x >= 0 && y >= 0 && x < W && y < H) occ[y * W + x] = v; };
     for (const [bid, b] of Object.entries(d.buildings)) {
-      if (b.node !== nid || !G.lotOf[bid]) continue;
-      const [w, h] = dims(b), [lx, ly] = G.lotOf[bid], x = Math.round(lx - w / 2), y = Math.round(ly - h / 2);
-      out.buildings[bid] = { x, y, w, h, b }; mark(x - 1, y - 2, w + 2, h + 3, 4);
+      if (b.node !== nid || !G.placeOf[bid]) continue;
+      const p = G.placeOf[bid]; out.buildings[bid] = { x: p.x, y: p.y, w: p.w, h: p.h, b }; mark(p.x - 2, p.y - 3, p.w + 6, p.h + 4, 4);
     }
     const free = (x, y, w, h) => { for (let yy = y - h; yy <= y; yy++) for (let xx = x; xx < x + w; xx++) { if (xx < 0 || yy < 0 || xx >= W || yy >= H || occ[yy * W + xx]) return false; } return true; };
-    const spot = (i, R, near, rad, w, h) => {                                        // a free spot in parcel i, near a point if given
+    const spot = (i, R, near, rad, w, h) => {
       const cells = G.area[i] || []; if (!cells.length) return null;
       for (let t = 0; t < 80; t++) { const c = near ? [near[0] + (R() - .5) * 2 * rad, near[1] + (R() - .5) * 2 * rad] : cells[(R() * cells.length) | 0], x = c[0] | 0, y = c[1] | 0;
         if (G.reg(x, y) === i && G.reg(x + w, y) === i && G.reg(x, y - h) === i && free(x, y, w, h)) return [x, y]; }
       return null;
     };
-    for (const [hid, h] of Object.entries(d.herds)) {
+    for (const [hid, h] of Object.entries(d.herds)) {                                            // each head by its role
       if (h.node !== nid) continue; const i = N.pids.indexOf(h.parcel); if (i < 0) continue;
-      const hR = rng(hstr(hid + "|" + day)), n = Math.max(1, Math.min(16, Math.round(h.count || 1))), c0 = spot(i, hR, null, 0, 7, 4) || G.centre[i], pts = [];
-      for (let k = 0; k < n; k++) { const s = spot(i, hR, c0, 6 + Math.sqrt(n) * 6, 7, 4); if (s) { pts.push(s); mark(s[0], s[1] - 4, 8, 6, 6); } }
+      const hR = rng(hstr(hid + "|" + day)), heads = [];
+      for (const role of ["cows", "oxen", "bulls", "young"]) for (let k = 0; k < Math.min(h[role] || 0, 20); k++) heads.push(role);
+      const c0 = spot(i, hR, null, 0, 8, 5) || G.centre[i], pts = [];
+      for (const role of heads) { const s = spot(i, hR, c0, 6 + Math.sqrt(heads.length) * 6, 9, 6); if (s) { pts.push([s[0], s[1], role]); mark(s[0], s[1] - 5, 9, 7, 6); } }
       out.herds.push({ id: hid, h, pts });
     }
     for (const [cid, t] of Object.entries(d.things)) {
-      if (t.node !== nid || t.on_road) continue;
-      const i = N.pids.indexOf(t.parcel), B = t.in && out.buildings[t.in], tR = rng(hstr(cid));
-      let s = B ? [B.x + B.w + 2, B.y + B.h] : i >= 0 ? spot(i, tR, null, 0, 6, 5) : null; if (!s) s = i >= 0 ? G.centre[i] : G.mid;
-      out.things.push({ id: cid, t, x: s[0] | 0, y: s[1] | 0 }); mark((s[0] | 0) - 2, (s[1] | 0) - 5, 8, 7, 6);
+      if (t.node !== nid || t.stretch != null) continue;
+      if (t.in && !t.door) continue;                                                              // inside a house: not seen from outside
+      const i = N.pids.indexOf(t.parcel), Bd = t.door && out.buildings[t.door], tR = rng(hstr(cid));
+      let s = Bd ? [Bd.x + (Bd.w >> 1) + 3, Bd.y + Bd.h + 3] : i >= 0 ? spot(i, tR, null, 0, 7, 5) : null; if (!s) s = i >= 0 ? G.centre[i] : G.mid;
+      out.things.push({ id: cid, t, x: s[0] | 0, y: s[1] | 0 }); mark((s[0] | 0) - 3, (s[1] | 0) - 6, 9, 8, 6);
     }
-    const acts = {}; for (const a of d.acts) if (a.node === nid) acts[a.actor] = a;
-    const atDoor = {}, anchor = {}, built = N.pids.findIndex((p) => ST.parcels[p].cover === "built");
-    for (const [name, p] of Object.entries(d.people).filter(([, p]) => p.node === nid && (p.alive || p.died === d.day)).sort((a, b) => a[0] < b[0] ? -1 : 1)) {
-      const a = acts[name], pR = rng(hstr(name + "|" + day));
-      let pid = (a && a.site) || p.parcel; if (pid && !ST.parcels[pid]) pid = (d.things[pid] || d.buildings[pid] || {}).parcel || null;
-      const i = N.pids.indexOf(pid), home = p.slept && out.buildings[p.slept], homeI = home ? N.pids.indexOf(home.b.parcel) : -2;
+    const acts = {}; for (const a of d.acts) if (a.node === nid) (acts[a.actor] = acts[a.actor] || []).push(a);
+    const speaking = new Set(d.events.filter((e) => e.kind === "speech" && e.place === nid).map((e) => e.actor));
+    const atDoor = {}, anchor = {};
+    for (const [name, p] of Object.entries(d.people).filter(([, p]) => p.at === nid && p.alive).sort((a, b) => a[0] < b[0] ? -1 : 1)) {
+      const pR = rng(hstr(name + "|" + day)), i = N.pids.indexOf(p.spot), home = (p.homes || []).map((b) => out.buildings[b]).find(Boolean);
       let s = null;
-      if (home && (!a || i < 0 || i === homeI)) { const k = atDoor[p.slept] = (atDoor[p.slept] || 0) + 1; s = [home.x + (home.w >> 1) - 1 + ((k - 1) % 3 - 1) * 6, home.y + home.h + 10 + Math.floor((k - 1) / 3) * 11]; }
-      else if (i >= 0) { if (!anchor[i]) anchor[i] = spot(i, rng(hstr(pid + "|" + day)), null, 0, 6, 10) || G.centre[i]; s = spot(i, pR, anchor[i], 22, 6, 10) || spot(i, pR, null, 0, 6, 10); }
-      if (!s) { const c = built >= 0 ? G.centre[built] : G.mid; s = [c[0] + (pR() - .5) * 30, c[1] + (pR() - .5) * 20]; }
+      if (!(p.worked || []).length && home) { const k = atDoor[home.b.name] = (atDoor[home.b.name] || 0) + 1;
+        s = [home.x + (home.w >> 1) - 2 + ((k - 1) % 3 - 1) * 7, home.y + home.h + 11 + Math.floor((k - 1) / 3) * 11]; }
+      else if (i >= 0) { if (!anchor[i]) anchor[i] = spot(i, rng(hstr(p.spot + "|" + day)), null, 0, 6, 10) || G.centre[i]; s = spot(i, pR, anchor[i], 24, 6, 10) || spot(i, pR, null, 0, 6, 10); }
+      if (!s) s = i >= 0 ? G.centre[i] : G.mid;
       s = [s[0] | 0, s[1] | 0]; mark(s[0] - 1, s[1] - 9, 7, 11, 7);
-      out.people.push({ name, p, a, x: s[0], y: s[1] });
+      const mine = acts[name] || [];
+      out.people.push({ name, p, a: mine[mine.length - 1], acts: mine, speaking: speaking.has(name), x: s[0], y: s[1] });
     }
     cache[key] = out; return out;
   }
 
   // ---------------------------------------------------------------------------------------------------- one place, close up
   function node(cv, V, nid, day) {
-    const G = geom(V, nid), W = G.W, H = G.H, M = model(V), N = M.nodes[nid], d = D(V, day), ST = V.static, R = rng(hstr(nid) ^ M.seed);
+    const G = geom(V, nid), W = G.W, H = G.H, M = model(V), N = M.nodes[nid], d = D(V, day), ST = V.static, R = rng(hstr(nid) ^ M.seed ^ day);
     const P = Px(cv, W, H, "#6ca63c"), out = { width: W, height: H, hotspots: [] }, pl = plan(V, nid, day);
     const cellNode = new Int16Array(W * H).fill(0), occ = new Uint8Array(W * H);
-    const ctx = paintLand(P, V, day, W, H, [nid], cellNode, G.REG, 1, R, occ, { scale: "node", courses: G.courses });
+    const ctx = paintLand(P, V, day, W, H, [nid], cellNode, G.REG, 1, rng(hstr(nid) ^ M.seed), occ, { scale: "node", courses: G.courses });
     const n2 = noise(M.seed ^ 5), paint = paintRoad(P, occ, ctx.LV, W, H);
-    for (const e of G.exits) {                                                                       // roads leaving the place
-      const r = ST.roads[e.rid];
-      wind(paint, e.fx, e.fy, e.tx, e.ty, n2, !r || !r.track ? 2 : 1, e.ex.hidden ? PAL.lane : PAL.road, false);
-      const lx = Math.max(10, Math.min(W - 10, e.tx)), ly = Math.max(8, Math.min(H - 8, e.ty));
-      out.hotspots.push({ kind: "exit", id: e.rid, to: e.ex.to, x: lx - 8, y: ly - 8, w: 16, h: 16, label: "→ " + (ST.nodes[e.ex.to]?.name || e.ex.to) + " · " + (r?.days ?? "?") + " day" + ((r?.days ?? 1) > 1 ? "s" : "") });
+    for (const e of G.exits) {                                                                       // roads leaving, from their ends' parcels
+      const r = ST.roads[e.rid], worn = ((d.roads[e.rid] || {}).ends || {})[nid]?.worn || 0, faint = e.end.hidden && worn < 0.8;
+      if (faint) { const pr = paintRoad(P, occ, ctx.LV, W, H); wind((x, y, c) => { if ((x * 7 + y * 3) % 10 < 3 + worn * 8) pr(x, y, c); }, e.fx, e.fy, e.tx, e.ty, n2, 0, PAL.lane, false); }
+      else wind(paint, e.fx, e.fy, e.tx, e.ty, n2, r && r.track ? 2 : 1, r && r.track ? PAL.road : PAL.lane, false);
+      const lx = Math.max(10, Math.min(W - 10, e.tx)), ly = Math.max(8, Math.min(H - 8, e.ty)), to = ST.nodes[e.to];
+      out.hotspots.push({ kind: "exit", id: e.rid, to: e.to, x: lx - 8, y: ly - 8, w: 16, h: 16, label: "→ " + (to?.name || e.to) + " · " + (r?.days ?? "?") + " day" + ((r?.days ?? 1) > 1 ? "s" : "") + (e.end.hidden ? (faint ? " (a hidden way)" : " (a worn path)") : "") });
     }
     const B = Object.entries(pl.buildings);
-    for (const [, p] of B) for (let y = p.y - 1; y < p.y + p.h + 1; y++) for (let x = p.x - 1; x < p.x + p.w + 1; x++) if (x >= 0 && y >= 0 && x < W && y < H) occ[y * W + x] = 4;
-    // a yard of packed earth before each door, a kitchen garden beside each house, a lane to the nearest road
-    for (const [bid, p] of B) {
-      for (let y = p.y + p.h - 2; y < p.y + p.h + 6; y++) for (let x = p.x - 2; x < p.x + p.w + 2; x++) { const i = ctx.at(x, y); if (i < 0 || ctx.LV[i] <= 0 || occ[i]) continue;
+    for (const [, p] of B) for (let y = p.y - 2; y < p.y + p.h + 1; y++) for (let x = p.x - 1; x < p.x + p.w + 1; x++) if (x >= 0 && y >= 0 && x < W && y < H) occ[y * W + x] = 4;
+    for (const [bid, p] of B) {                                                                       // a yard before each door; a lane to the nearest road
+      for (let y = p.y + p.h - 1; y < p.y + p.h + 6; y++) for (let x = p.x - 2; x < p.x + p.w + 2; x++) { const i = ctx.at(x, y); if (i < 0 || ctx.LV[i] <= 0 || occ[i]) continue;
         const dx = Math.max(p.x - x, x - (p.x + p.w - 1), 0), dy = Math.max(0, y - (p.y + p.h - 1)); if (dx + dy <= 2 + 2.5 * n2(x / 4, y / 4, 2)) { P.put(x, y, ctx.snow ? PAL.snow[2] : n2(x / 2, y / 2, 1) > 0.6 ? PAL.ground[1] : PAL.ground[0]); occ[i] = 2; } }
-      const dwelling = (p.b.sleepers || []).length || /house|cottage|hut|hall|steading|farm/i.test(p.b.name || "");
-      if (dwelling && p.b.structure !== "camp") { const gx = (hstr(bid) & 1) ? p.x + p.w + 2 : p.x - 9, gy = p.y + 1; let ok = true;
-        for (let y = gy - 1; y < gy + 7 && ok; y++) for (let x = gx - 1; x < gx + 8; x++) { const i = ctx.at(x, y); if (i < 0 || occ[i] || ctx.LV[i] <= 0) { ok = false; break; } }
-        if (ok) for (let y = gy; y < gy + 6; y++) for (let x = gx; x < gx + 7; x++) { const edge = y === gy || y === gy + 5 || x === gx || x === gx + 6;
-          P.put(x, y, edge ? PAL.fenceWood[(x + y) & 1] : ctx.snow ? PAL.snow[1] : ctx.season === "autumn" || ctx.season === "winter" ? PAL.soil[(y & 1)] : (y & 1) ? "#5a9a3a" : PAL.soil[0]); occ[y * W + x] = 2; } }
-    }
-    for (const [, p] of B) {
       let x = p.x + (p.w >> 1), y = p.y + p.h + 1, best = null, bd = 1e9;
       for (let yy = 0; yy < H; yy += 2) for (let xx = 0; xx < W; xx += 2) if (occ[yy * W + xx] === 3) { const dd = (xx - x) ** 2 + (yy - y) ** 2; if (dd < bd) { bd = dd; best = [xx, yy]; } }
-      if (best && bd < 70 * 70) for (let s = 0; s < 140; s++) { if (Math.abs(best[0] - x) + Math.abs(best[1] - y) < 1) break; if (Math.abs(best[0] - x) > Math.abs(best[1] - y)) x += Math.sign(best[0] - x); else y += Math.sign(best[1] - y); const i = y * W + x; if (occ[i] !== 4) { P.put(x, y, PAL.lane); if (!occ[i]) occ[i] = 5; } }
+      if (best && bd < 90 * 90) for (let s = 0; s < 200; s++) { if (Math.abs(best[0] - x) + Math.abs(best[1] - y) < 1) break; if (Math.abs(best[0] - x) > Math.abs(best[1] - y)) x += Math.sign(best[0] - x); else y += Math.sign(best[1] - y); const i = y * W + x; if (occ[i] !== 4) { P.put(x, y, ctx.snow ? PAL.snow[2] : PAL.lane); if (!occ[i]) occ[i] = 5; } }
     }
     for (const q of pl.people) for (let y = q.y - 9; y <= q.y + 1; y++) for (let x = q.x - 1; x < q.x + 7; x++) { const i = ctx.at(x, y); if (i >= 0 && !occ[i]) occ[i] = 1; }
-    for (const h of pl.herds) for (const [x0, y0] of h.pts) for (let y = y0 - 4; y <= y0 + 1; y++) for (let x = x0; x < x0 + 8; x++) { const i = ctx.at(x, y); if (i >= 0 && !occ[i]) occ[i] = 1; }
+    for (const h of pl.herds) for (const [x0, y0] of h.pts) for (let y = y0 - 5; y <= y0 + 1; y++) for (let x = x0; x < x0 + 9; x++) { const i = ctx.at(x, y); if (i >= 0 && !occ[i]) occ[i] = 1; }
     drawTrees(P, ctx.trees, ctx, occ, W, H, R);
+    for (const [k, x, y] of ctx.marks) if (k === "stook" && !occ[y * W + x]) { P.put(x, y, "#d8b850"); P.put(x, y - 1, "#e8c860"); P.put(x + 1, y, "#c4a03c"); P.dark(x + 1, y + 1, .3); }
+    for (const [pid, dp] of Object.entries(d.parcels)) if (dp.smoky && N.pids.includes(pid)) { const i = N.pids.indexOf(pid), [cx, cy] = G.centre[i]; smoke(P, cx | 0, cy | 0); smoke(P, (cx | 0) + 3, (cy | 0) - 2); }
     // everything that stands, back to front
     const items = [];
-    for (const [bid, p] of B) items.push({ y: p.y + p.h, f: () => { building(P, p.x, p.y, p.w, p.h, p.b, rng(hstr(p.b.name)));
-      out.hotspots.push({ kind: "building", id: bid, x: p.x, y: p.y, w: p.w, h: p.h, label: buildingLabel(p.b) }); } });
-    for (const h of pl.herds) { const hR = rng(hstr(h.id + day)); for (const [x, y] of h.pts) items.push({ y, f: () => beast(P, x, y, h.h.kind, hR) });
-      if (h.pts.length) { const xs = h.pts.map((q) => q[0]), ys = h.pts.map((q) => q[1]); out.hotspots.push({ kind: "herd", id: h.id, x: Math.min(...xs), y: Math.min(...ys) - 4, w: Math.max(...xs) - Math.min(...xs) + 8, h: Math.max(...ys) - Math.min(...ys) + 6,
-        label: `${h.h.name || h.id}: ${h.h.count} ${h.h.kind || ""}${h.h.hungry ? ", hungry" : ""}${h.h.in_milk ? `, ${Math.round(h.h.in_milk)} in milk` : ""}${(h.h.holders || []).length ? " (" + h.h.holders.join(", ") + ")" : ""}` }); } }
-    for (const t of pl.things) items.push({ y: t.y, f: () => {
-      if (t.t.kind === "body") (t.t.buried != null ? graveBig(P, t.x, t.y) : villager(P, t.x, t.y, t.t.of || t.id, { dead: true })); else if (t.t.kind === "carcass") bonesBig(P, t.x, t.y); else sackBig(P, t.x, t.y, t.t.goods);
-      const goods = Object.entries(t.t.goods || {}).map(([k, v]) => `${Math.round(v * 10) / 10} ${k}`).join(", ");
-      out.hotspots.push({ kind: "thing", id: t.id, x: t.x - 3, y: t.y - 6, w: 8, h: 8, label: (t.t.kind === "body" ? (t.t.buried != null ? `the grave of ${t.t.of}` : `the body of ${t.t.of}`) : t.t.kind === "carcass" ? "a carcass" : "goods left lying") + (goods ? ": " + goods : "") }); } });
+    for (const [bid, p] of B) items.push({ y: p.y + p.h, f: () => { drawBuilding(P, p.x, p.y, p.b, rng(hstr(bid)));
+      const pf = G.placeOf[bid]; out.hotspots.push({ kind: "building", id: bid, x: p.x, y: p.y, w: p.w, h: p.h, label: buildingLabel(p.b, d) + (pf && !pf.fits ? " · does not fit its parcel's ground (spec: built 24, scrub 16 spaces a unit of size)" : "") }); } });
+    for (const h of pl.herds) { const hR = rng(hstr(h.id + day)); for (const [x, y, role] of h.pts) items.push({ y, f: () => beast(P, x, y, role, hR, h.h.hungry >= 2) });
+      if (h.pts.length) { const xs = h.pts.map((q) => q[0]), ys = h.pts.map((q) => q[1]); out.hotspots.push({ kind: "herd", id: h.id, x: Math.min(...xs), y: Math.min(...ys) - 5, w: Math.max(...xs) - Math.min(...xs) + 9, h: Math.max(...ys) - Math.min(...ys) + 7, label: herdLabel(h.h, V) }); } }
+    for (const t of pl.things) items.push({ y: t.y, f: () => { drawThing(P, t.x, t.y, t.t, day);
+      out.hotspots.push({ kind: "thing", id: t.id, x: t.x - 3, y: t.y - 6, w: 9, h: 8, label: thingLabel(t.t, day) }); } });
     for (const q of pl.people) items.push({ y: q.y, f: () => {
-      const said = d.said && d.said[q.name] && (d.said[q.name].say || []).length;
-      villager(P, q.x, q.y, q.name, { child: q.p.stage === "child", dead: !q.p.alive, wounded: q.p.wounded, hungry: q.p.hunger <= -1 ? -q.p.hunger : 0, speak: said && !q.a, tool: toolFor(q.a) });
-      out.hotspots.push({ kind: "person", id: q.name, x: q.x - 1, y: q.y - 9, w: 7, h: 11, label: personLabel(q, d) }); } });
+      villager(P, q.x, q.y, q.name, { child: q.p.stage === "child" || q.p.stage === "infant", wounded: q.p.wounded, hungry: q.p.hunger <= -1 ? -q.p.hunger : 0,
+        speak: q.speaking && !q.a, tool: toolFor(q.a), pregnant: q.p.pregnant, load: (q.p.gear || []).length || Object.keys(q.p.carried || {}).some((i) => i !== "coin") });
+      out.hotspots.push({ kind: "person", id: q.name, x: q.x - 1, y: q.y - 9, w: 7, h: 11, label: personLabel(q, d, V) }); } });
     items.sort((a, b) => a.y - b.y).forEach((it) => it.f());
-    for (const e of d.events) {
-      if (e.place !== nid || !["death", "fight", "raid", "fire", "alarm", "theft"].includes(e.kind)) continue;
-      const hs = out.hotspots.find((h) => h.kind === "person" && h.id === (e.target || e.actor));
-      const bid = (e.about || []).map((x) => String(x).split(":")).find(([k]) => k === "building")?.[1], Bq = bid && pl.buildings[bid];
-      const xy = Bq ? [Bq.x + Bq.w / 2, Bq.y - 3] : hs ? [hs.x + 3, hs.y - 2] : G.mid;
-      out.hotspots.push({ kind: "event", id: e.kind, x: (xy[0] | 0) - 4, y: (xy[1] | 0) - 4, w: 9, h: 9, label: e.text, event: e.kind });
+    weatherOver(P, W, H, d.weather, rng(hstr("weather|" + day)), false);
+    for (const e of d.events) {                                                                        // marks for what happened, by how far it reaches
+      if (e.place !== nid || ["speech", "work", "store", "make", "build", "give", "take", "trade"].includes(e.kind)) continue;
+      let xy = null;
+      const bid = (e.about || []).map((x) => String(x).split(":")).find(([k]) => k === "building")?.[1], pid = (e.about || []).map((x) => String(x).split(":")).find(([k]) => k === "parcel")?.[1];
+      const who = pl.people.find((q) => q.name === (e.target || e.actor));
+      if (bid && pl.buildings[bid]) xy = [pl.buildings[bid].x + pl.buildings[bid].w / 2, pl.buildings[bid].y - 3];
+      else if (who) xy = [who.x + 2, who.y - 11];
+      else if (pid && N.pids.includes(pid)) xy = G.centre[N.pids.indexOf(pid)];
+      else xy = G.mid;
+      out.hotspots.push({ kind: "event", id: e.id, x: (xy[0] | 0) - 4, y: (xy[1] | 0) - 4, w: 9, h: 9, label: e.text, event: e.kind, extent: e.extent });
     }
     N.pids.forEach((pid, i) => { if (!G.area[i].length) return; const [cx, cy] = G.centre[i]; let x0 = 1e9, y0 = 1e9, x1 = -1, y1 = -1; for (const [x, y] of G.area[i]) { x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y); }
-      out.hotspots.push({ kind: "parcel", id: pid, x: x0, y: y0, w: x1 - x0, h: y1 - y0, cx, cy, label: ST.parcels[pid].name, info: parcelLabel(V, pid, d, day) }); });
+      out.hotspots.push({ kind: "parcel", id: pid, x: x0, y: y0, w: x1 - x0, h: y1 - y0, cx, cy, label: ST.parcels[pid].name, info: parcelLabel(V, pid, d, pl) }); });
     out.biome = N.biome; out.season = ctx.season; out.focus = (() => { const i = N.pids.findIndex((p) => ST.parcels[p].cover === "built"); return i >= 0 ? G.centre[i] : G.mid; })();
     P.flush();
     return out;
   }
-  function buildingLabel(b) {
-    const fit = Object.keys(b.fittings || {}), sl = b.sleepers || [];
-    return `${b.name}: ${b.unfinished ? "being built, " : ""}${b.structure || ""}${b.condition === 1 ? ", damaged" : b.condition === 0 ? ", in ruins" : ""}${b.fire ? ", fire lit" : ""}${fit.length ? "; " + fit.join(", ") : ""}${sl.length ? "; slept here: " + sl.join(", ") : ""}${(b.holders || []).length ? "; held by " + b.holders.join(", ") : ""}`;
+  function drawThing(P, x, y, t, day) {
+    if (t.kind === "remains") {
+      if (t.buried != null) { if (t.cairn) { for (const [a, b, c] of [[-2, 0, "#9a9aa0"], [-1, 0, "#b4b4ba"], [0, 0, "#9a9aa0"], [1, 0, "#b4b4ba"], [2, 0, "#9a9aa0"], [-1, -1, "#c8c8c8"], [0, -1, "#9a9aa0"], [1, -1, "#b4b4ba"], [0, -2, "#c8c8c8"]]) P.put(x + a, y + b, c); return; }
+        if (day - t.buried >= 7) { for (let dx = -2; dx <= 2; dx++) P.mix(x + dx, y, "#7a5a3a", 0.5); return; }   // a sunk mound
+        graveBig(P, x, y); return; }
+      if (t.body === "bones") { bonesBig(P, x, y); return; }
+      villager(P, x, y, t.of || "?", { dead: true });
+      if (t.rotting) { P.put(x + 1, y - 3, "#2a2a2a"); P.put(x + 4, y - 2, "#2a2a2a"); }
+      return;
+    }
+    if (t.kind === "carcass") {
+      if (t.bones) { bonesBig(P, x, y); return; }
+      for (let dx = 0; dx < 6; dx++) { P.put(x + dx - 2, y, t.fresh ? "#a0663a" : "#7a5a3a"); P.put(x + dx - 2, y - 1, t.fresh ? "#b8794a" : "#6a4a2a"); }
+      P.put(x - 3, y, "#e0dccc"); P.put(x + 4, y + 1, "#4a2f17"); if (!t.fresh) { P.put(x, y - 3, "#2a2a2a"); P.put(x + 2, y - 2, "#2a2a2a"); }
+      return;
+    }
+    if (t.hidden === "under brush") { for (const [a, b] of [[-2, 0], [-1, 0], [0, 0], [1, 0], [2, 0], [-1, -1], [0, -1], [1, -1], [0, -2]]) P.put(x + a, y + b, (a + b) & 1 ? "#5c7a34" : "#7a6a3a"); return; }
+    if (t.hidden === "buried") { for (let dx = -2; dx <= 2; dx++) P.put(x + dx, y, (dx & 1) ? "#8a6a48" : "#7a5a3a"); return; }
+    sackBig(P, x, y, t.goods); if (t.heap) { sackBig(P, x + 3, y, t.goods); sackBig(P, x + 1, y - 2, t.goods); }
   }
-  function personLabel(q, d) {
+  function buildingLabel(b, d) {
+    const fit = Object.entries(b.fittings || {}).map(([k, v]) => k === "beds" ? `${v} beds` : k), rooms = (b.rooms || []).map((r) => r.kind).join(" and ");
+    return `${b.name}: ${b.unfinished ? `being built (${Math.round(b.unfinished.done * 100)}%), ` : ""}${b.structure || ""}${b.condition === 1 ? ", damaged" : b.condition === 0 ? ", in ruins" : ""}`
+      + `; ${rooms}${b.derived ? " (rooms derived)" : ""}, ${b.footprint} spaces of ground${b.floor ? `, floor ${b.used}/${b.floor}` : ""}`
+      + `${fit.length ? "; " + fit.join(", ") : ""}${b.fire ? "; fire lit last night" : ""}${b.door === "barred" ? "; door barred" : ""}`
+      + `${(b.made || []).length ? "; worked today: " + b.made.join(", ") : ""}${b.sleepers.length ? "; slept here: " + b.sleepers.join(", ") : ""}${b.holders.length ? "; held by " + b.holders.join(", ") : ""}`;
+  }
+  function herdLabel(h, V) {
+    const roles = ["cows", "oxen", "bulls", "young"].filter((r) => h[r]).map((r) => `${h[r]} ${r === "young" ? "calves" : r}`).join(", ");
+    return `${h.name || "a herd"}: ${roles}${h.in_milk >= 0.5 ? `, ${Math.round(h.in_milk)} in milk` : ""}${h.hungry ? `, hungry ${h.hungry} nights` : ""}${h.watched ? ", herded today" : ""}${h.parcel !== h.home && h.home ? ", off its home ground" : ""}${(h.holders || []).length ? " (" + h.holders.join(", ") + ")" : ""}`;
+  }
+  function thingLabel(t, day) {
+    const goods = Object.entries(t.goods || {}).map(([k, v]) => `${Math.round(v * 10) / 10} ${k}`).join(", ");
+    const what = t.kind === "remains" ? (t.buried != null ? (t.cairn ? `a cairn over ${t.of}` : `the grave of ${t.of}`) : `the body of ${t.of}${t.body === "bones" ? " (bones)" : t.rotting ? " (rotting)" : ""}`)
+      : t.kind === "carcass" ? `the carcass of ${t.of || "a beast"}${t.bones ? " (bones)" : t.fresh ? " (fresh)" : " (gone off)"}` : t.hidden ? `goods ${t.hidden}` : t.heap ? "a heap of goods" : "goods left lying";
+    return what + (goods ? ": " + goods : "");
+  }
+  function personLabel(q, d, V) {
     const p = q.p, bits = [q.name];
     if (!p.alive) bits.push("dead" + (p.cause ? ` (${p.cause})` : ""));
-    if (q.a) bits.push(`${q.a.verb}${q.a.tech ? " " + q.a.tech : ""}${q.a.for ? " for " + q.a.for : ""}`);
-    else if (d.said && d.said[q.name] && (d.said[q.name].say || []).length) bits.push("speaking");
-    if (p.hunger <= -1) bits.push(`hungry (${-p.hunger} missed)`);
-    if (p.wounded) bits.push("wounded");
+    if (q.acts && q.acts.length) bits.push(q.acts.map((a) => `${a.verb}${a.tech ? " " + a.tech : ""}${a.for ? " for " + a.for : ""}`).join(", "));
+    else if (q.speaking) bits.push("spoke");
+    if (p.spot) bits.push("on " + (V.static.parcels[p.spot]?.name || p.spot));
+    if (p.hunger <= -1) bits.push(p.hunger <= -2 ? `starving (${p.missed} missed)` : `hungry (${p.missed} missed)`);
+    if (p.wounded) bits.push("wounded"); if (p.pregnant) bits.push("pregnant");
     if (p.stage && p.stage !== "adult") bits.push(p.stage);
-    const hands = Object.entries(p.hands || {}).filter(([, v]) => v > 0.05).map(([k, v]) => `${Math.round(v * 10) / 10} ${k}`).slice(0, 5);
+    const hands = Object.entries(p.carried || {}).map(([k, v]) => `${Math.round(v * 10) / 10} ${k}`).slice(0, 5);
     if (hands.length) bits.push("carrying " + hands.join(", "));
+    if (p.slept) bits.push("slept: " + (d.buildings[p.slept]?.name || p.slept));
     return bits.join(" · ");
   }
-  function parcelLabel(V, pid, d, day) {
-    const P0 = V.static.parcels[pid], dp = d.parcels[pid] || {}, bits = [`${P0.cover}, size ${P0.size}`];
-    const st = cropState(dp.crop, day); if (st) bits.push(`${dp.crop.kind || "crop"} ${st}${dp.crop.left != null && dp.crop.left < 1 ? `, ${Math.round(dp.crop.left * 100)}% left` : ""}`);
-    if (dp.fence) bits.push("fenced"); if ((dp.holders || []).length) bits.push("held by " + dp.holders.join(", "));
-    const nb = (P0.adj || []).map((q) => V.static.parcels[q]?.name).filter(Boolean); if (nb.length) bits.push("next to " + nb.join(", "));
+  function parcelLabel(V, pid, d, pl) {
+    const S0 = V.static.parcels[pid], dp = d.parcels[pid] || {}, bits = [`${dp.cover || S0.cover}${dp.was ? ` (was ${dp.was})` : ""}, size ${S0.size}`];
+    const c = dp.crop; if (c) bits.push(`${c.kind}: ${c.stage}, ${Math.round(c.sown * 100)}% sown${c.reaped ? `, ${Math.round(c.reaped * 100)}% reaped` : ""}${c.weeds ? ", weedy" : ""}`);
+    else if (dp.cover === "field") bits.push(dp.broken > 0.05 ? `${Math.round(dp.broken * 100)}% dug` : dp.last_crop && dp.last_crop !== "fallow" ? `after ${dp.last_kind || dp.last_crop}` : "fallow");
+    for (const [k, v] of Object.entries(dp.res || {})) bits.push(`${k} ${Math.round(v * 100)}%`);
+    if (dp.cover === "field" || dp.soil) bits.push(`soil ${dp.soil}`);
+    if (dp.works) bits.push(`${dp.works.ground === "wet" ? "ditched" : "terraced"} ${Math.round(dp.works.done * 100)}%`);
+    if (dp.fence) bits.push(`${dp.fence.kind === "stone" ? "walled" : "fenced"} (${["down", "gappy", "whole"][dp.fence.level]}, gate ${dp.fence.gate})`);
+    if (dp.clearing) bits.push(`being cleared ${Math.round(dp.clearing * 100)}%`);
+    if (dp.ground_spaces) { const used = Object.values(d.buildings).filter((b) => b.parcel === pid).reduce((s, b) => s + (b.footprint || 0), 0); bits.push(`ground ${used}/${dp.ground_spaces} spaces`); }
+    if (dp.felled) bits.push("felled"); if (dp.smoky) bits.push("smoke today");
+    if ((dp.holders || []).length) bits.push("held by " + dp.holders.join(", "));
+    const nb = (S0.adj || []).map((q) => V.static.parcels[q]?.name).filter(Boolean); bits.push(nb.length ? "next to " + nb.join(", ") : "next to nothing");
     return bits.join("; ");
   }
 
   // ---------------------------------------------------------------------------------------------------- the region
-  // each place's ground plan at one scale for all places (so a big place looks big), in its own territory; its buildings as
-  // small houses, its people as the small figures, roads between places, travellers on them. Unexplored places are drawn as they
-  // are: the world exists before anyone finds it.
+  // each place's ground plan at one scale for all places (so a big place looks big), in its own territory; its buildings at their
+  // footprint, smaller, its people as small figures, roads between places from their ends, travellers at the middle of the stretch
+  // they are on, landmarks on their stretches. Unexplored places are drawn as they are: the world exists before anyone finds it.
   function world(cv, V, day, opts = {}) {
     const M = model(V), d = D(V, day), ST = V.static, WL = ST.layout.world, nids = Object.keys(ST.nodes).sort();
     const W = opts.width || 400, H = opts.height || 260, R = rng(M.seed ^ 77), P = Px(cv, W, H, "#6ca63c"), out = { width: W, height: H, hotspots: [] };
@@ -686,51 +831,57 @@
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
       const jx = x + (n1(x / 24, y / 24, 3) - .5) * 26, jy = y + (n1(x / 24 + 7, y / 24, 3) - .5) * 26; let best = -1, bd = 1e18;
       for (let i = 0; i < nids.length; i++) { const dd = (jx - pos[nids[i]][0]) ** 2 + (jy - pos[nids[i]][1]) ** 2; if (dd < bd) { bd = dd; best = i; } }
-      cellNode[y * W + x] = best;                                                                       // the territory
+      cellNode[y * W + x] = best;
       const n = nids[best], g = G[n], lx = Math.round(g.mid[0] + (x - pos[n][0]) / f), ly = Math.round(g.mid[1] + (y - pos[n][1]) / f);
       if (lx >= 0 && ly >= 0 && lx < g.W && ly < g.H) cellPar[y * W + x] = g.REG[ly * g.W + lx];
     }
     const courses = [];
     nids.forEach((n, ni) => { for (const c of G[n].courses) courses.push({ pid: c.pid, pids: c.pids, n: ni, half: Math.max(0.7, c.half * f), line: c.line.filter((_, k) => k % 2 === 0).map(([x, y]) => toWorld(n, x, y)) }); });
     const ctx = paintLand(P, V, day, W, H, nids, cellNode, cellPar, f, R, occ, { scale: "world", courses });
-    // territory borders: a faint line of darker ground where two places' lands meet in the wild
     for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) { const i = y * W + x; if (cellPar[i] >= 0) continue; if (cellNode[i] !== cellNode[i + 1] || cellNode[i] !== cellNode[i + W]) if ((x + y) % 3 !== 0) P.dark(x, y, 0.16); }
-    // roads: from the parcel each leaves a place by, winding to the other place
     const n2 = noise(M.seed ^ 5), paint = paintRoad(P, occ, ctx.LV, W, H), roadPts = {};
     const exitPt = (n, rid) => { const e = G[n].exits.find((q) => q.rid === rid); return e ? toWorld(n, e.fx, e.fy) : pos[n]; };
     for (const [rid, r] of Object.entries(ST.roads)) {
       if (!pos[r.a] || !pos[r.b]) continue;
-      const a = exitPt(r.a, rid), b = exitPt(r.b, rid), pts = [];
-      wind(paint, a[0], a[1], b[0], b[1], n2, r.track ? 0 : 1, r.track ? PAL.lane : PAL.road, false, pts);
+      const a = exitPt(r.a, rid), b = exitPt(r.b, rid), pts = [], hid = Object.values(r.ends || {}).some((e) => e.hidden);
+      wind(hid ? (x, y, c) => { if ((Math.round(x) + Math.round(y)) % 3) paint(x, y, c); } : paint, a[0], a[1], b[0], b[1], n2, r.track ? 1 : 0, r.track ? PAL.road : PAL.lane, false, pts);
       roadPts[rid] = pts;
       const mid = pts[pts.length >> 1] || a;
-      out.hotspots.push({ kind: "road", id: rid, x: (mid[0] | 0) - 4, y: (mid[1] | 0) - 4, w: 8, h: 8, label: `${ST.nodes[r.a]?.name} — ${ST.nodes[r.b]?.name}: ${r.days} day${r.days > 1 ? "s" : ""}${r.terrain ? ", " + r.terrain : ""}` });
-      (r.stretches || []).forEach((st, i, all) => (st.landmarks || []).forEach((lm, j) => { const p = pts[Math.min(pts.length - 1, Math.floor(pts.length * (i + .5) / all.length) + j * 6)]; if (!p) return;
-        P.put(p[0] + 2, p[1] - 2, "#e8e8e0"); P.put(p[0] + 2, p[1] - 1, "#a8a29a"); out.hotspots.push({ kind: "landmark", id: rid + ":" + i + ":" + j, x: (p[0] | 0), y: (p[1] | 0) - 4, w: 5, h: 5, label: String(lm.kind || lm.words || lm) }); }));
+      out.hotspots.push({ kind: "road", id: rid, x: (mid[0] | 0) - 4, y: (mid[1] | 0) - 4, w: 8, h: 8, label: `${ST.nodes[r.a]?.name} — ${ST.nodes[r.b]?.name}: ${r.days} day${r.days > 1 ? "s" : ""}${r.track ? ", a cart track" : ""}${r.terrain ? ", " + r.terrain : ""}` });
+      const ch = (d.roads[rid] || {}).challenges || {};
+      (r.stretches || []).forEach((st, i, all) => (st.landmarks || []).forEach((lm, j) => {               // landmarks on their stretch
+        const p = pts[Math.min(pts.length - 1, Math.floor(pts.length * (i + .5) / all.length) + j * 5)]; if (!p) return;
+        const k = lm.kind || lm, x = p[0] | 0, y = p[1] | 0, c = ch[`${i + 1}:${k}`];
+        if (k === "ford") { for (let a = -1; a <= 1; a++) P.put(x + a, y + 1, c ? "#4e94a8" : "#7cc0c8"); }
+        else if (k === "bridge") { for (let a = -1; a <= 1; a++) P.put(x + a, y - 1, c ? "#6b4423" : "#8a5a2a"); if (c) P.put(x, y - 1, "#2a1a10"); }
+        else if (k === "pass") { P.put(x, y - 2, c ? "#ffffff" : "#9a9aa0"); P.put(x - 1, y - 1, "#9a9aa0"); P.put(x + 1, y - 1, "#9a9aa0"); }
+        else { P.put(x + 2, y - 2, "#e8e8e0"); P.put(x + 2, y - 1, "#a8a29a"); }
+        out.hotspots.push({ kind: "landmark", id: rid + ":" + i + ":" + j, x: x - 2, y: y - 3, w: 6, h: 6, label: `${k} on day ${i + 1} of the road${c ? ` (${c})` : ""}` }); }));
     }
-    // each place's buildings, herds, things and people where they are in its own plan
     const items = [];
     for (const n of nids) {
       const pl = plan(V, n, day); let tx = 0, ty = 0, tn = 0;
-      for (const [, p] of Object.entries(pl.buildings)) { const [x, y] = toWorld(n, p.x + p.w / 2, p.y + p.h / 2), w = Math.max(4, Math.round(p.w * f * 1.3)), h = Math.max(3, Math.round(p.h * f * 1.3)), bx = Math.round(x - w / 2), by = Math.round(y - h / 2);
+      for (const [, p] of Object.entries(pl.buildings)) { const [x, y] = toWorld(n, p.x + p.w / 2, p.y + p.h / 2), w = Math.max(3, Math.round(p.w * f * 1.1)), h = Math.max(2, Math.round(p.h * f * 1.1)), bx = Math.round(x - w / 2), by = Math.round(y - h / 2);
         items.push({ y: by + h, f: () => hut(P, bx, by, w, h, p.b) }); tx += x; ty += y; tn++;
         for (let yy = by - 1; yy < by + h + 2; yy++) for (let xx = bx - 1; xx < bx + w + 1; xx++) { const i = ctx.at(xx, yy); if (i >= 0) { occ[i] = 4; if (ctx.LV[i] > 0) P.put(xx, yy, ctx.snow ? PAL.snow[2] : PAL.ground[(xx + yy) & 1]); } } }
-      for (const h of pl.herds) for (const [x0, y0] of h.pts.slice(0, 8)) { const [x, y] = toWorld(n, x0, y0); items.push({ y, f: () => { P.put(x, y, "#f4efe6"); P.put(x + 1, y, "#f4efe6"); P.put(x + 2, y - 1, "#f4efe6"); P.dark(x + 2, y, .3); } }); }
-      for (const t of pl.things) { const [x, y] = toWorld(n, t.x, t.y); items.push({ y, f: () => t.t.kind === "body" ? (P.put(x, y - 1, "#c8c4bc"), P.put(x, y, "#7a5a3a")) : P.put(x, y, "#c9b38a") }); }
-      for (const q of pl.people) { const [x, y] = toWorld(n, q.x + 2, q.y); items.push({ y, f: () => person(P, x, y, q.name, { child: q.p.stage === "child", dead: !q.p.alive, hungry: q.p.hunger <= -1 ? -q.p.hunger : 0 }) });
-        out.hotspots.push({ kind: "person", id: q.name, x: (x | 0) - 2, y: (y | 0) - 6, w: 5, h: 7, label: personLabel(q, d), node: n }); }
-      const pop = Object.values(d.people).filter((p) => p.alive && p.node === n).length, [cx, cy] = tn ? [tx / tn, ty / tn] : pos[n];
-      out.hotspots.push({ kind: "node", id: n, x: (pos[n][0] - G[n].land * f * 0.7) | 0, y: (pos[n][1] - G[n].land * f * 0.6) | 0, w: G[n].land * f * 1.4, h: G[n].land * f * 1.2, cx, cy: Math.min(H - 12, cy + 8), label: ST.nodes[n].name, pop,
+      for (const h of pl.herds) for (const [x0, y0, role] of h.pts.slice(0, 10)) { const [x, y] = toWorld(n, x0, y0), col = role === "oxen" ? "#a0663a" : role === "bulls" ? "#4a3428" : "#f4efe6";
+        items.push({ y, f: () => { P.put(x, y, col); P.put(x + 1, y, col); P.dark(x + 2, y, .3); } }); }
+      for (const t of pl.things) { const [x, y] = toWorld(n, t.x, t.y); items.push({ y, f: () => t.t.kind === "remains" ? (P.put(x, y - 1, t.t.buried != null ? "#c8c4bc" : "#d8d2c4"), P.put(x, y, "#7a5a3a")) : P.put(x, y, "#c9b38a") }); }
+      for (const q of pl.people) { const [x, y] = toWorld(n, q.x + 2, q.y); items.push({ y, f: () => person(P, x, y, q.name, { child: q.p.stage === "child" || q.p.stage === "infant", hungry: q.p.hunger <= -1 ? -q.p.hunger : 0 }) });
+        out.hotspots.push({ kind: "person", id: q.name, x: (x | 0) - 2, y: (y | 0) - 6, w: 5, h: 7, label: personLabel(q, d, V), node: n }); }
+      const pop = Object.values(d.people).filter((p) => p.alive && p.at === n).length, [cx, cy] = tn ? [tx / tn, ty / tn] : pos[n];
+      out.hotspots.push({ kind: "node", id: n, x: (pos[n][0] - G[n].land * f * 0.7) | 0, y: (pos[n][1] - G[n].land * f * 0.6) | 0, w: G[n].land * f * 1.4, h: G[n].land * f * 1.2, cx, cy: Math.min(H - 12, cy + 6), label: ST.nodes[n].name, pop,
         unexplored: !!ST.nodes[n].unexplored, biome: M.nodes[n].biome, deaths: d.events.filter((e) => e.place === n && e.kind === "death").length });
     }
     drawTrees(P, ctx.trees, ctx, occ, W, H, R);
     items.sort((a, b) => a.y - b.y).forEach((it) => it.f());
-    for (const [name, t] of Object.entries(d.travellers || {})) {
-      const r = ST.roads[t.road], pts = roadPts[t.road]; if (!r || !pts || !pts.length) continue;
-      const fr = t.from === r.a ? t.progress : 1 - t.progress, p = pts[Math.max(0, Math.min(pts.length - 1, Math.round((0.08 + 0.84 * fr) * (pts.length - 1))))];
-      person(P, p[0], p[1] - 1, name, { tool: "carry" });
-      out.hotspots.push({ kind: "person", id: name, x: (p[0] | 0) - 2, y: (p[1] | 0) - 7, w: 6, h: 8, label: `${name} → ${ST.nodes[t.to]?.name || t.to}` });
+    for (const [name, p] of Object.entries(d.people)) {                                             // travellers, at the middle of their stretch
+      const t = p.transit; if (!t || !p.alive) continue; const r = ST.roads[t.road], pts = roadPts[t.road]; if (!r || !pts || !pts.length) continue;
+      const fr = (t.pos - 0.5) / Math.max(1, t.days), q = pts[Math.max(0, Math.min(pts.length - 1, Math.round(fr * (pts.length - 1))))], k = Object.keys(d.people).filter((m) => d.people[m].transit && d.people[m].transit.road === t.road && d.people[m].transit.pos === t.pos).indexOf(name);
+      person(P, q[0] + k * 4, q[1] - 1, name, { tool: "carry" });
+      out.hotspots.push({ kind: "person", id: name, x: (q[0] | 0) - 2 + k * 4, y: (q[1] | 0) - 7, w: 6, h: 8, label: `${name} on the road to ${ST.nodes[t.to]?.name || t.to}, day ${t.pos} of ${t.days}` });
     }
+    weatherOver(P, W, H, d.weather, rng(hstr("weather|" + day)), true);
     out.season = ctx.season; out.scale = f;
     P.flush();
     return out;
