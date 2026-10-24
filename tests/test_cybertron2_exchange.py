@@ -57,8 +57,8 @@ def test_export_import_and_replay_reproduce_the_run(model_run, tmp_path):
 def test_an_agents_context_is_its_conversation_as_sent(model_run):
     run, seen = model_run
     reqs = [r for r in VW.requests(run) if r["kind"] == "decision"]
-    later = next(r for r in reqs if r["step"] == "d1.decide")
-    ctx = VW.context(run, later["key"])
+    ctxs = [VW.context(run, r["key"]) for r in reqs if r["step"] == "d1.decide"]
+    ctx = next(c for c in ctxs if c["conversation"].endswith("@0"))        # a conversation begun on day 0 (they start staggered)
     assert ctx["system"] and ctx["schema"]["type"] == "object" and ctx["turns"]                 # day 0's exchange came first
     assert ctx["turns"][0]["reply"].startswith('{"why": "steady"') and ctx["answer"]["why"] == "steady"
     assert any(ctx["message"] in s for s in seen)                                                # what the model was sent
