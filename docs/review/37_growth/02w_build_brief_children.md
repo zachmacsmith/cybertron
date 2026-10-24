@@ -6,8 +6,9 @@ life area, written at Zach's request); background proposals/children.md and your
 
 ## 1. Order
 
-1. **Days everywhere (D2-139):** the generator's tree dated in days, stages by days since birth (infant 2, child 4, youth 12, adult
-   50, then elder), replacing ages in years in generate.py; life_stages.md's spans in days (yours to edit).
+1. **Days everywhere (D2-139), and the lifespan as a world setting (D2-153):** default 32 days to old age, every stage a share of it
+   (infant 2, child 4, youth 6, adult 20 at the default), pregnancy, the gap and old age's doubling scaled with it; the generator's
+   tree dated in days, replacing ages in years in generate.py; life_stages.md's spans (yours to edit).
 2. **Partners:** `partner {with}` and `part` (both choose the same day at the same node).
 3. **Trying and conception:** `try for a child {with, units}`, opposite sex, both adults, both choosing; the night's chance
    0.5 x (1 - e^(-0.5 x units)) if they sleep in one place and neither went hungry; keyed.

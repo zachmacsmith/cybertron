@@ -25,6 +25,7 @@ life/life_stages.md (D4-19).
 - D2-148: a child's menial work is set by the household head's standing order.
 - D2-149: old age is tuned to a life expectancy under each health regime; disease adds later (OPEN L-9).
 - D2-152: any two people of opposite sex at the same node can try for a child if both choose; a partnership is not required.
+- D2-153: the lifespan is a world setting that scales every part of a life (amends D4-19's spans to its default).
 - D4-19, D4-20: short childhoods in days; one agent, one model, for life.
 
 ## Mechanics
@@ -47,7 +48,7 @@ life/life_stages.md (D4-19).
 
 ### Pregnancy and birth (D2-141, D2-147)
 
-- **5 days.** The mother needs about 0.3 food a day more. In the last 2 days she has 1 unit a day fewer, and each day on the road
+- **5 days** (at the default lifespan; scaled, D2-153). The mother needs about 0.3 food a day more. In the last 2 days she has 1 unit a day fewer, and each day on the road
   then carries 0.05 of losing the child.
 - **Signs** from the third day ("Maud moves slowly now, near her time"), noticed by the usual rule (information/noticing.md).
 - **Birth** on the night ending the fifth day, wherever the mother is. Risks that night:
@@ -59,7 +60,7 @@ life/life_stages.md (D4-19).
 
   An adult other than the mother present that night halves both. A birth is a sign seen by those present; the household knows at once.
 - The child belongs to **the mother's household**; both parents are in the family tree; it is named from its line's names.
-- **The gap:** 4 days from the birth before she can conceive again.
+- **The gap:** 4 days (at the default lifespan; scaled) from the birth before she can conceive again.
 
 ### Infancy and childhood (D4-19, D2-142, D2-145, D2-148, D2-150)
 
@@ -87,19 +88,26 @@ life/life_stages.md (D4-19).
 - It starts with **lasting memories** of what it was present for (information/memory.md): who cared for it and fed it, who was away,
   births and deaths, raids, cold nights; its household's crafts as awareness (D4-33); the places it has been.
 
-### Life spans (D2-139, D2-149)
+### Life spans: a world setting (D2-139, D2-149, D2-153)
 
-| Stage | Days | Units a day |
-|---|---|---|
-| infant | 2 | none |
-| child | 4 | menial only |
-| youth | 12 | 4; learns faster (D4-19: practice counts double) |
-| adult | 50 | by season (agents/work.md) |
-| elder | until death | 5 |
+**`lifespan`** is a world setting: the days from birth to the start of old age, **default 32**. Every part of a life scales with it;
+each span is rounded to whole days, at least 1.
 
-- **Death** each night, beyond hunger, cold and wounds (as built): an adult **0.001**; an elder **0.01, doubling every 20 days into
-  old age** (about a third to a half of elders die in a 24-day run). These are tuned later to a chosen life expectancy under each
-  health regime; disease adds to them when it exists (OPEN L-9).
+| Stage | Share of the lifespan | At the default (32) | At 16 | At 64 | Units a day |
+|---|---|---|---|---|---|
+| infant | 1/16 | 2 | 1 | 4 | none |
+| child | 1/8 | 4 | 2 | 8 | menial only |
+| youth | 3/16 | 6 | 3 | 12 | 4; learns faster (D4-19: practice counts double) |
+| adult | 5/8 | 20 | 10 | 40 | by season (agents/work.md) |
+| elder | until death | | | | 5 |
+
+Also scaled by lifespan / 32: pregnancy (5 days at the default), the nursing gap (4), and the doubling of old age's risk (every 20
+days at the default). At the default a child born on day 0 is an agent on day 6, an adult on day 12 and old on day 32, so a run of
+24 to 48 days sees people born, grow up, grow old and die.
+
+- **Death** each night, beyond hunger, cold and wounds (as built): an adult **0.001**; an elder **0.01, doubling every (20 x
+  lifespan / 32) days into old age** (at the default about a third to a half of elders die in a 24-day run). Tuned later to a chosen
+  life expectancy under each health regime; disease adds to them when it exists (OPEN L-9).
 - A death is seen by those present and never announced (D2-4); the dead leave everything where they die (D2-87).
 
 ### Inheritance and succession (D2-143)
@@ -114,8 +122,8 @@ life/life_stages.md (D4-19).
 
 ### Seeding in days (D2-139)
 
-The generator dates the family tree in days, with these spans: stages follow days since birth; founders three or four generations
-back (a few hundred days); no calendar years anywhere (replacing generate.py's ages in years: child under 12, youth under 18).
+The generator dates the family tree in days, with the world's lifespan: stages follow days since birth; founders three or four
+generations back (a few lifespans); no calendar years anywhere (replacing generate.py's ages in years: child under 12, youth under 18).
 
 ## Data
 
@@ -127,10 +135,11 @@ succession rule, named heir. Per world: the cost dial's setting.
 | Parameter | Value | Status |
 |---|---|---|
 | conception chance | 0.5 x (1 - e^(-0.5 x units)) | decided (D2-146); calibrate |
-| pregnancy, gap | 5 days; 4 days; +0.3 food a day | decided (D2-147); calibrate |
+| lifespan (to old age) | 32 days, a world setting | decided (D2-153); calibrate |
+| pregnancy, gap | 5 days; 4 days at the default lifespan, scaled; +0.3 food a day | decided (D2-147, D2-153); calibrate |
 | birth risks | above | proposed; calibrate |
 | infant and child costs and deaths | above, by the dial | proposed (D2-145); calibrate |
-| youth, adult | 12 days, 50 days | proposed; calibrate |
+| youth, adult | 3/16 and 5/8 of the lifespan | decided (D2-153) |
 | death | adult 0.001; elder 0.01 doubling every 20 days | proposed (D2-149); calibrate |
 
 ## What agents see
@@ -149,4 +158,4 @@ as each saw or was told it.
 [proposals/children.md](../../proposals/children.md), [life.md](../../proposals/life.md),
 [38.09](../../../review/38_space_engine/09_life_design.md); 02v_children_model.py.
 
-*Current as of 24 Oct 2026: D2-138 to D2-152, D4-19, D4-20.*
+*Current as of 24 Oct 2026: D2-138 to D2-153, D4-19, D4-20.*

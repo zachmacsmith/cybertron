@@ -226,6 +226,7 @@ and correct them in place.**
 | D2-150 | 24 Oct | **Care bears on survival only for now;** its effects on health and learning are for the future (OPEN L-26) | conversation | care affecting health and learning now |
 | D2-151 | 24 Oct | **The cost dial is built with a low and a high setting;** a new world will be designed to test it once children are built | conversation | |
 | D2-152 | 24 Oct | **Any two people of opposite sex at the same node can try for a child if both choose** (the engine records sex); a partnership is not required | conversation | partners only |
+| D2-153 | 24 Oct | **The lifespan is a world setting that scales every part of a life:** the days to old age (default 32), with each stage a fixed share of it (infant 1/16, child 1/8, youth 3/16, adult 5/8), and pregnancy, the nursing gap and the rise of old age's risk scaling with it; D4-19's childhood spans are its default (amends D4-19 and D2-139's youth 12 and adult 50) | conversation ("Lifespans should be a setting for each run ... it scales all parts of their life") | youth 12 and adult 50 days fixed |
 
 ## Directions (Zach's stated aims recorded in the notes; designs follow them; checked by 37.2, 22 Oct)
 

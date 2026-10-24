@@ -125,6 +125,9 @@ law.md (37.3), so it should be built on them rather than as its own rule.
 - 24 Oct: Zach decided D2-150 to D2-152 (care for survival now, health and learning later; the dial built low and high, tested in
   a world designed after; any two of opposite sex who both choose). Spec written: spec/life/birth_and_death.md.
 
+- 24 Oct: Zach: adult 50 days is a lot; lifespans a setting per run, scaling every part of life (D2-153: default 32 days to old
+  age).
+
 ## Sources
 
 [life.md](life.md), [38.09](../../review/38_space_engine/09_life_design.md), [knowledge.md](knowledge.md), [law.md](law.md);
