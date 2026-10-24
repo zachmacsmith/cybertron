@@ -362,12 +362,7 @@ def turn_prompt(here, mind, opening=True) -> str:
     t = mind.store["today"]
     L = []
     if opening:
-        mem = mind.store.get("seeded", []) + mind.store["lasting"]
-        if mem:
-            L.append("## What you remember\n" + "\n".join(f"- {x}" for x in mem))
-        own = mind.store.get("own", [])
-        if own:
-            L.append("## Your own memory of recent days (written by you)\n" + "\n".join(f"- {x['span']}: {x['text']}" for x in own))
+        L += _memory_sections(mind)
     L.append(f"## Now\n{cal['season'].capitalize()}, day {cal['day']} of the season ({cal['left']} left), day {here.day + 1} of these days"
              + (", and cold" if here.cold() else "") + f": {here.weather_words()}. You have {here.units()} units of work today (saying "
              f"something aloud takes one) and {a['messages']} private messages.")
@@ -556,15 +551,26 @@ def meeting_wave_prompt(here, mind, said, offers, acts, last=False) -> str:
     return "\n\n".join(L)
 
 
+def _memory_sections(mind) -> list:
+    """What an opening shows of memory: what one has always known, and one's own memory (memory.py: in rewrite mode one memory,
+    rewritten by the agent, and no list kept by the engine; else the last few stretch memories and the engine's marked events)."""
+    rewrite = getattr(mind, "memory_mode", "append") == "rewrite"
+    mem = mind.store.get("seeded", []) + ([] if rewrite else mind.store["lasting"])
+    L = ["## What you remember\n" + "\n".join(f"- {x}" for x in mem)] if mem else []
+    if rewrite:
+        text = (mind.store.get("memory") or {}).get("text")
+        if text:
+            L.append("## Your memory (in your own words)\n" + text)
+    else:
+        own = mind.store.get("own", [])
+        if own:
+            L.append("## Your own memory of recent days (written by you)\n" + "\n".join(f"- {x['span']}: {x['text']}" for x in own))
+    return L
+
+
 def road_opening(here, mind) -> str:
     """What a traveller's conversation opens with when it has none running (a new stretch of days began on the road)."""
-    mem = mind.store.get("seeded", []) + mind.store["lasting"]
-    own = mind.store.get("own", [])
-    L = []
-    if mem:
-        L.append("## What you remember\n" + "\n".join(f"- {x}" for x in mem))
-    if own:
-        L.append("## Your own memory of recent days (written by you)\n" + "\n".join(f"- {x['span']}: {x['text']}" for x in own))
+    L = _memory_sections(mind)
     L.append("## Now\nYou are on the road, travelling.")
     return "\n\n".join(L)
 
