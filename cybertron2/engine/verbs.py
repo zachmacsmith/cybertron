@@ -357,6 +357,8 @@ def _technique(here, mind, a, party, verb):
             here.parcels()[key]["res"][t["draws"]]["K"] > 0 and t["draws"] != "quarry" else round(q, 2)
         if tech == "fell" and got > 0:                                         # its branches left as dead wood (D2-156)
             here.apply("add_res", parcel=key, key="dead", qty=got)
+    elif y["kind"] == "clear":                                                # new ground for a field (CLEARING)
+        word = _clear(here, key, place_name, m * tm, party)
     elif y["kind"] == "pool":                                                 # dead wood: less to find as it thins (D2-156)
         r = here.parcels()[key]["res"][t["draws"]]
         q = y["base"] * m * min(1.0, r["S"] / max(r["K"], 1e-9)) ** 0.5
@@ -971,6 +973,30 @@ def _release(here, mind, a, party):
 def _withdraw(here, mind, a, party):
     from cybertron2.engine import agreements as AG
     return AG.withdraw(here, a)
+
+
+# ---------------------------------------------------------------------- clearing new ground (Zach, 24 Oct)
+def _clear(here, pid, name, done, party) -> str:
+    """A unit of clearing: progress on the parcel; when its work is done it is a field, fallow, held by whoever cleared it by the
+    custom of the land if nobody held it (a claim, grounds "cleared")."""
+    from cybertron2.engine.data import CLEARING
+    p = here.parcels()[pid]
+    need = float(CLEARING[p["cover"]]) * float(p["size"])
+    got = round(float(p.get("clearing") or 0.0) + done, 2)
+    if got + 1e-9 < need:
+        here.apply("set", ref=("parcel", pid), field="clearing", value=got)
+        return f"You cleared ground at {name}: about {max(0, round(need - got))} units of work left before it is a field."
+    cover = p["cover"]
+    for f, v in (("cover", "field"), ("clearing", None), ("was", cover), ("crop", None), ("last_crop", "fallow"), ("broken", 0.0),
+                 ("fertility", p.get("fertility") if p.get("fertility", 1.0) != 1.0 else float(CLEARING["fertility"][cover]))):
+        here.apply("set", ref=("parcel", pid), field=f, value=v)
+    who = party or here.household() or here.name
+    held = bool(here.claims(("parcel", pid)))
+    if not held:
+        here.apply("claim", thing=("parcel", pid), claimant=who, rights="all", grounds="cleared")
+    here.event("work", f"{here.name} finished clearing {name}: it is a field now, ready to be sown", actor=here.name,
+               about=[f"parcel:{pid}"], salience=0.6, tags=["farming", "building"])
+    return f"You finished clearing {name}: it is a field now, ready to be broken and sown" + ("." if held else ", and yours: you cleared it.")
 
 
 # ---------------------------------------------------------------------- partners, children, the household's offices (D2-138 to D2-153)

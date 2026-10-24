@@ -12,6 +12,7 @@ force, an arbiter or an institution above both.
 
 - D4-23 (Zach, 22 Oct): everything in this file but "Wood".
 - D2-158: dead wood, and young growth on common land, are anyone's to gather; trees are their holder's.
+- D4-60: clearing new ground for fields.
 
 ## Mechanics
 
@@ -72,6 +73,8 @@ arbiter (an elder, a court) and live by the ruling, or an institution over both 
 - **Land at a node is counted in plots**, a fixed unit per world: about what one adult can work in a season. A node's land kind
   sets how many arable plots it has and their fertility range (world/land.md); clearing and draining add plots; abandoned plots
   return to scrub and forest.
+- **Clearing (D4-60):** a meadow or pasture (6 units of work a unit of size) or scrub (10) is cleared into a fallow field; a wood
+  is felled to scrub first. Land nobody holds is held, once cleared, by whoever cleared it (grounds `cleared`).
 - **Plots are whole: never split. Holdings are divided.** Partible inheritance deals whole plots, eldest first; where there are
   more heirs than plots, the rest is held jointly (by the household or the co-heirs) or the younger heirs get none. Fragmentation
   and a landless class come from this, with no split primitive.
@@ -130,4 +133,4 @@ beasts." "Your land can feed about 3 of your 5."
 The 37.4 conversation with Zach, 22 Oct; Schlager and Ostrom (1992) on bundles of rights; 37.2 02f §6.5 ("plots whole, holdings
 divided"); 37.1's inheritance (`wp/demography`); 37.3's tenures (`wp/inst-cross`); cybertron 1's D-37 (consent binds members).
 
-*Current as of 24 Oct 2026: D4-23, D2-158.*
+*Current as of 24 Oct 2026: D4-23, D2-158, D4-60.*

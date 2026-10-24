@@ -124,6 +124,9 @@ FORESTS = {
     "gale": 0.002,                 # of the trees thrown in a gale (as dead wood: a windfall, D2-79)
 }
 
+CLEARING = {"meadow": 6.0, "pasture": 6.0, "scrub": 10.0,      # units of work a unit of size to make it a field (calibrate)
+            "fertility": {"meadow": 1.1, "pasture": 1.0, "scrub": 0.85}}   # what the new field starts at, unless the land says
+
 # Fittings and blueprints: recipes.md §3 (a proposal; calibrate). A building is its structure and its fittings (D2-9).
 FITTINGS = {
     "beds": {"label": "beds", "materials": {"timber": 2, "straw": 2}, "units": 1, "per": "bed", "basic": True,
@@ -176,6 +179,12 @@ TECHNIQUES = {
                  "aliases": ["gather firewood", "gathering firewood", "sticks", "dead wood", "kindling"],
                  "at": {"covers": ["forest", "scrub"]}, "draws": "dead", "yield": {"kind": "pool", "base": 3.0}, "units": 1,
                  "gives": "firewood", "tags": ["timber", "woodland", "fuel"]},                                   # D2-156, D2-157
+    # clearing new ground for a field (Zach, 24 Oct: "Can they not clear land at all and make new plots?"): grass or scrub broken
+    # up, stones and roots got out; a wood must be felled to scrub first. The whole parcel becomes a field when its work is done
+    "clear": {"verb": "work", "label": "clearing new ground for a field (turf, roots and stones out)", "basic": True,
+              "aliases": ["clear ground", "clear land", "clearing", "make a field", "break new ground", "grub up"],
+              "at": {"covers": ["meadow", "pasture", "scrub"]}, "draws": "plot", "yield": {"kind": "clear"},
+              "tools": {"bare": 0.4, "crude": 1.0, "copper": 1.5}, "wear": 1, "units": 1, "gives": "", "tags": ["farming", "building"]},
     "cut": {"verb": "gather", "label": "cutting young growth for firewood", "basic": True,
             "aliases": ["cut young growth", "coppice", "coppicing", "cut brush", "cut poles"],
             "at": {"covers": ["forest", "scrub"]}, "draws": "young", "yield": {"kind": "fixed", "base": 5.0},

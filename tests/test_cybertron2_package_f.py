@@ -178,3 +178,21 @@ def test_every_sign_row_reads_its_context_and_the_new_ones_fire():
     text = " | ".join(sorted(fired))
     assert "is going up" in text and "heavy with child" in text and "just come in" in text
     assert "chewing raw grain" in text and "a wood no longer" in text
+
+
+def test_clearing_turns_a_meadow_into_a_field_held_by_who_cleared_it():
+    w = world()
+    n = "Edric"
+    w.s["containers"][w.hands(n)]["goods"]["crude tool"] = 1.0
+    pid = "mb_meadow"
+    size = w.s["parcels"][pid]["size"]
+    for d in range(40):
+        w.s["day"] = d
+        w.s["today"] = R.blank_today()
+        r = do(w, n, do="work", what="clear", at=w.s["parcels"][pid]["name"])
+        if "it is a field now" in r:
+            break
+    assert w.s["parcels"][pid]["cover"] == "field" and d + 1 >= 6 * size * 0.5
+    assert any(c["grounds"] == "cleared" for c in w.claims_on(("parcel", pid)))
+    w.s["containers"][w.hands(n)]["goods"]["grain"] = 20.0
+    assert do(w, n, do="work", what="sow", at=w.s["parcels"][pid]["name"], item="grain").startswith("You")
