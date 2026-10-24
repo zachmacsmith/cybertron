@@ -22,7 +22,8 @@ SCHEMA = {
             "household": {"type": "string"}, "name": {"type": "string"}, "for": {"type": "string"}, "feed": {"type": "boolean"},
             "days": {"type": "number"}, "lots": {"type": "number"}, "agreement": {"type": "string"}, "hidden": {"type": "string"},
             "method": {"type": "string"}, "on trouble": {"type": "string"}, "stop at": {"type": "string"}, "gather": {"type": "boolean"},
-            "searching": {"type": "string"},
+            "searching": {"type": "string"}, "meeting": {"type": "string"}, "lead": {"type": "string"},
+            "with": {"type": "string"}, "units": {"type": "number"}, "heir": {"type": "string"}, "head": {"type": "string"},
             "text": {"type": "string"}},
             "required": ["do"]}},
         "say": {"type": "array", "items": {"type": "object", "properties": {"to": {"type": "string"}, "text": {"type": "string"}},
@@ -121,7 +122,8 @@ def verb_lines(here, mind) -> str:
         if "{crafts}" in d["doc"] and not crafts:
             continue
         n = V.verb_units(here.p, v)
-        cost = "the craft's units" if n is None else ("free" if n == 0 else f"{n} unit{'s' if n > 1 else ''}")
+        cost = ("the units you choose" if V.VERB[v]["cost"] == "units" else "the craft's units") if n is None else \
+            ("free" if n == 0 else f"{n} unit{'s' if n > 1 else ''}")
         out.append(f"- {v} {d['args']}".rstrip() + f": {d['doc'].replace('{crafts}', '; '.join(crafts))}".rstrip(": ") + f" ({cost})")
         mods = MOD.lines(mind, v, place=True) + [x for t in TECHNIQUES if TECHNIQUES[t]["verb"] == v for x in MOD.lines(mind, v, t)]
         if mods:                                                               # the ways of doing it one knows (D2-93)

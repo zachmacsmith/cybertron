@@ -1,0 +1,172 @@
+# Hollins (Zach, 24 Oct: "a single village in one node, and then a few huts out in one forest but they have a bunch of edges going
+# out into other forests and the forests on their node will run out fast"; "some should be at least multiple nodes deep to see if
+# they explore and then explore again"; "a smaller village that has relatively good resources for a long time to see if they grow
+# and expand"), with children on (Package D, D2-138 to D2-153). 48 days from late summer through two winters (days 9 to 14 and
+# 33 to 38). People, kin and their past are generated from the lines.
+#   Ockley (the village, two households and a cottage): fields enough to feed it for the whole run and more (a granary of 160,
+#     barley standing, a fallow field to sow), cattle; wood: a copse of 10 for three hearths that burn about 50 each over the run.
+#   Hollins (the huts, a day's walk): two huts in Hollin Wood, 70 timber that does not grow back and a little game; no field.
+#   The forest beyond, which nobody has been into, nobody living there (D4-47), three ways out of Hollins, each going deeper:
+#     east  Blackthorn Wood (1) -> Thornend (1) -> Greyhanger (1, a high wood over a stony valley);
+#     north Fern Hollow (1) -> Oakhanger (1, great oaks, an open glade of deep soil) -> the Beckside (1, a river valley of meadow
+#           and good ground, the best land in the world);
+#     west  Birchmoss (1) -> the Fen Edge (2, reeds, fish and wildfowl);
+#     and a long way round between Blackthorn and Birchmoss (2). Each place shows only the ways out of it once one is there.
+# Food is not what binds (Ockley has plenty, scenario_design.md §4); timber does, and room: the question is whether people have
+# children, grow, and go further, settling new places as the near wood runs out.
+name: hollins
+seed: 31
+days: 48
+calendar: {season: summer, day: 4, season_days: 6}
+cold_days: []
+children: {on: true, dial: low}
+lifespan: 32
+nodes:
+  ockley:
+    name: Ockley
+    parcels:
+      ok_green: {name: the Green, cover: built, size: 2, side: centre, height: 1,
+                 text: "two houses, a cottage, a byre and the granary round a green", adj: [long_field, ok_common, middle_field]}
+      long_field: {name: Long Field, cover: field, size: 5, side: north, height: 1, holder: Thorne, fertility: 1.1,
+                   text: "the Thornes' barley, long strips, well dunged", adj: [ok_common, fallow_field],
+                   state: {crop: {kind: barley, left: 260, ripe_day: 2}, last_crop: legumes}}
+      fallow_field: {name: Fallow Field, cover: field, size: 4, side: north, height: 1, holder: Thorne, fertility: 1.05,
+                     text: "the Thornes' field resting this year under grass", state: {last_crop: fallow}}
+      middle_field: {name: Middle Field, cover: field, size: 3, side: east, height: 1, holder: Webb,
+                     text: "the Webbs' barley", adj: [croft_strip], state: {crop: {kind: barley, left: 150, ripe_day: 3}, last_crop: legumes}}
+      croft_strip: {name: the Croft Strip, cover: field, size: 1, side: south, height: 0, holder: Croft,
+                    text: "a narrow strip of oats behind the cottage", state: {crop: {kind: oats, left: 40, ripe_day: 4}, last_crop: grain}}
+      ok_common: {name: the Common, cover: pasture, size: 3, side: west, height: 1, text: "common grazing by the fields",
+                  adj: [ok_copse], state: {plants: {K: 4, S: 4, r: 0.3}, grass: {K: 90, S: 70, r: 0.32}}}
+      ok_copse: {name: Ockley Copse, cover: forest, size: 1, side: west, height: 2, text: "a few ash trees and hazel, much cut",
+                 state: {wood: {K: 12, S: 10, r: 0.0}, plants: {K: 3, S: 3, r: 0.3}}}
+  hollins:
+    name: Hollins
+    parcels:
+      hl_clearing: {name: the Clearing, cover: built, size: 1, side: centre, height: 1, text: "two huts of wattle and turf in a clearing",
+                    adj: [hollin_wood, hl_glade]}
+      hollin_wood: {name: Hollin Wood, cover: forest, size: 3, side: north, height: 2, text: "holly and oak, much cut over",
+                    state: {plants: {K: 8, S: 7, r: 0.3}, game: {K: 12, S: 10, r: 0.25}, wood: {K: 80, S: 70, r: 0.0}}}
+      hl_glade: {name: the Glade, cover: meadow, size: 1, side: south, height: 1, text: "a small grassy glade by a spring",
+                 state: {plants: {K: 3, S: 3, r: 0.3}}}
+  # east
+  blackthorn:
+    name: Blackthorn Wood
+    unexplored: true
+    parcels:
+      bt_wood: {name: the Blackthorn, cover: forest, size: 3, side: centre, height: 1, text: "dense blackthorn and oak, sloes on the bushes",
+                state: {wood: {K: 90, S: 90, r: 0.02}, game: {K: 10, S: 10, r: 0.25}, plants: {K: 8, S: 8, r: 0.3}}}
+      bt_brook: {name: Black Brook, cover: water, size: 1, side: south, height: 0, text: "a dark brook under the thorns", adj: [bt_wood]}
+  thornend:
+    name: Thornend
+    unexplored: true
+    parcels:
+      te_wood: {name: the Thorn End, cover: forest, size: 4, side: centre, height: 1, text: "where the thorns give way to tall ash",
+                state: {wood: {K: 180, S: 180, r: 0.03}, game: {K: 14, S: 14, r: 0.25}, plants: {K: 6, S: 6, r: 0.3}}}
+      te_lawn: {name: the Lawn, cover: meadow, size: 2, side: south, height: 1, text: "an open lawn grazed short by deer", adj: [te_wood],
+                state: {plants: {K: 4, S: 4, r: 0.3}, grass: {K: 50, S: 50, r: 0.32}}}
+  greyhanger:
+    name: Greyhanger
+    unexplored: true
+    parcels:
+      gh_wood: {name: the Grey Wood, cover: forest, size: 5, side: north, height: 3, text: "a high wood of grey beech over a stony valley",
+                state: {wood: {K: 300, S: 300, r: 0.03}, game: {K: 16, S: 16, r: 0.25}, plants: {K: 5, S: 5, r: 0.3}}}
+      gh_scree: {name: the Stones, cover: rock, size: 1, side: south, height: 2, text: "a stony valley floor, flat stones that split clean",
+                 adj: [gh_wood], state: {quarry: {S: 0, K: 0}}}
+  # north
+  fern_hollow:
+    name: Fern Hollow
+    unexplored: true
+    parcels:
+      fh_hollow: {name: the Hollow, cover: forest, size: 3, side: centre, height: 0, text: "a deep fern-filled hollow, full of deer sign",
+                  state: {wood: {K: 70, S: 70, r: 0.02}, game: {K: 24, S: 24, r: 0.25}, plants: {K: 6, S: 6, r: 0.3}}}
+      fh_spring: {name: the Spring, cover: water, size: 1, side: east, height: 0, text: "a cold spring at the hollow's foot", adj: [fh_hollow]}
+  oakhanger:
+    name: Oakhanger
+    unexplored: true
+    parcels:
+      oh_oaks: {name: the Hanger, cover: forest, size: 6, side: north, height: 2, text: "great oaks on a hanging slope, never cut",
+                adj: [oh_glade], state: {wood: {K: 400, S: 400, r: 0.03}, game: {K: 20, S: 20, r: 0.25}, plants: {K: 8, S: 8, r: 0.3}}}
+      oh_glade: {name: the Long Glade, cover: meadow, size: 4, side: south, height: 1, fertility: 1.2,
+                 text: "a long open glade of deep soil below the oaks, never ploughed",
+                 state: {plants: {K: 6, S: 6, r: 0.3}, grass: {K: 100, S: 100, r: 0.32}}}
+  beckside:
+    name: the Beckside
+    unexplored: true
+    parcels:
+      bs_meadow: {name: the Beck Meadows, cover: meadow, size: 8, side: centre, height: 0, fertility: 1.3,
+                  text: "a broad valley of meadow along a beck, deep soil, never ploughed", adj: [bs_beck, bs_alders],
+                  state: {plants: {K: 10, S: 10, r: 0.3}, grass: {K: 200, S: 200, r: 0.32}}}
+      bs_beck: {name: the Beck, cover: water, size: 2, side: south, height: 0, text: "a quick clear beck with trout in it"}
+      bs_alders: {name: the Alders, cover: forest, size: 3, side: north, height: 1, text: "alder and willow along the valley side",
+                  state: {wood: {K: 120, S: 120, r: 0.04}, game: {K: 10, S: 10, r: 0.25}, plants: {K: 6, S: 6, r: 0.3}}}
+  # west
+  birchmoss:
+    name: Birchmoss
+    unexplored: true
+    parcels:
+      bm_birches: {name: the Birches, cover: forest, size: 4, side: north, height: 1, text: "birch wood on wet ground",
+                   state: {wood: {K: 140, S: 130, r: 0.03}, game: {K: 8, S: 8, r: 0.25}, plants: {K: 6, S: 6, r: 0.3}}}
+      bm_moss: {name: the Moss, cover: water, size: 2, side: south, height: 0, text: "a bog pool with fish and wildfowl", adj: [bm_birches]}
+  fen_edge:
+    name: the Fen Edge
+    unexplored: true
+    parcels:
+      fe_reeds: {name: the Reed Beds, cover: water, size: 4, side: west, height: 0, text: "reeds to the horizon, wildfowl rising"}
+      fe_holm: {name: the Holm, cover: meadow, size: 2, side: centre, height: 1, text: "a dry island of grass in the fen", adj: [fe_reeds, fe_carr],
+                state: {plants: {K: 8, S: 8, r: 0.3}, grass: {K: 60, S: 60, r: 0.32}}}
+      fe_carr: {name: the Carr, cover: forest, size: 2, side: east, height: 0, text: "wet willow carr",
+                state: {wood: {K: 60, S: 60, r: 0.04}, game: {K: 12, S: 12, r: 0.25}, plants: {K: 6, S: 6, r: 0.3}}}
+roads:
+- [ockley, hollins, 1, {terrain: woodland, way: "the cart way into the wood", stretches: {1: {landmarks: [ford]}},
+                        ends: {ockley: {parcels: [ok_copse], side: west}, hollins: {parcels: [hl_clearing], side: south}}}]
+- [hollins, blackthorn, 1, {terrain: woodland, way: "a path east through the thorns", ends: {hollins: {parcels: [hollin_wood], side: east}}}]
+- [blackthorn, thornend, 1, {terrain: woodland, way: "a fainter path on east, where the thorns thin"}]
+- [thornend, greyhanger, 1, {terrain: hills, way: "a climb up toward grey trees on the skyline"}]
+- [hollins, fern_hollow, 1, {terrain: woodland, way: "a deer track down into the ferns", stretches: {1: {landmarks: [spring]}},
+                             ends: {hollins: {parcels: [hollin_wood], side: north}}}]
+- [fern_hollow, oakhanger, 1, {terrain: woodland, way: "a climb north out of the hollow under big trees"}]
+- [oakhanger, beckside, 1, {terrain: woodland, way: "a way down through the oaks toward the sound of water", stretches: {1: {landmarks: [fruit trees]}}}]
+- [hollins, birchmoss, 1, {terrain: woodland, way: "a wet path west among birches", ends: {hollins: {parcels: [hl_glade], side: west}}}]
+- [birchmoss, fen_edge, 2, {terrain: marsh, way: "a causeway of roots west into the reeds"}]
+- [blackthorn, birchmoss, 2, {terrain: woodland, way: "a long way round through the thickets"}]
+buildings:
+  thorne_house: {name: Thorne House, parcel: ok_green, household: Thorne, structure: timber, size: 6,
+                 fittings: {beds: 6, hearth: 1, bins: 1, hand mill: 1}, stock: {grain: 20, beans: 10, timber: 6}}
+  byre: {name: the Byre, parcel: ok_green, household: Thorne, structure: timber, size: 4, fittings: {bins: 1},
+         stock: {hay: 20, straw: 10, dung: 10, grain: 20}}
+  granary: {name: the Granary, parcel: ok_green, household: Thorne, structure: timber, size: 4, fittings: {bins: 1, granary: 1},
+            stock: {grain: 160}}
+  webb_house: {name: Webb House, parcel: ok_green, household: Webb, structure: wattle, size: 5, fittings: {beds: 5, hearth: 1, bins: 1, hand mill: 1},
+               stock: {grain: 25, timber: 5}}
+  croft_cottage: {name: Croft Cottage, parcel: ok_green, household: Croft, structure: wattle, size: 3, fittings: {beds: 3, hearth: 1},
+                  stock: {grain: 8, timber: 4}}
+  hunt_hut: {name: Hunt Hut, parcel: hl_clearing, household: Hunt, structure: wattle, size: 4, fittings: {beds: 4, hearth: 1, bins: 1},
+             stock: {grain: 10, dried meat: 6, timber: 8, hide: 2}}
+  fell_hut: {name: Fell Hut, parcel: hl_clearing, household: Fell, structure: wattle, size: 4, fittings: {beds: 4, hearth: 1, bins: 1},
+             stock: {grain: 10, dried meat: 3, timber: 12}}
+herds:
+  thorne_cattle: {name: the Thorne cattle, kind: cattle, parcel: ok_common, cows: 4, oxen: 1, bulls: 1, young: 1, in_milk: 2, holder: Thorne}
+claims: []
+customs:
+- {text: "Every hearth wants about twelve timber to see a house through the six nights of winter's cold.", nodes: all}
+- {text: "At harvest Ockley takes on reapers from wherever it can get them, and pays them in grain.", nodes: all}
+- {text: "Travellers carry bread or dried meat: grain is no use without a fire to boil it.", nodes: all}
+- {text: "Barley sown after the middle of autumn will not ripen before the frost; rye will stand the winter.", nodes: all}
+- {text: "Ockley has always had its timber from the Hollins folk, and paid them in grain.", nodes: all}
+- {text: "In Hollins they say the wood has been cut over too long; the old men talk of deeper woods past the thorns and the ferns.", nodes: [hollins]}
+- {text: "Hunters say the deer come up out of a fern hollow north of Hollin Wood, and that past it the oaks are bigger than any here, and past
+    them again a valley with water in it.", nodes: [hollins]}
+- {text: "Whoever clears new ground and sows it holds it, by the old custom, and so do their children.", nodes: all}
+incidents: []
+signs:
+- {day: 7, node: all, about: sky, sense: touch, text: "a white frost on the grass at dawn, the first of the year", salience: 0.6, tags: [season, farming]}
+lines:
+  Thorne: {acting: [3, 6], min_adults: 2, crafts: [sow, select seed, reap, weed, hoe, milk], tools: {crude tool: 3}, holdings: {coin: 8}}
+  Webb: {acting: [2, 4], min_adults: 2, crafts: [reap, hoe, ditch], tools: {crude tool: 2}, holdings: {coin: 4}, head_model: claude-sonnet-5-5}
+  Croft: {acting: [1, 3], min_adults: 1, crafts: [], tools: [crude tool], holdings: {coin: 1}, head_model: claude-sonnet-5-5}
+  Hunt: {acting: [2, 4], min_adults: 2, crafts: [hunt, pack, camp], tools: {crude weapon: 2, crude tool: 1}, holdings: {coin: 3, bedroll: 1}}
+  Fell: {acting: [2, 4], min_adults: 2, crafts: [fell, handcart, small room], tools: {crude tool: 2}, holdings: {coin: 3}, head_model: claude-sonnet-5-5}
+bounds: {acting: [12, 17], children_max: 5, youths_min: 2, per_min: 1, per_spread: 9}
+sim: {start: -58, fertility: 0.12, leave: 0.6}
+cast: {head: claude-opus-5-5, opus_extra: 1, middle: claude-sonnet-5-5, sonnet_extra: 2, rest: claude-haiku-5-5, youth: claude-haiku-5-5}
