@@ -720,6 +720,29 @@ def p_add_res(w, parcel, key, qty):
     return qty
 
 
+def p_set_res(w, parcel, key, fields, init=None):
+    """A resource stock's fields set by nature's night (regrowth, shedding, rot, dung): D4-7, D2-156; `init` makes it if missing."""
+    res = w.s["parcels"][parcel]["res"]
+    if key not in res:
+        res[key] = dict(init or {"S": 0.0, "K": 0.0, "r": 0.0})
+    res[key].update(fields)
+    return dict(res[key])
+
+
+def p_transit(w, person, fields):
+    """A traveller's journey record updated (its choices, where it was last, what it noticed: world/roads.md)."""
+    w.s["people"][person]["transit"].update(fields)
+    return fields
+
+
+def p_traces(w, add, day):
+    """Traces left on a road (D2-88), and those older than they last faded."""
+    from cybertron2.engine.data import ROADS
+    w.s.setdefault("traces", []).extend(dict(x) for x in add)
+    w.s["traces"] = [x for x in w.s["traces"] if day - x["day"] <= int(ROADS["trace_days"][x["kind"]])]
+    return len(w.s["traces"])
+
+
 def p_born(w, mother, father=None):
     """A child born (spec/life/birth_and_death.md, D2-141): a new person, an infant, where its mother is, in her household, named
     from its line's names (one of its forebears' not in use, else a name nobody here has), with both parents in the family tree."""
@@ -781,6 +804,10 @@ def p_office(w, inst, field, value, by=None):
     h = w.s["institutions"][inst]
     if field == "named":
         h["succession"].setdefault("named", {})[by] = value
+    elif field == "head":                                                      # the head the members named (D2-143)
+        h["offices"]["head"] = value
+    elif field == "succession" and value is None:                              # the naming over
+        h.pop("succession", None)
     else:
         h[field] = value
     return value
@@ -886,4 +913,7 @@ PRIMITIVES = {
     "agree": (p_agree, lambda kw: []),                                     # made at a node by parties present (checked by the verb)
     "leg": (p_leg, lambda kw: []),
     "close_agreement": (p_close_agreement, lambda kw: []),
+    "set_res": (p_set_res, _r("parcel", "parcel")),
+    "transit": (p_transit, _r("person", "person")),
+    "traces": (p_traces, lambda kw: []),                                   # at the road the party is on (checked by the caller)
 }

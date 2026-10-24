@@ -57,35 +57,41 @@ def night(w) -> list:
     for pid, par in w.s["parcels"].items():
         res = par["res"]
         t, y, d = res.get("wood"), res.get("young"), res.get("dead")
+        node = par["node"]
+        tS = t["S"] if t else None
         if t and t["K"] > 0:
-            t["S"] = round(min(t["K"], t["S"] + t["r"] * slow * t["S"] * (1 - t["S"] / t["K"])), 4)
+            tS = round(min(t["K"], tS + t["r"] * slow * tS * (1 - tS / t["K"])), 4)
         if y and y["K"] > 0 and pid not in grazed:
-            y["S"] = round(min(y["K"], y["S"] + y["r"] * slow * max(y["S"], 0.05 * y["K"]) * (1 - y["S"] / y["K"])), 4)
+            yS = round(min(y["K"], y["S"] + y["r"] * slow * max(y["S"], 0.05 * y["K"]) * (1 - y["S"] / y["K"])), 4)
+            if yS != y["S"]:
+                w.apply("set_res", node, parcel=pid, key="young", fields={"S": yS})
         if d is not None:
-            shed = FORESTS["shed"] / year * (t["S"] if t else 0.0) * FORESTS["per_timber"]
-            d["S"] = round(max(0.0, d["S"] + shed - FORESTS["rot"] / year * d["S"]), 4)
+            shed = FORESTS["shed"] / year * (tS if t else 0.0) * FORESTS["per_timber"]
+            dS = round(max(0.0, d["S"] + shed - FORESTS["rot"] / year * d["S"]), 4)
             if t and gale:
-                down = t["S"] * FORESTS["gale"]
-                t["S"] = round(t["S"] - down, 4)
-                d["S"] = round(d["S"] + down * FORESTS["per_timber"], 4)
-            d["K"] = max(d["K"], d["S"])
+                down = tS * FORESTS["gale"]
+                tS = round(tS - down, 4)
+                dS = round(dS + down * FORESTS["per_timber"], 4)
+            if dS != d["S"] or max(d["K"], dS) != d["K"]:
+                w.apply("set_res", node, parcel=pid, key="dead", fields={"S": dS, "K": max(d["K"], dS)})
+        if t and tS != t["S"]:
+            w.apply("set_res", node, parcel=pid, key="wood", fields={"S": tS})
         if t and t["K"] > 0 and par["cover"] in ("forest", "scrub") and t.get("kind") != "scrub":
             share = t["S"] / t["K"]
             if par["cover"] == "forest" and share < FORESTS["scrub_below"]:
-                par["cover"], par["was"] = "scrub", "forest"
+                w.apply("set", node, ref=("parcel", pid), field="cover", value="scrub")
+                w.apply("set", node, ref=("parcel", pid), field="was", value="forest")
                 changed.append(pid)
             elif par["cover"] == "scrub" and par.get("was") == "forest" and share >= FORESTS["scrub_below"] + 0.05:
-                par["cover"] = "forest"
+                w.apply("set", node, ref=("parcel", pid), field="cover", value="forest")
                 changed.append(pid)
     return changed
 
 
 def brash(w, parcel, timber) -> None:
     """Felling leaves its branches as dead wood: 1 firewood a timber (D2-156)."""
-    d = w.s["parcels"][parcel]["res"].get("dead")
-    if d is not None and timber > 0:
-        d["S"] = round(d["S"] + float(FORESTS["brash"]) * timber, 4)
-        d["K"] = max(d["K"], d["S"])
+    if w.s["parcels"][parcel]["res"].get("dead") is not None and timber > 0:
+        w.apply("add_res", w.s["parcels"][parcel]["node"], parcel=parcel, key="dead", qty=float(FORESTS["brash"]) * timber)
 
 
 # ---------------------------------------------------------------------- fuel in heat

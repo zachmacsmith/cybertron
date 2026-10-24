@@ -297,7 +297,7 @@ def dawn(w) -> None:
         if t and t["arrive"] <= w.d:
             RD.arrived(w, name, t)                                          # its notices on the way, remembered (D2-97)
             w.apply("arrive", t["to"], person=name)
-            w.s["people"][name]["arrived"] = w.d
+            w.apply("set", t["to"], ref=("person", name), field="arrived", value=w.d)
             from cybertron2.engine import herds as HD, layout as LY
             HD.arrive_with(w, name, t["to"])                                # beasts it accompanied come in with it (D2-127)
             LY.learn_way(w, name, t["road"], t["to"], "came")                # one knows the end one came in by (D2-90)

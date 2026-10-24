@@ -701,8 +701,9 @@ def _herds(w, rec):
                 rec["herds"].append((hid, "calf"))
             w.apply("set", node, ref=("herd", hid), field="births", value=round(acc, 4))
         w.apply("set", node, ref=("herd", hid), field="in_milk", value=round(max(0.0, milk), 4))
-        d = par["res"].setdefault("dung", {"S": 0.0, "K": 1e9, "r": 0.0})     # dung where they stand
-        d["S"] = round(d["S"] + n * float(cp["dung"]) / year, 4)
+        dS = (par["res"].get("dung") or {}).get("S", 0.0)                       # dung where they stand
+        w.apply("set_res", node, parcel=pid, key="dung", fields={"S": round(dS + n * float(cp["dung"]) / year, 4)},
+                init={"S": 0.0, "K": 1e9, "r": 0.0})
         if par["cover"] == "field" and not par.get("crop"):                    # a grazed fallow (D4-39)
             r, level = f["grazed"]
             dd = 1 - (1 - float(r)) ** (1 / slot)

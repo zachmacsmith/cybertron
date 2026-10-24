@@ -124,15 +124,15 @@ def _note(w, name, text, first=False):
     t = w.s["people"][name]["transit"]
     if t is None:
         return
-    t.setdefault("notices", [])
-    if text in t["notices"]:
+    notices = list(t.get("notices") or [])
+    if text in notices:
         return
     if first:
         k = int(t.get("notices_first", 0))
-        t["notices"].insert(k, text)
-        t["notices_first"] = k + 1
+        notices.insert(k, text)
+        w.apply("transit", w.place_of(("person", name)), person=name, fields={"notices": notices, "notices_first": k + 1})
     else:
-        t["notices"].append(text)
+        w.apply("transit", w.place_of(("person", name)), person=name, fields={"notices": notices + [text]})
 
 
 def night(w, today) -> dict:
@@ -162,6 +162,12 @@ def night(w, today) -> dict:
     return rec
 
 
+def _delay(w, n, days):
+    """A traveller held up on the way: it arrives later."""
+    t = w.s["people"][n]["transit"]
+    w.apply("transit", t["road"], person=n, fields={"arrive": t["arrive"] + days})
+
+
 # ---------------------------------------------------------------------- traces (D2-88)
 def leave_traces(w, members, t, pos):
     """Tracks (and cart ruts, a fire's ashes) on the stretch a party spent the night on; they fade (ROADS trace_days)."""
@@ -171,10 +177,8 @@ def leave_traces(w, members, t, pos):
     if any(n in (w.s.get("today") or {}).get("fire", {}) for n in members):
         kinds.append("ashes")
     toward = w.s["nodes"][t["to"]]["name"]
-    for k in kinds:
-        w.s.setdefault("traces", []).append({"road": t["road"], "pos": pos, "day": w.d, "kind": k, "n": len(members), "toward": toward,
-                                             "by": list(members)})
-    w.s["traces"] = [x for x in w.s["traces"] if w.d - x["day"] <= int(ROADS["trace_days"][x["kind"]])]
+    w.apply("traces", t["road"], add=[{"road": t["road"], "pos": pos, "day": w.d, "kind": k, "n": len(members), "toward": toward,
+                                      "by": list(members)} for k in kinds], day=w.d)
 
 
 def _landmark(w, today, rec, members, t, pos, lm):
@@ -256,12 +260,12 @@ def apply_choice(w, rec, members, t, pos, lm, ch, choice, exp=1.0, by_call=False
         choice = "go round" if other else "turn back"
     if choice.startswith("wait"):
         for n in members:
-            w.s["people"][n]["transit"]["arrive"] += 1
+            _delay(w, n, 1)
             _note(w, n, f"{words}: you waited a day", first=True)
         rec["trouble"].append({"members": members, "at": d["words"], "what": ch, "did": "waited"})
     elif choice.startswith("go round"):
         for n in members:
-            w.s["people"][n]["transit"]["arrive"] += 1
+            _delay(w, n, 1)
             _note(w, n, f"{words}: you went round by another way, a day longer", first=True)
         rec["trouble"].append({"members": members, "at": d["words"], "what": ch, "did": "went round"})
     elif choice.startswith("turn back"):
@@ -463,7 +467,7 @@ def _meetings(w, today, rec, ps):
         for n in members:
             t = w.s["people"][n]["transit"]
             if t is not None:
-                t["last_pos"] = position(w, t)
+                w.apply("transit", t["road"], person=n, fields={"last_pos": position(w, t)})
 
 
 def meeting_stretch(w, road_id, pa, pb, a, b) -> int:
@@ -570,7 +574,7 @@ def _ch_drive(w, today, name, e, a):
     HD.drive_stretch(w, e["herd"], toward)
     if back:                                                                    # a stretch back and a stretch again: two days more
         for n in e["members"]:
-            w.s["people"][n]["transit"]["arrive"] += 2
+            _delay(w, n, 2)
     word = f"back toward {w.s['nodes'][toward]['name']}" if back else f"on toward {w.s['nodes'][toward]['name']}"
     _note(w, name, f"you found {FM_words(w, e['herd'])} loose by the road and drove them a stretch {word}", first=True)
     return f"You drove the beasts a stretch {word} and left them there."
@@ -614,7 +618,7 @@ def _ch_after(w, today, name, e, a):
     from cybertron2.engine import farm as FM
     w.apply("set", e["road"], ref=("herd", e["herd"]), field="count", value=FM.head(w.s["herds"][e["herd"]]))
     for n in e["members"]:
-        w.s["people"][n]["transit"]["arrive"] += 1
+        _delay(w, n, 1)
         _note(w, n, f"some of the beasts broke away at {stretch_name(w, e['road'], e['pos'])}; rounding them up cost a day", first=True)
     return "You went after them and brought them back; it cost the day."
 

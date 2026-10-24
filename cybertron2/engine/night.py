@@ -44,7 +44,7 @@ def night(w) -> dict:
                 if not hearths and b["structure"] != "camp":
                     warm = min(warm, 0.5)                                     # a fire ring half-warms a house in the cold
         w.apply("set", b["node"], ref=("building", bid), field="fire", value=lit)
-        b["warm"] = warm
+        w.apply("set", b["node"], ref=("building", bid), field="warm", value=warm)
         if sleepers:
             rec["hearth"][bid] = {"sleepers": len(sleepers), "lit": lit, "warm": round(warm, 2)}
     fires = open_fires(w, today, where, rec)                                  # fires in the open, shared by 4 (D2-159)
@@ -99,24 +99,27 @@ def night(w) -> dict:
         ate = _eat(w, place, stores, need, hearth)
         if rawf and ate + 1e-9 < need:                                         # food that wants a fire, eaten raw or not (D2-160)
             rec.setdefault("uncooked", {})[name] = rawf
+        me = ("person", name)
         if rawf and ate > 1e-9:
-            a["ate_raw"] = w.d                                                 # seen on them tomorrow (signs.PERSON)
+            w.apply("set", place, ref=me, field="ate_raw", value=w.d)        # seen on them tomorrow (signs.PERSON)
         full = float(p["ration"]) * mult + extra                                # a short meal is a ration's worth at least
         if ate + 1e-9 >= need:
-            a["hunger"], a["missed"] = min(0, a["hunger"] + 1), 0
+            w.apply("harm", place, person=name, hunger=min(0, a["hunger"] + 1))
+            w.apply("set", place, ref=me, field="missed", value=0)
             rec["ate"][name] = round(ate, 2)
         elif ate + 1e-9 >= full:
-            a["missed"] = 0
+            w.apply("set", place, ref=me, field="missed", value=0)
             rec["short"].append(name)
             rec["ate"][name] = round(ate, 2)
         else:
-            a["hunger"], a["missed"] = max(-2, a["hunger"] - 1), a["missed"] + 1
+            w.apply("harm", place, person=name, hunger=max(-2, a["hunger"] - 1))
+            w.apply("set", place, ref=me, field="missed", value=a["missed"] + 1)
             rec["missed"].append(name)
             if ate:
                 rec["ate"][name] = round(ate, 2)
         soaked = name in (today.get("soaked") or [])                           # soaked at a ford: the cold's fall (world/roads.md)
         if (cold or soaked) and state == "unsheltered" and w.rng("cold", w.d, name).random() < float(p["cold_starving"]) * max(fall, 0.5 if soaked else 0):
-            a["hunger"] = -2
+            w.apply("harm", place, person=name, hunger=-2)
             rec["cold_falls"].append(name)
     if w.d < w.days - 1:
         for name in w.living():
@@ -166,7 +169,7 @@ def night(w) -> dict:
             continue
         gone = s["people"][o["by"]]["at"] != o["node"] or not s["people"][o["by"]]["alive"]
         if gone or (o.get("until") is not None and o["until"] <= w.d):         # to a person: at nightfall; to anyone: while
-            o["open"] = False                                                  # the offerer stays, or until its day
+            w.apply("close_offer", o["node"], offer=oid, why="lapsed")        # the offerer stays, or until its day
     s["log"].append(rec)
     return rec
 
@@ -184,22 +187,23 @@ def departures(w, today) -> list:
             homes = w.homes(name)
             h = next((b for b in homes if s["buildings"][b]["node"] == here), None)
             if h:                                                            # the house as last seen (D4-35: not watched from afar)
-                a["home_seen"] = {"day": w.d, "building": h, "stock": dict(w.goods(s["buildings"][h]["stock"])),
-                                  "condition": s["buildings"][h]["condition"], "door": s["buildings"][h]["door"]}
+                w.apply("set", here, ref=("person", name), field="home_seen", value={
+                    "day": w.d, "building": h, "stock": dict(w.goods(s["buildings"][h]["stock"])),
+                    "condition": s["buildings"][h]["condition"], "door": s["buildings"][h]["door"]})
             lead = ((today.get("travel_choices") or {}).get(name) or {}).get("lead")
             from cybertron2.engine import herds as HD
             ox = HD.pack_ox_for(w, name, lead) if lead else None               # the pack ox chosen at departure (D2-136)
             w.apply("depart", here, person=name, road=road, to=to)
             from cybertron2.engine import layout as LY
             LY.wear_way(w, road, here)                                       # a hidden end worn by use (D2-92)
-            a["transit"]["choices"] = dict((today.get("travel_choices") or {}).get(name) or {})
+            w.apply("transit", road, person=name, fields={"choices": dict((today.get("travel_choices") or {}).get(name) or {})})
             if ox:                                                           # one ox goes with the party, carrying (D2-136)
                 from cybertron2.engine import roads as RD
                 HD.lead_ox(w, name, ox, road, RD.position(w, a["transit"]))
             from cybertron2.engine import life as LF
             for baby in LF.infants_of(w, name, here):                        # her infants go with her (D2-141)
                 w.apply("depart", here, person=baby, road=road, to=to)
-                s["people"][baby]["transit"]["carried_by"] = name
+                w.apply("transit", road, person=baby, fields={"carried_by": name})
             out.append({"agent": name, "from": here, "to": to})
     today["_departed"] = out
     return out
@@ -347,7 +351,9 @@ def _grow(w):
             if reg == "threshold" and r["S"] < float(p["game_threshold"]) * r["K"]:
                 continue
             rate = r["r"] * (float(p["regrow_winter"]) if winter else 1.0)
-            r["S"] = round(min(r["K"], r["S"] + rate * r["S"] * (1 - r["S"] / r["K"]) + (0.01 * (r["K"] - r["S"]) if reg == "fast" else 0)), 4)
+            S = round(min(r["K"], r["S"] + rate * r["S"] * (1 - r["S"] / r["K"]) + (0.01 * (r["K"] - r["S"]) if reg == "fast" else 0)), 4)
+            if S != r["S"]:
+                w.apply("set_res", par["node"], parcel=pid, key=key, fields={"S": S})
         # crops: farm.night (D2-53, D4-39)
     from cybertron2.engine import forests as FO
     FO.night(w)

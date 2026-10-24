@@ -91,7 +91,7 @@ def dawn(w) -> list:
         new = stage_of(d, lifespan(w))
         if new != a["stage"]:
             old = a["stage"]
-            a["stage"] = new
+            w.apply("set", w.place_of(("person", name)), ref=("person", name), field="stage", value=new)
             out.append((name, old, new))
             if old in MINOR and new == "youth":
                 come_of_age(w, name)
@@ -104,29 +104,27 @@ def dawn(w) -> list:
                     names[choice] = names.get(choice, 0) + 1
             if names:
                 top = sorted(names.items(), key=lambda kv: (-kv[1], w.s["people"][kv[0]].get("born") or 0))[0][0]
-                h["offices"]["head"] = top
+                w.apply("office", None, inst=iid, field="head", value=top)
                 out.append(("succession", iid, top))
-            h.pop("succession", None)
+            w.apply("office", None, inst=iid, field="succession", value=None)
     return out
 
 
 def come_of_age(w, name) -> None:
     """A child becomes a youth: an agent, its model chosen now (D4-20: the heir to a pole seat takes that seat's model; the rest the
     cast's youth model), with lasting memories of what it was present for, and its household's crafts as awareness (D4-33)."""
-    a = w.s["people"][name]
     hh = w.household_of(name)
     inst = w.s["institutions"].get(hh) or {}
     head = (inst.get("offices") or {}).get("head")
     cast = w.spec.get("cast") or {}
     if inst.get("heir") == name and head in w.s["people"]:
-        a["model"] = w.s["people"][head].get("model") or cast.get("youth") or "claude-haiku-5-5"
+        model = w.s["people"][head].get("model") or cast.get("youth") or "claude-haiku-5-5"
     else:
-        a["model"] = cast.get("youth") or "claude-haiku-5-5"
-    hm = (w.spec.get("household_models") or {}).get(hh)                         # a world may give each household one model
-    if hm:
-        a["model"] = hm
+        model = cast.get("youth") or "claude-haiku-5-5"
+    model = (w.spec.get("household_models") or {}).get(hh) or model             # a world may give each household one model
     if w.spec.get("bots"):
-        a["model"] = "bot"
+        model = "bot"
+    w.apply("set", w.place_of(("person", name)), ref=("person", name), field="model", value=model)
     m = w.s["mind"][name]
     lines = list(dict.fromkeys((m.get("childhood") or [])))[-6:]
     if lines:
@@ -295,8 +293,9 @@ def _conceive(w, today, rec, where, out):
             continue                                                            # one of them went hungry
         u = min(int(units), int(back["units"]))
         if w.rng("conceive", w.d, a, b).random() < chance(u):
-            w.s["people"][wom]["pregnant"] = w.d
-            w.s["people"][wom]["father"] = b if wom == a else a
+            her = w.place_of(("person", wom))
+            w.apply("set", her, ref=("person", wom), field="pregnant", value=w.d)
+            w.apply("set", her, ref=("person", wom), field="father", value=b if wom == a else a)
             out["conceived"].append(wom)
 
 
@@ -307,7 +306,7 @@ def _pregnancies(w, today, rec, where, out):
         if a.get("pregnant") is None:
             continue
         if late_pregnancy(w, name) and a["at"] is None and w.rng("road-loss", w.d, name).random() < float(pg["road_loss"]):
-            a["pregnant"] = None
+            w.apply("set", w.place_of(("person", name)), ref=("person", name), field="pregnant", value=None)
             out["lost"].append(name)
             continue
         if w.d - int(a["pregnant"]) >= pregnancy_days(w):                      # the night ending its fifth day
@@ -328,7 +327,8 @@ def _birth(w, mother, where, rec, out):
     rng = w.rng("birth", w.d, mother)
     place = w.place_of(("person", mother))
     father = a.get("father")
-    a["pregnant"], a["gap_until"], a["father"] = None, w.d + 1 + scaled(LIFE["gap"], lifespan(w)), None
+    for field, value in (("pregnant", None), ("gap_until", w.d + 1 + scaled(LIFE["gap"], lifespan(w))), ("father", None)):
+        w.apply("set", place, ref=("person", mother), field=field, value=value)
     child = w.apply("born", place, mother=mother, father=father)
     out["births"].append({"mother": mother, "child": child, "helped": helped, "housed": housed})
     hh = w.household_of(mother)
@@ -352,7 +352,8 @@ def _young(w, today, rec, where, out):
         if a["stage"] not in MINOR or a.get("born") == w.d:                  # born tonight: the birth's own risk only
             continue
         units = float(care.get(name, 0.0))
-        a["cared"] = {"day": w.d, "units": units, "by": list((today.get("care_by") or {}).get(name, []))}
+        w.apply("set", w.place_of(("person", name)), ref=("person", name), field="cared",
+                value={"day": w.d, "units": units, "by": list((today.get("care_by") or {}).get(name, []))})
         if a["stage"] == "infant":
             inf = LIFE["infant"]
             p = float(inf["dies"]["cared" if units + 1e-9 >= float(d["infant_care"]) else "not"])
