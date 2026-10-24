@@ -74,14 +74,14 @@ def bot_fuse(w, name, x) -> dict:
     return {"actions": ([{"do": "alarm"}, {"do": "defend"}] if inside else [{"do": "defend"}])[: x["acts"]]}
 
 
-def decide(w, name, text, opening, system, backend, conv, talk=None, schema=None, fuse=None) -> tuple[dict, dict]:
+def decide(w, name, text, opening, system, backend, conv, talk=None, schema=None, fuse=None, transit=False) -> tuple[dict, dict]:
     model = w.s["people"][name]["model"]
     if model == "bot":
         return (bot_fuse(w, name, fuse) if fuse else bot_plan(w, name, talk)), {"model": "bot", "sent": text}
     from cybertron import llm
     t0 = time.monotonic()
     attempts = []
-    schema = schema or PR.schema_for(Here(w, name, transit=fuse is not None), Mind(w, name))
+    schema = schema or PR.schema_for(Here(w, name, transit=transit or fuse is not None), Mind(w, name))
     sent, ctx = conv.message(name, w.d, system, schema, text, opening)
     out, reasoning, usage = llm.call(backend, model, ctx["conv"]["system"], sent, schema,
                                      thinking_budget=int((w.spec.get("llm") or {}).get("thinking_budget", 2000)), attempts=attempts)
@@ -532,11 +532,13 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
                 "thinking": m.get("thinking"), "talk": talk_log[n], "plan": plans[n], "attend": attend.get(n), "results": results[n],
                 "night": nights.get(n, []), "usage": m.get("usage"), "seconds": m.get("seconds"), "error": errors.get(n)}) + "\n")
             PC.close_day(w, n, results[n], nights.get(n, []))
-        ending = [n for n in names if w.s["people"][n]["alive"] and w.at(n) is not None and conv.ends(n, day) and day < w.days - 1]
+        ending = [n for n in names if w.s["people"][n]["alive"] and conv.ends(n, day) and day < w.days - 1]   # set off tonight too
         if ending:
             spans = {n: f"{PC._day(w, conv.c[n]['day0'] if n in conv.c else day)} to {PC._day(w, day)}" for n in ending}
             texts = {n: PR.memory_prompt(Mind(w, n), results[n], nights.get(n, []), spans[n]) for n in ending}
-            mr, mm, me = _parallel(lambda n: decide(w, n, texts[n], openings[n] + "\n\n" + texts[n], systems[n], backend, conv),
+            keep = {n: json.loads(conv.c[n]["schema"]) for n in ending if n in conv.c}   # the stretch's own schema: it continues
+            mr, mm, me = _parallel(lambda n: decide(w, n, texts[n], openings[n] + "\n\n" + texts[n], systems[n], backend, conv,
+                                                    schema=keep.get(n), transit=True),
                                    {n: (n,) for n in ending}, workers)
             for n in ending:
                 text = str((mr.get(n) or {}).get("memory") or "").strip()

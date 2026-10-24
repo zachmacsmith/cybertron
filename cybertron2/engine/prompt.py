@@ -73,8 +73,8 @@ def schema_for(here, mind) -> dict:
     a["item"]["enum"] = list(ITEMS)
     a["what"]["enum"] = techs + [x for x in ("shelter", "shelter and food") if x not in techs]
     a["at"]["enum"] = parcels + buildings
-    ways = [nm for _, nm, _, _ in here.roads() if nm not in nodes]            # an unexplored way is named as the roads name it (D4-47)
-    a["to"]["enum"] = ["store", "hands", "anyone"] + people + holds + nodes + ways
+    # "to" stays free text: it names a place, a way as the roads name it (an unexplored one too: D4-47), a person, a household or a
+    # store, and the verbs refuse what is not there; an enum of ways by where one stands restarted the conversation at every move
     a["from"]["enum"] = people + buildings
     a["target"]["enum"] = people + buildings
     a["person"]["enum"] = people
