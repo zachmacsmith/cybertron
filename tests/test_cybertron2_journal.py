@@ -96,3 +96,54 @@ def test_a_usage_limit_is_waited_out_not_taken_for_an_answer(tmp_path, monkeypat
     n = w.agents_acting()[0]
     out, meta = R.decide(w, n, "hello", "hello", "system", "api", Conversations(tmp_path, backend="api"))
     assert out["why"] == "after the wait" and len(slept) == 1
+
+
+# ---------------------------------------------------------------------- R2: resume, pause, replay (execution.md)
+def _same_end(a, b):
+    for f in ("state.json", "days.jsonl", "memory.jsonl"):
+        assert (a / f).read_text() == (b / f).read_text(), f
+
+
+def test_a_run_killed_mid_step_resumes_to_the_same_end(tmp_path, monkeypatch):
+    R.run(SPEC, tmp_path / "full", days=5, bots=True)
+    real, hit = R.N.night, []
+
+    def crash(w):
+        if w.d == 2 and not hit:
+            hit.append(1)
+            raise KeyboardInterrupt("killed in the night")
+        return real(w)
+    monkeypatch.setattr(R.N, "night", crash)
+    with pytest.raises(KeyboardInterrupt):
+        R.run(SPEC, tmp_path / "killed", days=5, bots=True)
+    assert JN.read(tmp_path / "killed" / "run.db", "SELECT step FROM steps WHERE status = 'open'") == [("d2.night",)]
+    R.run(None, tmp_path / "killed", mode="resume")
+    _same_end(tmp_path / "full", tmp_path / "killed")
+    steps = JN.read(tmp_path / "killed" / "run.db", "SELECT step, attempt, status FROM steps WHERE step = 'd2.night' ORDER BY attempt")
+    assert steps == [("d2.night", 1, "aborted"), ("d2.night", 2, "committed")]
+
+
+def test_paused_and_resumed_a_models_answers_are_never_asked_twice(tmp_path, monkeypatch):
+    from cybertron import llm
+    asked = []
+
+    def api(model, system, user, schema, thinking_budget, max_tokens):
+        asked.append(str(user)[:200])
+        raw = json.dumps({"why": "steady", "actions": [{"do": "gather", "what": "forage"}]})
+        return raw, json.loads(raw), "", {"input_tokens": 1}
+    monkeypatch.setattr(llm, "_api", api)
+    R.run(SPEC, tmp_path / "full", backend="api", days=2)
+    whole = len(asked)
+    asked.clear()
+    R.run(SPEC, tmp_path / "paused", backend="api", days=2, until="d1.decide")
+    R.run(None, tmp_path / "paused", backend="api", mode="resume")
+    assert len(asked) == whole
+    _same_end(tmp_path / "full", tmp_path / "paused")
+
+
+def test_replay_checks_every_committed_step(tmp_path):
+    R.run(SPEC, tmp_path, days=3, bots=True)
+    rep = R.run(None, tmp_path, mode="replay")
+    assert rep["mismatches"] == [] and rep["checked"] == len(JN.read(tmp_path / "run.db", "SELECT step FROM steps"))
+    rep = R.run(None, tmp_path, mode="replay", until="d1.work")
+    assert rep["at"] == "d1.work"

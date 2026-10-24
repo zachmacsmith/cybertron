@@ -102,11 +102,31 @@ def limit_wait(error, now=None) -> float | None:
     return 600.0
 
 
+def _recorded(w, J, key, name, model, rec, text, opening, system, conv, schema, fuse, transit):
+    """A request answered from the journal (resume, replay): the conversation is kept as it was, and nothing is asked."""
+    out = rec["parsed"]
+    if model == "bot":
+        J.check_message(key, text)
+        return out, {"model": "bot", "sent": text, "key": key}
+    schema = schema or PR.schema_for(Here(w, name, transit=transit or fuse is not None), Mind(w, name))
+    sent, ctx = conv.message(name, w.d, system, schema, text, opening)
+    J.check_message(key, ctx["text"])
+    conv.after(ctx, rec["raw"] if not (out or {}).get("_error") else None, {**(rec["usage"] or {}), "turn": "replayed"})
+    usage = rec["usage"]                                                   # (no session to continue: the next live call starts one)
+    return out or {}, {"model": model, "usage": usage, "seconds": 0.0, "thinking": rec["thinking"], "sent": ctx["text"],
+                       "opening": ctx["text"] is opening, "key": key}
+
+
 def decide(w, name, text, opening, system, backend, conv, talk=None, schema=None, fuse=None, transit=False, kind="decision") -> tuple[dict, dict]:
     """One request to an agent's responder (execution.md): keyed, and written with its answer to the journal as they exist."""
     model = w.s["people"][name]["model"]
     J = w.journal
     key = J.request_key(name) if J else None
+    rec = J.answer(key) if J else None                                     # answered once, never asked again (execution.md)
+    if rec is not None:
+        return _recorded(w, J, key, name, model, rec, text, opening, system, conv, schema, fuse, transit)
+    if J and J.strict:
+        raise Stopped(f"no recorded answer for {key}")
     if model == "bot":
         if J:
             J.request(key, name, kind, None, None, system, None, text, "bot")
@@ -114,7 +134,7 @@ def decide(w, name, text, opening, system, backend, conv, talk=None, schema=None
             out = bot_fuse(w, name, fuse) if fuse else bot_plan(w, name, talk)
         except Exception as e:                                             # the failure is the answer on record
             if J:
-                J.response(key, [{"error": repr(e)[:500]}], None, None, {}, "bot")
+                J.response(key, [{"error": repr(e)[:500]}], {"_error": repr(e)[:500]}, None, {}, "bot")
             raise
         if J:
             J.response(key, [], out, None, {}, "bot")
@@ -455,231 +475,262 @@ def _runner(J, cost, conv, scope) -> dict:
         if isinstance(x, (list, tuple, set)):
             return [slim(v) for v in x]
         return x
-    convs = {n: {**{k: v for k, v in c.items() if k != "messages"}, "messages": slim(c["messages"])} for n, c in conv.c.items()}
+    convs = {n: {**{k: v for k, v in c.items() if k not in ("messages", "session")}, "messages": slim(c["messages"])}
+             for n, c in conv.c.items()}
     return {"cost": cost, "conversations": convs, "carry": slim({k: scope[k] for k in CARRY if k in scope})}
 
 
-def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, seed=None) -> Path:
-    spec = load_spec(spec_path)
-    if seed is not None:
-        spec["seed"] = int(seed)
-    if days:
-        spec["days"] = int(days)
-    if bots:
-        spec["bots"] = True                                                 # those who come of age are bots too
-        for a in spec["agents"].values():
-            if a.get("model"):
-                a["model"] = "bot"
+def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, seed=None, until=None, mode="start"):
+    """mode "start": a new run from a world file; "resume": go on with the run in out_dir from its journal (every answered request
+    reused, the first step not committed run again live); "replay": play the run in out_dir again from its record alone, in a
+    scratch copy, checking every committed step's state against its checkpoint, and return what was found. `until`: pause after
+    that step's commit (execution.md)."""
+    out = Path(out_dir)
+    if mode == "start":
+        spec = load_spec(spec_path)
+        if seed is not None:
+            spec["seed"] = int(seed)
+        if days:
+            spec["days"] = int(days)
+        if bots:
+            spec["bots"] = True                                             # those who come of age are bots too
+            for a in spec["agents"].values():
+                if a.get("model"):
+                    a["model"] = "bot"
+    else:
+        src = Path(out_dir) / "run.db"
+        if not src.exists():
+            raise SystemExit(f"{src}: no journal to {mode} from")
+        spec = json.loads(dict(JN.read(src, "SELECT key, value FROM meta"))["spec"])
+        backend = backend or json.loads((Path(out_dir) / "run.json").read_text()).get("backend")
+        if mode == "replay":                                                # never touch the run itself
+            import shutil
+            import tempfile
+            out = Path(tempfile.mkdtemp(prefix="replay_"))
+            import sqlite3
+            db = sqlite3.connect(str(src))
+            db.execute("PRAGMA wal_checkpoint(FULL)")                       # fold the WAL in before copying
+            db.close()
+            shutil.copy(src, out / "run.db")
     w = World(spec)
     backend = backend or os.environ.get("LLM_BACKEND") or "claude_code"
-    out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
     systems = {n: PR.system_prompt(Here(w, n), Mind(w, n)) for n in w.agents_acting()}
     (out / "run.json").write_text(json.dumps({"spec": spec, "backend": backend, "systems": systems,
                                               "models": {n: a["model"] for n, a in w.s["people"].items()}}, indent=1))
     files = {k: open(out / f"{k}.jsonl", "w") for k in ("turns", "days", "perception", "memory")}
     conv = Conversations(out, chunk=int((spec.get("memory") or {}).get("chunk", 3)), backend=backend)
-    for f in ("run.db", "run.db-wal", "run.db-shm"):                       # a fresh run: a fresh journal
-        (out / f).unlink(missing_ok=True)
+    if mode == "start":
+        for f in ("run.db", "run.db-wal", "run.db-shm"):                   # a fresh run: a fresh journal
+            (out / f).unlink(missing_ok=True)
     J = w.journal = JN.Journal(out / "run.db")
-    J.start(spec, w.seed, {n: (a["model"] if a.get("model") in (None, "bot") else f"model:{a['model']}") for n, a in w.s["people"].items()})
+    if mode == "start":
+        J.start(spec, w.seed, {n: (a["model"] if a.get("model") in (None, "bot") else f"model:{a['model']}") for n, a in w.s["people"].items()})
+        J.until = until
+    else:
+        J.resume(strict=mode == "replay", until=until)
     cost = 0.0
     last_system = dict(systems)
     extra_cost = [0.0]
-    for day in range(w.days):
-        J.open_step(day, "dawn")
-        w.s["day"] = day
-        w.s["events"] = []
-        today = w.s["today"] = blank_today()
-        dawn(w)
-        PC.dawn(w)
-        J.commit(w.s, _runner(J, cost, conv, locals()))
-        J.open_step(day, "decide")
-        names = w.agents_acting()
-        at_day = {n: w.at(n) for n in names}
-        systems = {n: PR.system_prompt(Here(w, n), Mind(w, n)) for n in names}
-        openings = {n: PR.turn_prompt(Here(w, n), Mind(w, n), opening=True) for n in names}
-        users = {n: PR.turn_prompt(Here(w, n), Mind(w, n), opening=False) for n in names}
-        replies, meta, errors = _parallel(lambda n: decide(w, n, users[n], openings[n], systems[n], backend, conv),
-                                          {n: (n,) for n in names}, workers)
-        if any(str(e).startswith("Stopped(") for e in errors.values()):
-            print(f"run stopped on day {day + 1}: {next(e for e in errors.values() if str(e).startswith('Stopped('))}", flush=True)
-            break
-        first = {n: dict(replies[n]) for n in names}
-        results = {n: ([f"(Your reply could not be used, so you did nothing: {errors[n][:160]})"] if n in errors else []) for n in names}
-        for n in names:
-            results[n] += PC.apply_notes(Mind(w, n), replies[n])
-        J.commit(w.s, _runner(J, cost, conv, locals()))
-        J.open_step(day, "talk.0")
-        woken = talk(w, names, replies, results)
-        talk_log = {n: [] for n in names}
-        talked = set()
-        for wave in range(WAVES):
-            if not woken:
+    try:
+        for day in range(w.days):
+            J.open_step(day, "dawn")
+            w.s["day"] = day
+            w.s["events"] = []
+            today = w.s["today"] = blank_today()
+            dawn(w)
+            PC.dawn(w)
+            J.commit(w.s, _runner(J, cost, conv, locals()))
+            J.open_step(day, "decide")
+            names = w.agents_acting()
+            at_day = {n: w.at(n) for n in names}
+            systems = {n: PR.system_prompt(Here(w, n), Mind(w, n)) for n in names}
+            openings = {n: PR.turn_prompt(Here(w, n), Mind(w, n), opening=True) for n in names}
+            users = {n: PR.turn_prompt(Here(w, n), Mind(w, n), opening=False) for n in names}
+            replies, meta, errors = _parallel(lambda n: decide(w, n, users[n], openings[n], systems[n], backend, conv),
+                                              {n: (n,) for n in names}, workers)
+            if any(str(e).startswith("Stopped(") for e in errors.values()):
+                print(f"run stopped on day {day + 1}: {next(e for e in errors.values() if str(e).startswith('Stopped('))}", flush=True)
                 break
-            if wave:
-                J.commit(w.s, _runner(J, cost, conv, locals()))
-                J.open_step(day, f"talk.{wave}")
-            texts = {n: PR.talk_prompt(Here(w, n), Mind(w, n), b["heard"], b["also"], b["offers"], b["opened"], b["cards"],
-                                       sum(1 for x in results[n] if x.startswith("You told "))) for n, b in woken.items()}
-            rr, mm, ee = _parallel(lambda n: decide(w, n, texts[n], openings[n] + "\n\n" + texts[n], systems[n], backend, conv, woken[n],
-                                                    kind="talk"),
-                                   {n: (n,) for n in woken}, workers)
-            late = {}
-            for n in woken:
-                talked.add(n)
-                r2 = rr[n]
-                talk_log[n].append({"wave": wave, "prompt": texts[n], "reply": r2, "usage": (mm.get(n) or {}).get("usage"),
-                                    "thinking": (mm.get(n) or {}).get("thinking"), "error": ee.get(n)})
-                if n in ee or not isinstance(r2.get("actions"), list):
-                    continue
-                replies[n] = {**replies[n], **{k: v for k, v in r2.items() if v not in (None, "", [])}, "actions": r2["actions"]}
-                results[n] += PC.apply_notes(Mind(w, n), {k: r2.get(k) for k in ("note", "pin", "forget")})
-                late[n] = {k: r2.get(k) for k in ("say", "tell", "explain", "offers")}
-            if not late:
+            first = {n: dict(replies[n]) for n in names}
+            results = {n: ([f"(Your reply could not be used, so you did nothing: {errors[n][:160]})"] if n in errors else []) for n in names}
+            for n in names:
+                results[n] += PC.apply_notes(Mind(w, n), replies[n])
+            J.commit(w.s, _runner(J, cost, conv, locals()))
+            J.open_step(day, "talk.0")
+            woken = talk(w, names, replies, results)
+            talk_log = {n: [] for n in names}
+            talked = set()
+            for wave in range(WAVES):
+                if not woken:
+                    break
+                if wave:
+                    J.commit(w.s, _runner(J, cost, conv, locals()))
+                    J.open_step(day, f"talk.{wave}")
+                texts = {n: PR.talk_prompt(Here(w, n), Mind(w, n), b["heard"], b["also"], b["offers"], b["opened"], b["cards"],
+                                           sum(1 for x in results[n] if x.startswith("You told "))) for n, b in woken.items()}
+                rr, mm, ee = _parallel(lambda n: decide(w, n, texts[n], openings[n] + "\n\n" + texts[n], systems[n], backend, conv, woken[n],
+                                                        kind="talk"),
+                                       {n: (n,) for n in woken}, workers)
+                late = {}
+                for n in woken:
+                    talked.add(n)
+                    r2 = rr[n]
+                    talk_log[n].append({"wave": wave, "prompt": texts[n], "reply": r2, "usage": (mm.get(n) or {}).get("usage"),
+                                        "thinking": (mm.get(n) or {}).get("thinking"), "error": ee.get(n)})
+                    if n in ee or not isinstance(r2.get("actions"), list):
+                        continue
+                    replies[n] = {**replies[n], **{k: v for k, v in r2.items() if v not in (None, "", [])}, "actions": r2["actions"]}
+                    results[n] += PC.apply_notes(Mind(w, n), {k: r2.get(k) for k in ("note", "pin", "forget")})
+                    late[n] = {k: r2.get(k) for k in ("say", "tell", "explain", "offers")}
+                if not late:
+                    break
+                woken = talk(w, names, {**{m: {} for m in names}, **late}, results)
+                if wave == WAVES - 1:
+                    break
+            J.commit(w.s, _runner(J, cost, conv, locals()))
+            J.open_step(day, "work")
+            attend = {n: replies[n].get("attend") for n in names if replies[n].get("attend")}
+            plans = {n: [x for x in (replies[n].get("actions") or []) if isinstance(x, dict)][:MAX_ACTIONS] for n in names}
+            scripted = {}
+            for sc in w.spec.get("script") or []:                              # scripted acts (dry runs): done first that day, in order
+                if int(sc["day"]) - 1 == day and sc["who"] in plans:
+                    scripted.setdefault(sc["who"], []).append(dict(sc["do"]))
+            for n, acts in scripted.items():
+                plans[n] = acts + plans[n]
+            order = list(names)
+            w.rng("order", day).shuffle(order)
+            spoke = {n: sum(1 for y in results[n] if y.startswith("You said (")) * int(w.p["say_units"]) for n in names}
+            budget = {n: max(0, w.units_for(n) - spoke[n]) for n in names}
+            used = {n: 0 for n in names}
+            rep = {n: {} for n in names}
+            heavy = {}
+            for i in range(max((len(p) for p in plans.values()), default=0)):
+                for n in order:
+                    if i >= len(plans[n]) or not w.s["people"][n]["alive"] or n in today["travel"] or n in heavy:
+                        continue
+                    here, mind = Here(w, n), Mind(w, n)
+                    a = plans[n][i]
+                    c = V.cost(here, a)
+                    if used[n] + c > budget[n]:
+                        if c and used[n] < budget[n]:
+                            results[n].append(f"Not done: {a.get('do')} {a.get('what') or ''}".rstrip() + f": it takes {c} units and you had {budget[n] - used[n]} left")
+                        continue
+                    res = V.do(here, mind, a)
+                    if res.startswith("Refused: travel: you carry"):
+                        heavy[n] = a
+                        continue
+                    if not res.startswith("Refused"):
+                        used[n] += c
+                        results[n].append(res)
+                    elif res in results[n]:
+                        rep[n][res] = rep[n].get(res, 1) + 1
+                    else:
+                        results[n].append(res)
+            if heavy:                                                        # too heavy to set off: what to leave, and with whom (D4-32)
+                texts = {n: PR.lighten_prompt(Here(w, n), Mind(w, n), heavy[n], results[n]) for n in heavy}
+                lr, lm, le = _parallel(lambda n: decide(w, n, texts[n], openings[n] + "\n\n" + texts[n], systems[n], backend, conv,
+                                                        kind="lighten"),
+                                       {n: (n,) for n in heavy}, workers)
+                for n in heavy:
+                    talk_log[n].append({"wave": "lighten", "prompt": texts[n], "reply": lr.get(n) or {}, "usage": (lm.get(n) or {}).get("usage")})
+                    acts = [x for x in ((lr.get(n) or {}).get("actions") or []) if isinstance(x, dict)
+                            and str(x.get("do", "")).lower() in ("give", "leave", "move", "travel")][:8]
+                    if not any(str(x.get("do", "")).lower() == "travel" for x in acts):
+                        results[n].append(f"You did not set off for {heavy[n].get('to')}: too heavy to carry.")
+                    for x in acts:
+                        res = V.do(Here(w, n), Mind(w, n), x)
+                        results[n].append(res)
+                        if str(x.get("do", "")).lower() == "travel":
+                            break
+            for n in names:
+                results[n] = [f"{x} (x{rep[n][x]})" if x in rep[n] else x for x in results[n]]
+                if used[n] < budget[n]:
+                    results[n].append(f"You left {budget[n] - used[n]} of your {budget[n]} units unused.")
+            J.commit(w.s, _runner(J, cost, conv, locals()))
+            J.open_step(day, "settle")
+            today["partners"] = LF.settle(w, today)                             # partnerships both chose (D2-140)
+            today["children_work"] = LF.children_work(w)                        # the head's standing order (D2-148)
+            settled = AG.settle(w)
+            for n, lines in list(ST.settle_teaching(w, today).items()) + list(ST.settle_joins(w, today).items()):
+                results.setdefault(n, []).extend(lines)
+            ST.settle_thefts(w, today, attend)
+            w.s["left"] = [x for x in w.s.get("left", []) if x["day"] >= day - 1] + [{**x, "day": day} for x in today["left"]]
+            J.commit(w.s, _runner(J, cost, conv, locals()))
+            J.open_step(day, "night")
+            N.departures(w, today)                                              # nightfall: those leaving are on their first stretch
+            road_rec = RD.night(w, today)                                       # the roads tonight (world/roads.md)
+            woke = FU.plan(w, today)                                            # fuse events: the urgent calls (D2-80 to D2-84)
+            last_system.update(systems)
+            if woke:
+                fuse_calls(w, today, woke, results, talk_log, openings, last_system, backend, conv, workers, extra_cost)
+            rec = N.night(w)
+            rec["fuse"] = FU.record(today)
+            rec["road"] = road_rec
+            per = PC.evening(w, attend, today)
+            nights = night_lines(w, rec)
+            for n in names:
+                m = meta.get(n, {})
+                for u in [m.get("usage") or {}] + [x["usage"] or {} for x in talk_log[n]]:
+                    cost += float(u.get("cc_equiv_usd") or 0.0)
+                files["turns"].write(json.dumps({
+                    "day": day, "agent": n, "model": w.s["people"][n]["model"], "units": budget[n], "used": used[n], "at": at_day[n],
+                    "household": w.household_of(n), "prompt": m.get("sent", users[n]), "opening": m.get("opening"), "reply": first[n],
+                    "thinking": m.get("thinking"), "talk": talk_log[n], "plan": plans[n], "attend": attend.get(n), "results": results[n],
+                    "night": nights.get(n, []), "usage": m.get("usage"), "seconds": m.get("seconds"), "error": errors.get(n)}) + "\n")
+                PC.close_day(w, n, results[n], nights.get(n, []))
+            J.commit(w.s, _runner(J, cost, conv, locals()))
+            J.open_step(day, "memory")
+            ending = [n for n in names if w.s["people"][n]["alive"] and conv.ends(n, day) and day < w.days - 1]   # set off tonight too
+            if ending:
+                spans = {n: f"{PC._day(w, conv.c[n]['day0'] if n in conv.c else day)} to {PC._day(w, day)}" for n in ending}
+                texts = {n: PR.memory_prompt(Mind(w, n), results[n], nights.get(n, []), spans[n]) for n in ending}
+                keep = {n: json.loads(conv.c[n]["schema"]) for n in ending if n in conv.c}   # the stretch's own schema: it continues
+                mr, mm, me = _parallel(lambda n: decide(w, n, texts[n], openings[n] + "\n\n" + texts[n], systems[n], backend, conv,
+                                                        schema=keep.get(n), transit=True, kind="memory"),
+                                       {n: (n,) for n in ending}, workers)
+                for n in ending:
+                    text = str((mr.get(n) or {}).get("memory") or "").strip()
+                    if text:
+                        PC.own_memory(w, n, spans[n], text)
+                    u = (mm.get(n) or {}).get("usage") or {}
+                    cost += float(u.get("cc_equiv_usd") or 0.0)
+                    files["memory"].write(json.dumps({"day": day, "agent": n, "span": spans[n], "memory": text, "prompt": texts[n],
+                                                      "usage": u, "thinking": (mm.get(n) or {}).get("thinking"), "error": me.get(n)}) + "\n")
+            for n, lg in per["agents"].items():
+                files["perception"].write(json.dumps({"day": day, "agent": n, **lg}) + "\n")
+            files["perception"].write(json.dumps({"day": day, "facts": per["facts"]}) + "\n")
+            rec.update(cost_usd=round(cost, 4), talked=sorted(talked), offers={k: v for k, v in w.s["offers"].items() if v.get("day", day) == day},
+                       agreements_made=[k for k, v in w.s["agreements"].items() if v.get("day") == day and not v.get("seeded")], settled=settled,
+                       teaching=today["teach"], learning=today["learn"], joins=today["joins"], admits=today["admits"], watch=today["watch"],
+                       thefts=today["thefts"], attend=attend, errors=errors)
+            cost += extra_cost[0]
+            extra_cost[0] = 0.0
+            for n in set(talk_log) - set(names):                                # calls to travellers on the road
+                files["turns"].write(json.dumps({"day": day, "agent": n, "model": w.s["people"][n]["model"], "on_road": True,
+                                                 "talk": talk_log[n], "results": results.get(n, [])}) + "\n")
+            files["days"].write(json.dumps(rec, default=str) + "\n")
+            for f in files.values():
+                f.flush()
+            J.commit(w.s, _runner(J, cost, conv, locals()))
+            print(f"day {day + 1}: alive {len(w.living())}, missed {rec['missed']}, deaths {rec['deaths']}, talked {len(talked)}, "
+                  f"agreements {len(rec['agreements_made'])}, taught {len(today['teach'])}, thefts {len(today['thefts'])}, "
+                  + (f"born {[b['child'] for b in rec['life']['births']]}, " if rec["life"]["births"] else "") +
+                  f"errors {len(errors)}, cost ${cost:.2f}", flush=True)
+            if not w.living():
                 break
-            woken = talk(w, names, {**{m: {} for m in names}, **late}, results)
-            if wave == WAVES - 1:
-                break
-        J.commit(w.s, _runner(J, cost, conv, locals()))
-        J.open_step(day, "work")
-        attend = {n: replies[n].get("attend") for n in names if replies[n].get("attend")}
-        plans = {n: [x for x in (replies[n].get("actions") or []) if isinstance(x, dict)][:MAX_ACTIONS] for n in names}
-        scripted = {}
-        for sc in w.spec.get("script") or []:                              # scripted acts (dry runs): done first that day, in order
-            if int(sc["day"]) - 1 == day and sc["who"] in plans:
-                scripted.setdefault(sc["who"], []).append(dict(sc["do"]))
-        for n, acts in scripted.items():
-            plans[n] = acts + plans[n]
-        order = list(names)
-        w.rng("order", day).shuffle(order)
-        spoke = {n: sum(1 for y in results[n] if y.startswith("You said (")) * int(w.p["say_units"]) for n in names}
-        budget = {n: max(0, w.units_for(n) - spoke[n]) for n in names}
-        used = {n: 0 for n in names}
-        rep = {n: {} for n in names}
-        heavy = {}
-        for i in range(max((len(p) for p in plans.values()), default=0)):
-            for n in order:
-                if i >= len(plans[n]) or not w.s["people"][n]["alive"] or n in today["travel"] or n in heavy:
-                    continue
-                here, mind = Here(w, n), Mind(w, n)
-                a = plans[n][i]
-                c = V.cost(here, a)
-                if used[n] + c > budget[n]:
-                    if c and used[n] < budget[n]:
-                        results[n].append(f"Not done: {a.get('do')} {a.get('what') or ''}".rstrip() + f": it takes {c} units and you had {budget[n] - used[n]} left")
-                    continue
-                res = V.do(here, mind, a)
-                if res.startswith("Refused: travel: you carry"):
-                    heavy[n] = a
-                    continue
-                if not res.startswith("Refused"):
-                    used[n] += c
-                    results[n].append(res)
-                elif res in results[n]:
-                    rep[n][res] = rep[n].get(res, 1) + 1
-                else:
-                    results[n].append(res)
-        if heavy:                                                        # too heavy to set off: what to leave, and with whom (D4-32)
-            texts = {n: PR.lighten_prompt(Here(w, n), Mind(w, n), heavy[n], results[n]) for n in heavy}
-            lr, lm, le = _parallel(lambda n: decide(w, n, texts[n], openings[n] + "\n\n" + texts[n], systems[n], backend, conv,
-                                                    kind="lighten"),
-                                   {n: (n,) for n in heavy}, workers)
-            for n in heavy:
-                talk_log[n].append({"wave": "lighten", "prompt": texts[n], "reply": lr.get(n) or {}, "usage": (lm.get(n) or {}).get("usage")})
-                acts = [x for x in ((lr.get(n) or {}).get("actions") or []) if isinstance(x, dict)
-                        and str(x.get("do", "")).lower() in ("give", "leave", "move", "travel")][:8]
-                if not any(str(x.get("do", "")).lower() == "travel" for x in acts):
-                    results[n].append(f"You did not set off for {heavy[n].get('to')}: too heavy to carry.")
-                for x in acts:
-                    res = V.do(Here(w, n), Mind(w, n), x)
-                    results[n].append(res)
-                    if str(x.get("do", "")).lower() == "travel":
-                        break
-        for n in names:
-            results[n] = [f"{x} (x{rep[n][x]})" if x in rep[n] else x for x in results[n]]
-            if used[n] < budget[n]:
-                results[n].append(f"You left {budget[n] - used[n]} of your {budget[n]} units unused.")
-        J.commit(w.s, _runner(J, cost, conv, locals()))
-        J.open_step(day, "settle")
-        today["partners"] = LF.settle(w, today)                             # partnerships both chose (D2-140)
-        today["children_work"] = LF.children_work(w)                        # the head's standing order (D2-148)
-        settled = AG.settle(w)
-        for n, lines in list(ST.settle_teaching(w, today).items()) + list(ST.settle_joins(w, today).items()):
-            results.setdefault(n, []).extend(lines)
-        ST.settle_thefts(w, today, attend)
-        w.s["left"] = [x for x in w.s.get("left", []) if x["day"] >= day - 1] + [{**x, "day": day} for x in today["left"]]
-        J.commit(w.s, _runner(J, cost, conv, locals()))
-        J.open_step(day, "night")
-        N.departures(w, today)                                              # nightfall: those leaving are on their first stretch
-        road_rec = RD.night(w, today)                                       # the roads tonight (world/roads.md)
-        woke = FU.plan(w, today)                                            # fuse events: the urgent calls (D2-80 to D2-84)
-        last_system.update(systems)
-        if woke:
-            fuse_calls(w, today, woke, results, talk_log, openings, last_system, backend, conv, workers, extra_cost)
-        rec = N.night(w)
-        rec["fuse"] = FU.record(today)
-        rec["road"] = road_rec
-        per = PC.evening(w, attend, today)
-        nights = night_lines(w, rec)
-        for n in names:
-            m = meta.get(n, {})
-            for u in [m.get("usage") or {}] + [x["usage"] or {} for x in talk_log[n]]:
-                cost += float(u.get("cc_equiv_usd") or 0.0)
-            files["turns"].write(json.dumps({
-                "day": day, "agent": n, "model": w.s["people"][n]["model"], "units": budget[n], "used": used[n], "at": at_day[n],
-                "household": w.household_of(n), "prompt": m.get("sent", users[n]), "opening": m.get("opening"), "reply": first[n],
-                "thinking": m.get("thinking"), "talk": talk_log[n], "plan": plans[n], "attend": attend.get(n), "results": results[n],
-                "night": nights.get(n, []), "usage": m.get("usage"), "seconds": m.get("seconds"), "error": errors.get(n)}) + "\n")
-            PC.close_day(w, n, results[n], nights.get(n, []))
-        J.commit(w.s, _runner(J, cost, conv, locals()))
-        J.open_step(day, "memory")
-        ending = [n for n in names if w.s["people"][n]["alive"] and conv.ends(n, day) and day < w.days - 1]   # set off tonight too
-        if ending:
-            spans = {n: f"{PC._day(w, conv.c[n]['day0'] if n in conv.c else day)} to {PC._day(w, day)}" for n in ending}
-            texts = {n: PR.memory_prompt(Mind(w, n), results[n], nights.get(n, []), spans[n]) for n in ending}
-            keep = {n: json.loads(conv.c[n]["schema"]) for n in ending if n in conv.c}   # the stretch's own schema: it continues
-            mr, mm, me = _parallel(lambda n: decide(w, n, texts[n], openings[n] + "\n\n" + texts[n], systems[n], backend, conv,
-                                                    schema=keep.get(n), transit=True, kind="memory"),
-                                   {n: (n,) for n in ending}, workers)
-            for n in ending:
-                text = str((mr.get(n) or {}).get("memory") or "").strip()
-                if text:
-                    PC.own_memory(w, n, spans[n], text)
-                u = (mm.get(n) or {}).get("usage") or {}
-                cost += float(u.get("cc_equiv_usd") or 0.0)
-                files["memory"].write(json.dumps({"day": day, "agent": n, "span": spans[n], "memory": text, "prompt": texts[n],
-                                                  "usage": u, "thinking": (mm.get(n) or {}).get("thinking"), "error": me.get(n)}) + "\n")
-        for n, lg in per["agents"].items():
-            files["perception"].write(json.dumps({"day": day, "agent": n, **lg}) + "\n")
-        files["perception"].write(json.dumps({"day": day, "facts": per["facts"]}) + "\n")
-        rec.update(cost_usd=round(cost, 4), talked=sorted(talked), offers={k: v for k, v in w.s["offers"].items() if v.get("day", day) == day},
-                   agreements_made=[k for k, v in w.s["agreements"].items() if v.get("day") == day and not v.get("seeded")], settled=settled,
-                   teaching=today["teach"], learning=today["learn"], joins=today["joins"], admits=today["admits"], watch=today["watch"],
-                   thefts=today["thefts"], attend=attend, errors=errors)
-        cost += extra_cost[0]
-        extra_cost[0] = 0.0
-        for n in set(talk_log) - set(names):                                # calls to travellers on the road
-            files["turns"].write(json.dumps({"day": day, "agent": n, "model": w.s["people"][n]["model"], "on_road": True,
-                                             "talk": talk_log[n], "results": results.get(n, [])}) + "\n")
-        files["days"].write(json.dumps(rec, default=str) + "\n")
-        for f in files.values():
-            f.flush()
-        J.commit(w.s, _runner(J, cost, conv, locals()))
-        print(f"day {day + 1}: alive {len(w.living())}, missed {rec['missed']}, deaths {rec['deaths']}, talked {len(talked)}, "
-              f"agreements {len(rec['agreements_made'])}, taught {len(today['teach'])}, thefts {len(today['thefts'])}, "
-              + (f"born {[b['child'] for b in rec['life']['births']]}, " if rec["life"]["births"] else "") +
-              f"errors {len(errors)}, cost ${cost:.2f}", flush=True)
-        if not w.living():
-            break
+    except JN.Paused as e:
+        print(str(e), flush=True)
     w.save(out / "state.json")
-    J.meta("ended", {"day": w.d, "alive": len(w.living()), "cost_usd": round(cost, 4)})
+    if mode != "replay":
+        J.meta("ended", {"day": w.d, "alive": len(w.living()), "cost_usd": round(cost, 4)})
+    report = {"checked": J.checked, "mismatches": J.mismatches, "at": J.step}
     J.close()
     w.journal = None
     conv.close()
     for f in files.values():
         f.close()
-    return out
+    return report if mode == "replay" else out
 
 
 def main(argv=None):
@@ -693,6 +744,22 @@ def main(argv=None):
     r.add_argument("--workers", type=int, default=12)
     r.add_argument("--bots", action="store_true")
     r.add_argument("--seed", type=int)
+    r.add_argument("--until", help="pause after this step's commit, e.g. d10.memory")
+    g = sub.add_parser("resume")
+    g.add_argument("run")
+    g.add_argument("--until")
+    g.add_argument("--backend")
+    g.add_argument("--workers", type=int, default=12)
+    p = sub.add_parser("replay")
+    p.add_argument("run")
+    p.add_argument("--to", help="stop after this step")
     args = ap.parse_args(argv)
     if args.cmd == "run":
-        print(run(args.spec, args.out, args.backend, args.days, args.workers, args.bots, args.seed))
+        print(run(args.spec, args.out, args.backend, args.days, args.workers, args.bots, args.seed, until=args.until))
+    elif args.cmd == "resume":
+        print(run(None, args.run, args.backend, workers=args.workers, until=args.until, mode="resume"))
+    elif args.cmd == "replay":
+        rep = run(None, args.run, until=args.to, mode="replay")
+        print(json.dumps(rep, indent=1))
+        if rep["mismatches"]:
+            raise SystemExit(1)

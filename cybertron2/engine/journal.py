@@ -38,10 +38,9 @@ EVENT_COLS = ("id", "day", "place", "kind", "actor", "target", "about", "concern
 
 
 def dumps(x) -> str:
-    try:
-        return json.dumps(x, sort_keys=True, default=_plain, separators=(",", ":"))
-    except TypeError:                                                         # keys of mixed kinds (a YAML `on:` is True)
-        return json.dumps(x, default=_plain, separators=(",", ":"))
+    """JSON in the order the engine made it: dicts keep their order, which the engine's iteration depends on (a world built from a
+    key-sorted copy is not the same world)."""
+    return json.dumps(x, default=_plain, separators=(",", ":"))
 
 
 def _plain(x):
@@ -75,6 +74,10 @@ def frozen_tables() -> dict:
     return out
 
 
+class Paused(Exception):
+    """The run stops after a committed step: `--until`, or the end of a replay."""
+
+
 class Journal:
     """Rows are written the moment they exist, each tagged with its step and attempt; a step's commit (one transaction: its
     checkpoint and its status) makes it official (D1-2)."""
@@ -90,6 +93,46 @@ class Journal:
         self.step, self.attempt, self.day = None, None, None
         self.counts = {}
         self.failures = 0
+        self.replaying = False                 # resume and replay: committed steps are played again, checked, not rewritten
+        self.strict = False                    # replay: stop at the first step not committed
+        self.until = None                      # pause after this step's commit
+        self.quiet = False
+        self.committed = {}
+        self.checked, self.mismatches = 0, []
+
+    # ------------------------------------------------------------------ resume and replay (R2, execution.md)
+    def resume(self, strict=False, until=None, kind="resume") -> None:
+        """Play the run again from its start: every request is answered from the journal, each committed step is checked against
+        its checkpoint instead of written, and the first step not committed is run live as a new attempt."""
+        self.committed = {k: (a, h) for k, a, h in self.db.execute(
+            "SELECT step, attempt, checkpoint FROM steps WHERE status = 'committed'").fetchall()}
+        self.replaying, self.strict, self.until = True, strict, until
+        if not strict:
+            prov = provenance()
+            row = self.db.execute("SELECT value FROM meta WHERE key = 'provenance'").fetchone()
+            was = json.loads(row[0])["code_sha"] if row else None
+            if was != prov["code_sha"]:
+                print(f"journal: the code has changed since this run began ({was} -> {prov['code_sha']}); resuming anyway", flush=True)
+            self._x("INSERT INTO segments (kind, first_step, code_sha, parent, responders) VALUES (?, ?, ?, ?, ?)",
+                    (kind, None, prov["code_sha"], None, dumps({})))
+
+    def answer(self, key) -> dict | None:
+        """The recorded answer to a request, if it was answered (an answer, or a failure the run took as one)."""
+        with self.lock:
+            row = self.db.execute("SELECT parsed, attempts, thinking, usage, transport FROM responses WHERE key = ?", (key,)).fetchone()
+        if not row or row[0] in (None, "null"):
+            return None
+        tries = json.loads(row[1] or "[]")
+        last = tries[-1] if tries else {}
+        return {"parsed": json.loads(row[0]), "raw": last.get("raw") if not last.get("error") else None, "thinking": row[2],
+                "usage": json.loads(row[3] or "{}"), "transport": row[4]}
+
+    def check_message(self, key, message) -> None:
+        """On replay, the message the engine would send now must be the one it sent then (the prompt reads only the state)."""
+        with self.lock:
+            row = self.db.execute("SELECT message_sha FROM requests WHERE key = ?", (key,)).fetchone()
+        if row and row[0] and row[0] != sha(str(message)):
+            self.mismatches.append({"key": key, "what": "message"})
 
     # ------------------------------------------------------------------ writing
     def _x(self, sql, args=()):
@@ -127,6 +170,15 @@ class Journal:
 
     def open_step(self, day, name) -> str:
         key = f"d{day}.{name}"
+        if self.replaying:
+            if key in self.committed:
+                self.step, self.attempt, self.day, self.quiet = key, self.committed[key][0], day, True
+                return key
+            if self.strict:
+                raise Paused(f"replayed to {key}: the record ends here")
+            self.replaying, self.quiet = False, False                           # live from here: earlier open attempts aborted
+            self._x("UPDATE steps SET status = 'aborted' WHERE status = 'open'")
+            self._x("UPDATE segments SET first_step = ? WHERE id = (SELECT MAX(id) FROM segments)", (key,))
         with self.lock:
             row = self.db.execute("SELECT MAX(attempt) FROM steps WHERE step = ?", (key,)).fetchone()
             self.step, self.attempt, self.day = key, int(row[0] or 0) + 1, day
@@ -135,6 +187,16 @@ class Journal:
 
     def commit(self, state, runner=None) -> None:
         """The step's checkpoint (the whole world state and the runner's own) and its commit, in one transaction (execution.md)."""
+        if self.quiet:                                                        # a committed step played again: check it
+            self.checked += 1
+            rec = checkpoint(self.path, self.step, self.committed[self.step][0], conn=self.db, lock=self.lock)
+            now = json.loads(dumps(state))
+            if rec is None or dumps(rec["world"]) != dumps(now):
+                self.mismatches.append({"step": self.step, "what": "world state",
+                                        "paths": differences(rec["world"], now)[:8] if rec else []})
+            if self.until == self.step:
+                raise Paused(f"paused after {self.step}")
+            return
         text = dumps({"world": state, "runner": runner or {}})
         h = sha(text)
         with self.lock:
@@ -149,6 +211,8 @@ class Journal:
                 self.db.execute("ROLLBACK") if self.db.in_transaction else None
                 self.failures += 1
                 print(f"journal: commit {self.step}: {e}", flush=True)
+        if self.until == self.step:
+            raise Paused(f"paused after {self.step}")
 
     def request_key(self, agent) -> str:
         with self.lock:
@@ -157,22 +221,30 @@ class Journal:
             return f"{self.step}.{agent}.{self.counts[k]}"
 
     def request(self, key, agent, kind, conversation, index, system, schema, message, responder) -> None:
+        if self.quiet:
+            return
         self._x("INSERT OR REPLACE INTO requests VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 (key, self.step, self.attempt, agent, kind, conversation, index, self.blob(system), self.blob(schema),
                  self.blob(str(message)), responder))
 
     def response(self, key, attempts, parsed, thinking, usage, transport) -> None:
+        if self.quiet:
+            return
         tries = [{"raw": a.get("raw"), "error": a.get("error"), "latency": a.get("latency_s")} for a in (attempts or [])]
         self._x("INSERT OR REPLACE INTO responses VALUES (?, ?, ?, ?, ?, ?)",
-                (key, dumps(tries), dumps(parsed), thinking or None, dumps(usage or {}), transport))
+                (key, dumps(tries), dumps(parsed), thinking, dumps(usage or {}), transport))
 
     def event(self, e: dict, cause=None) -> None:
+        if self.quiet:
+            return
         extra = {k: v for k, v in e.items() if k not in EVENT_COLS}
         self._x("INSERT INTO events VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 (e["id"], e["day"], self.step, self.attempt, e["place"], e["kind"], e.get("actor"), e.get("target"),
                  dumps(e.get("about") or []), dumps(e.get("concerns") or []), e.get("text"), dumps(cause), dumps(extra)))
 
     def change(self, call: dict, result) -> None:
+        if self.quiet:
+            return
         self._x("INSERT INTO changes (day, step, attempt, primitive, place, arguments, cause, result) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                 (call["day"], self.step, self.attempt, call["prim"], call["place"], dumps(call["kw"]), dumps(call["cause"]),
                  dumps(result)))
@@ -181,6 +253,22 @@ class Journal:
         with self.lock:
             self.meta("journal_failures", self.failures)
             self.db.close()
+
+
+def differences(a, b, path="") -> list:
+    """Where two JSON values differ: paths, for a replay's report."""
+    if type(a) is not type(b):
+        return [path or "/"]
+    if isinstance(a, dict):
+        out = []
+        for k in sorted(set(a) | set(b), key=str):
+            out += [f"{path}/{k}"] if (k not in a or k not in b) else differences(a[k], b[k], f"{path}/{k}")
+        return out
+    if isinstance(a, list):
+        if len(a) != len(b):
+            return [f"{path} (length {len(a)} vs {len(b)})"]
+        return [p for i, (x, y) in enumerate(zip(a, b)) for p in differences(x, y, f"{path}[{i}]")]
+    return [] if a == b else [path]
 
 
 # ---------------------------------------------------------------------- reading (for tests and the views to come, R5)
@@ -197,7 +285,12 @@ def unblob(path, h) -> str | None:
     return zlib.decompress(rows[0][0]).decode() if rows else None
 
 
-def checkpoint(path, step, attempt=None) -> dict:
+def checkpoint(path, step, attempt=None, conn=None, lock=None) -> dict:
     sql = "SELECT z FROM checkpoints WHERE step = ? " + ("AND attempt = ?" if attempt else "ORDER BY attempt DESC LIMIT 1")
-    rows = read(path, sql, (step, attempt) if attempt else (step,))
+    args = (step, attempt) if attempt else (step,)
+    if conn is not None:
+        with lock:
+            rows = conn.execute(sql, args).fetchall()
+    else:
+        rows = read(path, sql, args)
     return json.loads(zlib.decompress(rows[0][0]).decode()) if rows else None
