@@ -8,7 +8,7 @@ import copy
 import math
 
 from cybertron2.engine import forests as FO, agreements as AG, farm as FM, knowledge as KN, modifiers as MOD, perceive as PC, verbs as V
-from cybertron2.engine.data import BLUEPRINTS, FITTINGS, FUSE, ITEMS, MODIFIERS, TECHNIQUES
+from cybertron2.engine.data import BLUEPRINTS, FITTINGS, FUSE, HERDS, ITEMS, MODIFIERS, TECHNIQUES
 from cybertron2.engine.here import CONDITION, STAGES, show
 
 SCHEMA = {
@@ -418,7 +418,9 @@ def turn_prompt(here, mind, opening=True) -> str:
     you = [f"You are {STAGES[a['hunger']]}" + (", and hurt" if a["wounded"] else "") + f". You carry: {hold}"
            + (f" (weight {show(here.load())} of the {here.capacity():g} you can travel with"
               + (f", {here.capacity(True):g} on a road with a track" if here.capacity(True) > here.capacity() else "") + ")" if here.roads() else "") + "."]
-    beasts = _beast_lines(here, mind)
+    beasts = [f"Leading: {nm} ({'it carries ' + format(HERDS['pack_ox']['carry'], 'g') + ' for you on the road; ' if ox else ''}it stays "
+              "with you until you turn it out: drive {thing, to: a pasture here}; set off without leading it and it is left here)."
+              for _, nm, ox in here.led()] + _beast_lines(here, mind)
     L.append("## You\n" + "\n".join(you + _family_lines(here, mind) + beasts + _house_lines(here, mind)))
     can, near = KN.options(here, mind)
     opt = ["Today you could: " + "; ".join(can) + "." if can else "Of your crafts, none can be done here today with what you have."]

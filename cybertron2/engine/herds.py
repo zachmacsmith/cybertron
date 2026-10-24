@@ -35,10 +35,15 @@ def night(w, rec) -> None:
             if not h.get("with"):
                 _on_road(w, hid, rec)
             continue
+        if h.get("with"):                                                       # led: it stays with its leader (D2-136)
+            lead = w.s["people"].get(h["with"]) or {}
+            if lead.get("alive") and lead.get("at") == h["node"]:
+                continue
+            let_go(w, hid, rec, "its leader is gone")
         split(w, hid, rec)
     for hid in sorted(w.s["herds"]):                                            # the groups that broke off wander their own way
         h = w.s["herds"][hid]
-        if FM.head(h) > 0 and h["node"] in w.s["nodes"]:
+        if FM.head(h) > 0 and h["node"] in w.s["nodes"] and not h.get("with"):
             wander(w, hid, rec)
     _merge(w, rec)
 
@@ -320,20 +325,14 @@ def arrive_with(w, name, node) -> list:
     out = []
     for hid, h in list(w.s["herds"].items()):
         if h.get("with") == name and h["node"] in w.s["roads"]:
-            if h.get("pack"):
+            if h.get("pack"):                                                   # it stays led: with its leader, where they came in
                 rid = h["node"]
                 end = (w.s["roads"][rid].get("ends") or {}).get(node) or LY.default_end(w, node)
-                home = h.get("home") if h.get("home") in w.s["parcels"] and w.s["parcels"][h["home"]]["node"] == node else None
                 w.apply("set", rid, ref=("herd", hid), field="node", value=node)
-                w.apply("set", node, ref=("herd", hid), field="parcel", value=home or (end["parcels"] or LY.parcels_of(w, node))[0])
-                for f in ("pos", "with"):
-                    w.apply("set", node, ref=("herd", hid), field=f, value=None)
-                w.apply("set", node, ref=("herd", hid), field="pack_of", value=name)
-                from cybertron2.engine import perceive as PC                     # its leader knows where it is (r1: "the ox stayed
-                PC.remember_beasts(w, name, hid, "came with you")                 # behind", when it had come in and was grazing)
-                w.event(node, "arrive", f"{h['name']} came in with {name} and was turned out onto "
-                        f"{w.s['parcels'][w.s['herds'][hid]['parcel']]['name']}", actor=name, about=[f"herd:{hid}"], salience=0.5,
-                        tags=["animals", "travel"], concerns=[name], dawn=True)
+                w.apply("set", node, ref=("herd", hid), field="parcel", value=(end["parcels"] or LY.parcels_of(w, node))[0])
+                w.apply("set", node, ref=("herd", hid), field="pos", value=None)
+                w.event(node, "arrive", f"{h['name']} came in, led by {name}", actor=name, about=[f"herd:{hid}"], salience=0.5,
+                        tags=["animals", "travel"], dawn=True)
             else:
                 off_road(w, hid, node, {"herds": []})
             out.append(hid)
@@ -399,7 +398,7 @@ def _merge(w, rec):
     for hid, h in sorted(w.s["herds"].items()):
         of = h.get("split_of")
         g = w.s["herds"].get(of)
-        if not of or not g or FM.head(h) <= 0 or int(h.get("split_day", -1)) >= w.d or h["node"] != g["node"] or h.get("parcel") is None or h.get("parcel") != g.get("parcel"):
+        if not of or not g or FM.head(h) <= 0 or h.get("with") or int(h.get("split_day", -1)) >= w.d or h["node"] != g["node"] or h.get("parcel") is None or h.get("parcel") != g.get("parcel"):
             continue
         node = h["node"]
         for role in ROLES:
@@ -436,9 +435,30 @@ def pack_oxen(w, name) -> int:
     return sum(int(h.get("oxen", 0)) for h in w.s["herds"].values() if h.get("with") == name and h.get("pack") and FM.head(h) > 0)
 
 
+def let_go(w, hid, rec=None, why="let go") -> None:
+    """A led beast let go (turned out, or its leader gone): an ordinary herd where it stands, known by memory and noticing (D4-56)."""
+    h = w.s["herds"][hid]
+    for f in ("with", "pack"):
+        w.apply("set", h["node"], ref=("herd", hid), field=f, value=None)
+    if rec is not None:
+        rec.setdefault("herds", []).append((hid, "let go", why))
+
+
+def led_by(w, name) -> list:
+    """The beasts one is leading where one is (D2-136)."""
+    return sorted(hid for hid, h in w.s["herds"].items() if h.get("with") == name and h.get("pack") and FM.head(h) > 0
+                  and h["node"] == w.place_of(("person", name)))
+
+
 def lead_ox(w, name, hid, rid, pos) -> str:
-    """One ox split off its herd to go with the traveller's party (D2-136): an accompanied herd that carries."""
+    """One ox split off its herd to go with the traveller's party (D2-136): an accompanied herd that carries. One already led goes on
+    as it is."""
     node = w.s["herds"][hid]["node"]
+    h0 = w.s["herds"][hid]
+    if h0.get("with") == name and h0.get("pack"):
+        for f, v in (("parcel", None), ("pos", pos), ("node", rid)):
+            w.apply("set", node, ref=("herd", hid), field=f, value=v)
+        return hid
     new = w.apply("split_herd", node, like=hid, take={"oxen": 1})
     for cl in w.claims_on(("herd", hid)):
         w.apply("claim", node, thing=("herd", new), claimant=cl["claimant"], rights=cl["rights"], grounds=cl["grounds"])

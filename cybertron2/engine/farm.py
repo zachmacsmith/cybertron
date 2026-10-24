@@ -513,6 +513,9 @@ def drive(here, a, party) -> str:
     if whole and dest is None:
         here.apply("set", ref=("herd", hid), field="parcel", value=to)
         here.apply("set", ref=("herd", hid), field="home", value=to)
+        if h.get("with"):                                                    # a led beast turned out: let go there (D2-136)
+            for f in ("with", "pack"):
+                here.apply("set", ref=("herd", hid), field=f, value=None)
         moved_to = hid
     else:
         if dest is None:

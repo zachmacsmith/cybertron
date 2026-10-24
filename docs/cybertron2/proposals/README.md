@@ -30,6 +30,7 @@ without a proposal.
 | File | Summary | Owner | Status |
 |---|---|---|---|
 | [household_customs.md](household_customs.md) | a custom held by named households, not only by places | 37.4 | retrospective, accepted: D4-57 |
+| [led_beasts.md](led_beasts.md) | a beast one leads stays with one until let go | 37.4 | retrospective, accepted: D4-58 |
 | [run_record.md](run_record.md) | the run as a journal (SQLite; JSON values; content-addressed prompts) of keyed requests and answers, with step commits and checkpoints; the runner as a resumable, idempotent, cancellable state machine; views: state at any step, exact agent context, map frames, history, Parquet export, the site; a human responder plays an agent with the same context (review 39.01) | 37.1 (37.4: engine code) | accepted: D1-1 to D1-5 (spec/record/) |
 | [households.md](households.md) | membership, use and home as data agents change: admit and leave, grant use of a house, home derived, occupy an empty house (possession and a claim), build one from parts; the night follows use | 37.4 (37.2: building costs) | partly accepted: D4-36 |
 | [place.md](place.md) | place as the foundation: every entity and event has a place; state partitioned by node; agent-facing code gets only a view of where the agent is (`Here`) and its own mind (`Mind`), never the world; only travel moves anything between nodes; static and canary tests | 37.4 | accepted in principle: D4-35 |
@@ -259,3 +260,4 @@ Newest first. Ideas decided or rejected in conversation before 23 Oct are backfi
 | 23 Oct | Fences, hedges and stone walls as field works that keep beasts in or out | discussion | [fences.md](fences.md) |
 | 23 Oct | The senses: an eye for the land (some have none) and signs of bareness scaled by how bare | partly accepted: D4-50 | [senses.md](senses.md) |
 | 24 Oct | Customs held by named households (for Hollins 2) | retrospective, accepted: D4-57 | [household_customs.md](household_customs.md) |
+| 24 Oct | A led beast stays with its leader until let go | retrospective, accepted: D4-58 | [led_beasts.md](led_beasts.md) |

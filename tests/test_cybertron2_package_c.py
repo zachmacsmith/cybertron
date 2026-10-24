@@ -3,7 +3,7 @@
 ways (D2-90, D2-92, D2-98)."""
 import copy
 
-from cybertron2.engine import agreements as AG, fuse as FU, night as N, roads as RD, run as R, settle as ST
+from cybertron2.engine import agreements as AG, fuse as FU, night as N, prompt as PR, roads as RD, run as R, settle as ST
 from cybertron2.engine import verbs as V
 from cybertron2.engine.here import Here, Mind
 from cybertron2.engine.world import World, load_spec
@@ -477,9 +477,42 @@ def test_a_pack_ox_carries_60_goes_with_its_leader_grazes_or_eats_hay_and_comes_
     RD.night(w, w.s["today"])                                                       # farmland: it grazes
     assert abs(w.goods(w.hands(lead))["hay"] - 1.0) < 1e-9
     next_day(w)
-    assert w.at(lead) == "ashwood" and w.s["herds"][ox]["node"] == "ashwood" and w.s["herds"][ox]["pack_of"] == lead
-    assert ox in w.s["mind"][lead].get("beasts", {})                                # its leader knows it came in, and where it is
-    assert w.capacity(lead) < 60 and do(w, lead, do="travel", to="millbrook", lead="the cattle").startswith("You set off")   # to lead on
+    assert w.at(lead) == "ashwood" and w.s["herds"][ox]["node"] == "ashwood" and w.s["herds"][ox]["with"] == lead   # still led
+    assert w.capacity(lead) == 60 and any("Leading:" in x for x in PR.turn_prompt(Here(w, lead), Mind(w, lead)).split("\n"))
+    rec = {}
+    HD.night(w, rec)                                                                # held: it does not wander off
+    assert w.s["herds"][ox]["with"] == lead
+    assert do(w, lead, do="travel", to="millbrook", lead="the cattle").startswith("You set off")   # it goes on with its leader
+    N.departures(w, w.s["today"])
+    assert w.s["herds"][ox]["node"] in w.s["roads"] and sum(1 for h in w.s["herds"].values() if h.get("pack")) == 1
+
+
+def test_a_led_ox_is_let_go_when_turned_out_or_left_behind():
+    from cybertron2.engine import herds as HD
+    w = world(roads=[["millbrook", "ashwood", 1, {"terrain": "farmland"}]])
+    holder = w.claims_on(("herd", "cattle"))[0]["claimant"]
+    lead = next(n for n in w.living() if w.at(n) == "millbrook" and holder in (n, w.household_of(n)) and w.s["people"][n]["stage"] == "adult")
+    w.s["containers"][w.hands(lead)]["goods"]["harness"] = 1.0
+    w.s["herds"]["cattle"]["oxen"] = 2
+    do(w, lead, do="travel", to="ashwood", lead="the cattle")
+    N.departures(w, w.s["today"])
+    ox = next(hid for hid, h in w.s["herds"].items() if h.get("pack"))
+    next_day(w)
+    pasture = next(p["name"] for p in w.s["parcels"].values() if p["node"] == "ashwood" and p["cover"] in ("meadow", "pasture"))
+    assert do(w, lead, do="drive", thing=w.s["herds"][ox]["name"], to=pasture).startswith("You drove")
+    assert not w.s["herds"][ox].get("with") and w.capacity(lead) < 60                 # turned out: an ordinary herd now
+    w2 = world(roads=[["millbrook", "ashwood", 1, {"terrain": "farmland"}]])
+    w2.s["containers"][w2.hands(lead)]["goods"]["harness"] = 1.0
+    w2.s["herds"]["cattle"]["oxen"] = 2
+    do(w2, lead, do="travel", to="ashwood", lead="the cattle")
+    N.departures(w2, w2.s["today"])
+    ox2 = next(hid for hid, h in w2.s["herds"].items() if h.get("pack"))
+    next_day(w2)
+    w2.s["today"] = R.blank_today()
+    depart(w2, lead, "millbrook")                                                     # sets off without it
+    N.departures(w2, w2.s["today"])
+    HD.night(w2, {})
+    assert not w2.s["herds"][ox2].get("with") and w2.s["herds"][ox2]["node"] == "ashwood"   # left there
 
 
 def test_an_offer_to_a_child_goes_to_the_childs_parent():

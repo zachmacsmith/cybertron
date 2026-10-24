@@ -90,6 +90,11 @@ class Here:
         from cybertron2.engine import herds as HD
         return HD.pack_ox_for(self._w, self.name, want)
 
+    def led(self) -> list:
+        """The beasts one is leading, here with one (D2-136): [(id, name, oxen)]."""
+        from cybertron2.engine import herds as HD
+        return [(hid, self._w.s["herds"][hid]["name"], int(self._w.s["herds"][hid].get("oxen", 0))) for hid in HD.led_by(self._w, self.name)]
+
     def units(self) -> int:
         return self._w.units_for(self.name)
 
