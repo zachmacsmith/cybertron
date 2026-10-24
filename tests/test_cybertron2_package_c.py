@@ -478,3 +478,21 @@ def test_a_pack_ox_carries_60_goes_with_its_leader_grazes_or_eats_hay_and_comes_
     assert abs(w.goods(w.hands(lead))["hay"] - 1.0) < 1e-9
     next_day(w)
     assert w.at(lead) == "ashwood" and w.s["herds"][ox]["node"] == "ashwood" and w.s["herds"][ox]["pack_of"] == lead
+
+
+def test_an_offer_to_a_child_goes_to_the_childs_parent():
+    from cybertron2.engine.world import World, load_spec
+    w = World(load_spec("cybertron2/specs/region_c1.yaml"))
+    w.s["today"] = R.blank_today()
+    child = "Walter"
+    kin = w.s["mind"][child]["kin"]
+    parent = next(m for rel in ("your mother", "your father") for m, k in kin.items() if k["rel"] == rel and w.at(m) == w.at(child))
+    offerer = next(n for n in w.living() if w.at(n) == w.at(child) and w.s["people"][n]["stage"] == "adult" and w.household_of(n) != w.household_of(child))
+    w.s["containers"][w.hands(offerer)]["goods"]["grain"] = 5.0
+    names = [n for n in w.living() if w.s["people"][n]["stage"] != "child"]
+    replies = {n: {} for n in names}
+    replies[offerer] = {"offers": [{"to": child, "give": "2 grain", "get": "1 timber"}]}
+    results = {n: [] for n in names}
+    box = R.talk(w, names, replies, results)
+    assert any("goes to" in x and child in x for x in results[offerer])
+    assert box[parent]["offers"] and any(o["to"] in (parent,) for o in w.s["offers"].values() if o["by"] == offerer)

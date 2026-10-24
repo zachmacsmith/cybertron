@@ -108,6 +108,22 @@ def _parallel(fn, jobs: dict, workers) -> tuple[dict, dict, dict]:
 
 
 # ---------------------------------------------------------------------- the talk step (information/speech.md)
+def _guardian(w, child, names, node):
+    """Who answers for a child here (D4-55): a parent taking part in the talk at this node, else its household's head, else an adult
+    of its household."""
+    kin = (w.s["mind"].get(child) or {}).get("kin") or {}
+    here_ = [m for m in names if w.at(m) == node and w.s["people"][m]["alive"]]
+    for rel in ("your mother", "your father"):
+        p = next((m for m, k in kin.items() if k.get("rel") == rel and m in here_), None)
+        if p:
+            return p
+    hh = w.household_of(child)
+    head = w.head(hh) if hh else None
+    if head in here_:
+        return head
+    return next((m for m in here_ if hh and w.household_of(m) == hh and w.s["people"][m]["stage"] in ("adult", "elder")), None)
+
+
 def talk(w, names, replies, results) -> dict:
     """Deliver speech, explanations and offers. Returns {name: box} for those woken (a message or an offer to them; a note opened or
     a craft looked up wakes the agent itself)."""
@@ -171,8 +187,12 @@ def talk(w, names, replies, results) -> dict:
         for o in [o for o in (r.get("offers") or []) if isinstance(o, dict)][:3]:
             kid = here.person(o.get("to"))
             if kid and kid not in names and w.s["people"][kid]["stage"] == "child":
-                results[n].append(f"Refused: offer: {kid} is a child and takes no part in trade; make the offer to someone else")
-                continue
+                guardian = _guardian(w, kid, names, w.at(n))                  # an offer to a child goes to its parent (D4-55)
+                if guardian is None:
+                    results[n].append(f"Refused: offer: {kid} is a child, and no parent of {kid}'s is here to take the offer")
+                    continue
+                results[n].append(f"{kid} is a child: your offer goes to {kid}'s parent, {guardian}.")
+                o = {**o, "to": guardian}
             try:
                 line = AG.make_offer(here, mind, o)
             except Refused as e:
