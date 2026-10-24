@@ -382,7 +382,7 @@ def turn_prompt(here, mind, opening=True) -> str:
         L.append("## This morning\n" + "\n".join(f"- {x}" for x in t["dawn"]))
     home = next((nid for nid, x in mind.places().items() if x["days"] == 0), here.node)
     hl = [f"You are at {here.node_name}" + ("" if here.node == home else ", away from home") + ". Here today: "
-          + (", ".join(here.people(me=False)) or "nobody else") + "."]
+          + (", ".join(_who(here, x) for x in here.people(me=False)) or "nobody else") + "."]
     if a.get("arrived") == here.day:
         hl.append("You arrived this morning.")
         way = mind.store.get("on_the_way") or {}
@@ -397,7 +397,7 @@ def turn_prompt(here, mind, opening=True) -> str:
         known = nid in mind.places()
         lms = here.landmarks_known(nid)
         ways.append(f"{name} ({days} day{'s' if days != 1 else ''}" + (", a cart track" if track else "")
-                    + ("" if known else ": a way nobody you know has followed; travel along it by naming it")
+                    + ("" if known else f': a way nobody you know has followed; to go along it, travel {{"to": "{name}"}}')
                     + (f"; on the way you know {', '.join(lms)}" if lms else "") + ")")
     if ways:
         hl.append("Roads from here: " + "; ".join(ways) + f". Each night on the road you eat {here.p['camping']['out'][0]:g} "
@@ -412,7 +412,7 @@ def turn_prompt(here, mind, opening=True) -> str:
            + (f" (weight {show(here.load())} of the {here.capacity():g} you can travel with"
               + (f", {here.capacity(True):g} on a road with a track" if here.capacity(True) > here.capacity() else "") + ")" if here.roads() else "") + "."]
     beasts = _beast_lines(here, mind)
-    L.append("## You\n" + "\n".join(you + beasts + _house_lines(here, mind)))
+    L.append("## You\n" + "\n".join(you + _family_lines(here, mind) + beasts + _house_lines(here, mind)))
     can, near = KN.options(here, mind)
     opt = ["Today you could: " + "; ".join(can) + "." if can else "Of your crafts, none can be done here today with what you have."]
     if near:
@@ -441,6 +441,49 @@ def turn_prompt(here, mind, opening=True) -> str:
         L.append("## Your notes\n" + "\n".join(nl))
     L.append("Plan your day. Reply with JSON only.")
     return "\n\n".join(L)
+
+
+def _who(here, x) -> str:
+    """A person here as one sees them: a child as a child, a pregnancy once it shows (D2-141)."""
+    b = here.body(x)
+    tag = {"infant": "a baby", "child": "a child"}.get(b["stage"]) or ("near her time" if b["with_child"] else "")
+    return f"{x} ({tag})" if tag else x
+
+
+def _family_lines(here, mind) -> list:
+    """Partner, a pregnancy one feels, the household's young here and whether each was fed and cared for, the children's work,
+    a succession under way (birth_and_death.md "What agents see")."""
+    me = here.body(here.name)
+    out = []
+    if me["partner"]:
+        out.append(f"Your partner: {me['partner']}.")
+    if me["with_child"]:
+        out.append("You are with child, and your time is near: a birth on the road is dangerous, and housed, fed and with someone "
+                   "beside you it goes best.")
+    life = here.life()
+    young = [x for x in here.people(me=False) if here.body(x)["stage"] in ("infant", "child") and here.household(x) == mind.household]
+    for x in young:
+        b = here.body(x)
+        c = b["cared"]
+        cared = (f"looked after yesterday by {', '.join(c['by'])}" if c.get("by") else "not looked after yesterday") if c else ""
+        fed = {0: "fed", -1: "hungry", -2: "starving"}.get(b["hunger"], "fed")
+        grows = f"; grown in {b['grows']} day{'s' if b['grows'] != 1 else ''}" if b.get("grows") is not None else ""
+        out.append(f"{x}, {'a baby' if b['stage'] == 'infant' else 'a child'} of your household: {fed}" + (f", {cared}" if cared else "")
+                   + f"{grows}.")
+    if young:
+        need = life["dial"]["infant_care"]
+        out.append(f"Looking after a child is work: work {{what: care, at: <the child>}}, a unit; a baby needs {need} a day or it may "
+                   "not live, and it eats from its household's store or the hands of its family beside it.")
+        order = life.get("order")
+        out.append("The household's children are set to " + (KN.label(order["what"]) if order else "no work") + " each day"
+                   + (" (the head sets it: order)" if mind.head != mind.name else " (you set it: order)") + ".")
+    sc = life.get("succession")
+    if sc:
+        out.append(f"Your household's head has died: until day {sc['until'] + 1} its grown members each name who heads it now "
+                   "(name {head: ...}); the one named most heads it.")
+    elif mind.head == mind.name:
+        out.append(f"Your heir: {life['heir']}." if life.get("heir") else "You have named no heir (name {heir: ...}).")
+    return out
 
 
 def _things_lines(here, mind) -> list:

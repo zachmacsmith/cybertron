@@ -122,6 +122,8 @@ def come_of_age(w, name) -> None:
         a["model"] = w.s["people"][head].get("model") or cast.get("youth") or "claude-haiku-5-5"
     else:
         a["model"] = cast.get("youth") or "claude-haiku-5-5"
+    if w.spec.get("bots"):
+        a["model"] = "bot"
     m = w.s["mind"][name]
     lines = list(dict.fromkeys((m.get("childhood") or [])))[-6:]
     if lines:
@@ -226,6 +228,15 @@ def showing(w, name) -> bool:
     """A pregnancy shows from its third day (D2-141)."""
     a = w.s["people"][name]
     return a.get("pregnant") is not None and w.d - int(a["pregnant"]) >= scaled(LIFE["pregnancy"]["signs_from"], lifespan(w))
+
+
+def grows_in(w, name):
+    """Days until a child is grown (a youth), else None."""
+    d = days_old(w, name)
+    if d is None or w.s["people"][name]["stage"] not in MINOR:
+        return None
+    L = lifespan(w)
+    return sum(span for st, span in spans(L) if st in MINOR) - d
 
 
 def in_gap(w, name) -> bool:
@@ -338,6 +349,7 @@ def _young(w, today, rec, where, out):
         if a["stage"] not in MINOR or a.get("born") == w.d:                  # born tonight: the birth's own risk only
             continue
         units = float(care.get(name, 0.0))
+        a["cared"] = {"day": w.d, "units": units, "by": list((today.get("care_by") or {}).get(name, []))}
         if a["stage"] == "infant":
             inf = LIFE["infant"]
             p = float(inf["dies"]["cared" if units + 1e-9 >= float(d["infant_care"]) else "not"])

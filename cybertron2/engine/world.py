@@ -728,6 +728,7 @@ def p_born(w, mother, father=None):
     from cybertron2.engine.data import LIFE
     KN.seed(w, name, {"knows": {t: {"level": "known", "skill": LIFE["child_skill"]} for t in LIFE["children_work"]}})
     PC.seed(w, name, {})
+    w.s["mind"][name]["places"] = copy.deepcopy(w.s["mind"][mother]["places"])   # it grows up knowing the places its mother knows
     sib = [x for x, y in w.s["people"].items() if x != name and y["alive"] and set(y.get("parents") or []) & {mother}]
     kin = {mother: ("your mother", "your son" if sex == "m" else "your daughter")}
     if father in w.s["people"]:

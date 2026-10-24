@@ -389,6 +389,7 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
     if days:
         spec["days"] = int(days)
     if bots:
+        spec["bots"] = True                                                 # those who come of age are bots too
         for a in spec["agents"].values():
             if a.get("model"):
                 a["model"] = "bot"
@@ -562,6 +563,7 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
             f.flush()
         print(f"day {day + 1}: alive {len(w.living())}, missed {rec['missed']}, deaths {rec['deaths']}, talked {len(talked)}, "
               f"agreements {len(rec['agreements_made'])}, taught {len(today['teach'])}, thefts {len(today['thefts'])}, "
+              + (f"born {[b['child'] for b in rec['life']['births']]}, " if rec["life"]["births"] else "") +
               f"errors {len(errors)}, cost ${cost:.2f}", flush=True)
         if not w.living():
             break

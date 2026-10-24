@@ -442,8 +442,9 @@ LAYOUT = {
 # How far an event reaches (D4-53): the whole node (everyone there can notice it), the parcel it happens on (noticed by the rule:
 # presence, visibility, attention, the eye), or a building (those inside, and by the rule on its parcel). Kinds not listed: the parcel.
 EVENT_EXTENT = {
-    "node": ["death", "fire", "alarm", "fight", "threat", "raid", "sign", "arrive", "depart", "household", "claim", "grant", "release"],
-    "building": ["store", "put", "left", "make", "host", "build"],
+    "node": ["death", "fire", "alarm", "fight", "threat", "raid", "sign", "arrive", "depart", "household", "claim", "grant", "release",
+             "grown"],
+    "building": ["store", "put", "left", "make", "host", "build", "birth"],
 }
 
 NOTICING = {

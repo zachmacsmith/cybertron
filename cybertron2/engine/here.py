@@ -130,7 +130,8 @@ class Here:
         from cybertron2.engine import life as LF
         return {"stage": a["stage"], "hunger": a["hunger"], "wounded": a["wounded"], "carried": dict(self._w.goods(a["hands"])),
                 "sex": a.get("sex", ""), "with_child": LF.showing(self._w, x), "partner": a.get("partner"),
-                "parents": list(a.get("parents") or [])}
+                "parents": list(a.get("parents") or []), "cared": dict(a.get("cared") or {}),
+                "grows": LF.grows_in(self._w, x)}
 
     def children_on(self) -> bool:
         from cybertron2.engine import life as LF
@@ -139,8 +140,9 @@ class Here:
     def life(self) -> dict:
         """The world's life settings, for the verbs: the cost dial, whether children come, the spans (D2-145, D2-153)."""
         from cybertron2.engine import life as LF
-        return {"on": LF.on(self._w), "dial": LF.dial(self._w), "gap": LF.in_gap(self._w, self.name),
-                "succession": self._w.s["institutions"].get(self.household() or "", {}).get("succession")}
+        inst = self._w.s["institutions"].get(self.household() or "", {})
+        return {"on": LF.on(self._w), "dial": LF.dial(self._w), "gap": LF.in_gap(self._w, self.name), "succession": inst.get("succession"),
+                "order": inst.get("order"), "heir": inst.get("heir")}
 
     def buildings(self) -> dict:
         return {bid: b for bid, b in self._w.s["buildings"].items() if b["node"] == self.node}
