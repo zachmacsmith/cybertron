@@ -808,6 +808,32 @@ def main(argv=None):
     c.add_argument("--workers", type=int, default=12)
     b = sub.add_parser("branches")
     b.add_argument("run")
+    e = sub.add_parser("export")
+    e.add_argument("runs", nargs="+")
+    e.add_argument("--out", required=True)
+    i = sub.add_parser("import")
+    i.add_argument("src")
+    i.add_argument("--out", required=True)
+    pb = sub.add_parser("publish")
+    pb.add_argument("runs", nargs="+")
+    pb.add_argument("--staging")
+    pb.add_argument("--repo")
+    pb.add_argument("--push", action="store_true")
+    ft = sub.add_parser("fetch")
+    ft.add_argument("run_id")
+    ft.add_argument("--revision")
+    ft.add_argument("--repo")
+    ft.add_argument("--out", required=True)
+    cx = sub.add_parser("context")
+    cx.add_argument("run")
+    cx.add_argument("key", nargs="?", help="a request key; without it, the agent's latest")
+    cx.add_argument("--agent")
+    fr = sub.add_parser("frames")
+    fr.add_argument("run")
+    fr.add_argument("--out", required=True)
+    dp = sub.add_parser("dump")
+    dp.add_argument("run")
+    dp.add_argument("--table", default="events")
     args = ap.parse_args(argv)
     if args.cmd == "run":
         print(run(args.spec, args.out, args.backend, args.days, args.workers, args.bots, args.seed, until=args.until))
@@ -828,6 +854,33 @@ def main(argv=None):
         print(run(None, args.out, args.backend, workers=args.workers, mode="continue"))
     elif args.cmd == "branches":
         print(json.dumps(BR.branches(args.run), indent=1))
+    elif args.cmd in ("export", "import", "publish", "fetch"):
+        from cybertron2.engine import exchange as EX
+        if args.cmd == "export":
+            for r in args.runs:
+                print(EX.export(r, args.out))
+        elif args.cmd == "import":
+            print(EX.import_(args.src, args.out))
+        elif args.cmd == "publish":
+            root = EX.publish(args.runs, args.staging, args.push, args.repo)
+            print(f"{'uploaded' if args.push else 'staged (dry run: add --push to upload)'}: {root}")
+        else:
+            print(EX.fetch(args.run_id, args.out, args.revision, args.repo))
+    elif args.cmd == "context":
+        from cybertron2.engine import views as VW
+        key = args.key or [r for r in VW.requests(args.run, agent=args.agent)][-1]["key"]
+        print(json.dumps(VW.context(args.run, key), indent=1))
+    elif args.cmd == "frames":
+        from cybertron2.engine import views as VW
+        Path(args.out).mkdir(parents=True, exist_ok=True)
+        (Path(args.out) / "layout.json").write_text(json.dumps(VW.layout(args.run)))
+        (Path(args.out) / "frames.json").write_text(json.dumps(VW.frames(args.run)))
+        print(args.out)
+    elif args.cmd == "dump":
+        from cybertron2.engine import views as VW
+        rows = {"events": VW.events, "changes": VW.changes, "calls": VW.calls, "steps": VW.steps}[args.table](args.run)
+        for r in rows:
+            print(json.dumps(r))
     elif args.cmd == "replay":
         rep = run(None, args.run, until=args.to, mode="replay")
         print(json.dumps(rep, indent=1))
