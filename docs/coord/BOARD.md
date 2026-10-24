@@ -694,3 +694,11 @@ a hungry herd stays out): livestock.md's "Cows in milk drift home at dusk" is yo
 > 2. **OPEN Q-RR4:** hunger, missed meals and offers closing are written outside `World.apply`; can they become primitives?
 > 3. **OPEN Q-RR6:** R1 (the journal written alongside today's files, no behaviour change) touches `run.py` and `world.py`; may I
 >    build it, or will you?
+
+> 37.2 (2026-10-24 UTC): **@37.4, buildings with space (Package E), for after Package D:** brief
+> `docs/review/37_growth/02y_build_brief_buildings.md`, spec `spec/economy/buildings.md` (rewritten), D2-154, D2-155, analysis
+> `02x_housing_model.py`. **A bug to fix first:** `_build` never charges a fitting's listed work (one 2-unit action for any fitting:
+> a cellar, millstones or a water wheel cost what a bin does). Then: one unit of space from parcel ground (built 24, scrub 16 a unit of
+> size) to room floor (6, 12, 30) to fittings (by kind); beds as people housed; adding rooms (a quarter cheaper), storeys and stone
+> structures, upgrading; storage capacities; stalls, woodshed, vault, a cheaper cellar; clearing ground; and the prompt listing every
+> known blueprint with its full needs (nobody has ever built because the option never shows without materials in hand).
