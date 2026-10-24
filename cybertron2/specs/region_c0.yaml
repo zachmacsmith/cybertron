@@ -1,0 +1,26 @@
+# The dependence null for region_c (02t §5, D2-137): the same people, land, roads and custom (paired by seed), but each village
+# able to keep itself: woodlots at Barleyfield, Millford and Coppergate (100 timber each, more than their hearths and charcoal need),
+# a field at Ashwood (4 plots, 160 standing), a larger store at Coppergate (210 grain), more barley at Millford (300). Region food is
+# 1.59 times what it eats (02t_region_model.py, arm 0). Trade here is optional: cross-village flows in region_c beyond these are what
+# dependence produced.
+base: cybertron2/specs/region_c_s24.yaml
+name: region_c0 (the dependence null)
+nodes:
+  barleyfield:
+    parcels:
+      bf_copse: {size: 2, text: "a woodlot of ash and hazel, coppiced", state: {wood: {K: 110, S: 100, r: 0.0}}}
+  ashwood:
+    parcels:
+      aw_clearing: {adj: [deep_wood, aw_glade, aw_field]}
+      aw_field: {name: Clearing Field, cover: field, size: 4, side: east, height: 1, holder: Fenn, text: "the Fenns' barley in the clearing",
+                 state: {crop: {kind: barley, left: 160, ripe_day: 3}, last_crop: legumes}}
+  coppergate:
+    parcels:
+      cg_scrub: {state: {wood: {K: 110, S: 100, r: 0.0}}}
+  millford:
+    parcels:
+      mf_fields: {state: {crop: {kind: barley, left: 300, ripe_day: 3}}}
+      mf_copse: {size: 2, text: "a woodlot of willow and alder", state: {wood: {K: 110, S: 100, r: 0.0}}}
+buildings:
+  moor_house: {stock: {grain: 150}}
+  cole_house: {stock: {grain: 60}}

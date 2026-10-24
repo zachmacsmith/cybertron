@@ -1,0 +1,159 @@
+# The next region world (37.2's 02t, D2-137; carrying D2-135, the merchant's pack ox D2-133, D2-136): four villages that need
+# each other, 24 days from late summer (the harvest under way) through one winter (days 9 to 14) into spring. Arm 1 (dependent);
+# the null arm is region_c0.yaml (each village able to keep itself), paired by seed. Numbers from 02t_region_model.py.
+#   Barleyfield (farms): 16 plots, 760 grain standing, the granary (Barrow), two herds on the open Common beside the barley, the
+#     Reeds' fenced pasture; wood: a copse of 12 and woodpiles of 24 for 4 hearths that burn 84.
+#   Ashwood (wood): Deep Wood (400 timber at a sustainable take), game and forage; charcoal; carpenters. Grain: 113 food against 216.
+#   Coppergate (ore): the seam, the quarry, the forge, copper tools; a store of 120 grain; little fuel.
+#   Millford (market): the water mill, the inn, the merchant's pack ox and handcart, 5 plots; little wood; a market every fourth day.
+# Roads: a triangle of 1-day roads (Barleyfield-Millford with a track and a ford; Millford-Ashwood with a track; Barleyfield-Ashwood
+# on foot by the Holloway, a narrows in the wood with wild fruit trees), Ashwood-Coppergate 2 days on foot with a ford,
+# Coppergate-Millford 2 days over the Pass (snowed in deep winter). People, kin and their past are generated from the lines.
+name: region_c
+seed: 24
+days: 24
+calendar: {season: summer, day: 4, season_days: 6}
+cold_days: []
+nodes:
+  barleyfield:
+    name: Barleyfield
+    parcels:
+      bf_green: {name: the Green, cover: built, size: 2, side: centre, height: 1,
+                 text: "farmhouses, a byre, a cottage and the granary round a green", adj: [north_field, bf_pasture, east_field]}
+      north_field: {name: North Field, cover: field, size: 5, side: north, height: 1, holder: Reed, fertility: 1.05,
+                    text: "the Reeds' barley, ploughed, dunged and even", adj: [bean_field, bf_pasture],
+                    state: {crop: {kind: barley, left: 260, ripe_day: 2, broken: 5}, last_crop: legumes}}
+      bean_field: {name: Bean Field, cover: field, size: 2, side: north, height: 1, holder: Reed, text: "the Reeds' beans",
+                   adj: [reed_close], state: {crop: {kind: beans, left: 70, ripe_day: 4}, last_crop: grain}}
+      reed_close: {name: Reed Close, cover: pasture, size: 2, side: north, height: 1, holder: Reed,
+                   text: "the Reeds' own pasture, a wattle fence round it", fence: {kind: wood, level: 2, gate: shut}}
+      east_field: {name: East Field, cover: field, size: 3, side: east, height: 2, holder: Barrow, fertility: 0.9,
+                   text: "the Barrows' barley on the slope", adj: [south_field],
+                   state: {crop: {kind: barley, left: 150, ripe_day: 3}, last_crop: grain}}
+      west_field: {name: West Field, cover: field, size: 2, side: west, height: 1, holder: Barrow, text: "the Barrows' barley by the Common",
+                   adj: [bf_pasture, bf_copse], state: {crop: {kind: barley, left: 110, ripe_day: 2}, last_crop: legumes}}
+      south_field: {name: South Field, cover: field, size: 3, side: south, height: 1, holder: Hale, fertility: 0.7,
+                    text: "the Hales' oats, thin and weedy", adj: [brook_field], state: {crop: {kind: oats, left: 120, ripe_day: 5}, last_crop: grain}}
+      brook_field: {name: Brook Field, cover: field, size: 1, side: south, height: 0, holder: Hale, ground: wet,
+                    text: "the Hales' wet field by the brook, rushes in it", adj: [bf_meadow],
+                    state: {crop: {kind: barley, left: 50, ripe_day: 4}, last_crop: grain}}
+      bf_pasture: {name: the Common, cover: pasture, size: 4, side: west, height: 1, text: "the common grazing, open to the fields",
+                   state: {plants: {K: 4, S: 4, r: 0.3}, grass: {K: 100, S: 60, r: 0.32}}}
+      bf_meadow: {name: Brook Meadow, cover: meadow, size: 2, side: south, height: 0, holder: Reed, text: "the Reeds' hay meadow by the stream",
+                  state: {plants: {K: 3, S: 3, r: 0.3}}}
+      bf_copse: {name: Barley Copse, cover: forest, size: 1, side: west, height: 2, text: "a small copse of ash and hazel",
+                 state: {wood: {K: 14, S: 12, r: 0.0}, plants: {K: 3, S: 3, r: 0.3}}}
+  ashwood:
+    name: Ashwood
+    parcels:
+      aw_clearing: {name: the Clearing, cover: built, size: 1, side: centre, height: 1, text: "two long houses in a clearing",
+                    adj: [deep_wood, aw_glade]}
+      deep_wood: {name: Deep Wood, cover: forest, size: 6, side: north, height: 2, text: "old oak and ash forest",
+                  state: {plants: {K: 14, S: 12, r: 0.3}, game: {K: 24, S: 20, r: 0.25}, wood: {K: 450, S: 420, r: 0.03}}}
+      aw_glade: {name: the Glade, cover: meadow, size: 1, side: south, height: 1, text: "a sunny glade", adj: [aw_brook],
+                 state: {plants: {K: 4, S: 4, r: 0.3}}}
+      aw_brook: {name: Ash Brook, cover: water, size: 1, side: south, height: 0, text: "a stream under the trees"}
+  coppergate:
+    name: Coppergate
+    parcels:
+      cg_yard: {name: the Yard, cover: built, size: 1, side: centre, height: 2, text: "a yard with two stone houses and the forge",
+                adj: [the_seam, cg_scrub]}
+      the_seam: {name: the Seam, cover: rock, size: 1, side: north, height: 3, holder: Moor, text: "a green-stained seam in the hillside",
+                 state: {seam: {S: 80, K: 80}}}
+      cg_quarry: {name: the Quarry, cover: rock, size: 1, side: east, height: 3, holder: Moor, text: "a face of grey stone",
+                  adj: [the_seam], state: {quarry: {S: 0, K: 0}}}
+      cg_scrub: {name: the Hillside, cover: scrub, size: 2, side: south, height: 2, text: "thorn, gorse and a few stunted trees",
+                 adj: [cg_pasture], state: {plants: {K: 5, S: 4, r: 0.3}, wood: {K: 22, S: 20, r: 0.0}}}
+      cg_pasture: {name: High Pasture, cover: pasture, size: 1, side: west, height: 2, text: "thin upland grazing",
+                   state: {plants: {K: 3, S: 3, r: 0.3}}}
+  millford:
+    name: Millford
+    parcels:
+      mf_square: {name: the Square, cover: built, size: 3, side: centre, height: 1,
+                  text: "the market square, with the mill, the smithy, the store and the inn", adj: [mf_river, mf_meadow, mf_fields]}
+      mf_river: {name: the River, cover: water, size: 2, side: east, height: 0, text: "a broad slow river", adj: [mf_leat]}
+      mf_leat: {name: the Mill Leat, cover: water, size: 1, side: east, height: 0, text: "the channel that turns the mill"}
+      mf_meadow: {name: Riverside Meadow, cover: meadow, size: 2, side: east, height: 0, text: "wet meadow along the river",
+                  state: {plants: {K: 4, S: 4, r: 0.3}}}
+      mf_fields: {name: Town Field, cover: field, size: 5, side: south, height: 1, holder: Miller, text: "the town's barley",
+                  adj: [mf_copse], state: {crop: {kind: barley, left: 170, ripe_day: 3}, last_crop: legumes}}
+      mf_copse: {name: Willow Holt, cover: forest, size: 1, side: west, height: 1, text: "a thin stand of willow",
+                 state: {plants: {K: 3, S: 3, r: 0.3}, game: {K: 2, S: 2, r: 0.25}, wood: {K: 12, S: 10, r: 0.0}}}
+roads:
+- [barleyfield, millford, 1, track, {terrain: river valley, stretches: {1: {landmarks: [ford]}},
+                                     ends: {barleyfield: {parcels: [bf_green], side: south}, millford: {parcels: [mf_square], side: west}}}]
+- [millford, ashwood, 1, track, {terrain: farmland, ends: {millford: {parcels: [mf_square], side: north}, ashwood: {parcels: [aw_clearing], side: east}}}]
+- [barleyfield, ashwood, 1, {terrain: woodland, way: "the Holloway, a sunken way through the wood",
+                             stretches: {1: {landmarks: [narrows, fruit trees]}},
+                             ends: {barleyfield: {parcels: [bf_pasture], side: west}, ashwood: {parcels: [aw_clearing], side: south}}}]
+- [ashwood, coppergate, 2, {terrain: hills, stretches: {1: {landmarks: [ford]}},
+                            ends: {ashwood: {parcels: [deep_wood], side: north}, coppergate: {parcels: [cg_yard], side: west}}}]
+- [coppergate, millford, 2, {terrain: hills, stretches: {1: {landmarks: [pass]}, 2: {terrain: river valley}},
+                             ends: {coppergate: {parcels: [cg_yard], side: south}, millford: {parcels: [mf_square], side: east}}}]
+buildings:
+  mill: {name: the Mill, parcel: mf_square, household: Miller, structure: timber, size: 6, fittings: {millstones: 1, water wheel: 1, bins: 1},
+         stock: {grain: 8, flour: 16}}
+  miller_house: {name: Miller House, parcel: mf_square, household: Miller, structure: timber, size: 5, fittings: {beds: 5, hearth: 1, bins: 1},
+                 stock: {bread: 8, timber: 5}}
+  smithy: {name: the Smithy, parcel: mf_square, household: Smith, structure: wattle, size: 4, fittings: {hearth: 1, anvil: 1},
+           stock: {copper: 2, charcoal: 1}}
+  smith_house: {name: Smith House, parcel: mf_square, household: Smith, structure: wattle, size: 5, fittings: {beds: 5, hearth: 1, bins: 1},
+                stock: {bread: 8, grain: 8, timber: 5}}
+  merchant_house: {name: Merchant House, parcel: mf_square, household: Merchant, structure: timber, size: 6,
+                   fittings: {beds: 6, hearth: 1, bins: 1, cellar: 1}, stock: {bread: 8, timber: 5, hay: 10}}
+  store: {name: the Store, parcel: mf_square, household: Merchant, structure: wattle, size: 4, fittings: {bins: 1},
+          stock: {grain: 30, bread: 10, dried meat: 4, hide: 4, stone: 2, crude tool: 2, tent: 1}}
+  inn: {name: the Bell, parcel: mf_square, household: Bell, structure: timber, size: 8, fittings: {beds: 10, hearth: 1, bins: 1, cellar: 1},
+        stock: {bread: 16, grain: 14, timber: 5}}
+  reed_house: {name: Reed House, parcel: bf_green, household: Reed, structure: timber, size: 6, fittings: {beds: 6, hearth: 1, bins: 1, hand mill: 1},
+               stock: {grain: 15, rye: 8, beans: 10, timber: 6}}
+  byre: {name: the Byre, parcel: bf_green, household: Reed, structure: timber, size: 4, fittings: {bins: 1},
+         stock: {hay: 30, straw: 10, dung: 20, wooden plough: 1, harness: 2}}
+  hale_house: {name: Hale House, parcel: bf_green, household: Hale, structure: wattle, size: 5, fittings: {beds: 5, hearth: 1, bins: 1},
+               stock: {grain: 5, timber: 6}}
+  barrow_house: {name: Barrow House, parcel: bf_green, household: Barrow, structure: wattle, size: 5, fittings: {beds: 5, hearth: 1, bins: 1, hand mill: 1},
+                 stock: {grain: 10, beans: 10, timber: 6}}
+  granary: {name: the Granary, parcel: bf_green, household: Barrow, structure: timber, size: 4, fittings: {bins: 1, granary: 1}, stock: {grain: 120}}
+  lowe_cottage: {name: Lowe Cottage, parcel: bf_green, household: Lowe, structure: wattle, size: 3, fittings: {beds: 3, hearth: 1},
+                 stock: {grain: 2, timber: 6}}
+  fenn_house: {name: Fenn House, parcel: aw_clearing, household: Fenn, structure: timber, size: 6, fittings: {beds: 6, hearth: 1, bins: 1, hand mill: 1},
+               stock: {grain: 15, dried meat: 6, timber: 10}}
+  ashe_house: {name: Ash House, parcel: aw_clearing, household: Ash, structure: wattle, size: 5, fittings: {beds: 5, hearth: 1, bins: 1},
+               stock: {grain: 10, dried meat: 4, timber: 10, hide: 2, charcoal: 2}}
+  moor_house: {name: Moor House, parcel: cg_yard, household: Moor, structure: stone, size: 5, fittings: {beds: 5, hearth: 1, bins: 1, cellar: 1, hand mill: 1},
+               stock: {grain: 80, dried meat: 8, timber: 6, copper ore: 6, stone: 6}}
+  cole_house: {name: Cole House, parcel: cg_yard, household: Cole, structure: stone, size: 4, fittings: {beds: 4, hearth: 1, bins: 1},
+               stock: {grain: 40, dried meat: 4, timber: 4}}
+  forge: {name: the Forge, parcel: cg_yard, household: Moor, structure: stone, size: 3, fittings: {hearth: 1, anvil: 1}, stock: {charcoal: 2}}
+herds:
+  reed_cattle: {name: the Reed cattle, kind: cattle, parcel: bf_pasture, cows: 5, oxen: 2, bulls: 1, young: 2, in_milk: 3, holder: Reed}
+  barrow_cattle: {name: the Barrow cattle, kind: cattle, parcel: bf_pasture, cows: 3, young: 2, in_milk: 1, holder: Barrow}
+  merchant_ox: {name: the Merchant's ox, kind: cattle, parcel: mf_meadow, oxen: 1, holder: Merchant}
+claims: []
+customs:
+- {text: "Market day at Millford is every fourth day, on the Square: people bring goods there to trade, and the merchants buy and sell.", nodes: all}
+- {text: "The Millers grind for anyone who brings grain to the Mill; the custom is that they keep a share of the grain for the grinding.", nodes: all}
+- {text: "At harvest the farms take on reapers from wherever they can get them, and pay them in grain.", nodes: all}
+- {text: "The Bell at Millford gives travellers a bed and a meal for a price.", nodes: all}
+- {text: "Barley sown after the middle of autumn will not ripen before the frost; rye will stand the winter.", nodes: all}
+- {text: "Travellers carry bread or dried meat: grain is no use without a fire to boil it.", nodes: all}
+- {text: "Every hearth wants about twelve timber to see a house through the six nights of winter's cold.", nodes: all}
+incidents: []
+signs:
+- {day: 7, node: all, about: sky, sense: touch, text: "a white frost on the grass at dawn, the first of the year", salience: 0.6, tags: [season, farming]}
+lines:
+  Reed: {acting: [3, 5], min_adults: 3, crafts: [plough, select seed, sow, reap, weed, hoe, milk], tools: {crude tool: 3}, holdings: {coin: 6}}
+  Barrow: {acting: [2, 4], min_adults: 3, crafts: [ditch, sow, reap, hoe], tools: {crude tool: 2}, holdings: {coin: 10}}
+  Hale: {acting: [2, 4], min_adults: 2, crafts: [hoe, reap], tools: {crude tool: 2}, holdings: {coin: 5}, head_model: claude-sonnet-5-5}
+  Lowe: {acting: [2, 4], min_adults: 2, crafts: [], tools: [], holdings: {coin: 1}, head_model: claude-sonnet-5-5}
+  Fenn: {acting: [3, 5], min_adults: 3, crafts: [fell, handcart, wooden plough, medium room, hall], tools: {crude tool: 3, crude weapon: 1}, holdings: {coin: 6}}
+  Ash: {acting: [2, 4], min_adults: 3, crafts: [charcoal, hunt, harness, pack], tools: {crude tool: 1, crude weapon: 2}, holdings: {coin: 4, hide: 1}, head_model: claude-sonnet-5-5}
+  Moor: {acting: [3, 5], min_adults: 3, crafts: [mine, smelt, copper tool, quarry, hearth], tools: {copper tool: 2, crude tool: 1}, holdings: {coin: 8}}
+  Cole: {acting: [2, 3], min_adults: 2, crafts: [mine, quarry], tools: {crude tool: 2}, holdings: {coin: 2}, head_model: claude-sonnet-5-5}
+  Miller: {acting: [2, 4], min_adults: 2, crafts: [water mill], tools: [crude tool], holdings: {coin: 10}, head_model: claude-sonnet-5-5}
+  Merchant: {acting: [2, 4], min_adults: 3, crafts: [], tools: {handcart: 1, pack: 1, bedroll: 2, harness: 1}, holdings: {coin: 40}}
+  Bell: {acting: [2, 4], min_adults: 2, crafts: [], tools: [crude tool], holdings: {coin: 12}, head_model: claude-sonnet-5-5}
+  Smith: {acting: [2, 3], min_adults: 2, crafts: [copper tool, coin, wooden plough], tools: {copper tool: 1, crude tool: 1}, holdings: {coin: 15}, head_model: claude-sonnet-5-5}
+bounds: {acting: [32, 44], children_max: 14, youths_min: 4, per_min: 2, per_spread: 9}
+sim: {start: -58, fertility: 0.12, leave: 0.6}
+cast: {head: claude-opus-5-5, opus_extra: 0, middle: claude-sonnet-5-5, sonnet_extra: 2, rest: claude-haiku-5-5, youth: claude-haiku-5-5}
