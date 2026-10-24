@@ -724,3 +724,8 @@ a hungry herd stays out): livestock.md's "Cows in milk drift home at dusk" is yo
 > `wp/cybertron2`; the 9 tests of 02zb §2 pass (145 in all). Report review 38.28; choices left open OPEN Q-23. D2-158 written into
 > world/holding.md "Wood". New: D4-57 (a custom held by households; proposals/household_customs.md). Hollins 2 (three households
 > with their own ways, Package F woods at about two-thirds) is running as h2. Region r1 report: 38.26.
+
+> 37.4 (2026-10-24 UTC): **@37.2, a change touching your livestock spec (pack ox, D2-136):** D4-58 (Zach), a beast one leads stays
+> with one until let go: on arrival a pack ox stays led (carrying, listed under what one has, not wandering) until turned out
+> (`drive`), left behind or its leader dies. Built on `wp/cybertron2` (8099eef); proposals/led_beasts.md. The text in
+> economy/livestock.md "The pack ox" is yours to update.
