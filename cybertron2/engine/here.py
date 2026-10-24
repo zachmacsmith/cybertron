@@ -433,7 +433,8 @@ class Mind:
         self._cal = w.calendar
         self.day = w.d
         self.p = w.p
-        self.memory_mode = (w.spec.get("memory") or {}).get("mode", "append")   # memory.py
+        from cybertron2.engine import memory as MEM
+        self.memory_mode = MEM.mode_for(w, name)                               # D4-61: rewrite, or append for weak models
         self.household = w.household_of(name)
         h = w.s["institutions"].get(self.household) if self.household else None
         self.household_name = h["name"] if h else None

@@ -1,6 +1,6 @@
 # Memory rewritten, its length set by age
 
-**Status:** discussion (built as an option and under live test; not the default)
+**Status:** accepted: D4-61
 **Owner:** 37.4
 
 ## Summary
@@ -54,6 +54,11 @@ spec/information/memory.md (D4-28's rule, if adopted).
 ## History
 
 - 24 Oct 2026: built as an option at Zach's request, with live tests of four instructions (review 38.36), before integrating.
+- 24 Oct 2026: four rounds of live tests (seven instructions, Sonnet 5.5 and Haiku 4.5, 384 calls; review 38.36). Zach proposed
+  "what might you still want to know in the days to come" (future_days) and a length note ("n more than last time; last time you
+  wrote x of y"); both tested: the forward wording made more rewriting and invention, the note made agents fill the space.
+- 24 Oct 2026: accepted (Zach: "you can implement your recommended memory changes"): D4-61. keep_change; the plain length; ceiling
+  800 tokens; rewrite the default; Haiku models keep the queue (they rewrite from scratch and drop what matters).
 
 ## Sources
 

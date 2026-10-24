@@ -745,8 +745,8 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
             ending = [n for n in names if w.s["people"][n]["alive"] and conv.ends(n, day) and day < w.days - 1]   # set off tonight too
             if ending:
                 spans = {n: f"{PC._day(w, conv.c[n]['day0'] if n in conv.c else day)} to {PC._day(w, day)}" for n in ending}
-                rewrite = MEM.rewriting(w)                                  # memory.py: one memory, rewritten (under test)
-                texts = {n: (MEM.request(w, n, Mind(w, n), results[n], nights.get(n, []), spans[n]) if rewrite
+                rewrite = {n: MEM.rewriting(w, n) for n in ending}            # D4-61: one memory, rewritten (append for weak models)
+                texts = {n: (MEM.request(w, n, Mind(w, n), results[n], nights.get(n, []), spans[n]) if rewrite[n]
                              else PR.memory_prompt(Mind(w, n), results[n], nights.get(n, []), spans[n])) for n in ending}
                 keep = {n: json.loads(conv.c[n]["schema"]) for n in ending if n in conv.c}   # the stretch's own schema: it continues
                 mr, mm, me = _parallel(lambda n: decide(w, n, texts[n], openings[n] + "\n\n" + texts[n], systems[n], backend, conv,
@@ -754,7 +754,7 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
                                        {n: (n,) for n in ending}, workers, tally)
                 for n in ending:
                     text = str((mr.get(n) or {}).get("memory") or "").strip()
-                    if rewrite:
+                    if rewrite[n]:
                         MEM.keep(w, n, text, spans[n])
                     elif text:
                         PC.own_memory(w, n, spans[n], text)

@@ -1,10 +1,11 @@
-"""Memory rewritten (proposals/memory_rewrite.md, under test): at the end of each stretch of days an agent rewrites its one memory,
-keeping what it still wants from before and adding what it wants from these days, within a length that grows with its age.
+"""Memory rewritten (D4-61, spec/information/memory.md; review 38.36): at the end of each stretch of days an agent rewrites its one
+memory, keeping what it still wants from before and adding what it wants from these days, within a length that grows with its age.
 
-- The default (`memory.mode: append`) is unchanged: a new memory of at most 150 words each stretch, the last six shown, and the
-  engine's own list of marked events (perceive.close_day: `lasting`).
-- `memory.mode: rewrite`: one memory, rewritten each stretch; the engine keeps no list of its own (what matters is the agent's
+- `rewrite` (the default): one memory, rewritten each stretch; the engine keeps no list of its own (what matters is the agent's
   choice); its length is set by `budget`.
+- `append` (D4-28's rule, kept for weak models, which rewrite badly: `memory.append_models`, default the Haiku models): a new memory
+  of at most 150 words each stretch, the last six shown, and the engine's own list of marked events (perceive.close_day: `lasting`).
+  `memory.mode: append` puts every agent on it.
 
 The budget, in tokens, rises over a life with the largest rises early and levelling off later:
 
@@ -19,7 +20,9 @@ import re
 
 from cybertron2.engine import life as LF
 
-DEFAULTS = {"lo": 150, "hi": 1200, "k": 3.0, "words_per_token": 0.75, "cap": 1.15, "prompt": "keep_change"}
+DEFAULTS = {"lo": 150, "hi": 800, "k": 3.0, "words_per_token": 0.75, "cap": 1.15, "prompt": "keep_change"}
+APPEND_MODELS = ("claude-haiku",)                                          # weak models keep the queue (review 38.36: Haiku rewrites
+                                                                           # from scratch and drops what matters)
 
 # Very short instructions, compared live (review 38.36). {limit}: the length allowed, and how much more than last time (Zach:
 # "you should also say ... n more than last time"); the agent's memory as it stands and the stretch's own days are in front of it.
@@ -40,11 +43,21 @@ PROMPTS = {
 
 def settings(w) -> dict:
     m = (w.spec.get("memory") or {})
-    return {**DEFAULTS, **(m.get("rewrite") or {}), "mode": m.get("mode", "append")}
+    return {**DEFAULTS, **(m.get("rewrite") or {}), "mode": m.get("mode", "rewrite"),
+            "append_models": tuple(m.get("append_models", APPEND_MODELS))}
 
 
-def rewriting(w) -> bool:
-    return settings(w)["mode"] == "rewrite"
+def mode_for(w, name) -> str:
+    """rewrite, or append for a weak model (by its model id's start) or when the world says append."""
+    s = settings(w)
+    if s["mode"] == "append":
+        return "append"
+    model = str((w.s["people"].get(name) or {}).get("model") or "")
+    return "append" if any(model.startswith(p) for p in s["append_models"]) else "rewrite"
+
+
+def rewriting(w, name) -> bool:
+    return mode_for(w, name) == "rewrite"
 
 
 def budget_tokens(age_days, lifespan, lo=DEFAULTS["lo"], hi=DEFAULTS["hi"], k=DEFAULTS["k"]) -> int:
@@ -86,9 +99,8 @@ def request(w, name, mind, did, night, span, variant=None) -> str:
     L.append(f"This is the end of a stretch of days ({span}). Tomorrow you will remember only your memory, your notes and what you "
              "have always known, not the detail of these days.")
     L.append("## Your memory as it stands\n" + (current(mind) or "(nothing yet)"))
-    mem = mind.store.get("memory") or {}
-    wrote = len(mem["text"].split()) if mem.get("text") else None
-    instr = PROMPTS[variant or settings(w)["prompt"]].format(limit=limit(b["words"], mem.get("budget"), wrote))
+    instr = PROMPTS[variant or settings(w)["prompt"]].format(limit=limit(b["words"]))   # the plain limit (38.36: a growth note
+                                                                                          # made agents fill the space)
     L.append(f"{instr} Write it in \"memory\"; leave \"actions\" empty. Reply with JSON only.")
     return "\n\n".join(L)
 

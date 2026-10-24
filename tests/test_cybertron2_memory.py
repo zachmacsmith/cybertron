@@ -49,3 +49,19 @@ def test_in_rewrite_mode_the_memory_is_replaced_and_shown_alone(tmp_path, monkey
     assert any("Version" in c.split("## Your memory as it stands")[1][:200] for c in asks)        # the old one is put before them
     later = [c for c in calls if "## Your memory (in your own words)" in c]
     assert later and not any("## Your own memory of recent days" in c for c in calls)
+
+
+def test_by_default_agents_rewrite_and_weak_models_keep_the_queue():
+    """D4-61: rewrite is the default; Haiku agents keep D4-28's queue; a world may put everyone on append."""
+    import copy
+    from cybertron2.engine.here import Mind
+    from cybertron2.engine.world import World
+    spec = load_spec("cybertron2/specs/wide_s7.yaml")
+    w = World(copy.deepcopy(spec))
+    modes = {w.s["people"][n]["model"]: Mind(w, n).memory_mode for n in w.agents_acting()}
+    assert modes["claude-haiku-4-5"] == modes["claude-haiku-5-5"] == "append"
+    assert modes["claude-opus-4-7"] == modes["claude-sonnet-4-5"] == "rewrite"
+    spec["memory"] = {"mode": "append"}
+    w = World(spec)
+    assert {Mind(w, n).memory_mode for n in w.agents_acting()} == {"append"}
+    assert "more than last time" not in M.limit(500)

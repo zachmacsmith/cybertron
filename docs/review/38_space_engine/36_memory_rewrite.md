@@ -221,4 +221,6 @@ Round 4's Lucy under keep_change with the note (Sonnet, half budget):
   is in front of the agent when that stretch's memory is written; adding it to the request only doubled it, and was undone.)
 - **Next:** a short in-engine run in rewrite mode (the birth bug fixed) to see it working end to end, before deciding.
 
+Decided: D4-61 (rewrite the default with keep_change, the plain length, a ceiling of 800 tokens; Haiku models keep the queue).
+
 *Current as of 24 Oct 2026.*

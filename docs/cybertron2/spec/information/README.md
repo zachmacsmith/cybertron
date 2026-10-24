@@ -9,5 +9,5 @@ What agents know and how it moves. Owner: 37.4 (37.2: writing materials, papers'
 | speech.md | the talk step: one person, a building, the town; who is woken | 38.05 §1, 02h §4a | **written** (D2-7, D4-15, D4-25) |
 | [letters_and_documents.md](letters_and_documents.md) | letters, errands, boards, boxes, editions, documents as items | 38.05 §5, 02h §2-4 | **written** (D2-8, D2-24, D4-9, D4-35) |
 | [signs.md](signs.md) | in-world sentences about hidden change: audience, lag, reliability | D4-6, 37.4 notes | **written** (D4-6, D4-35) |
-| [memory.md](memory.md) | conversation memory, thinking, past reasoning, agent-written memory | D4-26 to D4-28 | **written** |
+| [memory.md](memory.md) | conversation memory, thinking, past reasoning, the agent's rewritten memory and its length by age | D4-26 to D4-28, D4-61 | **written** |
 | [noticing.md](noticing.md) | one noticing rule for things at a spot; traces; daily notices on the road and on arrival | things_in_places.md, journeys.md, hidden_ways.md (written by 37.2 at Zach's request) | **written** (D2-85, D2-86, D2-88, D2-89, D2-91, D2-97, D2-98, D2-102) |
