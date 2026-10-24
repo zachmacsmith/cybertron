@@ -7,7 +7,7 @@ Each item has an owner (README "Who owns what") who resolves it, with Zach where
 
 | # | Conflict | Where | Proposed resolution | Owner |
 |---|---|---|---|---|
-| C-1 | Carrying capacity: on foot 20, pack 35, animal +60, cart +150 | 38.06 §3 vs 02g §3 (on foot 10, pack 20, pack ox 60, handcart 40, ox cart 200, wagon 500, boat 1,500) | take 02g's numbers (calibrated against grain's cost); 06's table superseded | 37.2 (numbers) |
+| ~~C-1~~ | Carrying capacity: on foot 20, pack 35, animal +60, cart +150 | 38.06 §3 vs 02g §3 (on foot 10, pack 20, pack ox 60, handcart 40, ox cart 200, wagon 500, boat 1,500) | take 02g's numbers (calibrated against grain's cost); 06's table superseded | 37.2 (numbers) | resolved 24 Oct: D2-135 (02u) |
 | C-2 | Building limits: slots by land kind | 38.04 §1 vs 02e §3.9 lots, 02i parts | lots and slots are the same thing (land per node, by kind); parts decide what a building does | 37.4 with 37.2 |
 | C-3 | Speech at a node: one talk step | 38.05 §1 vs 02h §4a (the square, rooms by access, private messages) | the talk step delivers in 02h's three scopes | 37.4 |
 | C-4 | Letters and channels | 38.05 §5 (letters, errands) vs 02h §4 (channels with a medium and a location; boards, carried editions, boxes) | letters and boards first, on 02h's channel record; editions later | 37.4 with 37.2 |

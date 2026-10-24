@@ -10,6 +10,7 @@ charge).
 
 - D4-12: a night out costs 1.5 food (2 in winter, and the cold); hosts and inns are part of the design.
 - D2-68: camps and portable shelter (bedroll, tent, a camp built at a site).
+- D2-134: riders in a cart sleep as in a damaged house: 1.2 food a night on the road, 1.5 in the cold.
 - H-5: a lack of shelter raises the food needed, and in the cold carries a 0.3 chance of waking starving.
 
 ## Mechanics
@@ -53,4 +54,4 @@ Where they can sleep tonight and on what terms ("the inn has beds at 1 food a ni
 
 [02g §4](../../../review/37_growth/02g_resources_and_transport.md), 38.05 §3; proposals/transport_and_lodging.md.
 
-*Current as of 23 Oct 2026: H-5, D2-68, D4-12.*
+*Current as of 24 Oct 2026: H-5, D2-68, D2-134, D4-12.*

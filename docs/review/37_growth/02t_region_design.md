@@ -1,5 +1,8 @@
 # 02t: the next region world, designed from dependence and checked with transport
 
+**Decided: D2-137 (24 Oct): this world, the dependence null as the comparison, one seed of each arm first; the market day as a
+seeded custom. Carrying: D2-135, D2-136 (the merchant's pack ox).**
+
 Session 37.2, 24 Oct 2026. Zach: start the region world design and its transport check while 37.4 builds Package C. Design only;
 37.4 writes the world file (cybertron2/specs/ is its code) and runs it. Model: [02t_region_model.py](02t_region_model.py). Built on
 [38.23](../38_space_engine/23_region_run.md) (the region run: 27 of 51 died, fuel out of reach), scenario_design.md, and the
@@ -162,3 +165,15 @@ the pack ox, Barleyfield's grain to Ashwood over the Holloway is 2 trips instead
 2. The comparison: the dependence null (recommended), roads made bare, or both?
 3. One seed of each arm first, then more if the difference is unclear?
 4. A market day at Millford every fourth day as a seeded custom?
+
+## 7. Hand-over to 37.4 (24 Oct)
+
+1. **Build the pack ox** (spec/economy/transport.md, D2-136), on Package C's accompanied herd; and the capacities table (D2-135:
+   the engine's foot 10 and pack 20 already match; handcart 40 already matches).
+2. **Write the world file** from §2 and §2a (two files: the dependent arm and the dependence null, §5, paired by seed), with the
+   market day custom, the Reeds' fenced pasture, the open Common by the barley, road ends on their sides, and every road's terrain
+   and landmarks as in §2.
+3. **Check before running:** the engine's capacity script (38.21) on both files; this note's model (02t_region_model.py) against
+   the file's numbers; a dry run verifying each access gate by action (§5).
+4. **Run** one seed of each arm (about $50) and read as §5 says.
+

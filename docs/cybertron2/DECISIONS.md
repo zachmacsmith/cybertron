@@ -203,6 +203,9 @@ and correct them in place.**
 | D2-132 | 24 Oct | **Gates open and close by themselves** when people or a driven herd pass; nobody acts on them to move. **Opening a gate and leaving it open is an act** anyone can do, seen by whoever is present, so it can be sabotage | conversation | gates as something to work every time |
 | D2-133 | 24 Oct | **The merchant in the next region run starts with a pack ox, not an ox cart**; the pack ox (an ox with a harness carrying about 60, on any road, led) is to be built; the ox cart later | conversation; 02u §6 | an ox cart in this run |
 | D2-134 | 24 Oct | **Riders in a cart** sleep as in a damaged house: a night on the road costs 1.2 food (1.5 in the cold) | proposals/transport_and_lodging.md | |
+| D2-135 | 24 Oct | **Carrying capacities (OPEN C-1):** on foot 10, with a pack 20, a pack ox 60, a handcart 40 (on a track), an ox cart 300 to 400 when built (later) | review 02u | 38.06 §3's (on foot 20, pack 35, animal +60, cart +150); an ox cart of 200 |
+| D2-136 | 24 Oct | **The pack ox:** an ox with a harness carries 60 on any road, led by someone of its household, travelling with that person's party; it grazes where the road passes grass, otherwise eats 1 hay a day from its load; it stays part of its owner's herd, can stray if left unwatched, and can be taken | 02u §6 | |
+| D2-137 | 24 Oct | **The next region world** is 02t's (four villages that need each other; the starting kit by household; a market day at Millford every fourth day as a seeded custom), compared with the dependence null (the same world with each village able to keep itself), one seed of each arm first | review 02t | roads made bare as the comparison |
 
 ## Directions (Zach's stated aims recorded in the notes; designs follow them; checked by 37.2, 22 Oct)
 
