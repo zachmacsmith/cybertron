@@ -21,14 +21,6 @@ def _k(n) -> str:
 
 # ---------------------------------------------------------------------- crops in a field
 CROP = [
-    # beasts have been in it (D2-123): the field shows it for some days, whoever's beasts they were
-    dict(when=lambda x: x.trampled_days is not None and x.trampled_days <= 3, sense="sight", p=0.5, tags=["animals", "farming", "food"],
-         text=lambda x: f"hoof-marks and flattened {x.c['kind']} in {x.nm}: beasts have been in it"),
-    dict(when=lambda x: x.trampled_days is not None and x.trampled_days <= 1 and x.trampled_qty >= 5, sense="sight", p=0.7,
-         tags=["animals", "farming", "food"], knack="reap",
-         text=lambda x: f"a good swathe of the {x.c['kind']} in {x.nm} is grazed off and trodden into the mud"),
-    dict(when=lambda x: x.trampled_days is not None and x.trampled_days <= 2, sense="sight", p=0.35, tags=["animals"], knack="herd",
-         text=lambda x: f"dung and the tracks of cattle in {x.nm}, leading back toward {x.trampled_from}"),
     # growing
     dict(when=lambda x: x.growing and not x.failed, sense="sight", p=0.10, tags=["farming"],
          text=lambda x: f"the {x.c['kind']} in {x.nm} {x.be} up in green rows"),
@@ -169,6 +161,19 @@ HERD = [
          text=lambda x: f"nobody is watching {x.h['name']}, and only open ground lies between them and {x.adj_crop}"),
     dict(when=lambda x: x.h.get("watched") != x.day and x.adj_crop and x.fenced == "gappy", sense="sight", p=0.25, tags=["animals", "farming"],
          text=lambda x: f"nobody is watching {x.h['name']}, and the fence between them and {x.adj_crop} has gaps in it"),
+]
+
+
+# A field beasts have been in (D2-123): it shows for some days, read by the noticing rule (`own`), so those who work or pass there see
+# it and those elsewhere mostly do not. Context: signs.context (x.trampled_days, x.trampled_qty, x.trampled_from).
+TRAMPLED = [
+    dict(when=lambda x: x.c and x.trampled_days is not None and x.trampled_days <= 3, own=0.6, sense="sight", p=1.0,
+         tags=["animals", "farming", "food"], text=lambda x: f"hoof-marks and flattened {x.c['kind']} in {x.nm}: beasts have been in it"),
+    dict(when=lambda x: x.c and x.trampled_days is not None and x.trampled_days <= 1 and x.trampled_qty >= 5, own=0.8, sense="sight",
+         p=0.7, tags=["animals", "farming", "food"], knack="reap",
+         text=lambda x: f"a good swathe of the {x.c['kind']} in {x.nm} is grazed off and trodden into the mud"),
+    dict(when=lambda x: x.c and x.trampled_days is not None and x.trampled_days <= 2, own=0.5, sense="sight", p=0.6, tags=["animals"],
+         knack="herd", text=lambda x: f"dung and the tracks of cattle in {x.nm}, leading back toward {x.trampled_from}"),
 ]
 
 
@@ -588,6 +593,8 @@ def _herds_out(here, add) -> None:
     for pid, p in here.parcels().items():
         if p.get("fence"):
             spot_rows(here, FENCE, fence_context(w, pid), [f"parcel:{pid}"], here.node, pid, add)
+        if (p.get("crop") or {}).get("trampled"):
+            spot_rows(here, TRAMPLED, context(here, pid), [f"parcel:{pid}"], here.node, pid, add)
 
 
 def facts(here, add) -> None:
