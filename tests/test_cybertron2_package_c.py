@@ -531,3 +531,24 @@ def test_an_offer_to_a_child_goes_to_the_childs_parent():
     box = R.talk(w, names, replies, results)
     assert any("goes to" in x and child in x for x in results[offerer])
     assert box[parent]["offers"] and any(o["to"] in (parent,) for o in w.s["offers"].values() if o["by"] == offerer)
+
+
+def test_a_day_is_a_chain_of_parcels_in_the_order_of_ones_acts():
+    """D4-62: from where one slept, to each worked parcel in act order, to where one ends the day; kept in the day's record."""
+    import copy as _copy
+    from cybertron2.engine import layout as _LY, run as _R
+    from cybertron2.engine.world import World as _World, load_spec as _load
+    w = _World(_copy.deepcopy(_load("cybertron2/specs/wide_s7.yaml")))
+    w.s["today"] = t = _R.blank_today()
+    name = "Warin"                                                          # at Wynford, sleeps on the Green
+    t["worked"][name] = ["wy_copse", "wy_meadow", "wy_copse"]               # the copse, the meadow, back to the copse
+    r = _LY.route(w, name)
+    stops = [p for p in r if p in ("wy_copse", "wy_meadow")]
+    assert r[0] == r[-1] == "wy_green" and stops[0] == "wy_copse" and "wy_meadow" in stops and stops[-1] == "wy_copse"
+    assert all(b in w.s["parcels"][a]["adj"] for a, b in zip(r, r[1:]))    # every step to a neighbour
+    t["travel"][name] = "stannick"                                          # setting off tonight: the day ends at the road's end
+    r2 = _LY.route(w, name)
+    end = next(e for _, other, e in _LY.road_ends(w, "wynford") if other == "stannick")["parcels"][0]
+    assert r2[-1] == end
+    _LY.routes(w, t)
+    assert t["route"][name] == r2 and _LY.passed(w, name) == set(r2) - {"wy_copse", "wy_meadow"}

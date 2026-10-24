@@ -34,6 +34,7 @@ without a proposal.
 | [more_signs.md](more_signs.md) | signs for the newer systems (people, houses, woods, herds, travellers) | 37.4 | retrospective, accepted: D4-59 |
 | [clearing.md](clearing.md) | clearing meadow, pasture or scrub into a field | 37.4 | retrospective, accepted: D4-60 |
 | [memory_rewrite.md](memory_rewrite.md) | one memory rewritten each stretch, its length growing with age; weak models keep the queue | 37.4 | accepted: D4-61 |
+| [day_route.md](day_route.md) | a day as one chain of parcels in act order, kept in the day's record | 37.4 | retrospective, accepted: D4-62 |
 | [run_record.md](run_record.md) | the run as a journal (SQLite; JSON values; content-addressed prompts) of keyed requests and answers, with step commits and checkpoints; the runner as a resumable, idempotent, cancellable state machine; views: state at any step, exact agent context, map frames, history, Parquet export, the site; a human responder plays an agent with the same context (review 39.01) | 37.1 (37.4: engine code) | accepted: D1-1 to D1-5 (spec/record/) |
 | [households.md](households.md) | membership, use and home as data agents change: admit and leave, grant use of a house, home derived, occupy an empty house (possession and a claim), build one from parts; the night follows use | 37.4 (37.2: building costs) | partly accepted: D4-36 |
 | [place.md](place.md) | place as the foundation: every entity and event has a place; state partitioned by node; agent-facing code gets only a view of where the agent is (`Here`) and its own mind (`Mind`), never the world; only travel moves anything between nodes; static and canary tests | 37.4 | accepted in principle: D4-35 |
@@ -267,3 +268,4 @@ Newest first. Ideas decided or rejected in conversation before 23 Oct are backfi
 | 24 Oct | Signs for the newer systems | retrospective, accepted: D4-59 | [more_signs.md](more_signs.md) |
 | 24 Oct | Clearing new ground for fields | retrospective, accepted: D4-60 | [clearing.md](clearing.md) |
 | 24 Oct | Memory rewritten each stretch, its length set by age (after live tests) | accepted: D4-61 | [memory_rewrite.md](memory_rewrite.md) |
+| 24 Oct | A day as a chain of parcels in act order (built, then written down) | retrospective, accepted: D4-62 | [day_route.md](day_route.md) |

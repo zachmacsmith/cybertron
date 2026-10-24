@@ -17,6 +17,7 @@ parcels' `adj` lists already in every world file.
   movement inside a node.
 - D2-115: acting senses the parcel worked, those passed through, and those next to it.
 - D2-116: attending to the village shows how it fits together; arriving gives a concise overview of what is noticeable.
+- D4-62: a day is one chain of parcels in the order of one's acts, kept in the day's record.
 
 ## Mechanics
 
@@ -37,11 +38,15 @@ Presence for the noticing rule (information/noticing.md):
 | Parcel | Presence |
 |---|---|
 | the one it works in | by its activity (hunting 1.0, foraging 0.7, herding 0.5, fixed work 0.5) |
-| each one on the shortest path from where it slept to each parcel it works, and back | crossing, 0.3 |
+| each one on its route that it does not work (below) | crossing, 0.3 |
 | each one next to where it works | 0.1, for things of own conspicuousness 0.5 or more |
 | anywhere else at the node | 0.05, for things of 0.8 or more |
 
-Ties between shortest paths are broken by a keyed draw (D2-70).
+**The route (D4-62):** one chain in the order of its acts: from where it slept (its house's parcel at this node, else the built
+ground), to each parcel it works in turn (a building counts as its parcel; a parcel again if it goes back), to where it ends the
+day (the road's end if it sets off tonight, else the bed it chose, else where it slept). Each leg is a shortest way; ties are
+broken by a keyed draw (D2-70). The route is worked out at the end of the work step and kept in the day's record as parcels in
+order, for the evening's noticing and for the map.
 
 ### The village as a whole (D2-116)
 
@@ -75,4 +80,4 @@ Per parcel: its neighbours (as now), side, height.
 
 [proposals/parcel_graph.md](../../proposals/parcel_graph.md); cybertron2/engine/world.py (`adj`).
 
-*Current as of 24 Oct 2026: D2-114 to D2-116.*
+*Current as of 24 Oct 2026: D2-114, D2-115, D2-116, D4-62.*

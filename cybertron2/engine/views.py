@@ -217,6 +217,7 @@ def frames(run) -> list:
             else:
                 continue
             out.append({"day": day, "kind": "person", "id": name, "place": place, "x": round(x, 4), "y": round(y, 4),
+                        "route": ((w.get("today") or {}).get("route") or {}).get(name),     # the day's parcels in order (D4-62)
                         "household": next((h for h, i in w["institutions"].items() if name in (i.get("members") or [])), None),
                         "alive": a.get("alive", True), "stage": a.get("stage")})
         for e in events(run, days=(day, day)):

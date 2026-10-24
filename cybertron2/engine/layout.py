@@ -76,26 +76,65 @@ def slept_at(w, name):
     return built[0] if built else None
 
 
-def worked_parcels(w, name) -> list:
+def worked_parcels(w, name, ordered=False) -> list:
+    """The parcels one worked today (a building counts as its parcel): each once, or `ordered` every act in turn."""
     out = []
     for key in (w.s.get("today") or {}).get("worked", {}).get(name, []):
         pid = key if key in w.s["parcels"] else (w.s["buildings"][key]["parcel"] if key in w.s["buildings"] else None)
-        if pid and pid not in out:
+        if pid and (ordered or pid not in out):
             out.append(pid)
     return out
 
 
-def passed(w, name) -> set:
-    """The parcels one crossed today: on the way from where one slept to each parcel one worked, and back (D2-115); not the worked
-    parcels themselves."""
+def night_at(w, name, start):
+    """Where one's day ends: the road's end at this node if one sets off tonight, else the bed one chose, else where one slept."""
+    t = w.s.get("today") or {}
+    node = w.at(name)
+    to = (t.get("travel") or {}).get(name)
+    if to and node is not None:
+        end = next((e for _, other, e in road_ends(w, node) if other == to), None)
+        if end and end.get("parcels"):
+            return end["parcels"][0]
+    bid = (t.get("sleep") or {}).get(name)
+    if bid in w.s["buildings"] and w.s["buildings"][bid]["node"] == node:
+        return w.s["buildings"][bid]["parcel"]
+    return start
+
+
+def route(w, name) -> list:
+    """One's day as a chain (D4-62): from where one slept, to each parcel one worked in the order of one's acts, to where one ends
+    the day; each leg a shortest way, ties broken by a keyed draw (D2-70). Parcels in order, a parcel again when one returns."""
     start = slept_at(w, name)
-    work = worked_parcels(w, name)
-    if start is None or not work:
-        return set()
-    out = set()
-    for pid in work:
-        out |= set(path(w, start, pid, (name,)))
-    return out - set(work)
+    if start is None:
+        return []
+    stops = [start]
+    for pid in worked_parcels(w, name, ordered=True):
+        if pid != stops[-1]:
+            stops.append(pid)
+    end = night_at(w, name, start)
+    if end != stops[-1]:
+        stops.append(end)
+    out = [start]
+    for i, (a, b) in enumerate(zip(stops, stops[1:])):
+        leg = path(w, a, b, (name, i))
+        out += leg[1:] if leg else [b]
+    return out
+
+
+def routes(w, today) -> dict:
+    """Each acting person's route today, kept in the day's record (today["route"]): the noticing rule reads it in the evening and
+    the map (views.frames) draws it."""
+    today["route"] = {n: r for n in w.agents_acting() if len(r := route(w, n)) > 1}
+    return today["route"]
+
+
+def passed(w, name) -> set:
+    """The parcels one crossed today (D2-115, D4-62): those on one's route, not the parcels worked themselves."""
+    t = w.s.get("today") or {}
+    r = (t.get("route") or {}).get(name)
+    if r is None:
+        r = route(w, name)
+    return set(r) - set(worked_parcels(w, name))
 
 
 def next_door(w, name) -> set:

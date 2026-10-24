@@ -29,7 +29,7 @@ WAVES = 2
 
 def blank_today() -> dict:
     return {"worked": {}, "thefts": [], "left": [], "joins": [], "admits": [], "sleep": {}, "travel": {}, "watch": {}, "teach": [],
-            "learn": [], "fights": [], "guards": {}, "fire": {}, "partner": [], "try": [], "care": {}, "care_by": {}}
+            "learn": [], "fights": [], "guards": {}, "fire": {}, "partner": [], "try": [], "care": {}, "care_by": {}, "route": {}}
 
 
 # ---------------------------------------------------------------------- a scripted bot (smoke tests only)
@@ -708,6 +708,8 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
                 results[n] = [f"{x} (x{rep[n][x]})" if x in rep[n] else x for x in results[n]]
                 if used[n] < budget[n]:
                     results[n].append(f"You left {budget[n] - used[n]} of your {budget[n]} units unused.")
+            from cybertron2.engine import layout as LY
+            LY.routes(w, today)                                             # each one's day as a chain of parcels (D4-62)
             J.commit(w.s, _runner(J, cost, conv, locals()))
             J.open_step(day, "settle")
             today["partners"] = LF.settle(w, today)                             # partnerships both chose (D2-140)
