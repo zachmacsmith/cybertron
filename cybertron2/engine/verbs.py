@@ -19,7 +19,7 @@ VERB = {
              "cost": "craft", "doc": "{crafts}"},
     "make": {"args": '{"what", "qty"?: times, "for"?: party}', "cost": "craft",
              "doc": "a recipe; the inputs come from what you carry, then from stores here you may take from: {crafts}"},
-    "build": {"args": '{"what", "at": a place on built ground or scrub (a new building) or a building here (a fitting), "qty"?: beds, "name"?, "for"?: party}',
+    "build": {"args": '{"what", "at": a place on built ground or scrub (a new building; a camp: any place here but water) or a building here (a fitting), "qty"?: beds, "name"?, "for"?: party}',
               "cost": 2, "doc": "start or carry on a building or a fitting: its materials when you start, then the work over days: {crafts}"},
     "move": {"args": '{"item", "qty", "to": store | hands, "at"?: building}', "cost": 0,
              "doc": "between your hands and a store here you may use (your household's)"},
