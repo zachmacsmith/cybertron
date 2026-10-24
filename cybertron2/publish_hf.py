@@ -27,7 +27,7 @@ import time
 from pathlib import Path
 
 FOLDER = "experimental/cybertron2"
-FILES = ("run.json", "turns.jsonl", "rounds.jsonl", "state.json")
+FILES = ("run.json", "turns.jsonl", "rounds.jsonl", "days.jsonl", "perception.jsonl", "memory.jsonl", "state.json")   # those a run has
 ID_VARS = ("CLAUDE_CODE_SESSION_ID", "CLAUDE_CODE_REMOTE_SESSION_ID", "CLAUDE_CODE_CONTAINER_ID", "CLAUDE_CODE_ACCOUNT_UUID",
            "CLAUDE_CODE_ORGANIZATION_UUID", "CLAUDE_CODE_USER_EMAIL")
 
@@ -51,7 +51,8 @@ Code and write-ups: the `wp/cybertron2` branch of the cybertron repository, `cyb
 - `run.json`: the spec, each agent's model and its system prompt.
 - `turns.jsonl`: one line per agent and round: the turn prompt it saw, its reply (`why`: a few sentences on why it chose its actions;
   `actions`, `say`, `tell`, `note`), what each action did, usage.
-- `rounds.jsonl`: one line per round: hunts, fights, meals, shelter, deaths, the cold, house breaks, stocks of every place and house.
+- `rounds.jsonl` (older runs) or `days.jsonl`: one line per round or day: meals, shelter, deaths, the cold, fires, births.
+- `perception.jsonl` and `memory.jsonl` (newer runs): what each agent noticed each day, and the memories each wrote itself.
 - `state.json`: the final state, with every agent's knowledge store (what it saw where, and when).
 - `report.md`: the generated summary.
 
@@ -78,10 +79,15 @@ def stage(runs, staging: Path) -> Path:
         dst = root / r.name
         dst.mkdir()
         for f in FILES:
-            shutil.copy2(r / f, dst / f)
-        (dst / "report.md").write_text(report.summary(r))
+            if (r / f).exists():
+                shutil.copy2(r / f, dst / f)
+        try:
+            (dst / "report.md").write_text(report.summary(r))
+        except Exception:                                                   # the newer runs' layout (days.jsonl): no summary yet
+            pass
         run = json.loads((r / "run.json").read_text())
-        rounds = [json.loads(x) for x in (r / "rounds.jsonl").read_text().splitlines() if x.strip()]
+        rf = r / "rounds.jsonl" if (r / "rounds.jsonl").exists() else r / "days.jsonl"
+        rounds = [json.loads(x) for x in rf.read_text().splitlines() if x.strip()]
         cost = rounds[-1].get("cost_usd", 0.0) if rounds else 0.0
         rows.append(f"| {r.name} | `{run['spec'].get('name')}` | {len(run['spec']['agents'])} | {len(rounds)} | ${cost:.2f} | "
                     f"{SUMMARIES.get(r.name, '')} |")
