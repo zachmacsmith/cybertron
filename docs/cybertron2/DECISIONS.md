@@ -222,6 +222,9 @@ and correct them in place.**
 | D2-147 | 24 Oct | **The nursing gap is about 4 days; pregnancy adds about 0.3 food a day** to the mother's need | children.md | |
 | D2-148 | 24 Oct | **A child's menial work is set by the household head's standing order** (D4-16) | children.md | |
 | D2-149 | 24 Oct | **Old age is tuned to a chosen life expectancy under each health regime:** death's daily hazard has an ageing term now, and disease (OPEN L-9, the scheduler's disease era) adds to it later | children.md §4 | fixed old-age numbers chosen for the run's length alone |
+| D2-150 | 24 Oct | **Care bears on survival only for now;** its effects on health and learning are for the future (OPEN L-26) | conversation | care affecting health and learning now |
+| D2-151 | 24 Oct | **The cost dial is built with a low and a high setting;** a new world will be designed to test it once children are built | conversation | |
+| D2-152 | 24 Oct | **Any two people of opposite sex at the same node can try for a child if both choose** (the engine records sex); a partnership is not required | conversation | partners only |
 
 ## Directions (Zach's stated aims recorded in the notes; designs follow them; checked by 37.2, 22 Oct)
 

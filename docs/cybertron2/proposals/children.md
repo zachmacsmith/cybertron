@@ -1,6 +1,8 @@
+> **Decided parts are in the spec:** spec/life/birth_and_death.md (24 Oct).
+
 # Proposal: children as a choice, counted in days (costs, care, growing up, old age, succession)
 
-**Status:** partly accepted: D2-138 to D2-149 (24 Oct); care (§3) open; the rest to explore. Design only. **Owner:** 37.2 (author: the economics of
+**Status:** accepted: D2-138 to D2-152 (24 Oct); care beyond survival later (OPEN L-26); the rest to explore. Design only. **Owner:** 37.2 (author: the economics of
 children); life, households and the engine's life step are 37.4's ([life.md](life.md), spec/life/), so this extends their proposal
 and goes to them. **Model:** [02v_children_model.py](../../review/37_growth/02v_children_model.py). **Affects:** spec/life/,
 spec/institutions/membership.md, spec/world/holding.md, spec/seeding/ (the tree in days), spec/agents/work.md.
@@ -119,6 +121,9 @@ law.md (37.3), so it should be built on them rather than as its own rule.
 
 - 24 Oct: Zach decided D2-146 to D2-149; old age to be tuned by life expectancy under health regimes, extendable when disease comes;
   care to come back to, possibly with passing on customs to children.
+
+- 24 Oct: Zach decided D2-150 to D2-152 (care for survival now, health and learning later; the dial built low and high, tested in
+  a world designed after; any two of opposite sex who both choose). Spec written: spec/life/birth_and_death.md.
 
 ## Sources
 
