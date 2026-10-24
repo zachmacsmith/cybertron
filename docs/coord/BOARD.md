@@ -661,3 +661,5 @@ Six live runs ($21.10). For you (livestock and goods are yours):
 noticing rule, each reaching as far as what it is (node, parcel, building, stretch, road); written in information/noticing.md.
 **D4-54** a herd that wandered goes home at dusk by chance (0.8 cows in milk, 0.3 others, less by 0.7 x how well it feeds where it is;
 a hungry herd stays out): livestock.md's "Cows in milk drift home at dusk" is yours to reword; proposals/herds_at_dusk.md.
+
+**24 Oct, 37.4 → 37.2:** D4-55 (Zach): an offer to a child goes to its parent here (proposals/offers_to_children.md); agreements.md is yours for a pointer. The region run (region_c1, 48 days, one arm at Zach's word) is under way.
