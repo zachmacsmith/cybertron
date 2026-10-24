@@ -316,11 +316,21 @@ def follow(w) -> None:
 
 
 def arrive_with(w, name, node) -> list:
-    """A party that arrives brings the herd it accompanied onto the node (D2-127)."""
+    """A party that arrives brings the herd it accompanied onto the node (D2-127); a pack ox stays its leader's to lead on (D2-136)."""
     out = []
     for hid, h in list(w.s["herds"].items()):
         if h.get("with") == name and h["node"] in w.s["roads"]:
-            off_road(w, hid, node, {"herds": []})
+            if h.get("pack"):
+                rid = h["node"]
+                end = (w.s["roads"][rid].get("ends") or {}).get(node) or LY.default_end(w, node)
+                home = h.get("home") if h.get("home") in w.s["parcels"] and w.s["parcels"][h["home"]]["node"] == node else None
+                w.apply("set", rid, ref=("herd", hid), field="node", value=node)
+                w.apply("set", node, ref=("herd", hid), field="parcel", value=home or (end["parcels"] or LY.parcels_of(w, node))[0])
+                for f in ("pos", "with"):
+                    w.apply("set", node, ref=("herd", hid), field=f, value=None)
+                w.apply("set", node, ref=("herd", hid), field="pack_of", value=name)
+            else:
+                off_road(w, hid, node, {"herds": []})
             out.append(hid)
     return out
 
@@ -395,3 +405,68 @@ def _merge(w, rec):
         w.apply("set", node, ref=("herd", of), field="count", value=FM.head(w.s["herds"][of]))
         w.apply("set", node, ref=("herd", hid), field="count", value=0)
         rec["herds"].append((hid, "rejoined", of))
+
+
+# ---------------------------------------------------------------------- the pack ox (transport.md, D2-136)
+def pack_ox_for(w, name, want=None):
+    """A herd at one's node with an ox, held by one's household (or oneself), to lead as a pack ox; one must carry a harness."""
+    node = w.at(name)
+    if node is None or w.goods(w.hands(name)).get("harness", 0.0) < 1:
+        return None
+    mine = {name, w.household_of(name)}
+    want = str(want or "").strip().lower().removeprefix("the ")
+    for hid, h in sorted(w.s["herds"].items()):
+        if h["node"] != node or int(h.get("oxen", 0)) < 1:
+            continue
+        if not mine & {c["claimant"] for c in w.claims_on(("herd", hid))}:
+            continue
+        names = {h["name"].lower().removeprefix("the "), str(h.get("base_name") or "").lower().removeprefix("the "), "ox", "the ox",
+                 "pack ox", "oxen", hid}
+        if not want or want in names or want in ("yes", "true", "an ox", "the pack ox") or any(want in x for x in names if x):
+            return hid
+    return None
+
+
+def pack_oxen(w, name) -> int:
+    return sum(int(h.get("oxen", 0)) for h in w.s["herds"].values() if h.get("with") == name and h.get("pack") and FM.head(h) > 0)
+
+
+def lead_ox(w, name, hid, rid, pos) -> str:
+    """One ox split off its herd to go with the traveller's party (D2-136): an accompanied herd that carries."""
+    node = w.s["herds"][hid]["node"]
+    new = w.apply("split_herd", node, like=hid, take={"oxen": 1})
+    for cl in w.claims_on(("herd", hid)):
+        w.apply("claim", node, thing=("herd", new), claimant=cl["claimant"], rights=cl["rights"], grounds=cl["grounds"])
+    base = w.s["herds"][hid].get("base_name") or w.s["herds"][hid]["name"]
+    for f, v in (("name", f"the pack ox of {base.removeprefix('the ')}"), ("pack", True), ("with", name), ("parcel", None),
+                 ("pos", pos), ("node", rid)):
+        w.apply("set", node if f != "node" else node, ref=("herd", new), field=f, value=v)
+    return new
+
+
+def feed_pack(w) -> list:
+    """Each night on the road a pack ox grazes where the stretch passes grass, else eats hay from its leader's load (D2-136)."""
+    from cybertron2.engine import roads as RD
+    po = HERDS["pack_ox"]
+    out = []
+    for hid, h in sorted(w.s["herds"].items()):
+        if not h.get("pack") or not h.get("with") or h["node"] not in w.s["roads"] or FM.head(h) <= 0:
+            continue
+        st = RD.stretch(w, h["node"], int(h["pos"]))
+        grass = (st["terrain"] or "plain") in po["graze"] or any(l["kind"] in po["graze_landmarks"] for l in st["landmarks"])
+        lead = h["with"]
+        if grass:
+            w.apply("set", h["node"], ref=("herd", hid), field="hungry", value=0)
+            out.append((hid, "grazed"))
+            continue
+        need = float(po["hay"]) * FM.head(h)
+        have = w.goods(w.hands(lead)).get("hay", 0.0)
+        if have + 1e-9 >= need:
+            w.apply("destroy", h["node"], src=w.hands(lead), item="hay", qty=need, why="the pack ox's fodder")
+            w.apply("set", h["node"], ref=("herd", hid), field="hungry", value=0)
+            out.append((hid, "hay"))
+        else:
+            w.apply("set", h["node"], ref=("herd", hid), field="hungry", value=int(h.get("hungry", 0)) + 1)
+            RD._note(w, lead, "no grass on the way and no hay: the ox went hungry", first=True)
+            out.append((hid, "hungry"))
+    return out

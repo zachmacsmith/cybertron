@@ -163,10 +163,16 @@ def departures(w, today) -> list:
             if h:                                                            # the house as last seen (D4-35: not watched from afar)
                 a["home_seen"] = {"day": w.d, "building": h, "stock": dict(w.goods(s["buildings"][h]["stock"])),
                                   "condition": s["buildings"][h]["condition"], "door": s["buildings"][h]["door"]}
+            lead = ((today.get("travel_choices") or {}).get(name) or {}).get("lead")
+            from cybertron2.engine import herds as HD
+            ox = HD.pack_ox_for(w, name, lead) if lead else None               # the pack ox chosen at departure (D2-136)
             w.apply("depart", here, person=name, road=road, to=to)
             from cybertron2.engine import layout as LY
             LY.wear_way(w, road, here)                                       # a hidden end worn by use (D2-92)
             a["transit"]["choices"] = dict((today.get("travel_choices") or {}).get(name) or {})
+            if ox:                                                           # one ox goes with the party, carrying (D2-136)
+                from cybertron2.engine import roads as RD
+                HD.lead_ox(w, name, ox, road, RD.position(w, a["transit"]))
             out.append({"agent": name, "from": here, "to": to})
     today["_departed"] = out
     return out

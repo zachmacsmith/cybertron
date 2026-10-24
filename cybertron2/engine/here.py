@@ -82,8 +82,13 @@ class Here:
     def load(self) -> float:
         return self._w.load(self.name)
 
-    def capacity(self, track=False) -> float:
-        return self._w.capacity(self.name, track)
+    def capacity(self, track=False, oxen=None) -> float:
+        return self._w.capacity(self.name, track, oxen)
+
+    def pack_ox(self, want=None):
+        """A herd of one's household here with an ox one could lead as a pack ox (one must carry a harness), else None (D2-136)."""
+        from cybertron2.engine import herds as HD
+        return HD.pack_ox_for(self._w, self.name, want)
 
     def units(self) -> int:
         return self._w.units_for(self.name)

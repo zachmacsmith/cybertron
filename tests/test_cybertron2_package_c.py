@@ -451,3 +451,30 @@ def test_a_trampled_field_shows_it_after_the_beasts_have_gone_home():
     assert w.s["parcels"]["north_field"]["crop"]["trampled"]["day"] == 3
     texts = [f["text"] for f in PC.facts(Here(w, "Ancel"))]
     assert any("hoof-marks and flattened barley in North Field" in t for t in texts)
+
+
+# ---------------------------------------------------------------------- the pack ox (D2-135, D2-136)
+def test_a_pack_ox_carries_60_goes_with_its_leader_grazes_or_eats_hay_and_comes_in_with_it():
+    from cybertron2.engine import herds as HD, roads as RD
+    w = world(roads=[["millbrook", "ashwood", 2, {"terrain": "woodland", "stretches": {2: {"terrain": "farmland"}}}]])
+    holder = w.claims_on(("herd", "cattle"))[0]["claimant"]
+    lead = next(n for n in w.living() if w.at(n) == "millbrook" and holder in (n, w.household_of(n)) and w.s["people"][n]["stage"] == "adult")
+    g = w.s["containers"][w.hands(lead)]["goods"]
+    g.update(harness=1.0, hay=2.0, grain=40.0)
+    w.s["herds"]["cattle"]["oxen"] = 2
+    assert do(w, lead, do="travel", to="ashwood").startswith("Refused")               # 40 grain is too heavy on foot
+    oxen_before = w.s["herds"]["cattle"]["oxen"]
+    r = do(w, lead, do="travel", to="ashwood", lead="the cattle")
+    assert r.startswith("You set off"), r
+    N.departures(w, w.s["today"])
+    ox = next(hid for hid, h in w.s["herds"].items() if h.get("pack"))
+    assert w.s["herds"]["cattle"]["oxen"] == oxen_before - 1 and w.s["herds"][ox]["with"] == lead
+    assert w.capacity(lead) == 60
+    RD.night(w, w.s["today"])                                                       # woodland: no grass, so 1 hay
+    assert abs(w.goods(w.hands(lead))["hay"] - 1.0) < 1e-9
+    next_day(w)
+    w.s["today"] = R.blank_today()
+    RD.night(w, w.s["today"])                                                       # farmland: it grazes
+    assert abs(w.goods(w.hands(lead))["hay"] - 1.0) < 1e-9
+    next_day(w)
+    assert w.at(lead) == "ashwood" and w.s["herds"][ox]["node"] == "ashwood" and w.s["herds"][ox]["pack_of"] == lead

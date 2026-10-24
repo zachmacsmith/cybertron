@@ -423,6 +423,9 @@ HERDS = {
     "split": {"under": 0.01, "over": 0.1, "max": 0.6},                       # D2-128
     "share": {"centre": 0.25, "sd": 1.0, "max": 0.5},                        # D2-131: a quarter x 2^z, z Laplace (sd 1 doubling)
     "call": {"share": 0.25, "head": 3},          # a split while driving calls a drover who notices it, if this big (D2-127)
+    # the pack ox (transport.md, D2-136; D2-135 capacity): led on a road by someone of its household, with a harness; it grazes on
+    # stretches that pass grass, else eats hay from the load
+    "pack_ox": {"carry": 60, "hay": 1.0, "graze": ["farmland", "plain", "river valley"], "graze_landmarks": ["meadow"]},
 }
 
 # The parcel graph (world/parcel_graph.md; D2-114 to D2-116): heights in words; the fittings that strike an arriving eye; the overview's
@@ -528,6 +531,8 @@ TECHNIQUES.update({
                 "values": ["stop", "pass by"]},                                                                      # D4-51
     "gather on the way": {"verb": "modifier", "label": "gathering at good places one passes", "basic": True, "modifies": ["travel"],
                           "key": "gather", "value": "*", "changes": {}, "units": 0, "gives": "", "tags": ["travel"]},
+    "lead": {"verb": "modifier", "label": "leading a pack ox (an ox of your household's, with a harness)", "basic": True,
+             "modifies": ["travel"], "key": "lead", "value": "*", "changes": {}, "units": 0, "gives": "", "tags": ["travel", "animals"]},   # D2-136
     "searching": {"verb": "modifier", "label": "searching the road for a herd or a person", "basic": True, "modifies": ["travel"],
                   "key": "searching", "value": "*", "changes": {}, "units": 0, "gives": "", "tags": ["travel", "animals"]},   # D2-125
 })

@@ -143,6 +143,7 @@ def night(w, today) -> dict:
     ps = parties(w)
     from cybertron2.engine import herds as HD
     HD.follow(w)                                                            # herds a party accompanies go with it (D2-127)
+    rec["pack"] = HD.feed_pack(w)                                           # a pack ox grazes or eats hay from the load (D2-136)
     for key, members in ps.items():
         t = w.s["people"][members[0]]["transit"]
         pos = position(w, t)

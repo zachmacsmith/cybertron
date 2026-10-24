@@ -366,11 +366,19 @@ class World:
     def food_value(self, goods) -> float:
         return sum(float(goods.get(i, 0.0)) * ITEMS[i]["food"] for i in EDIBLE)
 
-    def capacity(self, name, track=False) -> float:
-        """On foot, more with a pack, more again with a cart on a road with a track (transport.md, 02g §3; the best one counts)."""
+    def capacity(self, name, track=False, oxen=None) -> float:
+        """On foot, more with a pack, more again with a cart on a road with a track, a pack ox led (transport.md, D2-135, D2-136; the
+        best one counts)."""
         g = self.goods(self.hands(name))
-        return float(self.p["carry"]["foot"]) + max((ITEMS[i].get("carry", 0) for i in g if g[i] >= 1 and ITEMS[i].get("carry")
-                                                     and (track or not ITEMS[i].get("track"))), default=0)
+        cap = float(self.p["carry"]["foot"]) + max((ITEMS[i].get("carry", 0) for i in g if g[i] >= 1 and ITEMS[i].get("carry")
+                                                    and (track or not ITEMS[i].get("track"))), default=0)
+        if oxen is None:
+            from cybertron2.engine import herds as HD
+            oxen = HD.pack_oxen(self, name)
+        if oxen:
+            from cybertron2.engine.data import HERDS
+            cap = max(cap, float(HERDS["pack_ox"]["carry"]) * oxen)
+        return cap
 
     def load(self, name) -> float:
         return sum(ITEMS[i]["weight"] * q for i, q in self.goods(self.hands(name)).items() if q > 1e-9)
