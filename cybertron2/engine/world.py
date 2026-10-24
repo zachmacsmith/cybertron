@@ -157,20 +157,8 @@ class World:
         for iid, h in (spec.get("households") or {}).items():
             s["institutions"][iid] = {"kind": "household", "name": h.get("name", f"the {iid}s"), "members": [],
                                       "offices": {"head": h.get("head")}, "rules": {"admit": "head", "grant": "members", **(h.get("rules") or {})}}
-        lo, hi = self.p["frailty"]
-        blo, bhi = self.p["combat"]["base"]
         for name, a in spec["agents"].items():
-            cid = f"hands:{name}"
-            s["containers"][cid] = {"kind": "hands", "of": name, "goods": {k: float(v) for k, v in (a.get("holdings") or {}).items()}, "wear": {}}
-            s["people"][name] = {
-                "stage": a.get("stage", "adult"), "sex": a.get("sex", ""), "model": a.get("model"), "role": a.get("role", ""),
-                "born_line": a.get("born_line") or a.get("household"), "trade": a.get("trade", ""), "aim": a.get("aim", ""),
-                "concerns": list(a.get("concerns") or []), "hands": cid, "hunger": 0, "missed": 0, "wounded": False, "alive": True,
-                "died": None, "cause": None, "relations": dict(a.get("relations") or {}), "notes": {}, "pinned": None,
-                "frailty": round(random.Random(f"{self.seed}|frailty|{name}").uniform(lo, hi), 4),
-                "attack": round(random.Random(f"{self.seed}|attack|{name}").uniform(blo, bhi), 4),
-                "defence": round(random.Random(f"{self.seed}|defence|{name}").uniform(blo, bhi), 4),
-                "messages": self._message_limit(name), "at": None, "transit": None, "home_seen": None}
+            self._person(name, a)
             hh = a.get("household")
             if hh:
                 s["institutions"].setdefault(hh, {"kind": "household", "name": f"the {hh}s", "members": [], "offices": {"head": None},
@@ -223,6 +211,30 @@ class World:
         for who, cid in self.s.pop("_seed_things", []):                        # who knows where a seeded thing lies
             TH.remember(self, who, cid, "put")
 
+    def _person(self, name, a):
+        """A person's record and hands (D2-139: `born` a day, negative before the run; the stage follows it when given)."""
+        s = self.s
+        lo, hi = self.p["frailty"]
+        blo, bhi = self.p["combat"]["base"]
+        cid = f"hands:{name}"
+        s["containers"][cid] = {"kind": "hands", "of": name, "goods": {k: float(v) for k, v in (a.get("holdings") or {}).items()}, "wear": {}}
+        born = a.get("born")
+        stage = a.get("stage", "adult")
+        if born is not None:
+            from cybertron2.engine import life as LF
+            stage = LF.stage_of(-int(born), LF.lifespan(self))
+        s["people"][name] = {
+            "stage": stage, "sex": a.get("sex", ""), "model": a.get("model"), "role": a.get("role", ""),
+            "born_line": a.get("born_line") or a.get("household"), "trade": a.get("trade", ""), "aim": a.get("aim", ""),
+            "concerns": list(a.get("concerns") or []), "hands": cid, "hunger": 0, "missed": 0, "wounded": False, "alive": True,
+            "died": None, "cause": None, "relations": dict(a.get("relations") or {}), "notes": {}, "pinned": None,
+            "frailty": round(random.Random(f"{self.seed}|frailty|{name}").uniform(lo, hi), 4),
+            "attack": round(random.Random(f"{self.seed}|attack|{name}").uniform(blo, bhi), 4),
+            "defence": round(random.Random(f"{self.seed}|defence|{name}").uniform(blo, bhi), 4),
+            "messages": self._message_limit(name), "at": None, "transit": None, "home_seen": None,
+            "born": None if born is None else int(born), "parents": list(a.get("parents") or []), "partner": a.get("partner"),
+            "pregnant": a.get("pregnant"), "gap_until": a.get("gap_until"), "order": None}
+
     def _new_building(self, bid, b):
         s = self.s
         cid = f"stock:{bid}"
@@ -234,9 +246,9 @@ class World:
                                "door": b.get("door", "open"), "fire": False, "stock": cid, "unfinished": b.get("unfinished")}
 
     def _eldest(self, members):
-        order = {"elder": 0, "adult": 1, "youth": 2, "child": 3}
+        order = {"elder": 0, "adult": 1, "youth": 2, "child": 3, "infant": 4}
         live = [m for m in members if self.s["people"][m]["alive"] and self.s["people"][m]["stage"] in ("adult", "elder")]
-        return sorted(live, key=lambda m: order[self.s["people"][m]["stage"]])[0] if live else None
+        return sorted(live, key=lambda m: (order[self.s["people"][m]["stage"]], self.s["people"][m].get("born") or 0))[0] if live else None
 
     def _message_limit(self, name) -> int:
         m = self.p["messages"]
@@ -313,7 +325,7 @@ class World:
         return sorted(out | {name}) if t else [name]
 
     def agents_acting(self) -> list:
-        return [n for n in self.living() if self.s["people"][n]["stage"] != "child" and self.s["people"][n]["at"] is not None]
+        return [n for n in self.living() if self.s["people"][n]["stage"] not in ("infant", "child") and self.s["people"][n]["at"] is not None]
 
     # ------------------------------------------------------------------ the chokepoint
     @contextlib.contextmanager
@@ -381,7 +393,8 @@ class World:
         return cap
 
     def load(self, name) -> float:
-        return sum(ITEMS[i]["weight"] * q for i, q in self.goods(self.hands(name)).items() if q > 1e-9)
+        from cybertron2.engine import life as LF                              # an infant carried weighs 2 (D2-141)
+        return sum(ITEMS[i]["weight"] * q for i, q in self.goods(self.hands(name)).items() if q > 1e-9) + LF.carried_weight(self, name)
 
     def best_tool(self, name, table):
         """The carried tool with the best multiplier in this table (recipes.md §8), or bare hands."""
@@ -487,7 +500,8 @@ class World:
             base = min(2, base)
         if a["wounded"]:
             base = max(1, base - 2)
-        return base
+        from cybertron2.engine import life as LF
+        return max(1, base - LF.unit_penalty(self, name))                     # late in a pregnancy, a unit fewer (D2-141)
 
     def yield_mult(self, name) -> float:
         return float(self.p["hunger_yield"][str(self.s["people"][name]["hunger"])])
@@ -684,10 +698,76 @@ def p_die(w, person, cause, to=None):
                                   "stretch": _stretch_of(w, a) if place not in w.s["nodes"] else None}
     for i in list(hands):
         hands[i] = 0.0
-    for iid, h in w.s["institutions"].items():
-        if h["offices"].get("head") == person:
-            h["offices"]["head"] = w._eldest(w.members(iid))
+    from cybertron2.engine import life as LF
+    LF.on_death(w, person)                                                    # the household's rules: head and heirs (D2-143)
+    if a.get("partner") in w.s["people"]:
+        w.s["people"][a["partner"]]["partner"] = None
     return place
+
+
+def p_born(w, mother, father=None):
+    """A child born (spec/life/birth_and_death.md, D2-141): a new person, an infant, where its mother is, in her household, named
+    from its line's names (one of its forebears' not in use, else a name nobody here has), with both parents in the family tree."""
+    from cybertron2.engine import generate as G, knowledge as KN, perceive as PC
+    m = w.s["people"][mother]
+    rng = w.rng("born", w.d, mother)
+    sex = rng.choice("mf")
+    hh = w.household_of(mother)
+    used = set(w.s["people"])
+    line = m.get("born_line") or hh
+    forebears = [x["name"] for x in (w.spec.get("tree") or []) if x.get("sex") == sex and line in (x.get("line"), x.get("line_born"))]
+    pool = [n for n in forebears if n not in used] or [n for n in (G.MALE if sex == "m" else G.FEMALE) if n not in used]
+    name = rng.choice(sorted(pool)) if pool else f"{mother}'s child {w.d}"
+    while name in used:
+        name += " the younger"
+    w._person(name, {"sex": sex, "household": hh, "born_line": hh, "born": w.d, "parents": [x for x in (mother, father) if x]})
+    a = w.s["people"][name]
+    a["at"], a["transit"] = m["at"], (dict(m["transit"]) if m.get("transit") else None)
+    if hh:
+        w.s["institutions"][hh]["members"].append(name)
+    from cybertron2.engine.data import LIFE
+    KN.seed(w, name, {"knows": {t: {"level": "known", "skill": LIFE["child_skill"]} for t in LIFE["children_work"]}})
+    PC.seed(w, name, {})
+    sib = [x for x, y in w.s["people"].items() if x != name and y["alive"] and set(y.get("parents") or []) & {mother}]
+    kin = {mother: ("your mother", "your son" if sex == "m" else "your daughter")}
+    if father in w.s["people"]:
+        kin[father] = ("your father", "your son" if sex == "m" else "your daughter")
+    for x in sib:
+        kin[x] = ("your brother" if w.s["people"][x]["sex"] == "m" else "your sister", "your brother" if sex == "m" else "your sister")
+    for x in (w.members(hh) if hh else []):
+        if x != name and x not in kin:
+            kin[x] = ("of your household", f"{mother}'s child, of your household")
+    for x, (theirs, mine) in kin.items():
+        a["relations"][x] = theirs
+        w.s["people"][x]["relations"][name] = mine
+        homes = w.homes(x)
+        lives = f"{w.s['buildings'][homes[0]]['name']}, {w.s['nodes'][w.s['buildings'][homes[0]]['node']]['name']}" if homes else "no house"
+        w.s["mind"][name]["kin"][x] = {"rel": theirs, "lives": lives, "household": w.household_of(x), "alive": True, "seen": w.d}
+        w.s["mind"][x]["kin"][name] = {"rel": mine, "lives": lives, "household": hh, "alive": True, "seen": w.d}
+    return name
+
+
+def p_partner(w, person, other, on=True):
+    """A partnership made (both chose it) or ended (D2-140); it is in the family tree."""
+    a, b = w.s["people"][person], w.s["people"][other]
+    if on:
+        for x in (a, b):
+            if x.get("partner") in w.s["people"]:
+                w.s["people"][x["partner"]]["partner"] = None
+        a["partner"], b["partner"] = other, person
+    else:
+        a["partner"] = b["partner"] = None
+    return on
+
+
+def p_office(w, inst, field, value, by=None):
+    """A household's heir, its standing order for its children, or a member's naming of the next head (D2-143, D2-148)."""
+    h = w.s["institutions"][inst]
+    if field == "named":
+        h["succession"].setdefault("named", {})[by] = value
+    else:
+        h[field] = value
+    return value
 
 
 def _stretch_of(w, a):
@@ -777,6 +857,9 @@ PRIMITIVES = {
     "arrive": (p_arrive, lambda kw: []),                                   # checked by arrival: the person is on the road
     "harm": (p_harm, _r("person", "person")),
     "die": (p_die, _r("person", "person")),
+    "born": (p_born, _r("person", "mother")),
+    "partner": (p_partner, lambda kw: [("person", kw["person"]), ("person", kw["other"])]),
+    "office": (p_office, _r("person", "by")),
     "learn": (p_learn, _r("person", "person")),
     "new_thing": (p_new_thing, _r("parcel", "parcel")),
     "set_thing": (p_set_thing, _rc("cid")),

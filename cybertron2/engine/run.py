@@ -14,7 +14,7 @@ import os
 import time
 from pathlib import Path
 
-from cybertron2.engine import agreements as AG, fuse as FU, knowledge as KN, night as N, perceive as PC, prompt as PR, roads as RD, settle as ST, verbs as V
+from cybertron2.engine import agreements as AG, fuse as FU, knowledge as KN, life as LF, night as N, perceive as PC, prompt as PR, roads as RD, settle as ST, verbs as V
 from cybertron2.engine.converse import Conversations
 from cybertron2.engine.data import EDIBLE, TECHNIQUES
 from cybertron2.engine.here import Here, Mind
@@ -27,7 +27,7 @@ WAVES = 2
 
 def blank_today() -> dict:
     return {"worked": {}, "thefts": [], "left": [], "joins": [], "admits": [], "sleep": {}, "travel": {}, "watch": {}, "teach": [],
-            "learn": [], "fights": [], "guards": {}, "fire": {}}
+            "learn": [], "fights": [], "guards": {}, "fire": {}, "partner": [], "try": [], "care": {}, "care_by": {}}
 
 
 # ---------------------------------------------------------------------- a scripted bot (smoke tests only)
@@ -286,8 +286,14 @@ def dawn(w) -> None:
         live = [m for m in w.living() if x["building"] in w.homes(m)]
         w.event(b["node"], "left", f"{x['by']} left {x['qty']:g} {x['item']} at {b['name']}", actor=x["by"], about=[f"building:{x['building']}"],
                 salience=0.6, tags=["food"] if x["item"] in EDIBLE else [], concerns=live, dawn=True)
+    grew = LF.dawn(w)                                                       # growing up, coming of age, succession (D2-139, D2-143)
+    if grew:
+        w.s.setdefault("life", []).append({"day": w.d, "dawn": grew})
     for name in w.living():
         t = w.s["people"][name]["transit"]
+        if t and t["arrive"] <= w.d and t.get("carried_by"):                 # an infant carried: it comes in with its mother
+            w.apply("arrive", t["to"], person=name)
+            continue
         if t and t["arrive"] <= w.d:
             RD.arrived(w, name, t)                                          # its notices on the way, remembered (D2-97)
             w.apply("arrive", t["to"], person=name)
@@ -497,6 +503,8 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
             results[n] = [f"{x} (x{rep[n][x]})" if x in rep[n] else x for x in results[n]]
             if used[n] < budget[n]:
                 results[n].append(f"You left {budget[n] - used[n]} of your {budget[n]} units unused.")
+        today["partners"] = LF.settle(w, today)                             # partnerships both chose (D2-140)
+        today["children_work"] = LF.children_work(w)                        # the head's standing order (D2-148)
         settled = AG.settle(w)
         for n, lines in list(ST.settle_teaching(w, today).items()) + list(ST.settle_joins(w, today).items()):
             results.setdefault(n, []).extend(lines)

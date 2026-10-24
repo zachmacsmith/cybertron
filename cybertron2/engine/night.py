@@ -7,6 +7,7 @@ may take from, the one slept in first (38.17 §9: to confirm).
 """
 from __future__ import annotations
 
+from cybertron2.engine import life as LF
 from cybertron2.engine.data import DECAY, EDIBLE, FITTINGS, ITEMS, THINGS
 
 FIRE = tuple(f for f, d in FITTINGS.items() if d.get("fire"))
@@ -65,11 +66,15 @@ def night(w) -> dict:
             rec.setdefault("camped", {})[name] = gear
         if state == "unsheltered" and name in (road.get("fed") or {}):          # fed on the way at a good place (D2-109)
             need = min(need, float(p["ration"]) * float(road["fed"][name]))
+        mult, extra = LF.ration_factor(w, name)                                 # an infant, a child, a pregnancy (D2-141, D2-145)
+        need = need * mult + extra
         place = w.place_of(("person", name))
         stores = [a["hands"]]
         if place in s["nodes"]:
             mine = w.takeable(name, place)
             stores += sorted((c for c in mine if c != a["hands"]), key=lambda c: 0 if b is not None and c == b["stock"] else 1)
+        if a["stage"] in LF.MINOR:                                             # then from its carers' hands (D2-141)
+            stores += [w.hands(x) for x in LF.feeders(w, name) if w.hands(x) not in stores]
         hearth = b is not None and any(b["fittings"].get(f_) for f_ in FIRE) and bool(b["fire"])   # grain boiled at a lit fire (D2-60)
         if state == "unsheltered" and (today.get("fire") or {}).get(name):    # a fire in the open (D4-49)
             burn = float(p["fuel"]["open"])
@@ -78,10 +83,11 @@ def night(w) -> dict:
                 hearth = True
                 rec.setdefault("open_fire", []).append(name)
         ate = _eat(w, place, stores, need, hearth)
+        full = float(p["ration"]) * mult + extra                                # a short meal is a ration's worth at least
         if ate + 1e-9 >= need:
             a["hunger"], a["missed"] = min(0, a["hunger"] + 1), 0
             rec["ate"][name] = round(ate, 2)
-        elif ate + 1e-9 >= float(p["ration"]):
+        elif ate + 1e-9 >= full:
             a["missed"] = 0
             rec["short"].append(name)
             rec["ate"][name] = round(ate, 2)
@@ -109,6 +115,8 @@ def night(w) -> dict:
                     rec["deaths"].append(name)
                     if place in s["nodes"]:
                         w.event(place, "death", f"{name} died in the night, of hunger", target=name, salience=1.0, tags=["death", "food"])
+    rec["life"] = LF.night(w, today, rec, where)                              # conception, births, the young, old age (D2-138 to D2-150)
+    rec["deaths"] += rec["life"]["deaths"] + rec["life"]["old_age"]
     for cid, c in list(s["containers"].items()):                              # spoilage, by condition (D2-58, D2-87)
         if c["kind"] == "hands" and not s["people"][c["of"]]["alive"]:
             continue
@@ -173,6 +181,10 @@ def departures(w, today) -> list:
             if ox:                                                           # one ox goes with the party, carrying (D2-136)
                 from cybertron2.engine import roads as RD
                 HD.lead_ox(w, name, ox, road, RD.position(w, a["transit"]))
+            from cybertron2.engine import life as LF
+            for baby in LF.infants_of(w, name, here):                        # her infants go with her (D2-141)
+                w.apply("depart", here, person=baby, road=road, to=to)
+                s["people"][baby]["transit"]["carried_by"] = name
             out.append({"agent": name, "from": here, "to": to})
     today["_departed"] = out
     return out

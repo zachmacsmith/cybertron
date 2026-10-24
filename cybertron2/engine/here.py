@@ -127,7 +127,20 @@ class Here:
         if x not in self.people():
             raise Refused(f"{x} is not here")
         a = self._w.s["people"][x]
-        return {"stage": a["stage"], "hunger": a["hunger"], "wounded": a["wounded"], "carried": dict(self._w.goods(a["hands"]))}
+        from cybertron2.engine import life as LF
+        return {"stage": a["stage"], "hunger": a["hunger"], "wounded": a["wounded"], "carried": dict(self._w.goods(a["hands"])),
+                "sex": a.get("sex", ""), "with_child": LF.showing(self._w, x), "partner": a.get("partner"),
+                "parents": list(a.get("parents") or [])}
+
+    def children_on(self) -> bool:
+        from cybertron2.engine import life as LF
+        return LF.on(self._w)
+
+    def life(self) -> dict:
+        """The world's life settings, for the verbs: the cost dial, whether children come, the spans (D2-145, D2-153)."""
+        from cybertron2.engine import life as LF
+        return {"on": LF.on(self._w), "dial": LF.dial(self._w), "gap": LF.in_gap(self._w, self.name),
+                "succession": self._w.s["institutions"].get(self.household() or "", {}).get("succession")}
 
     def buildings(self) -> dict:
         return {bid: b for bid, b in self._w.s["buildings"].items() if b["node"] == self.node}

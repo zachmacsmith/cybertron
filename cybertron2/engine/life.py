@@ -16,7 +16,7 @@ import math
 
 from cybertron2.engine.data import LIFE
 
-STAGES = [s for s, _ in LIFE["stages"]] + ["elder"]
+STAGES = [s for s, _ in LIFE["shares"]] + ["elder"]
 MINOR = ("infant", "child")
 
 
@@ -36,10 +36,29 @@ def dial(w) -> dict:
     return LIFE["dial"].get(setting(w)["dial"], LIFE["dial"]["low"])
 
 
-def stage_of(days: float) -> str:
-    """The stage by days since birth (D2-139)."""
+def lifespan(w=None) -> int:
+    """Days from birth to old age, a world setting (D2-153; default 32)."""
+    return int((w.spec.get("lifespan") if w is not None else None) or LIFE["lifespan"])
+
+
+def scaled(days, L) -> int:
+    """A span given at the default lifespan, scaled to this one: whole days, at least 1 (D2-153)."""
+    return max(1, round(float(days) * L / float(LIFE["lifespan"])))
+
+
+def spans(L=None) -> list:
+    """[(stage, days)] for a lifespan: each stage its share, whole days, at least 1; the adult span takes up the rounding."""
+    L = int(L or LIFE["lifespan"])
+    out = [(name, max(1, round(share * L))) for name, share in LIFE["shares"]]
+    young = sum(d for _, d in out[:-1])
+    out[-1] = (out[-1][0], max(1, L - young))
+    return out
+
+
+def stage_of(days: float, L=None) -> str:
+    """The stage by days since birth (D2-139, D2-153)."""
     t = 0
-    for name, span in LIFE["stages"]:
+    for name, span in spans(L):
         t += span
         if days < t:
             return name
@@ -51,8 +70,12 @@ def days_old(w, name):
     return None if born is None else w.d - int(born)
 
 
-def elder_from() -> int:
-    return sum(span for _, span in LIFE["stages"])
+def elder_from(L=None) -> int:
+    return sum(span for _, span in spans(L))
+
+
+def pregnancy_days(w) -> int:
+    return scaled(LIFE["pregnancy"]["days"], lifespan(w))
 
 
 # ---------------------------------------------------------------------- dawn: growing up, coming of age, succession
@@ -65,7 +88,7 @@ def dawn(w) -> list:
         d = days_old(w, name)
         if d is None:
             continue
-        new = stage_of(d)
+        new = stage_of(d, lifespan(w))
         if new != a["stage"]:
             old = a["stage"]
             a["stage"] = new
@@ -115,6 +138,46 @@ def come_of_age(w, name) -> None:
             tags=["family"], concerns=w.members(hh) if hh else [])
 
 
+# ---------------------------------------------------------------------- the day: partners, children's work
+def settle(w, today) -> list:
+    """Partnerships both chose today at one place (D2-140). Returns [(a, b)] made."""
+    out = []
+    picks = today.get("partner") or []
+    for x in picks:
+        a, b = x["by"], x["with"]
+        if a < b and any(y["by"] == b and y["with"] == a for y in picks) and w.place_of(("person", a)) == w.place_of(("person", b)):
+            w.apply("partner", w.place_of(("person", a)), person=a, other=b)
+            out.append((a, b))
+            w.event(w.place_of(("person", a)), "household", f"{a} and {b} are partners now", actor=a, target=b, salience=0.6,
+                    tags=["family"], concerns=sorted(set(w.members(w.household_of(a)) or []) | set(w.members(w.household_of(b)) or [])))
+    return out
+
+
+def children_work(w) -> dict:
+    """Each child does its household's standing order (D2-148), up to the dial's units: at the high setting half a unit, so every
+    other day. Returns {child: result line}."""
+    from cybertron2.engine import verbs as V
+    from cybertron2.engine.here import Here, Mind
+    out = {}
+    share = float(dial(w)["child_works"])
+    for name in w.living():
+        a = w.s["people"][name]
+        if a["stage"] != "child" or a["at"] is None:
+            continue
+        hh = w.household_of(name)
+        order = (w.s["institutions"].get(hh) or {}).get("order")
+        if not order or order.get("node") not in (None, a["at"]):
+            continue
+        if share < 1 and w.rng("child-work", w.d, name).random() >= share:
+            continue
+        from cybertron2.engine.data import TECHNIQUES
+        act = {"do": TECHNIQUES[order["what"]]["verb"], "what": order["what"], "for": "my household"}
+        if order.get("at"):
+            act["at"] = order["at"]
+        out[name] = V.do(Here(w, name), Mind(w, name), act)
+    return out
+
+
 # ---------------------------------------------------------------------- what people eat and can do
 def ration_factor(w, name) -> tuple:
     """(multiplier on the ration, food added): an infant eats 0.5, a child by the dial; a pregnancy adds 0.3 a day (D2-141)."""
@@ -129,12 +192,45 @@ def ration_factor(w, name) -> tuple:
 
 def late_pregnancy(w, name) -> bool:
     a = w.s["people"][name]
-    pg = LIFE["pregnancy"]
-    return a.get("pregnant") is not None and w.d - int(a["pregnant"]) >= int(pg["days"]) - int(pg["late"])
+    late = scaled(LIFE["pregnancy"]["late"], lifespan(w))
+    return a.get("pregnant") is not None and w.d - int(a["pregnant"]) > pregnancy_days(w) - late     # its last 2 days
 
 
 def unit_penalty(w, name) -> int:
     return int(LIFE["pregnancy"]["late_units"]) if late_pregnancy(w, name) else 0
+
+
+def infants_of(w, name, place=None) -> list:
+    """The living infants whose mother this is, with her (at her node, or carried on the road)."""
+    place = w.place_of(("person", name)) if place is None else place
+    return sorted(n for n, a in w.s["people"].items() if a["alive"] and a["stage"] == "infant" and (a.get("parents") or [None])[0] == name
+                  and w.place_of(("person", n)) == place)
+
+
+def feeders(w, name) -> list:
+    """Who may feed a child from their own hands: its parents and its household's adults and youths, where it is."""
+    a = w.s["people"][name]
+    hh = w.household_of(name)
+    near = set(w.company(name))
+    kin = set(a.get("parents") or []) | set(w.members(hh) if hh else [])
+    return sorted(x for x in kin & near if x != name and w.s["people"][x]["alive"] and w.s["people"][x]["stage"] not in MINOR)
+
+
+def carried_weight(w, name) -> float:
+    if w.s["people"][name].get("sex") != "f":
+        return 0.0
+    return float(LIFE["infant"]["weight"]) * len(infants_of(w, name))
+
+
+def showing(w, name) -> bool:
+    """A pregnancy shows from its third day (D2-141)."""
+    a = w.s["people"][name]
+    return a.get("pregnant") is not None and w.d - int(a["pregnant"]) >= scaled(LIFE["pregnancy"]["signs_from"], lifespan(w))
+
+
+def in_gap(w, name) -> bool:
+    a = w.s["people"][name]
+    return a.get("gap_until") is not None and w.d < int(a["gap_until"])
 
 
 def may_conceive(w, name) -> str:
@@ -200,7 +296,7 @@ def _pregnancies(w, today, rec, where, out):
             a["pregnant"] = None
             out["lost"].append(name)
             continue
-        if w.d - int(a["pregnant"]) >= int(pg["days"]):
+        if w.d - int(a["pregnant"]) >= pregnancy_days(w):                      # the night ending its fifth day
             _birth(w, name, where, rec, out)
 
 
@@ -218,7 +314,7 @@ def _birth(w, mother, where, rec, out):
     rng = w.rng("birth", w.d, mother)
     place = w.place_of(("person", mother))
     father = a.get("father")
-    a["pregnant"], a["gap_until"], a["father"] = None, w.d + 1 + int(LIFE["gap"]), None
+    a["pregnant"], a["gap_until"], a["father"] = None, w.d + 1 + scaled(LIFE["gap"], lifespan(w)), None
     child = w.apply("born", place, mother=mother, father=father)
     out["births"].append({"mother": mother, "child": child, "helped": helped, "housed": housed})
     hh = w.household_of(mother)
@@ -239,7 +335,7 @@ def _young(w, today, rec, where, out):
     d = dial(w)
     for name in w.living():
         a = w.s["people"][name]
-        if a["stage"] not in MINOR:
+        if a["stage"] not in MINOR or a.get("born") == w.d:                  # born tonight: the birth's own risk only
             continue
         units = float(care.get(name, 0.0))
         if a["stage"] == "infant":
@@ -273,9 +369,9 @@ def _old_age(w, out):
         if a["stage"] == "adult":
             p = float(oa["adult"])
         elif a["stage"] == "elder":
-            d = days_old(w, name)
-            into = max(0, (d if d is not None else elder_from()) - elder_from())
-            p = float(oa["elder"]) * 2 ** (into / float(oa["doubling"]))
+            d, L = days_old(w, name), lifespan(w)
+            into = max(0, (d if d is not None else elder_from(L)) - elder_from(L))
+            p = float(oa["elder"]) * 2 ** (into / (float(oa["doubling"]) * L / float(LIFE["lifespan"])))
         else:
             continue
         if a.get("born") is None and a["stage"] != "elder":

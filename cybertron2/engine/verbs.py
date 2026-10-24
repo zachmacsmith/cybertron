@@ -62,6 +62,15 @@ VERB = {
     "guard": {"args": '{"at"?: building}', "cost": 1, "doc": "stand guard tonight over a building here and anyone set upon"},
     "fire": {"args": "", "cost": 0, "doc": "light a fire in the open tonight if you sleep out (on the road, or with no bed), from timber in your "
                                             "hands, so grain and flour can be boiled; say it before you set off"},
+    "partner": {"args": '{"with": a person here}', "cost": 0, "doc": "become partners with someone here, if they choose it too today"},
+    "part": {"args": "", "cost": 0, "doc": "end your partnership"},
+    "try": {"args": '{"with": a person of the other sex here, "units": 1 or more}', "cost": "units", "when": "children",
+            "doc": "try for a child with them, if they try with you today and you both sleep in one place tonight: the more units, "
+                   "the better the chance, less with each one more"},
+    "name": {"args": '{"heir"?: a person of your household, "head"?: a person of your household}', "cost": 0,
+             "doc": "as head, name who heads the household after you; when a head has died, each grown member names the new head"},
+    "order": {"args": '{"what": forage | herd | hay | nothing, "at"?: a place here}', "cost": 0, "when": "children",
+              "doc": "as head, set your household's children to a small work each day, until you change it"},
     "rest": {"args": "", "cost": 0, "doc": ""},
 }
 VERBS = tuple(VERB)
@@ -71,12 +80,13 @@ FREE = tuple(v for v, d in VERB.items() if d["cost"] == 0)
 
 def verb_here(here, verb) -> bool:
     when = VERB[verb].get("when")
-    return not when or (when == "roads" and bool(here.roads())) or (when == "herds" and any(FM.head(h) > 0 for h in here.herds().values()))
+    return not when or (when == "roads" and bool(here.roads())) or (when == "herds" and any(FM.head(h) > 0 for h in here.herds().values())) \
+        or (when == "children" and here.children_on())
 
 
 def verb_units(p, verb):
     c = VERB[verb]["cost"]
-    if c == "craft":
+    if c in ("craft", "units"):
         return None
     if isinstance(c, list):
         x = p
@@ -93,6 +103,8 @@ def cost(here, a) -> int:
     n = verb_units(here.p, v)
     if n is not None:
         return n
+    if VERB[v]["cost"] == "units":                                            # as many as one chooses to spend (D2-146)
+        return _units(a.get("units"))
     tech = KN.resolve(a.get("what"), a.get("do"))
     if tech is None:
         return 1
@@ -295,6 +307,8 @@ def _gather(here, mind, a, party):
 
 
 def _work(here, mind, a, party):
+    if KN.resolve(a.get("what"), "work") == "care":
+        return _care(here, mind, a)
     return _technique(here, mind, a, party, "work")
 
 
@@ -949,9 +963,130 @@ def _withdraw(here, mind, a, party):
     return AG.withdraw(here, a)
 
 
+# ---------------------------------------------------------------------- partners, children, the household's offices (D2-138 to D2-153)
+def _units(x) -> int:
+    try:
+        return max(1, int(float(x if x is not None else 1)))
+    except (TypeError, ValueError):
+        raise Refused("units must be a number")
+
+
+def _here_person(here, x, what="person"):
+    who = here.person(x)
+    if who is None or who == here.name:
+        raise Refused(f"there is nobody called {x!r} here")
+    return who
+
+
+def _grown(here, who) -> bool:
+    return here.body(who)["stage"] in ("youth", "adult", "elder")
+
+
+def _partner(here, mind, a, party):
+    who = _here_person(here, a.get("with") or a.get("person"))
+    if not _grown(here, here.name) or not _grown(here, who):
+        raise Refused(f"{who} is a child")
+    if here.body(here.name)["partner"] == who:
+        raise Refused(f"{who} is your partner already")
+    here.today().setdefault("partner", []).append({"by": here.name, "with": who})
+    return f"You chose {who} as your partner; it is so if {who} chooses you too today."
+
+
+def _part(here, mind, a, party):
+    who = here.body(here.name)["partner"]
+    if not who:
+        raise Refused("you have no partner")
+    here.apply("partner", person=here.name, other=who, on=False)
+    here.event("household", f"{here.name} and {who} have parted", actor=here.name, target=who, salience=0.6, tags=["family"],
+               concerns=[who])
+    return f"You and {who} are no longer partners."
+
+
+def _try(here, mind, a, party):
+    who = _here_person(here, a.get("with") or a.get("person"))
+    me, them = here.body(here.name), here.body(who)
+    if not me["sex"] or me["sex"] == them["sex"]:
+        raise Refused("a child needs a man and a woman")
+    if me["stage"] != "adult" or them["stage"] != "adult":
+        raise Refused("you must both be grown adults")
+    woman = here.name if me["sex"] == "f" else who
+    if here.body(woman)["with_child"]:
+        raise Refused(f"{'you are' if woman == here.name else woman + ' is'} with child already")
+    if woman == here.name and here.life()["gap"]:
+        raise Refused("you gave birth lately and cannot conceive yet")
+    units = _units(a.get("units"))
+    here.today().setdefault("try", []).append({"by": here.name, "with": who, "units": units})
+    return f"You spent {units} unit{'s' if units > 1 else ''} trying for a child with {who}; it counts only if {who} tries with you today."
+
+
+def _care(here, mind, a):
+    x = a.get("at") or a.get("person") or a.get("child")
+    who = here.person(x)
+    young = [n for n in here.people(me=False) if here.body(n)["stage"] in ("infant", "child")]
+    if who is None and len(young) == 1 and not x:
+        who = young[0]
+    if who not in young:
+        raise Refused(f"there is no child called {x!r} here" + (f"; the children here: {', '.join(young)}" if young else ""))
+    t = here.today()
+    t.setdefault("care", {})[who] = t.setdefault("care", {}).get(who, 0) + 1
+    t.setdefault("care_by", {}).setdefault(who, [])
+    if here.name not in t["care_by"][who]:
+        t["care_by"][who].append(here.name)
+    here.record("work", "care", who)
+    return f"You looked after {who} (fed, minded and kept warm)."
+
+
+def _name(here, mind, a, party):
+    hh = here.household()
+    if hh is None:
+        raise Refused("you belong to no household")
+    members = here.institution(hh)["members"]
+    pick = lambda x: next((m for m in members if m.lower() == str(x or "").strip().lower()), None)
+    if a.get("heir"):
+        if here.head(hh) != here.name:
+            raise Refused(f"only the head of {here.institution(hh)['name']} names its heir")
+        who = pick(a["heir"])
+        if who is None or who == here.name:
+            raise Refused(f"{a['heir']!r} is not of your household")
+        here.apply("office", inst=hh, field="heir", value=who, by=here.name)
+        return f"You named {who} to head {here.institution(hh)['name']} after you."
+    if a.get("head"):
+        sc = here.life()["succession"]
+        if not sc:
+            raise Refused("the household has a head; only when a head has died do its members name the next")
+        if not _grown(here, here.name) or here.body(here.name)["stage"] == "youth":
+            raise Refused("only the grown members name the head")
+        who = pick(a["head"])
+        if who is None:
+            raise Refused(f"{a['head']!r} is not of your household")
+        here.apply("office", inst=hh, field="named", value=who, by=here.name)
+        return f"You named {who} as the head of {here.institution(hh)['name']}; the one most named heads it."
+    raise Refused('say "heir" or "head"')
+
+
+def _order(here, mind, a, party):
+    from cybertron2.engine.data import LIFE
+    hh = here.household()
+    if hh is None or here.head(hh) != here.name:
+        raise Refused("only the head of a household sets its children's work")
+    what = str(a.get("what") or "").strip().lower()
+    if what in ("nothing", "none", "rest", ""):
+        here.apply("office", inst=hh, field="order", value=None, by=here.name)
+        return "Your household's children do no work now."
+    tech = KN.resolve(what, None)
+    if tech not in LIFE["children_work"]:
+        raise Refused(f"children can do only {', '.join(LIFE['children_work'])}")
+    at = a.get("at")
+    if at:
+        _site(here, mind, tech, at)                                           # a place here it can be done
+    here.apply("office", inst=hh, field="order", value={"what": tech, "at": at, "node": here.node}, by=here.name)
+    return f"Your household's children will {TECHNIQUES[tech]['label'].split(' (')[0]} each day" + (f" at {at}." if at else ".")
+
+
 HANDLERS = {"gather": _gather, "work": _work, "make": _make, "build": _build, "move": _move, "take": _take, "give": _give,
             "accept": _accept, "withdraw": _withdraw, "release": _release, "host": _host, "grant": _grant, "revoke": _revoke, "join": _join, "admit": _admit,
             "leave_household": _leave_household, "found": _found, "claim": _claim, "sleep": _sleep, "set": _set, "travel": _travel,
             "watch": _watch, "teach": _teach, "learn": _learn, "attack": _attack, "guard": _guard, "fire": _fire, "rest": _rest,
-            "drive": lambda here, mind, a, party: FM.drive(here, a, party)}
+            "drive": lambda here, mind, a, party: FM.drive(here, a, party), "partner": _partner, "part": _part, "try": _try,
+            "name": _name, "order": _order}
 assert set(HANDLERS) == set(VERB)

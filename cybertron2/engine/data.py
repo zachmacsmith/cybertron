@@ -545,16 +545,20 @@ MODIFIERS = {t for t, d in TECHNIQUES.items() if d.get("modifies")}
 # Birth and death (life/birth_and_death.md: D2-138 to D2-152; calibrate where the spec says so). Stages by days since birth (D2-139):
 # infant 2, child 4, youth 12, adult 50, then elder. A world sets `children: {on: true, dial: low | high}`; off, nobody conceives.
 LIFE = {
-    "stages": [["infant", 2], ["child", 4], ["youth", 12], ["adult", 50]],          # then elder
+    # the lifespan (days to old age) is a world setting (D2-153); every stage is a share of it, and the spans marked "scaled" below
+    # are at the default and scale with lifespan / 32
+    "lifespan": 32,
+    "shares": [["infant", 1 / 16], ["child", 1 / 8], ["youth", 3 / 16], ["adult", 5 / 8]],          # then elder
     "conceive": {"base": 0.5, "k": 0.5},                    # 0.5 x (1 - e^(-0.5 x units)) a night (D2-146)
-    "pregnancy": {"days": 5, "food": 0.3, "late": 2, "late_units": 1, "road_loss": 0.05, "signs_from": 3},   # D2-141, D2-147
+    "pregnancy": {"days": 5, "food": 0.3, "late": 2, "late_units": 1, "road_loss": 0.05, "signs_from": 3},   # D2-141, D2-147; days, late, signs scaled
     "birth": {"housed": {"mother": 0.02, "infant": 0.03}, "out": {"mother": 0.06, "infant": 0.10}, "helped": 0.5},
-    "gap": 4,
+    "gap": 4,                                                               # scaled
     "infant": {"eats": 0.5, "dies": {"cared": 0.02, "not": 0.08}, "hungry": 2.0, "cold": 2.0, "weight": 2},
     "child": {"dies": 0.005, "unminded": 4.0},
     "dial": {"low": {"infant_care": 1, "child_eats": 0.7, "child_works": 1.0, "child_minding": 0},
              "high": {"infant_care": 3, "child_eats": 1.0, "child_works": 0.5, "child_minding": 1}},   # D2-145, D2-151
-    "old_age": {"adult": 0.001, "elder": 0.01, "doubling": 20},                     # D2-149
+    "old_age": {"adult": 0.001, "elder": 0.01, "doubling": 20},            # D2-149; the doubling scaled
     "succession_days": 2,                                                           # D2-143
-    "children_work": ["forage", "herd", "watch"],                                   # D2-148: what a head may set children to
+    "children_work": ["forage", "herd", "hay"],      # D2-148: what a head may set children to (the watch, D2-21, is not built)
+    "child_skill": 0.5,                                                             # a child's skill at that work, to start
 }
