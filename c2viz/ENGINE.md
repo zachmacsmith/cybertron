@@ -347,8 +347,10 @@ Two halves, so that every rule stays in the engine:
 - **Where in a parcel** a building stands (its lot, spread through the parcel, kept from the day it first stands), a person
   stands (around the parcel the engine says they are on), a beast grazes.
 - **Height** (a word in the engine) as terraces and cliff faces: a parcel above its neighbours to the south shows a face.
-- **The region's map:** every place's plan at one scale in a territory of wild country by its character; distances between
-  places from the road graph (days).
+- **The region's map is a schematic, not to scale:** every place's plan is drawn large (the largest about a fifth of the map's
+  height), at one scale for all places so a big place still looks bigger; roads are short, about 14 pixels a day of travel
+  beyond the two places' land, with each day's stretch and its landmarks along it; the order of places comes from the road
+  graph (days), each in a territory of wild country by its character.
 
 ## 10. Audit of the first renderer (before this model), fixed in the rebuild
 

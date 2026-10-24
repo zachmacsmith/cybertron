@@ -820,11 +820,29 @@
   function world(cv, V, day, opts = {}) {
     const M = model(V), d = D(V, day), ST = V.static, WL = ST.layout.world, nids = Object.keys(ST.nodes).sort();
     const W = opts.width || 400, H = opts.height || 260, R = rng(M.seed ^ 77), P = Px(cv, W, H, "#6ca63c"), out = { width: W, height: H, hotspots: [] };
-    const pos = {}; for (const n of nids) pos[n] = [(WL[n] || [500, 350])[0] * W / 1000, (WL[n] || [500, 350])[1] * H / 700];
+    // A schematic, not to scale (a presentation choice, ENGINE.md §9): every place drawn large at one scale for all of them, so a
+    // big place still looks bigger than a hamlet; roads short, a stretch a day with room for its landmarks. From the travel-days
+    // layout: places a road joins are pulled to the road's drawn length, all places pushed apart until their land clears, then
+    // the whole fitted to the canvas.
     const G = {}; for (const n of nids) G[n] = geom(V, n);
-    let md = 1e9; for (const a of nids) for (const b of nids) if (a < b) md = Math.min(md, Math.hypot(pos[a][0] - pos[b][0], pos[a][1] - pos[b][1]));
-    if (md > 1e8) md = Math.min(W, H) * 0.8;
-    const f = Math.min(0.6, ...nids.map((n) => 0.52 * md / G[n].land));                            // region pixels a close-up pixel
+    const pos = {}; for (const n of nids) pos[n] = [(WL[n] || [500, 350])[0] * W / 1000, (WL[n] || [500, 350])[1] * H / 700];
+    const big = Math.max(...nids.map((n) => G[n].land)), PERDAY = 14, rds = Object.values(ST.roads).filter((r) => pos[r.a] && pos[r.b]);
+    let f = Math.min(1, 0.22 * Math.min(W, H) / big);
+    for (let pass = 0; pass < 3; pass++) {
+      const rad = (n) => G[n].land * f;
+      for (let it = 0; it < 300; it++) {
+        for (const r of rds) { const a = pos[r.a], b = pos[r.b], dx = b[0] - a[0], dy = b[1] - a[1], dd = Math.hypot(dx, dy) || 1, k = (dd - (rad(r.a) + rad(r.b) + PERDAY * r.days)) / dd * 0.2;
+          a[0] += dx * k; a[1] += dy * k; b[0] -= dx * k; b[1] -= dy * k; }
+        for (const x of nids) for (const y of nids) { if (x >= y) continue; const a = pos[x], b = pos[y], dx = b[0] - a[0], dy = b[1] - a[1], dd = Math.hypot(dx, dy) || 0.01, want = rad(x) + rad(y) + 8;
+          if (dd < want) { const k = (dd - want) / dd * 0.5; a[0] += dx * k; a[1] += dy * k; b[0] -= dx * k; b[1] -= dy * k; } }
+      }
+      let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+      for (const n of nids) { const r = rad(n); x0 = Math.min(x0, pos[n][0] - r); y0 = Math.min(y0, pos[n][1] - r * 0.8); x1 = Math.max(x1, pos[n][0] + r); y1 = Math.max(y1, pos[n][1] + r * 0.8); }
+      const sc = Math.min((W - 12) / Math.max(1, x1 - x0), (H - 24) / Math.max(1, y1 - y0)), cx = (x0 + x1) / 2, cy = (y0 + y1) / 2, fs = Math.min(sc, 1 / f);
+      for (const n of nids) pos[n] = [(pos[n][0] - cx) * sc + W / 2, (pos[n][1] - cy) * sc + H / 2 - 4];
+      f *= fs;
+      if (Math.abs(sc - 1) < 0.03) break;
+    }
     const toWorld = (n, x, y) => [pos[n][0] + (x - G[n].mid[0]) * f, pos[n][1] + (y - G[n].mid[1]) * f];
     const n1 = noise(M.seed ^ 11);
     const cellNode = new Int16Array(W * H).fill(-1), cellPar = new Int16Array(W * H).fill(-1), occ = new Uint8Array(W * H);
@@ -852,10 +870,12 @@
       (r.stretches || []).forEach((st, i, all) => (st.landmarks || []).forEach((lm, j) => {               // landmarks on their stretch
         const p = pts[Math.min(pts.length - 1, Math.floor(pts.length * (i + .5) / all.length) + j * 5)]; if (!p) return;
         const k = lm.kind || lm, x = p[0] | 0, y = p[1] | 0, c = ch[`${i + 1}:${k}`];
-        if (k === "ford") { for (let a = -1; a <= 1; a++) P.put(x + a, y + 1, c ? "#4e94a8" : "#7cc0c8"); }
-        else if (k === "bridge") { for (let a = -1; a <= 1; a++) P.put(x + a, y - 1, c ? "#6b4423" : "#8a5a2a"); if (c) P.put(x, y - 1, "#2a1a10"); }
-        else if (k === "pass") { P.put(x, y - 2, c ? "#ffffff" : "#9a9aa0"); P.put(x - 1, y - 1, "#9a9aa0"); P.put(x + 1, y - 1, "#9a9aa0"); }
-        else { P.put(x + 2, y - 2, "#e8e8e0"); P.put(x + 2, y - 1, "#a8a29a"); }
+        if (k === "ford") { for (let a = -2; a <= 2; a++) { P.put(x + a, y, c ? "#4e94a8" : "#7cc0c8"); P.put(x + a, y + 1, c ? "#3e8498" : "#5aa2b4"); } }
+        else if (k === "bridge") { for (let a = -2; a <= 2; a++) { P.put(x + a, y - 1, c ? "#6b4423" : "#8a5a2a"); P.put(x + a, y + 1, "#5aa2b4"); } P.put(x - 2, y, "#6b4423"); P.put(x + 2, y, "#6b4423"); if (c) P.put(x, y - 1, "#2a1a10"); }
+        else if (k === "pass") { for (let a = -2; a <= 2; a++) P.put(x + a, y - 1 + Math.abs(a) - 2, "#9a9aa0"); P.put(x, y - 3, c ? "#ffffff" : "#b4b4ba"); }
+        else if (k === "spring") { P.put(x + 2, y - 1, "#7cc0c8"); P.put(x + 3, y - 1, "#5aa2b4"); }
+        else if (k === "fruit trees") { P.put(x + 2, y - 2, "#3a8a3e"); P.put(x + 3, y - 2, "#c8553d"); P.put(x + 2, y - 1, "#5a3a24"); }
+        else { P.put(x + 2, y - 2, "#e8e8e0"); P.put(x + 2, y - 1, "#a8a29a"); P.put(x + 3, y - 1, "#c8c4bc"); }
         out.hotspots.push({ kind: "landmark", id: rid + ":" + i + ":" + j, x: x - 2, y: y - 3, w: 6, h: 6, label: `${k} on day ${i + 1} of the road${c ? ` (${c})` : ""}` }); }));
     }
     const items = [];
