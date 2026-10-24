@@ -214,6 +214,7 @@ and correct them in place.**
 | D2-142 | 24 Oct | **Care for an infant or child is a choice,** not required; its consequences to explore | children.md §3 | care as required |
 | D2-143 | 24 Oct | **Inheritance and the head's succession are the household's own rules** (seeded, changeable by the household): the head names a successor, or the household decides together; the first case of offices and succession in institutions | children.md §5 | |
 | D2-144 | 24 Oct | **No loyalty mechanic for now** (no aims, D4-29); a child carries lasting memories of its childhood | children.md | loyalty at coming of age set by how the child was fed (37.1) |
+| D2-145 | 24 Oct | **A child's total cost before it becomes an agent is a world setting (the cost dial)**, the daily costs derived from it; to explore in runs whether and when agents choose children at a low and a high setting (about 3 and about 20 food and units) | children.md §2 | |
 
 ## Directions (Zach's stated aims recorded in the notes; designs follow them; checked by 37.2, 22 Oct)
 
