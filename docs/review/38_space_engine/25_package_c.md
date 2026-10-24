@@ -65,7 +65,17 @@ once; Philippa, Annora and Ancel began a fence round North Field; Bennet told hi
 Thurstan went to shut the Close's gate (already shut). Fixed after the run: the trampled field is a bundle read by the noticing rule
 (signs.py TRAMPLED), so those who work or pass there see it. Six runs, $21.10 in all.
 
-## 6. Choices the spec left open
+## 6. c7: every sign and event by the one rule (D4-53), going home at dusk a chance (D4-54)
+
+Barleyfield again, 5 days, $1.72 (seven runs, $22.82 in all). The Barrow cattle got through their wattle on night 3 and spent the night
+in the Reeds' ripe barley (8 trampled; the dusk chance kept them there). Next day seven people saw them in North Field, mostly those who
+live on the Green beside it or crossed it; others only heard "lowing and the crack of hedges from North Field". Christian and Thurstan
+(Barrows), at home and in the wood, saw only that **Barrow Close is empty**; Bennet drove the herd home; Clement (Reed) herded in North
+Field to guard the barley. That night the cattle got out again, into East Field: Thurstan told Bennet "The Barrow cattle are loose in
+East Field, trampling the barley and heading for South Field", herded them out and set about mending the Close's fence; Bennet drove
+them home again. Events are now seen where they happen: those reaping East Field saw each other there, not the whole village.
+
+## 7. Choices the spec left open
 
 OPEN Q-21 lists them (16 items, for Zach and, for livestock, 37.2), with D4-52's numbers in world/things_in_places.md as calibrate.
 
