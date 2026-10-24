@@ -176,6 +176,21 @@ def day_record(rec: dict, prev: dict | None, said: dict) -> dict:
             "households": households, "changed": changed}
 
 
+def _lines(x) -> list:
+    """say / tell as the reply gives them ([{to, text}], a string, or a list of strings) -> [{to, text}]."""
+    if not x:
+        return []
+    if isinstance(x, str):
+        return [{"to": "everyone", "text": x[:400]}]
+    out = []
+    for y in x if isinstance(x, list) else [x]:
+        if isinstance(y, dict) and y.get("text"):
+            out.append({"to": str(y.get("to") or "everyone"), "text": str(y["text"])[:400]})
+        elif isinstance(y, str):
+            out.append({"to": "everyone", "text": y[:400]})
+    return out
+
+
 def said_by_day(cap: Path) -> dict:
     """{day: {agent: {why, say}}} from turns.jsonl (what each said aloud and why it chose its acts), when the run has it."""
     out = {}
@@ -186,9 +201,15 @@ def said_by_day(cap: Path) -> dict:
         for line in fh:
             t = json.loads(line)
             r = t.get("reply") or {}
-            why, say = r.get("why"), r.get("say")
-            if why or say:
-                out.setdefault(t["day"], {})[t["agent"]] = {"why": (why or "")[:600], "say": say}
+            why = r.get("why")
+            say = _lines(r.get("say"))
+            tell = _lines(r.get("tell"))
+            for x in t.get("talk") or []:                            # what the talk step added
+                rr = x.get("reply") or {}
+                say += _lines(rr.get("say"))
+                tell += _lines(rr.get("tell"))
+            if why or say or tell:
+                out.setdefault(t["day"], {})[t["agent"]] = {"why": (why or "")[:600], "say": say[:6], "tell": tell[:6]}
     return out
 
 

@@ -206,11 +206,12 @@ def node_layout(nid, parcels, roads, seed=1, w=W, h=H) -> dict:
             if not poly:
                 break
         cells[a] = poly
-    centre, lots = {}, {}
+    centre, lots, label = {}, {}, {}
     for pid, poly in cells.items():
         if len(poly) < 3:
             centre[pid] = list(P[pid])
             lots[pid] = []
+            label[pid] = list(P[pid])
             continue
         c = _centroid(poly)
         centre[pid] = [round(c[0], 1), round(c[1], 1)]
@@ -227,6 +228,11 @@ def node_layout(nid, parcels, roads, seed=1, w=W, h=H) -> dict:
                 x += step
             y += step
         pts.sort(key=lambda p: (p[0] - c[0]) ** 2 + (p[1] - c[1]) ** 2)  # lots nearest the middle first
+        ly = y0 + 0.2 * (y1 - y0) + 10
+        lx = c[0]
+        if not _inside(poly, lx, ly):
+            ly = c[1] - 0.25 * (c[1] - y0)
+        label[pid] = [round(lx, 1), round(ly, 1)]
         lots[pid] = [[round(x, 1), round(y, 1)] for x, y in pts[:24]]
     exits = {}
     for rid, r in sorted(roads.items()):
@@ -241,4 +247,5 @@ def node_layout(nid, parcels, roads, seed=1, w=W, h=H) -> dict:
         exits[rid] = {"to": other, "side": end.get("side") or "centre", "parcels": ps, "dir": [dx, dy],
                       "from": centre[ps[0]] if ps else [w / 2, h / 2], "hidden": bool(end.get("hidden"))}
     rnd = lambda poly: [[round(x, 1), round(y, 1)] for x, y in poly]
-    return {"cells": {k: rnd(v) for k, v in cells.items()}, "centre": centre, "lots": lots, "outline": rnd(outline), "exits": exits}
+    return {"cells": {k: rnd(v) for k, v in cells.items()}, "centre": centre, "lots": lots, "label": label, "outline": rnd(outline),
+            "exits": exits}

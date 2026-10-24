@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>World Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;600&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root { --night: #1b2444; --night2: #202b50; --ink: #f6ead0; --muted: #9aa4c8; --gold: #e8c060; --rim: #c4507a; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--night); color: var(--ink); font: 15px/1.4 Nunito, system-ui, sans-serif; }
+  .px { font-family: "Pixelify Sans", ui-monospace, monospace; }
+  .top { display: flex; align-items: center; gap: 12px; padding: 10px 16px; flex-wrap: wrap; }
+  .top h1 { font: 600 22px "Pixelify Sans", monospace; margin: 0; }
+  .top .where { color: var(--gold); font: 16px "Pixelify Sans", monospace; }
+  .top button { background: var(--night2); color: var(--ink); border: 2px solid #3a4680; font: 14px "Pixelify Sans", monospace; padding: 4px 10px; cursor: pointer; box-shadow: 0 3px 0 #10162e; }
+  .top button:active { transform: translateY(2px); box-shadow: 0 1px 0 #10162e; }
+  .top input[type=range] { flex: 1; min-width: 160px; accent-color: var(--gold); }
+  .day { font: 16px "Pixelify Sans", monospace; min-width: 9em; }
+  .map { position: relative; margin: 0 16px 16px; border: 3px solid #10162e; box-shadow: 0 0 0 3px #3a4680; }
+  .map canvas { display: block; width: 100%; height: auto; image-rendering: pixelated; cursor: pointer; }
+  .lab { position: absolute; transform: translate(-50%, 0); font: 14px "Pixelify Sans", monospace; color: var(--ink); text-shadow: 2px 2px 0 #10162e, -1px -1px 0 #10162e;
+    white-space: nowrap; pointer-events: none; }
+  .lab.place { font-size: 17px; }
+  .lab small { display: block; font-size: 12px; color: var(--muted); text-align: center; }
+  .lab.exit { color: var(--gold); }
+  .mark { position: absolute; width: 14px; height: 14px; margin: -7px 0 0 -7px; border: 2px solid var(--rim); border-radius: 50%; pointer-events: none; animation: ping 1.4s ease-out infinite; }
+  @keyframes ping { from { transform: scale(.6); opacity: 1 } to { transform: scale(2.2); opacity: 0 } }
+  .tip { position: fixed; pointer-events: none; background: #10162e; color: var(--ink); border: 2px solid #3a4680; padding: 4px 8px; font: 13px Nunito, sans-serif; max-width: 340px; display: none; z-index: 5; }
+</style>
+</head>
+<body>
+<div class="top">
+  <h1 id="title">World</h1><span class="where" id="where"></span>
+  <button id="back" hidden>← the world</button>
+  <button id="prev">◀</button><button id="play">▶</button><button id="next">▶|</button>
+  <span class="day" id="day"></span>
+  <input type="range" id="slider" min="0" value="0" aria-label="Day">
+</div>
+<div class="map" id="map"><canvas id="cv"></canvas></div>
+<div class="tip" id="tip"></div>
+<script>__PIXEL_JS__</script>
+<script id="vizdata" type="application/json">__VIZ_DATA__</script>
+<script>
+"use strict";
+const V = JSON.parse(document.getElementById("vizdata").textContent), ST = V.static;
+const S = { day: 0, node: null, hot: [], playing: false, timer: null };
+const $ = (s) => document.querySelector(s), cv = $("#cv"), map = $("#map"), tip = $("#tip");
+$("#title").textContent = V.meta.name; $("#slider").max = V.days.length - 1;
+const q = new URLSearchParams(location.search);
+if (q.get("day")) S.day = Math.max(0, Math.min(V.days.length - 1, +q.get("day") - 1));
+if (q.get("node")) S.node = q.get("node");
+function render() {
+  const d = V.days[S.day], cal = d.calendar || {};
+  const r = S.node ? C2Pixel.node(cv, V, S.node, S.day, { width: 256, height: 160 }) : C2Pixel.world(cv, V, S.day, { width: 400, height: 260 });
+  S.hot = r.hotspots;
+  $("#day").textContent = `Day ${d.day + 1}${cal.season ? " · " + cal.season : ""}${d.weather_words ? " · " + d.weather_words : ""}`;
+  $("#slider").value = S.day; $("#back").hidden = !S.node; $("#where").textContent = S.node ? ST.nodes[S.node].name : `${Object.keys(ST.nodes).length} places`;
+  map.querySelectorAll(".lab,.mark").forEach((e) => e.remove());
+  const k = 100 / r.width, kh = 100 / r.height;
+  const lab = (cls, x, y, html) => { const e = document.createElement("div"); e.className = "lab " + cls; e.style.left = x * k + "%"; e.style.top = y * kh + "%"; e.innerHTML = html;
+    const f = x / r.width; e.style.transform = f < .14 ? "translate(0,0)" : f > .86 ? "translate(-100%,0)" : "translate(-50%,0)"; map.appendChild(e); };
+  for (const h of r.hotspots) {
+    if (h.kind === "node") lab("place", h.cx, h.cy + 14, `${h.label}<small>${h.unexplored ? "unexplored" : h.pop + " here"}</small>`);
+    if (h.kind === "parcel") lab("", h.cx, h.cy - 4, h.label);
+    if (h.kind === "exit") lab("exit", h.x + h.w / 2, Math.min(r.height - 12, h.y + h.w), h.label);
+    if (h.kind === "event" || (h.kind === "node" && h.deaths)) { const e = document.createElement("div"); e.className = "mark"; e.style.left = (h.cx ?? h.x + h.w / 2) * k + "%"; e.style.top = (h.cy ?? h.y + h.h / 2) * kh + "%"; map.appendChild(e); }
+  }
+}
+function at(e) {
+  const b = cv.getBoundingClientRect(), x = (e.clientX - b.left) * cv.width / b.width, y = (e.clientY - b.top) * cv.height / b.height;
+  const order = ["person", "event", "herd", "thing", "building", "exit", "node", "landmark", "road", "parcel"];
+  const hits = S.hot.filter((h) => x >= h.x - 1 && x <= h.x + h.w + 1 && y >= h.y - 1 && y <= h.y + h.h + 1);
+  hits.sort((a, b) => order.indexOf(a.kind) - order.indexOf(b.kind));
+  return hits[0];
+}
+cv.addEventListener("mousemove", (e) => { const h = at(e); if (h) { tip.style.display = "block"; tip.textContent = h.label; tip.style.left = e.clientX + 14 + "px"; tip.style.top = e.clientY + 12 + "px"; } else tip.style.display = "none"; });
+cv.addEventListener("mouseleave", () => (tip.style.display = "none"));
+cv.addEventListener("click", (e) => { const h = at(e); if (!h) return; if (h.kind === "node") { S.node = h.id; render(); } else if (h.kind === "exit") { S.node = h.to; render(); } });
+const setDay = (i) => { S.day = Math.max(0, Math.min(V.days.length - 1, i)); render(); };
+function play(on) { S.playing = on; $("#play").textContent = on ? "❚❚" : "▶"; clearTimeout(S.timer); const t = () => { if (!S.playing) return; if (S.day >= V.days.length - 1) return play(false); setDay(S.day + 1); S.timer = setTimeout(t, 900); }; if (on) S.timer = setTimeout(t, 900); }
+$("#prev").onclick = () => { play(false); setDay(S.day - 1); }; $("#next").onclick = () => { play(false); setDay(S.day + 1); };
+$("#play").onclick = () => play(!S.playing); $("#slider").oninput = (e) => { play(false); setDay(+e.target.value); };
+$("#back").onclick = () => { S.node = null; render(); };
+document.addEventListener("keydown", (e) => { if (e.key === "ArrowRight") setDay(S.day + 1); else if (e.key === "ArrowLeft") setDay(S.day - 1); else if (e.key === "Escape") { S.node = null; render(); } else if (e.key === " ") { e.preventDefault(); play(!S.playing); } });
+render();
+</script>
+</body>
+</html>
