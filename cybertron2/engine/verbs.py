@@ -835,6 +835,8 @@ def _set(here, mind, a, party):
 
 # ---------------------------------------------------------------------- travel (D4-8, D4-32)
 def _travel(here, mind, a, party):
+    if not str(a.get("to") or "").strip() and here.road_to(a.get("stop at")) is not None:
+        a = {**{k: v for k, v in a.items() if k != "stop at"}, "to": a["stop at"]}   # a way named as the stop: it is where one goes
     if not str(a.get("to") or "").strip():
         ways = ", ".join(f"{n} ({k} day{'s' if k > 1 else ''})" for _, n, k, _t in here.roads())
         raise Refused(f'say where in "to" (a place, or a way as the roads name it); from here: {ways or "nowhere"}')

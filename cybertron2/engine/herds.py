@@ -438,7 +438,8 @@ def lead_ox(w, name, hid, rid, pos) -> str:
     for cl in w.claims_on(("herd", hid)):
         w.apply("claim", node, thing=("herd", new), claimant=cl["claimant"], rights=cl["rights"], grounds=cl["grounds"])
     base = w.s["herds"][hid].get("base_name") or w.s["herds"][hid]["name"]
-    for f, v in (("name", f"the pack ox of {base.removeprefix('the ')}"), ("pack", True), ("with", name), ("parcel", None),
+    led = base if FM.head(w.s["herds"][hid]) == 0 else f"an ox of {base}"           # the whole herd, or one ox from it
+    for f, v in (("name", led), ("pack", True), ("with", name), ("parcel", None),
                  ("pos", pos), ("node", rid)):
         w.apply("set", node if f != "node" else node, ref=("herd", new), field=f, value=v)
     return new

@@ -193,6 +193,9 @@ TECHNIQUES = {
     "herd": {"verb": "work", "label": "herding (watching the beasts)", "aliases": ["herding", "watch the herd", "tend the herd"], "basic": True,
              "at": {"covers": ["pasture", "meadow", "field"]}, "draws": "herd", "yield": {"kind": "herd"}, "units": 1, "gives": "",
              "tags": ["animals"]},
+    "care": {"verb": "work", "label": "caring for a child (feeding, minding, keeping it warm)", "basic": True,
+             "aliases": ["mind", "minding", "look after", "nurse", "tend the child"], "at": {"children": True}, "draws": "child",
+             "yield": {"kind": "care"}, "units": 1, "gives": "", "tags": ["family"]},                                       # D2-142, D2-150
     # Fences round a parcel and gates (livestock.md "Fences and gates": D2-130, D2-132): a field work on the parcel; FENCES has the numbers
     "fence": {"verb": "work", "label": "fencing a parcel round (wattle or post and rail)", "basic": True,
               "aliases": ["fencing", "put up a fence", "wattle fence", "mend the fence", "build a fence", "a fence"],
@@ -537,3 +540,21 @@ TECHNIQUES.update({
                   "key": "searching", "value": "*", "changes": {}, "units": 0, "gives": "", "tags": ["travel", "animals"]},   # D2-125
 })
 MODIFIERS = {t for t, d in TECHNIQUES.items() if d.get("modifies")}
+
+# ---------------------------------------------------------------------------------------------------------------- life (spec/life)
+# Birth and death (life/birth_and_death.md: D2-138 to D2-152; calibrate where the spec says so). Stages by days since birth (D2-139):
+# infant 2, child 4, youth 12, adult 50, then elder. A world sets `children: {on: true, dial: low | high}`; off, nobody conceives.
+LIFE = {
+    "stages": [["infant", 2], ["child", 4], ["youth", 12], ["adult", 50]],          # then elder
+    "conceive": {"base": 0.5, "k": 0.5},                    # 0.5 x (1 - e^(-0.5 x units)) a night (D2-146)
+    "pregnancy": {"days": 5, "food": 0.3, "late": 2, "late_units": 1, "road_loss": 0.05, "signs_from": 3},   # D2-141, D2-147
+    "birth": {"housed": {"mother": 0.02, "infant": 0.03}, "out": {"mother": 0.06, "infant": 0.10}, "helped": 0.5},
+    "gap": 4,
+    "infant": {"eats": 0.5, "dies": {"cared": 0.02, "not": 0.08}, "hungry": 2.0, "cold": 2.0, "weight": 2},
+    "child": {"dies": 0.005, "unminded": 4.0},
+    "dial": {"low": {"infant_care": 1, "child_eats": 0.7, "child_works": 1.0, "child_minding": 0},
+             "high": {"infant_care": 3, "child_eats": 1.0, "child_works": 0.5, "child_minding": 1}},   # D2-145, D2-151
+    "old_age": {"adult": 0.001, "elder": 0.01, "doubling": 20},                     # D2-149
+    "succession_days": 2,                                                           # D2-143
+    "children_work": ["forage", "herd", "watch"],                                   # D2-148: what a head may set children to
+}
