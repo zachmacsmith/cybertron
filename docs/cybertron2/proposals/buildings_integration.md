@@ -41,7 +41,16 @@ are built of and what every hearth burns, and the worlds' woods are far too smal
      regrowing pool in woods and scrub (about 5 a unit of size, regrowing in days), burnable but not buildable; timber (felled from
      standing trees, with a tool) builds and can also burn. This is the historical split (commoners' firewood rights against the
      lord's timber) and lets houses and fires stop competing for the same stock.
-- Either needs the capacity check (38.21) to compare fuel and building needs against what woods give back, not what stands.
+  3. **Small woods near villages, large forests beyond (Zach, 24 Oct):** a village's own wood is small and regrows (a copse or coppice
+     giving perhaps 10 to 30% of its fuel each year), while old forest spans several nodes one or two days out, with large standing
+     stock and slow regrowth. Getting wood then pushes people outward: woodcutters' camps (D2-68), forest villages that sell wood,
+     roads and hidden ways through woodland, and new settlements cleared in the forest (with E's clearing). To stay possible
+     (38.23 died of fuel out of reach): **charcoal burns in a hearth** (proposed: 1 charcoal gives the heat of 3 timber at the weight
+     of 1 timber), so distant fuel can be carried at a third of the weight, at the cost of 40% of the wood and 2 units a charcoal; and
+     the capacity check counts carrying.
+     For a village of 4 hearths (84 timber a run) whose copse gives 12: the rest from a forest 1 day out is 8 pack trips (8
+     carrier-days, about 3% of its adults' days); from 2 days out, 24 carrier-days (10%); as charcoal from 2 days out, about 8.
+- Any of these needs the capacity check (38.21) to compare fuel and building needs against what woods give back, not what stands.
 
 ### 2b. Beds and who sleeps where
 
@@ -87,7 +96,8 @@ are built of and what every hearth burns, and the worlds' woods are far too smal
 
 ## Open questions (for Zach)
 
-1. Fuel: size woods by kind (2a.1), split firewood from timber (2a.2), or both?
+1. Fuel: size woods by kind (2a.1), split firewood from timber (2a.2), small woods with forests beyond and charcoal in hearths
+   (2a.3)?
 2. Beds for members, with infants sharing and two children a bed (2b)?
 3. A hearth warming 12 spaces, fuel scaling with floor (2c)?
 4. Building ground as a claim, disputed by custom (2d)?
@@ -97,6 +107,9 @@ are built of and what every hearth burns, and the worlds' woods are far too smal
 
 - 24 Oct: Zach: defer Package E; first consider how buildings integrate with the other systems; and the little forests seem to be
   stripped bare quickly in every run. Written.
+
+- 24 Oct: Zach: smaller woods near villages, with forests across several nodes, so getting timber pushes societies out into
+  the forests. Added as 2a.3 with charcoal in hearths and the carrying it costs.
 
 ## Sources
 
