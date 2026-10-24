@@ -96,7 +96,7 @@ are built of and what every hearth burns, and the worlds' woods are far too smal
 
 ## Open questions (for Zach)
 
-1. Fuel: size woods by kind (2a.1), split firewood from timber (2a.2), small woods with forests beyond and charcoal in hearths
+1. Fuel: now worked out as a system in [forests.md](forests.md). Size woods by kind (2a.1), split firewood from timber (2a.2), small woods with forests beyond and charcoal in hearths
    (2a.3)?
 2. Beds for members, with infants sharing and two children a bed (2b)?
 3. A hearth warming 12 spaces, fuel scaling with floor (2c)?

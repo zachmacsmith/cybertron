@@ -45,6 +45,7 @@ without a proposal.
 | [shelter.md](shelter.md) | houses, upkeep, breaks, the cold, the shelter ladder | 37.2 | partly accepted: H-5, D2-10 |
 | [buildings.md](buildings.md) | buildings from parts: structures, rooms, fittings, scaling, storeys, limits | 37.2 | partly accepted: D2-3, D2-9 |
 | [buildings_integration.md](buildings_integration.md) | how buildings meet every other system; eight decisions before Package E: fuel and timber (woods too small; firewood apart from timber), beds for members, heating by floor, building ground as a claim, children, room access, fire and floods, materials over roads | 37.2 | discussion |
+| [forests.md](forests.md) | a forest as trees, young growth and dead wood; timber (builds, 2 heat), firewood (burns, 0.5 heat, by hand), charcoal (6 heat, light); near woods degrade, far forests endure; links to perception, labour, building, food, trade, claims, environment | 37.2 (37.4 owns land and perception) | discussion |
 | [resources_and_goods.md](resources_and_goods.md) | the base resources, the lean first-world set and the pruning rule, unlocks, end uses | 37.2 | discussion (D2-10, D2-19, D2-23 accepted) |
 | [economy_later.md](economy_later.md) | options kept out of the first worlds (armour, nets, boats, seed drill, irrigation, clay, iron, the press, ...) | 37.2 | deferred |
 | [transport_and_lodging.md](transport_and_lodging.md) | the transport ladder, capacities, danger by edge and season, inns and hosts | 37.2 (37.4 the mechanism) | partly accepted: D4-9, D4-12, D2-4 |
@@ -81,6 +82,7 @@ Newest first. Ideas decided or rejected in conversation before 23 Oct are backfi
 
 | Date | Idea | Outcome | Where |
 |---|---|---|---|
+| 24 Oct | The forest as a system; firewood apart from timber, by the forest's health; fuel in heat | discussion | forests.md |
 | 24 Oct | Package E deferred; buildings' integration with the other systems, and woods too small for fuel | discussion | buildings_integration.md |
 | 24 Oct | One unit of space from parcel to fitting; storage takes space; a cheaper cellar | accepted: D2-154, D2-155 | buildings.md; spec/economy/buildings.md |
 | 24 Oct | Fittings free of space; unlimited stores | rejected: D2-154, D2-155 | buildings.md |
