@@ -71,6 +71,11 @@ knowledge has to reach someone else or outlast the writer, which is where instit
 
 - 23 Oct: tested in M1 runs A and B ([11_m1_slice.md](../../review/38_space_engine/11_m1_slice.md)): Opus and Haiku write and pin
   notes, Sonnet almost never; opening notes was used twice in 280 turns. Not revised.
+- 24 Oct (37.4): Hollins 2 (h2, 41 days, review 38.30): 89 pins refused, almost all from one Hunt (Opus) who used `pin` to write a
+  morning reminder ("Fern Hollow: hunt twice and forage, carry meat home to Hunt Hut store") rather than to name a note he had.
+  Proposed revision, not built (it changes the rule): a pin that names no note writes it as one (title its first 60 characters,
+  text the whole) and pins it, if there is room for another note; otherwise refused as now. The alternative is a clearer schema
+  line ("pin: the title of a note you already keep") with no change of rule.
 
 ## Sources
 
