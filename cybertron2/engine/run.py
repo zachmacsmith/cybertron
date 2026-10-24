@@ -77,29 +77,27 @@ def bot_fuse(w, name, x) -> dict:
 
 
 class Stopped(Exception):
-    """The run cannot go on (a usage limit that does not lift): it stops after saving, rather than play days nobody chose."""
+    """The run cannot go on (a replay whose record ends): it stops."""
 
 
-LIMIT_MAX_WAIT = 12 * 3600                                               # give up after half a day of waiting
+class Abandoned(Exception):
+    """Too many calls of the day failed (cybertron 1's fail-stop: a usage limit, auth, CLI errors): the day is dropped."""
 
 
-def limit_wait(error, now=None) -> float | None:
-    """Seconds to wait before asking again when a call failed for a usage or rate limit, not for its reply; None for any other
-    error. A limit is not an answer: a day must not go on as if everyone had chosen to do nothing (w1, day 25)."""
-    e = str(error or "")
-    if not any(k in e for k in ("hit your session limit", "usage limit", "rate limit", "rate_limit", '"api_error_status": 429', "429")):
-        return None
-    import datetime as dt
-    import re
-    now = now or dt.datetime.now(dt.timezone.utc)
-    m = re.search(r"resets (\d{1,2})(?::(\d{2}))?\s*(am|pm)\s*\(UTC\)", e)
-    if m:
-        h, mi = int(m.group(1)) % 12 + (12 if m.group(3) == "pm" else 0), int(m.group(2) or 0)
-        at = now.replace(hour=h, minute=mi, second=0, microsecond=0)
-        if at <= now:
-            at += dt.timedelta(days=1)
-        return (at - now).total_seconds() + 120
-    return 600.0
+class Tally:
+    """A day's model calls and how many failed. At `llm.fail_stop_fraction` (default half) of max(planned decisions, calls so
+    far), the day is abandoned and the run stops, to be resumed later (cybertron 1's failstop.py)."""
+
+    def __init__(self, frac, planned):
+        self.frac, self.planned = frac, planned
+        self.calls, self.failed, self.errors = 0, 0, []
+
+    def add(self, n_calls, errors) -> None:
+        self.calls += n_calls
+        self.failed += len(errors)
+        self.errors += list(errors.items())
+        if self.failed > 0 and self.failed >= self.frac * max(self.planned, self.calls):
+            raise Abandoned(f"{self.failed} of {self.calls} model calls failed")
 
 
 def _recorded(w, J, key, name, model, rec, text, opening, system, conv, schema, fuse, transit):
@@ -147,18 +145,8 @@ def decide(w, name, text, opening, system, backend, conv, talk=None, schema=None
     if J:
         c = ctx["conv"]
         J.request(key, name, kind, f"{name}@{c['day0']}", len(c["messages"]) // 2, c["system"], schema, ctx["text"], f"model:{model}")
-    waited = 0.0
-    while True:
-        out, reasoning, usage = llm.call(backend, model, ctx["conv"]["system"], sent, schema,
-                                         thinking_budget=int((w.spec.get("llm") or {}).get("thinking_budget", 2000)), attempts=attempts)
-        pause = limit_wait((out or {}).get("_error"))
-        if pause is None:
-            break
-        if waited >= LIMIT_MAX_WAIT:
-            raise Stopped(f"the usage limit did not lift in {LIMIT_MAX_WAIT / 3600:.0f} hours")
-        print(f"usage limit on {name}'s call: waiting {pause / 60:.0f} min before asking again", flush=True)
-        time.sleep(pause)                                                  # the world waits: nothing happens until it is answered
-        waited += pause
+    out, reasoning, usage = llm.call(backend, model, ctx["conv"]["system"], sent, schema,
+                                     thinking_budget=int((w.spec.get("llm") or {}).get("thinking_budget", 2000)), attempts=attempts)
     raw = attempts[-1].get("raw") if attempts and attempts[-1].get("ok") and not (out or {}).get("_error") else None
     usage = conv.after(ctx, raw, usage)
     if J:
@@ -167,7 +155,7 @@ def decide(w, name, text, opening, system, backend, conv, talk=None, schema=None
                        "sent": ctx["text"], "opening": ctx["text"] is opening, "key": key}
 
 
-def _parallel(fn, jobs: dict, workers) -> tuple[dict, dict, dict]:
+def _parallel(fn, jobs: dict, workers, tally=None) -> tuple[dict, dict, dict]:
     replies, meta, errors = {}, {}, {}
     with cf.ThreadPoolExecutor(max_workers=workers) as ex:
         futs = {ex.submit(fn, *args): n for n, args in jobs.items()}
@@ -180,6 +168,8 @@ def _parallel(fn, jobs: dict, workers) -> tuple[dict, dict, dict]:
                     replies[n] = {"actions": []}
             except Exception as e:
                 replies[n], meta[n], errors[n] = {"actions": []}, {}, repr(e)[:500]
+    if tally is not None:
+        tally.add(len(jobs), errors)
     return replies, meta, errors
 
 
@@ -420,7 +410,7 @@ def night_lines(w, rec) -> dict:
 
 
 # ---------------------------------------------------------------------- urgent calls (fuse events: D2-80 to D2-84, D2-110)
-def fuse_calls(w, today, woke, results, talk_log, openings, systems, backend, conv, workers, extra_cost):
+def fuse_calls(w, today, woke, results, talk_log, openings, systems, backend, conv, workers, extra_cost, tally=None):
     """One call each for the woken, appended to its own conversation; a meeting on the road has up to 3 waves of talk among everyone
     in it (D2-110), each wave's speech and offers shown to all in the next; the last reply's acts are done."""
     def ask(texts):
@@ -429,7 +419,7 @@ def fuse_calls(w, today, woke, results, talk_log, openings, systems, backend, co
             op = openings.get(n) or PR.road_opening(here, mind)
             return decide(w, n, texts[n], op + "\n\n" + texts[n], conv.system(n, systems.get(n) or ""), backend, conv, fuse=woke[n],
                           kind="fuse")
-        r, m, e = _parallel(one, {n: (n,) for n in texts}, workers)
+        r, m, e = _parallel(one, {n: (n,) for n in texts}, workers, tally)
         for n in texts:
             extra_cost[0] += float(((m.get(n) or {}).get("usage") or {}).get("cc_equiv_usd") or 0.0) if n not in openings else 0.0
             talk_log.setdefault(n, []).append({"wave": "fuse", "prompt": texts[n], "reply": r.get(n) or {},
@@ -478,6 +468,27 @@ def _runner(J, cost, conv, scope) -> dict:
     convs = {n: {**{k: v for k, v in c.items() if k not in ("messages", "session")}, "messages": slim(c["messages"])}
              for n, c in conv.c.items()}
     return {"cost": cost, "conversations": convs, "carry": slim({k: scope[k] for k in CARRY if k in scope})}
+
+
+def _abandon(J, out, day, days, tally, why) -> str:
+    """Drop the day (cybertron 1's fail-stop): its steps are marked aborted and its failed calls set aside, so that a resume plays it
+    again, reusing the answers that came and asking the failed ones again; STOPPED.md says why."""
+    J.abandon_day(day)
+    kept = "the start of the run" if day == 0 else f"the end of day {day}"
+    samples, seen = [], set()
+    for who, err in tally.errors:
+        if str(err)[:120] not in seen:
+            seen.add(str(err)[:120])
+            samples.append(f"- {who}: {str(err)[:400]}")
+    (out / "STOPPED.md").write_text("\n".join([
+        "# Run stopped", "", f"- When: {time.strftime('%Y-%m-%d %H:%M:%S')}",
+        f"- Day {day + 1} of {days} was abandoned: {why} (the stop is at {tally.frac:.0%} of max({tally.planned} planned decisions, "
+        "calls made)).",
+        f"- The run is kept as of {kept}; the day's answers that came are kept and reused, the failed calls are set aside (journal "
+        "table `abandoned`) and will be asked again.",
+        f"- Continue with `python -m cybertron2.engine resume {out}` once the cause is fixed (a usage limit: after it resets).", "",
+        "## Sample errors", ""] + samples[:5]) + "\n")
+    return f"day {day + 1}: {why}; the day was abandoned and the run kept as of {kept}. Resume to play day {day + 1} again."
 
 
 def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, seed=None, until=None, mode="start"):
@@ -529,6 +540,11 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
         J.until = until
     else:
         J.resume(strict=mode == "replay", until=until)
+    stopped = None
+    if mode == "resume" and (out / "STOPPED.md").exists():               # a resumed run shows only a current stop
+        with open(out / "stop_history.md", "a") as h:
+            h.write((out / "STOPPED.md").read_text() + "\n")
+        (out / "STOPPED.md").unlink()
     cost = 0.0
     last_system = dict(systems)
     extra_cost = [0.0]
@@ -547,11 +563,9 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
             systems = {n: PR.system_prompt(Here(w, n), Mind(w, n)) for n in names}
             openings = {n: PR.turn_prompt(Here(w, n), Mind(w, n), opening=True) for n in names}
             users = {n: PR.turn_prompt(Here(w, n), Mind(w, n), opening=False) for n in names}
+            tally = Tally(float(((w.spec.get("llm") or {}).get("fail_stop_fraction")) or 0.5), len(names))
             replies, meta, errors = _parallel(lambda n: decide(w, n, users[n], openings[n], systems[n], backend, conv),
-                                              {n: (n,) for n in names}, workers)
-            if any(str(e).startswith("Stopped(") for e in errors.values()):
-                print(f"run stopped on day {day + 1}: {next(e for e in errors.values() if str(e).startswith('Stopped('))}", flush=True)
-                break
+                                              {n: (n,) for n in names}, workers, tally)
             first = {n: dict(replies[n]) for n in names}
             results = {n: ([f"(Your reply could not be used, so you did nothing: {errors[n][:160]})"] if n in errors else []) for n in names}
             for n in names:
@@ -571,7 +585,7 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
                                            sum(1 for x in results[n] if x.startswith("You told "))) for n, b in woken.items()}
                 rr, mm, ee = _parallel(lambda n: decide(w, n, texts[n], openings[n] + "\n\n" + texts[n], systems[n], backend, conv, woken[n],
                                                         kind="talk"),
-                                       {n: (n,) for n in woken}, workers)
+                                       {n: (n,) for n in woken}, workers, tally)
                 late = {}
                 for n in woken:
                     talked.add(n)
@@ -631,7 +645,7 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
                 texts = {n: PR.lighten_prompt(Here(w, n), Mind(w, n), heavy[n], results[n]) for n in heavy}
                 lr, lm, le = _parallel(lambda n: decide(w, n, texts[n], openings[n] + "\n\n" + texts[n], systems[n], backend, conv,
                                                         kind="lighten"),
-                                       {n: (n,) for n in heavy}, workers)
+                                       {n: (n,) for n in heavy}, workers, tally)
                 for n in heavy:
                     talk_log[n].append({"wave": "lighten", "prompt": texts[n], "reply": lr.get(n) or {}, "usage": (lm.get(n) or {}).get("usage")})
                     acts = [x for x in ((lr.get(n) or {}).get("actions") or []) if isinstance(x, dict)
@@ -663,7 +677,7 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
             woke = FU.plan(w, today)                                            # fuse events: the urgent calls (D2-80 to D2-84)
             last_system.update(systems)
             if woke:
-                fuse_calls(w, today, woke, results, talk_log, openings, last_system, backend, conv, workers, extra_cost)
+                fuse_calls(w, today, woke, results, talk_log, openings, last_system, backend, conv, workers, extra_cost, tally)
             rec = N.night(w)
             rec["fuse"] = FU.record(today)
             rec["road"] = road_rec
@@ -688,7 +702,7 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
                 keep = {n: json.loads(conv.c[n]["schema"]) for n in ending if n in conv.c}   # the stretch's own schema: it continues
                 mr, mm, me = _parallel(lambda n: decide(w, n, texts[n], openings[n] + "\n\n" + texts[n], systems[n], backend, conv,
                                                         schema=keep.get(n), transit=True, kind="memory"),
-                                       {n: (n,) for n in ending}, workers)
+                                       {n: (n,) for n in ending}, workers, tally)
                 for n in ending:
                     text = str((mr.get(n) or {}).get("memory") or "").strip()
                     if text:
@@ -721,7 +735,11 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
                 break
     except JN.Paused as e:
         print(str(e), flush=True)
-    w.save(out / "state.json")
+    except Abandoned as e:
+        stopped = _abandon(J, out, day, w.days, tally, str(e))
+        print(stopped, flush=True)
+    if stopped is None:
+        w.save(out / "state.json")
     if mode != "replay":
         J.meta("ended", {"day": w.d, "alive": len(w.living()), "cost_usd": round(cost, 4)})
     report = {"checked": J.checked, "mismatches": J.mismatches, "at": J.step}

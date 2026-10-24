@@ -33,6 +33,7 @@ TABLES = {
     "changes": "seq INTEGER PRIMARY KEY, day INTEGER, step TEXT, attempt INTEGER, primitive TEXT, place TEXT, arguments TEXT, "
                "cause TEXT, result TEXT",
     "interventions": "id INTEGER PRIMARY KEY, submitted TEXT, applied TEXT",
+    "abandoned": "key TEXT, attempts TEXT, parsed TEXT, at REAL",          # failed calls of an abandoned day (fail-stop)
 }
 EVENT_COLS = ("id", "day", "place", "kind", "actor", "target", "about", "concerns", "text")
 
@@ -115,6 +116,17 @@ class Journal:
                 print(f"journal: the code has changed since this run began ({was} -> {prov['code_sha']}); resuming anyway", flush=True)
             self._x("INSERT INTO segments (kind, first_step, code_sha, parent, responders) VALUES (?, ?, ?, ?, ?)",
                     (kind, None, prov["code_sha"], None, dumps({})))
+
+    def abandon_day(self, day) -> None:
+        """A day dropped by the fail-stop: its steps aborted, its failed calls set aside (not answers: asked again on resume)."""
+        pat = f"d{day}.%"
+        with self.lock:
+            self.db.execute("BEGIN")
+            self.db.execute("INSERT INTO abandoned SELECT key, attempts, parsed, ? FROM responses WHERE key LIKE ? AND parsed LIKE '%\"_error\"%'",
+                            (time.time(), pat))
+            self.db.execute("DELETE FROM responses WHERE key LIKE ? AND parsed LIKE '%\"_error\"%'", (pat,))
+            self.db.execute("UPDATE steps SET status = 'aborted' WHERE step LIKE ? AND status IN ('open', 'committed')", (pat,))
+            self.db.execute("COMMIT")
 
     def answer(self, key) -> dict | None:
         """The recorded answer to a request, if it was answered (an answer, or a failure the run took as one)."""

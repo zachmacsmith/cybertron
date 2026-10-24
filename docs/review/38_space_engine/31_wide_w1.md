@@ -9,9 +9,11 @@ On day 25 (about 13:10 UTC) every model call began failing with "You've hit your
 took each failure as an empty reply, so the days went on with nobody acting: all 23 starved by day 73, within minutes of wall
 time. **Only days 1 to 24 are a run;** nothing after day 24 says anything about the agents.
 
-Fixed (d9e9448): a call that hits a usage or rate limit waits for the reset the error names (or 10 minutes) and is asked again; the
-world does not move meanwhile. After 12 hours of waiting the run stops after saving. Test: test_cybertron2_journal.py. w1 began
-on the code before R1 (38.29), so it has no journal and cannot be resumed from day 24.
+Fixed, as cybertron 1 does it (its failstop.py): when half the model calls of a day fail (`llm.fail_stop_fraction`, default 0.5,
+of max(planned decisions, calls made)), the day is abandoned and the run stops; STOPPED.md says why, the day's failed calls are set
+aside, and `python -m cybertron2.engine resume RUN` plays the day again later, reusing the answers that came (38.32). (A first fix,
+d9e9448, waited for the limit to reset instead; replaced.) w1 began on the code before the journal (38.29), so it cannot be
+resumed from day 24.
 
 Cost to day 24: $98 (API-equivalent). By model: Opus 4.7 $36 (Fenwick), Sonnet 4.6 $24 (Moor, two people), Opus 4.5 $12 (Wynn),
 Opus 5.5 $8 (Rook), Haiku 4.5 $7, Sonnet 4.5 $4, Haiku 5.5 $0.3. Sonnet 4.6 and Opus 4.7 cost about three times as much a turn as

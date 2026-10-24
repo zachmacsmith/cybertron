@@ -72,30 +72,29 @@ def test_a_models_request_records_what_it_was_given(tmp_path, monkeypatch):
     assert json.loads(parsed[0])["why"] == "test" and json.loads(parsed[1])[0]["raw"]
 
 
-def test_a_usage_limit_is_waited_out_not_taken_for_an_answer(tmp_path, monkeypatch):
-    import datetime as dt
+def test_a_day_with_half_its_calls_failed_is_abandoned_and_played_again_on_resume(tmp_path, monkeypatch):
+    """cybertron 1's fail-stop: a usage limit drops the day and stops the run; resumed later, it ends as if nothing happened."""
     from cybertron import llm
-    now = dt.datetime(2026, 10, 24, 13, 10, tzinfo=dt.timezone.utc)
-    msg = 'CallError: claude -p error (exit 1): {"result": "You\'ve hit your session limit · resets 2:20pm (UTC)", "api_error_status": 429}'
-    assert R.limit_wait(msg, now) == 70 * 60 + 120
-    assert R.limit_wait("ValueError: no JSON in the reply", now) is None
-    calls, slept = [], []
+    limited = {"on": False}
 
     def api(model, system, user, schema, thinking_budget, max_tokens):
-        calls.append(1)
-        if len(calls) <= 2:                                                # the first call and its own retry hit the limit
-            raise RuntimeError(msg)
-        raw = json.dumps({"why": "after the wait", "actions": []})
+        if limited["on"] and "day 2 of these days" in str(user):
+            raise RuntimeError("claude -p error (exit 1): You've hit your session limit · resets 2:20pm (UTC)")
+        raw = json.dumps({"why": "steady", "actions": [{"do": "gather", "what": "forage"}]})
         return raw, json.loads(raw), "", {}
     monkeypatch.setattr(llm, "_api", api)
-    monkeypatch.setattr(R.time, "sleep", lambda s: slept.append(s))
-    from cybertron2.engine.world import World, load_spec
-    from cybertron2.engine.converse import Conversations
-    w = World(load_spec(SPEC))
-    w.s["today"] = R.blank_today()
-    n = w.agents_acting()[0]
-    out, meta = R.decide(w, n, "hello", "hello", "system", "api", Conversations(tmp_path, backend="api"))
-    assert out["why"] == "after the wait" and len(slept) == 1
+    R.run(SPEC, tmp_path / "full", backend="api", days=3)
+    limited["on"] = True
+    R.run(SPEC, tmp_path / "cut", backend="api", days=3)
+    stop = (tmp_path / "cut" / "STOPPED.md").read_text()
+    assert "Day 2 of 3 was abandoned" in stop and "session limit" in stop and not (tmp_path / "cut" / "state.json").exists()
+    db = tmp_path / "cut" / "run.db"
+    assert JN.read(db, "SELECT COUNT(*) FROM abandoned")[0][0] > 0
+    assert not JN.read(db, "SELECT step FROM steps WHERE step LIKE 'd1.%' AND status = 'committed'")
+    limited["on"] = False                                                  # the limit has reset
+    R.run(None, tmp_path / "cut", backend="api", mode="resume")
+    assert not (tmp_path / "cut" / "STOPPED.md").exists() and "Day 2" in (tmp_path / "cut" / "stop_history.md").read_text()
+    _same_end(tmp_path / "full", tmp_path / "cut")
 
 
 # ---------------------------------------------------------------------- R2: resume, pause, replay (execution.md)

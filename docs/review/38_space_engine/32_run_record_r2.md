@@ -18,6 +18,17 @@ Tests: a run killed in the night of day 3 resumes to the same state, days and me
 step's attempts `aborted` then `committed`; a model run paused after `d1.decide` and resumed asks exactly as many calls as an
 uninterrupted one and ends the same; replay checks every committed step and stops where asked.
 
+## A usage limit stops the run (cybertron 1's fail-stop)
+
+Zach: limits should work as in cybertron 1. There (cybertron/failstop.py) a round in which half the model calls fail is abandoned:
+the logs are cut back to the last checkpoint, STOPPED.md records the round, the counts and sample errors, and the run stops for a
+`resume` later. Here, with the journal: the day's calls are counted (decisions, talk, lightening, fuse calls, memories); at
+`llm.fail_stop_fraction` (default 0.5) of max(planned decisions, calls made) the day is abandoned. Its steps are marked `aborted`,
+its failed calls moved to the journal table `abandoned`, no state.json is written, and STOPPED.md says why. On `resume` the day is
+played again: the answers that came are reused and only the failed calls are asked again (cybertron 1 asked the whole round
+again); STOPPED.md moves to stop_history.md. Test: a run whose every call fails on day 2 stops there, and resumed after "the reset"
+ends the same as a run that never failed. The earlier fix (d9e9448: wait for the reset) is replaced.
+
 ## Differences from the spec, for 37.1
 
 - Resume replays from day 0 rather than loading the last checkpoint: the checkpoints serve as the check that the replay is the same
