@@ -357,6 +357,26 @@ a few edges from its farms is fed by carts and cured food, as historically.
   quarry and the mason (stone, hearths, cellars, millstones), the scribe (documents), the ox (ploughing).
 - The cards fit 37.4's verbs and technique record with no new verb.
 
+### 17. Eating without a fire (24 Oct, proposal; amends how D2-60 is applied)
+
+Today grain, rye, beans and flour are worth nothing without a lit fire, and fresh meat is worth its full 1.5 raw. Zach: some foods
+should be fully edible raw (they matter most when fuel runs low), some worth less raw, and some not edible raw at all. Proposed, each
+food's value raw as data:
+
+| Food | Cooked (at a fire) | Raw | Why |
+|---|---|---|---|
+| bread, cheese, dried meat, milk | as now | the same | made to be eaten as they are |
+| wild food (berries, greens, nuts) | 1.0 | 1.0 | |
+| flour | 1.0 (porridge) | 0.5 | stirred into water or milk, poorly |
+| grain, rye (whole) | 0.7 (boiled) | 0.2 | chewed or soaked, mostly undigested |
+| fresh meat | 1.5 | 0.8 | and, once disease exists (L-9), a chance of sickness |
+| beans | 0.6 | 0 | raw beans are poisonous |
+
+So a household out of fuel does not fall off a cliff beside full stores (38.23's deaths): 100 grain raw is 20 food, flour 50, and
+bread, cheese and dried meat keep their worth. Milling and baking become a hedge against fuel running out, as well as more food.
+This softens the symptom; the cause of the fuel deaths is the woods (proposals/forests.md: worlds sized on standing wood, no
+yearly flow, no firewood).
+
 ## Alternatives considered
 
 - **Charcoal, planks, leather as goods:** folded into recipes (02g §1f).
@@ -406,6 +426,8 @@ within a run. A full-time woodsman's 14 days is within one.
   stone tie every house to a quarry (fieldstone from fields, or a quarry in every settled kind); shore salt sun-dried, inland
   springs boiled; tools worth 3-8x their cost, so prices are bargained among few smiths; the copper seam the dominant chokepoint
   (about 14% of the region's work at a monopoly price); striking coin nearly free (a stamp later).
+
+- 24 Oct: Zach: does every food need a fire? Some should be fully edible raw, some worth less raw, some not at all. Added §17.
 
 ## Sources
 
