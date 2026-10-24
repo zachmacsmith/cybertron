@@ -216,8 +216,9 @@ Round 4's Lucy under keep_change with the note (Sonnet, half budget):
 - **Nothing forced by the engine**, as built.
 - **Weak models:** Haiku 4.5 does not keep a memory well under any instruction tried. Either keep the old queue for weak models,
   or test a smaller budget and an explicit "edit, don't rewrite" instruction for them.
-- **Fixed alongside:** a mother is told she gave birth (17a8cda); the end-of-stretch request in rewrite mode now includes what the
-  agent saw that last day, which the old request left out.
+- **Fixed alongside:** a mother is told she gave birth (17a8cda). (What an agent sees on the last day of a stretch is not in the
+  end-of-stretch request, but it is shown the next morning as "What you saw yesterday", at the opening of the next stretch, so it
+  is in front of the agent when that stretch's memory is written; adding it to the request only doubled it, and was undone.)
 - **Next:** a short in-engine run in rewrite mode (the birth bug fixed) to see it working end to end, before deciding.
 
 *Current as of 24 Oct 2026.*

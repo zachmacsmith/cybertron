@@ -83,10 +83,6 @@ def request(w, name, mind, did, night, span, variant=None) -> str:
     L = ["## The day is over", "You did: " + (" ".join(x for x in did if not x.startswith(PC.SPEECH)) or "nothing")]
     if night:
         L.append("In the night: " + " ".join(night))
-    from cybertron2.engine import prompt as PR
-    saw = PR.saw_lines(mind)                                                  # the last day's perceptions, else seen only tomorrow
-    if saw:
-        L.append("What you saw today:\n" + "\n".join(saw))
     L.append(f"This is the end of a stretch of days ({span}). Tomorrow you will remember only your memory, your notes and what you "
              "have always known, not the detail of these days.")
     L.append("## Your memory as it stands\n" + (current(mind) or "(nothing yet)"))
