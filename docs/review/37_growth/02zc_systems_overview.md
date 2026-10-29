@@ -348,7 +348,7 @@ removes, so it is not a guide to the present engine. Only h2 (41 days) and w1 (2
 - **Status:** implemented (life.py, Package D; D2-138 to D2-152). Whether agents try for children is strongly model-dependent
   (38.31).
   - As built, the population cannot replace itself at any effort: R0 0.59 with every couple trying every night (02ze).
-  - D2-162 (29 Oct): pregnancy 2 days, gap 1, cap 0.8; not yet built.
+  - D2-162 (29 Oct): pregnancy 2 days, gap 1, cap 0.8; built (478944e).
 
 ## 18. Speech and messages
 
