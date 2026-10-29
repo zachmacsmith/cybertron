@@ -223,4 +223,48 @@ Round 4's Lucy under keep_change with the note (Sonnet, half budget):
 
 Decided: D4-61 (rewrite the default with keep_change, the plain length, a ceiling of 800 tokens; Haiku models keep the queue).
 
-*Current as of 24 Oct 2026.*
+## 8. The live run d1_duo (D4-61 in the engine, 10 days)
+
+`runs/d1_duo`, spec `cybertron2/specs/duo.yaml` (cut from wide_s7): Wynford with the Wynns (Opus 4.5) and the Cotters (Haiku 4.5,
+so `append`); Stannick with the Moors (Sonnet 4.6) and the Fenwicks (Opus 4.7); 14 people, lifespan 64, stretches of 3 days. The
+run hit the weekly usage limit on day 9 (24 Oct); the fail-stop abandoned the day as built (38.32), and it was resumed on 29 Oct
+from a worktree at its own commit (26ded5d), so the replay of days 0 to 8 matched the record and days 9 and 10 played live. All 14
+alive at the end; $33.91. It ran before D4-62 (routes) and D2-162 (fertility), so it has neither.
+
+**Lengths and change** (words; change against the agent's previous memory, by word sequence):
+
+| Agent | Model, mode | Memories (day: words / change) |
+|---|---|---|
+| Ellen | Opus 4.7, rewrite | d2 545; d5 571 / 75%; d8 509 / 71% |
+| Jory | Opus 4.7, rewrite | d1 501; d4 506 / 67%; d7 559 / 58% |
+| Lucy | Opus 4.7, rewrite | d2 447; d5 492 / 71%; d8 504 / 67% |
+| Roger | Opus 4.7, rewrite | d1 432; d4 472 / 40%; d7 511 / 70% |
+| Avice | Sonnet 4.6, rewrite | d2 493; d5 527 / 52%; d8 607 / 51% |
+| Richard | Sonnet 4.6, rewrite | d1 329; d4 390 / 87%; d7 408 / 89% |
+| Warin | Opus 4.5, rewrite | d2 392; d5 414 / 61%; d8 438 / 44% |
+| Beatrix | Opus 4.5, rewrite | d0 237; d3 358 / 54%; d6 412 / 52% |
+| Mabel | Opus 4.5, rewrite | d2 216; d5 301 / 76%; d8 377 / 61% |
+| Odo, Sabina, Thomas, Wilmot | Haiku 4.5, append | 113 to 212 a stretch (each a new entry; change is not comparable) |
+
+- **It works end to end.** Rewritten memories grow slowly and stay within the budget (Avice at 48 days old: limit about 570 words,
+  wrote 607, within the 15% slack; nobody was cut). None has collapsed into a diary of the last three days; each keeps standing
+  sections (Mabel's HEIR line, Ellen's FENWICK RISE priorities, Avice's store and cattle) and updates them in place.
+- **One event, five memories.** The rye-for-grain trade between Wynford and Stannick (days 1 to 3 of autumn) is in Mabel's, Avice's,
+  Richard's, Ellen's and Lucy's memories, with the same quantities (Mabel: "Avice traded 10 rye for 10 grain ... Richard also agreed:
+  20 rye for 20 grain"). At home Warin keeps the plan ("Immediately sow rye in Fallow Close"), and Thomas and Odo keep their own
+  rival plan to fetch rye.
+- **The one theft was a misunderstanding, kept by the taker only.** Day 6: Richard told Lucy "Two rye from the store is yours" and
+  also gave her 2 rye; Lucy then took 2 from Moor House, and the engine rightly answered "not yours to take from". Lucy kept it:
+  "Richard gave me 2 rye on autumn d1; I 'took' from Moor House and the engine logged it as not mine to take — Jory watched."
+  Richard's memory has only "2 rye to Lucy (gift)"; he never learned of the second 2.
+- **Opus 4.7 calls the world "the engine".** Five memories, all Fenwicks (Ellen three times: "Try for a child: the engine refuses
+  elders"; Jory; Lucy). No prompt uses the word; it is the model's own frame for refusals. No other model did it.
+- **Avice still copies what she has always known.** Her memory opens, in all three rewrites, with about 190 words of her seeded
+  history and customs, word for word, though they are shown to her every morning anyway: a third of her budget. No one else does.
+  A clause in the instruction ("what you have always known is shown to you anyway") would likely stop it; not built (for Zach).
+- **Haiku's queue** reads like a household report ("the grain store stood at 9.7 for five people—a day's hunger away", Sabina),
+  shorter and plainer, as expected.
+- **Pregnancies at lifespan 64** were 10 days under D2-147 scaled (D2-153): Lucy (since day 0) and Wilmot (since day 2) were still
+  pregnant at the end. Lucy rested from day 5 waiting ("If the pains come I'll send Ellen or Roger"); under D2-162 it would be 4 days.
+
+*Current as of 29 Oct 2026.*
