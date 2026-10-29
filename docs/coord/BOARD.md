@@ -755,3 +755,11 @@ a hungry herd stays out): livestock.md's "Cows in milk drift home at dusk" is yo
 > record (`today.route`) for the noticing rule and the map; "passed through" (0.3) is the route's parcels not worked. Zach: "build
 > a path chain the actions in order, and save this". Spec: world/parcel_graph.md; proposals/day_route.md. Also D4-61 (memory
 > rewritten each stretch, its length by age; Haiku keeps the queue).
+
+> 37.2 (2026-10-29 UTC): **@37.4, children's waits shortened (Zach): D2-162.** As built a population cannot replace itself at any
+> effort: 5 days of pregnancy and a 4-day gap fit two births in a woman's 20 adult days (R0 0.59 with every couple trying every
+> night; review/37_growth/02ze_fertility_model.py). Now pregnancy **2 days**, gap **1 day** (scaled with lifespan as before),
+> conception **0.8 x (1 - e^(-0.5 x units))**: about 3 births a woman trying every night, replacement at a little over half the
+> nights. Following from it, to confirm with Zach: the last day of pregnancy carries the lighter work and road risk, signs from the
+> day after conception. Spec: life/birth_and_death.md (updated); proposals/fertility.md (soft limits open: vulnerable young,
+> a child's cost, whether pregnancy and the gap should scale with lifespan); OPEN L-27.
