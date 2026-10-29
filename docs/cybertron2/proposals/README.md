@@ -269,3 +269,4 @@ Newest first. Ideas decided or rejected in conversation before 23 Oct are backfi
 | 24 Oct | Clearing new ground for fields | retrospective, accepted: D4-60 | [clearing.md](clearing.md) |
 | 24 Oct | Memory rewritten each stretch, its length set by age (after live tests) | accepted: D4-61 | [memory_rewrite.md](memory_rewrite.md) |
 | 24 Oct | A day as a chain of parcels in act order (built, then written down) | retrospective, accepted: D4-62 | [day_route.md](day_route.md) |
+| 29 Oct | Fertility and replacement: shorter waits, a higher chance; soft limits to discuss | accepted in part: D2-162 | [fertility.md](fertility.md) |

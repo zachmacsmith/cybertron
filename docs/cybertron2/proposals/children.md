@@ -2,7 +2,7 @@
 
 # Proposal: children as a choice, counted in days (costs, care, growing up, old age, succession)
 
-**Status:** accepted: D2-138 to D2-152 (24 Oct); care beyond survival later (OPEN L-26); the rest to explore. Design only. **Owner:** 37.2 (author: the economics of
+**Status:** accepted: D2-138 to D2-152 (24 Oct; pregnancy, gap and cap replaced by D2-162, see fertility.md); care beyond survival later (OPEN L-26); the rest to explore. Design only. **Owner:** 37.2 (author: the economics of
 children); life, households and the engine's life step are 37.4's ([life.md](life.md), spec/life/), so this extends their proposal
 and goes to them. **Model:** [02v_children_model.py](../../review/37_growth/02v_children_model.py). **Affects:** spec/life/,
 spec/institutions/membership.md, spec/world/holding.md, spec/seeding/ (the tree in days), spec/agents/work.md.
@@ -127,6 +127,9 @@ law.md (37.3), so it should be built on them rather than as its own rule.
 
 - 24 Oct: Zach: adult 50 days is a lot; lifespans a setting per run, scaling every part of life (D2-153: default 32 days to old
   age).
+
+- 29 Oct: the pregnancy (5 days), gap (4) and cap (0.5) proved below replacement at any effort; replaced by D2-162 (2 days, 1, 0.8).
+  See [fertility.md](fertility.md).
 
 ## Sources
 

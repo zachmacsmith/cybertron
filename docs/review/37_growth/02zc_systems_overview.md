@@ -341,12 +341,14 @@ removes, so it is not a guide to the present engine. Only h2 (41 days) and w1 (2
 - **Persistence:** births and deaths change the population for good.
 - **Interactions:** it depends on food, fire and households, and feeds labour, succession and memory.
 - **Behaviour observed:**
-  - 38.31: the Fenwicks (Opus 4.7) tried 24 times from day 0 ("We need the numbers before autumn turns") and had the first child;
+  - 38.31: the Fenwicks (Opus 4.7) tried every day from day 0; Lucy conceived on day 5 ("We need the numbers before autumn turns") and had the first child;
   - the Cotters (Haiku 4.5) never tried but cared for their infant (43 care actions);
   - 38.30: the Webbs never tried, though their custom said they should;
   - 38.30: 6 died of old age.
 - **Status:** implemented (life.py, Package D; D2-138 to D2-152). Whether agents try for children is strongly model-dependent
   (38.31).
+  - As built, the population cannot replace itself at any effort: R0 0.59 with every couple trying every night (02ze).
+  - D2-162 (29 Oct): pregnancy 2 days, gap 1, cap 0.8; not yet built.
 
 ## 18. Speech and messages
 

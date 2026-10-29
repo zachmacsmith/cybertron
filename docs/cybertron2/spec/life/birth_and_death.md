@@ -15,7 +15,9 @@ life/life_stages.md (D4-19).
 - D2-138: a child only by choice: both people, at the same node on the same day, each spend work trying; never automatic.
 - D2-139: all time is counted in days: ages, stages, lifespans, the seeded tree.
 - D2-140: partnering is both people's choice, even when their households arranged it.
-- D2-141, D2-147: pregnancy adds about 0.3 food a day; a gap of about 4 days after a birth before the mother can conceive again.
+- D2-141, D2-147: pregnancy adds about 0.3 food a day; a gap after a birth before the mother can conceive again.
+- D2-162: pregnancy 2 days, the gap 1 day (at the default lifespan, scaled); conception capped at 0.8 (replaces D2-147's 5 and 4 days
+  and D2-146's 0.5).
 - D2-142, D2-150: care is a choice; for now it bears on survival only; its effects on health and learning come later (OPEN L-26).
 - D2-143: inheritance and the head's succession are the household's own rules.
 - D2-144: no loyalty mechanic; a child carries memories of its childhood.
@@ -42,16 +44,17 @@ life/life_stages.md (D4-19).
 - `try for a child {with, units}`: both, at the same node on the same day, each spending the units (1 or more). Opposite sex
   (the engine records sex); both adults; the woman not pregnant and not in a gap.
 - That night, if both sleep in the same building, camp or place out and neither went hungry, the woman conceives with chance
-  **0.5 x (1 - e^(-0.5 x units))**, the units being what each spent (about 0.20 for 1, 0.32 for 2, 0.39 for 3, 0.48 for 6).
+  **0.8 x (1 - e^(-0.5 x units))** (D2-162), the units being what each spent (about 0.31 for 1, 0.51 for 2, 0.62 for 3, 0.76 for 6).
   Keyed draw (D2-70).
 - Nobody is told of a conception; it shows later as signs.
 
 ### Pregnancy and birth (D2-141, D2-147)
 
-- **5 days** (at the default lifespan; scaled, D2-153). The mother needs about 0.3 food a day more. In the last 2 days she has 1 unit a day fewer, and each day on the road
-  then carries 0.05 of losing the child.
-- **Signs** from the third day ("Maud moves slowly now, near her time"), noticed by the usual rule (information/noticing.md).
-- **Birth** on the night ending the fifth day, wherever the mother is. Risks that night:
+- **2 days** (D2-162; at the default lifespan, scaled, D2-153). The mother needs about 0.3 food a day more. On the last day she has 1
+  unit fewer, and a day on the road then carries 0.05 of losing the child (proposed, fertility.md Q5).
+- **Signs** from the day after conception ("Maud moves slowly now, near her time"; proposed, fertility.md Q5), noticed by the usual
+  rule (information/noticing.md).
+- **Birth** on the night ending the second day, wherever the mother is. Risks that night:
 
   | | Housed and fed | Out, cold or hungry |
   |---|---|---|
@@ -60,7 +63,9 @@ life/life_stages.md (D4-19).
 
   An adult other than the mother present that night halves both. A birth is a sign seen by those present; the household knows at once.
 - The child belongs to **the mother's household**; both parents are in the family tree; it is named from its line's names.
-- **The gap:** 4 days (at the default lifespan; scaled) from the birth before she can conceive again.
+- **The gap:** 1 day (D2-162; at the default lifespan, scaled) from the birth before she can conceive again.
+- **Replacement:** about 3 births a woman trying every night with 1 unit, R0 1.39; replacement at a little over half the nights
+  (02ze; proposals/fertility.md §2).
 
 ### Infancy and childhood (D4-19, D2-142, D2-145, D2-148, D2-150)
 
@@ -101,7 +106,7 @@ each span is rounded to whole days, at least 1.
 | adult | 5/8 | 20 | 10 | 40 | by season (agents/work.md) |
 | elder | until death | | | | 5 |
 
-Also scaled by lifespan / 32: pregnancy (5 days at the default), the nursing gap (4), and the doubling of old age's risk (every 20
+Also scaled by lifespan / 32: pregnancy (2 days at the default), the nursing gap (1), and the doubling of old age's risk (every 20
 days at the default). At the default a child born on day 0 is an agent on day 6, an adult on day 12 and old on day 32, so a run of
 24 to 48 days sees people born, grow up, grow old and die.
 
@@ -134,9 +139,9 @@ succession rule, named heir. Per world: the cost dial's setting.
 
 | Parameter | Value | Status |
 |---|---|---|
-| conception chance | 0.5 x (1 - e^(-0.5 x units)) | decided (D2-146); calibrate |
+| conception chance | 0.8 x (1 - e^(-0.5 x units)) | decided (D2-146, D2-162); calibrate |
 | lifespan (to old age) | 32 days, a world setting | decided (D2-153); calibrate |
-| pregnancy, gap | 5 days; 4 days at the default lifespan, scaled; +0.3 food a day | decided (D2-147, D2-153); calibrate |
+| pregnancy, gap | 2 days; 1 day at the default lifespan, scaled; +0.3 food a day | decided (D2-147, D2-153, D2-162); calibrate |
 | birth risks | above | proposed; calibrate |
 | infant and child costs and deaths | above, by the dial | proposed (D2-145); calibrate |
 | youth, adult | 3/16 and 5/8 of the lifespan | decided (D2-153) |
@@ -155,7 +160,7 @@ as each saw or was told it.
 
 ## Sources
 
-[proposals/children.md](../../proposals/children.md), [life.md](../../proposals/life.md),
+[proposals/children.md](../../proposals/children.md), [fertility.md](../../proposals/fertility.md), [life.md](../../proposals/life.md),
 [38.09](../../../review/38_space_engine/09_life_design.md); 02v_children_model.py.
 
-*Current as of 24 Oct 2026: D2-138 to D2-153, D4-19, D4-20.*
+*Current as of 29 Oct 2026: D2-138 to D2-153, D2-162, D4-19, D4-20.*
