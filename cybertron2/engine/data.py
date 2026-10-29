@@ -591,10 +591,12 @@ LIFE = {
     # are at the default and scale with lifespan / 32
     "lifespan": 32,
     "shares": [["infant", 1 / 16], ["child", 1 / 8], ["youth", 3 / 16], ["adult", 5 / 8]],          # then elder
-    "conceive": {"base": 0.5, "k": 0.5},                    # 0.5 x (1 - e^(-0.5 x units)) a night (D2-146)
-    "pregnancy": {"days": 5, "food": 0.3, "late": 2, "late_units": 1, "road_loss": 0.05, "signs_from": 3},   # D2-141, D2-147; days, late, signs scaled
+    "conceive": {"base": 0.8, "k": 0.5},                    # 0.8 x (1 - e^(-0.5 x units)) a night (D2-146, D2-162)
+    # D2-141, D2-162; days, late, signs scaled. late (the last day) and signs_from (the day after conception) follow from 2 days
+    # (proposals/fertility.md Q5, to confirm)
+    "pregnancy": {"days": 2, "food": 0.3, "late": 1, "late_units": 1, "road_loss": 0.05, "signs_from": 1},
     "birth": {"housed": {"mother": 0.02, "infant": 0.03}, "out": {"mother": 0.06, "infant": 0.10}, "helped": 0.5},
-    "gap": 4,                                                               # scaled
+    "gap": 1,                                                               # scaled (D2-162)
     "infant": {"eats": 0.5, "dies": {"cared": 0.02, "not": 0.08}, "hungry": 2.0, "cold": 2.0, "weight": 2},
     "child": {"dies": 0.005, "unminded": 4.0},
     "dial": {"low": {"infant_care": 1, "child_eats": 0.7, "child_works": 1.0, "child_minding": 0},

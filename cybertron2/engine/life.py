@@ -196,7 +196,7 @@ def ration_factor(w, name) -> tuple:
 def late_pregnancy(w, name) -> bool:
     a = w.s["people"][name]
     late = scaled(LIFE["pregnancy"]["late"], lifespan(w))
-    return a.get("pregnant") is not None and w.d - int(a["pregnant"]) > pregnancy_days(w) - late     # its last 2 days
+    return a.get("pregnant") is not None and w.d - int(a["pregnant"]) > pregnancy_days(w) - late     # its last days
 
 
 def unit_penalty(w, name) -> int:
@@ -226,7 +226,7 @@ def carried_weight(w, name) -> float:
 
 
 def showing(w, name) -> bool:
-    """A pregnancy shows from its third day (D2-141)."""
+    """A pregnancy shows from LIFE's signs_from (D2-141; the day after conception at 2 days, fertility.md Q5)."""
     a = w.s["people"][name]
     return a.get("pregnant") is not None and w.d - int(a["pregnant"]) >= scaled(LIFE["pregnancy"]["signs_from"], lifespan(w))
 
@@ -309,7 +309,7 @@ def _pregnancies(w, today, rec, where, out):
             w.apply("set", w.place_of(("person", name)), ref=("person", name), field="pregnant", value=None)
             out["lost"].append(name)
             continue
-        if w.d - int(a["pregnant"]) >= pregnancy_days(w):                      # the night ending its fifth day
+        if w.d - int(a["pregnant"]) >= pregnancy_days(w):                      # the night ending its last day
             _birth(w, name, where, rec, out)
 
 

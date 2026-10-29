@@ -80,7 +80,7 @@ def test_no_conception_unless_both_try_and_same_sex_or_pregnant_refused(monkeypa
                  ) if any(n != m and w.s["people"][n]["sex"] == "m" and w.s["people"][n]["stage"] == "adult" for n in w.present(w.at(m))) else None
     if other:
         assert do(w, m, do="try", **{"with": other}).startswith("Refused")       # same sex
-    w.s["day"] += 3                                                                # her pregnancy shows: refused
+    w.s["day"] += 1                                                                # her pregnancy shows: refused
     assert do(w, m, do="try", **{"with": f}).startswith("Refused")
     w.s["people"][f].update(pregnant=None, gap_until=w.d + 2)
     assert do(w, f, do="try", **{"with": m}).startswith("Refused")               # in the gap after a birth
@@ -93,7 +93,7 @@ def test_children_off_has_no_try():
 
 
 def test_the_chance_a_night_matches_the_formula_and_hungry_or_apart_none(monkeypatch):
-    for u, p in ((1, 0.197), (2, 0.316), (3, 0.388), (6, 0.475)):
+    for u, p in ((1, 0.315), (2, 0.506), (3, 0.622), (6, 0.760)):                # D2-162
         assert abs(LF.chance(u) - p) < 0.002
     f, m = COUPLES[0]
     for case in ("hungry", "apart"):
@@ -123,21 +123,24 @@ def test_the_chance_a_night_matches_the_formula_and_hungry_or_apart_none(monkeyp
 
 
 # ---------------------------------------------------------------------- pregnancy and birth (D2-141, D2-147)
-def test_pregnancy_food_units_birth_on_the_fifth_night_and_the_gap(monkeypatch):
+def test_pregnancy_food_units_birth_on_the_second_night_and_the_gap(monkeypatch):
+    """D2-162: 2 days, the last one a unit lighter; refused while pregnant and for 1 day after the birth."""
     w = world()
     f, m = COUPLES[0]
     w.s["people"][f].update(pregnant=0, father=m)
     assert LF.ration_factor(w, f) == (1.0, 0.3)
-    base = {d: None for d in range(6)}
-    for d in range(1, 6):
+    pen, shows = [], []
+    for d in range(1, 3):
         w.s["day"] = d
-        base[d] = LF.unit_penalty(w, f)
-    assert [base[d] for d in range(1, 6)] == [0, 0, 0, 1, 1]                     # its last 2 days
+        pen.append(LF.unit_penalty(w, f))
+        shows.append(LF.showing(w, f))
+        assert do(w, f, do="try", **{"with": m}).startswith("Refused")           # with child
+    assert pen == [0, 1] and shows == [True, True]                              # its last day; signs from the day after
     fix_rng(monkeypatch, w, 0.99, {"birth", "born", "young"})
-    w.s["day"] = 4
+    w.s["day"] = 1
     night_life(w)
     assert w.s["people"][f]["pregnant"] == 0                                    # not yet
-    w.s["day"] = 5
+    w.s["day"] = 2
     out = night_life(w)
     assert len(out["births"]) == 1 and w.s["people"][f]["pregnant"] is None
     baby = out["births"][0]["child"]
@@ -145,9 +148,9 @@ def test_pregnancy_food_units_birth_on_the_fifth_night_and_the_gap(monkeypatch):
     assert b["stage"] == "infant" and b["parents"] == [f, m] and w.household_of(baby) == w.household_of(f) and w.at(baby) == w.at(f)
     assert w.s["people"][f]["relations"][baby].startswith("your ") and baby in w.s["mind"][m]["kin"]
     assert baby not in w.agents_acting()
-    w.s["day"] = 7
-    assert do(w, f, do="try", **{"with": m}).startswith("Refused")               # the gap: 4 days
-    w.s["day"] = 10
+    w.s["day"] = 3
+    assert do(w, f, do="try", **{"with": m}).startswith("Refused")               # the gap: 1 day
+    w.s["day"] = 4
     assert do(w, f, do="try", **{"with": m}).startswith("You spent")
 
 
@@ -295,28 +298,37 @@ def test_succession_heir_else_most_named_else_eldest():
     assert w2.head(hh) == pick and not w2.s["institutions"][hh].get("succession")
 
 
-# ---------------------------------------------------------------------- the whole: births near 02v's
-def test_couples_who_try_every_day_have_births_near_the_model():
+# ---------------------------------------------------------------------- the whole: births near 02ze's
+def _births_a_woman(share, seeds=24):
+    """Births to each woman over an adult span at the default lifespan, the couple trying (1 unit each) on `share` of the nights."""
+    import random
+    adult = dict(LF.spans(LIFE["lifespan"]))["adult"]
     births, n = 0, 0
-    for seed in range(12):
-        w = world(seed=seed)
-        for d in range(24):
+    for seed in range(seeds):
+        w, pick = world(seed=seed), random.Random(seed)
+        for d in range(adult):
             w.s["day"] = d
             w.s["today"] = R.blank_today()
             LF.dawn(w)
             for f, m in COUPLES:
-                for a, b in ((f, m), (m, f)):
-                    do(w, a, do="try", **{"with": b, "units": 1})
-            where = {x: "same" for x in w.living()}
+                if pick.random() < share:
+                    for a, b in ((f, m), (m, f)):
+                        do(w, a, do="try", **{"with": b, "units": 1})
             out = {"conceived": [], "lost": [], "births": [], "deaths": [], "old_age": []}
-            LF._conceive(w, w.s["today"], {"missed": []}, where, out)
+            LF._conceive(w, w.s["today"], {"missed": []}, {x: "same" for x in w.living()}, out)
             for x in w.living():                                                    # births, without the risks
                 a = w.s["people"][x]
                 if a.get("pregnant") is not None and d - a["pregnant"] >= LF.pregnancy_days(w):
                     a["pregnant"], a["gap_until"] = None, d + 1 + LIFE["gap"]
                     births += 1
         n += len(COUPLES)
-    assert 1.3 <= births / n <= 1.9                                                # 02v: 1.6 a couple at the low dial
+    return births / n
+
+
+def test_couples_who_try_have_births_near_the_model():
+    """D2-162 (02ze): about 3.0 births a woman trying every night, about 1.96 trying half the nights."""
+    assert 2.7 <= _births_a_woman(1.0) <= 3.3
+    assert 1.65 <= _births_a_woman(0.5) <= 2.25
 
 
 def test_nothing_is_paid_to_the_dead():
