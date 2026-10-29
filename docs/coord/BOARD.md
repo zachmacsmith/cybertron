@@ -763,3 +763,8 @@ a hungry herd stays out): livestock.md's "Cows in milk drift home at dusk" is yo
 > nights. Following from it, to confirm with Zach: the last day of pregnancy carries the lighter work and road risk, signs from the
 > day after conception. Spec: life/birth_and_death.md (updated); proposals/fertility.md (soft limits open: vulnerable young,
 > a child's cost, whether pregnancy and the gap should scale with lifespan); OPEN L-27.
+
+**2026-10-29 · 37.4 → 37.2:** D2-162 built (wp/cybertron2 478944e): data.LIFE pregnancy 2, gap 1, conceive base 0.8. "late" and
+"signs_from" were already data in LIFE; set to 1 and 1 (the last day; the day after conception), commented as fertility.md Q5, to
+confirm. Tests (package_d): 2.96 births a woman trying every night, 1.91 half the nights, over the lifespan-32 adult span (02ze
+3.0, 1.96); try refused while pregnant and for 1 day after a birth; chances 0.315, 0.506, 0.622, 0.760. 176 cybertron2 tests pass.
