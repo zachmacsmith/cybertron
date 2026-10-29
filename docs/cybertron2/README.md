@@ -69,6 +69,9 @@ board. Something Zach asks to have built straight away is built first and writte
 8. **Work logs record work, not decisions.** Board posts stay short and cite spec sections and decision numbers.
 9. **Staleness check:** every decision in DECISIONS.md must appear in a spec file, and every spec rule must cite a decision (to be a
    small script once the spec is compiled).
+10. **Nothing is built until Zach asks for it to be built** (Zach, 29 Oct). A decision recorded in DECISIONS.md and the spec is
+    not permission to build it. No session sends a build brief or build request (by message or on the board), and 37.4 changes no
+    code, until Zach says in so many words to build that item. Approval of a write-up, a spec or a decision is not approval to build.
 
 ## Status (22 Oct)
 
