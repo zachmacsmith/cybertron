@@ -350,6 +350,8 @@ wrong fact on purpose; false beliefs come only from what people say, rumour and 
 - 23 Oct: memory bands (two full days, one-line days, lasting memories by keyword) replaced by conversation memory and
   agent-written memory (D4-27, D4-28; spec/information/memory.md); attending one's own house allowed (38.13 §5).
 
+- 31 Oct 2026: everything shown, as built, inventoried with its origins and effects in review 38.37; redesign proposed in [agent_view.md](agent_view.md).
+
 ## Sources
 
 cybertron2/prompt.py and perceive.py (as built), 38.02, knowledge.md, notes.md, verbs.md, D4-6, D4-11, D4-19, D4-21, D2-4.

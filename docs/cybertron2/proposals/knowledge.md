@@ -312,6 +312,8 @@ version of a quarrel. The engine never writes these and never checks them.
   by name; one session took a youth to known (Q3 there); a craft only known of left one agent stuck for ten days (Q1 there). Not
   revised yet.
 
+- 31 Oct 2026: §4d as built differs (cards in the system text, an unordered menu cut at 10, look-up unused: 0 of 324 in d1_duo); a redesign is proposed in [agent_view.md](agent_view.md) (review 38.37).
+
 ## Sources
 
 38.02 (perception), 38.06 (actions), 09 §2c (childhood memories), 02c §5 (skills, apprenticeship), 02h (knowledge as documents,
