@@ -67,3 +67,11 @@ def test_the_same_over_http(tmp_path):
             break
         time.sleep(0.1)
     assert st["ended"] and VW.requests(out, pending=True) == []
+
+
+def test_the_page_gets_each_verbs_own_arguments_from_the_registry():
+    v = API.verbs()
+    assert v["try"]["fields"] == [["with", False], ["units", False]]
+    assert ["for", True] in v["give"]["fields"] and v["rest"]["fields"] == []
+    assert "{crafts}" not in v["gather"]["doc"]
+    assert "Play an agent" in API.PAGE.read_text()

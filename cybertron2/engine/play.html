@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Play an agent</title>
+<style>
+:root{--bg:#fbfaf7;--fg:#1f1d1a;--muted:#6b665e;--line:#dedad2;--panel:#f2efe8;--accent:#2f5d50;--warn:#9a3b2a;--chip:#e6efe9}
+@media (prefers-color-scheme:dark){:root{--bg:#191816;--fg:#e9e6df;--muted:#a19b90;--line:#38352f;--panel:#23211e;--accent:#8cc0ad;--warn:#e08a74;--chip:#24332d}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.45 system-ui,sans-serif}
+header{padding:10px 16px;border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}
+header h1{font-size:17px;margin:0}
+header .meta{color:var(--muted);font-size:13px}
+main{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:0}
+@media (max-width:900px){main{grid-template-columns:1fr}}
+#ctx,#form{padding:12px 16px;min-width:0}
+#ctx{border-right:1px solid var(--line)}
+#form{position:sticky;top:0;align-self:start;max-height:100vh;overflow:auto}
+pre{white-space:pre-wrap;word-wrap:break-word;background:var(--panel);padding:10px 12px;border-radius:6px;font:13px/1.45 ui-monospace,monospace;margin:6px 0}
+details{margin:4px 0}
+summary{cursor:pointer;color:var(--muted);font-size:13px}
+h2{font-size:15px;margin:14px 0 6px}
+h3{font-size:13px;margin:12px 0 4px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.row{border:1px solid var(--line);border-radius:6px;padding:8px;margin:6px 0;background:var(--panel)}
+.row .top{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.hint{color:var(--muted);font-size:12px;margin:4px 0}
+.f{display:flex;gap:6px;align-items:center;margin:4px 0;flex-wrap:wrap}
+.f label{min-width:80px;font-size:13px;color:var(--muted)}
+.f .opt{font-style:italic}
+input,select,textarea{font:inherit;font-size:14px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:4px 6px;max-width:100%}
+input[type=text],textarea{flex:1;min-width:140px}
+textarea{width:100%;min-height:3.5em;resize:vertical}
+#memory{min-height:16em}
+button{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:4px;padding:3px 8px;cursor:pointer}
+button.main{background:var(--accent);color:var(--bg);border-color:var(--accent);font-size:15px;padding:6px 16px}
+button.x{color:var(--warn)}
+.chips{display:flex;flex-wrap:wrap;gap:4px}
+.chip{background:var(--chip);border-color:transparent}
+#problems{color:var(--warn);white-space:pre-wrap}
+.wc{font-size:12px;color:var(--muted)}
+.wc.over{color:var(--warn)}
+#wait{padding:24px 16px;color:var(--muted);white-space:pre-wrap}
+#wait:empty{display:none}
+</style>
+</head>
+<body>
+<header><h1>Play an agent</h1><span class="meta" id="head">loading…</span></header>
+<div id="wait"></div>
+<main id="main" hidden>
+  <section id="ctx"></section>
+  <section id="form"></section>
+</main>
+<script>
+"use strict";
+// Everything shown on the left is what a model would be given (GET /context/<key>); the form on the right is built from that
+// request's own reply schema, and the verbs' argument lists from the engine's registry (GET /verbs). The reply is checked by the
+// server against the schema, as a model's would be.
+const $ = (t, a = {}, ...kids) => { const e = document.createElement(t); for (const [k, v] of Object.entries(a)) { if (k === "text") e.textContent = v; else if (k.startsWith("on")) e[k] = v; else e.setAttribute(k, v); } for (const k of kids) if (k != null) e.append(k); return e; };
+let VERBS = {}, ctx = null, key = null, KIND = "", S = null, state = null, rawMode = false;
+const AGENT = new URLSearchParams(location.search).get("as");
+
+async function j(url, opt) { const r = await fetch(url, opt); return r.json(); }
+
+async function load() {
+  const st = await j("status");
+  const waiting = st.waiting.filter(w => !AGENT || w.agent === AGENT);
+  const head = document.getElementById("head"), wait = document.getElementById("wait"), main = document.getElementById("main");
+  if (!waiting.length) {
+    main.hidden = true;
+    head.textContent = st.at ? `at ${st.at}` : "";
+    wait.textContent = st.ended ? "The run has ended." : st.stopped ? "The run stopped:\n" + st.stopped :
+      (st.advancing ? "The others are taking their turns…" : "Nobody is waiting for a person" + (st.waiting.length ? ` (waiting: ${st.waiting.map(w => w.agent).join(", ")})` : "") + ".");
+    if (!st.ended && !st.stopped) setTimeout(load, 2000);
+    return;
+  }
+  wait.textContent = "";
+  key = waiting[0].key;
+  KIND = waiting[0].kind;
+  ctx = await j("context/" + encodeURIComponent(key));
+  S = ctx.schema || { properties: {} };
+  head.textContent = `${ctx.agent} · ${key} · ${waiting[0].kind}` + (waiting.length > 1 ? ` · ${waiting.length - 1} more waiting` : "");
+  state = initial(waiting[0].kind);
+  rawMode = false;
+  renderContext();
+  renderForm(waiting[0].kind);
+  main.hidden = false;
+  window.scrollTo(0, 0);
+}
+
+// ---------------------------------------------------------------- the left: exactly what the model is given
+function renderContext() {
+  const c = document.getElementById("ctx");
+  c.replaceChildren();
+  c.append($("details", {}, $("summary", { text: `System text (${ctx.system.length} characters)` }), $("pre", { text: ctx.system })));
+  for (const t of ctx.turns) {
+    c.append($("details", {}, $("summary", { text: `Earlier in this conversation: ${t.key}` }), $("pre", { text: t.message }),
+      $("div", { class: "hint", text: "Your reply:" }), $("pre", { text: pretty(t.reply) })));
+  }
+  c.append($("h2", { text: "Now" }), $("pre", { text: ctx.message }));
+}
+function pretty(s) { try { return JSON.stringify(JSON.parse(s), null, 1); } catch (e) { return s; } }
+
+// ---------------------------------------------------------------- the reply being built
+function initial(kind) {
+  const st = { why: "", actions: [], lists: {}, attend: "", look_up: [], pin: "", forget: "", open: "", memory: "" };
+  const last = ctx.turns.length ? ctx.turns[ctx.turns.length - 1] : null;
+  if (kind === "talk" && last) {                       // "give your whole plan for the day again": start from the one before
+    try { const r = JSON.parse(last.reply); st.why = r.why || ""; st.actions = (r.actions || []).map(a => ({ ...a })); } catch (e) {}
+  }
+  return st;
+}
+const P = k => (S.properties || {})[k];
+const AP = () => ((P("actions") || {}).items || {}).properties || {};
+
+function reply() {
+  const out = { why: state.why, actions: state.actions.map(clean).filter(a => a.do) };
+  for (const [k, rows] of Object.entries(state.lists)) { const xs = rows.map(clean).filter(r => Object.keys(r).length); if (xs.length) out[k] = xs; }
+  if (state.attend) out.attend = state.attend;
+  if (state.look_up.length) out.look_up = state.look_up;
+  if (state.pin.trim()) out.pin = state.pin.trim();
+  for (const k of ["forget", "open"]) { const xs = state[k].split(",").map(x => x.trim()).filter(Boolean); if (xs.length) out[k] = xs; }
+  if (state.memory.trim()) out.memory = state.memory;
+  return out;
+}
+function clean(o) { const r = {}; for (const [k, v] of Object.entries(o)) if (v !== "" && v != null && !(typeof v === "number" && isNaN(v))) r[k] = v; return r; }
+
+// one input for one schema property: a list where the schema has one, a number, a tick, or free text
+function input(prop, value, set, long, name) {
+  prop = prop || { type: "string" };
+  if (prop.enum) {
+    const s = $("select", {}, $("option", { value: "", text: "—" }), ...prop.enum.map(v => $("option", { value: v, text: v })));
+    s.value = value ?? ""; s.onchange = () => set(s.value); return s;
+  }
+  if (prop.type === "number" || prop.type === "integer") {
+    const i = $("input", { type: "number", step: "any", style: "width:6em" }); i.value = value ?? "";
+    i.oninput = () => set(i.value === "" ? "" : Number(i.value)); return i;
+  }
+  if (prop.type === "boolean") { const i = $("input", { type: "checkbox" }); i.checked = !!value; i.onchange = () => set(i.checked || ""); return i; }
+  const i = long ? $("textarea") : $("input", { type: "text" }); i.value = value ?? ""; i.oninput = () => set(i.value);
+  const sug = !long && suggest(name);
+  if (sug && sug.length) {                              // free text in the schema: offered names, still typed freely
+    const id = "dl-" + name.replace(/\W/g, "_");
+    if (!document.getElementById(id)) document.body.append($("datalist", { id }, ...sug.map(v => $("option", { value: v }))));
+    i.setAttribute("list", id);
+  }
+  return i;
+}
+// suggestions for the free-text fields, from the schema's own lists of what the agent knows
+function suggest(name) {
+  const e = k => ((AP()[k] || {}).enum || []);
+  const m = { with: e("person"), lead: e("person"), "stop at": e("at"), head: e("person"), heir: e("person"),
+              to: [...new Set([...e("person"), ...e("at"), ...e("household"), "store", "hands"])] };
+  return m[name];
+}
+
+// ---------------------------------------------------------------- the right: the form
+function renderForm(kind) {
+  const f = document.getElementById("form");
+  f.replaceChildren();
+  if (rawMode) return renderRaw(f);
+  if (kind === "memory" && P("memory")) f.append(memoryBox());
+  f.append($("h3", { text: "Why" }), input({ type: "string" }, state.why, v => { state.why = v; preview(); }, true));
+  if (kind !== "memory") {
+    f.append($("h3", { text: "Actions, in order" }));
+    const chips = couldChips();
+    if (chips) f.append(chips);
+    const list = $("div", { id: "actions" });
+    state.actions.forEach((a, i) => list.append(actionRow(a, i)));
+    f.append(list, $("button", { text: "+ action", onclick: () => { state.actions.push({ do: "" }); renderForm(kind); } }));
+    const sections = [["tell", "Tell (private)"], ["say", "Say (aloud)"], ["offers", "Offers"]];
+    const more = [["explain", "Explain a craft"], ["note", "Notes"]];
+    for (const [k, label] of sections) if (P(k)) f.append(listSection(k, label, kind));
+    const m = $("details", {}, $("summary", { text: "More: explain, notes, attend, look up, pin, forget, open" }));
+    for (const [k, label] of more) if (P(k)) m.append(listSection(k, label, kind));
+    if (P("attend")) m.append($("h3", { text: "Attend to" }), input(P("attend"), state.attend, v => { state.attend = v; preview(); }));
+    if (P("look_up")) {
+      const s = $("select", { multiple: "", size: 6 }, ...(P("look_up").items.enum || []).map(v => $("option", { value: v, text: v, ...(state.look_up.includes(v) ? { selected: "" } : {}) })));
+      s.onchange = () => { state.look_up = [...s.selectedOptions].map(o => o.value); preview(); };
+      m.append($("h3", { text: "Look up (crafts)" }), s);
+    }
+    for (const k of ["pin", "forget", "open"]) if (P(k)) m.append($("h3", { text: k + (k === "pin" ? "" : " (comma separated)") }), input({ type: "string" }, state[k], v => { state[k] = v; preview(); }));
+    if (P("memory")) m.append($("h3", { text: "Memory" }), memoryBox(true));
+    f.append(m);
+  }
+  f.append($("h3", { text: "The reply that will be sent" }), $("pre", { id: "preview" }),
+    $("p", {}, $("button", { class: "main", text: "Answer", onclick: send }), " ",
+      $("button", { text: "Edit as JSON", onclick: () => { rawMode = true; renderForm(kind); } })),
+    $("div", { id: "problems" }));
+  preview();
+}
+
+function memoryBox(small) {
+  const m = ctx.message.match(/at most (\d+) words/);
+  const lim = m ? Number(m[1]) : null;
+  const wrap = $("div");
+  const t = $("textarea", { id: small ? "memory2" : "memory" }); t.value = state.memory;
+  const wc = $("div", { class: "wc" });
+  const count = () => { const n = (t.value.match(/\S+/g) || []).length; wc.textContent = `${n} words` + (lim ? ` of at most ${lim}` : ""); wc.className = "wc" + (lim && n > lim ? " over" : ""); };
+  t.oninput = () => { state.memory = t.value; count(); preview(); };
+  const prev = ctx.message.match(/## Your memory as it stands\n([\s\S]*?)\n\n(?:Rewrite|Write)/);
+  if (!small && prev && prev[1].trim() !== "(nothing yet)")
+    wrap.append($("button", { text: "Start from my memory as it stands", onclick: () => { t.value = prev[1]; t.oninput(); } }));
+  count();
+  wrap.prepend($("h3", { text: "Memory" }));
+  wrap.append(t, wc);
+  return wrap;
+}
+
+// "Today you could: gather forage at Water Meadow, Wyn Copse (1 units); ..." from the message, as one-click actions
+function couldChips() {
+  const m = ctx.message.match(/Today you could: ([^\n]+)/);
+  if (!m) return null;
+  const box = $("div", { class: "chips" });
+  for (const part of m[1].replace(/\.$/, "").split("; ")) {
+    const x = part.match(/^(\S+) (.+?)(?: at (.+?))? \((\d+) units?\)$/);
+    if (!x) continue;
+    const [, verb, what, at, units] = x;
+    for (const place of at ? at.split(", ") : [null]) {
+      const a = { do: verb, what }; if (place) a.at = place;
+      box.append($("button", { class: "chip", text: `${verb} ${what}${place ? " at " + place : ""} (${units})`, onclick: () => { state.actions.push(a); renderForm(KIND); } }));
+    }
+  }
+  return $("div", {}, $("div", { class: "hint", text: "Today you could (click to add):" }), box);
+}
+
+function actionRow(a, i) {
+  const kind = KIND;
+  const props = AP();
+  const doSel = input(props.do, a.do, v => { state.actions[i] = { do: v }; renderForm(kind); });
+  const row = $("div", { class: "row" });
+  row.append($("div", { class: "top" }, $("b", { text: `${i + 1}.` }), doSel,
+    $("button", { text: "↑", title: "earlier", onclick: () => { if (i) { [state.actions[i - 1], state.actions[i]] = [state.actions[i], state.actions[i - 1]]; renderForm(kind); } } }),
+    $("button", { text: "↓", title: "later", onclick: () => { if (i < state.actions.length - 1) { [state.actions[i + 1], state.actions[i]] = [state.actions[i], state.actions[i + 1]]; renderForm(kind); } } }),
+    $("button", { class: "x", text: "remove", onclick: () => { state.actions.splice(i, 1); renderForm(kind); } })));
+  const v = VERBS[a.do];
+  if (v) row.append($("div", { class: "hint", text: `${a.do} ${v.args}${v.doc ? ": " + v.doc : ""}` }));
+  const fields = v ? v.fields.map(x => x[0]) : [];
+  const shown = [...fields, ...Object.keys(a).filter(k => k !== "do" && !fields.includes(k))];
+  for (const name of shown) {
+    const opt = v && (v.fields.find(x => x[0] === name) || [])[1];
+    row.append($("div", { class: "f" }, $("label", { class: opt ? "opt" : "", text: name + (opt ? "?" : "") }),
+      input(props[name], a[name], val => { state.actions[i][name] = val; preview(); }, name === "text", name)));
+  }
+  if (a.do) {
+    const others = Object.keys(props).filter(k => k !== "do" && !shown.includes(k));
+    const add = $("select", {}, $("option", { value: "", text: "+ other field" }), ...others.map(k => $("option", { value: k, text: k })));
+    add.onchange = () => { if (add.value) { state.actions[i][add.value] = ""; renderForm(kind); } };
+    row.append(add);
+  }
+  return row;
+}
+
+function listSection(k, label, kind) {
+  const item = (P(k).items || {});
+  const props = item.properties || {};
+  const rows = state.lists[k] = state.lists[k] || [];
+  const box = $("div", {}, $("h3", { text: label }));
+  rows.forEach((r, i) => {
+    const row = $("div", { class: "row" });
+    for (const [name, prop] of Object.entries(props))
+      row.append($("div", { class: "f" }, $("label", { text: name + ((item.required || []).includes(name) ? "" : "?") }),
+        input(prop, r[name], v => { rows[i][name] = v; preview(); }, name === "text")));
+    row.append($("button", { class: "x", text: "remove", onclick: () => { rows.splice(i, 1); renderForm(kind); } }));
+    box.append(row);
+  });
+  box.append($("button", { text: "+ " + k, onclick: () => { rows.push({}); renderForm(kind); } }));
+  return box;
+}
+
+function renderRaw(f) {
+  const kind = KIND;
+  const t = $("textarea", { style: "min-height:24em;font:13px ui-monospace,monospace" }); t.value = JSON.stringify(reply(), null, 1);
+  f.append($("h3", { text: "The reply, as JSON" }), t,
+    $("p", {}, $("button", { class: "main", text: "Answer", onclick: () => send(t.value) }), " ",
+      $("button", { text: "Back to the form", onclick: () => { rawMode = false; renderForm(kind); } })),
+    $("div", { id: "problems" }));
+}
+
+function preview() { const p = document.getElementById("preview"); if (p) p.textContent = JSON.stringify(reply(), null, 1); }
+
+async function send(raw) {
+  let body;
+  try { body = typeof raw === "string" ? JSON.parse(raw) : reply(); } catch (e) { document.getElementById("problems").textContent = "Not JSON: " + e.message; return; }
+  const res = await j("answer/" + encodeURIComponent(key), { method: "POST", body: JSON.stringify(body) });
+  if (res.problems && res.problems.length) { document.getElementById("problems").textContent = "Refused:\n" + res.problems.join("\n"); return; }
+  document.getElementById("main").hidden = true;
+  document.getElementById("wait").textContent = "Answered. The others are taking their turns…";
+  setTimeout(load, 1500);
+}
+
+j("verbs").then(v => { VERBS = v; load(); });
+</script>
+</body>
+</html>

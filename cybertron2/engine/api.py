@@ -9,13 +9,16 @@ any other front end.
     status(run)                       {"waiting": pending(run), "ended": bool, "at": last committed step}
 
 `python -m cybertron2.engine play RUN --as NAME` answers in the terminal; `serve RUN [--port 8765]` gives the same over HTTP
-(GET /status, GET /context/<key>, POST /answer/<key> with the reply as JSON) and a bare page at / to try it.
+(GET /status, GET /context/<key>, GET /verbs, POST /answer/<key> with the reply as JSON) and a page at / (play.html): what the
+model would be shown on the left, and on the right a form built from the request's reply schema (a verb chosen from a list, its
+own arguments as lists where the schema closes them, free text typed). `serve RUN --new WORLD --as NAME` starts a new run first.
 """
 from __future__ import annotations
 
 import json
 import threading
 from pathlib import Path
+from urllib.parse import unquote
 
 from cybertron2.engine import journal as JN, views as VW
 
@@ -108,31 +111,20 @@ def play(run, agent, backend=None) -> None:
 
 
 # ---------------------------------------------------------------------- HTTP, for a web page or anything else
-PAGE = """<!doctype html><meta charset=utf-8><title>cybertron2: play</title>
-<style>body{font:15px system-ui;max-width:900px;margin:2em auto;padding:0 1em}pre{white-space:pre-wrap;background:#f4f4f4;padding:1em}
-textarea{width:100%;height:12em;font:13px monospace}</style>
-<h1>Play an agent</h1><div id=s>loading...</div>
-<script>
-async function load(){const st=await (await fetch('status')).json();const d=document.getElementById('s');
- if(!st.waiting.length){d.innerHTML='<p>'+(st.ended?'The run has ended.':'Nobody is waiting for a person. At '+st.at+'.')+'</p>';return}
- const k=st.waiting[0].key;const c=await (await fetch('context/'+k)).json();
- d.innerHTML='<h2>'+c.agent+' &middot; '+k+'</h2><details><summary>System text</summary><pre></pre></details>'
-  +c.turns.map(t=>'<details><summary>Earlier: '+t.key+'</summary><pre></pre><pre></pre></details>').join('')
-  +'<pre id=m></pre><p>Your reply (JSON; keys: '+Object.keys((c.schema||{}).properties||{}).join(', ')+')</p>'
-  +'<textarea id=r>{"why": "", "actions": []}</textarea><p><button id=b>Answer</button> <span id=e></span></p>';
- const pres=d.querySelectorAll('pre');pres[0].textContent=c.system;let i=1;
- for(const t of c.turns){pres[i++].textContent=t.message;pres[i++].textContent=t.reply}
- document.getElementById('m').textContent=c.message;
- document.getElementById('b').onclick=async()=>{let body;try{body=JSON.parse(document.getElementById('r').value)}catch(x){
-  document.getElementById('e').textContent='not JSON';return}
-  const res=await (await fetch('answer/'+k,{method:'POST',body:JSON.stringify(body)})).json();
-  if(res.problems&&res.problems.length){document.getElementById('e').textContent=res.problems.join('; ');return}
-  d.innerHTML='<p>Answered; the run is going on...</p>';setTimeout(load,1500)}}
-load()
-</script>"""
+PAGE = Path(__file__).with_name("play.html")
 
 
-def serve(run, port=8765, backend=None) -> None:
+def verbs() -> dict:
+    """The verbs' arguments from the registry, for a front end's form: {verb: {args, doc, fields: [[name, optional]]}}."""
+    import re
+    from cybertron2.engine import verbs as V
+    return {v: {"args": d["args"], "doc": d["doc"].replace(": {crafts}", "").replace("{crafts}", ""),
+                "fields": [[m.group(1), bool(m.group(2))] for m in re.finditer(r'"([^"]+)"(\?)?', d["args"])]}
+            for v, d in V.VERB.items()}
+
+
+def serve(run, port=8765, backend=None, new=None, agent=None, days=None, bots=False) -> None:
+    """Serve the run over HTTP. With `new` (a world file) and `agent`, first start the run with that person played by a person."""
     from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
     run = Path(run)
     lock = threading.Lock()
@@ -140,6 +132,16 @@ def serve(run, port=8765, backend=None) -> None:
     def go_on():
         with lock:
             advance(run, backend)
+
+    def start():
+        from cybertron2.engine import run as R
+        with lock:
+            R.run(new, run, backend, days, bots=bots, responders={agent: "human"})
+
+    if new:
+        if (run / "run.db").exists():
+            raise SystemExit(f"{run} exists already: serve it without --new, or choose another directory")
+        threading.Thread(target=start, daemon=True).start()
 
     class H(BaseHTTPRequestHandler):
         def _send(self, obj, code=200, ctype="application/json"):
@@ -151,13 +153,18 @@ def serve(run, port=8765, backend=None) -> None:
             self.wfile.write(body)
 
         def do_GET(self):
-            if self.path in ("/", "/index.html"):
-                return self._send(PAGE, ctype="text/html; charset=utf-8")
-            if self.path == "/status":
+            path = self.path.split("?")[0]
+            if path in ("/", "/index.html"):
+                return self._send(PAGE.read_text(), ctype="text/html; charset=utf-8")
+            if path == "/verbs":
+                return self._send(verbs())
+            if path == "/status":
+                if not (run / "run.db").exists():
+                    return self._send({"waiting": [], "ended": False, "at": None, "stopped": None, "advancing": True})
                 return self._send({**status(run), "advancing": lock.locked()})
-            if self.path.startswith("/context/"):
+            if path.startswith("/context/"):
                 try:
-                    return self._send(context(run, self.path[len("/context/"):]))
+                    return self._send(context(run, unquote(path[len("/context/"):])))
                 except KeyError as e:
                     return self._send({"error": str(e)}, 404)
             self._send({"error": "not found"}, 404)
@@ -170,7 +177,7 @@ def serve(run, port=8765, backend=None) -> None:
                 reply = json.loads(self.rfile.read(n) or b"{}")
             except json.JSONDecodeError as e:
                 return self._send({"problems": [f"not JSON: {e}"]}, 400)
-            problems = answer(run, self.path[len("/answer/"):], reply)
+            problems = answer(run, unquote(self.path[len("/answer/"):]), reply)
             if not problems and not pending(run):
                 threading.Thread(target=go_on, daemon=True).start()         # everyone has answered: the run goes on
             self._send({"problems": problems}, 400 if problems else 200)
@@ -178,5 +185,5 @@ def serve(run, port=8765, backend=None) -> None:
         def log_message(self, *a):
             pass
 
-    print(f"serving {run} on http://127.0.0.1:{port}/", flush=True)
+    print(f"serving {run} on http://127.0.0.1:{port}/" + (f"?as={agent}" if agent else ""), flush=True)
     ThreadingHTTPServer(("127.0.0.1", port), H).serve_forever()

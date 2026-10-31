@@ -882,6 +882,10 @@ def main(argv=None):
     sv.add_argument("run")
     sv.add_argument("--port", type=int, default=8765)
     sv.add_argument("--backend")
+    sv.add_argument("--new", help="a world file: start a new run in RUN first, with --as played by a person")
+    sv.add_argument("--as", dest="agent", help="the person you play (with --new; the page shows only their turns)")
+    sv.add_argument("--days", type=int)
+    sv.add_argument("--bots", action="store_true", help="with --new: everyone else scripted (no model calls), to try it out")
     dp = sub.add_parser("dump")
     dp.add_argument("run")
     dp.add_argument("--table", default="events")
@@ -933,7 +937,7 @@ def main(argv=None):
         API.play(args.run, args.agent, args.backend)
     elif args.cmd == "serve":
         from cybertron2.engine import api as API
-        API.serve(args.run, args.port, args.backend)
+        API.serve(args.run, args.port, args.backend, new=args.new, agent=args.agent, days=args.days, bots=args.bots)
     elif args.cmd == "dump":
         from cybertron2.engine import views as VW
         rows = {"events": VW.events, "changes": VW.changes, "calls": VW.calls, "steps": VW.steps}[args.table](args.run)
