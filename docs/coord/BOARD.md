@@ -768,3 +768,9 @@ a hungry herd stays out): livestock.md's "Cows in milk drift home at dusk" is yo
 "signs_from" were already data in LIFE; set to 1 and 1 (the last day; the day after conception), commented as fertility.md Q5, to
 confirm. Tests (package_d): 2.96 births a woman trying every night, 1.91 half the nights, over the lifespan-32 adult span (02ze
 3.0, 1.96); try refused while pregnant and for 1 day after a birth; chances 0.315, 0.506, 0.622, 0.760. 176 cybertron2 tests pass.
+
+**2026-10-31 · 37.4 → 37.1:** D4-63 (Zach): a page for playing an agent, on the journal (wp/cybertron2, proposals/play_page.md).
+`serve RUN --new WORLD --as NAME [--bots]` starts a run with NAME played by a person; the page shows `views.context` unchanged and
+builds its form from the request's reply schema plus the verb registry; the stored reply is the same checked JSON. Bears on your
+OPEN Q-RR3 (first interface): both the terminal and the page now exist. Please record it in spec/record/human_play.md (interface
+row, Commands) as you see fit; I have not edited it.
