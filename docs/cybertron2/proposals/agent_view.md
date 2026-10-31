@@ -7,8 +7,7 @@
 
 Rebuild the system text and the daily message on these principles: the engine shows the world and the rules a person living there
 would know, and never works out the agent's choices for it; each thing is shown once; detail about a craft follows how well one
-knows it and stops at know-how (skill and its effects are never told, only met in outcomes); a fixed grammar of action kinds
-replaces the verb manual; common knowledge only, in words; stable things in the system text and today's world in the message;
+knows it and stops at know-how (skill and its effects are never told, only met in outcomes); common knowledge only, in words; stable things in the system text and today's world in the message;
 lists that grow with the world are budgeted by closeness; the verbs back to the closed grammar first designed; one belief store
 per person, fed by the senses and every other channel, from which the message is rendered. Also: a constant reply schema, so
 conversations restart only at the end of a stretch. The inventory and evidence are in review 38.37.
