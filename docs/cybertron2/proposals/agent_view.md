@@ -5,12 +5,13 @@
 
 ## Summary
 
-Rebuild the system text and the daily message on seven principles: the engine shows the world and the rules a person living there
+Rebuild the system text and the daily message on these principles: the engine shows the world and the rules a person living there
 would know, and never works out the agent's choices for it; each thing is shown once; detail about a craft follows how well one
 knows it and stops at know-how (skill and its effects are never told, only met in outcomes); a fixed grammar of action kinds
 replaces the verb manual; common knowledge only, in words; stable things in the system text and today's world in the message;
-lists that grow with the world are budgeted by closeness. Also: a constant reply schema, so conversations restart only at the end
-of a stretch. The inventory and evidence are in review 38.37.
+lists that grow with the world are budgeted by closeness; the verbs back to the closed grammar first designed; one belief store
+per person, fed by the senses and every other channel, from which the message is rendered. Also: a constant reply schema, so
+conversations restart only at the end of a stretch. The inventory and evidence are in review 38.37.
 
 ## The proposal
 
@@ -29,8 +30,11 @@ of a stretch. The inventory and evidence are in review 38.37.
 
    No multipliers or yields by tool at any level. Practice changes outcomes; agents meet them in their results, in what they see
    others get and in what they are told, and keep what they learn in their notes and memory.
-4. **Action kinds instead of a verb manual:** about ten kinds (take from the land, work, make, build, goods, dealing, household and
-   family, going elsewhere, learning, force), a sentence and the forms each. The full arguments stay in the reply schema.
+4. **The verb grammar as first designed** (verbs.md): about 22 verbs, each a kind of change on a kind of referent, shown once
+   with their slots (about 300 tokens); settings on things one controls through `set`, powers of offices and creditors through
+   `invoke`, membership of any institution through `join`, `leave`, `found`; the night's and the road's choices as existing verbs
+   with options. Today's 34 verbs and 18 event words (52 values of `do`) fold back into it. (Replaces "action kinds", which only
+   grouped the same verbs.)
 5. **Common knowledge only** in "How life works": the day and units, eating and the cold, fire, what is whose, how people learn,
    what one notices; numbers only where people count (meals, units, days, weights).
 6. **Stable in the system text, today in the message;** a change in what one knows mid-stretch is one line in the message ("You
@@ -38,6 +42,12 @@ of a stretch. The inventory and evidence are in review 38.37.
 7. **Budgets by closeness** for kin, places, crafts known of and beliefs, once they grow long.
 8. **A constant reply schema** for the run: the lists of known names out of it (free strings; the verbs refuse unknown words).
    Conversations then restart only at the end of a stretch, where the memory is written.
+9. **One belief store per person, and the message rendered from it.** Entries of (thing, aspect, value, day, how known); every
+   channel writes to it: the senses (signs, the noticing rule), speech (mentions), one's own acts and their results (which sense
+   what was worked), seeding. Structure anyone present sees at once (parcels, buildings, people) goes in by a sure sight; states
+   (crops, stores, condition, beasts) by signs. The engine reads the true state only for one's own body and the day; nothing is
+   computed for the agent from the true state. The five partial stores today (land, beasts, things, home, elsewhere) become
+   aspects of the one store. The senses become the channel for nearly everything in the world (today 3.8% of what an agent reads).
 
 Open to test: whether the store's "food worth N meals; about K a night" stays (arithmetic on what one sees).
 
@@ -75,14 +85,20 @@ manual") and knowledge.md §4d (names in the system text, cards by look-up).
 
 ## Affects
 
-spec/information/prompts.md, spec/agents/actions.md (D4-24's wording), proposals/knowledge.md §4d, proposals/seeing.md §1;
-cybertron2/engine/prompt.py, knowledge.py, converse.py.
+spec/information/prompts.md, perception.md, spec/agents/actions.md (D4-24's wording), proposals/verbs.md, knowledge.md §4d,
+seeing.md §1, senses.md; cybertron2/engine/prompt.py, perceive.py, knowledge.py, verbs.py, converse.py.
 
 ## History
 
 - 31 Oct 2026: proposed (37.4) after Zach asked for a review of everything in the system text and the daily message (review
   38.37), with his point that skill should not unlock told detail; the schema restarts found while answering his question on
   what carries from day to day.
+
+- 31 Oct 2026: revised after Zach ("didn't we originally design the verbs to be the primitives? ... It feels like a rename";
+  "are senses not coming much into this at all?"): "action kinds" withdrawn as a rename; point 4 now restores verbs.md's grammar
+  (38.37 §7c: 24 designed, 34 verbs and 18 event words built, none decided); point 9 added, one belief store rendered into the
+  message, from 38.37 §7d (3.8% of what an agent reads comes through the senses; the menu tells crop states the senses would gate)
+  and §7e (what an agent has to know, from first principles).
 
 ## Sources
 

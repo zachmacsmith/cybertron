@@ -231,6 +231,80 @@ words and targets are what the model's reply is fitted to.
 **Fix (in the proposal):** keep the schema constant for a run: the knowledge lists out of it (free strings; the verbs already
 refuse unknown words, and the prompt carries the words). Restarts then happen only on schedule, and the schema shrinks.
 
+## 7c. The verbs: the original design, and how far it drifted (Zach: "didn't we design the verbs to be the primitives?")
+
+**The design** (proposals/verbs.md, 23 Oct, "ready for a decision", never decided as a list; its principle is D4-24): a short
+closed grammar of about 24 verbs, each a kind of change on a kind of referent; all variety in their objects and parameters
+(techniques, sites, people, settings, powers), which are data. Its rules against swelling: a new verb needs a new kind of change
+and Zach's yes; settings on things one controls go through `set {thing, setting}`; every institutional act is a power through
+`invoke`; households are institutions (`join`, `leave`, `found`). It budgeted the verbs at about 300 tokens in the system text and
+techniques as names only.
+
+**As built:** 34 verbs, plus 18 words that only night and road events accept (`defend`, `flee`, `hand over`, `alarm`, `push on`,
+`go round`, `accompany` ...): 52 values of `do`. None of the additions went through a decision. What should have been data on a
+verb became verbs:
+
+| Built as its own verb | In the design |
+|---|---|
+| `host`, `grant`, `revoke`, `sleep`, `fire`, `order`, `withdraw` | settings: `set {thing, setting}` (a house's guests, where one sleeps tonight, a fire tonight, the children's work, an offer) |
+| `admit`, `name` (heir, head), `release` | powers of an office or a creditor: `invoke` |
+| `partner`, `part`, `leave_household`, `join` (households only), `found` (households only) | membership of any institution: `join`, `leave`, `found` |
+| `learn` | the learner's side of `teach` (accept) |
+| `drive` | `move` of a herd, or a `work` method on a herd |
+| the 18 event words | existing verbs with the event's options (`flee` is `travel` or `leave`; `defend` is `guard` or `attack`; `hand over` is `give`; `alarm` is `say`; `push on`, `wait`, `turn back`, `go round` are `travel`'s `on trouble`) |
+
+And the verb list in the system text carries every craft's card (tools, multipliers, materials) under its verb: 7,024 characters
+against the design's ~1,200. The "action kinds" in §6 were only a grouping of the same verbs, not a fix; withdrawn. The fix is the
+original grammar: about 22 verbs, objects and settings as data, the verbs' lines short, the crafts elsewhere by depth.
+
+## 7d. The senses (Zach: "are senses not coming much into this at all?")
+
+They are not, and the structure explains why. Per decision in d1_duo an agent reads about 22,800 characters (15,074 system,
+7,759 message); **856 (3.8%) come through the senses** (what was seen and attended yesterday, what was seen elsewhere, the night's
+news). "Your crafts today" alone is 1,488. Three reasons:
+
+1. **Presence gives the node whole.** D4-35's rule shows everything structural at one's node exactly: every parcel, building,
+   fitting, holder, fence, a home store to 0.1 of a unit. Senses (D4-48 signs, D4-53's noticing rule) only gate changes of state
+   and things at a spot.
+2. **Computed sections read the true state, bypassing the senses.** The menu says "work reap at the Infield" or "Not yet: work sow,
+   but the Infield is sown as thick as it will take": crop and field states told with certainty, whether or not anyone noticed a
+   sign. The "Here" line for a field does not show its crop at all; the menu is the channel. Lucy's d1 message never mentions the
+   barley except through it.
+3. **The knowledge stores are separate and partial.** What one has seen of bare land, of one's beasts, of things lying about, of
+   one's home while away, of elsewhere: five stores, each with its own rendering, beside the direct reads.
+
+## 7e. From the other end: what an agent has to know, and one general system for it
+
+The information a person needs to act, whatever the world:
+
+| # | What | How a person comes to know it | Changes |
+|---|---|---|---|
+| 1 | **Oneself**: body (fed, hurt, stage, with child), time to spend today, what one holds and can carry | feels it; certain | daily |
+| 2 | **When**: season, day, weather | sees it; certain | daily |
+| 3 | **Where**: the place, its parts and how they join, the ways out | sees it on arrival, learns it by going | rarely |
+| 4 | **What is there and its state**: land and what grows, crops, buildings and what is in them, stores, beasts, goods lying | **senses**: sight, sound, smell, touch, by attention and work | constantly |
+| 5 | **Who**: people present, how they look, what they are to one | sees them; knows kin | daily |
+| 6 | **Whose**: claims and rights | seen, told, remembered | sometimes |
+| 7 | **What happened**: one's acts and their outcomes; what others did; what was said | own results; senses; hearing | daily |
+| 8 | **What is owed and planned**: agreements, offers, one's intentions | records, memory | sometimes |
+| 9 | **How the world works**: common knowledge (eating, cold, a day's work) and know-how (crafts, by depth) | upbringing, watching, teaching, trying | slowly |
+| 10 | **How to act**: the verbs and their slots | given once | never |
+| 11 | **One's own mind**: memory, notes | written by oneself | by oneself |
+
+Items 4 to 8 are **beliefs about the world**, each held with when and how it was learned. Today the engine has them as five
+partial stores plus direct reads of the true state. **A general system:** one belief store per person, entries of (thing, aspect,
+value, day, how known: saw, heard, did, worked it, always known); every channel writes to it (the senses through the noticing
+rule; speech through mentions; one's own acts through their results, which also sense what was worked, D2-115; seeding); the
+message is a rendering of it, by thing: what is here (fresh), one's own (house, beasts, fields), elsewhere (aged); the engine
+reads the true state only for one's own body (1) and the day (2). Structure that anyone present sees at once (parcels, buildings,
+people) goes in by a sure sight; states go in by signs. **Nothing is computed for the agent from the true state.**
+
+What it gives: senses become the channel for nearly everything in the world, as D4-48 meant; asymmetries of information become
+real (a farmer who works her field knows its crop; a neighbour may not); a new system adds things, aspects and signs, never a new
+prompt section; the prompt grows with what one knows and where one is, not with the data. What it costs: a rebuild of perceive.py
+and prompt.py's rendering around one store; a calibration of signs so that ordinary states (one's own field, one's own store) are
+reliably known to those who work them; some agents will act on stale or missing beliefs (as people do).
+
 ## 8. For Zach
 
 1. The principles in §6 (especially 1 and 3: no computed choices; no skill told).
@@ -239,5 +313,9 @@ refuse unknown words, and the prompt carries the words). Restarts then happen on
 4. Whether to run the three arms.
 5. The schema fix (§7b): a constant schema, so conversations restart only at the end of a stretch. This one is a fault more than a
    design choice; it can go in before the arms, in all three.
+6. Restoring the verb grammar (§7c): about 22 verbs, settings through `set`, powers through `invoke`, membership general, event
+   choices as existing verbs.
+7. The belief store (§7e): one store, every channel writing to it, the message rendered from it, nothing computed from the true
+   state; the senses as the main channel.
 
 *Current as of 31 Oct 2026.*
