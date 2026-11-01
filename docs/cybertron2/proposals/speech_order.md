@@ -36,8 +36,12 @@ calling out to the whole place (a unit).
 5. **Gatherings, for larger places (later):**
    - the evening place is a choice, home by default: an alehouse, a hall or a neighbour's house instead, if one may go in. Each
      gathering has its own round, so a town's evening is many rooms at once;
-   - a meeting in the day is an act: one calls it at a building (a council at the hall), those who come spend units on it, and it
-     has a round of its own among those present;
+   - **a gathering called for the day** (Zach, 2 Nov): anyone may call one at a parcel or a building, for tomorrow, at the hearth
+     or by calling out. Everyone at that place finds it in their morning message ("Ivo has called the Hobbs and the Ashbys to the
+     Green: a unit to come"). Those who come spend a unit and get a round of their own after the morning's answers and before the
+     work, with up to three waves among those present, and may re-plan the rest of the day. What is agreed there is witnessed:
+     everyone present knows it, so agreements made at a gathering are common knowledge (cybertron 1: halls lost to private
+     messages because they had no power of their own; this gives them one);
    - writing a notice (a document at a place, D2-24) is the town-wide channel that lasts.
 6. **The memory request** (every few days) is folded into that evening's hearth call, which saves a call.
 7. **To test against it:** plan tomorrow at the hearth, and wake people at dawn only if something new reached them (a word, an
@@ -69,7 +73,9 @@ Evidence:
 2. (Answered by Zach, 2 Nov: not the parcel, since nobody knows who will be there until they act.)
 3. Whether speech to the house in the morning is free as well (the house is the same gathering) or the morning is for private words
    only.
-4. What to measure: share of talk that is not work; calls per agent-day; DM share; coordination failures (the harvest
+4. Whether gatherings are used at all: not in one family (the hearth covers it); the test is a world of several households with a
+   common to share (the Common at Combe was grazed bare again and again).
+5. What to measure: share of talk that is not work; calls per agent-day; DM share; coordination failures (the harvest
    overshoot); whether households talk about aims, kin and the dead.
 
 ## Affects
@@ -84,6 +90,8 @@ information/prompts.md.
   acted"); the evening at the building or camp, where they "chat and plan and talk about what they want" and see the day's
   outcomes; the second wave of replies removed ("A says to B and then B responds to A"); only those asked something directly are
   woken in the answer wave; gatherings generalise the hearth for towns (his question about meeting rooms).
+- 2 Nov 2026: Zach suggested a gathering one declares at a parcel, which others may join for more back-and-forth; folded into point
+  5, called for the next day so others know of it before they plan, a unit to come, up to three waves, witnessed agreements.
 
 ## Sources
 
