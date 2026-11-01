@@ -315,6 +315,7 @@ def travel_with(w, name, other):
 def _notices(w, members, t, pos, ps):
     """What each traveller notices on its stretch tonight, from the bundles in signs.py (ROAD, THING, TRACE, TRAVELLER; D2-97)."""
     from cybertron2.engine import perceive as PC, signs as SG
+    from cybertron2.engine.data import NOTICING
     road_id = t["road"]
     cover = stretch(w, road_id, pos)["terrain"] or "plain"
     sight = EV.visibility(w, None, sense="sight", cover=cover)
@@ -322,11 +323,17 @@ def _notices(w, members, t, pos, ps):
         know = PC.practised(PC.Mind(w, n))
         eye = TH.eye(w, n)
         rng = w.rng("road-notice", w.d, n)
-        for text in SG.roll(SG.ROAD, SG.road_context(w, n, t, pos), rng, know=know):
+
+        def rule(row, own=1.0):                                         # the one rule on a stretch (D4-75): presence 1 (on it),
+            sense = row.get("sense", "sight")                           # the terrain's and the weather's visibility for the sense,
+            o = row.get("own")                                          # the eye for sight
+            o = own if o is None else o
+            return float(o) * EV.visibility(w, None, sense=sense, cover=cover) * (eye if sense in NOTICING["eye_senses"] else 1.0)
+        for text in SG.roll(SG.ROAD, SG.road_context(w, n, t, pos), rng, know=know):   # the road underfoot: one is in it
             _note(w, n, text)
         for c in things_on(w, road_id, pos).values():
             rows, x = SG.bundle(w, c)
-            for text in SG.roll(rows, x, rng, mult=TH.own(w, c) * sight * eye, know=know, at_node=False):
+            for text in SG.roll(rows, x, rng, know=know, rule=lambda row, c=c: rule(row, TH.own(w, c))):
                 _note(w, n, text)
         for x in w.s.get("traces", []):                                 # traces of others who passed (D2-88): fading
             if x["road"] != road_id or x["pos"] != pos or n in x["by"] or w.d - x["day"] < 1:
@@ -341,7 +348,7 @@ def _notices(w, members, t, pos, ps):
             o = w.s["people"][others[0]]["transit"]
             if position(w, o) != pos or (o["from"], o["to"]) == (t["from"], t["to"]):
                 continue
-            for text in SG.roll(SG.TRAVELLER, SG.traveller_context(w, others, o, pos), rng, mult=sight, know=know):
+            for text in SG.roll(SG.TRAVELLER, SG.traveller_context(w, others, o, pos), rng, know=know, rule=rule):
                 _note(w, n, text)
 
 

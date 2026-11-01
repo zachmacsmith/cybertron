@@ -172,9 +172,45 @@ def eye(w, name, on="things") -> float:
     return float(NOTICING["eye" if on == "things" else "eye_bare"][eye_level(w, name)])
 
 
-# ---------------------------------------------------------------------- the noticing rule (D2-85, D2-102)
-def presence(w, name, parcel, own_x=1.0) -> float:
-    """Where the observer was and what it did there today."""
+# ---------------------------------------------------------------------- the noticing rule (D2-85, D2-102, D4-53, D4-75)
+def steps(w, name, parcel):
+    """Steps in the parcel graph from where one was today (the parcels one worked, crossed, or one's spot) to `parcel` (D4-75);
+    None if it is not at one's node."""
+    from cybertron2.engine import layout as LY
+    a = w.s["people"][name]
+    par = w.s["parcels"].get(parcel)
+    if par is None or a["at"] is None or par["node"] != a["at"]:
+        return None
+    start = set(LY.worked_parcels(w, name)) | set(LY.passed(w, name)) | {spot_of(w, name)}
+    seen, ring, d = {parcel}, [parcel], 0
+    while ring:
+        if start & set(ring):
+            return d
+        nxt = [y for x in ring for y in w.s["parcels"][x]["adj"] if y in w.s["parcels"] and y not in seen]
+        seen |= set(nxt)
+        ring, d = nxt, d + 1
+    return None
+
+
+def presence(w, name, parcel, own_x=1.0, sense="sight", within=None, attending=False) -> float:
+    """Where the observer was and what it did there today (D2-85, D2-115); for sound and smell, how far it carries in steps of the
+    parcel graph (D4-75); `within`: the furthest step the sign is read from; `attending`: one sought it out (at least "about")."""
+    pr = NOTICING["presence"]
+    lim = NOTICING["within"].get(sense)
+    lim = within if lim is None else (lim if within is None else min(lim, within))
+    d = steps(w, name, parcel) if (lim is not None or sense in NOTICING["carry"]) else None
+    if lim is not None and (d is None or d > lim):
+        return 0.0
+    best = _presence_here(w, name, parcel, own_x)
+    if attending:
+        best = max(best, float(pr["about"]))
+    carry = NOTICING["carry"].get(sense)
+    if carry and d is not None:
+        best = max(best, float(carry[min(d, len(carry) - 1)]))
+    return best
+
+
+def _presence_here(w, name, parcel, own_x) -> float:
     pr = NOTICING["presence"]
     best = 0.0
     for e in w.s.get("events", []):
@@ -182,6 +218,9 @@ def presence(w, name, parcel, own_x=1.0) -> float:
             continue
         d = TECHNIQUES.get(e.get("tech"), {}).get("draws")
         best = max(best, float(pr.get(d, pr["work"])))
+    from cybertron2.engine import layout as LY
+    if not best and parcel in LY.worked_parcels(w, name):                 # worked there, on a herd or a building on it (D4-75)
+        best = float(pr["work"])
     if best:
         return best
     if spot_of(w, name) == parcel:
@@ -189,7 +228,6 @@ def presence(w, name, parcel, own_x=1.0) -> float:
     a = w.s["people"][name]
     if any(w.s["buildings"][b]["parcel"] == parcel for b in w.homes(name) if w.s["buildings"][b]["node"] == a["at"]):
         return float(pr["crossing"])                                       # one's own ground is crossed every day
-    from cybertron2.engine import layout as LY
     if parcel in LY.passed(w, name):                                       # on the way to where one worked, and back (D2-115)
         return float(pr["crossing"])
     if parcel in LY.next_door(w, name) and own_x >= float(NOTICING["next_door_min"]):
@@ -208,7 +246,7 @@ def attention(w, name, parcel, target) -> float:
 
 
 def hidden_factor(c) -> float:
-    """How much hiding keeps even a close look from finding a thing (THINGS hidden, taught or untaught); 1 if not hidden."""
+    """How much hiding keeps a thing from being noticed (THINGS hidden, taught or untaught); 1 if not hidden. Part of own()."""
     how = c.get("hidden")
     if not how:
         return 1.0
@@ -216,57 +254,53 @@ def hidden_factor(c) -> float:
     return float(untaught if c.get("untaught") else taught)
 
 
-def close(w, name, c, target=None) -> bool:
-    """A close look: one worked at the spot today, searched it, or it lies in (or at the door of) one's own house."""
-    if c.get("in") and c["in"] in w.homes(name):
-        return True
-    if c.get("door") and c["door"] in w.homes(name):
-        return True
-    pid = c.get("parcel")
-    if pid not in w.s["parcels"]:
-        return False
-    return presence(w, name, pid, 1.0) >= 0.5 and spot_of(w, name) == pid or attention(w, name, pid, target) > 1.0
+def spot_chance(w, name, node, parcel, own_x, target=None, sense="sight", inside=(), everyone=False, eye_on="things", reach=None,
+                night=False, attending=False, focus=1.0, sky=False, cap=True) -> float:
+    """The one noticing rule (information/noticing.md, D4-53, D4-75), for every perceived line about the world:
+    own x the sense's visibility x presence x attention x the eye (sight only), capped at 1.
 
-
-def near_spot(w, name, parcel, target=None, around=False) -> bool:
-    """For a sign's reach at a spot (D4-71): "near" is one who was there today (worked there, was about it, or attended to it);
-    "around" also one who crossed it or worked next to it."""
-    if parcel not in w.s["parcels"]:
-        return False
-    from cybertron2.engine import layout as LY
-    if parcel in LY.worked_parcels(w, name) or attention(w, name, parcel, target) > 1.0:
-        return True
-    pr = presence(w, name, parcel, 1.0)
-    return pr >= float(NOTICING["presence"]["about"]) or (around and pr >= float(NOTICING["presence"]["next door"]))
-
-
-def spot_chance(w, name, node, parcel, own_x, target=None, sense="sight", inside=(), everyone=False, eye_on="things") -> float:
-    """The noticing rule (information/noticing.md, D4-53): own x visibility x presence x attention x eye, for every sign. `inside`:
-    those always there (who live in the house, the household); `everyone`: open to all at the node (the sky)."""
+    `inside`: those always there (who live in the house, the household): presence 1, no visibility. `everyone`: open to all at the
+    node, through the open air's visibility for the sense (not for the sky itself). `reach`: "near" (a close look: the parcel only,
+    attention x close) or "around" (the parcel and next door). `night`: sensed in the dark. `attending`: a subject one sought out
+    (presence at least "about", attention x subject). `focus`: a further attention factor (things in one's own house, what one
+    worked on). `cap=False` leaves the cap to the caller, who multiplies by the row's base chance first."""
     if own_x <= 0:
         return 0.0
-    e = eye(w, name, on=eye_on)
+    top = 1.0 if cap else float("inf")
+    N = NOTICING
+    e = eye(w, name, on=eye_on) if (sense in N["eye_senses"] or eye_on != "things") else 1.0
+    att = attention(w, name, parcel, target) if parcel in w.s["parcels"] else 1.0
+    if attending:
+        att = max(att, float(N["attention"]["subject"]))
+    if reach == "near":
+        att *= float(N["attention"]["close"])
+    att *= focus
     if everyone or name in inside:
-        return min(1.0, own_x * e if eye_on != "things" else own_x)
+        vis = 1.0 if (name in inside or (sky and not N["sky_weather"])) else EV.open_air(w, sense, night)
+        x = own_x * vis * float(N["inside"]) * (att if (attending or focus != 1.0) else 1.0)
+        return min(top, x * e if eye_on != "things" else x)
     if parcel not in w.s["parcels"]:
         return 0.0
-    vis = EV.visibility(w, node, parcel, sense if sense in ("sight", "sound") else "sight")
-    return min(1.0, own_x * vis * presence(w, name, parcel, own_x) * attention(w, name, parcel, target) * e)
+    vis = EV.visibility(w, node, parcel, sense, night=night)
+    pres = presence(w, name, parcel, own_x, sense, within=N["reach"].get(reach) if reach else None, attending=attending)
+    return min(top, own_x * vis * pres * att * e)
 
 
-def chance(w, name, c, target=None) -> float:
-    """One person's chance today of noticing a thing at its spot (information/noticing.md)."""
-    x = own(w, c)
+def chance(w, name, c, target=None, sense="sight", own_x=None, reach=None, night=False, attending=False, cap=True) -> float:
+    """One person's chance today of noticing a sign of a thing at its spot, by the one rule (information/noticing.md): the thing's
+    own conspicuousness and hiding (or the sign's own, if it sets one); a thing in one's own house (or left at its door) is among
+    what one handles every day (attention x own house)."""
+    x = own(w, c) if own_x is None else float(own_x)
     if x <= 0:
         return 0.0
-    if c.get("in") and c["in"] in w.homes(name):                          # in one's own house: found at once
-        return 1.0
+    if own_x is None and sense == "sight" and (not c.get("body") or c.get("buried") is not None):
+        x *= EV.ground_factor(w)                                           # things on the ground under lying snow
     pid = c.get("parcel")
-    vis = EV.visibility(w, c.get("node"), pid, "sight") if pid in w.s["parcels"] else 1.0
-    if not c.get("body") or c.get("buried") is not None:
-        vis *= EV.ground_factor(w)                                         # things on the ground under lying snow
-    p = x * vis * presence(w, name, pid, x) * attention(w, name, pid, target) * eye(w, name)
-    return min(1.0, p)
+    if pid not in w.s["parcels"]:
+        pid = next((p for p, q in w.s["parcels"].items() if q["node"] == c.get("node") and q["cover"] == "built"), pid)
+    home = (c.get("in") and c["in"] in w.homes(name)) or (c.get("door") and c["door"] in w.homes(name))
+    return spot_chance(w, name, c.get("node"), pid, x, target, sense, inside=[name] if home else (), reach=reach, night=night,
+                       attending=attending, focus=float(NOTICING["attention"]["own house"]) if home else 1.0, cap=cap)
 
 
 # ---------------------------------------------------------------------- what one knows of things

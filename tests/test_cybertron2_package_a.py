@@ -256,7 +256,8 @@ def test_a_things_signs_follow_the_weather_the_season_and_who_reads_them():
     assert not any("flies" in t for t in cold) and any("frozen hard" in t for t in cold)   # flies in the warm, nothing in frost
     x = SG.thing_context(w, w.s["containers"]["b"])
     crows = [r for _, r in SG.true_rows(SG.THING, x) if "crows" in r["text"](x)]
-    assert crows and all(r["reach"] == "node" for r in crows)                           # seen from anywhere at the place
+    from cybertron2.engine.data import NOTICING
+    assert crows and all(r.get("own", 0) >= NOTICING["elsewhere_min"] for r in crows)  # plain enough to be seen from anywhere (D4-75)
     cache = _thing(w, "c", goods={"coin": 5.0}, hidden="under brush")
     rng = w.rng("t")
     hunter = SG.roll(SG.THING, cache, rng, mult=1.0, know={"hunt"})

@@ -494,7 +494,18 @@ NOTICING = {
                  "elsewhere": 0.05, "road": 1.0},
     "next_door_min": 0.5,                                           # only things this conspicuous are seen from next door
     "elsewhere_min": 0.8,                                           # only things this conspicuous are seen from elsewhere at the node
-    "attention": {"place": 3.0, "search": 5.0},
+    "attention": {"place": 3.0, "search": 5.0,
+                  # D4-75: a close look at what lies where one is (a sign's reach "near"); things in one's own house; a subject one
+                  # attends to (a person, a house, a herd: one seeks it out, so presence is at least "about"); what one worked on
+                  "close": 2.0, "own house": 3.0, "subject": 5.0, "working": 3.0},
+    # D4-75: sound and smell carry beyond the parcel: presence by steps in the parcel graph from where one was today (0: the parcel
+    # itself, 1: next door, ...; the last value for anything further), times the sense's visibility (weather, cover, night, masking)
+    "carry": {"sound": [0.5, 0.45, 0.2, 0.1, 0.05], "smell": [0.5, 0.3, 0.12, 0.05, 0.0]},
+    "within": {"touch": 0},                                         # a sense that reaches no further than this many steps
+    "reach": {"near": 0, "around": 1},                              # a sign's reach: the furthest step it is read from
+    "eye_senses": ["sight"],                                        # the eye for the land is an eye: it reads sight only
+    "inside": 1.0,                                                  # those inside a house, or of a household: always there
+    "sky_weather": False,                                           # the weather is not seen through itself (signs about the sky)
     "eye": {"none": 0.5, "ordinary": 1.0, "keen": 3.0},             # D2-91 on things
     "eye_bare": {"none": 0.0, "ordinary": 1.0, "keen": 2.0},        # D4-50 on how bare a place is (none: only by failing)
     "eye_keen": 0.15,                                               # the share born keen (the share with none is `land_blind`)

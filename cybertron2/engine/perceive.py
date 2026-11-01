@@ -14,7 +14,7 @@ from __future__ import annotations
 from types import SimpleNamespace
 
 from cybertron2.engine import knowledge as KN, signs as SG
-from cybertron2.engine.data import COVERS, EDIBLE, FITTINGS, ITEMS, RESOURCES, TECHNIQUES
+from cybertron2.engine.data import COVERS, EDIBLE, FITTINGS, ITEMS, NOTICING, RESOURCES, TECHNIQUES
 from cybertron2.engine.here import Here, Mind
 
 NOTICE_MAX = 5
@@ -155,7 +155,7 @@ def facts(here) -> list:
     for pid, p in here.parcels().items():
         nm, sub = p["name"], f"parcel:{pid}"
         for sense, tpl, sal in COVERS[p["cover"]]["ambient"]:
-            add([sub], tpl.format(name=nm), sal, ["place"], sense, ambient=True)
+            add([sub], tpl.format(name=nm), sal, ["place"], sense, ambient=True, spot={"node": here.node, "parcel": pid, "own": 1.0})
     from cybertron2.engine import signs as SG                                  # fields, pastures and herds: bundles of signs
     SG.facts(here, add)
     from cybertron2.engine import things as TH                                 # things at a spot: their bundles (D2-85, D4-48)
@@ -163,9 +163,10 @@ def facts(here) -> list:
         about = ([f"parcel:{c['parcel']}"] if c.get("parcel") else []) + [f"thing:{cid}"]
         rows, x = SG.bundle(here._w, c)
         for i, row in SG.true_rows(rows, x):
-            p = row["p"](x) if callable(row["p"]) else row["p"]
+            p = row.get("p", 1.0)
+            p = p(x) if callable(p) else p
             add(about, row["text"](x), p, row.get("tags", []), row.get("sense", "sight"), thing=cid, reach=row.get("reach", "rule"),
-                knows=row.get("knows"), lay=row.get("lay"), sign=f"thing:{cid}#{i}")
+                knows=row.get("knows"), lay=row.get("lay"), sign=f"thing:{cid}#{i}", own=row.get("own"), night=row.get("night", False))
     for e in here.events():
         if e["kind"] == "speech":
             continue
@@ -199,6 +200,34 @@ def _event_at(here, e, about) -> dict:
     if parcel is None and e.get("actor") in w.s["people"] and w.at(e["actor"]) == here.node:
         parcel = TH.spot_of(w, e["actor"])
     return {"node": here.node, "parcel": parcel, "own": 1.0, "inside": inside, "everyone": ext == "node" or parcel is None}
+
+
+def chance_of(w, name, f, target=None, mind=None, attending=False, focus=1.0) -> float:
+    """One person's chance of noticing a fact, by the one noticing rule (information/noticing.md; D4-53, D4-75): the fact's base
+    chance (its row's p, 1 unless set) x its knack x things.spot_chance (own x visibility x presence x attention x eye), capped at 1
+    only then. Every line
+    about the world goes through here: signs at a spot, things, events, dawn lines, ambient lines, the attended subject."""
+    from cybertron2.engine import things as TH
+    base = f["salience"] * (knack(mind, f) if mind is not None else 1.0)
+    reach = f.get("reach") if f.get("reach") in ("near", "around") else None
+    if f.get("thing"):
+        c = w.s["containers"][f["thing"]]
+        return min(1.0, base * TH.chance(w, name, c, target, f.get("sense", "sight"), own_x=f.get("own"), reach=reach,
+                                         night=f.get("night", False), attending=attending, cap=False))
+    sp = f.get("spot") or f.get("at") or {"node": w.at(name), "parcel": None, "own": 1.0, "everyone": True}
+    return min(1.0, base * TH.spot_chance(w, name, sp["node"], sp["parcel"], float(sp.get("own", 1.0)), target, f.get("sense", "sight"),
+                                          inside=sp.get("inside") or (), everyone=sp.get("everyone", False),
+                                          eye_on="bare" if f.get("eye") else "things", reach=reach, night=f.get("night", False),
+                                          attending=attending, focus=focus, sky=(f.get("about") or [""])[0] == "sky", cap=False))
+
+
+def happened_to(w, name, f) -> bool:
+    """A concerned line that happened to one, or in one's own house (D4-75): read with full presence. Other concerns (one's field,
+    one's beasts) are read by the rule like anything else."""
+    about = f.get("about") or []
+    if f"person:{name}" in about[1:] or (about[:1] == [f"person:{name}"] and f.get("actor") != name):
+        return True
+    return any(s.startswith("building:") and s[9:] in w.homes(name) for s in about)
 
 
 def relevance(here, mind, f) -> float:
@@ -291,9 +320,19 @@ def dawn(w) -> None:
         here, mind = Here(w, name), Mind(w, name)
         rng = here.rng("dawn", here.day, name)
         t = mind.store["today"]
-        for e in [e for e in here.events() if e.get("dawn")]:
-            f = {"concerns": e.get("concerns", []), "about": e.get("about") or ["sky"], "tags": e["tags"]}
-            p = 1.0 if name in f["concerns"] or e["salience"] >= SALIENT else min(1.0, e["salience"] * (0.3 + relevance(here, mind, f)))
+        for e in [e for e in here.events() if e.get("dawn")]:                # by the one rule (D4-75)
+            about = list(e.get("about") or [])
+            if e.get("actor"):
+                about.insert(0, f"person:{e['actor']}")
+            if e.get("target"):
+                about.append(f"person:{e['target']}")
+            f = {"concerns": e.get("concerns", []), "about": about or ["sky"], "tags": e["tags"], "salience": e["salience"],
+                 "sense": e.get("sense", "sight"), "actor": e.get("actor"), "at": _event_at(here, e, about)}
+            if name in f["concerns"] and happened_to(w, name, f):
+                from cybertron2.engine import things as TH
+                p = TH.spot_chance(w, name, here.node, None, 1.0, inside=[name])  # it happened to one: full presence
+            else:
+                p = chance_of(w, name, f, mind=mind)
             if rng.random() < p:
                 t["dawn"].append(e["text"])
                 mind.store["log"].append({"day": here.day, "dawn": [e["id"]]})
@@ -322,52 +361,41 @@ def evening(w, attend: dict, today: dict) -> dict:
         tgt_raw = today["watch"].get(name) or attend.get(name)
         subject, label = resolve_target(here, tgt_raw)
         place = subject == "place"
-        con = [f for f in F if name in f["concerns"] and f.get("event") and f.get("actor") != name]
+        from cybertron2.engine import things as TH
+        con = []                                                                # what concerns one (D4-75): by the rule; what
+        for f in F:                                                             # happened to one, or in one's house, in full
+            if name not in f["concerns"] or not f.get("event") or f.get("actor") == name or f.get("dawn") and f["text"] in t["dawn"]:
+                continue
+            p = TH.spot_chance(w, name, here.node, None, 1.0, inside=[name]) if happened_to(w, name, f) else chance_of(w, name, f, tgt_raw, mind)
+            if rng.random() < p:
+                con.append(f)
         t["concerned"] = list(dict.fromkeys(f["text"] for f in con))           # the same line once
-        seen = {f["id"] for f in con}
+        seen = {f["id"] for f in con} | {f["id"] for f in F if name in f["concerns"] and f.get("event")}
         homes = {f"building:{b}" for b in here.homes_here()}
         cand = []
-        from cybertron2.engine import things as TH
         knows = TH.known_here(w, name, here.node)
         for f in F:
-            if f.get("thing"):                                                 # the noticing rule (D2-85): not the salience formula
+            if f.get("ambient"):
+                continue                                                        # read only when attending to the place
+            if f.get("thing"):                                                 # things: the one rule (D2-85, D4-75)
                 if f["text"] in (knows.get(f["thing"]) or {}).get("texts", []):
                     continue                                                    # already known as it is
                 if not SG.readable(f, practised(mind)):
                     continue
-                c = w.s["containers"][f["thing"]]
-                reach = f.get("reach", "rule")
-                if reach == "rule":
-                    p = f["salience"] * TH.chance(w, name, c, tgt_raw)
-                elif reach == "near":                                          # a close look, as hard as the hiding makes it
-                    p = f["salience"] * TH.hidden_factor(c) if TH.close(w, name, c, tgt_raw) else 0.0
-                else:
-                    p = f["salience"]
-                if rng.random() < min(1.0, p):
+                if rng.random() < chance_of(w, name, f, tgt_raw):
                     cand.append((1.0 + f["salience"], f))
                 continue
-            if f.get("spot"):                                                  # every sign: the one noticing rule (D4-53)
+            if f.get("spot"):                                                  # every sign: the one noticing rule (D4-53, D4-75)
                 if f.get("only") is not None and name not in f["only"]:
                     continue
                 if f["text"] in t["dawn"] or f.get("peek") or not SG.readable(f, practised(mind)) or not _can_read(mind, f):
                     continue
                 if f["about"] and f["about"][0] == f"person:{name}":
                     continue                                                    # oneself
-                sp = f["spot"]
-                reach = f.get("reach", "rule")                                 # D4-71: near, around, the node, or the rule
-                if reach == "node":
-                    p = f["salience"] * knack(mind, f)
-                elif reach in ("near", "around"):
-                    p = f["salience"] * knack(mind, f) if TH.near_spot(w, name, sp["parcel"], tgt_raw, around=reach == "around") else 0.0
-                else:
-                    p = f["salience"] * knack(mind, f) * TH.spot_chance(w, name, sp["node"], sp["parcel"], sp["own"], tgt_raw,
-                                                                        f.get("sense", "sight"), inside=sp.get("inside") or (),
-                                                                        everyone=sp.get("everyone", False),
-                                                                        eye_on="bare" if f.get("eye") else "things")
-                if rng.random() < min(1.0, p):
+                if rng.random() < chance_of(w, name, f, tgt_raw, mind):
                     cand.append((1.0 + f["salience"], f))
                 continue
-            if f["id"] in seen or f.get("actor") == name or f.get("peek") or f.get("ambient") or not _can_read(mind, f):
+            if f["id"] in seen or f.get("actor") == name or f.get("peek") or not _can_read(mind, f):
                 continue
             if (f.get("knows") or f.get("lay")) and not SG.readable(f, practised(mind)):
                 continue                                                    # an expert's reading, or a lay one (signs.py)
@@ -380,13 +408,7 @@ def evening(w, attend: dict, today: dict) -> dict:
             if f.get("kind") in ROUTINE or (f["about"] and f["about"][0] == f"person:{name}"):
                 continue
             rel = relevance(here, mind, f)                                     # orders what one notices; the chance is the rule's
-            at = f.get("at") or {"node": here.node, "parcel": None, "own": 1.0, "everyone": True}
-            p = min(1.0, f["salience"] * knack(mind, f) * TH.spot_chance(w, name, at["node"], at["parcel"], at["own"], tgt_raw,
-                                                                         f.get("sense", "sight"), inside=at.get("inside") or (),
-                                                                         everyone=at.get("everyone", False)))
-            if f.get("eye"):
-                p *= eye(here, name)
-            if rng.random() < p:
+            if rng.random() < chance_of(w, name, f, tgt_raw, mind):
                 cand.append((f["salience"] + rel, f))
         close = {f["thing"] for _, f in cand if f.get("thing") and f.get("reach") == "near"}
         cand = [(k, f) for k, f in cand if not (f.get("thing") in close and f.get("reach") == "rule")]   # a close look over a glimpse
@@ -403,16 +425,18 @@ def evening(w, attend: dict, today: dict) -> dict:
                 t["notice"].append(f"you shut the gate of {w.s['parcels'][f['gate']]['name']}")
         seen |= {f["id"] for f in notice}
         att = []
-        if place:
+        if place:                                                              # the place in general: its ambient lines, by the rule
             amb = [f for f in F if f.get("ambient")]
             rng.shuffle(amb)
-            att = amb[:4]
+            att = [f for f in amb if rng.random() < chance_of(w, name, f, mind=mind, attending=True)][:4]
         elif subject == "village":
             att = [{"id": f"layout:{i}", "text": x, "about": ["village"]} for i, x in enumerate(here.layout())]
-        elif subject:
+        elif subject:                                                          # a subject sought out: the rule, attention x subject
             pool = [f for f in F if subject in f["about"] and f["id"] not in seen and f.get("actor") != name and _can_read(mind, f)
                     and not f.get("thing")                                    # things: by the noticing rule, attention x3 (D2-85)
+                    and (f.get("only") is None or name in f["only"]) and not f.get("ambient")
                     and (not f.get("peek") or subject.startswith("building:"))]
+            pool = [f for f in pool if rng.random() < chance_of(w, name, f, mind=mind, attending=True)]
             pool.sort(key=lambda f: -(f["salience"] + relevance(here, mind, f)))
             texts = set()
             for f in pool:
@@ -426,7 +450,9 @@ def evening(w, attend: dict, today: dict) -> dict:
         kin = [x for x in others if x in mind.members]
         rest = [x for x in others if x not in kin]
         rng.shuffle(rest)
-        for x in (kin + rest)[:int(here.p["glimpse"])]:
+        home = [m for m in here.people() if mind.members and m in mind.members]  # one's household: always there (D4-75)
+        seen_people = [x for x in kin + rest if rng.random() < TH.spot_chance(w, name, here.node, TH.spot_of(w, x), 1.0, inside=home)]
+        for x in seen_people[:int(here.p["glimpse"])]:
             pl = today["worked"].get(x)
             if pl:
                 spot = here.parcels().get(pl[-1]) or here.buildings().get(pl[-1])
@@ -437,7 +463,8 @@ def evening(w, attend: dict, today: dict) -> dict:
                 t["glimpse"].append(f"{x} was about the houses")
         for v in watchers.get(name, []):
             mutual = str(today["watch"].get(name) or attend.get(name) or "").lower() == v.lower()
-            if today["watch"].get(v) == name or here.rng("felt", here.day, name, v).random() < float(here.p["felt_watched"]) * (2 if mutual else 1):
+            own = 1.0 if today["watch"].get(v) == name else float(here.p["felt_watched"]) * (2 if mutual else 1)
+            if here.rng("felt", here.day, name, v).random() < TH.spot_chance(w, name, here.node, None, own, inside=[name]):
                 t["felt"].append(f"You had the feeling {v} was watching you today" if today["watch"].get(v) != name
                                  else f"{v} spent the day at your side, watching how you work")
         times = {}
@@ -492,9 +519,12 @@ def evening(w, attend: dict, today: dict) -> dict:
                     b["lines"].append(f["text"])
         for key in today["worked"].get(name, []):                               # acting: what one worked on, one sees (38.40 §9)
             sub = f"parcel:{key}" if key in w.s["parcels"] else f"building:{key}"
+            act = here.rng("acting", here.day, name, key)                       # by the rule, attention x working (D4-75)
             rows = sorted((f for f in F if sub in (f.get("about") or []) and not f.get("event") and not f.get("thing")
                            and not f.get("actor") and not f.get("ambient") and _can_read(mind, f)
-                           and (f.get("only") is None or name in f["only"])), key=lambda f: -f["salience"])
+                           and (f.get("only") is None or name in f["only"])
+                           and act.random() < chance_of(w, name, f, tgt_raw, mind, focus=float(NOTICING["attention"]["working"]))),
+                          key=lambda f: -f["salience"])
             if rows:
                 b = mind.store["beliefs"].setdefault(sub, {"day": here.day, "lines": [], "ids": []})
                 if b["day"] != here.day:

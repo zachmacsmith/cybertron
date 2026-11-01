@@ -135,6 +135,16 @@ def visibility(w, node, parcel=None, sense="sight", night=False, moon=False, qui
     return round(v, 4)
 
 
+def open_air(w, sense="sight", night=False) -> float:
+    """What the day's weather (and the dark) let a sense through anywhere at a place (D4-75): for signs open to everyone there."""
+    if sense not in ("sight", "sound"):
+        return 1.0
+    v = float(WEATHER[weather(w)][sense])
+    if night:
+        v *= float(ENV["night"]["sight"]) if sense == "sight" else float(ENV["night"]["sound"])
+    return round(v, 4)
+
+
 def felled(w, parcel) -> bool:
     """A wood cut down below a share of its timber is open ground: one sees through it (D2-92)."""
     wood = w.s["parcels"][parcel]["res"].get("wood")
