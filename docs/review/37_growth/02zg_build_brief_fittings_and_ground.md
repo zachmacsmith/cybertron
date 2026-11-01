@@ -1,5 +1,7 @@
 # 02zg: build brief for 37.4: fitting work over days, and ground shown used and free
 
+**Built (3 Nov): ab971ff on wp/cybertron2 (37.4; tests/test_cybertron2_fittings_ground.py).**
+
 Session 37.2, 3 Nov 2026. **Zach asked for these two to be built** (3 Nov: "1. Yes. 2. Yes", on the list of what was ready).
 README rule 10: nothing else here is to be built. Plot shares (D2-163) wait for a design question to Zach; Package E stays
 deferred; no calibration numbers change.
