@@ -1,6 +1,6 @@
 # What an agent is shown: the world and its rules, not choices made for it
 
-**Status:** discussion
+**Status:** partly accepted: D4-78 (points 1 and 9, as a world setting); the rest in discussion
 **Owner:** 37.4
 
 ## Summary
@@ -129,6 +129,9 @@ seeing.md §1, senses.md; cybertron2/engine/prompt.py, perceive.py, knowledge.py
   6,600 with the old view; refusals 7.4% and 8.9% against 6.5% without the menu; the agents kept their footing, read crops from
   signs, used the store's changes, and acted under real ignorance (two youths kept to a dead head's orders, not knowing of his
   death). The system text (the verb manual, 14,000 characters) is the next lever.
+- 2 Nov 2026: the belief-built message, built 1 Nov at Zach's request, recorded as D4-78 (spec information/prompts.md) in a review of
+  decisions not yet logged. Still in discussion: the system text (the verb manual and its tool multipliers), the verb grammar,
+  texts as beliefs, budgets by closeness.
 
 ## Sources
 

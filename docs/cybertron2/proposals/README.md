@@ -284,3 +284,5 @@ Newest first. Ideas decided or rejected in conversation before 23 Oct are backfi
 | 2 Nov | No invented acts in signs; one's beasts kept short (built, then written down) | retrospective, accepted: D4-72, D4-73 | [sign_rules.md](sign_rules.md) |
 | 2 Nov | A fallback each person sets (built, then written down) | retrospective, accepted: D4-76 | [fallback.md](fallback.md) |
 | 2 Nov | The evening's add-ons: meetings, memory at the evening, plan at the hearth | accepted: D4-77 | [speech_order.md](speech_order.md) |
+| 2 Nov | The morning message from beliefs (built 1 Nov, recorded in review) | partly accepted: D4-78 | [agent_view.md](agent_view.md) |
+| 2 Nov | Runs stop before the weekly limit; continue --days (built, then written down) | retrospective, accepted: D4-79 | [run_tools.md](run_tools.md) |
