@@ -255,6 +255,8 @@ def decay_rate(w, c, item) -> tuple:
     if c["kind"] == "stock":
         bb = w.s["buildings"][c["of"]]
         keep = min([1.0] + [float(FITTINGS[f_].get("spoil", 1.0)) for f_, n in bb["fittings"].items() if n and f_ in FITTINGS])
+        if bb.get("structure") == "camp":                                    # a lean-to keeps as the open does (D4-84)
+            return base * season, None
         return base * float(p["house_spoil"]) * keep * season, None
     if c["kind"] in TH.KINDS:
         cond = "buried" if c.get("hidden") == "buried" or c.get("buried") is not None else ("open_wet" if EV.wet(w) else "open_dry")

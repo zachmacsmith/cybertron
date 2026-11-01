@@ -732,11 +732,8 @@ buildings:
       fire ring: 1
     lasts_until: 6
     stock:
-      dried meat: 16
-      wild food: 4
-      timber: 4
-      firewood: 10
-      hide: 2
+      dried meat: 8
+      firewood: 1
       tent: 1
 agents:
   Bran:

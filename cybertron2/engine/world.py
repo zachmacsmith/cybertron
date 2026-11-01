@@ -146,6 +146,7 @@ class World:
             s["roads"][f"road:{a}-{b}"]["ends"] = LY.build_ends(self, extra, a, b)                   # a side and parcels (D2-90)
         for bid, b in (spec.get("buildings") or {}).items():
             self._new_building(bid, b)
+        self._fit_seed_free(spec.get("buildings") or {})
         for hid, h in (spec.get("herds") or {}).items():                       # cattle by role (D2-63); a bare count is cows
             roles = {r: int(h.get(r, 0)) for r in ("cows", "oxen", "bulls", "young")}
             if not any(roles.values()):
@@ -270,6 +271,27 @@ class World:
                                                  "day": -1, "how": ln.get("how", "paint"), "was": None})
         if b.get("lasts_until") is not None:                                    # a seeded camp that will fall (world file)
             s["buildings"][bid]["lasts_until"] = int(b["lasts_until"])
+
+    def _fit_seed_free(self, specs) -> None:
+        """The default free floor of seeded buildings (D4-85) only while each parcel keeps ground for a small room: where it would
+        not, those buildings are seeded with none, last first."""
+        from cybertron2.engine import buildings as BL
+        from cybertron2.engine.data import SPACE
+        s = self.s
+        keep = int(SPACE["seed_keep_ground"])
+        for pid, par in s["parcels"].items():
+            total = BL.ground_total(par)
+            if not total:
+                continue
+            mine = [bid for bid, x in specs.items() if x.get("parcel") == pid and "free" not in x and bid in s["buildings"]
+                    and not x.get("rooms") and x.get("structure") != "camp" and not x.get("monument")]
+            for bid in reversed(mine):
+                if BL.ground_used(pid, par, s["buildings"]) <= total - keep:
+                    break
+                x = specs[bid]
+                b = s["buildings"][bid]
+                rooms = BL.seed_rooms({**x, "free": 0}, b["fittings"], self.goods(b["stock"]))
+                b.update(rooms=rooms, size=sum(int(r["floor"]) for r in rooms))
 
     def _eldest(self, members):
         order = {"elder": 0, "adult": 1, "youth": 2, "child": 3, "infant": 4}

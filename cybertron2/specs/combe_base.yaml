@@ -23,7 +23,7 @@ nodes:
   combe:
     name: Combe
     parcels:
-      cb_green: {name: the Green, cover: built, size: 1, side: centre, height: 1, text: "a house and a byre round a trodden green",
+      cb_green: {name: the Green, cover: built, size: 2, side: centre, height: 1, text: "a house and a byre round a trodden green",
                  adj: [cb_infield, cb_common, cb_copse]}
       cb_infield: {name: the Infield, cover: field, size: 2, side: north, height: 1, holder: Hobb, fertility: 1.0,
                    text: "the Hobbs' barley, walled from the beasts", adj: [cb_common],

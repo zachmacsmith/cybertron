@@ -177,7 +177,13 @@ def free_floor(b, goods=None) -> int:
     return floor(b) - fitting_spaces(b) - (alloc(b, goods)["floor_spaces"] if goods else 0)
 
 
+def camp_weight(goods) -> float:
+    return sum(float(q) * _weight(i) for i, q in (goods or {}).items() if q > 1e-9)
+
+
 def fits(b, goods) -> bool:
+    if b.get("structure") == "camp":                                        # a lean-to keeps little (D4-84)
+        return camp_weight(goods) <= float(SPACE["camp_store"]) + 1e-6
     if exempt(b):
         return True
     return alloc(b, goods)["floor_weight"] <= (floor(b) - fitting_spaces(b)) * float(STORES["floor"]) + 1e-6
@@ -185,6 +191,9 @@ def fits(b, goods) -> bool:
 
 def room_for(b, goods, item) -> float:
     """How much more of a good its stores and free floor can take."""
+    if b.get("structure") == "camp":                                        # D4-84
+        wt = _weight(item)
+        return max(0.0, float(SPACE["camp_store"]) - camp_weight(goods)) / wt if wt > 0 else float("inf")
     if exempt(b):
         return float("inf")
     if not fits(b, goods):
@@ -205,6 +214,8 @@ def room_for(b, goods, item) -> float:
 def full_words(b, goods, item) -> str:
     """What is full, for a refusal: "the bins hold 60 food; 58 are in them; the free floor (2 spaces) holds 60 weight; 55 lie on it"."""
     from cybertron2.engine.world import show
+    if b.get("structure") == "camp":                                        # D4-84
+        return f"a camp keeps {show(float(SPACE['camp_store']))} weight; {show(camp_weight(goods))} lie in it"
     a = alloc(b, goods)
     bits = []
     for name, kind, cap in stores(b):

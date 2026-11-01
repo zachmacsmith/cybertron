@@ -66,13 +66,14 @@ def test_ground_is_shown_used_and_free_and_fields_by_their_plots():
     w = World(load_spec(SPEC))
     lines = PR._place_lines(Here(w, "Ivo"), Mind(w, "Ivo"))
     green = next(x for x in lines if x.startswith("- the Green ("))
-    assert "built ground; 2 buildings, 18 of 24 spaces used, room for 6 more spaces" in green      # spaces (D2-154)
+    assert "built ground; 2 buildings, 24 of 48 spaces used, room for 24 more spaces" in green     # spaces (D2-154; free floor D4-85)
     assert any(x.startswith("- the Infield (field; 2 plots") for x in lines)
-    w.apply("raise", "combe", node="combe", parcel="cb_green", rec={"name": "Hut", "structure": "wattle", "fittings": {},
-                                                                  "rooms": [{"kind": "small room", "floor": 6, "storey": 1}], "unfinished": None})
+    for i in range(4):
+        w.apply("raise", "combe", node="combe", parcel="cb_green", rec={"name": f"Hut {i}", "structure": "wattle", "fittings": {},
+                                                                      "rooms": [{"kind": "small room", "floor": 6, "storey": 1}], "unfinished": None})
     lines = PR._place_lines(Here(w, "Ivo"), Mind(w, "Ivo"))
-    assert "built ground; 3 buildings, 24 of 24 spaces used, no room left" in next(x for x in lines if x.startswith("- the Green ("))
+    assert "built ground; 6 buildings, 48 of 48 spaces used, no room left" in next(x for x in lines if x.startswith("- the Green ("))
     w.s["today"] = R.blank_today()
     w.apply("create", "combe", dst=w.s["buildings"]["hobb_house"]["stock"], item="timber", qty=20, why="test")
     out = V.do(Here(w, "Ivo"), Mind(w, "Ivo"), {"do": "build", "what": "small room", "at": "the Green"})
-    assert out.startswith("Refused: build: there is no room left to build on the Green: 24 of its 24 spaces are taken")
+    assert out.startswith("Refused: build: there is no room left to build on the Green: 48 of its 48 spaces are taken")

@@ -754,13 +754,8 @@ buildings:
       fire ring: 1
     lasts_until: 14
     stock:
-      grain: 30
-      beans: 10
-      dried meat: 10
-      timber: 6
-      firewood: 20
-      straw: 10
-      stone: 6
+      dried meat: 6
+      firewood: 9
   bramley_camp:
     name: the Bram camp
     parcel: bramley_camp
@@ -772,13 +767,8 @@ buildings:
       fire ring: 1
     lasts_until: 14
     stock:
-      grain: 30
-      beans: 10
-      dried meat: 10
-      timber: 6
-      firewood: 20
-      straw: 10
-      stone: 6
+      dried meat: 6
+      firewood: 9
   coldwell_camp:
     name: the Cold camp
     parcel: coldwell_camp
@@ -790,13 +780,8 @@ buildings:
       fire ring: 1
     lasts_until: 14
     stock:
-      grain: 30
-      beans: 10
-      dried meat: 10
-      timber: 6
-      firewood: 20
-      straw: 10
-      stone: 6
+      dried meat: 6
+      firewood: 9
   gorm_hall:
     name: the Gorm Hall
     parcel: gorm_yard
@@ -838,6 +823,9 @@ agents:
     holdings:
       crude tool: 1
       coin: 2
+      timber: 6
+      stone: 6
+      straw: 10
     concerns:
     - food
     - shelter
@@ -861,6 +849,9 @@ agents:
     holdings:
       crude tool: 1
       coin: 2
+      grain: 30
+      beans: 10
+      dried meat: 4
     concerns:
     - food
     - shelter
@@ -887,6 +878,9 @@ agents:
     holdings:
       crude tool: 1
       coin: 2
+      timber: 6
+      stone: 6
+      straw: 10
     concerns:
     - food
     - shelter
@@ -910,6 +904,9 @@ agents:
     holdings:
       crude tool: 1
       coin: 2
+      grain: 30
+      beans: 10
+      dried meat: 4
     concerns:
     - food
     - shelter
@@ -936,6 +933,9 @@ agents:
     holdings:
       crude tool: 1
       coin: 2
+      timber: 6
+      stone: 6
+      straw: 10
     concerns:
     - food
     - shelter
@@ -959,6 +959,9 @@ agents:
     holdings:
       crude tool: 1
       coin: 2
+      grain: 30
+      beans: 10
+      dried meat: 4
     concerns:
     - food
     - shelter

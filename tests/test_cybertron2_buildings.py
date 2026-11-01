@@ -391,3 +391,25 @@ def test_tiers_multiply_materials_and_work_and_a_rich_building_is_named_on_arriv
     assert w.s["buildings"][bid]["tier"] == "rich"
     from cybertron2.engine import layout as LY
     assert any("Fine Hut, a richly built" in x for x in LY.overview(w, "combe"))
+
+
+def test_a_camp_keeps_little_and_its_goods_keep_as_in_the_open():
+    from cybertron2.engine import buildings as BL, night as N
+    from cybertron2.engine.data import SPACE
+    from cybertron2.engine.world import World, load_spec
+    w = World(load_spec("cybertron2/specs/wild_bands.yaml"))
+    b = w.s["buildings"]["band_camp"]
+    cap = float(SPACE["camp_store"])
+    assert BL.fits(b, {"grain": cap}) and not BL.fits(b, {"grain": cap + 1})
+    assert abs(BL.room_for(b, {"grain": cap - 5}, "grain") - 5) < 1e-6
+    stock = w.s["containers"][b["stock"]]
+    house = next(x for x in World(load_spec("cybertron2/specs/combe.yaml")).s["buildings"].values())
+    assert N.decay_rate(w, stock, "wild food")[0] > 0.15 * 0.3 + 1e-9             # not the house rate
+
+
+def test_a_seeded_house_has_some_free_floor_by_default():
+    from cybertron2.engine import buildings as BL
+    from cybertron2.engine.world import World, load_spec
+    w = World(load_spec("cybertron2/specs/combe.yaml"))
+    b = w.s["buildings"]["hobb_house"]
+    assert BL.free_floor(b, w.goods(b["stock"])) >= 3

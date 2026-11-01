@@ -27,7 +27,7 @@ nodes:
       cb_green:
         name: the Green
         cover: built
-        size: 1
+        size: 2
         side: centre
         height: 1
         text: a house and a byre round a trodden green

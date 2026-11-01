@@ -74,7 +74,7 @@ def frontier():
             f"{nid}_brook": {"name": f"{name} Brook", "cover": "water", "size": 1, "side": "west", "height": 0, "text": "a quick brook"}}}
         buildings[f"{nid}_camp"] = {"name": f"the {short} camp", "parcel": f"{nid}_camp", "household": short, "structure": "camp", "size": 4,
                                     "fittings": {"beds": 4, "fire ring": 1}, "lasts_until": 14,
-                                    "stock": {"grain": 30, "beans": 10, "dried meat": 10, "timber": 6, "firewood": 20, "straw": 10, "stone": 6}}
+                                    "stock": {"dried meat": 6, "firewood": 9}}         # a lean-to keeps little (D4-84)
     for nid, name, kind in wilds:
         nodes[nid] = wild_node(nid, name, {"forest": "deep woods", "meadow": "open meadows", "hill": "high fells"}[kind], kind)
     ring = ["ashby", "e1", "e2", "bramley", "e3", "e4", "coldwell", "e5", "e6"]
@@ -89,7 +89,9 @@ def frontier():
         aim = f"Make {name} a home for the {short} folk and see them grow into a great house; learn what lies beyond {name}."
         for who, sex, partner, model in ((h[0], h[1], s[0], "claude-opus-5-5"), (s[0], s[1], h[0], "claude-sonnet-5-5")):
             rel = {partner: "your wife" if sex == "m" else "your husband"}
-            agents[who] = person(who, short, sex, -38, partner, rel, model, mem, aim, {"crude tool": 1, "coin": 2}, craft)
+            carry = ({"crude tool": 1, "coin": 2, "timber": 6, "stone": 6, "straw": 10} if model == "claude-opus-5-5"
+                     else {"crude tool": 1, "coin": 2, "grain": 30, "beans": 10, "dried meat": 4})   # what they came with, in hand
+            agents[who] = person(who, short, sex, -38, partner, rel, model, mem, aim, carry, craft)
     # the raiders (Zach, 2 Nov): a family with plenty and weapons, a few days off the ring, meaning to be the only folk in the land
     nodes["gormhold"] = {"name": "Gormhold", "parcels": {
         "gorm_yard": {"name": "the Gorm Yard", "cover": "built", "size": 1, "side": "centre", "height": 2, "text": "a stockade round a long hall",
@@ -145,7 +147,7 @@ def wild():
                 roads.append(road(grid[r][c], grid[r + 1][c], 1, "river valley"))
     buildings = {"band_camp": {"name": "the band's camp", "parcel": "w1_lea", "household": "Wolf", "structure": "camp", "size": 4,
                                "fittings": {"beds": 4, "fire ring": 1}, "lasts_until": 6,
-                               "stock": {"dried meat": 16, "wild food": 4, "timber": 4, "firewood": 10, "hide": 2, "tent": 1}}}
+                               "stock": {"dried meat": 8, "firewood": 1, "tent": 1}}}          # a lean-to keeps little (D4-84)
     mem = ["Your people, the Wolf band, have never kept a house: you follow the game and the seasons from place to place.",
            "In the cold, game is hard to find and the greens die back: the old ones dried meat in the autumn and carried it.",
            "Elkmere's lea, Deepholt's woods and Birchlea are places you have camped before; there is more land beyond that no one of you "
