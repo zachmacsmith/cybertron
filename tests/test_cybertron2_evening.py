@@ -156,3 +156,17 @@ def test_slaughter_says_where_the_meat_went_and_taking_from_a_place_searches_it(
     assert TH.search_chance(w, "Margery", buried) < 0.3                             # well buried: seldom found
     nothing = V.do(Here(w, "Margery"), Mind(w, "Margery"), {"do": "take", "item": "stone", "qty": 1, "from": pname})
     assert nothing.startswith("Refused: take: you looked over") and "found no stone" in nothing
+
+
+def test_groups_that_are_no_more_leave_the_list_of_ones_beasts():
+    from cybertron2.engine import perceive as PC
+    w = _world(tags=True)
+    h1 = next(iter(w.s["herds"]))
+    node = w.s["herds"][h1]["node"]
+    new = w.apply("split_herd", node, like=h1, take={"cows": 1})
+    PC.remember_beasts(w, "Ivo", new, "saw")
+    PC.remember_beasts(w, "Ivo", h1, "saw")
+    assert set(w.s["mind"]["Ivo"]["beasts"]) == {h1, new}
+    w.apply("set", node, ref=("herd", new), field="cows", value=0)              # it rejoined: no beasts left in the group
+    PC.remember_beasts(w, "Ivo", h1, "saw")
+    assert set(w.s["mind"]["Ivo"]["beasts"]) == {h1}

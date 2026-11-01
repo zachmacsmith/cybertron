@@ -267,6 +267,10 @@ def remember_beasts(w, name, hid, how) -> None:
     where = w.s["parcels"][h["parcel"]]["name"] if h.get("parcel") in w.s["parcels"] else "on the road"
     k[hid] = {"name": h["name"], "words": FM.herd_words(h), "where": f"on {where}" if h.get("parcel") else where,
               "day": -1 if how == "known" else w.d, "how": how}
+    root = hid.split("-")[0]                                                    # seeing the beasts, one counts them: groups that are
+    for other in [x for x in k if x != hid and x.split("-")[0] == root]:        # no more (rejoined, led off, dead) leave one's list
+        if FM.head(w.s["herds"].get(other) or {}) <= 0:
+            del k[other]
 
 
 def remember_land(mind, day, pid, what, state, how) -> None:

@@ -231,8 +231,14 @@ def _beast_lines(here, mind) -> list:
     if not k:
         return []
     when = lambda r: "as you have long known" if r["day"] < 0 else ("seen today" if r["day"] == here.day else _daystr(mind, r["day"]))
+    rows = sorted(k.values(), key=lambda r: -int(r["day"]))                    # the latest first; at most BEASTS_SHOWN groups
+    more = len(rows) - BEASTS_SHOWN
     return ["Your household's beasts, as you last knew of them: " + "; ".join(
-        f"{r['name']} ({r['words']}), {r['where']} ({'found missing' if r['how'] == 'missing' else when(r)})" for r in k.values()) + "."]
+        f"{r['name']} ({r['words']}), {r['where']} ({'found missing' if r['how'] == 'missing' else when(r)})" for r in rows[:BEASTS_SHOWN])
+            + (f"; and {more} other groups you have not seen lately" if more > 0 else "") + "."]
+
+
+BEASTS_SHOWN = 4
 
 
 def _fence_words(fc) -> str:
