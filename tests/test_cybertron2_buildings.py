@@ -413,3 +413,21 @@ def test_a_seeded_house_has_some_free_floor_by_default():
     w = World(load_spec("cybertron2/specs/combe.yaml"))
     b = w.s["buildings"]["hobb_house"]
     assert BL.free_floor(b, w.goods(b["stock"])) >= 3
+
+
+def test_one_who_knows_nobody_gets_a_valid_schema_with_names_left_free():
+    from cybertron2.engine import prompt as PR
+    from cybertron2.engine.here import Here, Mind
+    w = World(load_spec("cybertron2/specs/wenbridge.yaml"))                   # Piers starts with no relations (wb1 day 0)
+    s = PR.schema_for(Here(w, "Piers"), Mind(w, "Piers"))
+
+    def enums(n):
+        if isinstance(n, dict):
+            yield n.get("enum", None)
+            for v in n.values():
+                yield from enums(v)
+        elif isinstance(n, list):
+            for v in n:
+                yield from enums(v)
+    assert [] not in list(enums(s))
+    assert "enum" not in s["properties"]["tell"]["items"]["properties"]["to"]

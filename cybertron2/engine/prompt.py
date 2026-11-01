@@ -104,7 +104,20 @@ def schema_for(here, mind) -> dict:
     s["properties"]["fallback"] = copy.deepcopy(s["properties"]["actions"])    # units left over: what one does with them
     if here.setting("evening"):
         a["when"] = {"type": "string", "enum": ["morning", "nightfall"]}
+    _drop_empty_enums(s)                                                       # one who knows nobody: the name is free text
     return s
+
+
+def _drop_empty_enums(node) -> None:
+    """An empty enum is not a valid schema (the call is refused): a field with nothing to choose from stays free text."""
+    if isinstance(node, dict):
+        if node.get("enum") == []:
+            node.pop("enum")
+        for v in node.values():
+            _drop_empty_enums(v)
+    elif isinstance(node, list):
+        for v in node:
+            _drop_empty_enums(v)
 
 
 def _craft_note(tech) -> str:
