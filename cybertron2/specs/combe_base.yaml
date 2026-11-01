@@ -1,4 +1,4 @@
-# Combe (designed 1 Nov from the ground up, for the first run of the belief-built morning message, review 38.40 §9): one family,
+# Combe (designed 1 Nov from the ground up; cheap at the start, Zach: one couple, room to grow, for the first run of the belief-built morning message, review 38.40 §9): one family,
 # the Hobbs, at Combe, who mean to grow; the land round them empty. Run it through the generator for the family:
 #   python -m cybertron2.engine.generate cybertron2/specs/combe_base.yaml --seed 61 --out cybertron2/specs/combe.yaml
 #
@@ -25,12 +25,12 @@ nodes:
     parcels:
       cb_green: {name: the Green, cover: built, size: 1, side: centre, height: 1, text: "a house and a byre round a trodden green",
                  adj: [cb_infield, cb_common, cb_copse]}
-      cb_infield: {name: the Infield, cover: field, size: 4, side: north, height: 1, holder: Hobb, fertility: 1.0,
+      cb_infield: {name: the Infield, cover: field, size: 2, side: north, height: 1, holder: Hobb, fertility: 1.0,
                    text: "the Hobbs' barley, walled from the beasts", adj: [cb_common],
-                   state: {crop: {kind: barley, left: 200, ripe_day: 5}, last_crop: legumes}}
+                   state: {crop: {kind: barley, left: 100, ripe_day: 5}, last_crop: legumes}}
       cb_common: {name: the Common, cover: pasture, size: 3, side: west, height: 1, text: "grazing down to the brook", adj: [cb_brook, cb_moor],
                   state: {plants: {K: 3, S: 3, r: 0.3}, grass: {K: 90, S: 70, r: 0.32}}}
-      cb_copse: {name: Combe Copse, cover: forest, size: 3, side: east, height: 2, text: "ash and hazel on the bank above the house",
+      cb_copse: {name: Combe Copse, cover: forest, size: 2, side: east, height: 2, text: "ash and hazel on the bank above the house",
                  state: {wood: {kind: managed wood}, plants: {K: 3, S: 3, r: 0.3}}}
       cb_moor: {name: Combe Moor, cover: scrub, size: 4, side: south, height: 3, text: "gorse and heather up to the skyline",
                 state: {wood: {kind: scrub}, plants: {K: 4, S: 4, r: 0.3}, grass: {K: 40, S: 40, r: 0.3}}}
@@ -68,7 +68,7 @@ roads:
 - [wenmoor, holtwood, 2, {terrain: woodland, way: "a long way round under the trees", ends: {wenmoor: {parcels: [wm_meadow], side: east}}}]
 buildings:
   hobb_house: {name: Hobb House, parcel: cb_green, household: Hobb, structure: wattle, size: 6, fittings: {beds: 6, hearth: 1, bins: 1},
-               stock: {grain: 50, beans: 10, timber: 12, firewood: 40}}
+               stock: {grain: 30, beans: 6, timber: 8, firewood: 30}}
   byre: {name: the Byre, parcel: cb_green, household: Hobb, structure: wattle, size: 4, fittings: {bins: 1},
          stock: {hay: 20, straw: 10, dung: 10, wooden plough: 1, harness: 2}}
   old_house: {name: the Old House, parcel: wm_green, structure: timber, size: 5, condition: 1, fittings: {beds: 4, hearth: 1, bins: 1}, stock: {}}
@@ -85,8 +85,8 @@ incidents: []
 signs:
 - {day: 9, node: all, about: sky, sense: touch, text: "a white frost on the grass at dawn, the first of the year", salience: 0.6, tags: [season, farming]}
 lines:
-  Hobb: {place: Combe, acting: [4, 5], min_adults: 3, crafts: [sow, reap, hoe, weed, plough, milk, select seed], tools: {crude tool: 2},
+  Hobb: {place: Combe, acting: [2, 2], min_adults: 2, crafts: [sow, reap, hoe, weed, plough, milk, select seed], tools: {crude tool: 2},
          holdings: {coin: 4}}
-bounds: {acting: [4, 5], children_max: 1, youths_min: 0, per_min: 1, per_spread: 9}
+bounds: {acting: [2, 2], children_max: 1, youths_min: 0, per_min: 1, per_spread: 9}
 sim: {start: -100, fertility: 0.15, leave: 0.5}
-cast: {head: claude-opus-5-5, opus_extra: 1, middle: claude-sonnet-5-5, sonnet_extra: 3, rest: claude-sonnet-5-5, youth: claude-haiku-5-5}
+cast: {head: claude-opus-5-5, opus_extra: 0, middle: claude-sonnet-5-5, sonnet_extra: 1, rest: claude-sonnet-5-5, youth: claude-haiku-5-5}
