@@ -117,6 +117,14 @@ seeing.md §1, senses.md; cybertron2/engine/prompt.py, perceive.py, knowledge.py
   certainty and scaling driver; the upbringing test for common knowledge (rules move into seeded memory and customs); cached and
   updating layers with deltas within a stretch; presence by proximity; and the lessons of cybertron 1 and 2. To be folded into this
   proposal if Zach takes the frame.
+- 1 Nov 2026: Zach: build the belief-built message and test it in a long run of a new world; the day and the weather are senses
+  (obvious ones). Built as a world setting (`view: beliefs`, cybertron2/engine/view.py): the opening of a stretch shows the whole
+  of what one believes of here (layout, the ground's kind, what one last saw of each part, dated; who is here, household and kin
+  first, the rest counted); later days only what changed (people come and gone, what one saw anew that the day's notice did not
+  already say, one's house and its store since one last looked); no "Today you could"; the acting channel (perceive.evening: what
+  one worked, one sees, into the belief store); the reply schema's `at` free text (a child cared for). Not the default; the verb
+  grammar and the system text are unchanged. World for it: cybertron2/specs/combe_base.yaml (designed from the ground up). The
+  run's report will be review 38.41.
 
 ## Sources
 

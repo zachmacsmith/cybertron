@@ -1,0 +1,92 @@
+# Combe (designed 1 Nov from the ground up, for the first run of the belief-built morning message, review 38.40 §9): one family,
+# the Hobbs, at Combe, who mean to grow; the land round them empty. Run it through the generator for the family:
+#   python -m cybertron2.engine.generate cybertron2/specs/combe_base.yaml --seed 61 --out cybertron2/specs/combe.yaml
+#
+# Dependence by design (scenario_design §1), for a family that grows and splits:
+#   Combe (home): the house, a small barley infield, the common and its cattle (the only plough team), a copse, rough moor. Feeds
+#     the household as it is (capacity: checked in the dry run), not one twice its size: growth needs ground and beds.
+#   Wenmoor (1 day down the valley, empty): a village the fever emptied; rich fallow bottoms, a damaged house to claim, and the
+#     only mill, idle by the river (grinding: a chokepoint whoever holds it controls).
+#   Holtwood (1 day, empty): old forest: timber for beds and rooms, game, forage.
+#   Redscar (unexplored, a day past Holtwood): stone and a seam of copper ore; found only by going.
+# A grown child who leaves to hold Wenmoor's bottoms needs Combe's oxen to plough; Combe needs Wenmoor's mill and Holtwood's timber.
+name: combe
+seed: 61
+days: 40
+calendar: {season: summer, day: 3, season_days: 8}
+cold_days: []
+children: {on: true, dial: low}
+lifespan: 96
+view: beliefs
+llm: {week_stop: 0.40}
+nodes:
+  combe:
+    name: Combe
+    parcels:
+      cb_green: {name: the Green, cover: built, size: 1, side: centre, height: 1, text: "a house and a byre round a trodden green",
+                 adj: [cb_infield, cb_common, cb_copse]}
+      cb_infield: {name: the Infield, cover: field, size: 4, side: north, height: 1, holder: Hobb, fertility: 1.0,
+                   text: "the Hobbs' barley, walled from the beasts", adj: [cb_common],
+                   state: {crop: {kind: barley, left: 200, ripe_day: 5}, last_crop: legumes}}
+      cb_common: {name: the Common, cover: pasture, size: 3, side: west, height: 1, text: "grazing down to the brook", adj: [cb_brook, cb_moor],
+                  state: {plants: {K: 3, S: 3, r: 0.3}, grass: {K: 90, S: 70, r: 0.32}}}
+      cb_copse: {name: Combe Copse, cover: forest, size: 3, side: east, height: 2, text: "ash and hazel on the bank above the house",
+                 state: {wood: {kind: managed wood}, plants: {K: 3, S: 3, r: 0.3}}}
+      cb_moor: {name: Combe Moor, cover: scrub, size: 4, side: south, height: 3, text: "gorse and heather up to the skyline",
+                state: {wood: {kind: scrub}, plants: {K: 4, S: 4, r: 0.3}, grass: {K: 40, S: 40, r: 0.3}}}
+      cb_brook: {name: the Brook, cover: water, size: 1, side: west, height: 0, text: "a quick stony brook"}
+  wenmoor:
+    name: Wenmoor
+    parcels:
+      wm_green: {name: the Old Green, cover: built, size: 1, side: centre, height: 1, text: "grass grown over a green between an empty house and the mill",
+                 adj: [wm_bottoms, wm_river, wm_meadow]}
+      wm_bottoms: {name: the Bottoms, cover: field, size: 6, side: south, height: 0, fertility: 1.3,
+                   text: "deep river soil, gone to grass and docks since the fever", adj: [wm_meadow, wm_river],
+                   state: {last_crop: fallow}}
+      wm_meadow: {name: Wen Meadow, cover: meadow, size: 3, side: east, height: 0, text: "rich meadow by the water", adj: [wm_river],
+                  state: {plants: {K: 4, S: 4, r: 0.3}, grass: {K: 80, S: 80, r: 0.32}}}
+      wm_river: {name: the Wen, cover: water, size: 1, side: west, height: 0, text: "a broad slow river"}
+  holtwood:
+    name: Holtwood
+    parcels:
+      hw_edge: {name: the Wood's Edge, cover: meadow, size: 1, side: south, height: 1, text: "a clearing where the track meets the trees",
+                adj: [hw_wood], state: {plants: {K: 3, S: 3, r: 0.3}}}
+      hw_wood: {name: the Holt, cover: forest, size: 4, side: centre, height: 2, text: "old oak and beech, deep and dim",
+                state: {wood: {kind: old forest}, game: {K: 14, S: 12, r: 0.25}, plants: {K: 8, S: 8, r: 0.3}}}
+  redscar:
+    name: Redscar
+    unexplored: true
+    parcels:
+      rs_scar: {name: the Red Scar, cover: rock, size: 2, side: centre, height: 3, text: "a red-earthed cliff, good grey stone under it, green stains in the rock"}
+      rs_slope: {name: Scar Slope, cover: scrub, size: 2, side: south, height: 2, text: "thin grass and thorn below the cliff", adj: [rs_scar],
+                 state: {wood: {kind: scrub}, plants: {K: 2, S: 2, r: 0.3}, grass: {K: 30, S: 30, r: 0.3}}}
+roads:
+- [combe, wenmoor, 1, {terrain: river valley, way: "the track down the valley", stretches: {1: {landmarks: [ford]}},
+                       ends: {combe: {parcels: [cb_common], side: west}, wenmoor: {parcels: [wm_green], side: north}}}]
+- [combe, holtwood, 1, {terrain: woodland, way: "the path east into the trees", ends: {combe: {parcels: [cb_copse], side: east}, holtwood: {parcels: [hw_edge], side: south}}}]
+- [holtwood, redscar, 1, {terrain: hills, way: "a faint path north up a red-earthed gully", ends: {holtwood: {parcels: [hw_wood], side: north}}}]
+- [wenmoor, holtwood, 2, {terrain: woodland, way: "a long way round under the trees", ends: {wenmoor: {parcels: [wm_meadow], side: east}}}]
+buildings:
+  hobb_house: {name: Hobb House, parcel: cb_green, household: Hobb, structure: wattle, size: 6, fittings: {beds: 6, hearth: 1, bins: 1},
+               stock: {grain: 50, beans: 10, timber: 12, firewood: 40}}
+  byre: {name: the Byre, parcel: cb_green, household: Hobb, structure: wattle, size: 4, fittings: {bins: 1},
+         stock: {hay: 20, straw: 10, dung: 10, wooden plough: 1, harness: 2}}
+  old_house: {name: the Old House, parcel: wm_green, structure: timber, size: 5, condition: 1, fittings: {beds: 4, hearth: 1, bins: 1}, stock: {}}
+  the_mill: {name: Wen Mill, parcel: wm_green, structure: stone, size: 4, condition: 1, fittings: {millstones: 1, water wheel: 1, bins: 1}, stock: {}}
+herds:
+  hobb_cattle: {name: the Hobb cattle, kind: cattle, parcel: cb_common, cows: 2, oxen: 2, bulls: 1, young: 1, in_milk: 1, holder: Hobb}
+claims: []
+customs:
+- {text: "The Hobbs mean to be a great house: many children, and every grown child given ground of their own to hold.", households: [Hobb]}
+- {text: "Whoever clears new ground and sows it holds it, by the old custom, and so do their children.", nodes: all}
+- {text: "Wenmoor down the valley was a village until the fever; its fields lie fallow, and its mill stands idle by the river.", nodes: all}
+- {text: "Every hearth wants about twelve timber to see a house through winter's cold.", nodes: all}
+incidents: []
+signs:
+- {day: 9, node: all, about: sky, sense: touch, text: "a white frost on the grass at dawn, the first of the year", salience: 0.6, tags: [season, farming]}
+lines:
+  Hobb: {place: Combe, acting: [4, 5], min_adults: 3, crafts: [sow, reap, hoe, weed, plough, milk, select seed], tools: {crude tool: 2},
+         holdings: {coin: 4}}
+bounds: {acting: [4, 5], children_max: 1, youths_min: 0, per_min: 1, per_spread: 9}
+sim: {start: -100, fertility: 0.15, leave: 0.5}
+cast: {head: claude-opus-5-5, opus_extra: 1, middle: claude-sonnet-5-5, sonnet_extra: 3, rest: claude-sonnet-5-5, youth: claude-haiku-5-5}

@@ -16,7 +16,7 @@ import time
 from pathlib import Path
 
 from cybertron2.engine import agreements as AG, fuse as FU, knowledge as KN, life as LF, night as N, perceive as PC, prompt as PR, roads as RD, settle as ST, verbs as V
-from cybertron2.engine import branch as BR, journal as JN, memory as MEM
+from cybertron2.engine import branch as BR, journal as JN, memory as MEM, view as VW
 from cybertron2.engine.converse import Conversations
 from cybertron2.engine.data import EDIBLE, TECHNIQUES
 from cybertron2.engine.here import Here, Mind
@@ -86,6 +86,23 @@ class HumanTurn(Exception):
     def __init__(self, turns):
         self.turns = list(turns)                                           # [(key, agent)]
         super().__init__(", ".join(f"{a} ({k})" for k, a in self.turns))
+
+
+class UsageStop(Exception):
+    """The subscription's weekly window is at the stop level (`llm.week_stop`, env CYBERTRON2_WEEK_STOP; default 0.9): the run stops
+    cleanly before the day, to be resumed later."""
+
+
+def _week_stop(spec):
+    """Why to stop before a live day, or None: the claude CLI reports each window's use with every call (cybertron.llm.USAGE)."""
+    from cybertron import llm
+    v = os.environ.get("CYBERTRON2_WEEK_STOP")
+    level = float(v) if v not in (None, "") else float(((spec.get("llm") or {}).get("week_stop")) or 0.9)
+    wins = (llm.USAGE or {}).get("windows") or {}
+    used = wins.get("seven_day")
+    if used is not None and used >= level:
+        return f"the subscription's weekly window is {used:.0%} used (stop at {level:.0%})"
+    return None
 
 
 class Abandoned(Exception):
@@ -607,6 +624,10 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
     finished = False
     try:
         for day in range(start_day, w.days):
+            if not (J.replaying and f"d{day}.dawn" in J.committed) and mode != "replay":
+                why = _week_stop(spec)
+                if why:
+                    raise UsageStop(why)
             J.open_step(day, "dawn")
             w.s["day"] = day
             w.s["events"] = []
@@ -618,8 +639,9 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
             names = w.agents_acting()
             at_day = {n: w.at(n) for n in names}
             systems = {n: PR.system_prompt(Here(w, n), Mind(w, n)) for n in names}
-            openings = {n: PR.turn_prompt(Here(w, n), Mind(w, n), opening=True) for n in names}
-            users = {n: PR.turn_prompt(Here(w, n), Mind(w, n), opening=False) for n in names}
+            turn = VW.turn if VW.on(w) else PR.turn_prompt                     # the message from beliefs (38.40 §9), or as before
+            openings = {n: turn(Here(w, n), Mind(w, n), opening=True) for n in names}
+            users = {n: turn(Here(w, n), Mind(w, n), opening=False) for n in names}
             tally = Tally(float(((w.spec.get("llm") or {}).get("fail_stop_fraction")) or 0.5), len(names))
             replies, meta, errors = _parallel(lambda n: decide(w, n, users[n], openings[n], systems[n], backend, conv),
                                               {n: (n,) for n in names}, workers, tally)
@@ -808,6 +830,10 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
         print(stopped, flush=True)
     except HumanTurn as e:
         stopped = f"waiting for {e}: answer with `play {out} --as NAME` (or the api), then the run goes on"
+        print(stopped, flush=True)
+    except UsageStop as e:
+        stopped = f"stopped before day {day}: {e}. Resume with `python -m cybertron2.engine resume {out}`."
+        (out / "STOPPED.md").write_text(f"# Run stopped\n\n- {stopped}\n")
         print(stopped, flush=True)
     if stopped is None:
         w.save(out / "state.json")

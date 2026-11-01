@@ -74,7 +74,7 @@ def schema_for(here, mind) -> dict:
     # the night's choices are in the one schema, so an urgent call continues the agent's conversation (D2-84; a new schema restarts it)
     a["item"]["enum"] = list(ITEMS)
     a["what"]["enum"] = techs + [x for x in ("shelter", "shelter and food") if x not in techs]
-    a["at"]["enum"] = parcels + buildings
+    # "at" stays free text: a place, a building, or a child cared for (work care at <the child>); the verbs refuse what is not there
     # "to" stays free text: it names a place, a way as the roads name it (an unexplored one too: D4-47), a person, a household or a
     # store, and the verbs refuse what is not there; an enum of ways by where one stands restarted the conversation at every move
     a["from"]["enum"] = people + buildings

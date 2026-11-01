@@ -479,6 +479,18 @@ def evening(w, attend: dict, today: dict) -> dict:
                 if f["id"] not in b["ids"]:
                     b["ids"].append(f["id"])
                     b["lines"].append(f["text"])
+        for key in today["worked"].get(name, []):                               # acting: what one worked on, one sees (38.40 §9)
+            sub = f"parcel:{key}" if key in w.s["parcels"] else f"building:{key}"
+            rows = sorted((f for f in F if sub in (f.get("about") or []) and not f.get("event") and not f.get("thing")
+                           and not f.get("actor") and _can_read(mind, f)), key=lambda f: -f["salience"])
+            if rows:
+                b = mind.store["beliefs"].setdefault(sub, {"day": here.day, "lines": [], "ids": []})
+                if b["day"] != here.day:
+                    b.update(day=here.day, lines=[], ids=[])
+                for f in rows[:4]:
+                    if f["id"] not in b["ids"]:
+                        b["ids"].append(f["id"])
+                        b["lines"].append(f["text"])
         _update_known(here, mind, F)
         logs[name] = {"notice": [f["id"] for f in notice], "attended": [f["id"] for f in att], "concerned": [f["id"] for f in con],
                       "target": label}
@@ -571,6 +583,8 @@ def close_day(w, name, did: list, night_lines: list) -> None:
             m["lasting"].append(f"{_day(w, w.d)}: {line}")
     m["lasting"] = m["lasting"][-14:]
     t["heard"], t["dawn"] = [], []
+    if "view_next" in m:                                                        # what the morning showed is now what was seen (view.py)
+        m["view"] = m.pop("view_next")
 
 
 def _day(w, d) -> str:
