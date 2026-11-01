@@ -460,7 +460,8 @@ def evening_step(w, names, results, budget, used, talk_log, openings, systems, b
     for n in called:
         PC.store(w, n)["evening_shown"] = [x for x in results[n] if not x.startswith(PC.SPEECH)]
     texts = {}
-    fold = [n for n in called if conv.ends(n, w.d) and w.d < w.days - 1]          # the memory request at the evening (D4-77)
+    fold = [n for n in called if conv.ends(n, w.d) and w.d < w.days - 1] \
+        if (w.spec or {}).get("memory_at_evening") else []                        # off by default: D4-80 (the evening's acts were lost)
     spans, mem_texts = {}, {}
     for n in fold:
         spans[n] = f"{PC._day(w, conv.c[n]['day0'] if n in conv.c else w.d)} to {PC._day(w, w.d)}"

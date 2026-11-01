@@ -286,3 +286,4 @@ Newest first. Ideas decided or rejected in conversation before 23 Oct are backfi
 | 2 Nov | The evening's add-ons: meetings, memory at the evening, plan at the hearth | accepted: D4-77 | [speech_order.md](speech_order.md) |
 | 2 Nov | The morning message from beliefs (built 1 Nov, recorded in review) | partly accepted: D4-78 | [agent_view.md](agent_view.md) |
 | 2 Nov | Runs stop before the weekly limit; continue --days (built, then written down) | retrospective, accepted: D4-79 | [run_tools.md](run_tools.md) |
+| 2 Nov | The memory at the evening withdrawn after a test (38.44) | accepted: D4-80 (replaces D4-77 (2)) | [speech_order.md](speech_order.md) |

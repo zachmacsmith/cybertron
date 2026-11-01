@@ -219,12 +219,12 @@ def test_a_meeting_called_at_the_evening_is_held_next_morning_for_those_who_come
     assert R.run(None, out, mode="replay")["mismatches"] == []
 
 
-def test_the_memory_is_written_at_the_evening_on_the_last_day_of_a_stretch(tmp_path):
+def test_with_the_setting_the_memory_is_written_at_the_evening_on_the_last_day_of_a_stretch(tmp_path):
     def reply(key, who, msg):
         if ".evening." in key and "## This evening" in msg and "Kept for good" in msg or ".evening." in key and "keep for good" in msg.lower():
             return {"why": "x", "actions": [], "memory": f"{who} remembers the days."}
         return {"why": "", "actions": [], "memory": "A day."}
-    out, seen = _evening_run(tmp_path, 4, reply)
+    out, seen = _evening_run(tmp_path, 4, reply, memory_at_evening=True)   # a setting since D4-80; off by default
     M = [json.loads(x) for x in open(out / "memory.jsonl")]
     assert any(m["prompt"] == "(at the evening)" and m["memory"].endswith("remembers the days.") for m in M)
     assert not any(".memory." in k for k in seen)                                # no separate memory call

@@ -115,6 +115,9 @@ information/prompts.md.
 - 2 Nov 2026: Zach: "Add the evening add ons". Built as D4-77: meetings called for the next morning (point 5, with `meet` and
   `come`), the memory request at the evening (point 6), the plan made at the hearth as a world setting (point 7, `evening: plan`).
   Still open: the day's sightings at the hearth (needs noticing to run before the evening; after the noticing rework, D4-74).
+- 2 Nov 2026: point 6 (the memory at the evening) withdrawn after a targeted test (review 38.44): the folded call dropped the evening's
+  acts and speech and missed what the evening agreed, most in Haiku. D4-80: the memory in its own call after the night; the fold a
+  setting, off by default.
 
 ## Sources
 

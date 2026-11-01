@@ -58,7 +58,8 @@ without interrupting them.
   step and before work: up to three rounds, each asking all present at once with what was said before; it ends early when a round
   says and offers nothing. Speech there is heard by all present and costs nothing; an offer made there is written into each one's
   lasting memories as witnessed; each may give their whole plan again.
-- On the last day of a stretch, the memory request (information/memory.md) is asked at the evening call, not in a call of its own.
+- The memory request (information/memory.md) is asked in its own call after the night (D4-80); a world may ask it at the evening call
+  instead (`memory_at_evening: true`).
 - `evening: plan`: the evening reply's acts beyond the night's are tomorrow's plan (with its fallback); at dawn one is asked again
   only if a sign at dawn or something concerning one came, one's household had a birth, a death or a missed meal in the night, or a
   meeting is called; otherwise the plan is done as made, and what the morning would have shown is put at the head of that evening's
@@ -73,4 +74,4 @@ without interrupting them.
 | private messages a day | 3 plus a jitter drawn once per person (weights 37, 37, 18, 8 for +0 to +3), at most 10 | decided (D4-31: cybertron 1's) |
 | work for speaking aloud | 1 unit a say | decided (D4-31) |
 
-*Current as of 2 Nov 2026: D2-7, D4-15, D4-25, D4-30, D4-31, D4-65, D4-66, D4-77.*
+*Current as of 2 Nov 2026: D2-7, D4-15, D4-25, D4-30, D4-31, D4-65, D4-66, D4-77, D4-80.*
