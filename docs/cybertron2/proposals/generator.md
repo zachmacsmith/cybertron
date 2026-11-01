@@ -178,7 +178,7 @@ pins name:
 
 The generator fills in the rest around them, keyed per element in the same way.
 
-## 7. Where nodes come from: the world or the observer (discussion, 3 Nov)
+## 6. Where nodes come from: the world or the observer (discussion, 3 Nov)
 
 Zach: "the node being a property of the observer, not the world?" The extreme form: travel can go to any point, and each agent's
 node is what lies within a day's reach of where it stands.
@@ -224,7 +224,24 @@ node is what lies within a day's reach of where it stands.
 So: the generator outputs this general form now, with today's nodes derived from it. The engine keeps its node rules until that
 refactor is wanted.
 
-## 8. How much physics: only what bottoms out in leverage (discussion, 3 Nov)
+**Two ways to go on from here (Zach, 3 Nov: "the two are quite a big divergence"):**
+- **A, roads only:** travel only along roads and hidden ways, as today, with the wild as scenery.
+- **C, across country:** every place has links to its neighbours, so anyone can head off in any direction. Positions are still
+  places, so presence stays shared. In the wild:
+  - **Setting off:** `travel {to}` a known place, or `travel {direction}`.
+  - **The day:** one passes through several wild places, sensing each, and decides only if something happens; on arrival at
+    nightfall one decides.
+  - **Getting lost:** without a known way one may drift to another neighbour, less with the eye for the land.
+  - **Paths:** repeated crossings make a link a path, so roads emerge from use.
+
+  Positions are the size of today's parcels near a settlement, and large in the wild (a few km across, an hour or two to cross;
+  about 5 to 15 of them in a day's walk).
+
+**Building the generator does not need this decided.** Its output is the general form: places covering all the land, links with
+travel times everywhere (roads as the cheap ones), and today's nodes, parcels and roads derived from them. Today's engine reads the
+derived view; C would read the rest.
+
+## 7. How much physics: only what bottoms out in leverage (discussion, 3 Nov)
 
 Zach: terrain matters for leverage (which land is most useful, where the best resources are), so complexity that does not end in
 tangible differences is not worth much.
@@ -263,7 +280,80 @@ No erosion or climate simulation. And a **leverage check** on every generated wo
 
 That check, not realism, is the generator's measure of success.
 
-## 6. Prior work to build on
+## 8. Places that get finer with use (discussion, 3 Nov)
+
+Zach: would the large wild places become finer grained when land is cleared and settled? And is splitting the right level of
+abstraction, or will it depend on too many edge cases? Three ways, outlined so they can be compared.
+
+### 8a. Split on use
+
+A wild place splits when an act needs only part of it. The cells the act needs (one connected patch, next to land already worked
+or on the side one came in, sized by the act) become a place of their own; the rest stays wild.
+
+**What triggers a split:** only physical change:
+- clearing part of it;
+- building on it;
+- fencing part of it.
+
+A claim on part of a wild place is a plot share of it (D2-163) and needs no split.
+
+**Edge cases and the rule for each:**
+
+| Case | Rule |
+|---|---|
+| which cells | one connected patch of the act's size, next to worked land or the side entered from, as compact as the cells allow; keyed draws break ties |
+| work over several days (clearing) | the split happens when the work starts, as "being cleared", so the work has a place |
+| two acts in one wild place on one day | two splits, in the order of the acts; they may border each other |
+| a camp in the wild | no split: a camp goes up anywhere and takes no ground |
+| stocks (trees, game, dead wood) | divided by the cells' own values, so the split gets what grows on its cells |
+| things lying there, herds, a hidden way's end | each goes with the cell it lies on (things and herds would record a cell, chosen by a keyed draw when they come to be there) |
+| a claim on the whole wild place | the split part stays under it; clearing another's land is use, seen and disputed (D4-23) |
+| what people believed of the wild place | beliefs stay with the parent; the new place is unknown until seen or told |
+| tiny slivers | a split is at least one plot's worth; a remainder smaller than that joins the split |
+| many small splits round a village | never merged in the world; the overview groups adjacent places of one cover and holder |
+| land abandoned | the place stays and its cover returns to scrub, then wood; never merged back |
+| names | the one who cleared it may name it; otherwise a plain description |
+
+**Risk:** every system that keeps something per place (stocks, things, herds, claims, beliefs, hidden ways, signs) must say what
+happens at a split. That is about ten rules now, and one more for each system added later.
+
+### 8b. Fine places everywhere, grouped when shown
+
+Places are made fine from the start over the whole map: about the size of a parcel, 5 to 20 ha, thousands in a region. They never
+split or merge.
+- **What agents meet:** groups, adjacent places of one cover and holder, shown as one ("the high moor", 40 places), much as a node
+  is a label over places.
+- **When land is cleared:** places change cover and leave their group, so the group's line changes and nothing in the world is
+  re-partitioned.
+
+**The cost:**
+- many places in the state (cheap for the engine);
+- grouping in perception and in the overview;
+- descriptions per group that change when groups do (templated, or re-written and frozen when a group changes).
+
+**The gain:** none of 8a's edge cases. Stocks, things, herds, claims and beliefs are per place, as now, and stay put.
+
+### 8c. Counts inside one place
+
+A wild place stays one place, and clearing part of it is a count ("4 plots cleared by the Hobbs"), like plot shares. It's cheapest,
+but a place then holds several covers at once: a field inside the moor, with its own crop, fence and herd rules. That breaks one
+cover a place (§2d). Rejected unless the others prove worse.
+
+### Comparison
+
+| | 8a: split on use | 8b: fine places, grouped | 8c: counts |
+|---|---|---|---|
+| state | few places, re-partitioned | many places, fixed | few places, mixed covers |
+| rules per system at a split | about ten, growing | none | none, but every system handles mixed cover |
+| what agents see | the places as they are | groups, re-formed as land changes | the place, with counts |
+| determinism | keyed by parent and order | fixed from generation | fixed |
+| fits L-33 (towns) | yes | yes, most naturally: density is finer places shown | poorly |
+
+**Leaning:** 8b. The world never re-partitions, so the edge cases of 8a can't arise. The abstraction moves into how things are
+shown (groups), which is where the readability problem actually is. It needs a test that grouping keeps an overview readable, and
+that agents can act on one place inside a group ("the north end of the high moor").
+
+## 9. Prior work to build on
 
 From 37.2's knowledge, not checked against the sources on 3 Nov.
 
@@ -291,17 +381,21 @@ From 37.2's knowledge, not checked against the sources on 3 Nov.
 1. ~~A mesh kept as ground truth~~: decided (D2-174).
 2. A node's parcels covering all its land, with wild land as large parcels split when cleared or claimed (§2d). Zach: to address
    with 3.
-3. Places as the world's, reach as the observer's, nodes as a derived label, places appearing where people go off the graph (§7)?
-4. Cheap approximations and a leverage check in place of erosion and climate simulation (§8)?
+3. Places as the world's, reach as the observer's, nodes as a derived label, places appearing where people go off the graph (§6)?
+4. Cheap approximations and a leverage check in place of erosion and climate simulation (§7)?
 5. ~~Land-use rings as the default~~: decided (D2-175).
+6. Roads only (A) or across country (C) (§6): not needed to build the generator.
+7. Places finer with use: split on use (8a), fine places grouped when shown (8b), or counts (8c)?
 
 ## History
 
 - 3 Nov: Zach: start with the generator; worlds highly configurable for land and people, arbitrary specifics filled in around,
   reproducibly, with no seed search; then pins win where physics allows, a vocabulary of descriptions, model-written descriptions
   frozen, land first (D2-173); then: what to explore, given a broader world with nodes as a compression of it. Written.
-- 3 Nov: Zach: a mesh as ground truth (D2-174); rings by default (D2-175); add the prior work (§6); is the node the observer's
-  or the world's (§7); what would erosion and climate simulation add, given that terrain matters for leverage (§8). Written.
+- 3 Nov: Zach: a mesh as ground truth (D2-174); rings by default (D2-175); add the prior work (§9); is the node the observer's
+  or the world's (§6); what would erosion and climate simulation add, given that terrain matters for leverage (§7). Written.
+- 3 Nov: Zach: how nodes as labels differ; across country or roads only, a big divergence; would wild places get finer when
+  cleared; build the generator without deciding; outline the split to look at. Added §6's two ways and §8 (three ways, compared).
 
 ## Sources
 
