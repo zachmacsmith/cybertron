@@ -403,6 +403,9 @@ def _technique(here, mind, a, party, verb):
                tech=tech, concerns=_holders_people(here, thing) if note else [])
     here.record(verb, tech, party, site=key)
     if word:
+        if y["kind"] == "slaughter":                                          # where the meat and hide went (D4-70)
+            word = word.rstrip(".") + (" (now in your hands)." if out == here.hands else
+                                       f" (put into {here.buildings()[out[len('stock:'):]]['name']})." if out.startswith("stock:") else ".")
         return word if not for_txt else word.rstrip(".") + for_txt + "."
     if y["kind"] == "chance" and got <= 0:
         return f"You hunted in {place_name}{note} and caught nothing{extra_got}."
@@ -581,7 +584,9 @@ def _take(here, mind, a, party):
     src_name = str(a.get("from") or "")
     rem = here.find_thing(src_name, item)                        # what one knows lies here (D2-87: nobody's)
     if rem is None and here.parcel(src_name) is not None and here.building(src_name) is None:
-        raise Refused(f"you know of no {item} lying at {src_name}")
+        rem = here.search_thing(src_name, item)                  # not known of: one looks, as it is seen or hidden (D4-70)
+        if rem is None:
+            raise Refused(f"you looked over {here.parcels()[here.parcel(src_name)]['name']} and found no {item} lying there")
     if rem:
         c = here.thing(rem)
         src, theft = rem, False

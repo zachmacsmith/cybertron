@@ -93,6 +93,14 @@ east"; "tracks of a herd, two days old") is read by the eye for the land.
 Per thing at a spot: its own conspicuousness and signs. Per person: its eye for the land and its practice. Per traveller: the day's
 notices on the road, held until arrival.
 
+### Searching when taking (D4-70)
+
+Taking from a parcel (`take {"from": a parcel}`) a good one knows of no thing there holding: one looks the parcel over. Each thing
+there holding the good that one did not know of is found with chance min(1, own x visibility x 5 (a search's attention) x eye),
+own including its hiding (THINGS "hidden": under brush 0.2 taught, buried 0.03 taught). The first found is known from then on, from a
+close look, and taken from; none found: "you looked over P and found no G lying there". A slaughter's result says where its goods
+went.
+
 ## Parameters
 
 | Parameter | Value | Status |
@@ -116,4 +124,4 @@ Things they notice, as signs in their daily notice ("a pack lies under the hazel
 [proposals/things_in_places.md](../../proposals/things_in_places.md), [journeys.md](../../proposals/journeys.md),
 [hidden_ways.md](../../proposals/hidden_ways.md), [visibility.md](../../proposals/visibility.md).
 
-*Current as of 24 Oct 2026: D2-85, D2-86, D2-88, D2-89, D2-91, D2-97, D2-98, D2-102, D2-115, D4-53.*
+*Current as of 24 Oct 2026: D2-85, D2-86, D2-88, D2-89, D2-91, D2-97, D2-98, D2-102, D2-115, D4-53, D4-70 (2 Nov).*

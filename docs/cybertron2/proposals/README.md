@@ -279,3 +279,4 @@ Newest first. Ideas decided or rejected in conversation before 23 Oct are backfi
 | 2 Nov | Setting off in the morning or at nightfall | accepted: D4-67 | [departure_times.md](departure_times.md) |
 | 2 Nov | Short tags and names for herds and things | accepted: D4-68 | [referent_tags.md](referent_tags.md) |
 | 2 Nov | Each person told their age (built, then written down) | retrospective, accepted: D4-69 | [ages_shown.md](ages_shown.md) |
+| 2 Nov | Taking from a place is a search (built, then written down) | retrospective, accepted: D4-70 | [search_on_take.md](search_on_take.md) |

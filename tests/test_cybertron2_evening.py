@@ -134,3 +134,25 @@ def test_the_beast_to_slaughter_may_be_named_in_thing_when_tags_free_it():
     out = V.do(Here(w, "Ivo"), Mind(w, "Ivo"), {"do": "work", "what": "slaughter", "at": w.s["parcels"][pid]["name"], "thing": "bull"})
     assert out.startswith("You slaughtered a bull"), out
     assert int(w.s["herds"][hid]["bulls"]) == bulls - 1
+
+
+def test_slaughter_says_where_the_meat_went_and_taking_from_a_place_searches_it():
+    from cybertron2.engine import things as TH
+    w = _world()
+    w.s["today"] = R.blank_today()
+    hid = next(iter(w.s["herds"]))
+    pid = w.s["herds"][hid]["parcel"]
+    pname = w.s["parcels"][pid]["name"]
+    out = V.do(Here(w, "Ivo"), Mind(w, "Ivo"), {"do": "work", "what": "slaughter", "at": pname, "item": "calf"})
+    assert out.endswith("(now in your hands)."), out
+    V.do(Here(w, "Ivo"), Mind(w, "Ivo"), {"do": "give", "to": pname, "item": "meat", "qty": 10})   # put down in the open
+    cid = next(k for k, c in w.s["containers"].items() if c.get("kind") == "pile")
+    assert cid not in TH.known_here(w, "Margery", "combe")
+    assert TH.search_chance(w, "Margery", w.s["containers"][cid]) >= 0.99           # a fresh heap in the open: found
+    got = V.do(Here(w, "Margery"), Mind(w, "Margery"), {"do": "take", "item": "meat", "qty": 5, "from": pname})
+    assert got.startswith("You took"), got
+    assert cid in TH.known_here(w, "Margery", "combe")
+    buried = dict(w.s["containers"][cid], hidden="buried")
+    assert TH.search_chance(w, "Margery", buried) < 0.3                             # well buried: seldom found
+    nothing = V.do(Here(w, "Margery"), Mind(w, "Margery"), {"do": "take", "item": "stone", "qty": 1, "from": pname})
+    assert nothing.startswith("Refused: take: you looked over") and "found no stone" in nothing

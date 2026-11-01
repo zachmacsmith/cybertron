@@ -307,6 +307,39 @@ def find(w, name, where, item=None):
     return None
 
 
+def search_chance(w, name, c) -> float:
+    """The chance that one looking over a parcel for something finds a thing there it did not know of (D4-70): the thing's own
+    conspicuousness and its hiding (own), the parcel's visibility, a search's attention and one's eye. A fresh heap or pack in the
+    open is almost sure to be found; something under brush often; something well buried seldom."""
+    x = own(w, c)
+    if x <= 0:
+        return 0.0
+    pid = c.get("parcel")
+    vis = EV.visibility(w, c.get("node"), pid, "sight") if pid in w.s["parcels"] else 1.0
+    if not c.get("body") or c.get("buried") is not None:
+        vis *= EV.ground_factor(w)
+    return min(1.0, x * vis * float(NOTICING["attention"]["search"]) * eye(w, name))
+
+
+def search(w, name, where, item=None):
+    """Looking over a parcel for a thing one does not know of (taking from a place: D4-70). Each unknown thing there holding the item
+    is found by its search chance; one found is known from then on, from a close look."""
+    node = w.at(name)
+    low = str(where or "").strip().lower()
+    pid = next((p for p, x in w.s["parcels"].items() if x["node"] == node
+                and low in (p.lower(), x["name"].lower(), x["name"].lower().removeprefix("the "))), None)
+    if pid is None:
+        return None
+    known = known_here(w, name, node)
+    for cid in sorted(c for c, x in w.s["containers"].items() if x.get("kind") in KINDS and x.get("node") == node
+                      and x.get("parcel") == pid and c not in known and (not item or x["goods"].get(item, 0.0) > 1e-9)):
+        c = w.s["containers"][cid]
+        if w.rng("search", w.d, name, cid).random() < search_chance(w, name, c):
+            remember(w, name, cid, "found", close=True)
+            return cid
+    return None
+
+
 # ---------------------------------------------------------------------- burying (D2-96)
 def bodies(w, node) -> dict:
     return {cid: c for cid, c in at_node(w, node).items() if c.get("body") and c.get("buried") is None}

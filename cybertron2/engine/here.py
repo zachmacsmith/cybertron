@@ -369,6 +369,10 @@ class Here:
         from cybertron2.engine import things as TH
         return TH.bury_units(self._w, cid, cairn)
 
+    def search_thing(self, where, item=None):
+        from cybertron2.engine import things as TH
+        return TH.search(self._w, self.name, where, item)
+
     def find_thing(self, where, item=None):
         from cybertron2.engine import things as TH
         return TH.find(self._w, self.name, where, item)
