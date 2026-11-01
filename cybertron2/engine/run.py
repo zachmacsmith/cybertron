@@ -817,6 +817,29 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
                         rep[n][res] = rep[n].get(res, 1) + 1
                     else:
                         results[n].append(res)
+            for n in order:                                                  # units left over: one's own fallback, in order (D4-76)
+                fb = [x for x in (replies[n].get("fallback") or []) if isinstance(x, dict)][:3]
+                if not fb or not w.s["people"][n]["alive"] or n in today["travel"] or n in heavy or n in today.get("travel_morning", {}):
+                    continue
+                for _ in range(budget[n] + 1):
+                    if used[n] >= budget[n]:
+                        break
+                    done = False
+                    for a in fb:
+                        here, mind = Here(w, n), Mind(w, n)
+                        c = V.cost(here, a)
+                        if c <= 0 or used[n] + c > budget[n] or str(a.get("do", "")).lower() == "travel":
+                            continue
+                        res = V.do(here, mind, a)
+                        if res.startswith("Refused"):
+                            continue
+                        used[n] += c
+                        results[n].append(res + " (your fallback)")
+                        done = True
+                        if used[n] >= budget[n]:
+                            break
+                    if not done:
+                        break
             if heavy:                                                        # too heavy to set off: what to leave, and with whom (D4-32)
                 texts = {n: PR.lighten_prompt(Here(w, n), Mind(w, n), heavy[n], results[n]) for n in heavy}
                 lr, lm, le = _parallel(lambda n: decide(w, n, texts[n], openings[n] + "\n\n" + texts[n], systems[n], backend, conv,

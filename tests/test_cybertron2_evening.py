@@ -184,3 +184,16 @@ def test_no_sign_invents_an_act_and_a_byre_has_no_dwellers():
     byre = next(b for b, x in w.s["buildings"].items() if not x["fittings"].get("beds") and b in w.homes("Ivo"))
     texts = [f["text"] for f in __import__("cybertron2.engine.perceive", fromlist=["facts"]).facts(here)]
     assert not any(w.s["buildings"][byre]["name"] in t and ("near empty" in t or "baby crying" in t) for t in texts)
+
+
+def test_units_left_over_go_to_ones_own_fallback(tmp_path):
+    def reply(key, who, msg):
+        if ".decide." in key:
+            return {"why": "x", "actions": [{"do": "work", "what": "reap", "at": "the Infield"}],
+                    "fallback": [{"do": "gather", "what": "firewood", "at": "Combe Copse"}]}
+        return {"why": "", "actions": [], "memory": "A day."}
+    out, seen = _evening_run(tmp_path, 1, reply)
+    T = {t["agent"]: t for t in (json.loads(x) for x in open(out / "turns.jsonl")) if "units" in t}
+    ivo = T["Ivo"]
+    assert any(r.endswith("(your fallback)") for r in ivo["results"]) and ivo["used"] == ivo["units"]
+    assert R.run(None, out, mode="replay")["mismatches"] == []

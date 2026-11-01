@@ -99,6 +99,7 @@ def schema_for(here, mind) -> dict:
         for k in ("thing", "from"):
             a[k].pop("enum", None)
         s["properties"]["attend"].pop("enum", None)
+    s["properties"]["fallback"] = copy.deepcopy(s["properties"]["actions"])    # units left over: what one does with them
     if here.setting("evening"):
         a["when"] = {"type": "string", "enum": ["morning", "nightfall"]}
     return s
@@ -168,6 +169,8 @@ REPLY_LINES = """Reply with JSON:
 - "why": a sentence or two on what you mean to do today and why.
 - "actions": today's plan, in order, each {"do": verb, ...}. Actions beyond your units are not done. "for": a person or your
   household, on work, gathering, making, building, giving and accepting: done on their behalf (the goods go into their store here).
+- "fallback": [actions] what to do with units left over if an act is refused or the plan runs out (say, gather firewood): done in
+  order, again and again, until your units are used or none of them can be done.
 - "tell": [{"to": a person here, "text"}] said to that person alone. They hear it before the day's work and may answer or change
   their plans. You have a set number of private messages a day (answers count too); shown each morning.
 - "say": [{"to": "everyone" or a building you have access to, "text"}] said to everyone here, or in a building (everyone who has

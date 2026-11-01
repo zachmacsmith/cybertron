@@ -488,7 +488,9 @@ def _build(here, mind, a, party):
     f = FITTINGS[what]
     bid = here.building(at) if at else (here.homes_here() or [None])[0]
     if bid is None:
-        raise Refused("say which building here to put it in")
+        inside = ", ".join(x["name"] for x in here.buildings().values() if not x.get("unfinished"))
+        raise Refused(f"{f['label']} is fitted inside a building, not built on open ground: say which building in \"at\""
+                      + (f" ({inside})" if inside else " (there is none here yet: build a small room first)"))
     b = here.buildings()[bid]
     if b.get("unfinished"):
         raise Refused(f"{b['name']} is not finished")
