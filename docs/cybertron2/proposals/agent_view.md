@@ -48,6 +48,17 @@ conversations restart only at the end of a stretch. The inventory and evidence a
    computed for the agent from the true state. The five partial stores today (land, beasts, things, home, elsewhere) become
    aspects of the one store. The senses become the channel for nearly everything in the world (today 3.8% of what an agent reads).
 
+10. **Texts as a second kind of belief.** Customs, stories, laws one knows, letters read, and one's own notes and memory are
+   texts: the engine cannot read their meaning, only who holds which text, from whom and since when. A text has an author and
+   words, and lives in a mind (private: notes, memory; held: customs, sayings, a law one knows) or on a document (an object at a
+   place, D2-24, D4-35). Channels: upbringing (a child takes its household's held texts as it comes of age), telling by an explicit
+   act (`explain {to, what}` for a held text as for a craft; free speech is not parsed for meaning, knowledge.md §4e), writing (a
+   text from a mind onto a document: `write`, in verbs.md's 24) and reading (`read`), later exposure (a hearth, a campfire).
+   Shown verbatim with its source ("the Thornes have always said ...", "Ellen told you", "read on the stone at the ford"),
+   budgeted. Held texts do nothing mechanical; what they change is what people do. Firmness, values and drift: proposals/
+   beliefs_and_values.md (37.2, flagged for later, OPEN L-25). Found with it: a child born in a run gets no customs or history at
+   all (`p_born` seeds an empty memory; only the mother's map is copied), so customs end with the seeded generation.
+
 Open to test: whether the store's "food worth N meals; about K a night" stays (arithmetic on what one sees).
 
 ## Why
@@ -98,6 +109,9 @@ seeing.md §1, senses.md; cybertron2/engine/prompt.py, perceive.py, knowledge.py
   (38.37 §7c: 24 designed, 34 verbs and 18 event words built, none decided); point 9 added, one belief store rendered into the
   message, from 38.37 §7d (3.8% of what an agent reads comes through the senses; the menu tells crop states the senses would gate)
   and §7e (what an agent has to know, from first principles).
+
+- 1 Nov 2026: point 10 added after Zach asked whether customs and what people write down or pass on fit here: texts as a second kind
+  of belief, with their channels; the born child's empty memory found.
 
 ## Sources
 
