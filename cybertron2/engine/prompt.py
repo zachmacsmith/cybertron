@@ -638,8 +638,10 @@ def _family_lines(here, mind) -> list:
     a succession under way (birth_and_death.md "What agents see")."""
     me = here.body(here.name)
     out = []
-    if me["partner"]:
-        out.append(f"Your partner: {me['partner']}.")
+    late = me.get("widowed_of")                                                  # a death not yet learned is not shown by the line
+    partner = me["partner"] or (late if late and (mind.kin().get(late) or {}).get("alive", True) else None)
+    if partner:
+        out.append(f"Your partner: {partner}.")
     if me["with_child"]:
         out.append("You are with child, and your time is near: a birth on the road is dangerous, and housed, fed and with someone "
                    "beside you it goes best.")

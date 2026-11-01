@@ -338,6 +338,15 @@ def sleeping_places(w, today) -> dict:
         if out[name] is None and name in homeless:                              # on the floor at home (D2-165)
             out[name] = homeless[name]
             floor_.add(name)
+    for name in living:                                                         # a baby sleeps where its mother sleeps, in her bed
+        a = s["people"][name]
+        mother = next((m for m in a.get("parents") or [] if m in s["people"] and s["people"][m].get("sex") == "f"
+                       and s["people"][m]["alive"] and m in out), None)
+        if a["stage"] == "infant" and mother and s["people"][mother]["at"] == a["at"]:
+            out[name] = out[mother]
+            floor_.discard(name)
+            if mother in floor_ and out[name] is not None:
+                floor_.add(name)
     today["_floor"] = sorted(floor_)
     return out
 

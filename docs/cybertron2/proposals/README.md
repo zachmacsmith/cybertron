@@ -295,3 +295,4 @@ Newest first. Ideas decided or rejected in conversation before 23 Oct are backfi
 | 3 Nov | The landscape generator: a world under the graph, filled in around what a world file gives | accepted in part: D2-173 | [generator.md](generator.md) |
 | 2 Nov | A fire under no roof in the night's weather (built, then written down) | retrospective, accepted: D4-83 | [fire_weather.md](fire_weather.md) |
 | 3 Nov | The generator, stage 1: a spec for review (today's world format plus the mesh, no engine change) | for review | [generator_stage1.md](generator_stage1.md) |
+| 2 Nov | A baby sleeps with its mother; a partner's death shown only once known (built, then written down) | retrospective, accepted: D4-87, D4-88 | [baby_and_partner_lines.md](baby_and_partner_lines.md) |

@@ -164,7 +164,11 @@ succession rule, named heir. Per world: the cost dial's setting.
 
 Partnerships; a pregnancy as signs; a birth; their infants and children in their household lines, with whether each was fed and
 cared for; the care option where a child is; the children's work; a child coming of age; an elder failing; a death and who inherits,
-as each saw or was told it.
+as each saw or was told it. A partner who has died is still named as one's partner until one has learned of the death; one is free
+to partner again at once (D4-88).
+
+A baby sleeps where its mother sleeps when she is at the same place: in her bed, on the floor beside her, or out by her fire
+(D4-87, applying D4-86).
 
 ## Open
 
@@ -176,4 +180,4 @@ as each saw or was told it.
 [proposals/children.md](../../proposals/children.md), [fertility.md](../../proposals/fertility.md), [life.md](../../proposals/life.md),
 [38.09](../../../review/38_space_engine/09_life_design.md); 02v_children_model.py.
 
-*Current as of 1 Nov 2026: D2-138 to D2-153, D2-162, D4-19, D4-20, D4-64.*
+*Current as of 2 Nov 2026: D2-138 to D2-153, D2-162, D4-19, D4-20, D4-64, D4-87, D4-88.*

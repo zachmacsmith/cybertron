@@ -768,8 +768,9 @@ def p_die(w, person, cause, to=None):
         hands[i] = 0.0
     from cybertron2.engine import life as LF
     LF.on_death(w, person)                                                    # the household's rules: head and heirs (D2-143)
-    if a.get("partner") in w.s["people"]:
+    if a.get("partner") in w.s["people"]:                                       # free to partner again; the line stays till known
         w.s["people"][a["partner"]]["partner"] = None
+        w.s["people"][a["partner"]]["widowed_of"] = person
     return place
 
 
@@ -857,6 +858,7 @@ def p_partner(w, person, other, on=True):
             if x.get("partner") in w.s["people"]:
                 w.s["people"][x["partner"]]["partner"] = None
         a["partner"], b["partner"] = other, person
+        a.pop("widowed_of", None), b.pop("widowed_of", None)
     else:
         a["partner"] = b["partner"] = None
     return on

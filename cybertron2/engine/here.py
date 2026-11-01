@@ -134,7 +134,7 @@ class Here:
         a = self._w.s["people"][x]
         from cybertron2.engine import life as LF
         return {"stage": a["stage"], "hunger": a["hunger"], "wounded": a["wounded"], "carried": dict(self._w.goods(a["hands"])),
-                "sex": a.get("sex", ""), "with_child": LF.showing(self._w, x), "partner": a.get("partner"),
+                "sex": a.get("sex", ""), "with_child": LF.showing(self._w, x), "partner": a.get("partner"), "widowed_of": a.get("widowed_of"),
                 "parents": list(a.get("parents") or []), "cared": dict(a.get("cared") or {}),
                 "grows": LF.grows_in(self._w, x)}
 
