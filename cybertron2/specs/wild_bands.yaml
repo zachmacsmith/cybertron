@@ -1,0 +1,852 @@
+# Written by cybertron2/specs/make_frontier.py (2 Nov): Zach's two small worlds; see that file.
+name: wild_bands
+seed: 83
+days: 40
+calendar:
+  season: autumn
+  day: 1
+  season_days: 8
+children:
+  'on': true
+  dial: low
+lifespan: 96
+view: beliefs
+evening: true
+tags: true
+ages: true
+llm:
+  week_stop: 0.4
+cold_days: []
+incidents: []
+claims: []
+herds: {}
+customs:
+- text: The band moves on when the land is picked bare, and never stays where it will starve.
+  households:
+  - Wolf
+- text: Meat dried by the fire keeps through the cold; fresh meat and greens do not.
+  households:
+  - Wolf
+nodes:
+  w1:
+    name: Elkmere
+    text: open meadows
+    unexplored: false
+    parcels:
+      w1_lea:
+        name: Elkmere Lea
+        cover: meadow
+        size: 4
+        side: centre
+        height: 1
+        text: wide grass and brambles
+        state:
+          plants:
+            K: 8
+            S: 8
+            r: 0.3
+          grass:
+            K: 90
+            S: 90
+            r: 0.32
+      w1_holt:
+        name: Elkmere Holt
+        cover: forest
+        size: 2
+        side: east
+        height: 2
+        text: a stand of beech
+        adj:
+        - w1_lea
+        state:
+          wood:
+            kind: old forest
+          game:
+            K: 8
+            S: 7
+            r: 0.25
+          plants:
+            K: 3
+            S: 3
+            r: 0.3
+      w1_beck:
+        name: the Elkmere Beck
+        cover: water
+        size: 1
+        side: west
+        height: 0
+        text: a clear stream
+        adj:
+        - w1_lea
+  w2:
+    name: Deepholt
+    text: deep woods
+    unexplored: false
+    parcels:
+      w2_wood:
+        name: the Deepholt Wood
+        cover: forest
+        size: 4
+        side: centre
+        height: 2
+        text: old oak and ash, game trails between them
+        state:
+          wood:
+            kind: old forest
+          game:
+            K: 14
+            S: 12
+            r: 0.25
+          plants:
+            K: 6
+            S: 6
+            r: 0.3
+      w2_glade:
+        name: Deepholt Glade
+        cover: meadow
+        size: 2
+        side: south
+        height: 1
+        text: a clearing of long grass
+        adj:
+        - w2_wood
+        state:
+          plants:
+            K: 4
+            S: 4
+            r: 0.3
+          grass:
+            K: 60
+            S: 60
+            r: 0.3
+      w2_beck:
+        name: the Deepholt Beck
+        cover: water
+        size: 1
+        side: west
+        height: 0
+        text: a clear stream
+        adj:
+        - w2_wood
+  w3:
+    name: Raven Fell
+    text: high fells
+    unexplored: true
+    parcels:
+      w3_fell:
+        name: Raven Fell Fell
+        cover: scrub
+        size: 4
+        side: centre
+        height: 3
+        text: heather, gorse and stone
+        state:
+          wood:
+            kind: scrub
+          plants:
+            K: 4
+            S: 4
+            r: 0.3
+          grass:
+            K: 40
+            S: 40
+            r: 0.3
+      w3_hanger:
+        name: Raven Fell Hanger
+        cover: forest
+        size: 2
+        side: west
+        height: 2
+        text: a steep wood
+        adj:
+        - w3_fell
+        state:
+          wood:
+            kind: old forest
+          game:
+            K: 10
+            S: 9
+            r: 0.25
+          plants:
+            K: 3
+            S: 3
+            r: 0.3
+      w3_beck:
+        name: the Raven Fell Beck
+        cover: water
+        size: 1
+        side: west
+        height: 0
+        text: a clear stream
+        adj:
+        - w3_fell
+  w4:
+    name: Birchlea
+    text: open meadows
+    unexplored: false
+    parcels:
+      w4_lea:
+        name: Birchlea Lea
+        cover: meadow
+        size: 4
+        side: centre
+        height: 1
+        text: wide grass and brambles
+        state:
+          plants:
+            K: 8
+            S: 8
+            r: 0.3
+          grass:
+            K: 90
+            S: 90
+            r: 0.32
+      w4_holt:
+        name: Birchlea Holt
+        cover: forest
+        size: 2
+        side: east
+        height: 2
+        text: a stand of beech
+        adj:
+        - w4_lea
+        state:
+          wood:
+            kind: old forest
+          game:
+            K: 8
+            S: 7
+            r: 0.25
+          plants:
+            K: 3
+            S: 3
+            r: 0.3
+      w4_beck:
+        name: the Birchlea Beck
+        cover: water
+        size: 1
+        side: west
+        height: 0
+        text: a clear stream
+        adj:
+        - w4_lea
+  w5:
+    name: Wolfwood
+    text: deep woods
+    unexplored: true
+    parcels:
+      w5_wood:
+        name: the Wolfwood Wood
+        cover: forest
+        size: 4
+        side: centre
+        height: 2
+        text: old oak and ash, game trails between them
+        state:
+          wood:
+            kind: old forest
+          game:
+            K: 14
+            S: 12
+            r: 0.25
+          plants:
+            K: 6
+            S: 6
+            r: 0.3
+      w5_glade:
+        name: Wolfwood Glade
+        cover: meadow
+        size: 2
+        side: south
+        height: 1
+        text: a clearing of long grass
+        adj:
+        - w5_wood
+        state:
+          plants:
+            K: 4
+            S: 4
+            r: 0.3
+          grass:
+            K: 60
+            S: 60
+            r: 0.3
+      w5_beck:
+        name: the Wolfwood Beck
+        cover: water
+        size: 1
+        side: west
+        height: 0
+        text: a clear stream
+        adj:
+        - w5_wood
+  w6:
+    name: Highcairn
+    text: high fells
+    unexplored: true
+    parcels:
+      w6_fell:
+        name: Highcairn Fell
+        cover: scrub
+        size: 4
+        side: centre
+        height: 3
+        text: heather, gorse and stone
+        state:
+          wood:
+            kind: scrub
+          plants:
+            K: 4
+            S: 4
+            r: 0.3
+          grass:
+            K: 40
+            S: 40
+            r: 0.3
+      w6_hanger:
+        name: Highcairn Hanger
+        cover: forest
+        size: 2
+        side: west
+        height: 2
+        text: a steep wood
+        adj:
+        - w6_fell
+        state:
+          wood:
+            kind: old forest
+          game:
+            K: 10
+            S: 9
+            r: 0.25
+          plants:
+            K: 3
+            S: 3
+            r: 0.3
+      w6_beck:
+        name: the Highcairn Beck
+        cover: water
+        size: 1
+        side: west
+        height: 0
+        text: a clear stream
+        adj:
+        - w6_fell
+  w7:
+    name: Reedwater
+    text: open meadows
+    unexplored: true
+    parcels:
+      w7_lea:
+        name: Reedwater Lea
+        cover: meadow
+        size: 4
+        side: centre
+        height: 1
+        text: wide grass and brambles
+        state:
+          plants:
+            K: 8
+            S: 8
+            r: 0.3
+          grass:
+            K: 90
+            S: 90
+            r: 0.32
+      w7_holt:
+        name: Reedwater Holt
+        cover: forest
+        size: 2
+        side: east
+        height: 2
+        text: a stand of beech
+        adj:
+        - w7_lea
+        state:
+          wood:
+            kind: old forest
+          game:
+            K: 8
+            S: 7
+            r: 0.25
+          plants:
+            K: 3
+            S: 3
+            r: 0.3
+      w7_beck:
+        name: the Reedwater Beck
+        cover: water
+        size: 1
+        side: west
+        height: 0
+        text: a clear stream
+        adj:
+        - w7_lea
+  w8:
+    name: Ashgrove
+    text: deep woods
+    unexplored: true
+    parcels:
+      w8_wood:
+        name: the Ashgrove Wood
+        cover: forest
+        size: 4
+        side: centre
+        height: 2
+        text: old oak and ash, game trails between them
+        state:
+          wood:
+            kind: old forest
+          game:
+            K: 14
+            S: 12
+            r: 0.25
+          plants:
+            K: 6
+            S: 6
+            r: 0.3
+      w8_glade:
+        name: Ashgrove Glade
+        cover: meadow
+        size: 2
+        side: south
+        height: 1
+        text: a clearing of long grass
+        adj:
+        - w8_wood
+        state:
+          plants:
+            K: 4
+            S: 4
+            r: 0.3
+          grass:
+            K: 60
+            S: 60
+            r: 0.3
+      w8_beck:
+        name: the Ashgrove Beck
+        cover: water
+        size: 1
+        side: west
+        height: 0
+        text: a clear stream
+        adj:
+        - w8_wood
+  w9:
+    name: Blackhope
+    text: high fells
+    unexplored: true
+    parcels:
+      w9_fell:
+        name: Blackhope Fell
+        cover: scrub
+        size: 4
+        side: centre
+        height: 3
+        text: heather, gorse and stone
+        state:
+          wood:
+            kind: scrub
+          plants:
+            K: 4
+            S: 4
+            r: 0.3
+          grass:
+            K: 40
+            S: 40
+            r: 0.3
+      w9_hanger:
+        name: Blackhope Hanger
+        cover: forest
+        size: 2
+        side: west
+        height: 2
+        text: a steep wood
+        adj:
+        - w9_fell
+        state:
+          wood:
+            kind: old forest
+          game:
+            K: 10
+            S: 9
+            r: 0.25
+          plants:
+            K: 3
+            S: 3
+            r: 0.3
+      w9_beck:
+        name: the Blackhope Beck
+        cover: water
+        size: 1
+        side: west
+        height: 0
+        text: a clear stream
+        adj:
+        - w9_fell
+  w10:
+    name: Thornden
+    text: deep woods
+    unexplored: true
+    parcels:
+      w10_wood:
+        name: the Thornden Wood
+        cover: forest
+        size: 4
+        side: centre
+        height: 2
+        text: old oak and ash, game trails between them
+        state:
+          wood:
+            kind: old forest
+          game:
+            K: 14
+            S: 12
+            r: 0.25
+          plants:
+            K: 6
+            S: 6
+            r: 0.3
+      w10_glade:
+        name: Thornden Glade
+        cover: meadow
+        size: 2
+        side: south
+        height: 1
+        text: a clearing of long grass
+        adj:
+        - w10_wood
+        state:
+          plants:
+            K: 4
+            S: 4
+            r: 0.3
+          grass:
+            K: 60
+            S: 60
+            r: 0.3
+      w10_beck:
+        name: the Thornden Beck
+        cover: water
+        size: 1
+        side: west
+        height: 0
+        text: a clear stream
+        adj:
+        - w10_wood
+  w11:
+    name: Sedgemoor
+    text: open meadows
+    unexplored: true
+    parcels:
+      w11_lea:
+        name: Sedgemoor Lea
+        cover: meadow
+        size: 4
+        side: centre
+        height: 1
+        text: wide grass and brambles
+        state:
+          plants:
+            K: 8
+            S: 8
+            r: 0.3
+          grass:
+            K: 90
+            S: 90
+            r: 0.32
+      w11_holt:
+        name: Sedgemoor Holt
+        cover: forest
+        size: 2
+        side: east
+        height: 2
+        text: a stand of beech
+        adj:
+        - w11_lea
+        state:
+          wood:
+            kind: old forest
+          game:
+            K: 8
+            S: 7
+            r: 0.25
+          plants:
+            K: 3
+            S: 3
+            r: 0.3
+      w11_beck:
+        name: the Sedgemoor Beck
+        cover: water
+        size: 1
+        side: west
+        height: 0
+        text: a clear stream
+        adj:
+        - w11_lea
+  w12:
+    name: Hollins Edge
+    text: deep woods
+    unexplored: true
+    parcels:
+      w12_wood:
+        name: the Hollins Edge Wood
+        cover: forest
+        size: 4
+        side: centre
+        height: 2
+        text: old oak and ash, game trails between them
+        state:
+          wood:
+            kind: old forest
+          game:
+            K: 14
+            S: 12
+            r: 0.25
+          plants:
+            K: 6
+            S: 6
+            r: 0.3
+      w12_glade:
+        name: Hollins Edge Glade
+        cover: meadow
+        size: 2
+        side: south
+        height: 1
+        text: a clearing of long grass
+        adj:
+        - w12_wood
+        state:
+          plants:
+            K: 4
+            S: 4
+            r: 0.3
+          grass:
+            K: 60
+            S: 60
+            r: 0.3
+      w12_beck:
+        name: the Hollins Edge Beck
+        cover: water
+        size: 1
+        side: west
+        height: 0
+        text: a clear stream
+        adj:
+        - w12_wood
+roads:
+- - w1
+  - w2
+  - 1
+  - terrain: woodland
+    way: a track along the river
+- - w1
+  - w4
+  - 1
+  - terrain: river valley
+    way: a stony path along the river
+- - w2
+  - w3
+  - 1
+  - terrain: woodland
+    way: a trail along the river
+- - w2
+  - w5
+  - 1
+  - terrain: river valley
+    way: an old drove road along the river
+- - w3
+  - w10
+  - 1
+  - terrain: woodland
+    way: a hollow way along the river
+- - w3
+  - w6
+  - 1
+  - terrain: river valley
+    way: a ridge path along the river
+- - w10
+  - w11
+  - 1
+  - terrain: river valley
+    way: a sunken lane along the river
+- - w4
+  - w5
+  - 1
+  - terrain: woodland
+    way: a deer path up the fell
+- - w4
+  - w7
+  - 1
+  - terrain: river valley
+    way: a track up the fell
+- - w5
+  - w6
+  - 1
+  - terrain: woodland
+    way: a stony path up the fell
+- - w5
+  - w8
+  - 1
+  - terrain: river valley
+    way: a trail up the fell
+- - w6
+  - w11
+  - 1
+  - terrain: woodland
+    way: an old drove road up the fell
+- - w6
+  - w9
+  - 1
+  - terrain: river valley
+    way: a hollow way up the fell
+- - w11
+  - w12
+  - 1
+  - terrain: river valley
+    way: a ridge path up the fell
+- - w7
+  - w8
+  - 1
+  - terrain: woodland
+    way: a sunken lane up the fell
+- - w8
+  - w9
+  - 1
+  - terrain: woodland
+    way: a deer path through bracken
+- - w9
+  - w12
+  - 1
+  - terrain: woodland
+    way: a track through bracken
+buildings:
+  band_camp:
+    name: the band's camp
+    parcel: w1_lea
+    household: Wolf
+    structure: camp
+    size: 4
+    fittings:
+      beds: 4
+      fire ring: 1
+    lasts_until: 6
+    stock:
+      dried meat: 16
+      wild food: 4
+      timber: 4
+      firewood: 10
+      hide: 2
+      tent: 1
+agents:
+  Bran:
+    household: Wolf
+    born: -44
+    stage: adult
+    sex: m
+    relations:
+      Wren: your wife
+      Tam: of your band
+      Sorrel: of your band
+    memories: &id001
+    - 'Your people, the Wolf band, have never kept a house: you follow the game and the seasons from place to place.'
+    - 'In the cold, game is hard to find and the greens die back: the old ones dried meat in the autumn and carried it.'
+    - Elkmere's lea, Deepholt's woods and Birchlea are places you have camped before; there is more land beyond that no one of you has walked.
+    knows: {}
+    aware_of: {}
+    holdings:
+      crude tool: 1
+      crude weapon: 1
+      bedroll: 1
+      dried meat: 3
+    concerns:
+    - food
+    - shelter
+    - family
+    - travel
+    parents: []
+    partner: Wren
+    model: claude-opus-5-5
+    born_line: Wolf
+    aim: Keep the Wolf band fed, warm and growing through the year, wherever the land is best.
+  Wren:
+    household: Wolf
+    born: -44
+    stage: adult
+    sex: f
+    relations:
+      Bran: your husband
+      Tam: of your band
+      Sorrel: of your band
+    memories: *id001
+    knows: {}
+    aware_of: {}
+    holdings:
+      crude tool: 1
+      crude weapon: 1
+      bedroll: 1
+      dried meat: 3
+    concerns:
+    - food
+    - shelter
+    - family
+    - travel
+    parents: []
+    partner: Bran
+    model: claude-sonnet-5-5
+    born_line: Wolf
+    aim: Keep the Wolf band fed, warm and growing through the year, wherever the land is best.
+  Tam:
+    household: Wolf
+    born: -38
+    stage: adult
+    sex: m
+    relations:
+      Sorrel: your wife
+      Bran: of your band
+      Wren: of your band
+    memories: *id001
+    knows: {}
+    aware_of: {}
+    holdings:
+      crude tool: 1
+      crude weapon: 1
+      bedroll: 1
+      dried meat: 3
+    concerns:
+    - food
+    - shelter
+    - family
+    - travel
+    parents: []
+    partner: Sorrel
+    model: claude-sonnet-5-5
+    born_line: Wolf
+    aim: Keep the Wolf band fed, warm and growing through the year, wherever the land is best.
+  Sorrel:
+    household: Wolf
+    born: -38
+    stage: adult
+    sex: f
+    relations:
+      Tam: your husband
+      Bran: of your band
+      Wren: of your band
+    memories: *id001
+    knows: {}
+    aware_of: {}
+    holdings:
+      crude tool: 1
+      crude weapon: 1
+      bedroll: 1
+      dried meat: 3
+    concerns:
+    - food
+    - shelter
+    - family
+    - travel
+    parents: []
+    partner: Tam
+    model: claude-haiku-5-5
+    born_line: Wolf
+    aim: Keep the Wolf band fed, warm and growing through the year, wherever the land is best.

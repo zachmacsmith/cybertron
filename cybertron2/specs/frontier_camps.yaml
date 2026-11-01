@@ -1,0 +1,785 @@
+# Written by cybertron2/specs/make_frontier.py (2 Nov): Zach's two small worlds; see that file.
+name: frontier_camps
+seed: 71
+days: 40
+calendar:
+  season: spring
+  day: 1
+  season_days: 8
+children:
+  'on': true
+  dial: low
+lifespan: 96
+view: beliefs
+evening: true
+tags: true
+ages: true
+llm:
+  week_stop: 0.4
+cold_days: []
+incidents: []
+claims: []
+herds: {}
+customs:
+- text: 'We mean to build a great house: a home of our own, many children, and every child grown given ground to hold.'
+  households:
+  - Ash
+  - Bram
+  - Cold
+- text: 'We mean to walk the ways out of our valley and learn the world: who else lives in it, and what it holds.'
+  households:
+  - Ash
+  - Bram
+  - Cold
+nodes:
+  ashby:
+    name: Ashby
+    parcels:
+      ashby_camp:
+        name: Ashby Knoll
+        cover: scrub
+        size: 2
+        side: centre
+        height: 2
+        text: a dry knoll of thorn and turf where the camp stands
+        adj:
+        - ashby_wood
+        - ashby_lea
+        state:
+          wood:
+            kind: scrub
+          plants:
+            K: 3
+            S: 3
+            r: 0.3
+      ashby_wood:
+        name: Ashby Wood
+        cover: forest
+        size: 3
+        side: east
+        height: 2
+        text: oak and hazel
+        state:
+          wood:
+            kind: old forest
+          game:
+            K: 12
+            S: 10
+            r: 0.25
+          plants:
+            K: 5
+            S: 5
+            r: 0.3
+      ashby_lea:
+        name: Ashby Lea
+        cover: meadow
+        size: 3
+        side: south
+        height: 1
+        text: deep grass by the water
+        adj:
+        - ashby_brook
+        fertility: 1.2
+        state:
+          plants:
+            K: 5
+            S: 5
+            r: 0.3
+          grass:
+            K: 80
+            S: 80
+            r: 0.32
+      ashby_brook:
+        name: Ashby Brook
+        cover: water
+        size: 1
+        side: west
+        height: 0
+        text: a quick brook
+  bramley:
+    name: Bramley
+    parcels:
+      bramley_camp:
+        name: Bramley Knoll
+        cover: scrub
+        size: 2
+        side: centre
+        height: 2
+        text: a dry knoll of thorn and turf where the camp stands
+        adj:
+        - bramley_wood
+        - bramley_lea
+        state:
+          wood:
+            kind: scrub
+          plants:
+            K: 3
+            S: 3
+            r: 0.3
+      bramley_wood:
+        name: Bramley Wood
+        cover: forest
+        size: 3
+        side: east
+        height: 2
+        text: oak and hazel
+        state:
+          wood:
+            kind: old forest
+          game:
+            K: 12
+            S: 10
+            r: 0.25
+          plants:
+            K: 5
+            S: 5
+            r: 0.3
+      bramley_lea:
+        name: Bramley Lea
+        cover: meadow
+        size: 3
+        side: south
+        height: 1
+        text: deep grass by the water
+        adj:
+        - bramley_brook
+        fertility: 1.2
+        state:
+          plants:
+            K: 5
+            S: 5
+            r: 0.3
+          grass:
+            K: 80
+            S: 80
+            r: 0.32
+      bramley_brook:
+        name: Bramley Brook
+        cover: water
+        size: 1
+        side: west
+        height: 0
+        text: a quick brook
+  coldwell:
+    name: Coldwell
+    parcels:
+      coldwell_camp:
+        name: Coldwell Knoll
+        cover: scrub
+        size: 2
+        side: centre
+        height: 2
+        text: a dry knoll of thorn and turf where the camp stands
+        adj:
+        - coldwell_wood
+        - coldwell_lea
+        state:
+          wood:
+            kind: scrub
+          plants:
+            K: 3
+            S: 3
+            r: 0.3
+      coldwell_wood:
+        name: Coldwell Wood
+        cover: forest
+        size: 3
+        side: east
+        height: 2
+        text: oak and hazel
+        state:
+          wood:
+            kind: old forest
+          game:
+            K: 12
+            S: 10
+            r: 0.25
+          plants:
+            K: 5
+            S: 5
+            r: 0.3
+      coldwell_lea:
+        name: Coldwell Lea
+        cover: meadow
+        size: 3
+        side: south
+        height: 1
+        text: deep grass by the water
+        adj:
+        - coldwell_brook
+        fertility: 1.2
+        state:
+          plants:
+            K: 5
+            S: 5
+            r: 0.3
+          grass:
+            K: 80
+            S: 80
+            r: 0.32
+      coldwell_brook:
+        name: Coldwell Brook
+        cover: water
+        size: 1
+        side: west
+        height: 0
+        text: a quick brook
+  e1:
+    name: Hartwood
+    text: deep woods
+    unexplored: true
+    parcels:
+      e1_wood:
+        name: the Hartwood Wood
+        cover: forest
+        size: 4
+        side: centre
+        height: 2
+        text: old oak and ash, game trails between them
+        state:
+          wood:
+            kind: old forest
+          game:
+            K: 14
+            S: 12
+            r: 0.25
+          plants:
+            K: 6
+            S: 6
+            r: 0.3
+      e1_glade:
+        name: Hartwood Glade
+        cover: meadow
+        size: 2
+        side: south
+        height: 1
+        text: a clearing of long grass
+        adj:
+        - e1_wood
+        state:
+          plants:
+            K: 4
+            S: 4
+            r: 0.3
+          grass:
+            K: 60
+            S: 60
+            r: 0.3
+      e1_beck:
+        name: the Hartwood Beck
+        cover: water
+        size: 1
+        side: west
+        height: 0
+        text: a clear stream
+        adj:
+        - e1_wood
+  e2:
+    name: Longmere
+    text: open meadows
+    unexplored: true
+    parcels:
+      e2_lea:
+        name: Longmere Lea
+        cover: meadow
+        size: 4
+        side: centre
+        height: 1
+        text: wide grass and brambles
+        state:
+          plants:
+            K: 8
+            S: 8
+            r: 0.3
+          grass:
+            K: 90
+            S: 90
+            r: 0.32
+      e2_holt:
+        name: Longmere Holt
+        cover: forest
+        size: 2
+        side: east
+        height: 2
+        text: a stand of beech
+        adj:
+        - e2_lea
+        state:
+          wood:
+            kind: old forest
+          game:
+            K: 8
+            S: 7
+            r: 0.25
+          plants:
+            K: 3
+            S: 3
+            r: 0.3
+      e2_beck:
+        name: the Longmere Beck
+        cover: water
+        size: 1
+        side: west
+        height: 0
+        text: a clear stream
+        adj:
+        - e2_lea
+  e3:
+    name: Greyfell
+    text: high fells
+    unexplored: true
+    parcels:
+      e3_fell:
+        name: Greyfell Fell
+        cover: scrub
+        size: 4
+        side: centre
+        height: 3
+        text: heather, gorse and stone
+        state:
+          wood:
+            kind: scrub
+          plants:
+            K: 4
+            S: 4
+            r: 0.3
+          grass:
+            K: 40
+            S: 40
+            r: 0.3
+      e3_hanger:
+        name: Greyfell Hanger
+        cover: forest
+        size: 2
+        side: west
+        height: 2
+        text: a steep wood
+        adj:
+        - e3_fell
+        state:
+          wood:
+            kind: old forest
+          game:
+            K: 10
+            S: 9
+            r: 0.25
+          plants:
+            K: 3
+            S: 3
+            r: 0.3
+      e3_beck:
+        name: the Greyfell Beck
+        cover: water
+        size: 1
+        side: west
+        height: 0
+        text: a clear stream
+        adj:
+        - e3_fell
+  e4:
+    name: Oakhurst
+    text: deep woods
+    unexplored: true
+    parcels:
+      e4_wood:
+        name: the Oakhurst Wood
+        cover: forest
+        size: 4
+        side: centre
+        height: 2
+        text: old oak and ash, game trails between them
+        state:
+          wood:
+            kind: old forest
+          game:
+            K: 14
+            S: 12
+            r: 0.25
+          plants:
+            K: 6
+            S: 6
+            r: 0.3
+      e4_glade:
+        name: Oakhurst Glade
+        cover: meadow
+        size: 2
+        side: south
+        height: 1
+        text: a clearing of long grass
+        adj:
+        - e4_wood
+        state:
+          plants:
+            K: 4
+            S: 4
+            r: 0.3
+          grass:
+            K: 60
+            S: 60
+            r: 0.3
+      e4_beck:
+        name: the Oakhurst Beck
+        cover: water
+        size: 1
+        side: west
+        height: 0
+        text: a clear stream
+        adj:
+        - e4_wood
+  e5:
+    name: Fernlea
+    text: open meadows
+    unexplored: true
+    parcels:
+      e5_lea:
+        name: Fernlea Lea
+        cover: meadow
+        size: 4
+        side: centre
+        height: 1
+        text: wide grass and brambles
+        state:
+          plants:
+            K: 8
+            S: 8
+            r: 0.3
+          grass:
+            K: 90
+            S: 90
+            r: 0.32
+      e5_holt:
+        name: Fernlea Holt
+        cover: forest
+        size: 2
+        side: east
+        height: 2
+        text: a stand of beech
+        adj:
+        - e5_lea
+        state:
+          wood:
+            kind: old forest
+          game:
+            K: 8
+            S: 7
+            r: 0.25
+          plants:
+            K: 3
+            S: 3
+            r: 0.3
+      e5_beck:
+        name: the Fernlea Beck
+        cover: water
+        size: 1
+        side: west
+        height: 0
+        text: a clear stream
+        adj:
+        - e5_lea
+  e6:
+    name: Stonyhope
+    text: high fells
+    unexplored: true
+    parcels:
+      e6_fell:
+        name: Stonyhope Fell
+        cover: scrub
+        size: 4
+        side: centre
+        height: 3
+        text: heather, gorse and stone
+        state:
+          wood:
+            kind: scrub
+          plants:
+            K: 4
+            S: 4
+            r: 0.3
+          grass:
+            K: 40
+            S: 40
+            r: 0.3
+      e6_hanger:
+        name: Stonyhope Hanger
+        cover: forest
+        size: 2
+        side: west
+        height: 2
+        text: a steep wood
+        adj:
+        - e6_fell
+        state:
+          wood:
+            kind: old forest
+          game:
+            K: 10
+            S: 9
+            r: 0.25
+          plants:
+            K: 3
+            S: 3
+            r: 0.3
+      e6_beck:
+        name: the Stonyhope Beck
+        cover: water
+        size: 1
+        side: west
+        height: 0
+        text: a clear stream
+        adj:
+        - e6_fell
+roads:
+- - ashby
+  - e1
+  - 1
+  - terrain: woodland
+    way: a deer path into the oaks
+- - e1
+  - e2
+  - 1
+  - terrain: river valley
+    way: a track into the oaks
+- - e2
+  - bramley
+  - 1
+  - terrain: hills
+    way: a stony path into the oaks
+- - bramley
+  - e3
+  - 1
+  - terrain: woodland
+    way: a trail into the oaks
+- - e3
+  - e4
+  - 1
+  - terrain: river valley
+    way: an old drove road into the oaks
+- - e4
+  - coldwell
+  - 1
+  - terrain: hills
+    way: a hollow way into the oaks
+- - coldwell
+  - e5
+  - 1
+  - terrain: woodland
+    way: a ridge path into the oaks
+- - e5
+  - e6
+  - 1
+  - terrain: river valley
+    way: a sunken lane into the oaks
+- - e6
+  - ashby
+  - 1
+  - terrain: hills
+    way: a deer path along the river
+buildings:
+  ashby_camp:
+    name: the Ash camp
+    parcel: ashby_camp
+    household: Ash
+    structure: camp
+    size: 4
+    fittings:
+      beds: 4
+      fire ring: 1
+    lasts_until: 14
+    stock:
+      grain: 30
+      beans: 10
+      dried meat: 10
+      timber: 6
+      firewood: 20
+      straw: 10
+      stone: 6
+  bramley_camp:
+    name: the Bram camp
+    parcel: bramley_camp
+    household: Bram
+    structure: camp
+    size: 4
+    fittings:
+      beds: 4
+      fire ring: 1
+    lasts_until: 14
+    stock:
+      grain: 30
+      beans: 10
+      dried meat: 10
+      timber: 6
+      firewood: 20
+      straw: 10
+      stone: 6
+  coldwell_camp:
+    name: the Cold camp
+    parcel: coldwell_camp
+    household: Cold
+    structure: camp
+    size: 4
+    fittings:
+      beds: 4
+      fire ring: 1
+    lasts_until: 14
+    stock:
+      grain: 30
+      beans: 10
+      dried meat: 10
+      timber: 6
+      firewood: 20
+      straw: 10
+      stone: 6
+agents:
+  Aldo:
+    household: Ash
+    born: -38
+    stage: adult
+    sex: m
+    relations:
+      Bryony: your wife
+    memories: &id001
+    - The Ash folk came to Ashby this spring with what they could carry, and made camp on the knoll.
+    - 'The camp is a lean-to and a fire ring: it will not stand long, nor keep out a winter.'
+    - No one you know has walked the ways out of Ashby; your people mean to find what lies beyond.
+    knows: &id002
+      hearth:
+        level: known
+        skill: 1.0
+      small room:
+        level: known
+        skill: 1.0
+    aware_of: {}
+    holdings:
+      crude tool: 1
+      coin: 2
+    concerns:
+    - food
+    - shelter
+    - family
+    - travel
+    parents: []
+    partner: Bryony
+    model: claude-opus-5-5
+    born_line: Ash
+    aim: Make Ashby a home for the Ash folk and see them grow into a great house; learn what lies beyond Ashby.
+  Bryony:
+    household: Ash
+    born: -38
+    stage: adult
+    sex: f
+    relations:
+      Aldo: your husband
+    memories: *id001
+    knows: *id002
+    aware_of: {}
+    holdings:
+      crude tool: 1
+      coin: 2
+    concerns:
+    - food
+    - shelter
+    - family
+    - travel
+    parents: []
+    partner: Aldo
+    model: claude-sonnet-5-5
+    born_line: Ash
+    aim: Make Ashby a home for the Ash folk and see them grow into a great house; learn what lies beyond Ashby.
+  Cuthbert:
+    household: Bram
+    born: -38
+    stage: adult
+    sex: m
+    relations:
+      Delia: your wife
+    memories: &id003
+    - The Bram folk came to Bramley this spring with what they could carry, and made camp on the knoll.
+    - 'The camp is a lean-to and a fire ring: it will not stand long, nor keep out a winter.'
+    - No one you know has walked the ways out of Bramley; your people mean to find what lies beyond.
+    knows: *id002
+    aware_of: {}
+    holdings:
+      crude tool: 1
+      coin: 2
+    concerns:
+    - food
+    - shelter
+    - family
+    - travel
+    parents: []
+    partner: Delia
+    model: claude-opus-5-5
+    born_line: Bram
+    aim: Make Bramley a home for the Bram folk and see them grow into a great house; learn what lies beyond Bramley.
+  Delia:
+    household: Bram
+    born: -38
+    stage: adult
+    sex: f
+    relations:
+      Cuthbert: your husband
+    memories: *id003
+    knows: *id002
+    aware_of: {}
+    holdings:
+      crude tool: 1
+      coin: 2
+    concerns:
+    - food
+    - shelter
+    - family
+    - travel
+    parents: []
+    partner: Cuthbert
+    model: claude-sonnet-5-5
+    born_line: Bram
+    aim: Make Bramley a home for the Bram folk and see them grow into a great house; learn what lies beyond Bramley.
+  Edwin:
+    household: Cold
+    born: -38
+    stage: adult
+    sex: m
+    relations:
+      Freya: your wife
+    memories: &id004
+    - The Cold folk came to Coldwell this spring with what they could carry, and made camp on the knoll.
+    - 'The camp is a lean-to and a fire ring: it will not stand long, nor keep out a winter.'
+    - No one you know has walked the ways out of Coldwell; your people mean to find what lies beyond.
+    knows: *id002
+    aware_of: {}
+    holdings:
+      crude tool: 1
+      coin: 2
+    concerns:
+    - food
+    - shelter
+    - family
+    - travel
+    parents: []
+    partner: Freya
+    model: claude-opus-5-5
+    born_line: Cold
+    aim: Make Coldwell a home for the Cold folk and see them grow into a great house; learn what lies beyond Coldwell.
+  Freya:
+    household: Cold
+    born: -38
+    stage: adult
+    sex: f
+    relations:
+      Edwin: your husband
+    memories: *id004
+    knows: *id002
+    aware_of: {}
+    holdings:
+      crude tool: 1
+      coin: 2
+    concerns:
+    - food
+    - shelter
+    - family
+    - travel
+    parents: []
+    partner: Edwin
+    model: claude-sonnet-5-5
+    born_line: Cold
+    aim: Make Coldwell a home for the Cold folk and see them grow into a great house; learn what lies beyond Coldwell.

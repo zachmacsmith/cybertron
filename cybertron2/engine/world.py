@@ -253,6 +253,8 @@ class World:
                                "fittings": {FITTING_ALIAS.get(k, k): v for k, v in (b.get("fittings") or {}).items()},
                                "condition": int(b.get("condition", 2)),
                                "door": b.get("door", "open"), "fire": False, "stock": cid, "unfinished": b.get("unfinished")}
+        if b.get("lasts_until") is not None:                                    # a seeded camp that will fall (world file)
+            s["buildings"][bid]["lasts_until"] = int(b["lasts_until"])
 
     def _eldest(self, members):
         order = {"elder": 0, "adult": 1, "youth": 2, "child": 3, "infant": 4}
