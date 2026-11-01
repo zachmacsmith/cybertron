@@ -390,9 +390,17 @@ Two halves, so that every rule stays in the engine:
 - Roads left from the first parcel and toward a direction from layout.py: they leave from their ends' parcels on their sides,
   and hidden ends are faint by `worn`.
 
-## 11. Next: a person's way through the day
+## 11. A day as it happened
 
-What the engine has: `today.worked[name]` (sites in act order) and `layout.passed` (the shortest way from where one slept to
-each worked parcel, ties by a keyed draw: a star out and back, not a chain from act to act), which is what one senses in
-passing (presence 0.3) along with what is next door (0.1). Not stored; recomputed by the evening. When the visuals draw a
-person's way, they draw exactly that (from the engine, in Python), and if the engine moves to a chain of acts, the same.
+- **What the engine has:** the journal's changes for the work step, in order, each with its cause (actor, verb, for); the act
+  record (verb, technique, site); and since D4-62 each person's **route**, kept in the day's record (`today.route`): parcels in
+  order from where they slept, through each parcel of their acts in turn (each leg a shortest way, ties by a keyed draw), to their
+  bed or the road's end. Moving inside a place still takes no time (D2-114; movement inside a node is open "for later"), and
+  there is no clock inside a day.
+- **The model** (`model.timeline`): the world from the checkpoint just before the work step, then each act's changes replayed
+  through `World.apply` (changes made inside another primitive are replayed with it), with the parcels, buildings, herds, things
+  and hands each act changed; the route; the talk step's speech.
+- **Presentation choices:** an act starts where the actor's earlier acts' units end, against the units they had that day
+  (`World.units_for`), and ends after its own units; the walk along the route to its site takes the first part of the act's time
+  (at most 0.45 of it, 0.03 of the day a parcel); the way home after the last act 0.1 of the day; talk before work, dusk from 0.9,
+  night after 1 (the night's outcomes: beds from the night log, deaths, what was eaten). Each act's change lands when it ends.

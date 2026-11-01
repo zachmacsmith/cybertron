@@ -30,6 +30,10 @@ Two halves, so every rule stays in the engine:
      ribs when hungry; travellers at the middle of their stretch;
    - **marks**: the day's events by how far they reach (a person, a building, a parcel, the place).
 
+**A day as it happened** (close up, `C2Pixel.nodeAt`; ENGINE.md §11): talk first, then each act in the journal's order, its change
+landing on the land as it ends, each person walking the engine's route (D4-62) between the parcels of their acts with the tool of
+the act in hand; dusk; night with the night log's beds lit. In the preview, "☀ the day" plays it; the clock slider scrubs it.
+
 Each scale returns hotspots (kind, id, box, label, info) so a page can label, hover and click.
 
 ```

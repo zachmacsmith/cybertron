@@ -293,6 +293,120 @@ def day_record(w, rooms: Rooms) -> dict:
     return rec
 
 
+# ---------------------------------------------------------------------------------------------------- one day as it happened
+def _units(w, act) -> int:
+    """What an act cost (verbs.cost): a verb's own units, else its technique's (a make record is one of its batch)."""
+    from cybertron2.engine import verbs as VB
+    n = VB.verb_units(w.p, act.get("verb")) if act.get("verb") in VB.VERB else None
+    if n is not None:
+        return int(n)
+    tech = DT.TECHNIQUES.get(act.get("tech") or "")
+    return int(tech["units"]) if tech else 1
+
+
+def _touched(w, kw, out) -> dict:
+    """What a change touched, from its arguments and result: parcels, buildings, herds, things, people (by their hands)."""
+    t = {"parcels": set(), "buildings": set(), "herds": set(), "things": set(), "people": set()}
+    vals = list(kw.values()) + [out]
+    while vals:
+        v = vals.pop()
+        if isinstance(v, (list, tuple)):
+            if len(v) == 2 and isinstance(v[0], str) and v[0] in ("parcel", "building", "herd", "person") and isinstance(v[1], str):
+                vals.append(v[1])
+            else:
+                vals.extend(v)
+            continue
+        if not isinstance(v, str):
+            continue
+        if v in w.s["parcels"]:
+            t["parcels"].add(v)
+        elif v in w.s["buildings"]:
+            t["buildings"].add(v)
+        elif v in w.s["herds"]:
+            t["herds"].add(v)
+        elif v in w.s["people"]:
+            t["people"].add(v)
+        elif v in w.s["containers"]:
+            c = w.s["containers"][v]
+            if c["kind"] == "hands":
+                t["people"].add(c.get("of") or v.split(":", 1)[1])
+            elif c["kind"] == "stock":
+                t["buildings"].add(c.get("of") or v.split(":", 1)[1])
+            else:
+                t["things"].add(v)
+    return t
+
+
+def timeline(R, d, rooms: Rooms) -> dict | None:
+    """The day's work as it happened (the journal's changes in order, spec/record): the world just before the work step, then
+    each act replayed through the engine's own primitives (World.apply), with what it changed. When in the day an act falls is a
+    presentation choice (the engine has no clock inside a day): an act starts where the actor's earlier acts' units end, against
+    the units the actor had that day (World.units_for). Where each one went is the engine's route (layout.route, D4-62)."""
+    con = sqlite3.connect(str(R["db"]))
+    steps = [r[0] for r in con.execute("SELECT step FROM steps WHERE status = 'committed' AND step LIKE ? ORDER BY rowid", (f"d{d}.%",))]
+    if f"d{d}.work" not in steps:
+        return None
+    pre = steps[steps.index(f"d{d}.work") - 1]
+    rows = con.execute("SELECT seq, primitive, place, arguments, cause FROM changes WHERE step = ? ORDER BY seq", (f"d{d}.work",)).fetchall()
+    talk = [dict(zip(("actor", "place", "kind", "text"), r)) for r in con.execute(
+        "SELECT actor, place, kind, text FROM events WHERE step LIKE ? AND kind = 'speech' ORDER BY rowid", (f"d{d}.talk%",))]
+    con.close()
+    after = world_at(R, f"d{d}.work")
+    routes = dict((after.s.get("today") or {}).get("route") or {})
+    acted = [a for a in after.s["acts"] if a.get("day") == d]
+    w = world_at(R, pre)
+    budget = {n: max(1, w.units_for(n)) for n in w.agents_acting()}
+    morning = day_record(w, rooms)
+    groups, cur = [], None
+    for seq, prim, place, args, cause in rows:
+        c = json.loads(cause) if cause else {}
+        if c.get("within"):
+            continue                                                            # made inside another primitive: replayed with it
+        key = (c.get("actor"), c.get("verb"), c.get("for"))
+        if cur is None or cur["key"] != key:
+            cur = {"key": key, "rows": []}
+            groups.append(cur)
+        cur["rows"].append((prim, place, json.loads(args)))
+    queue = {}
+    for a in acted:
+        queue.setdefault(a["actor"], []).append(a)
+    used, acts, failed = {}, [], 0
+    for g in groups:
+        actor, verb, party = g["key"]
+        touched = {"parcels": set(), "buildings": set(), "herds": set(), "things": set(), "people": set()}
+        for prim, place, kw in g["rows"]:
+            try:
+                out = w.apply(prim, place, **kw)
+            except Exception:                                                   # noqa: BLE001 (a change that will not replay is counted)
+                failed += 1
+                out = None
+            for k, v in _touched(w, kw, out).items():
+                touched[k] |= v
+        rec = None
+        for i, a in enumerate(queue.get(actor, [])):
+            if a.get("verb") == verb:
+                rec = queue[actor].pop(i)
+                break
+        u = _units(w, rec or {"verb": verb})
+        b = budget.get(actor, 7)
+        t0 = used.get(actor, 0) / b
+        used[actor] = used.get(actor, 0) + u
+        views = {}
+        view = lambda nid: views.setdefault(nid, node_view(w, nid))
+        delta = {"parcels": {p: parcel_day(w, view(w.s["parcels"][p]["node"]), p) for p in touched["parcels"]},
+                 "buildings": {b_: building_day(w, view(w.s["buildings"][b_]["node"]), b_, rooms, {}) for b_ in touched["buildings"]},
+                 "herds": {h: x for h in touched["herds"] if (x := herd_day(w, h))},
+                 "things": {c: thing_day(w, c, w.s["containers"][c]) for c in touched["things"] if c in w.s["containers"]},
+                 "carried": {n: {i: r3(q) for i, q in w.s["containers"].get(f"hands:{n}", {}).get("goods", {}).items() if q > 1e-9}
+                             for n in touched["people"] if n in w.s["people"]}}
+        delta = {k: v for k, v in delta.items() if v}
+        acts.append({"actor": actor, "verb": verb, "for": party, "tech": (rec or {}).get("tech"), "site": (rec or {}).get("site"),
+                     "node": (rec or {}).get("node") or (g["rows"][0][1] if g["rows"] else None), "units": u,
+                     "t0": round(min(1.0, t0), 3), "t1": round(min(1.0, used[actor] / b), 3), "delta": delta})
+    return {"from": pre, "morning": {k: morning[k] for k in ("parcels", "buildings", "herds", "things", "people")},
+            "acts": acts, "routes": routes, "budget": budget, "talk": talk, "unreplayed": failed}
+
+
 # ---------------------------------------------------------------------------------------------------- the whole run
 def static(w0: World, seed) -> dict:
     s = w0.s
@@ -320,7 +434,7 @@ def tables() -> dict:
             "spec": {"spaces": SPACES, "ground": GROUND, "rooms": ROOMS, "source": "economy/buildings.md D2-154, D2-155 (not yet in the engine)"}}
 
 
-def build(run, out=None, days=None) -> Path:
+def build(run, out=None, days=None, timelines=True) -> Path:
     R = open_run(run)
     want = R["days"] if days is None else [d for d in R["days"] if d < days]
     rooms = Rooms()
@@ -328,7 +442,10 @@ def build(run, out=None, days=None) -> Path:
     st = static(w0, R["seed"])
     recs = []
     for d in want:
-        recs.append(day_record(world_at(R, f"d{d}.memory"), rooms))
+        rec = day_record(world_at(R, f"d{d}.memory"), rooms)
+        if timelines:
+            rec["timeline"] = timeline(R, d, rooms)
+        recs.append(rec)
     people = {n: {"household": w0.household_of(n), "model": p.get("model")} for n, p in w0.s["people"].items()}
     meta = {"name": R["spec"].get("name") or Path(run).name, "days": len(recs), "seed": R["seed"], "source": str(Path(run).resolve()),
             "people": people, "season_days": w0.season_len}
@@ -342,8 +459,9 @@ def main(argv=None):
     ap.add_argument("run")
     ap.add_argument("--out")
     ap.add_argument("--days", type=int)
+    ap.add_argument("--no-timeline", action="store_true", help="only each day's end, not the day as it happened")
     a = ap.parse_args(argv)
-    p = build(a.run, a.out, a.days)
+    p = build(a.run, a.out, a.days, not a.no_timeline)
     print(p, f"{p.stat().st_size // 1024} KB")
 
 
