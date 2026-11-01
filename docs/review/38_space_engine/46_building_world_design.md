@@ -35,7 +35,7 @@ D2-171, D2-176) with D4-83 to D4-86.
 **Copperhill** (2 days, unexplored): a copper seam. The water wheel needs 2 copper, which the lord already holds, so the trip is a choice,
 not a gate.
 
-## Who lives there (11 people; 4 Opus, 4 Sonnet, 3 Haiku)
+## Who lives there (12 people: 3 Opus, 5 Sonnet, 4 Haiku)
 
 | Household | Buildings, as they start | Knows | Holds | Wants (in-world aim) | Model |
 |---|---|---|---|---|---|
@@ -45,8 +45,8 @@ not a gate.
 | **Hearne** (Tom and Ellen, two youths Will and Kit) | a crowded wattle hut (6 spaces: 3 beds, a hearth, bins; full), on the Green | farming, wattle building | the Long Field (barley ripe in about 5 days), a plough team on Mill Mead by the lord's leave | "Get the harvest in and kept, and room for the children still to come" | Tom Sonnet; Ellen Sonnet; Will and Kit Haiku |
 | **Newcomers** (Rob and Mary) | a camp on Gorse Bank (falls in 10 nights) | wattle building, farming | tools, grain 20, beans 6 | "Make a home in Wenbridge before winter, and ground of our own" | Rob Sonnet; Mary Haiku |
 
-(The count is 4 Opus at the poles: the lord, the mason, the carpenter and one more. The newcomers' head may take the fourth instead of
-Sonnet if a stronger cast is wanted.)
+Opus sits at the three poles of leverage: the lord, the mason and the carpenter. For a stronger cast, Rob, the newcomers' head, could be
+Opus too.
 
 ## Leverage and dependence (scenario_design §1)
 
@@ -86,7 +86,7 @@ building comes from need rather than from being able to build. It costs a second
 
 ## Cost and running
 
-11 agents for 30 days with the evening: about $30 to $35, from f1_frontier's $1 a day for 10. That is 8 to 10 points of weekly
+12 agents for 30 days with the evening: about $30 to $35, from f1_frontier's $1 a day for 10. That is 8 to 10 points of weekly
 usage, so it runs after the weekly window resets. Before any live run: the world file, a dry run with every gate tried by hand
 (quarrying, the wheel's carpentry, a cellar, clearing Mill Mead, beds and straw, the hand mill and bread), and a 20-day bot run with
 its replay.
