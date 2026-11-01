@@ -511,6 +511,9 @@ def _build(here, mind, a, party):
         raise Refused(f"{f['label']} needs {FITTINGS[f['needs']]['label']} first")
     if f.get("site") and not any(here.parcels()[x]["cover"] == f["site"] for x in [b["parcel"]] + here.parcels()[b["parcel"]]["adj"]):
         raise Refused(f"{f['label']} needs a building by {f['site']}")
+    under = dict(b.get("fitting_work") or {})
+    if what in under:                                                          # carry on one under way: no more materials (02zg)
+        return _fitting_work(here, mind, bid, what, lvl)
     n = max(1, int(_qty(a.get("qty"), 1))) if f.get("per") else 1
     if f.get("per"):
         n = min(n, max(0, b["size"] - int(b["fittings"].get(what, 0))))
@@ -523,13 +526,35 @@ def _build(here, mind, a, party):
     KN.tried(here, mind, what, ok)
     if not ok:
         return f"Your try at {f['label']} went wrong; the materials are spoilt."
+    under[what] = {"n": n, "units_left": float(f["units"]) * n}                  # its work charged over days, as a building's
+    here.apply("set", ref=("building", bid), field="fitting_work", value=under)
+    here.record("build", what, party)
+    return _fitting_work(here, mind, bid, what, lvl, started=True)
+
+
+def _fitting_work(here, mind, bid, what, lvl, started=False):
+    """A fitting's work, two units an action (more with skill), until it is done; it counts only when finished (02zg)."""
+    f = FITTINGS[what]
+    b = here.buildings()[bid]
+    under = dict(b.get("fitting_work") or {})
+    u = dict(under[what])
+    done = round(2 * KN.skill(mind, what) * here.yield_mult(), 2)
+    u["units_left"] = round(max(0.0, float(u["units_left"]) - done), 2)
+    n = int(u["n"])
+    words = f"{str(n) + ' ' if f.get('per') else ''}{f['label']}"
+    if u["units_left"] > 1e-9:
+        under[what] = u
+        here.apply("set", ref=("building", bid), field="fitting_work", value=under)
+        here.event("build", f"{here.name} was working on {words} in {b['name']}", actor=here.name, about=[f"building:{bid}"],
+                   salience=0.2, tags=["building"])
+        return ("You began " if started else "You worked on ") + f"{words} in {b['name']}: about {show(u['units_left'])} units of work left."
+    under.pop(what)
+    here.apply("set", ref=("building", bid), field="fitting_work", value=under or None)
     fit = dict(b["fittings"])
     fit[what] = int(fit.get(what, 0)) + n
     here.apply("set", ref=("building", bid), field="fittings", value=fit)
-    here.event("build", f"{here.name} put {n if f.get('per') else ''} {f['label']} into {b['name']}".replace("  ", " "), actor=here.name,
-               about=[f"building:{bid}"], salience=0.3, tags=["building"])
-    here.record("build", what, party)
-    return f"You put {str(n) + ' ' if f.get('per') else ''}{f['label']} into {b['name']}."
+    here.event("build", f"{here.name} put {words} into {b['name']}", actor=here.name, about=[f"building:{bid}"], salience=0.3, tags=["building"])
+    return f"You put {words} into {b['name']}."
 
 
 def _build_work(here, mind, bid, lvl, started=False):

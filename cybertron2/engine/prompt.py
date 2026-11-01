@@ -197,6 +197,21 @@ def _kin_lines(mind) -> list:
     return out
 
 
+def _ground_words(here, pid, p) -> str:
+    """A parcel's ground as anyone there sees it (D2-164): on built ground and scrub, its buildings and the room left in the current
+    lots; on fields, pasture and meadow, its size in plots."""
+    from cybertron2.engine.data import COVERS
+    lots = int(COVERS[p["cover"]]["lots"]) * int(p["size"])
+    if lots > 0:
+        used = sum(1 for b in here.buildings().values() if b["parcel"] == pid)
+        word = "built ground" if p["cover"] == "built" else p["cover"]
+        room = f"room for {lots - used} more" if used < lots else "no room left"
+        return f"{word}; {used} building{'s' if used != 1 else ''}, {room}"
+    if p["cover"] in ("field", "pasture", "meadow"):
+        return f"{p['cover']}; {p['size']:g} plot{'s' if p['size'] != 1 else ''}"
+    return p["cover"]
+
+
 def _place_lines(here, mind=None) -> list:
     out = []
     for pid, p in here.parcels().items():
@@ -208,7 +223,7 @@ def _place_lines(here, mind=None) -> list:
                        and (mind is None or d.get("crew") or KN.level(mind, t) in ("rough", "capable", "known"))
                        and ((d.get("yield") or {}).get("kind") != "gate" or not FM.ready(here, t, pid))})   # a gate only where one is
         held = _holders(here, ("parcel", pid))
-        bits = [f"{p['cover']}"] + ([f"held by {held}"] if held else []) + ([_fence_words(p["fence"])] if p.get("fence") else []) \
+        bits = [_ground_words(here, pid, p)] + ([f"held by {held}"] if held else []) + ([_fence_words(p["fence"])] if p.get("fence") else []) \
             + (["here one can " + ", ".join(what)] if what else [])
         bs = [b["name"] + (" (half built)" if b.get("unfinished") else "") for b in here.buildings().values() if b["parcel"] == pid]
         if bs:
