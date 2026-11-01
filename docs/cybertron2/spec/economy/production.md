@@ -103,7 +103,8 @@ is in proposals.
   by a mason, turned by an ox) by upgrading it; a water mill (a wheel and a leat) only at a river site, usually a new building,
   which can reuse dressed millstones carried there. Each rung grinds more grain per unit of work. A mill's holder may charge for
   milling.
-- **Bread** is baked from flour at a hearth or, in batches, at a stone oven.
+- **Bread** is baked from mill flour (an ox or water mill's) at a hearth or, in batches, at a stone oven; hand-ground flour makes
+  porridge only, and grinding by hand is slow (about 3 grain a unit) (D2-167).
 
 ### Specialised tools (D2-48)
 
@@ -182,4 +183,4 @@ the soil in words ("tired", "good"), their seed in store, their tools and whethe
 [02l_farming.md](../../../review/37_growth/02l_farming.md), [02j_end_uses.md](../../../review/37_growth/02j_end_uses.md),
 [02d_ladders.md](../../../review/37_growth/02d_ladders.md); proposals/farming.md, proposals/tools.md.
 
-*Current as of 23 Oct 2026: H-6, D2-11 to D2-19, D2-23, D2-42, D2-43, D2-46, D2-47, D2-48, D2-52, D2-53, D2-54, D2-58, D2-59, D2-60, D2-61, D2-62, D2-64, D2-65, D2-66, D2-67, D2-130, D2-156, D2-157.*
+*Current as of 3 Nov 2026: H-6, D2-11 to D2-19, D2-23, D2-42, D2-43, D2-46, D2-47, D2-48, D2-52, D2-53, D2-54, D2-58, D2-59, D2-60, D2-61, D2-62, D2-64, D2-65, D2-66, D2-67, D2-130, D2-156, D2-157, D2-167.*

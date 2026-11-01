@@ -68,7 +68,7 @@ does 2 units, more with skill, until its work is done).
 |---|---|---|---|---|---|
 | bed | 1 each | 1 timber, 2 straw (proposed; was 2 and 2) | 1 | anyone | sleeps one, housed |
 | bins | 1 | 3 timber | 1 | anyone | 60 food stored, spoiling at half the house rate |
-| hand mill | 1 | 2 stone | 2 | anyone | grinds 8 grain a unit |
+| hand mill | 1 | 2 stone | 2 | anyone | grinds about 3 grain a unit (D2-167, to calibrate); its flour makes porridge, not bread |
 | fire ring | 1 | 1 stone | 1 | anyone | a fire for cooking; indoors it half-warms a house on a cold night (proposed) |
 | hearth | 1 | 4 stone | 3 | mason | a fire that warms the house, cooks, bakes |
 | oven | 2 | 6 stone | 4 | mason | bread in batches of 40 |
@@ -116,8 +116,10 @@ used and free ("Reed House: 12 spaces, 9 used: 6 beds, a hearth, bins, a hand mi
 
 - **Shelter:** sleeping in a house you may use, with its fire lit in the cold, gives the full ration rule; sleeping without shelter
   raises the food needed, and in the cold carries the 0.3 chance of waking starving (H-5).
-- **Upkeep:** a building breaks with a small chance a night (more in the cold) and is mended with 2 timber and 2 units; neglected,
-  it falls in.
+- **Upkeep:** a building breaks with a small chance a night (more in the cold), slowest for stone and fastest for wattle, and is
+  mended with materials and work in proportion to its size (D2-168; rates to calibrate); neglected, it falls in.
+- **Large capital is village-scale** (D2-166): a hall, a water wheel and stone building cost several times a household's yearly
+  surplus (about 300 to 500 units for a water mill in all, about 300 for a hall: to calibrate; 02zf).
 - **Rooms** can be booked by others on terms the holder sets; who may use a room is its access (information/: speech in rooms).
 
 ### Seeded worlds
@@ -159,4 +161,4 @@ and do ("a stone hall with a hearth"), who holds them as they know it, and the r
 [02i_buildings.md](../../../review/37_growth/02i_buildings.md), [02k §3](../../../review/37_growth/02k_fuses_and_gates.md);
 proposals/buildings.md, proposals/shelter.md.
 
-*Current as of 3 Nov 2026: H-5, D2-3, D2-9, D2-20, D2-45, D2-49, D2-56, D2-60, D2-61, D2-154, D2-155, D2-164, D2-165.*
+*Current as of 3 Nov 2026: H-5, D2-3, D2-9, D2-20, D2-45, D2-49, D2-56, D2-60, D2-61, D2-154, D2-155, D2-164, D2-165, D2-166, D2-167, D2-168.*
