@@ -240,6 +240,9 @@ def test_a_household_of_five_with_four_beds_one_sleeps_on_the_floor_with_an_infa
     assert not rec2.get("floor") and all(rec2["slept"][n] == "Hobb House" for n in ("Ada", "Bran", "Everard", "Ivo", "Margery"))
 
 
+CROWDED = {"cybertron2/specs/wenbridge.yaml": ["Will"]}     # the Hearne hut: 3 beds for 4, by design (review 38.46)
+
+
 def test_every_seeded_house_has_beds_for_its_household_and_floor_for_what_is_in_it():
     import glob
     for f in sorted(glob.glob("cybertron2/specs/*.yaml")):
@@ -256,7 +259,7 @@ def test_every_seeded_house_has_beds_for_its_household_and_floor_for_what_is_in_
             assert BL.ground_used(pid, p, w.s["buildings"]) <= BL.ground_total(p) or BL.ground_total(p) == 0, (f, pid)
         today = R.blank_today()
         N.sleeping_places(w, today)
-        assert not today["_floor"], (f, today["_floor"])
+        assert today["_floor"] == CROWDED.get(f, []), (f, today["_floor"])
 
 
 # ---------------------------------------------------------------------- §7: wear and repair

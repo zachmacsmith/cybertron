@@ -269,6 +269,9 @@ class World:
             ln = {"text": ln} if isinstance(ln, str) else dict(ln)
             s["buildings"][bid]["lines"].append({"slot": int(ln.get("slot", i)), "text": str(ln["text"]), "by": ln.get("by", ""),
                                                  "day": -1, "how": ln.get("how", "paint"), "was": None})
+        if b.get("fitting_work"):                                               # a fitting begun, its work left (world file)
+            s["buildings"][bid]["fitting_work"] = {k: {"n": int(v.get("n", 1)), "units_left": float(v["units_left"])}
+                                                   for k, v in b["fitting_work"].items()}
         if b.get("lasts_until") is not None:                                    # a seeded camp that will fall (world file)
             s["buildings"][bid]["lasts_until"] = int(b["lasts_until"])
 

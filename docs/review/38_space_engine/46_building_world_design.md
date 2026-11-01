@@ -91,4 +91,17 @@ usage, so it runs after the weekly window resets. Before any live run: the world
 (quarrying, the wheel's carpentry, a cellar, clearing Mill Mead, beds and straw, the hand mill and bread), and a 20-day bot run with
 its replay.
 
-*Current as of 2 Nov 2026 (design only).*
+## Changes made while building the world file (after approval)
+
+- **Food recalibrated.** The design's "about 1.3 times demand" was wrong: at a ration of 1 meal a day, 12 people need 360 meals in
+  30 days, and the first file held about 180 (stores plus a 100-grain harvest), with no weapons, so hunting gives little. The
+  Long Field now gives 200 (50 a plot, as in Hollins) and the Hall holds grain 120 and beans 30. Stores plus harvest are now about
+  290 meals, 0.8 of demand; the rest has to come from weeding, hunting (a crude weapon is 1 timber, open to all) and foraging.
+- **The Green is size 1 and full** (24 of 24 spaces), not "size 2, about 40 of 48": anyone who builds new must clear ground or go
+  to Gorse Bank. The hut cannot store the harvest (0 free spaces).
+- **The newcomers** hold grain 16 and beans 2 in hand and 4 beans in the camp (the camp store is 10 weight, D4-84), not grain 20.
+- **No plough team.** No herds are seeded, so the millstones' ox gate means the stones grind only once the wheel is hung.
+- The 20-day bot run (scripted players) had no errors and a clean replay; its bots wandered and slept out, and most starved.
+- The building test's beds check names the Hearne hut's missing bed as intended (`CROWDED` in test_cybertron2_buildings.py).
+
+*Current as of 2 Nov 2026 (world file built; live run wb1 started).*
