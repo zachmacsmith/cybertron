@@ -17,3 +17,6 @@ version:
 Engine gaps are tracked in `docs/engine_gaps.md`; add to it when a design needs something the engine lacks. The work packages for
 worlds that grow (demography, economy, institutions acting on each other, environment, frontier, generated populations,
 coordination problems) are in `docs/review/37_growth/`.
+
+**The website is the pixel-art night village** (`site/` on branch `wp/site-v2`). The old broadsheet site still in `site/` on this
+branch and on `main` is archived (`archive/site-broadsheet/` on `wp/site-archive`): never use, serve or deploy it.
