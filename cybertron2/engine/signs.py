@@ -536,15 +536,11 @@ BUILDING = [
 PERSON = [
     dict(when=lambda x: x.a["hunger"] == 0, sense="sight", p=0.08, tags=[], text=lambda x: f"{x.who} looks well enough fed"),
     dict(when=lambda x: x.a["hunger"] == -1, sense="sight", p=0.35, tags=["food"], text=lambda x: f"{x.who} looks drawn and hungry"),
-    dict(when=lambda x: x.a["hunger"] == -1, sense="sound", p=0.15, tags=["food"], text=lambda x: f"{x.who} is short with everyone today"),
     dict(when=lambda x: x.a["hunger"] == -2, sense="sight", p=0.6, tags=["food", "danger"],
          text=lambda x: f"{x.who} is gaunt and unsteady on their feet"),
     dict(when=lambda x: x.a["hunger"] == -2, sense="sight", p=0.3, tags=["food"], text=lambda x: f"{x.who} sat down twice in the day's work"),
     dict(when=lambda x: x.a["wounded"], sense="sight", p=0.5, tags=["danger"], text=lambda x: f"{x.who} moves stiffly, bruised about the face"),
     dict(when=lambda x: x.a["wounded"], sense="sight", p=0.2, tags=["danger"], text=lambda x: f"{x.who} winces at every lift and bend"),
-    dict(when=lambda x: x.bereaved, sense="sight", p=0.2, tags=["death"],
-         text=lambda x: f"{x.who} goes about grey-faced and silent since the death in their house"),
-    dict(when=lambda x: x.bereaved, sense="sound", p=0.15, tags=["death"], text=lambda x: f"{x.who} was heard weeping"),
     dict(when=lambda x: x.stage == "elder" and x.cold, sense="sight", p=0.1, tags=["season"],
          text=lambda x: f"{x.who} is slow and stiff in the cold"),
     dict(when=lambda x: x.weapon, sense="sight", p=0.06, tags=["danger", "weapons"], text=lambda x: f"{x.who} goes about with a club or a spear"),
@@ -637,7 +633,7 @@ def building_context(here, bid):
     from cybertron2.engine.data import FITTINGS
     b = here.buildings()[bid]
     st = here.stock(bid)
-    live = [x for x in here.people() if bid in here.homes_here(x)]
+    live = [x for x in here.people() if bid in here.homes_here(x)] if b["fittings"].get("beds") else []   # who lives in it: a dwelling's
     made = {e.get("tech") for e in here.events() if e.get("kind") == "make" and f"building:{bid}" in (e.get("about") or [])}
     from cybertron2.engine import environment as EV
     mended = any(e.get("kind") == "work" and e.get("tech") == "repair" and f"building:{bid}" in (e.get("about") or []) for e in here.events())

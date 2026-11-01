@@ -40,6 +40,12 @@ kept apart from the change it signals.
 
   One who slaughtered that day is seen with blood to the elbows (sight 0.6) and smelt (0.3), as a sign of the person.
 
+## Signs of people (D4-72)
+
+A sign of a person shows their body (hunger, injury, age, pregnancy, what they carry or lead) and what they did; never an act or a
+feeling they did not choose. Signs about those who live in a building apply only to buildings with beds. How to write signs:
+docs/cybertron2/guides/senses.md.
+
 ## Data
 
 Per sign: day, place, sense, text, salience, what it bears on.
@@ -48,4 +54,4 @@ Per sign: day, place, sense, text, salience, what it bears on.
 
 devlog 37.4 #6; 38.04 §3.
 
-*Current as of 2 Nov 2026: D4-6, D4-35, D4-71.*
+*Current as of 2 Nov 2026: D4-6, D4-35, D4-71, D4-72.*

@@ -70,9 +70,10 @@ about the world reaches it through the senses**, as beliefs with a date. Senses 
 
 ## Known gaps
 
-The ranked audit of events and states with thin or no signs is review 38_space_engine/43_sign_audit.md. Signs found wrong while
-writing this guide (to be fixed by 37.4): the weeping and "grey-faced and silent" signs of bereavement and "short with everyone"
-(invented behaviour); "the bins in X look near empty" and "a baby crying in X" applied to household buildings nobody lives in.
+The ranked audit of events and states with thin or no signs is review 38_space_engine/43_sign_audit.md (18 items; the first: night
+fights, a hunting kill, a house fire, a birth in the night, food rotting in a house, a guard posted, beasts driven, a weapon made).
+Fixed while writing this guide (D4-72): the bereavement signs and "short with everyone" removed; signs about a building's dwellers
+limited to buildings with beds. The slaughter bundle (D4-71, proposals/slaughter_signs.md) is the worked example of a bundle.
 
 ## Sources
 

@@ -54,6 +54,12 @@ Per agent: what it knows of places, people and things, with when and how it lear
 
 The node in words, never as engine numbers; other places as they knew them, with how old the knowledge is.
 
+### One's beasts as one last knew of them (D4-73)
+
+Each person keeps, per group of their household's beasts, what they last knew (how many, where, when). Seeing the household's beasts
+removes the groups that are no more (no head left); the message shows the latest four, then "and N other groups you have not seen
+lately".
+
 ## Open
 
 - The knowledge store and its levels: proposals/knowledge.md; how seeing works in detail: proposals/seeing.md.
@@ -62,4 +68,4 @@ The node in words, never as engine numbers; other places as they knew them, with
 
 38.02; proposals/place.md, knowledge.md, seeing.md.
 
-*Current as of 24 Oct 2026: H-7, D2-4, D2-29, D2-85, D2-91, D2-102, D4-6, D4-33, D4-35, D4-47, D4-48, D4-50.*
+*Current as of 24 Oct 2026: H-7, D2-4, D2-29, D2-85, D2-91, D2-102, D4-6, D4-33, D4-35, D4-47, D4-48, D4-50, D4-73 (2 Nov).*

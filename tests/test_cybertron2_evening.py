@@ -170,3 +170,17 @@ def test_groups_that_are_no_more_leave_the_list_of_ones_beasts():
     w.apply("set", node, ref=("herd", new), field="cows", value=0)              # it rejoined: no beasts left in the group
     PC.remember_beasts(w, "Ivo", h1, "saw")
     assert set(w.s["mind"]["Ivo"]["beasts"]) == {h1}
+
+
+def test_no_sign_invents_an_act_and_a_byre_has_no_dwellers():
+    import inspect
+    from cybertron2.engine import signs as SG
+    src = inspect.getsource(SG)
+    for t in ("was heard weeping", "grey-faced and silent", "short with everyone"):
+        assert t not in src                                                     # an act or a feeling the person did not choose
+    w = _world()
+    w.s["today"] = R.blank_today()
+    here = Here(w, "Ivo")
+    byre = next(b for b, x in w.s["buildings"].items() if not x["fittings"].get("beds") and b in w.homes("Ivo"))
+    texts = [f["text"] for f in __import__("cybertron2.engine.perceive", fromlist=["facts"]).facts(here)]
+    assert not any(w.s["buildings"][byre]["name"] in t and ("near empty" in t or "baby crying" in t) for t in texts)
