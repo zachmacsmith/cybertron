@@ -21,6 +21,13 @@ def _k(n) -> str:
 
 # ---------------------------------------------------------------------- crops in a field
 CROP = [
+    # reaping today (D4-74): heard, seen; conditional: rain on the cut sheaves
+    dict(when=lambda x: x.c is not None and x.pid in x.reaping, own=1.0, sense="sound", tags=["farming", "harvest"],
+         text=lambda x: f"the swish of sickles in the {x.c['kind']} in {x.nm}"),
+    dict(when=lambda x: x.c is not None and x.pid in x.reaping, own=0.8, sense="sight", tags=["farming", "harvest"],
+         text=lambda x: f"the {x.c['kind']} in {x.nm} going down in swathes, sheaves laid in rows behind the sickles"),
+    dict(when=lambda x: x.c is not None and x.pid in x.reaping and x.weather in ("rain", "heavy rain"), reach="near", own=0.8,
+         sense="sight", tags=["farming", "harvest", "food"], text=lambda x: f"wet sheaves lying in {x.nm}: the {x.c['kind']} cut in the rain"),
     # growing
     dict(when=lambda x: x.growing and not x.failed, sense="sight", p=0.10, tags=["farming"],
          text=lambda x: f"the {x.c['kind']} in {x.nm} {x.be} up in green rows"),
@@ -76,6 +83,13 @@ CROP = [
 
 # ---------------------------------------------------------------------- the ground of a field with no crop, its soil and its works
 FIELD = [
+    # ploughing and hoeing today (D4-74): heard, the birds after the share; conditional: frozen clods
+    dict(when=lambda x: x.pid in x.ploughed, own=1.0, sense="sound", tags=["farming", "animals"],
+         text=lambda x: f"the creak of the plough and the ox-team blowing in {x.nm}" + (", the share grating on frozen clods" if x.cold else "")),
+    dict(when=lambda x: x.pid in x.ploughed and not x.snow, own=0.9, sense="sight", tags=["farming"],
+         text=lambda x: f"rooks and gulls following the plough down {x.nm}"),
+    dict(when=lambda x: x.pid in x.hoed, own=0.6, sense="sound", tags=["farming"],
+         text=lambda x: f"the chop of hoes in {x.nm}"),
     dict(when=lambda x: x.c is None and x.p.get("broken", 0) > 0.1, sense="sight", p=0.15, tags=["farming"],
          text=lambda x: f"{x.nm} is dug over, the soil turned dark and ready for seed"),
     dict(when=lambda x: x.c is None and x.p.get("broken", 0) <= 0.1 and x.p.get("last_crop"), sense="sight", p=0.06, tags=["farming"],
@@ -141,6 +155,16 @@ HERD = [
          text=lambda x: f"{x.h['name']} on a halter on {x.nm}, kept close by {x.h['with']}"),
     dict(when=lambda x: x.h.get("last_calf") is not None and x.day - x.h["last_calf"] <= 1, sense="sight", p=0.45, tags=["animals"],
          text=lambda x: f"a new calf on unsteady legs among {x.h['name']}"),
+    dict(when=lambda x: x.h.get("last_calf") == x.day, own=0.8, sense="sound", tags=["animals"],
+         text=lambda x: f"a cow among {x.h['name']} lowing low to her new calf"),
+    dict(when=lambda x: x.h.get("last_calf") is not None and 0 <= x.day - x.h["last_calf"] <= 1, reach="near", own=0.8, sense="sight",
+         tags=["animals"], text=lambda x: f"the afterbirth in the grass on {x.nm}, crows at it"),
+    dict(when=lambda x: x.h.get("last_calf") == x.day and x.cold, reach="near", own=0.7, sense="sight", tags=["animals", "season"],
+         text=lambda x: f"the new calf among {x.h['name']} steaming in the cold, its mother licking it dry"),
+    dict(when=lambda x: (x.h.get("milked") or {}).get("day") == x.day and (x.h.get("milked") or {}).get("n", 0) > 0, own=0.5,
+         sense="sound", tags=["animals", "food"], text=lambda x: f"the hiss of milk into a pail on {x.nm}"),
+    dict(when=lambda x: x.h.get("watched") == x.day, own=0.6, sense="sight", tags=["animals"],
+         text=lambda x: f"someone is out minding {x.h['name']} on {x.nm}"),
     dict(when=lambda x: x.h.get("hungry", 0) >= 1, sense="sound", p=0.3, tags=["animals", "food"],
          text=lambda x: f"{x.h['name']} lowing and restless: they want feeding"),
     dict(when=lambda x: x.h.get("hungry", 0) >= 2, sense="sight", p=0.45, tags=["animals", "food"], knack="herd",
@@ -318,6 +342,150 @@ SLAUGHTER_DOGS = [
 ]
 
 
+# ====================================================================================================================================
+# Events and their aftermath (D4-74; review 38.43): each a bundle in the slaughter pattern, every row read by the one noticing rule
+# (D4-75): a row sets how plain the sign is (`own`), its sense, its conditions (`when`) and its scope (`who`), never a chance. Each
+# bundle says which kinds of sense it gives (guides/senses.md): to the doer (felt), nearby as it happens, lingering, conditional.
+# Context: event_context; emitted by _aftermath. Blood, splinters, crows and the like are presentation of the record, deterministic.
+# ====================================================================================================================================
+
+# A fight at a place in the night (settle.settle_fights: the parcel where the one set upon sleeps). Doer: the one who struck (its body).
+# Nearby, as it happens: the sound in the dark (carries), the sight (hardly, in the dark). Lingering: the ground by morning and the
+# next day. Conditional: snow, blood (a wound or a death), dogs kept (DOGS).
+FIGHT = [
+    dict(when=lambda x: x.age == 0, who="others", night=True, own=1.6, sense="sound", tags=["danger"],
+         text=lambda x: f"a scuffle in the dark by {x.nm} in the night: feet, the thud of blows, a fall"),
+    dict(when=lambda x: x.age == 0, who="others", night=True, reach="near", own=1.0, sense="sight", tags=["danger"],
+         text=lambda x: f"two shapes struggling by {x.nm} in the dark"),
+    dict(when=lambda x: x.age == 0, who="doer", own=2.0, sense="touch", tags=["danger"],
+         text=lambda x: "your knuckles are split and your arm aches from the blows in the night"),
+    dict(when=lambda x: x.age <= 1 and not x.snow and x.blood, reach="near", own=0.8, sense="sight", tags=["danger"],
+         text=lambda x: f"the ground by {x.nm} is scuffed and trampled, with dark spots of blood on it"),
+    dict(when=lambda x: x.age <= 1 and not x.snow and not x.blood, reach="near", own=0.6, sense="sight", tags=["danger"],
+         text=lambda x: f"the ground by {x.nm} is scuffed and trampled, as if people had struggled there"),
+    dict(when=lambda x: x.age <= 1 and x.snow, reach="near", own=1.0, sense="sight", tags=["danger"],
+         text=lambda x: f"the snow by {x.nm} is trampled about" + (" and spotted with blood" if x.blood else ", footprints everywhere")),
+]
+
+# A house broken into, or tried, in the night (settle.settle_fights). As it happens: fuse's NIGHT bundle for those woken. Lingering: the
+# door, the store (those who live there). Conditional: snow (footprints), food taken.
+RAID = [
+    dict(when=lambda x: x.age <= 1 and x.outcome in ("taken", "repelled"), own=0.8, sense="sight", tags=["danger"],
+         text=lambda x: f"fresh gouges and splinters about the door of {x.nm}, where someone tried to force it"),
+    dict(when=lambda x: x.age == 0 and x.outcome == "taken", who="inside", own=0.9, sense="sight", tags=["danger", "food"],
+         text=lambda x: f"the store of {x.nm} was gone through in the night: bins tipped, the food gone"),
+    dict(when=lambda x: x.age <= 1 and x.snow, own=1.0, sense="sight", tags=["danger"],
+         text=lambda x: f"footprints in the snow come to the door of {x.nm} and go away again"),
+]
+
+# A hunting kill (verbs: the day's kills on the parcel). Doer: the weight and the blood. Nearby: the gutting (the hunter seen at it).
+# Lingering: crows at the guts today and tomorrow; the smell the next day. Conditional: snow (blood and drag-marks), warmth.
+HUNTED = [
+    dict(when=lambda x: x.age == 0, who="others", reach="near", own=0.9, sense="sight", tags=["food", "hunting"],
+         text=lambda x: f"{x.by} gutting a kill in {x.nm}, the blood and guts spilled on the ground"),
+    dict(when=lambda x: x.age == 0, who="doer", own=2.0, sense="touch", tags=["food", "hunting"],
+         text=lambda x: "the warm weight of the kill, its blood sticky on your hands and down your front"),
+    dict(when=lambda x: True, own=0.9, sense="sight", tags=["food", "hunting"],
+         text=lambda x: f"crows and magpies dropping into {x.nm} after the guts of a kill"),
+    dict(when=lambda x: x.snow, reach="near", own=1.0, sense="sight", tags=["food", "hunting"],
+         text=lambda x: f"blood and drag-marks in the snow of {x.nm}, where a kill was gutted"),
+    dict(when=lambda x: x.age == 1 and x.warm, reach="near", own=0.6, sense="smell", tags=["food", "hunting"],
+         text=lambda x: f"a smell of old blood in {x.nm}, where a kill was gutted yesterday"),
+]
+
+# A fire in a house in the night (run: the fire incident). Doer: none (nobody chose it). Nearby, as it happened: the glow (its own
+# light: plain in the dark), the roar (carries), the smoke inside (those asleep there). Lingering: the burnt roof, the smell of ash.
+# Conditional: rain or snow through the roof.
+FIRE = [
+    dict(when=lambda x: x.age == 0, own=3.0, sense="sight", tags=["danger", "shelter"],
+         text=lambda x: f"a glow over {x.nm} in the night, flames through the thatch"),
+    dict(when=lambda x: x.age == 0, night=True, own=1.5, sense="sound", tags=["danger", "shelter"],
+         text=lambda x: f"the roar and crack of fire from {x.nm} in the night"),
+    dict(when=lambda x: x.age == 0, who="inside", own=2.0, sense="smell", tags=["danger", "shelter"],
+         text=lambda x: f"smoke thick in {x.nm} in the night, stinging the eyes and throat"),
+    dict(when=lambda x: x.age <= 3, own=1.0, sense="sight", tags=["shelter", "building"],
+         text=lambda x: f"the thatch of {x.nm} is burnt through, the rafters charred black"),
+    dict(when=lambda x: x.age <= 2, own=1.2, sense="smell", tags=["shelter", "food"],
+         text=lambda x: f"a smell of wet ash and burnt grain about {x.nm}"),
+    dict(when=lambda x: x.age <= 3 and x.wet and not x.snowing, reach="near", own=0.8, sense="sight", tags=["shelter"],
+         text=lambda x: f"rain dripping through {x.nm}'s burnt roof onto the ash"),
+    dict(when=lambda x: x.age <= 3 and x.snowing, reach="near", own=0.8, sense="sight", tags=["shelter"],
+         text=lambda x: f"snow falling into {x.nm} through the burnt roof"),
+]
+
+# A birth in the night (life.py: the birth event, about the house). Nearby, as it happens: the newborn's cry (an infant's body), for
+# those inside and those near. Lingering: the mother's body (PERSON). Conditional: none.
+BIRTH = [
+    dict(when=lambda x: x.age == 0, who="others", night=True, own=1.0, sense="sound", tags=["family"],
+         text=lambda x: f"a newborn's cry from {x.nm} in the night"),
+]
+
+# A guard posted (verbs._guard: on the person). Doer: the long night sitting up. Nearby: the watcher at the door (those inside; in the
+# dark, hardly anyone else). Conditional: a weapon in hand, the cold. Lingering: the watcher heavy-eyed (PERSON).
+GUARD = [
+    dict(when=lambda x: x.age == 0, who="others", night=True, own=1.0, sense="sight", tags=["danger"],
+         text=lambda x: f"{x.by} kept watch by the door of {x.nm} through the night" + (", a club or a spear to hand" if x.armed else "")),
+    dict(when=lambda x: x.age == 0, who="doer", own=2.0, sense="touch", tags=["danger"],
+         text=lambda x: "a long night sitting up by the door: stiff and heavy-eyed" + (", frost on your cloak by morning" if x.cold else "")),
+]
+
+# Beasts driven from one parcel to another (farm.drive: on the herd). Nearby: the hooves and lowing (carries), the drover seen.
+# Lingering: the track between, two days. Conditional: wet ground (churned to mud).
+DRIVEN = [
+    dict(when=lambda x: x.age == 0, who="others", own=1.4, sense="sound", tags=["animals"],
+         text=lambda x: f"the thud of hooves and lowing as {x.herd} are driven from {x.frm} to {x.to}"),
+    dict(when=lambda x: x.age == 0, who="others", own=0.8, sense="sight", tags=["animals"],
+         text=lambda x: f"{x.by} driving {x.herd} from {x.frm} to {x.to}"),
+    dict(when=lambda x: x.age <= 2 and not x.wet, reach="around", own=0.6, sense="sight", tags=["animals"],
+         text=lambda x: f"a trodden line of hoof-marks between {x.frm} and {x.to}"),
+    dict(when=lambda x: x.age <= 2 and x.wet, reach="around", own=0.8, sense="sight", tags=["animals"],
+         text=lambda x: f"the way from {x.frm} to {x.to} is churned to mud by hooves"),
+]
+
+# A theft from a store (settle.settle_thefts: on the building). Lingering: the store lower (those who live there). Conditional: snow
+# (footprints to the door), rain (mud on the floor).
+THEFT = [
+    dict(when=lambda x: x.age <= 1, who="inside", own=0.8, sense="sight", tags=["food", "danger"],
+         text=lambda x: f"someone has been at the {x.item} in {x.nm}'s store: there is less than there was"),
+    dict(when=lambda x: x.age <= 1 and x.snow, own=1.0, sense="sight", tags=["danger"],
+         text=lambda x: f"footprints in the snow lead to the door of {x.nm} and away again"),
+    dict(when=lambda x: x.age <= 1 and x.wet and not x.snow, who="inside", own=0.6, sense="sight", tags=["danger"],
+         text=lambda x: f"muddy footprints across the floor of {x.nm} to the store"),
+]
+
+# A house breaking in the night (night.py: breaks; a camp falling in). Nearby, as it happens: the crack (carries, those inside).
+# Lingering: the roof in, or the crack in the wall, two days. Conditional: how far it went (fallen in, or damaged).
+BROKE = [
+    dict(when=lambda x: x.age == 0 and x.to == 0, night=True, own=2.0, sense="sound", tags=["shelter", "building"],
+         text=lambda x: f"a long crack and a rush of falling thatch from {x.nm} in the night"),
+    dict(when=lambda x: x.age == 0 and x.to > 0, night=True, own=1.0, sense="sound", tags=["shelter", "building"],
+         text=lambda x: f"a crack from {x.nm} in the night, and the patter of falling daub"),
+    dict(when=lambda x: x.age <= 2 and x.to == 0, own=1.0, sense="sight", tags=["shelter", "building"],
+         text=lambda x: f"{x.nm}'s roof has come in: thatch and rafters lie on the floor"),
+    dict(when=lambda x: x.age <= 2 and x.to > 0, reach="around", own=0.8, sense="sight", tags=["shelter", "building"],
+         text=lambda x: f"a fresh crack down {x.nm}'s wall, fallen daub at its foot"),
+]
+
+# A burial (the day's bury acts at a parcel). Doer: the work of it (frozen ground, or the weight). Nearby: the digging seen and heard.
+# Lingering: the grave (THING). Conditional: frost.
+BURIAL = [
+    dict(when=lambda x: x.age == 0, who="others", own=1.0, sense="sight", tags=["death"],
+         text=lambda x: f"{x.by} digging a grave at {x.nm}"),
+    dict(when=lambda x: x.age == 0, who="others", own=0.8, sense="sound", tags=["death"],
+         text=lambda x: f"the scrape of a spade at {x.nm}" + (" on frozen ground" if x.cold else "")),
+    dict(when=lambda x: x.age == 0 and x.cold, who="doer", own=2.0, sense="touch", tags=["death"],
+         text=lambda x: "the ground was frozen: every spadeful had to be hacked out"),
+    dict(when=lambda x: x.age == 0 and not x.cold, who="doer", own=2.0, sense="touch", tags=["death"],
+         text=lambda x: "the dead weight of the body as you lowered it, and the earth falling back over it"),
+]
+
+# Dogs at the place, heard where they are kept (a building with a dog): at a fight in the night, at a slaughter (SLAUGHTER_DOGS).
+DOGS = [
+    dict(when=lambda x: x.age == 0, night=True, own=1.0, sense="sound", tags=["danger"],
+         text=lambda x: f"the dogs at {x.house} barked half the night"),
+]
+
+
 # ---------------------------------------------------------------------- the sky and the season
 SKY = [
     dict(when=lambda x: x.cold and x.first_cold, sense="touch", p=0.85, tags=["season", "shelter", "farming"],
@@ -441,6 +609,10 @@ WILD = [
          eye=True, text=lambda x: f"the young shoots in {x.nm} are browsed to stubs where the beasts get in"),
     dict(when=lambda x: x.r("young") is not None and x.r("young") > 0.75 and x.r("wood") is not None and x.r("wood") < 0.5, sense="sight",
          p=0.1, tags=["timber"], text=lambda x: f"hazel and ash shoots springing thick from the stumps in {x.nm}"),
+    dict(when=lambda x: x.pid in x.picks, own=1.0, sense="sound", tags=["mining", "building"],
+         text=lambda x: f"the ring of picks on stone from {x.nm}"),
+    dict(when=lambda x: x.pid in x.picks, own=0.6, sense="sight", tags=["mining", "building"],
+         text=lambda x: f"fresh spoil and broken stone at {x.nm}"),
     dict(when=lambda x: x.pid in x.axes, sense="sound", p=0.6, tags=["timber"], own=0.2,
          text=lambda x: f"the ring of axes from {x.nm}"),
     dict(when=lambda x: x.pid in x.axes, sense="sight", p=0.3, tags=["timber"],
@@ -527,6 +699,20 @@ BUILDING = [
          text=lambda x: f"the sour smell of cheese-making from {x.nm}"),
     dict(when=lambda x: {"smelt"} & x.made, sense="smell", p=0.3, tags=["craft", "mining"],
          text=lambda x: f"sharp fumes from {x.nm}: someone is smelting"),
+    # what is made there today, heard and seen (D4-74): woodwork, a weapon, hides cut and stitched
+    dict(when=lambda x: x.made & {"crude weapon", "crude tool", "wooden plough", "handcart"}, own=0.8, sense="sound", tags=["craft"],
+         text=lambda x: f"the knock and scrape of wood being shaped at {x.nm}"),
+    dict(when=lambda x: "crude weapon" in x.made, own=0.7, sense="sight", tags=["craft", "danger", "weapons"],
+         text=lambda x: f"{x.makers['crude weapon']} shaping a club or a spear at {x.nm}, hardening it in the fire"),
+    dict(when=lambda x: x.made & {"tent", "bedroll", "pack", "harness"}, own=0.5, sense="sight", tags=["craft"],
+         text=lambda x: f"{x.makers_any({'tent', 'bedroll', 'pack', 'harness'})} cutting and stitching hides at {x.nm}"),
+    dict(when=lambda x: x.mended, own=0.8, sense="sound", tags=["building"],
+         text=lambda x: f"mallets knocking at {x.nm}'s walls"),
+    # food rotting in the store (D4-74)
+    dict(when=lambda x: x.rotting and not x.cold, own=0.8, sense="smell", tags=["food"],
+         text=lambda x: f"a stink of {x.rotting[0]} from {x.nm}'s store"),
+    dict(when=lambda x: x.rotting and not x.cold, reach="near", own=0.6, sense="sight", tags=["food"],
+         text=lambda x: f"flies at the {x.rotting[0]} in {x.nm}, gone green and slimy"),
     dict(when=lambda x: x.fits, sense="sight", p=0.05, tags=["building"], text=lambda x: f"{x.nm} has " + ", ".join(x.fits)),
     dict(when=lambda x: x.b["door"] == "barred", sense="sight", p=0.3, tags=["danger"], text=lambda x: f"{x.nm}'s door is barred"),
     dict(when=lambda x: x.b["door"] != "barred", sense="sight", p=0.05, tags=["food"], peek=True,
@@ -571,11 +757,24 @@ PERSON = [
          text=lambda x: f"{x.who} was chewing raw grain: no fire to cook it on"),
     dict(when=lambda x: x.partner, sense="sight", p=0.06, tags=["family"],
          text=lambda x: f"{x.who} and {x.partner} keep close together"),
-    # one who slaughtered a beast today (D4-71)
+    # one who slaughtered a beast or gutted a kill today (D4-71, D4-74)
     dict(when=lambda x: x.bloodied, sense="sight", own=0.6, tags=["animals", "food"],
-         text=lambda x: f"{x.who} has blood to the elbows and down their front, from butchering a beast"),
+         text=lambda x: f"{x.who} has blood to the elbows and down their front, from {x.bloodied}"),
     dict(when=lambda x: x.bloodied, sense="smell", own=0.3, tags=["animals", "food"],
          text=lambda x: f"{x.who} smells of blood and guts"),
+    # the body after a birth, a night on watch, a night in the open; a child minded (D4-74)
+    dict(when=lambda x: x.childbed, sense="sight", own=0.6, tags=["family"],
+         text=lambda x: f"{x.who} is pale and slow, just risen from childbed"),
+    dict(when=lambda x: x.sat_up, sense="sight", own=0.5, tags=["danger"],
+         text=lambda x: f"{x.who} is heavy-eyed after sitting up on watch"),
+    dict(when=lambda x: x.slept_out and x.slept_out.get("cold"), sense="sight", own=0.8, tags=["shelter", "season"],
+         text=lambda x: f"{x.who} slept out in the frost: grey-lipped and stiff this morning"),
+    dict(when=lambda x: x.slept_out and not x.slept_out.get("cold") and x.wet, sense="sight", own=0.6, tags=["shelter"],
+         text=lambda x: f"{x.who} slept out in the rain and is soaked through"),
+    dict(when=lambda x: x.slept_out and not x.slept_out.get("cold") and not x.wet, sense="sight", own=0.3, tags=["shelter"],
+         text=lambda x: f"{x.who} slept in the open last night, with no roof over them"),
+    dict(when=lambda x: x.cared, sense="sight", own=0.5, tags=["family"],
+         text=lambda x: f"{x.who} kept {' and '.join(x.cared)} close all day, feeding and minding"),
 ]
 
 
@@ -594,6 +793,9 @@ def context(here, pid, h=None):
               for s in e.get("about") or [] if s.startswith("parcel:")}
     x.charcoal = {s.split(":", 1)[1] for e in here.events() if e.get("kind") == "make" and e.get("tech") == "charcoal"
                   for s in e.get("about") or [] if s.startswith("parcel:")}
+    worked_by = lambda techs: {s.split(":", 1)[1] for e in here.events() if e.get("kind") == "work" and e.get("tech") in techs   # noqa: E731
+                               for s in e.get("about") or [] if s.startswith("parcel:")}
+    x.ploughed, x.hoed, x.reaping, x.picks = worked_by({"plough"}), worked_by({"hoe"}), worked_by({"reap"}), worked_by({"quarry", "mine"})
     standing = [here.parcels()[q]["name"] for q in p["adj"] if (here.parcels()[q].get("crop") or {}).get("area_left", 0) > 1e-6]
     x.adj_crop = standing[0] if standing else None
     fc = p.get("fence") or {}                                                  # the parcel's own fence (livestock.md, D2-130)
@@ -658,6 +860,15 @@ def building_context(here, bid):
     x.ring_only = bool(b["fittings"].get("fire ring")) and not b["fittings"].get("hearth") and not x.camp
     stages = [w_.s["people"][n]["stage"] for w_ in (here._w,) for n in live]
     x.babies, x.children = "infant" in stages, "child" in stages
+    makers = {}
+    for e in here.events():
+        if e.get("kind") == "make" and f"building:{bid}" in (e.get("about") or []) and e.get("actor"):
+            makers.setdefault(e.get("tech"), [])
+            if e["actor"] not in makers[e.get("tech")]:
+                makers[e.get("tech")].append(e["actor"])
+    x.makers = {k: " and ".join(v) for k, v in makers.items()}
+    x.makers_any = lambda techs: " and ".join(dict.fromkeys(n for t in sorted(techs) for n in makers.get(t, [])))
+    x.rotting = [i for i, q in st.items() if ITEMS.get(i, {}).get("rot") and q > 0.2]
     return x
 
 
@@ -682,8 +893,17 @@ def person_context(here, who):
     x.failing = x.stage == "elder" and d is not None and d - LF.elder_from(L) >= L // 4
     x.ate_raw = p.get("ate_raw") == here.day - 1
     x.partner = a.get("partner") if a.get("partner") in here.people() else None
-    x.bloodied = any((par.get("slaughter") or {}).get("day") == here.day and who in {k["by"] for k in par["slaughter"].get("kills") or []}
-                     for par in here.parcels().values())
+    x.bloodied = ("butchering a beast" if any((par.get("slaughter") or {}).get("day") == here.day
+                                              and who in {k["by"] for k in par["slaughter"].get("kills") or []} for par in here.parcels().values())
+                  else "gutting a kill" if any((par.get("hunted") or {}).get("day") == here.day
+                                                and who in {k["by"] for k in par["hunted"].get("kills") or []} for par in here.parcels().values())
+                  else "")
+    x.childbed = p.get("sex") == "f" and any(q.get("parents") and q["parents"][0] == who and q.get("born") is not None
+                                             and 0 <= here.day - int(q["born"]) <= 2 for q in w.s["people"].values())
+    x.sat_up = (p.get("guarded") or {}).get("day") == here.day
+    x.slept_out = p.get("slept_out") if (p.get("slept_out") or {}).get("day") == here.day else None
+    x.wet = EV.wet(w)
+    x.cared = sorted(c for c, by in ((w.s.get("today") or {}).get("care_by") or {}).items() if who in by)
     x.gear = [i for i, q in a["carried"].items() if q >= 1 and ITEMS[i].get("seen") and not ITEMS[i].get("camp")]
     x.load = [(i, q) for i, q in a["carried"].items() if q >= 2 and ITEMS[i]["weight"] > 0]
     x.travel_gear = next((i for i, q in a["carried"].items() if q >= 1 and ITEMS[i].get("camp")), None)
@@ -770,6 +990,7 @@ def facts(here, add) -> None:
             emit(HERD, context(here, h["parcel"], h), [f"herd:{hid}", f"parcel:{h['parcel']}"], parcel=h["parcel"])
     _herds_out(here, add)
     _slaughtered(here, add)
+    _aftermath(here, add)
     for bid, b in here.buildings().items():
         live = [x for x in here.people() if bid in here.homes_here(x)]
         if b.get("unfinished"):
@@ -1305,6 +1526,87 @@ def _slaughtered(here, add) -> None:
             for bid in x.dog_houses:
                 spot_rows(here, SLAUGHTER_DOGS, x, [f"parcel:{pid}", f"building:{bid}"], here.node, here.buildings()[bid]["parcel"], add,
                           name="slaughter_dogs")
+
+
+def event_context(here, nm, day, **kw):
+    """The context of an event's bundle (D4-74): its place's name, how many days since, the weather and season on it now."""
+    from cybertron2.engine import environment as EV
+    w = here._w
+    wx = EV.weather(w)
+    x = SimpleNamespace(nm=nm, age=here.day - int(day), weather=wx, snow=EV.snow_lying(w), snowing=wx == "snow",
+                        wet=EV.wet(w), cold=here.cold(), warm=not here.cold(), season=here.calendar()["season"])
+    x.__dict__.update(kw)
+    return x
+
+
+def _dwellers(here, bid) -> list:
+    b = here.buildings()[bid]
+    return [m for m in here.people() if bid in here.homes_here(m)] if b["fittings"].get("beds") else []
+
+
+def _aftermath(here, add) -> None:
+    """The bundles of events and their aftermath at this place (D4-74), each read by the one rule at its spot: fights, hunting kills,
+    burials on parcels; fires, raids, thefts, breaks, births and guards at houses; beasts driven."""
+    w = here._w
+    people = here.people()
+    dog_houses = sorted(bid for bid, b in here.buildings().items() if b["fittings"].get("dog"))
+
+    def rec_age(rec, most):
+        return rec and rec.get("day") is not None and 0 <= here.day - int(rec["day"]) <= most
+
+    for pid, p in here.parcels().items():
+        sub = [f"parcel:{pid}"]
+        rec = p.get("fight") or {}
+        if rec_age(rec, 1) and rec.get("fights"):
+            fs = rec["fights"]
+            doers = sorted({f_["by"] for f_ in fs})
+            x = event_context(here, p["name"], rec["day"], blood=any(f_["outcome"] in ("wounded", "killed") for f_ in fs))
+            spot_rows(here, FIGHT, x, sub, here.node, pid, add, name="fight",
+                      who={"others": [m for m in people if m not in doers and m not in {f_["target"] for f_ in fs}], "doer": doers})
+            for bid in dog_houses:
+                y = event_context(here, p["name"], rec["day"], house=here.buildings()[bid]["name"])
+                spot_rows(here, DOGS, y, sub + [f"building:{bid}"], here.node, here.buildings()[bid]["parcel"], add, name="dogs",
+                          inside=_dwellers(here, bid))
+        rec = p.get("hunted") or {}
+        if rec_age(rec, 1) and rec.get("kills"):
+            doers = sorted({k["by"] for k in rec["kills"]})
+            x = event_context(here, p["name"], rec["day"], by=" and ".join(doers))
+            spot_rows(here, HUNTED, x, sub, here.node, pid, add, name="hunted",
+                      who={"others": [m for m in people if m not in doers], "doer": doers})
+        diggers = sorted({e["actor"] for e in here.events() if e.get("kind") == "work" and e.get("tech") == "bury"
+                          and f"parcel:{pid}" in (e.get("about") or []) and e.get("actor")})
+        if diggers:
+            x = event_context(here, p["name"], here.day, by=" and ".join(diggers))
+            spot_rows(here, BURIAL, x, sub, here.node, pid, add, name="burial",
+                      who={"others": [m for m in people if m not in diggers], "doer": diggers})
+    for bid, b in here.buildings().items():
+        sub, live = [f"building:{bid}"], _dwellers(here, bid)
+        for field, rows, most, extra in (("fire_hit", FIRE, 3, {}), ("raided", RAID, 1, {}), ("theft", THEFT, 1, {}),
+                                         ("broke", BROKE, 2, {})):
+            rec = b.get(field) or {}
+            if rec_age(rec, most):
+                x = event_context(here, b["name"], rec["day"], outcome=rec.get("outcome"), item=rec.get("item", "food"),
+                                  to=int(rec.get("to", 0) or 0), **extra)
+                spot_rows(here, rows, x, sub, here.node, b["parcel"], add, name=field, inside=live, who={"inside": live})
+        for e in here.events():
+            if e.get("kind") == "birth" and f"building:{bid}" in (e.get("about") or []):
+                x = event_context(here, b["name"], here.day)
+                spot_rows(here, BIRTH, x, sub, here.node, b["parcel"], add, name="birth", inside=live,
+                          who={"others": [m for m in people if m != e.get("actor")]})
+    for g in people:
+        rec = w.s["people"][g].get("guarded") or {}
+        if rec_age(rec, 0) and rec.get("at") in here.buildings():
+            b = here.buildings()[rec["at"]]
+            x = event_context(here, b["name"], rec["day"], by=g, armed=bool(w.weapon(g)))
+            spot_rows(here, GUARD, x, [f"building:{rec['at']}", f"person:{g}"], here.node, b["parcel"], add, name="guard",
+                      inside=_dwellers(here, rec["at"]), who={"others": [m for m in people if m != g], "doer": [g]})
+    for hid, h in here.herds().items():
+        rec = h.get("driven") or {}
+        if rec_age(rec, 2) and rec.get("to") in here.parcels() and rec.get("from") in here.parcels() and FM.head(h) > 0:
+            x = event_context(here, here.parcels()[rec["to"]]["name"], rec["day"], herd=h["name"], by=rec.get("by", "someone"),
+                              frm=here.parcels()[rec["from"]]["name"], to=here.parcels()[rec["to"]]["name"])
+            spot_rows(here, DRIVEN, x, [f"herd:{hid}", f"parcel:{rec['to']}"], here.node, rec["to"], add, name="driven",
+                      who={"others": [m for m in people if m != rec.get("by")]})
 
 
 def road_context(w, name, t, pos):

@@ -505,6 +505,8 @@ NOTICING = {
     "reach": {"near": 0, "around": 1},                              # a sign's reach: the furthest step it is read from
     "eye_senses": ["sight"],                                        # the eye for the land is an eye: it reads sight only
     "inside": 1.0,                                                  # those inside a house, or of a household: always there
+    "loud": 1.0,                                                    # a sound this plain is not masked by louder ones (D2-100)
+    "person": 2.0,                                                  # a person at work in the open: where they spent the day (glimpses)
     "sky_weather": False,                                           # the weather is not seen through itself (signs about the sky)
     "eye": {"none": 0.5, "ordinary": 1.0, "keen": 3.0},             # D2-91 on things
     "eye_bare": {"none": 0.0, "ordinary": 1.0, "keen": 2.0},        # D4-50 on how bare a place is (none: only by failing)

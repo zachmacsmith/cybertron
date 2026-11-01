@@ -537,6 +537,7 @@ def drive(here, a, party) -> str:
             here.apply("set", ref=("herd", x), field="count", value=head(here.herds()[x]))
         moved_to = dest
     what = ", ".join(f"{n} {ROLE_WORD[r][0 if n == 1 else 1]}" for r, n in moving.items() if n)
+    here.apply("set", ref=("herd", moved_to), field="driven", value={"day": here.day, "from": h["parcel"], "to": to, "by": here.name})
     pname = here.parcels()[to]["name"]
     here.event("work", f"{here.name} drove {what} of {h['name']} to {pname}", actor=here.name, about=[f"herd:{moved_to}", f"parcel:{to}"],
                salience=0.3, tags=["animals"])

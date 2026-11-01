@@ -451,7 +451,8 @@ def evening(w, attend: dict, today: dict) -> dict:
         rest = [x for x in others if x not in kin]
         rng.shuffle(rest)
         home = [m for m in here.people() if mind.members and m in mind.members]  # one's household: always there (D4-75)
-        seen_people = [x for x in kin + rest if rng.random() < TH.spot_chance(w, name, here.node, TH.spot_of(w, x), 1.0, inside=home)]
+        seen_people = [x for x in kin + rest if rng.random() < TH.spot_chance(w, name, here.node, TH.spot_of(w, x), float(NOTICING["person"]),
+                                                                               inside=home)]
         for x in seen_people[:int(here.p["glimpse"])]:
             pl = today["worked"].get(x)
             if pl:

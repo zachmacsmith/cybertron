@@ -26,6 +26,9 @@ def night(w) -> dict:
     rec["departed"] = today["_departed"] if "_departed" in today else departures(w, today)
     where = sleeping_places(w, today)
     rec["slept"] = {n: (s["buildings"][b]["name"] if b else "out") for n, b in where.items()}
+    for n, b in where.items():                                                  # who slept in the open, for its signs (D4-74)
+        if b is None and s["people"][n]["at"] is not None:
+            w.apply("set", s["people"][n]["at"], ref=("person", n), field="slept_out", value={"day": w.d, "cold": cold})
     from cybertron2.engine import forests as FO
     hp = p["heat"]
     for bid, b in s["buildings"].items():                                     # fires in heat (D2-157, D2-159)
@@ -158,11 +161,13 @@ def night(w) -> dict:
     for bid, b in s["buildings"].items():                                       # a camp falls in after its nights (D2-68)
         if b.get("lasts_until") is not None and w.d >= b["lasts_until"] and b["condition"] > 0:
             w.apply("set", b["node"], ref=("building", bid), field="condition", value=0)
+            w.apply("set", b["node"], ref=("building", bid), field="broke", value={"day": w.d, "to": 0})
             w.event(b["node"], "build", f"{b['name']} has fallen in", about=[f"building:{bid}"], salience=0.3, tags=["shelter"])
     for bid, b in s["buildings"].items():                                       # breaks (H-5)
         q = float(p["breaks"]["cold" if cold else "p"])
         if not b.get("unfinished") and b["condition"] > 0 and w.rng("break", w.d, bid).random() < q:
             w.apply("set", b["node"], ref=("building", bid), field="condition", value=b["condition"] - 1)
+            w.apply("set", b["node"], ref=("building", bid), field="broke", value={"day": w.d, "to": b["condition"]})
             rec["breaks"].append(bid)
     _grow(w)
     from cybertron2.engine import farm as FM

@@ -355,6 +355,11 @@ def _technique(here, mind, a, party, verb):
                 if rng.random() < pr:
                     here.apply("create", dst=out, item=by, qty=1, why=tech)
                     extra_got = f" and a {by}"
+            if got > 0:                                                         # the day's kills on this ground, for its signs (D4-74)
+                rec = here.parcels()[key].get("hunted") or {}
+                kills = list(rec.get("kills") or []) if rec.get("day") == here.day else []
+                kills.append({"by": here.name, "meat": got, "hide": bool(extra_got)})
+                here.apply("set", ref=("parcel", key), field="hunted", value={"day": here.day, "kills": kills})
         if armed and t.get("wear"):
             here.apply("wear", container=here.hands, item=armed, uses=t["wear"])
     elif y["kind"] == "fixed":
@@ -968,6 +973,7 @@ def _attack(here, mind, a, party):
 def _guard(here, mind, a, party):
     bid = here.building(a.get("at")) if a.get("at") else (here.homes_here() or [None])[0]
     here.today()["guards"][here.name] = bid
+    here.apply("set", ref=("person", here.name), field="guarded", value={"day": here.day, "at": bid})   # for its signs (D4-74)
     return "You stand guard tonight" + (f" over {here.buildings()[bid]['name']}." if bid else ".")
 
 

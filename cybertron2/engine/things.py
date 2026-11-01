@@ -281,7 +281,7 @@ def spot_chance(w, name, node, parcel, own_x, target=None, sense="sight", inside
         return min(top, x * e if eye_on != "things" else x)
     if parcel not in w.s["parcels"]:
         return 0.0
-    vis = EV.visibility(w, node, parcel, sense, night=night)
+    vis = EV.visibility(w, node, parcel, sense, night=night, quiet=own_x < float(N["loud"]))   # a loud sound is not masked
     pres = presence(w, name, parcel, own_x, sense, within=N["reach"].get(reach) if reach else None, attending=attending)
     return min(top, own_x * vis * pres * att * e)
 

@@ -381,6 +381,7 @@ def dawn(w) -> None:
                 share = float(inc.get("food", 0.85)) if item in EDIBLE else float(inc.get("other", 0.5))
                 w.apply("destroy", node, src=b["stock"], item=item, qty=q * share, why="fire")
             w.apply("set", node, ref=("building", bid), field="condition", value=max(0, b["condition"] - int(inc.get("damage", 1))))
+            w.apply("set", node, ref=("building", bid), field="fire_hit", value={"day": w.d})   # for its signs (D4-74)
             live = [m for m in w.living() if bid in w.homes(m)]
             w.event(node, "fire", f"fire broke out in {b['name']} in the night: the store is burnt, most of its food is gone and the roof "
                     "is damaged", about=[f"building:{bid}"], salience=0.95, tags=["danger", "food", "shelter"], concerns=live, dawn=True)

@@ -64,13 +64,23 @@ def settle_fights(w, today) -> list:
                         about=[f"building:{bid}"], salience=0.95, tags=["danger"], concerns=holders + gd)
             for d in gd:
                 wear_weapon(d)
+            w.apply("set", node, ref=("building", bid), field="raided", value={"day": w.d, "outcome": rec["outcome"]})   # D4-74
             out.append(rec)
             continue
         t = f["target"]
         if not w.s["people"][t]["alive"] or w.at(t) != node:
             continue
         helpers = [g for g in guards if g not in (t, by) and w.at(g) == node]
-        out.append(duel(w, node, by, t, f["aim"], helpers=helpers, guarding=t in guards, rng=rng, wear_attacker=False))
+        r = duel(w, node, by, t, f["aim"], helpers=helpers, guarding=t in guards, rng=rng, wear_attacker=False)
+        from cybertron2.engine import things as TH
+        home = [x for x in w.homes(t) if w.s["buildings"][x]["node"] == node]
+        pid = w.s["buildings"][home[0]]["parcel"] if home else TH.spot_of(w, t)
+        if pid in w.s["parcels"]:                                               # where it happened, for its signs (D4-74)
+            prev = w.s["parcels"][pid].get("fight") or {}
+            fights = list(prev.get("fights") or []) if prev.get("day") == w.d else []
+            fights.append({"by": by, "target": t, "outcome": r["outcome"]})
+            w.apply("set", node, ref=("parcel", pid), field="fight", value={"day": w.d, "fights": fights})
+        out.append(r)
     return out
 
 
@@ -180,6 +190,7 @@ def settle_thefts(w, today, attend) -> None:
     for st in today["thefts"]:
         b = w.s["buildings"][st["building"]]
         node = b["node"]
+        w.apply("set", node, ref=("building", st["building"]), field="theft", value={"day": w.d, "item": st["item"]})   # D4-74
         seen = []
         for x in w.agents_acting():
             if x == st["by"] or w.at(x) != node:
