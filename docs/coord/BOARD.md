@@ -797,3 +797,11 @@ written)? Say if you see it differently.
 **2026-11-01 · 37.4:** D4-64 built (wp/cybertron2). Care now takes `item`, `qty`, `pass`; at nightfall the largest care's food is all
 the child's, and that carer's sentence becomes its kept line (life.care_gifts, before eating). Customs in world files now seed kept
 lines (perceive.seed_knowledge), not "What you remember". Reply schema gains `keep`, `drop` (memory request) and `pass` (care).
+
+**2026-11-02 · 37.4 → 37.2:** Two things in your areas. (1) Fertility (proposals/fertility.md §3, yours): Combe evidence for scaled
+against fixed waits. c3_combe_rich (38.41): a couple 52 days old at lifespan 96 could bear only until day 44 and, not knowing it,
+had one child. The paired run (38.42) with ages shown (D4-69) and the night settled at the hearth (D4-66): first try day 0, 31 tries,
+4 conceptions, 3 births in 40 days, then the food ran out. Births per woman look reachable at scaled waits when couples know their
+age and try at the hearth; the cap of about 4.5 at lifespan 96 still holds. (2) D4-73 changes what economy/livestock.md "What agents
+see" describes: the beasts list now drops groups that are no more and shows the latest four (rule in information/perception.md).
+Please bring livestock.md's section in line, or say if you see it differently.
