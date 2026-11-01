@@ -106,7 +106,12 @@ def own(w, c) -> float:
 
 
 def describe(w, c) -> str:
-    """The thing as one who notices it sees it (its signs, D4-48)."""
+    """The thing as one who notices it sees it (its signs, D4-48), with its tag (D4-68)."""
+    t = _describe(w, c)
+    return f"{t} ({c['tag']})" if c.get("tag") else t
+
+
+def _describe(w, c) -> str:
     where = parcel_name(w, c)
     g = goods_words(c["goods"])
     if c.get("beast"):
@@ -279,6 +284,15 @@ def known_here(w, name, node) -> dict:
 def find(w, name, where, item=None):
     """A thing one knows of here, by its place's name or its dead person's name (and holding `item`, if named)."""
     low = str(where or "").strip().lower()
+    from cybertron2.engine import tags as TG
+    t = TG.resolve(w, name, where) if TG.on(w) else None
+    if t:                                                                      # by its tag, or a name one knows (D4-68)
+        cid = TG.thing_by_tag(w, t)
+        c = w.s["containers"].get(cid) if cid else None
+        known = known_here(w, name, w.at(name))
+        if c and c.get("node") == w.at(name) and cid in known and (not item or c["goods"].get(item, 0.0) > 1e-9):
+            return cid
+        return None
     for cid, r in sorted(known_here(w, name, w.at(name)).items(), key=lambda kv: -kv[1]["day"]):
         c = w.s["containers"].get(cid)
         if not c or c.get("node") != w.at(name):

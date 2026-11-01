@@ -464,6 +464,8 @@ def lead_ox(w, name, hid, rid, pos) -> str:
         w.apply("claim", node, thing=("herd", new), claimant=cl["claimant"], rights=cl["rights"], grounds=cl["grounds"])
     base = w.s["herds"][hid].get("base_name") or w.s["herds"][hid]["name"]
     led = base if FM.head(w.s["herds"][hid]) == 0 else f"an ox of {base}"           # the whole herd, or one ox from it
+    from cybertron2.engine import tags as TG
+    led = TG.label(led, w.s["herds"][new].get("tag"))                          # its own tag (D4-68)
     for f, v in (("name", led), ("pack", True), ("with", name), ("parcel", None),
                  ("pos", pos), ("node", rid)):
         w.apply("set", node if f != "node" else node, ref=("herd", new), field=f, value=v)

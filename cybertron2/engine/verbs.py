@@ -882,11 +882,22 @@ def _travel(here, mind, a, party):
         raise Refused(f"you carry {math.ceil(load * 10 - 1e-9) / 10:g} weight; you can carry {cap:g} on this road, so set down "
                       f"at least {math.ceil((load - cap) * 10 - 1e-9) / 10:g}"
                       + (" (a cart needs a road with a track, and this one has none)" if cart and not track else ""))
-    here.today()["travel"][here.name] = to
+    morning = bool(here.setting("evening")) and str(a.get("when") or "").lower() == "morning"
+    if morning:                                                               # set off in the morning, in by nightfall (D4-67)
+        here.today().setdefault("travel_morning", {})[here.name] = to
+    else:
+        here.today()["travel"][here.name] = to
     choices = {k: a[k] for k in ("on trouble", "stop at", "gather", "days", "meeting", "searching", "lead") if a.get(k) not in (None, "", False)}
     if choices:                                                               # the choices for the road (D2-105, D2-109, D2-113)
         here.today().setdefault("travel_choices", {})[here.name] = choices
     here.event("depart", f"{here.name} set off on the road", actor=here.name, salience=0.6, tags=["travel"])
+    if morning:
+        return (f"You set off this morning: you walk all day" + (f", {days - 1} night{'s' if days > 2 else ''} out on the road," if days > 1 else "")
+                + f" and come in at {here.place_name(to)} by nightfall" + (f" of day {here.day + days}" if days > 1 else "")
+                + ". Nothing more is done today.")
+    if here.setting("evening"):
+        return (f"You set off at nightfall: {days} night{'s' if days > 1 else ''} on the road, sleeping out; you come in at midday on day "
+                f"{here.day + days + 1}, with half that day's units left. Nothing more is done today.")
     return (f"You set off at the end of the day: {days} day{'s' if days > 1 else ''} on the road, sleeping out; you arrive on the morning "
             f"of day {here.day + days + 1}. Nothing more is done today.")
 
@@ -1090,7 +1101,28 @@ def _care(here, mind, a):
     return f"You looked after {who} (fed, minded and kept warm)" + ("; " + "; ".join(bits) if bits else "") + "."
 
 
+def _tags(here) -> bool:
+    return bool(here.setting("tags"))
+
+
+def _name_thing(here, a):
+    """Naming a group of beasts or a thing by its tag (D4-68): the name is known to the namer, everyone here and the household."""
+    new = " ".join(str(a.get("as") or "").split())[:40]
+    if not new:
+        raise Refused('say the name in "as"')
+    x = a.get("thing") or a.get("what") or a.get("at")
+    tag = here.tag_of(x)
+    if not tag or not here.tagged_here(tag):
+        raise Refused(f"there is nothing here tagged or called {x!r} that you know of; name a group of beasts or a thing here by its tag")
+    who = here.give_name(tag, new)
+    here.event("name", f"{here.name} named {tag} {new}", actor=here.name, salience=0.2, sense="sound")
+    others = [m for m in who if m != here.name]
+    return f"You named {tag} “{new}”" + (f"; {', '.join(others)} will know it by that name." if others else ".")
+
+
 def _name(here, mind, a, party):
+    if a.get("as"):
+        return _name_thing(here, a)
     hh = here.household()
     if hh is None:
         raise Refused("you belong to no household")
@@ -1115,7 +1147,7 @@ def _name(here, mind, a, party):
             raise Refused(f"{a['head']!r} is not of your household")
         here.apply("office", inst=hh, field="named", value=who, by=here.name)
         return f"You named {who} as the head of {here.institution(hh)['name']}; the one most named heads it."
-    raise Refused('say "heir" or "head"')
+    raise Refused('say "heir" or "head"' + (', or "thing" and "as" to name a group of beasts or a thing' if _tags(here) else ""))
 
 
 def _order(here, mind, a, party):

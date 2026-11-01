@@ -161,6 +161,8 @@ class World:
                                "kind": h.get("kind", "cattle"), **roles, "count": sum(roles.values()),
                                "in_milk": float(min(roles["cows"], int(h.get("in_milk", 0)))), "milked": {"day": -1, "n": 0},
                                "births": 0.0, "hungry": 0, "watched": -1}
+        from cybertron2.engine import tags as TG
+        TG.herds_at_start(self)                                                 # H1, H2, ... (D4-68)
         for iid, h in (spec.get("households") or {}).items():
             s["institutions"][iid] = {"kind": "household", "name": h.get("name", f"the {iid}s"), "members": [],
                                       "offices": {"head": h.get("head")}, "rules": {"admit": "head", "grant": "members", **(h.get("rules") or {})}}
@@ -518,6 +520,8 @@ class World:
             base = min(2, base)
         if a["wounded"]:
             base = max(1, base - 2)
+        if a.get("arrived") == self.d and a.get("arrived_by") == "midday":     # in at midday from a night on the road (D4-67)
+            base = max(1, base // 2)
         from cybertron2.engine import life as LF
         return max(1, base - LF.unit_penalty(self, name))                     # late in a pregnancy, a unit fewer (D2-141)
 
@@ -600,8 +604,10 @@ def p_new_herd(w, like, parcel):
     hid = f"{like}-{k}"
     pname = w.s["parcels"][parcel]["name"]
     w.s["herds"][hid] = {**{x: v for x, v in h.items() if x not in ("cows", "oxen", "bulls", "young", "in_milk", "count", "births")},
-                         "parcel": parcel, "home": parcel, "name": f"{h['name']} on {pname}", "cows": 0, "oxen": 0, "bulls": 0, "young": 0,
+                         "parcel": parcel, "home": parcel, "name": f"{h.get('base_name') or h['name']} on {pname}", "cows": 0, "oxen": 0, "bulls": 0, "young": 0,
                          "in_milk": 0.0, "count": 0, "births": 0.0, "milked": {"day": -1, "n": 0}, "hungry": 0, "watched": -1}
+    from cybertron2.engine import tags as TG
+    TG.new_herd(w, hid)
     return hid
 
 
@@ -624,6 +630,8 @@ def p_split_herd(w, like, take):
     h["in_milk"] = round(float(h.get("in_milk", 0.0)) - milk, 4)
     h["count"] = sum(int(h.get(r, 0)) for r in ("cows", "oxen", "bulls", "young"))
     w.s["herds"][hid]["count"] = n
+    from cybertron2.engine import tags as TG
+    TG.new_herd(w, hid)
     return hid
 
 
@@ -836,6 +844,8 @@ def p_new_thing(w, node, parcel, kind, **fields):
     w.s["seq"] += 1
     cid = f"{kind}:{w.s['seq']}"
     w.s["containers"][cid] = {"kind": kind, "node": node, "parcel": parcel, "goods": {}, "wear": {}, "day": w.d, **fields}
+    from cybertron2.engine import tags as TG
+    TG.new_thing(w, cid)
     return cid
 
 

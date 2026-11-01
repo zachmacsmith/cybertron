@@ -74,6 +74,35 @@ def elder_from(L=None) -> int:
     return sum(span for _, span in spans(L))
 
 
+def ages_on(w) -> bool:
+    """Each person is told their age and the stages ahead (D4-69): a world turns it on with `ages: true`."""
+    return bool((w.spec or {}).get("ages"))
+
+
+def age_line(w, name) -> str:
+    """One's age in days and what lies ahead: coming of age, the end of having children (old age), and one's partner's."""
+    d = days_old(w, name)
+    if d is None or not ages_on(w):
+        return ""
+    L = lifespan(w)
+    grown = sum(sp for st, sp in spans(L) if st in ("infant", "child", "youth"))
+    old = elder_from(L)
+
+    def ahead(x, who):
+        if x < grown:
+            return f"{who} come{'s' if who != 'you' else ''} of age at {grown} days old (in {grown - x})"
+        if x < old:
+            return (f"{who} {'are' if who == 'you' else 'is'} grown; {who} turn{'s' if who != 'you' else ''} elder at {old} days old "
+                    f"(in {old - x}), and then can have no more children")
+        return f"{who} {'are' if who == 'you' else 'is'} an elder, past having children"
+    line = f"You are {d} days old: {ahead(d, 'you')}."
+    p = w.s["people"][name].get("partner")
+    pd = days_old(w, p) if p and w.s["people"].get(p, {}).get("alive") else None
+    if pd is not None:
+        line += f" {p} is {pd} days old" + (f", and turns elder in {old - pd}." if grown <= pd < old else ".")
+    return line
+
+
 def pregnancy_days(w) -> int:
     return scaled(LIFE["pregnancy"]["days"], lifespan(w))
 

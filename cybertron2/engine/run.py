@@ -16,7 +16,7 @@ import time
 from pathlib import Path
 
 from cybertron2.engine import agreements as AG, fuse as FU, knowledge as KN, life as LF, night as N, perceive as PC, prompt as PR, roads as RD, settle as ST, verbs as V
-from cybertron2.engine import branch as BR, journal as JN, memory as MEM, view as VW
+from cybertron2.engine import branch as BR, evening as EVN, journal as JN, memory as MEM, tags as TG, view as VW
 from cybertron2.engine.converse import Conversations
 from cybertron2.engine.data import EDIBLE, TECHNIQUES
 from cybertron2.engine.here import Here, Mind
@@ -398,19 +398,103 @@ def dawn(w) -> None:
             w.apply("arrive", t["to"], person=name)
             continue
         if t and t["arrive"] <= w.d:
-            RD.arrived(w, name, t)                                          # its notices on the way, remembered (D2-97)
-            w.apply("arrive", t["to"], person=name)
-            w.apply("set", t["to"], ref=("person", name), field="arrived", value=w.d)
-            from cybertron2.engine import herds as HD, layout as LY
-            HD.arrive_with(w, name, t["to"])                                # beasts it accompanied come in with it (D2-127)
-            LY.learn_way(w, name, t["road"], t["to"], "came")                # one knows the end one came in by (D2-90)
-            LY.wear_way(w, t["road"], t["to"])
-            w.event(t["to"], "arrive", f"{name} arrived from {w.s['nodes'][t['from']]['name']}", actor=name, salience=0.7, tags=["travel"], dawn=True)
+            arrive(w, name, t, dawn=True)
     for sg in w.spec.get("signs") or []:
         if int(sg["day"]) - 1 == w.d:
             for node in (list(w.s["nodes"]) if sg.get("node") in (None, "all") else [sg["node"]]):
                 w.event(node, "sign", sg["text"], about=[sg.get("about", "sky")], salience=float(sg.get("salience", 0.3)),
                         tags=sg.get("tags", ["season"]), sense=sg.get("sense", "sight"), dawn=True)
+
+
+def arrive(w, name, t, dawn=True) -> None:
+    """A traveller in: at dawn (set off at nightfall; with an evening, in at midday with half the day's units, D4-67) or at nightfall
+    (set off in the morning)."""
+    RD.arrived(w, name, t)                                                  # its notices on the way, remembered (D2-97)
+    w.apply("arrive", t["to"], person=name)
+    w.apply("set", t["to"], ref=("person", name), field="arrived", value=w.d)
+    if EVN.on(w):
+        w.apply("set", t["to"], ref=("person", name), field="arrived_by", value="nightfall" if t.get("by_day") else "midday")
+        w.apply("set", t["to"], ref=("person", name), field="came_from", value=t["from"])
+    from cybertron2.engine import herds as HD, layout as LY
+    HD.arrive_with(w, name, t["to"])                                        # beasts it accompanied come in with it (D2-127)
+    LY.learn_way(w, name, t["road"], t["to"], "came")                        # one knows the end one came in by (D2-90)
+    LY.wear_way(w, t["road"], t["to"])
+    w.event(t["to"], "arrive", f"{name} arrived from {w.s['nodes'][t['from']]['name']}" + ("" if dawn else " at nightfall"), actor=name,
+            salience=0.7, tags=["travel"], dawn=dawn)
+
+
+def morning_departures(w, today) -> None:
+    """Those who set off this morning (D4-67): on the road all day; a one-day road brings them in by nightfall, a longer one at
+    nightfall of its last day, with a night out for each day between."""
+    tm = dict(today["travel_morning"])
+    N.departures(w, {"travel": tm, "travel_choices": today.get("travel_choices") or {}})
+    for name in sorted(tm):
+        t = w.s["people"][name]["transit"]
+        if not t:
+            continue
+        due = w.d + int(w.s["roads"][t["road"]]["days"]) - 1
+        for m in [name] + [b for b, x in w.s["people"].items() if (x.get("transit") or {}).get("carried_by") == name]:
+            w.apply("transit", t["road"], person=m, fields={"by_day": True, "arrive": due})
+    arrive_evening(w)
+
+
+def arrive_evening(w) -> None:
+    for name in w.living():
+        t = w.s["people"][name]["transit"]
+        if t and t.get("by_day") and t["arrive"] <= w.d:
+            if t.get("carried_by"):
+                w.apply("arrive", t["to"], person=name)
+                continue
+            arrive(w, name, t, dawn=False)
+
+
+def evening_step(w, names, results, budget, used, talk_log, openings, systems, backend, conv, workers, tally) -> None:
+    """The evening at the hearth (evening.py): one call each, together, then one wave of answers for those asked something."""
+    called = EVN.who_is_called(w, names)
+    if not called:
+        return
+    arrive_evening(w)
+    gather = {n: EVN.gathering(w, n) for n in called}
+    keys = {n: g[0] for n, g in gather.items()}
+    left = {n: max(0, budget.get(n, 0) - used.get(n, 0)) for n in called}
+    for n in called:
+        PC.store(w, n)["evening_shown"] = [x for x in results[n] if not x.startswith(PC.SPEECH)]
+    texts = {}
+    for n in called:
+        a = w.s["people"][n]
+        came = None
+        if a.get("arrived") == w.d and a.get("arrived_by") == "nightfall" and a.get("came_from") in w.s["nodes"]:
+            came = w.s["nodes"][a["came_from"]]["name"]
+        others = [m for m in called if m != n and keys[m] == keys[n]]
+        texts[n] = TG.render(w, n, EVN.prompt(w, n, results[n], left[n], gather[n][1], others, came))
+    since = EVN.snapshot(w)
+    rr, mm, ee = _parallel(lambda n: decide(w, n, texts[n], openings.get(n, texts[n]) + "\n\n" + texts[n], systems.get(n), backend, conv,
+                                            kind="evening"), {n: (n,) for n in called}, workers, tally)
+    box = {}
+    for n in called:
+        talk_log.setdefault(n, []).append({"wave": "evening", "prompt": texts[n], "reply": rr.get(n) or {},
+                                           "usage": (mm.get(n) or {}).get("usage"), "thinking": (mm.get(n) or {}).get("thinking"),
+                                           "error": ee.get(n)})
+        if n in ee:
+            continue
+        spent = EVN.apply(w, n, rr.get(n) or {}, keys, called, results[n], left[n], box)
+        used[n] = used.get(n, 0) + spent
+        left[n] -= spent
+    asked = {n: EVN._requests(w, n, since) for n in called}
+    woken = sorted(n for n in called if (box.get(n) or {}).get("heard") or asked[n])
+    if not woken:
+        return
+    texts2 = {n: TG.render(w, n, EVN.answer_prompt(w, n, (box.get(n) or {}).get("heard", []), asked[n], left[n])) for n in woken}
+    rr, mm, ee = _parallel(lambda n: decide(w, n, texts2[n], openings.get(n, texts2[n]) + "\n\n" + texts2[n], systems.get(n), backend, conv,
+                                            kind="evening"), {n: (n,) for n in woken}, workers, tally)
+    late = {}
+    for n in woken:
+        talk_log[n].append({"wave": "evening answer", "prompt": texts2[n], "reply": rr.get(n) or {}, "usage": (mm.get(n) or {}).get("usage"),
+                            "thinking": (mm.get(n) or {}).get("thinking"), "error": ee.get(n)})
+        if n in ee:
+            continue
+        spent = EVN.apply(w, n, rr.get(n) or {}, keys, called, results[n], left[n], late)
+        used[n] = used.get(n, 0) + spent
 
 
 def night_lines(w, rec) -> dict:
@@ -644,8 +728,8 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
             at_day = {n: w.at(n) for n in names}
             systems = {n: PR.system_prompt(Here(w, n), Mind(w, n)) for n in names}
             turn = VW.turn if VW.on(w) else PR.turn_prompt                     # the message from beliefs (38.40 §9), or as before
-            openings = {n: turn(Here(w, n), Mind(w, n), opening=True) for n in names}
-            users = {n: turn(Here(w, n), Mind(w, n), opening=False) for n in names}
+            openings = {n: TG.render(w, n, turn(Here(w, n), Mind(w, n), opening=True)) for n in names}
+            users = {n: TG.render(w, n, turn(Here(w, n), Mind(w, n), opening=False)) for n in names}
             tally = Tally(float(((w.spec.get("llm") or {}).get("fail_stop_fraction")) or 0.5), len(names))
             replies, meta, errors = _parallel(lambda n: decide(w, n, users[n], openings[n], systems[n], backend, conv),
                                               {n: (n,) for n in names}, workers, tally)
@@ -658,14 +742,15 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
             woken = talk(w, names, replies, results)
             talk_log = {n: [] for n in names}
             talked = set()
-            for wave in range(WAVES):
+            waves = 1 if EVN.on(w) else WAVES                                  # with an evening, one wave of answers (D4-65)
+            for wave in range(waves):
                 if not woken:
                     break
                 if wave:
                     J.commit(w.s, _runner(J, cost, conv, locals()))
                     J.open_step(day, f"talk.{wave}")
-                texts = {n: PR.talk_prompt(Here(w, n), Mind(w, n), b["heard"], b["also"], b["offers"], b["opened"], b["cards"],
-                                           sum(1 for x in results[n] if x.startswith("You told "))) for n, b in woken.items()}
+                texts = {n: TG.render(w, n, PR.talk_prompt(Here(w, n), Mind(w, n), b["heard"], b["also"], b["offers"], b["opened"], b["cards"],
+                                           sum(1 for x in results[n] if x.startswith("You told ")))) for n, b in woken.items()}
                 rr, mm, ee = _parallel(lambda n: decide(w, n, texts[n], openings[n] + "\n\n" + texts[n], systems[n], backend, conv, woken[n],
                                                         kind="talk"),
                                        {n: (n,) for n in woken}, workers, tally)
@@ -683,7 +768,7 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
                 if not late:
                     break
                 woken = talk(w, names, {**{m: {} for m in names}, **late}, results)
-                if wave == WAVES - 1:
+                if wave == waves - 1:
                     break
             J.commit(w.s, _runner(J, cost, conv, locals()))
             J.open_step(day, "work")
@@ -704,10 +789,16 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
             heavy = {}
             for i in range(max((len(p) for p in plans.values()), default=0)):
                 for n in order:
-                    if i >= len(plans[n]) or not w.s["people"][n]["alive"] or n in today["travel"] or n in heavy:
+                    if i >= len(plans[n]) or not w.s["people"][n]["alive"] or n in today["travel"] or n in heavy \
+                            or n in today.get("travel_morning", {}):
                         continue
                     here, mind = Here(w, n), Mind(w, n)
                     a = plans[n][i]
+                    morning = EVN.on(w) and str(a.get("do", "")).lower() == "travel" and str(a.get("when") or "").lower() == "morning"
+                    if morning and used[n] > 0:                                # setting off in the morning: the day's first act (D4-67)
+                        results[n].append("Refused: travel: to set off in the morning, make it your first act; to go after the day's "
+                                          "work, set off at nightfall")
+                        continue
                     c = V.cost(here, a)
                     if used[n] + c > budget[n]:
                         if c and used[n] < budget[n]:
@@ -719,6 +810,8 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
                         continue
                     if not res.startswith("Refused"):
                         used[n] += c
+                        if n in today.get("travel_morning", {}):
+                            used[n] = budget[n]                                 # the day spent walking
                         results[n].append(res)
                     elif res in results[n]:
                         rep[n][res] = rep[n].get(res, 1) + 1
@@ -744,9 +837,15 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
                 results[n] = [f"{x} (x{rep[n][x]})" if x in rep[n] else x for x in results[n]]
                 if used[n] < budget[n]:
                     results[n].append(f"You left {budget[n] - used[n]} of your {budget[n]} units unused.")
+            if today.get("travel_morning"):                                    # set off this morning: in by nightfall (D4-67)
+                morning_departures(w, today)
             from cybertron2.engine import layout as LY
             LY.routes(w, today)                                             # each one's day as a chain of parcels (D4-62)
             J.commit(w.s, _runner(J, cost, conv, locals()))
+            if EVN.on(w):                                                       # the evening at the hearth (D4-65, D4-66)
+                J.open_step(day, "evening")
+                evening_step(w, names, results, budget, used, talk_log, openings, systems, backend, conv, workers, tally)
+                J.commit(w.s, _runner(J, cost, conv, locals()))
             J.open_step(day, "settle")
             today["partners"] = LF.settle(w, today)                             # partnerships both chose (D2-140)
             today["children_work"] = LF.children_work(w)                        # the head's standing order (D2-148)

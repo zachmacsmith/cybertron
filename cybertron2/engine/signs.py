@@ -202,7 +202,7 @@ ASTRAY = [
     dict(when=lambda x: x.whose, own=0.7, sense="sight", p=0.5, tags=["animals"], knack="herd",
          text=lambda x: f"you know those beasts on {x.nm}: {x.whose}"),
     dict(when=lambda x: x.strays, own=0.8, sense="sight", p=0.6, tags=["animals"],
-         text=lambda x: f"a few head broken off from {x.base} are on {x.nm} on their own"),
+         text=lambda x: f"a few head broken off from {x.base} are on {x.nm} on their own" + (f" ({x.h['tag']})" if x.h.get("tag") else "")),
     dict(when=lambda x: x.from_road, own=0.9, sense="sight", p=1.0, tags=["animals"],
          text=lambda x: f"beasts nobody here knows are on {x.nm}: {x.words}, come in off the road"),
 ]
@@ -1126,7 +1126,7 @@ def thing_context(w, c):
     wx = EV.weather(w)
     person = w.s["people"].get(c.get("of")) or {}
     x = SimpleNamespace(c=c, kind=c["kind"], of=c.get("of"), where=where, body=st,
-                        at=f"in {where}" if indoors else ("by the road" if on_road else f"at {where}"),
+                        at=(f"in {where}" if indoors else ("by the road" if on_road else f"at {where}")) + (f" ({c['tag']})" if c.get("tag") else ""),
                         grave=bool(c.get("body")) and c.get("buried") is not None, cairn=bool(c.get("cairn")),
                         buried_age=w.d - int(c["buried"]) if c.get("buried") is not None else 0,
                         hidden=c.get("hidden"), untaught=bool(c.get("untaught")), goods=dict(c["goods"]),
@@ -1202,7 +1202,7 @@ def carcass_context(w, c):
     age = w.d - int(c.get("died", w.d))
     bones = age >= int(THINGS["carcass_bones_after"])
     return SimpleNamespace(beast=c.get("beast", "beast"), of=c.get("of", "a beast"), where=where, on_road=on_road,
-                           at="by the road" if on_road else f"at {where}", off_road=c.get("hidden") == "off the road",
+                           at=("by the road" if on_road else f"at {where}") + (f" ({c['tag']})" if c.get("tag") else ""), off_road=c.get("hidden") == "off the road",
                            age=age, fresh=TH.carcass_fresh(w, c) and not bones, rotten=not TH.carcass_fresh(w, c) and not bones,
                            bones=bones, starved=c.get("cause") == "starved", hide=c["goods"].get("hide", 0) > 0,
                            meat=c["goods"].get("meat", 0) > 0, cold=w.cold(), warm=not w.cold(), weather=EV.weather(w),

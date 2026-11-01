@@ -95,6 +95,9 @@ def _self(here, mind, a, full) -> str:
     hold = ", ".join(f"{show(q)} {i}" for i, q in sorted(here.carried().items()) if q > 0.05) or "nothing"
     you = [f"You are {STAGES[a['hunger']]}" + (", and hurt" if a["wounded"] else "") + f". You carry: {hold}"
            + (f" (weight {show(here.load())} of the {here.capacity():g} you can travel with)" if here.roads() else "") + "."]
+    age = here.age_line()                                                      # one's age and what lies ahead (D4-69)
+    if age:
+        you.append(age)
     fam = PR._family_lines(here, mind)
     if not full:                                                               # the standing instructions only at the opening
         fam = [x for x in fam if not x.startswith(("Looking after a child is work", "While caring for a child"))]

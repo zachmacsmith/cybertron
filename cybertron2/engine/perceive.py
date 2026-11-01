@@ -574,6 +574,10 @@ def close_day(w, name, did: list, night_lines: list) -> None:
     if t["attended"]:
         saw.append(f"(attending to {t['attended']['target']}) " + "; ".join(t["attended"]["lines"]))
     acts = [x for x in did if not x.startswith(SPEECH)]
+    shown = m.pop("evening_shown", None)
+    if shown:                                                                   # already read at the hearth (D4-65)
+        seen = set(shown)
+        acts = [x for x in acts if x not in seen]
     said = [x.removeprefix("You ") for x in did if x.startswith(("You told ", "You said "))]
     m["days"].append({"day": w.d, "did": acts + night_lines, "said": said, "heard": list(t["heard"]), "saw": saw, "glimpse": list(t["glimpse"])})
     for line in t["concerned"] + t["learned"] + night_lines:

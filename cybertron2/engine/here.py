@@ -189,8 +189,47 @@ class Here:
     def herds(self) -> dict:
         return {hid: h for hid, h in self._w.s["herds"].items() if h["node"] == self.node}
 
+    # ------------------------------------------------------------------ settings, tags and names, age (D4-65 to D4-69)
+    def setting(self, key):
+        return (self._w.spec or {}).get(key)
+
+    def place_name(self, nid) -> str:
+        return self._w.s["nodes"][nid]["name"] if nid in self._w.s["nodes"] else str(nid)
+
+    def tag_of(self, x):
+        """The tag meant by a tag, a name one knows, or a herd here."""
+        from cybertron2.engine import tags as TG
+        t = TG.resolve(self._w, self.name, x)
+        if t is None:
+            hid = self.herd(x)
+            t = self._w.s["herds"][hid].get("tag") if hid else None
+        return t
+
+    def tagged_here(self, tag) -> bool:
+        """A group of beasts here, or a thing here one knows of, with this tag."""
+        from cybertron2.engine import tags as TG, things as TH
+        return TG.herd_by_tag(self._w, tag) in self.herds() or TG.thing_by_tag(self._w, tag) in TH.known_here(self._w, self.name, self.node)
+
+    def give_name(self, tag, name) -> list:
+        from cybertron2.engine import tags as TG
+        return TG.give_name(self._w, self.name, tag, name)
+
+    def age_line(self) -> str:
+        from cybertron2.engine import life as LF
+        return LF.age_line(self._w, self.name)
+
     def herd(self, x=None):
         hs = self.herds()
+        from cybertron2.engine import farm as FM, tags as TG
+        if TG.on(self._w):                                                     # a tag, or a name one knows (D4-68)
+            t = TG.resolve(self._w, self.name, x)
+            if t:
+                return next((hid for hid, h in hs.items() if h.get("tag") == t), None)
+            x = TG.strip(str(x or "")).strip().lower()
+            hit = [hid for hid, h in hs.items() if not x or x in (hid.lower(), h["name"].lower(), TG.strip(h["name"]).lower(), h["kind"],
+                                                                  "cattle", "the herd", "herd", str(h.get("base_name") or "").lower())
+                   or TG.strip(h["name"]).lower().startswith(x)]
+            return next((hid for hid in hit if FM.head(hs[hid]) > 0), hit[0] if hit else None)
         x = str(x or "").strip().lower()
         return next((hid for hid, h in hs.items() if not x or x in (hid.lower(), h["name"].lower(), h["kind"], "cattle", "the herd", "herd")), None)
 

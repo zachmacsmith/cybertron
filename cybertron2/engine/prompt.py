@@ -94,6 +94,13 @@ def schema_for(here, mind) -> dict:
     s["properties"]["offers"]["items"]["properties"]["for"]["enum"] = ["my household"] + holds
     s["properties"]["attend"]["enum"] = people + buildings + parcels + herds + ["the sky", "the place in general", "the village"]
     s["properties"]["look_up"]["items"]["enum"] = techs
+    if here.setting("tags"):                                                    # tags and names are free text (D4-68)
+        a["as"] = {"type": "string"}
+        for k in ("thing", "from"):
+            a[k].pop("enum", None)
+        s["properties"]["attend"].pop("enum", None)
+    if here.setting("evening"):
+        a["when"] = {"type": "string", "enum": ["morning", "nightfall"]}
     return s
 
 
@@ -116,6 +123,27 @@ def _craft_note(tech) -> str:
     return tech + (f" ({', '.join(bits)})" if bits else "")
 
 
+def _verb_extra(here, v, args, doc):
+    """What a world's settings add to a verb's line: naming things by their tags (D4-68), setting off in the morning (D4-67)."""
+    if v == "name" and here.setting("tags"):
+        args = args[:-1] + ', or "thing": a tag (H2, T5) and "as": the name you give it}'
+        doc += ("; or give a group of beasts or a thing a name of your own: you, everyone here and your household will know it by "
+                "that name, and can use it in place of the tag")
+    if v == "travel" and here.setting("evening"):
+        args = args[:-1] + ', "when"?: morning | nightfall}'
+        doc = ("leave at nightfall (the default: you work the day, sleep out on the road, and arrive the next day at midday with half "
+               "your units) or in the morning (\"when\": \"morning\", as your first act: you walk all day and arrive by nightfall, "
+               "with no night out on a one-day road). On the road you decide nothing unless something happens (trouble, a meeting, a "
+               "find); what you choose here is what you do if the road gives trouble, and whether you stop for others you meet (pass "
+               "by: you go on without a word)")
+    return args, doc
+
+
+def evening(w) -> bool:
+    """The day with an evening at the hearth (D4-65 to D4-67): a world turns it on with `evening: true`."""
+    return bool((w.spec or {}).get("evening"))
+
+
 def verb_lines(here, mind) -> str:
     out = []
     for v, d in V.VERB.items():
@@ -127,7 +155,9 @@ def verb_lines(here, mind) -> str:
         n = V.verb_units(here.p, v)
         cost = ("the units you choose" if V.VERB[v]["cost"] == "units" else "the craft's units") if n is None else \
             ("free" if n == 0 else f"{n} unit{'s' if n > 1 else ''}")
-        out.append(f"- {v} {d['args']}".rstrip() + f": {d['doc'].replace('{crafts}', '; '.join(crafts))}".rstrip(": ") + f" ({cost})")
+        args, doc = d["args"], d["doc"]
+        args, doc = _verb_extra(here, v, args, doc)
+        out.append(f"- {v} {args}".rstrip() + f": {doc.replace('{crafts}', '; '.join(crafts))}".rstrip(": ") + f" ({cost})")
         mods = MOD.lines(mind, v, place=True) + [x for t in TECHNIQUES if TECHNIQUES[t]["verb"] == v for x in MOD.lines(mind, v, t)]
         if mods:                                                               # the ways of doing it one knows (D2-93)
             out.append("  ways: " + "; ".join(dict.fromkeys(mods)))
@@ -298,6 +328,11 @@ def system_prompt(here, mind) -> str:
               "learns faster).",
               "- What you notice: each morning you hear what concerned you and what stood out the day before. You see one thing "
               "closely each day, whatever you chose to attend to; the rest you only glimpse."]
+    if here.setting("evening"):                                                 # the day's shape with an evening (D4-65 to D4-67)
+        lines.append("- The day: in the morning you plan the day's work; a private word you send then can be answered once before "
+                     "work. In the evening you are with those you sleep under one roof with: you see how your day went, talk freely "
+                     "with them (it costs nothing), and settle the night (where you sleep, whom you let in, trying for a child, setting "
+                     "off at nightfall). Calling out to everyone at the place costs a unit of work.")
     if len(mind.places()) > 1:
         lines += ["", f"Other places, as you know them (only what is carried goes between them; a night out costs "
                   f"{p['shelter']['unsheltered']:g} meals, {p['shelter_cold']['unsheltered']:g} in the cold, unless someone takes you in; "
@@ -422,6 +457,8 @@ def turn_prompt(here, mind, opening=True) -> str:
     you = [f"You are {STAGES[a['hunger']]}" + (", and hurt" if a["wounded"] else "") + f". You carry: {hold}"
            + (f" (weight {show(here.load())} of the {here.capacity():g} you can travel with"
               + (f", {here.capacity(True):g} on a road with a track" if here.capacity(True) > here.capacity() else "") + ")" if here.roads() else "") + "."]
+    if here.age_line():                                                        # one's age and what lies ahead (D4-69)
+        you.append(here.age_line())
     beasts = [f"Leading: {nm} ({'it carries ' + format(HERDS['pack_ox']['carry'], 'g') + ' for you on the road; ' if ox else ''}it stays "
               "with you until you turn it out: drive {thing, to: a pasture here}; set off without leading it and it is left here)."
               for _, nm, ox in here.led()] + _beast_lines(here, mind)
