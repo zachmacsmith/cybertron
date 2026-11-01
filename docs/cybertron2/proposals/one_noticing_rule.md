@@ -49,6 +49,8 @@ spec/information/noticing.md (written: D4-53); perception.py, signs.py, data.EVE
 - 24 Oct: after c6, Zach asked why any sign does not follow the rule, and whether events have locations, with their extents; built
   that day (signs.facts gives every bundle a spot; perceive reads events by the rule with an extent; things.spot_chance takes those
   inside and the whole node), written down here afterwards: retrospective, accepted D4-53.
+- 2 Nov 2026: extended by D4-75 (proposals/every_line_by_the_rule.md): every perceived line, not only signs and events, takes its
+  chance from this rule; sound and smell carry by steps in the parcel graph; reach becomes shorthand for the rule's inputs.
 
 ## Sources
 

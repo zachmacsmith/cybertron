@@ -21,6 +21,7 @@ the crafts of the lines born there.
 - D4-50: how bare a place is, is a sign like any other; some notice only by failing.
 - D2-85, D2-91, D2-102: things at a spot are noticed by one rule (information/noticing.md); the eye for the land is one knack,
   raised by practice at roaming work and by finds.
+- D4-75: every perceived line about the world comes from the one noticing rule (information/noticing.md).
 
 ## Mechanics
 
@@ -37,6 +38,10 @@ the crafts of the lines born there.
   carries several possible signs. Each sign has a sense, a base chance of being noticed, a condition on the state and on what else
   is there (who worked there today, beasts near, the season, the cold), and may have a knack: the work whose practice makes one read
   it more often. Each observer rolls for each sign separately; attention to a thing raises the chances.
+- **One rule for every line** (D4-75): the daily notice, what concerns one, dawn lines, the attended subject and the place in
+  general, what one worked on, glimpses of others, feeling watched and road notices all take their chance from the one noticing
+  rule (information/noticing.md); attention is its attention factor, not a listing. One's own body, carriage and units are shown
+  directly, and what was said lives in the conversation: neither is a sense.
 - **How bare a place is** (D4-50): wild food, game and standing timber running out show as signs whose chance grows with how
   bare the place is. Each person has an eye for the land (none, ordinary or keen), drawn once and raised a step by practice at
   roaming work and by finds (D2-91); those with none learn it only by working the place and finding nothing. What one has seen or found (and when) shows in one's own description of the place; trying a bare place tells
@@ -68,4 +73,4 @@ lately".
 
 38.02; proposals/place.md, knowledge.md, seeing.md.
 
-*Current as of 24 Oct 2026: H-7, D2-4, D2-29, D2-85, D2-91, D2-102, D4-6, D4-33, D4-35, D4-47, D4-48, D4-50, D4-73 (2 Nov).*
+*Current as of 2 Nov 2026: H-7, D2-4, D2-29, D2-85, D2-91, D2-102, D4-6, D4-33, D4-35, D4-47, D4-48, D4-50, D4-73, D4-75.*

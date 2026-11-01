@@ -22,6 +22,7 @@ Written by 37.2 at Zach's request (23 Oct), from proposals/things_in_places.md, 
 - D2-102: a thing's conspicuousness is its own x the place's sight.
 - D4-53: every sign and event by this one rule, each reaching as far as what it is.
 - D2-115: presence along the way and next door (world/parcel_graph.md).
+- D4-75: every perceived line about the world comes from this one rule; sound and smell carry by steps in the parcel graph.
 
 ## Mechanics
 
@@ -70,6 +71,51 @@ capped at 1. What is noticed shows through its signs (D4-48).
 | a hidden way's end | 0.03, rising with use (world/roads.md) |
 | hidden under brush | x0.2 (untaught x0.4) |
 | buried | x0.03 (untaught x0.06) |
+
+### Every perceived line by the one rule (D4-75)
+
+- **What goes through it:** every line about the world outside oneself: signs at a spot (crops, fields, herds, buildings, people,
+  events and their aftermath), signs of things, events, what concerns one, dawn lines, the attended subject, the place's ambient
+  lines when attending the place, what one worked on, glimpses of others, feeling watched, and notices on the road. What one knows
+  of one's own body, carriage and units is shown directly; what was said lives in the conversation; neither is a sense.
+- **The chance:** a sign's base chance (its row's `p`, 1 unless set) x own x visibility for its sense x presence x attention x the
+  eye, capped at 1 only after the base chance. A sign row sets how plain it is (`own`; above 1 for what is plain from far off), its
+  sense, its conditions and its scope (who reads it at all: the doer, the others, those inside); never a final chance.
+- **Sound and smell carry:** presence for them is at least the carry for the number of steps in the parcel graph from where one was
+  that day (the parcels one worked or crossed, one's spot) to the sign's parcel, times the sense's visibility (cover, weather, the
+  night, masking). Touch reaches only where one is.
+- **Visibility:** sight and sound by the cover, the land's state and the weather (environment/visibility.md); at night sight x0.1
+  and sound x1.2 (signs sensed in the dark); smell and touch x1. A sound of own 1 or more is not masked by louder ones. Signs open to
+  everyone at the place take the open air's visibility for their sense; signs about the sky and the weather itself take none.
+- **The eye** (D2-91) multiplies sight only.
+- **Reach**, a row's shorthand for its rule inputs: **near**, a close look: the spot itself, attention x2; **around**: the spot and
+  next door.
+- **Those always there:** those who live in a house read its signs, and a household its members', with presence 1 and no
+  visibility; a thing in one's own house (or left at its door) with attention x3.
+- **Attention:** attending to a place x3, searching it x5 (as before); a subject one attends to (a person, a house, a herd) is sought
+  out: presence at least 0.5 and attention x5; the place in general: its ambient lines, the same way (up to 4); what one worked on
+  that day is read with attention x3 (up to 4 lines a parcel, into one's beliefs).
+- **What concerns one:** read in full (presence 1) when it happened to one or in one's own house; otherwise by the rule.
+- **Glimpses:** where others spent the day, by the rule, a person at work being own 2; one's household always.
+- **On the road:** presence 1 on one's stretch; visibility by the terrain and the weather for each sign's sense; the road underfoot
+  and the weather on it are read as one is in them.
+- **In the night:** a sign sensed in the dark is read from where one sleeps (the house's parcel, else where one was), with the
+  night's visibility.
+- **A theft seen** (settle): one slipping into a house is own 0.4; those of the house at home read it inside; one attending the house
+  or the place seeks it out. **Woken by a break-in** (fuse, D2-81): the watcher's, the dog's and the walls' values are own, read
+  inside; a neighbour's own is 0.3, read by the night's sound and steps from where they sleep.
+
+| Factor (D4-75) | Value | Status |
+|---|---|---|
+| carry, sound (steps 0, 1, 2, 3, further) | 0.5, 0.45, 0.2, 0.1, 0.05 | calibrate |
+| carry, smell | 0.5, 0.3, 0.12, 0.05, 0 | calibrate |
+| touch reaches | the spot only | decided |
+| attention: close look, own house, subject, working | x2, x3, x5, x3 | calibrate |
+| a loud sound (not masked) | own 1 or more | calibrate |
+| a person at work (glimpses) | own 2 | calibrate |
+| one slipping into a house (a theft) | own 0.4 | calibrate |
+| a break-in heard by a neighbour | own 0.3 | calibrate |
+| night | sight x0.1, sound x1.2 (D2-99) | calibrate |
 
 ### Traces (D2-88)
 
@@ -124,4 +170,4 @@ Things they notice, as signs in their daily notice ("a pack lies under the hazel
 [proposals/things_in_places.md](../../proposals/things_in_places.md), [journeys.md](../../proposals/journeys.md),
 [hidden_ways.md](../../proposals/hidden_ways.md), [visibility.md](../../proposals/visibility.md).
 
-*Current as of 24 Oct 2026: D2-85, D2-86, D2-88, D2-89, D2-91, D2-97, D2-98, D2-102, D2-115, D4-53, D4-70 (2 Nov).*
+*Current as of 2 Nov 2026: D2-85, D2-86, D2-88, D2-89, D2-91, D2-97, D2-98, D2-102, D2-115, D4-53, D4-70, D4-75.*

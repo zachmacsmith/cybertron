@@ -2,7 +2,7 @@
 
 For any session or agent asked to add or change what people in a world can sense. Read it before touching
 `cybertron2/engine/signs.py`. Decided rules are in the spec (information/signs.md, noticing.md, perception.md) and DECISIONS.md
-(D4-6, D4-48, D4-53, D4-59, D4-70, D4-71); this guide is how to apply them well, with the evidence behind it.
+(D4-6, D4-48, D4-53, D4-59, D4-70, D4-71, D4-72, D4-74, D4-75); this guide is how to apply them well, with the evidence behind it.
 
 ## What senses are for
 
@@ -40,14 +40,20 @@ about the world reaches it through the senses**, as beliefs with a date. Senses 
    Forecasts were ignored here too: a fact the agents had no way to act on in these worlds.
 3. **It tells a change, not a standing fact.** What a building has, where a field lies, how big it is: that belongs in the place's
    layout ("Here, as you see it"), shown once. A sign is for what is different now.
-4. **It comes as a bundle** (D4-48). One state, several signs across senses, each with its own chance, reach and conditions: the
+4. **It comes as a bundle** (D4-48). One state, several signs across senses, each with how plain it is, its conditions and scope: the
    obvious one near (the sight of it), fainter ones further off (the sound, the smell, the crows over it), and signs of its
    aftermath on later days. Different people then notice different things, which is what gives them something to tell each other.
-   The slaughter bundle (D4-71) is the worked example.
-5. **Its chance fits how plain it is.** The one noticing rule (D4-53): own conspicuousness x the parcel's visibility for the sense x
-   presence (worked there, passed through, next door) x attention x the eye. Set `p` so that what would be hard to miss is near
-   certain for those there (a slaughter, a body, a fire), and what is easy to miss stays rare (a trace, a thing under brush). Hidden
-   things go through `hidden` (taught or untaught), not lower prose.
+   The slaughter bundle (D4-71, below) is the worked example; "The four kinds of sense" says which signs a bundle needs.
+5. **Its chance comes from the one rule, never from the row** (D4-53, D4-75). Every perceived line about the world takes its
+   chance from the noticing rule: the row's base chance (1 unless set) x own x the visibility for its sense (cover, weather, the
+   dark, masking) x presence (where one was that day, or slept; for sound and smell, steps in the parcel graph) x attention x the eye
+   (sight only). **Always build bundles this way:** a row gives how plain the thing is (`own`; above 1 for what is plain from far off,
+   like a glow or a bellow), its sense, its conditions (`when`) and its scope (`who`: the doer, the others, those inside); the rule
+   gives the chance. `reach` is only shorthand for the rule's inputs (near: a close look at the spot; around: the spot and next
+   door); `night=True` marks a sign sensed in the dark. Then **check the outcome** against the chances you intend for typical cases
+   (on the parcel, next door, across the place; clear, fog, night) and adjust the inputs (`own`, and if it is general, the factors in
+   `data.NOTICING`), never the result. Hard to miss should come out near certain for those there in clear daylight; easy to miss
+   rare. Hidden things go through `hidden` (taught or untaught), not lower prose.
 6. **It is concrete and in-world.** One sentence, in the words of someone who saw, heard, smelt or felt it ("the ears rub out hard in
    the hand"). Numbers only where people count (meals, days, head of cattle); judgements as judgements ("about 5 days"). Name things
    by their in-world names, and tagged things with their tag (D4-68).
@@ -56,24 +62,72 @@ about the world reaches it through the senses**, as beliefs with a date. Senses 
 8. **It stays quiet when nothing matters.** Ambient lines cost reading and are ignored. Keep their chance low, or let the "Now"
    section (the day and the weather, which anyone awake there senses) carry them.
 
+## The four kinds of sense
+
+A thing that happens can show itself four ways (Zach, 2 Nov). Not every event needs all four; use those that fit, and say in the
+bundle's comment which it gives. Each maps onto the rule:
+
+1. **To the doer, as they do it:** felt or bodily, and only what the result line does not already say; scope `who="doer"`, usually
+   touch (which reaches only where one is). Example (SLAUGHTER): "the cow kicked as it went down, and its blood ran hot over your
+   hands: you are red to the elbows and stink of it".
+2. **To those nearby as it happens:** by presence and distance; sound and smell carry by steps, the far, faint ones (sound, smoke,
+   a glow) reach the whole place. Example (FIRE): "a glow over Hale House in the night, flames through the thatch" (own 3, its own
+   light) and "the roar and crack of fire from Hale House in the night" (`night=True`, carries).
+3. **Lingering traces afterwards:** on later days, fading: the row's `when` reads the days since (`x.age`). Example (FIGHT): "the
+   ground by the Green is scuffed and trampled, with dark spots of blood on it", that day and the next.
+4. **Conditional:** a sign that exists only under certain circumstances, in its `when`: snow, rain, frost, the dark, dogs kept, a
+   door, who is inside. Example (SLAUGHTER): "blood in the snow on the Common, trodden pink where a beast was killed" (only when snow
+   lies).
+
+### Worked example: the slaughter bundle (D4-71, D4-75)
+
+Intended chances first, then `own` set until the rule gives them (ordinary eye; the valley: the Common Pasture, the Green next
+door, Long Field two steps off, Alder Copse three):
+
+| Sign | Sense | Own, reach, scope | Intended | Actual: on it / next door / two / three (clear) | Fog | Night |
+|---|---|---|---|---|---|---|
+| who killed which beast | sight | 1.0, near, others | certain on the parcel | 1.0 / 0 / 0 / 0 | 0.3 | 0.1 |
+| the butchering | sight | 0.8, near, others | likely on it | 0.8 / 0 / 0 / 0 | 0.24 | 0.08 |
+| the smell of guts | smell | 1.8, around | on it and beside it | 0.9 / 0.54 / 0 / 0 | same | same |
+| the bellow | sound | 2.0, others | near certain beside it, about 0.4 across the place | 1.0 / 0.9 / 0.4 / 0.2 | same | x1.2 |
+| the blood over one's hands | touch | 2.0, doer | certain for the doer | 1.0 (the doer) | same | same |
+| the herd uneasy | sight | 0.38, herder's knack | now and then | 0.19 / 0 / 0 / 0 | 0.06 | 0.02 |
+| crows over the leavings | sight | 0.9 | sometimes, from far rarely | 0.45 / 0.09 / 0.05 / 0.05 | 0.14 | 0.05 |
+
 ## Checklist for adding a bundle
 
 1. Find the state: which fields change, when, and who could be near (`here.events()`, the containers, the herds, the parcels).
-2. Read how a similar bundle is built in `signs.py` (the same dict shape: `when`, `sense`, `p`, `reach`, `tags`, `text`) and its
+2. Read how a similar bundle is built in `signs.py` (the same dict shape: `when`, `who`, `own`, `sense`, `reach`, `night`, `tags`,
+   `text`; no `p` on a new row) and its
    context builder (`thing_context`, `herd_context`, the building and person contexts). Add any state the conditions need the way
    similar systems do, deterministic and replay-safe.
-3. Write 3 to 6 signs across senses: the plain one near, the far ones, the aftermath. Check each against "What makes a good sign".
-4. Test: a focused test that the bundle reaches those it should (near: near certain; far: rarer), then the whole cybertron2 suite
+3. Write 3 to 6 signs across senses, by the four kinds that fit (to the doer, nearby, lingering, conditional). Give each an `own`,
+   never a chance. Check each against "What makes a good sign".
+4. Calibrate: compute each row's chance through `perceive.chance_of` for typical cases (on the parcel, next door, across the place;
+   clear, fog, night) and adjust `own` until they land where you intend; write the table into the bundle's proposal.
+5. Test: a focused test that the bundle reaches those it should (near: near certain; far: rarer; fog or night lowering sight, not
+   sound; lingering; conditional), then the whole cybertron2 suite
    (`python3 -m pytest -q tests/ -k cybertron2 -p no:cacheprovider`), then a short bot run and its replay with no mismatches.
-5. Record: a proposal (or a retrospective one if built at Zach's request), a DECISIONS row, the spec line in
+6. Record: a proposal (or a retrospective one if built at Zach's request), a DECISIONS row, the spec line in
    information/signs.md, an outcome-log row (CLAUDE.md, "The path of an idea").
 
 ## Known gaps
 
-The ranked audit of events and states with thin or no signs is review 38_space_engine/43_sign_audit.md (18 items; the first: night
-fights, a hunting kill, a house fire, a birth in the night, food rotting in a house, a guard posted, beasts driven, a weapon made).
+The audit (review 38_space_engine/43_sign_audit.md) is built (D4-74): bundles for fights and raids in the night, a hunting kill, a
+house fire, a birth, food rotting in a store, a guard posted, beasts driven, things made, sleeping out, ploughing and reaping,
+quarrying, a theft, calving, a house breaking or mended, a burial, milking and minding. Still open:
+
+- **Old age and illness:** the engine holds no illness before a death ("a sudden illness" is only a cause), so nothing can show it;
+  old age shows only as "failing". An engine gap first.
+- **A threat:** it leaves no trace; its event line is read by the rule. A sound of it would put cries in a mouth that did not choose
+  them (D4-72).
+- **A raid as it happens** reaches only those fuse wakes (by the rule since D4-75); neighbours who are not woken get nothing until
+  the gouges at the door next morning.
+- **Smell** has no visibility (D2-101): rain and wind do not touch it.
+- **The sky** is not lowered by the weather it describes; whether fog should hide other sky lines is open.
+
 Fixed while writing this guide (D4-72): the bereavement signs and "short with everyone" removed; signs about a building's dwellers
-limited to buildings with beds. The slaughter bundle (D4-71, proposals/slaughter_signs.md) is the worked example of a bundle.
+limited to buildings with beds. Every line by the one rule: D4-75 (proposals/every_line_by_the_rule.md).
 
 ## Sources
 

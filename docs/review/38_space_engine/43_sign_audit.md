@@ -1,3 +1,5 @@
+Built since: every item below has a bundle or a stated reason it has none (D4-74, proposals/sign_bundles.md); the chances now come from the one noticing rule (D4-75, proposals/every_line_by_the_rule.md), so the fixed chances by reach in "What was added" are history.
+
 # 38.43: what shows itself, and what does not (a sign audit)
 
 Session 37.4, 2 Nov 2026. After the paired Combe run (38.42), where the family slaughtered a calf, two cows and an ox and nobody saw
@@ -98,6 +100,33 @@ Ranked by how hard the thing would be to miss in life, how much it matters to ot
     illness before it, so nothing can show (an engine gap, not a sign gap).
 17. **A threat** (verbs.py:949). One sight line, node-wide; no raised voices. State: today's fights.
 18. **Milking, herding, caring for a child.** No signs; routine, low.
+
+## Built (2 Nov, D4-74)
+
+| # | Item | Built (kinds: doer, nearby, lingering, conditional) | State read or added |
+|---|---|---|---|
+| 1 | night fights; raids | FIGHT: knuckles (doer); blows in the dark, shapes struggling (nearby, night); scuffed and bloodied ground (lingering); snow, blood, dogs (conditional). RAID: gouges at the door, the store gone through (lingering); footprints in snow | parcel `fight`, building `raided` (added) |
+| 2 | a hunting kill | HUNTED: the weight (doer); the gutting (nearby); crows, the smell next day, the hunter bloodied (lingering); snow, warmth | parcel `hunted` (added) |
+| 3 | a house fire | FIRE: glow, roar, smoke inside (nearby); burnt thatch, ash smell (lingering); rain or snow through the roof | building `fire_hit` (added) |
+| 4 | a birth | BIRTH: a newborn's cry (nearby, night); the mother from childbed (lingering, PERSON) | the birth event; the child's `born` |
+| 5 | food rotting in a store | BUILDING: the stink (nearby); flies (near); not in frost | the store's rotting goods |
+| 6 | a guard posted | GUARD: the long night (doer); the watcher at the door (nearby, night); heavy-eyed (PERSON); weapon, frost | person `guarded` (added) |
+| 7 | beasts driven | DRIVEN: hooves and lowing, the drover (nearby); hoof-marks (lingering); wet ground | herd `driven` (added) |
+| 8 | a weapon made | BUILDING: woodwork heard, a club or spear shaped, hides stitched (nearby) | the day's make events |
+| 9 | sleeping out cold | PERSON: stiff with cold, soaked, roofless (lingering); frost, rain | person `slept_out` (added) |
+| 10 | ploughing and reaping | FIELD, CROP: plough and team, hoes, sickles, birds, swathes (nearby); frozen clods, rain on sheaves | the day's work events |
+| 11 | quarrying and mining | WILD: picks, spoil (nearby) | the day's work events |
+| 12 | theft from a store | THEFT: the store lower (lingering, those inside); snow footprints, mud on the floor | building `theft` (added) |
+| 13 | calving | HERD: lowing to the calf (nearby); the afterbirth (lingering); the calf steaming in the cold | `last_calf` |
+| 14 | a house falling in; mended | BROKE: the crack in the night (nearby); the roof in, a crack in the wall (lingering); how far it went. BUILDING: mallets | building `broke` (added); repair events |
+| 15 | a burial | BURIAL: frozen ground or the weight (doer); the grave dug, a spade (nearby); frost | the day's bury events |
+| 16 | old age, illness | left out: no illness state before a death; old age already shows as "failing" | (engine gap) |
+| 17 | a threat | left out: no trace, and a sound would put cries in a mouth that did not choose them (D4-72); its event line is read by the rule | |
+| 18 | milking, herding, care | HERD: milk into a pail, someone minding the herd; PERSON: a child kept close (nearby) | `milked`, `watched`, the day's care |
+
+Checked in two scripted bot runs (combe_evening 30 days, valley_s5 20 days, with a slaughter, hunts, a guard, drives, fights, a raid,
+a theft and a fire scripted), both replayed with no mismatches; the new lines were noticed (for example in the valley: the scuffle 3
+times, gutting 5, the glow 3, gouges at the door 3, the store lower 3, slept out 8).
 
 ## Sources
 

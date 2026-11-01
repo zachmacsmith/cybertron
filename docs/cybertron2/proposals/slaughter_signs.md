@@ -68,6 +68,10 @@ things.py (`near_spot`), perceive.py (reach for spot signs; `only` respected in 
 
 - 2 Nov 2026: built at Zach's request after the paired run's slaughters showed nothing to anyone; written down after (retrospective).
   The audit of other thin signs is review 38.43.
+- 2 Nov 2026: the mechanism changed by D4-75 (proposals/every_line_by_the_rule.md): the reach rows with fixed chances became own
+  values read by the one noticing rule, calibrated to the same typical chances (the kill certain on the parcel in clear daylight,
+  the bellow about 0.9 next door and 0.4 two steps off); fog and the dark now lower the sight of it. The rows are in spec
+  information/signs.md.
 
 ## Sources
 
