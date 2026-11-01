@@ -51,6 +51,19 @@ without interrupting them.
 - D4-66: the evening's acts are those that take no work and answer the day's requests or take effect tonight (core/round.md).
 
 
+### Meetings, and the memory at the evening (D4-77)
+
+- `meet {"at": a building or a place here, "about"?}` (free; in the evening or the day's plan) calls a meeting for the next
+  morning. Everyone at the place is shown it in their morning message. Those whose plan holds `come` (a unit) meet after the talk
+  step and before work: up to three rounds, each asking all present at once with what was said before; it ends early when a round
+  says and offers nothing. Speech there is heard by all present and costs nothing; an offer made there is written into each one's
+  lasting memories as witnessed; each may give their whole plan again.
+- On the last day of a stretch, the memory request (information/memory.md) is asked at the evening call, not in a call of its own.
+- `evening: plan`: the evening reply's acts beyond the night's are tomorrow's plan (with its fallback); at dawn one is asked again
+  only if a sign at dawn or something concerning one came, one's household had a birth, a death or a missed meal in the night, or a
+  meeting is called; otherwise the plan is done as made, and what the morning would have shown is put at the head of that evening's
+  message.
+
 ## Parameters
 
 | Parameter | Value | Status |
@@ -60,4 +73,4 @@ without interrupting them.
 | private messages a day | 3 plus a jitter drawn once per person (weights 37, 37, 18, 8 for +0 to +3), at most 10 | decided (D4-31: cybertron 1's) |
 | work for speaking aloud | 1 unit a say | decided (D4-31) |
 
-*Current as of 2 Nov 2026: D2-7, D4-15, D4-25, D4-30, D4-31, D4-65, D4-66.*
+*Current as of 2 Nov 2026: D2-7, D4-15, D4-25, D4-30, D4-31, D4-65, D4-66, D4-77.*

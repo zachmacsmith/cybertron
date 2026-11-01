@@ -282,3 +282,5 @@ Newest first. Ideas decided or rejected in conversation before 23 Oct are backfi
 | 2 Nov | Taking from a place is a search (built, then written down) | retrospective, accepted: D4-70 | [search_on_take.md](search_on_take.md) |
 | 2 Nov | A slaughter shows itself (built, then written down) | retrospective, accepted: D4-71 | [slaughter_signs.md](slaughter_signs.md) |
 | 2 Nov | No invented acts in signs; one's beasts kept short (built, then written down) | retrospective, accepted: D4-72, D4-73 | [sign_rules.md](sign_rules.md) |
+| 2 Nov | A fallback each person sets (built, then written down) | retrospective, accepted: D4-76 | [fallback.md](fallback.md) |
+| 2 Nov | The evening's add-ons: meetings, memory at the evening, plan at the hearth | accepted: D4-77 | [speech_order.md](speech_order.md) |

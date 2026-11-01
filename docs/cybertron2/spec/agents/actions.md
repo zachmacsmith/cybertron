@@ -34,4 +34,11 @@ the world, not from a complete manual. Moving house is one of the things agents 
 
 proposals/verbs.md, proposals/knowledge.md; 38.06.
 
-*Current as of 24 Oct 2026: D4-24, D4-29, D4-32, D4-35, D4-36, D4-37, D2-93, D2-94, D2-96, D2-111, D2-112.*
+## Fallback (D4-76)
+
+A reply may give `fallback`: acts for units left over once the plan is done (an act refused, a resource run out, a plan too short).
+They are done in order, again and again, until the units are used or none of them can be done. Free acts and travel are not taken as
+fallback.
+
+
+*Current as of 2 Nov 2026: D4-24, D4-29, D4-32, D4-35, D4-36, D4-37, D2-93, D2-94, D2-96, D2-111, D2-112, D4-76.*

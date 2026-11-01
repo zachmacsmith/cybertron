@@ -1,6 +1,6 @@
 # When people talk, and what it costs: by reach, with an evening at the hearth
 
-**Status:** partly accepted: D4-65, D4-66 (2 Nov)
+**Status:** accepted: D4-65, D4-66, D4-77 (2 Nov)
 **Owner:** 37.4
 
 ## Summary
@@ -112,6 +112,9 @@ information/prompts.md.
   called for the day (point 5), the memory request folded into the evening (point 6), planning tomorrow at the hearth (point 7),
   and the day's sightings shown at the hearth (they still reach the next morning, since noticing runs after the night); open in
   OPEN.md.
+- 2 Nov 2026: Zach: "Add the evening add ons". Built as D4-77: meetings called for the next morning (point 5, with `meet` and
+  `come`), the memory request at the evening (point 6), the plan made at the hearth as a world setting (point 7, `evening: plan`).
+  Still open: the day's sightings at the hearth (needs noticing to run before the evening; after the noticing rework, D4-74).
 
 ## Sources
 
