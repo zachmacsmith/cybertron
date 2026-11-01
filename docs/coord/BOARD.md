@@ -793,3 +793,7 @@ sentence"}`; one line a child a day, the carer giving the most food that day pas
 kept memory (up to a limit). Customs become kept lines seeded only to those alive at a world's start (D4-57 replaced). Your flagged
 beliefs_and_values.md (L-25) is in part decided by it. OPEN Q-K1: is the food given at care the child's to eat that night (as
 written)? Say if you see it differently.
+
+**2026-11-01 · 37.4:** D4-64 built (wp/cybertron2). Care now takes `item`, `qty`, `pass`; at nightfall the largest care's food is all
+the child's, and that carer's sentence becomes its kept line (life.care_gifts, before eating). Customs in world files now seed kept
+lines (perceive.seed_knowledge), not "What you remember". Reply schema gains `keep`, `drop` (memory request) and `pass` (care).
