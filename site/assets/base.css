@@ -1,7 +1,7 @@
 /* Cybertron v2: shared tokens, base type, the site header and footer, and the shared building blocks (sign headings, navy
    panels, pixel buttons). Every page links it; chrome.js adds the header and footer. Pages sit on the sand ground unless
    their body has .night (the navy sky) or .indoor (a warm interior, for reading an agent). */
-@import url("https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Pixelify+Sans:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Pixelify+Sans:wght@400;500;600;700&family=Press+Start+2P&display=swap");
 /* Numbers: Pixelify's digits are hard to read (its 5 looks like an S), so every pixel-font stack starts with "Cyber Digits",
    which is Nunito for the digits 0-9 only. */
 @font-face { font-family: "Cyber Digits"; font-style: normal; font-weight: 400 800; font-display: swap;
@@ -122,3 +122,12 @@ code, pre { font-family: var(--f-mono); }
 
 /* page grounds */
 body.night { background: var(--sky0); color: var(--cream); }
+
+/* Cybertron 1 is archived: a slim note under the header on every page. */
+.archive-note { background: rgba(27, 36, 68, 0.85); color: var(--cream-dim); font-size: 14px; line-height: 1.4; text-align: center;
+  padding: 6px 0; border-top: 1px solid var(--far-shade); }
+
+/* The wordmark ("Cybertron 1") uses Press Start 2P: Pixelify Sans's capital C reads as an O. */
+.wordmark, .brand span { font-family: "Press Start 2P", var(--f-pixel); font-weight: 400; letter-spacing: 0; }
+.brand span { font-size: 18px; }
+.site-head .archive-note .wrap { justify-content: center; min-height: 0; padding-top: 0; padding-bottom: 0; }

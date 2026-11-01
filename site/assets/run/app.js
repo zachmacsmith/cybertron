@@ -62,7 +62,7 @@ function go(patch) {
 const ctx = { S, D, F, row, st, href, go, R1, LAST, TOTAL, tip: $("#tip"), loadReasoning: (agent) => loadReasoning(row, agent) };
 
 // ------------------------------------------------------------------ masthead
-document.title = `${row.title} · Cybertron`;
+document.title = `${row.title} · Cybertron 1`;
 $(".run-title").textContent = row.title;
 $(".spec").textContent = `${row.spec} · seed ${row.seed ?? (row.run_id.match(/seed(\d+)/) || [])[1] ?? "?"} · ${S.agents.filter((a) => a.cls !== "observer").length} villagers`;
 $(".standfirst").textContent = row.description || "";

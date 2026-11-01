@@ -2,7 +2,9 @@
 // Also: a run's cast (agents, camps, observer) without downloading the whole viewer.json, for drawing its village.
 import { villageCfg } from "./scene.js";
 
-export const HF = "https://huggingface.co/datasets/zachmacsmith/charter-runs/resolve/main";
+// Pinned to the Cybertron 1 release of the dataset, so later uploads never change this site.
+export const DATASET_REV = "v0.17.1";
+export const HF = `https://huggingface.co/datasets/zachmacsmith/charter-runs/resolve/${DATASET_REV}`;
 export const DATA = new URLSearchParams(location.search).get("data") === "local" ? new URL("../_data", import.meta.url).href : HF;
 export const getJson = (url) => fetch(url).then((r) => { if (!r.ok) throw new Error(`${url}: ${r.status}`); return r.json(); });
 export const catalog = () => getJson(`${DATA}/catalog.json`).then((c) => c.runs || []);

@@ -3,9 +3,9 @@
 /* ------------------------------------------------------------------ hero */
 .hero { position: relative; overflow: hidden; height: min(92vh, 780px); min-height: 560px; background: var(--sky0); color: var(--cream); }
 .hero-sky { position: absolute; left: 0; top: 0; height: 100%; }
-.hero-copy { position: relative; z-index: 2; padding-top: clamp(96px, 15vh, 150px); text-align: center; }
+.hero-copy { position: relative; z-index: 2; padding-top: clamp(128px, 17vh, 170px); text-align: center; }
 .hero .label { color: var(--cloud0); text-shadow: 2px 2px 0 var(--ink); font-size: 16px; }
-.hero h1 { font-size: clamp(50px, 14vw, 176px); font-weight: 700; line-height: 0.95; margin: 10px 0 18px; color: var(--cream);
+.hero h1 { font-size: clamp(28px, 7.4vw, 92px); white-space: nowrap; font-weight: 700; line-height: 0.95; margin: 10px 0 18px; color: var(--cream);
   text-shadow: 0.05em 0.05em 0 var(--ink); letter-spacing: 0.02em; }
 .tagline { font-size: 20px; line-height: 1.55; font-weight: 600; max-width: 34em; margin: 0 auto 26px; color: var(--cream);
   background: var(--sky0); padding: 12px 20px; box-shadow: 0 -4px 0 var(--sky0), 0 4px 0 var(--sky0), -4px 0 0 var(--sky0), 4px 0 0 var(--sky0); }
@@ -29,7 +29,7 @@
 
 @media (max-width: 720px) {
   .hero { height: auto; min-height: 640px; }
-  .hero-copy { padding-top: 132px; padding-bottom: 210px; }
+  .hero-copy { padding-top: 232px; padding-bottom: 210px; }
   .hero .label { font-size: 14px; }
   .tagline { font-size: 16px; padding: 10px 14px; }
   .villager .say { font-size: 13px; }
@@ -109,3 +109,5 @@
 .code { margin: 16px 0 0; background: #121933; color: var(--cream); padding: 16px; font-size: 13.5px; line-height: 1.6; overflow-x: auto; white-space: pre; }
 .code .c { color: #9ccfe0; }
 .loading { color: inherit; opacity: 0.7; font-family: var(--f-pixel); }
+
+.hero h1.wordmark { font-weight: 400; letter-spacing: 0; }
