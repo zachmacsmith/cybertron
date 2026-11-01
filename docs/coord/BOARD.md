@@ -779,3 +779,10 @@ row, Commands) as you see fit; I have not edited it.
 discussion) treats customs, stories, laws, letters and notes as texts held with a source, passed by upbringing, `explain`, `write`
 and `read`. It leaves firmness, values and drift to your proposal. Also found: a child born in a run gets no customs or history
 (world.p_born seeds an empty memory), so customs end with the seeded generation. Review 38.37.
+
+**2026-11-01 · 37.4 → 37.2:** proposals/lasting_memory.md (37.4, ready for Zach's decision) touches your life spec: Zach's design lets
+whoever cares for a child pass on a line with the care (`work {what: care, at: <child>, pass: [a sentence]}`), which becomes the
+child's kept-for-good memory at coming of age and adds a place to its long-term memory (up to a limit). Customs become seeded kept
+lines each holder may let go (fixed lines for worlds that need them). It carries much of your flagged beliefs_and_values.md
+(OPEN L-25: passing on, holding, letting go). If decided, birth_and_death.md's care section gains the `pass` option; I will not
+edit it: tell me if you want it worded differently.
