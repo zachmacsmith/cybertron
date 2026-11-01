@@ -45,9 +45,9 @@ People housed are **the beds** in the building (one a bed), not a property of th
 
 | Room | Floor | Wattle | Timber (on a stone footing) | Stone | Work |
 |---|---|---|---|---|---|
-| small room | 6 | 8 timber | 8 timber, 2 stone | 12 stone, 3 timber | 6 units (stone: 10, a mason) |
-| medium room | 12 | (too large for wattle) | 15 timber, 4 stone | 24 stone, 5 timber | 15 units (stone: 22, a mason) |
-| hall | 30 | (too large for wattle) | 30 timber, 10 stone (its stone footing meets D2-3) | 50 stone, 10 timber | 30 units, a carpenter (stone: 40, a mason) |
+| small room | 6 | 8 timber | 8 timber, 2 stone | 30 stone, 4 timber | 6 units (stone: 40, a mason) |
+| medium room | 12 | (too large for wattle) | 15 timber, 4 stone | 60 stone, 8 timber | 15 units (stone: 90, a mason) |
+| hall | 30 | (too large for wattle) | 80 timber, 20 stone (its stone footing meets D2-3) | 150 stone, 20 timber | 200 units, a carpenter (stone: 250, a mason) (D2-166) |
 | camp | 4, lasts 10 nights | 3 timber | | | 1 unit (D2-68) |
 
 - **A building's structure** is one material for all its rooms. Wattle: anyone; timber: a carpenter for a medium room; stone: a
@@ -75,11 +75,11 @@ does 2 units, more with skill, until its work is done).
 | anvil and bellows | 2 | 6 stone, 2 hides, 1 timber | 4 | smith; needs a hearth | a smithy |
 | granary floor | 3 | 6 timber | 4 | anyone | 300 grain stored at a fifth of the house rate |
 | dressed millstones | 3 | 10 stone | 10 | mason | an ox mill, 16 grain a unit with an ox |
-| water wheel | 0 inside (on the water) | 15 timber, 1 copper | 12 | carpenter; needs millstones, a river site | a water mill, 40 grain a unit |
+| water wheel and leat | 0 inside (on the water) | 60 timber, 20 stone, 2 copper | 250 | carpenter; needs millstones, a river site | a water mill, 40 grain a unit (D2-166: about 350 units with the millstones) |
 | cellar | 0 (underground; one a building) | 4 stone, 6 units (D2-155) | 6 | mason | 40 food for each space of footprint, at a quarter of the house rate |
 | stalls | 2 a beast | 1 timber a stall | 1 a stall | anyone | beasts housed: winter fodder x0.8, dung kept x1.5, cannot be driven off without entering (proposed) |
 | woodshed (a lean-to against the building) | 0 inside; 2 spaces of ground | 2 timber | 1 | anyone | 40 timber kept dry |
-| vault (a stone room, ground floor) | 4 of floor, its own room | 16 stone | 12 | mason | 30 weight a space stored; does not burn (D2-49) |
+| vault (a stone room, ground floor) | 4 of floor, its own room | 40 stone | 30 | mason | 30 weight a space stored; does not burn (D2-49) |
 
 ### Storage (D2-155)
 
@@ -114,9 +114,11 @@ used and free ("Reed House: 12 spaces, 9 used: 6 beds, a hearth, bins, a hand mi
 
 ### What people write on buildings (D2-169)
 
-Every building carries a **description** and **lines** written by people: anyone who enters or attends to it reads them, and
-anyone who can reach it may change or deface them, at a cost in work and seen. Lengths, costs, the monument (a building with no
-room) and fine work are proposed: proposals/building_lines.md.
+Every building carries a **description** (written with the build) and **lines** written by people: anyone who enters or attends to
+it reads them, and anyone who can reach it may change or deface them, at a cost in work and seen (D2-169). Each line costs its own
+engraving: painting 2 units, carving 4 with a tool, 6 on stone by a mason; changing another's the same plus 1 (D2-170). Buildings
+and monuments may be built plain, fine, rich or grand: materials x1, x1.5, x2.5, x4 and work x1, x2, x4, x8, each tier more
+noticeable (D2-171). Lengths, places by size and the monument: proposals/building_lines.md.
 
 ### Shelter and upkeep
 
@@ -167,4 +169,4 @@ and do ("a stone hall with a hearth"), who holds them as they know it, and the r
 [02i_buildings.md](../../../review/37_growth/02i_buildings.md), [02k §3](../../../review/37_growth/02k_fuses_and_gates.md);
 proposals/buildings.md, proposals/shelter.md.
 
-*Current as of 3 Nov 2026: H-5, D2-3, D2-9, D2-20, D2-45, D2-49, D2-56, D2-60, D2-61, D2-154, D2-155, D2-164, D2-165, D2-166, D2-167, D2-168, D2-169.*
+*Current as of 3 Nov 2026: H-5, D2-3, D2-9, D2-20, D2-45, D2-49, D2-56, D2-60, D2-61, D2-154, D2-155, D2-164, D2-165, D2-166, D2-167, D2-168, D2-169, D2-170, D2-171.*

@@ -1,8 +1,8 @@
 # Proposal: buildings people make their own (descriptions and lines written on them)
 
 **Status:** decided in part (3 Nov): every building carries a description and lines its people write, anyone can read them, and
-others can change or deface them (D2-169). The details below (lengths, costs, the monument, fine work) are proposed. Not to be built
-until Zach asks (README rule 10). **Owner:** 37.2. **Affects:** spec/economy/buildings.md; information/noticing.md and memory.md
+others can change or deface them (D2-169); each line costs its own engraving (D2-170); extravagance comes in tiers (D2-171). The details below (lengths, costs, the monument, fine work) are proposed. Zach asked for it to be built with the building
+package (3 Nov): review 02zh. **Owner:** 37.2. **Affects:** spec/economy/buildings.md; information/noticing.md and memory.md
 (37.4's: reading and keeping); letters_and_documents.md (writing as a later skill); proposals/law.md (a rule written at a seat);
 beliefs_and_values.md (OPEN L-25: passing on by exposure).
 
@@ -62,27 +62,32 @@ A **monument** has no floor and no fittings: a carved post, a standing stone, a 
 - `write {at, description: text}` replaces the description;
 - `erase {at, line}` scratches one out.
 
-| Act | Work (proposed) | Seen |
+No line comes with a building: each costs its own engraving (D2-170). The description is written with the build.
+
+| Act | Work (D2-170; calibrate) | Seen |
 |---|---|---|
-| paint a line or description (wattle, timber) | 1 unit | by the noticing rule, as work at the building |
-| carve one (timber, stone) | 2 units (stone 3, a mason) | the same |
-| change or erase another's | the same as writing it, plus 1 | the same; the building's people notice next time they see it ("the dedication over the door has been scratched out") |
+| paint a line (wattle, timber) | 2 units | by the noticing rule, as work at the building |
+| carve one (timber) | 4 units, with a tool (wears it) | the same |
+| carve one in stone | 6 units, a mason's, with a tool | the same |
+| change or erase another's, or the description | the same as writing it, plus 1 | the same; the building's people notice next time they see it ("the dedication over the door has been scratched out") |
 
 - **Who may write:** anyone who can reach the building. Writing on another's building isn't refused, because the engine enforces
   only possession (D4-23). It is seen and remembered, and may be disputed by custom or law, like any use of what others hold.
 - **The record:** the journal keeps every text with who wrote it and when, so ground truth and each person's reading can be
   compared.
 
-## 4. Fine work
+## 4. Extravagance in tiers (D2-171)
 
-**Proposed:** `build {..., "how": "fine"}`, a modifier (D2-93), costs half again the materials and twice the work. In return the
-building:
-- is noticed from neighbouring parcels;
-- is named in the village overview;
-- is described as "finely built".
+`build {..., "how": "fine" | "rich" | "grand"}` (a modifier, D2-93), for a building or a monument:
 
-That is the whole effect. It is the cost of display, with no other payback. Whether it should do more (draw visitors, raise a
-holder's standing) is open (Q4).
+| Tier | Materials | Work | Noticed | Described |
+|---|---|---|---|---|
+| plain | x1 | x1 | as any building | (as now) |
+| fine | x1.5 | x2 | also from neighbouring parcels | "finely built" |
+| rich | x2.5 | x4 | also named in the village overview and on arrival | "richly built" |
+| grand | x4 | x8 | also seen from the road's last stretch coming in | "a grand ..." |
+
+A tier can be raised later by paying the difference (materials and work). Nothing else pays it back (Q4).
 
 ## 5. What it lets us measure
 
@@ -99,15 +104,16 @@ medieval village rather than a choice.
 ## Open questions (for Zach)
 
 1. Lengths and places (§1): about 25 words for a description, 30 for a line, and places by size (2, 4, 8; a monument 3)?
-2. Costs (§3): 1 unit to paint, 2 to carve (3 on stone, a mason's), plus 1 to change another's?
 3. Should painted lines wear with the building's breaks?
-4. Fine work: noticeability only, or also something more (visitors, standing)?
+4. The tiers: noticeability only, or also something more (visitors, standing)?
 5. The monument (§2): a post, a stone and a cairn at those costs?
 
 ## History
 
 - 3 Nov: Zach, on village capital: rather than a church, "different buildings they can customize themselves and somehow put
   themselves into"; then: every building, anyone can read, others can deface; write it up. D2-169. Written.
+- 3 Nov: Zach: a line costs extra to engrave (D2-170); extravagance in several tiers, each dearer (D2-171); build it with the
+  building package (02zh).
 
 ## Sources
 
