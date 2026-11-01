@@ -338,6 +338,58 @@ def raw_archive(run: Path, out: Path, spec: str) -> dict:
     return {"files": files, "bytes_raw": size, "bytes_archive": out.stat().st_size}
 
 
+# the parts of a model call only its agent's diary shows (the rest places messages and phases for everyone)
+VIEWER_PRIVATE = ("reasoning", "stated_reasoning", "actions", "final_actions", "lookup_results")
+
+
+def _dm_text(a) -> str | None:
+    args = a.get("args") if isinstance(a.get("args"), dict) else None
+    if args is None:
+        try:
+            args = json.loads(a.get("args_json") or "{}")
+        except ValueError:
+            args = {}
+    t = args.get("text") if isinstance(args, dict) else None
+    return " ".join(t.split())[:160] if isinstance(t, str) else None
+
+
+def write_viewer_split(tdir: Path, text: str) -> None:
+    """TEMPORARY, with viewer.json: the run page's data in two parts, so a run opens without downloading every agent's private
+    reasoning. viewer-core.json.gz is viewer.json with each model call cut to what placing messages needs (round, agent, phase,
+    what it saw, and the text of each message it planned, as dm_texts); reasoning/<agent>.json.gz is that agent's calls in full,
+    loaded when its diary opens."""
+    import gzip
+    from urllib.parse import quote
+    data = json.loads(text)
+    mine: dict[str, list] = {}
+    slim = []
+    for x in data.get("reasoning") or []:
+        mine.setdefault(str(x.get("agent")), []).append(x)
+        s = {k: v for k, v in x.items() if k not in VIEWER_PRIVATE}
+        dmt = [t for t in (_dm_text(a) for a in x.get("actions") or [] if isinstance(a, dict)) if t]
+        if dmt:
+            s["dm_texts"] = dmt
+        slim.append(s)
+    gz = lambda obj: gzip.compress(json.dumps(obj, separators=(",", ":"), default=str).encode(), mtime=0)
+    (tdir / "viewer-core.json.gz").write_bytes(gz({**data, "reasoning": slim, "reasoning_split": True}))
+    rdir = tdir / "reasoning"
+    if rdir.exists():
+        shutil.rmtree(rdir)
+    rdir.mkdir()
+    for agent, xs in mine.items():
+        (rdir / f"{quote(agent, safe='')}.json.gz").write_bytes(gz(xs))
+
+
+def resplit(root: Path, log=print) -> int:
+    """Write the split files next to every viewer.json under root (a staging directory), e.g. before re-uploading."""
+    n = 0
+    for v in sorted(Path(root).rglob("viewer.json")):
+        write_viewer_split(v.parent, v.read_text())
+        n += 1
+        log(f"split {v.parent.relative_to(root)}")
+    return n
+
+
 def viewer_data(run: Path) -> dict:
     """TEMPORARY (--with-viewer-json; the calls_seen table will replace it, docs/site_data_contract.md): the story viewer's data,
     plus each model call's planned actions (and, for the decide call,
@@ -869,7 +921,9 @@ def stage_runs(runs: list[Path], stage: Path, cards: dict, log=print, with_promp
         raw = raw_archive(run, stage / "raw" / spec / f"{rid}.tar.gz", spec)
         if with_viewer_json:                                            # TEMPORARY: the story viewer's own data file, until the
             text = json.dumps(viewer_data(run), separators=(",", ":"), default=str)
-            (tdir / "viewer.json").write_text(_scrub(text, _local_prefixes(run), _home()))
+            text = _scrub(text, _local_prefixes(run), _home())
+            (tdir / "viewer.json").write_text(text)
+            write_viewer_split(tdir, text)
         problems += [f"{rid}: {p}" for p in check_tables(tdir)]
         rows.append(catalog_row(spec, rid, tdir, card, now))
         log(f"staged {spec}/{rid}: {sum(v.get('rows') or 0 for v in man['tables'].values())} table rows, raw {raw['files']} files "
@@ -1037,6 +1091,8 @@ def add_command(sub) -> None:
     p.add_argument("--with-viewer-json", action="store_true",
                    help="TEMPORARY: also write the story viewer's data (viewer.json) per run, which the site's run page reads "
                         "until it reads the tables (calls_seen: docs/site_data_contract.md); off by default")
+    p.add_argument("--resplit", metavar="DIR", help="TEMPORARY: write viewer-core.json.gz and reasoning/ next to every viewer.json "
+                                                    "under DIR (a staging directory) and stop")
     p.add_argument("--prune-legacy", action="store_true", help="delete pre-catalog files (runs.csv) from the dataset")
     p.add_argument("--message", help="commit message")
     p.add_argument("--push", action="store_true", help="upload (without it: stage and summarise only)")
@@ -1052,6 +1108,9 @@ def add_command(sub) -> None:
 
 
 def cmd(a) -> None:
+    if a.resplit:
+        print(f"split {resplit(Path(a.resplit))} runs")
+        return
     if a.audit:
         if a.runs or a.push or a.stories or a.reexport_all:
             raise SystemExit("--audit takes only a path: it scans, it does not stage or upload")
