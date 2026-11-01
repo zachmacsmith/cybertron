@@ -1,6 +1,6 @@
 # When people talk, and what it costs: by reach, with an evening at the hearth
 
-**Status:** discussion
+**Status:** partly accepted: D4-65, D4-66 (2 Nov)
 **Owner:** 37.4
 
 ## Summary
@@ -107,6 +107,11 @@ information/prompts.md.
 - 2 Nov 2026: Zach: requests made in the day (being let in) answered in the evening talk. Point 2a: the evening carries the night's
   free acts and the answers to the day's requests; two-sided acts decided where both are present; the evening call moved before
   the night's sleeping is settled.
+- 2 Nov 2026: Zach: "build all five then do the paired combe run". Accepted and built as D4-65 (the evening, one wave of answers,
+  reach by where one speaks) and D4-66 (the evening settles the night), as a world setting (`evening: true`). Not built: gatherings
+  called for the day (point 5), the memory request folded into the evening (point 6), planning tomorrow at the hearth (point 7),
+  and the day's sightings shown at the hearth (they still reach the next morning, since noticing runs after the night); open in
+  OPEN.md.
 
 ## Sources
 

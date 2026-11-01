@@ -34,6 +34,23 @@ without interrupting them.
 - **Access** is recorded on each building: a house gives it to its household and to anyone listed as let in; a public building
   (a hall) to everyone at the node.
 
+## With an evening (`evening: true`)
+
+- D4-65: the day has an evening at the hearth, after work and before the day's settling and the night. Everyone at a place who is
+  not setting off tonight is asked once, together, where they will sleep: the building they mean to sleep in, else their house
+  here with beds, else the open. Shown: where they are and who is with them, how their day went (its acts and results), and what
+  waits on their answer.
+- What is said there (`say`) is heard by everyone at that hearth and costs nothing; a private word (`tell`) goes to anyone at the
+  place, from the day's ration.
+- Then one wave: only those asked something directly are asked again (told something; named in what was said at their hearth;
+  someone trying for a child with them, asking to be partners, asking to join their household, or making them an offer). What
+  they say is heard, and answered the next day.
+- The morning keeps one wave of answers to private words (two without an evening). Speech to everyone at the place, or in a
+  building, in the morning costs a unit as before (D4-31).
+- Who hears is fixed by where one is when speaking, never where one will be.
+- D4-66: the evening's acts are those that take no work and answer the day's requests or take effect tonight (core/round.md).
+
+
 ## Parameters
 
 | Parameter | Value | Status |
@@ -43,4 +60,4 @@ without interrupting them.
 | private messages a day | 3 plus a jitter drawn once per person (weights 37, 37, 18, 8 for +0 to +3), at most 10 | decided (D4-31: cybertron 1's) |
 | work for speaking aloud | 1 unit a say | decided (D4-31) |
 
-*Current as of 23 Oct 2026: D2-7, D4-15, D4-25, D4-30, D4-31.*
+*Current as of 2 Nov 2026: D2-7, D4-15, D4-25, D4-30, D4-31, D4-65, D4-66.*

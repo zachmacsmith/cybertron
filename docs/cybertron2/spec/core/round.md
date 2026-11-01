@@ -30,6 +30,17 @@ Travellers on a road make no daily decision until they arrive (D4-10); on a road
 for trouble, a meeting or a find (D2-81, world/roads.md). Departures happen at nightfall before the roads' night and the fuse
 sub-step, so those leaving are on their first stretch.
 
+### With an evening (`evening: true`)
+
+| Step | What happens |
+|---|---|
+| dawn | as above; a traveller who set off at nightfall comes in with half the day's units (D4-67) |
+| decide, talk | as above, with one wave of answers (D4-65) |
+| work | as above; one who sets off in the morning does so as the day's first act and walks the day (D4-67); those whose road ends today come in by nightfall |
+| evening | the evening at the hearth (information/speech.md, D4-65): one call each, then one wave for those asked something. Its acts (D4-66): sleep, host (the guest sleeps there), grant, revoke, admit, join, leave, found, partner, part, try (with units kept back), fire, set the door, accept, withdraw, release, give, move, name, claim, order, rest, travel at nightfall; anything else is refused ("the day's work is done") |
+| settle, night, memory | as above; what was shown at the evening is not repeated in the next morning's record of the day |
+
+
 ## Parameters
 
 | Parameter | Value | Status |
@@ -44,4 +55,4 @@ sub-step, so those leaving are on their first stretch.
 
 38.05 §1; 38.17 §6.
 
-*Current as of 24 Oct 2026: D4-8, D4-13, D4-14, D4-15, D4-25, D4-28, D2-80 to D2-84.*
+*Current as of 2 Nov 2026: D4-8, D4-13, D4-14, D4-15, D4-25, D4-28, D2-80 to D2-84, D4-65 to D4-67.*

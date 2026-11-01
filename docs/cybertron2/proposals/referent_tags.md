@@ -1,6 +1,6 @@
 # Short tags for things one can act on that have no unique name
 
-**Status:** discussion
+**Status:** accepted: D4-68 (2 Nov)
 **Owner:** 37.4
 
 ## Summary
@@ -96,6 +96,9 @@ verbs.md, agent_view.md; spec information/prompts.md, agents/actions.md.
   be that names are an individual thing, where people hear names from others"; "would individual cattle be too much?"): naming
   added as a second step, names held as knowledge by the namer, those present and the household (point 7); individual beasts
   deferred, groups of one standing in (point 8); speech left to the agents.
+- 2 Nov 2026: accepted and built as D4-68 (Zach: "build all five"), as a world setting (`tags: true`): tags for groups of beasts
+  and things lying at a spot; naming known to the namer, those at the place and the household; by a herd's name, the group with
+  beasts in it. Not built: documents, offers and agreements tagged (not in the engine yet, or already ids), naming places.
 
 ## Sources
 

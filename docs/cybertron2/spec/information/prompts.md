@@ -28,6 +28,18 @@ a stretch of days are one conversation (memory.md).
   do today (by the techniques it knows of and the sites and tools at hand), its agreements, and what it was told.
 - Everything is in world terms; engine numbers appear only where a person would count (goods, days, units of work).
 
+### Tags, names and ages
+
+- D4-68 (`tags: true`): groups of beasts carry a tag H1, H2, ... and things lying at a spot T1, T2, ..., given when they come to
+  be and shown in brackets after their name or description, the same for everyone. The verbs take a tag wherever they take a name;
+  a herd's name picks the group of that name that has beasts in it. `name {"thing": tag, "as": name}` gives a tagged thing a name,
+  known to the namer, everyone at the place and the namer's household; for them every "(H4)" in what they are shown reads
+  "(H4: name)", and the verbs take the name. With tags on, the reply schema leaves `thing`, `from` and `attend` free text.
+- D4-69 (`ages: true`): under "You", one's age in days and what lies ahead: when a youth comes of age; when an adult turns elder
+  and can have no more children; one's partner's age and when they turn elder.
+- With an evening (D4-65 to D4-67), the system text says how the day goes, and `travel` shows `"when": morning | nightfall`.
+
+
 ## Parameters
 
 | Parameter | Value | Status |
@@ -42,4 +54,4 @@ a stretch of days are one conversation (memory.md).
 
 38.02; cybertron2/engine/prompt.py; 38.17.
 
-*Current as of 24 Oct 2026: D2-4, D2-29, D2-84, D2-97, D2-99, D4-19, D4-24, D4-26, D4-27, D4-29, D4-32.*
+*Current as of 2 Nov 2026: D2-4, D2-29, D2-84, D2-97, D2-99, D4-19, D4-24, D4-26, D4-27, D4-29, D4-32, D4-68, D4-69.*

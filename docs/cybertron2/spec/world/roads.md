@@ -135,6 +135,15 @@ or a camp); the departure prompt states what N days of waiting would cost in foo
 - **Finding one (D2-98):** by the noticing rule (information/noticing.md), its own conspicuousness about 0.03 (a game trail) times
   the parcel's sight. The finder learns only that a way leaves there, as an unexplored way (D4-47), and chooses whom to tell.
 
+### Setting off in the morning or at nightfall (D4-67; worlds with an evening)
+
+| | `travel {"when": "morning"}` | at nightfall (the default) |
+|---|---|---|
+| when | the day's first act; the rest of the day is walking | the day's last act, after work |
+| nights out, road of n days | n - 1 | n |
+| comes in | by nightfall of day n, in time for that place's evening | at midday on the day after the last night, with half that day's units |
+
+
 ## Data
 
 Per edge: the two nodes and the days (as before); its terrain; per stretch, a terrain if different and its landmarks with their
@@ -176,4 +185,4 @@ party and the conversation.
 [proposals/road_layout.md](../../proposals/road_layout.md), [road_encounters.md](../../proposals/road_encounters.md),
 [hidden_ways.md](../../proposals/hidden_ways.md), [journeys.md](../../proposals/journeys.md); world/edges.md.
 
-*Current as of 24 Oct 2026: D2-81, D2-90, D2-92, D2-98, D2-104 to D2-110, D2-113, D2-120 to D2-122, D2-125, D4-51.*
+*Current as of 2 Nov 2026: D2-81, D2-90, D2-92, D2-98, D2-104 to D2-110, D2-113, D2-120 to D2-122, D2-125, D4-51, D4-67.*

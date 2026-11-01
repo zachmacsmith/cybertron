@@ -275,3 +275,7 @@ Newest first. Ideas decided or rejected in conversation before 23 Oct are backfi
 | 29 Oct | Fertility and replacement: shorter waits, a higher chance; soft limits to discuss | accepted in part: D2-162 | [fertility.md](fertility.md) |
 | 31 Oct | A page for playing an agent (built, then written down) | retrospective, accepted: D4-63 | [play_page.md](play_page.md) |
 | 1 Nov | Lines kept for good, passed on with care, replacing customs | accepted: D4-64 | [lasting_memory.md](lasting_memory.md) |
+| 2 Nov | An evening at the hearth, one wave of answers; the evening settles the night | partly accepted: D4-65, D4-66 | [speech_order.md](speech_order.md) |
+| 2 Nov | Setting off in the morning or at nightfall | accepted: D4-67 | [departure_times.md](departure_times.md) |
+| 2 Nov | Short tags and names for herds and things | accepted: D4-68 | [referent_tags.md](referent_tags.md) |
+| 2 Nov | Each person told their age (built, then written down) | retrospective, accepted: D4-69 | [ages_shown.md](ages_shown.md) |

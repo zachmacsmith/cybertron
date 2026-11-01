@@ -1,6 +1,6 @@
 # Setting off in the morning or at nightfall
 
-**Status:** discussion
+**Status:** accepted: D4-67 (2 Nov)
 **Owner:** 37.4
 
 ## Summary
@@ -58,6 +58,8 @@ spec world/roads.md; D4-8, D4-10.
 ## History
 
 - 2 Nov 2026: proposed (37.4) from Zach's question, alongside speech_order.md (the evening).
+- 2 Nov 2026: accepted and built as D4-67 (Zach: "build all five"), for worlds with an evening. Midday arrival: half the units
+  (open question 1 settled for now); no evening call on the road (open question 2 left as D4-10).
 
 ## Sources
 
