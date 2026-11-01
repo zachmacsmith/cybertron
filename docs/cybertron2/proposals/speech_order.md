@@ -16,13 +16,25 @@ calling out to the whole place (a unit).
 
 1. **Who hears is fixed by where one is when speaking**, never by where one will be. Speech comes before the day's work or after
    it, so "those on my parcel" is not known when one speaks; the parcel is not a reach.
-2. **The evening at the hearth** (after work and the night's settling of who sleeps where, before eating and the night's events):
+2. **The evening at the hearth** (after work; before who sleeps where is settled, eating and the night's events):
    - each person at a hearth is asked once, together: the day's outcome is shown here (the results of their acts, what they saw,
      whom they met, the day's events), not the next morning;
    - each may speak to the house (free, everyone at that hearth hears), tell one person (a private word), write a note, and say
      what they mean to do tomorrow;
    - then **one wave**: only those asked something directly (a tell, or speech to the house naming them) are woken to answer.
      A asks, B answers; A reads the answer in the morning.
+2a. **The evening decides the night** (Zach, 2 Nov: "if someone asks to be let in during the day, the owners of the house can
+   decide whether to let them in in the evening talk"). The evening call comes before who sleeps where is settled, and it carries
+   the free acts that answer the day's requests or take effect tonight:
+   - answers to requests made during the day, listed in the evening message: let someone in for the night (host), take someone
+     into the household (admit), accept or refuse an offer, become partners;
+   - the night's own choices: where to sleep, the door barred or open, a fire if sleeping out, trying for a child, setting off on
+     a journey at nightfall;
+   - two-sided acts that today must be chosen by both in the same morning (partner, try, join and admit) are then answered where
+     both are present; trying for a child is decided at the hearth, where it belongs;
+   - whoever a decision concerns and who is not at that hearth (the stranger at the door) learns it in the answer wave, before
+     the night.
+   The morning plans the work; the evening settles the night.
 3. **The morning:** the decision as now, with dawn's news and what was said last night; private words to people at the same place;
    **one wave**, in which those told something are woken once to answer and re-plan. No second wave.
 4. **Speech by reach:**
@@ -92,6 +104,9 @@ information/prompts.md.
   woken in the answer wave; gatherings generalise the hearth for towns (his question about meeting rooms).
 - 2 Nov 2026: Zach suggested a gathering one declares at a parcel, which others may join for more back-and-forth; folded into point
   5, called for the next day so others know of it before they plan, a unit to come, up to three waves, witnessed agreements.
+- 2 Nov 2026: Zach: requests made in the day (being let in) answered in the evening talk. Point 2a: the evening carries the night's
+  free acts and the answers to the day's requests; two-sided acts decided where both are present; the evening call moved before
+  the night's sleeping is settled.
 
 ## Sources
 
