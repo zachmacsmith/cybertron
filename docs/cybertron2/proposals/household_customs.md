@@ -1,6 +1,6 @@
 # Customs held by households
 
-**Status:** retrospective, accepted: D4-57
+**Status:** retrospective, accepted: D4-57; replaced by D4-64
 **Owner:** 37.4
 
 ## Summary
@@ -51,6 +51,8 @@ information/memory.md (what is seeded); world files.
   read.
 - 1 Nov 2026: Zach proposed that customs become lines kept for good, seeded per household or place and each holder's own to let go
   ([lasting_memory.md](lasting_memory.md), discussion); if decided, this mechanism is replaced.
+- 1 Nov 2026: replaced by D4-64 ([lasting_memory.md](lasting_memory.md)): customs are lines kept for good, seeded to those alive
+  at the start (per household or place, as here), each holder's own to let go unless fixed; none seeded to those born in a run.
 
 ## Sources
 

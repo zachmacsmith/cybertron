@@ -15,7 +15,8 @@ knowledge from that person's own position.
 - D4-33: a seeded person's knowledge of other lines' crafts is awareness, not skill; a village's repute is the crafts of the lines
   born there.
 - D4-19: runs start with people of every age; no time skips.
-- D4-57: a custom can be held by named households, not only by everyone at a place.
+- D4-64: customs are lines kept for good, seeded per person, household or place to those alive when a world starts, and to
+  nobody born during a run; a world may fix them so they cannot be let go (replaces D4-57's fixed customs).
 
 ## Mechanics
 
@@ -26,8 +27,12 @@ knowledge from that person's own position.
 - **Crafts**: a person knows its own line's crafts (and its birth line's, if married in); of other lines' crafts it is only aware
   (D4-33).
 - **Repute** of a village, as others know it, is the crafts of the lines born there (D4-33).
-- **Customs**: a world file's custom is `{text, nodes?, households?}`. With `households`, those whose household or birth household is
-  named hold it among what they remember (one married in keeps both houses' ways); without, everyone at the named nodes (D4-57).
+- **Customs** (D4-64): a world file's custom is `{text, nodes?, households?, fixed?}`; a person may also be given lines of its own
+  (`kept: [lines]`). Each becomes a line kept for good (information/memory.md) of everyone **alive when the world starts** whose
+  household or birth household is named (one married in keeps both houses' ways), or, without `households`, of everyone at the
+  named nodes. It is that person's own: shown at every opening under "Kept for good", taking a place, and it may be let go, unless
+  `fixed`. **Nobody born during a run is seeded any**: what a child starts with is what its carers passed on (life/
+  birth_and_death.md). A village's or household's custom is then what most of its people still hold.
 - **Aims** a world file or a line gives are kept as data; no aim is shown to an agent (D4-29).
 
 ## Data
@@ -38,4 +43,4 @@ The tree (every person, living and dead), the history, and each person's seeded 
 
 38.09 §3c; cybertron2/m1/generate.py (moving to the rebuilt engine).
 
-*Current as of 24 Oct 2026: H-4, D4-19, D4-21, D4-29, D4-33, D4-57.*
+*Current as of 1 Nov 2026: H-4, D4-19, D4-21, D4-29, D4-33, D4-64.*

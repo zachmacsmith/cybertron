@@ -25,6 +25,9 @@ life/life_stages.md (D4-19).
   world designed for it once this is built.
 - D2-146: more units spent trying raise the chance, with diminishing returns.
 - D2-148: a child's menial work is set by the household head's standing order.
+- D4-64: whoever cares for a child may pass on a sentence with the care, which becomes a line the child keeps for good; if several
+  care that day, whoever gives the most food passes theirs on; each line passed on adds a place to the child's long-term memory,
+  up to a limit (information/memory.md).
 - D2-149: old age is tuned to a life expectancy under each health regime; disease adds later (OPEN L-9).
 - D2-152: any two people of opposite sex at the same node can try for a child if both choose; a partnership is not required.
 - D2-153: the lifespan is a world setting that scales every part of a life (amends D4-19's spans to its default).
@@ -78,6 +81,12 @@ life/life_stages.md (D4-19).
   its memories.
 - **Care counts** on a day if someone did the care work for that child at its place that day; for now it bears on survival only
   (D2-150). Health and learning from care come later (OPEN L-26).
+- **Passing on** (D4-64): with the care a carer may give the child food from its own hands and pass on a sentence:
+  `work {what: care, at: <child>, food?: qty, pass?: "a sentence"}`. Each carer who cares for the child is told so in the morning,
+  with what the child holds so far ("Helewise holds 2 lines: ..., ...; 2 more can be added"). The sentence is the carer's choice:
+  a custom, a line of its own, or new words. One line a child a day: if several pass one on, the one who gave the most food that
+  day passes theirs on and the others' are dropped (a tie by a keyed draw, D2-70). Each line passed on adds a place, up to the
+  limit (`memory.kept.childhood`); past it, a line is not kept and the carer is told.
 
 **The cost dial** (D2-145, D2-151), a world setting:
 
@@ -92,6 +101,8 @@ life/life_stages.md (D4-19).
   seat takes that seat's model; the rest keep the cast balanced).
 - It starts with **lasting memories** of what it was present for (information/memory.md): who cared for it and fed it, who was away,
   births and deaths, raids, cold nights; its household's crafts as awareness (D4-33); the places it has been.
+- And with **the lines passed on to it** as its own kept for good, each with who passed it on, in places of its own, and one empty
+  place more; later places open over its adult life (information/memory.md, D4-64). No custom is seeded to anyone born in a run.
 
 ### Life spans: a world setting (D2-139, D2-149, D2-153)
 
@@ -163,4 +174,4 @@ as each saw or was told it.
 [proposals/children.md](../../proposals/children.md), [fertility.md](../../proposals/fertility.md), [life.md](../../proposals/life.md),
 [38.09](../../../review/38_space_engine/09_life_design.md); 02v_children_model.py.
 
-*Current as of 29 Oct 2026: D2-138 to D2-153, D2-162, D4-19, D4-20.*
+*Current as of 1 Nov 2026: D2-138 to D2-153, D2-162, D4-19, D4-20, D4-64.*

@@ -1,6 +1,6 @@
 # Kept for good: a few lines an agent keeps word for word
 
-**Status:** ready for a decision (Zach's design of 1 Nov; parameters to calibrate)
+**Status:** accepted: D4-64
 **Owner:** 37.4
 
 ## Summary
@@ -14,6 +14,10 @@ something that matters more. A world may fix some lines so they cannot be let go
 number of places, the schedule and the fixed lines are set per run. Tests: review 38.39.
 
 ## The proposal
+
+*Decided as D4-64; the spec (information/memory.md, seeding/populations.md, life/birth_and_death.md) is the rule. Where the text
+below differs, the decision changed it: places at coming of age are the childhood lines and one more (no fixed start of 3); any
+carer that day may pass on, the one giving the most food winning; any sentence; no customs seeded to those born in a run.*
 
 **Passing on in childhood** (Zach, 1 Nov: "a mother who has a current child to care for is told that when she does the caring
 action she can pass on some customs that will become long term memories. The model can then later remove them, but they are their
@@ -146,6 +150,12 @@ on the board).
   caring can actually increase the long term memory"; "a world setting that fixes some of the memory slots (which is the same as
   having them as a custom)"; "the specific slot lengths, the number and discovery schedule should be configurable per run".
   Written in; status ready for a decision.
+- 1 Nov 2026: **accepted: D4-64.** Zach: "seeded customs are just for those that are already alive. We don't seed any customs for
+  those born during a run"; "whoever gives care that day, and then if multiple people care, caring also involves giving some number
+  of food, and whoever gives the most food gets their one passed on with the others ignored"; "any sentence"; "As soon as they come
+  of age they should have just childhood ones + 1 after the first memory, then the rest is decided by the scheduler"; "I think this
+  new design works better. Turn this proposal into a spec to be built soon." Spec: information/memory.md (Kept for good),
+  seeding/populations.md (customs), life/birth_and_death.md (passing on with care). Open: OPEN Q-K1 to Q-K3.
 
 ## Sources
 
