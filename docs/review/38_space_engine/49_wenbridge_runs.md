@@ -58,8 +58,25 @@ for. But nothing new was finished. Food took over the second half of both runs.
   - from day 18 Ellen sold to the rich at 3 to 4 coin a grain, six to eight times Wat's bid.
 - **Wat stole instead.** Wat (Opus) posted his offers to everyone but never dealt with Tom face to face. Then he stole 19 grain
   from the heap at the Hearnes' door (day 12), and Mary took 20 (day 14). The Hearnes saw Wat and barred their door.
-- **The design is confounded.** The Hearnes' aim was "Get the harvest in and kept", and once the harvest was in, the pole of
-  leverage was the grain, with no Opus at it. The test is the Hearne head as Opus and an aim without "kept".
+- **Correction (2 Nov):** aims are never shown to agents (D4-29: data only), so "kept" did not push them. An earlier draft of
+  this note said it did.
+- **Probe (Tom's own day-11 prompt, rebuilt from the d11.decide checkpoint, 4 replies per arm).** A reply counted if it took a
+  Mason offer, offered grain, gave grain to the Masons, or spoke of feeding them:
+
+  | Arm | Traded or shared with the Masons |
+  |---|---|
+  | Sonnet, as it was | 0 of 4 |
+  | Opus, as it was | 1 of 4 (sold grain to Wat "for coin, which keeps") |
+  | Sonnet + "stand back: who needs what you have, what do you need from them, what is about to go wrong?" | 0 of 4 |
+  | Sonnet + the Masons' hunger shown as signs (Wat gaunt; Joan thin with a weak-crying newborn) | 0 of 4 |
+
+  Fifteen of sixteen carried on the plan in Tom's own memory text (timber, the granary site, guarding the grain). It is not mainly
+  the model tier, and neither a nudge nor seen hunger moved it. Scripts: the session scratchpad, probe/.
+- **The grain was not a surplus in the end.** On day 11 the Hearnes held about 150 grain (about 105 meals), near their own need for
+  20 days, 4 people and a winter; Will and Kit later starved. From day 10 the village held about half of what it needed, so
+  someone was going to starve wherever the grain lay. Keeping it was defensible. The Hearnes' mistake was timing: trading a little
+  early for the Masons' stone and labour would have got them their granary.
+- **The next probe:** Tom's prompt without his written plan, in a world with a real surplus.
 
 ### Engine faults the run exposed (to fix)
 
@@ -87,8 +104,8 @@ for. But nothing new was finished. Food took over the second half of both runs.
 ## Next
 
 - Fix faults 1 to 6.
-- Rerun with the Hearne head as Opus, the Hearne aim without "kept", and food at 1.3 a person a night net of wages. This would also
-  test whether the model tier or the aim drives hoarding.
+- Rerun with food at 1.3 a person a night net of wages, so the grain is a real surplus. Before that, run the plan-removal probe
+  above (it is cheap).
 - Both runs are in `runs/` (wb1_wenbridge_paused, wb2_wenbridge). They are not yet on the Hub (HF_TOKEN is not in this session).
 
 *Current as of 2 Nov 2026.*
