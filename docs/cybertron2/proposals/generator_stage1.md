@@ -243,6 +243,7 @@ Each node, parcel, stretch and landmark gets a description written by a model fr
 | no settlement is self-sufficient: each lacks at least one of food, fuel, stone or metal that another has (scenario_design §1) | design |
 | each supply chain's links lie in different places, and at least one junction of two chains is worth holding (generator.md §10) | design |
 | at least one chokepoint (a ford, a pass, a narrows) on the roads between settlements | design |
+| every settlement reachable by land (11k) | design |
 | 6 to 15 parcels per node | design |
 
 ## 8. Output
@@ -403,6 +404,51 @@ chooses the cover, and the terrain limits which are possible:
 **How they combine:**
 - templates blend by taking the highest of the shapes, plus noise;
 - every parameter has a default, and any can be pinned.
+
+### 11k. Primitives and named configurations (D2-188)
+
+**Primitives**, each shaping the macro height, water or geology, with a few parameters (all defaulted) and named anchors:
+
+| Kind | Primitives |
+|---|---|
+| land and sea | sea; coast (a line); landmass (a blob); inlet (a bay or fjord); strait; isthmus |
+| relief | ridge (passes at its low points); massif; plateau (steep edges); scarp; basin; valley; gorge; saddle |
+| water | river (a path and flow); lake; fen; delta; estuary; confluence |
+| geology and climate | belts of chalk, clay, sand and ore; the prevailing wind |
+
+**How they combine:**
+- primitives are applied in order: added (the highest shape), cut, or blended, then roughened with noise;
+- each exposes anchors (`north_bay.head`, `spur.pass`, `valley.gate`, `island_2`) where settlements and features can be pinned:
+  "Ashby: {at: north_bay.head}".
+
+**The library**, as data (11d's templates become these):
+
+| Configuration | Built from | What it does |
+|---|---|---|
+| twin bays split by a spur | coast, two inlets, a ridge to a headland | rival bays; overland only by the pass over the spur |
+| gated valley | a valley ringed by ridges, one gorge | one way in; the gate settlement holds the valley |
+| two valleys over a pass | two valleys, a ridge with a high saddle | trade only while the pass is open |
+| river through a range | a ridge, a gorge, a river | the low road follows the river; fords and mill sites at the drop |
+| scarp and vale | a chalk plateau, a scarp, a clay vale | spring-line villages; sheep above and grain below |
+| plateau with few ascents | a plateau, steep edges, two or three climbs | herders above, farmers below; the climbs are chokepoints |
+| fen with islands | a fen basin, low rises | villages on the islands; draining as a project of the whole fen |
+| confluence plain | two rivers meeting, a plain | the market-town site |
+| isthmus | two landmasses, a neck | all land travel crosses the neck |
+| coastal strip under mountains | a coast, a ridge close behind | a narrow strip; passes inland the only way out |
+| basin in a ring of hills | a basin, a ring of ridges | one rich interior, hard to reach |
+| rift | a trough, two scarps, lakes | a corridor of lakes |
+| watershed divide | a ridge with rivers both ways | upstream and downstream run opposite ways |
+| settled lowland and frontier | a plain, a wide forest or moor | room to expand at the edge |
+| delta | a large river, a coast, channels | rich, wet and flood-prone; trade at the mouth |
+
+**Configurations that wait:**
+- a tidal island (tides);
+- a karst plateau (water as a need, L-23);
+- a mountain lake above a valley (floods, stage 2);
+- a fjord coast and an archipelago (water travel, L-38).
+
+**Reachability.** Whether every settlement can be reached by land is a design check (warns; a world may require it), since some
+configurations mean isolation. Islands without water travel must each be self-contained until boats exist, and the check says so.
 
 ### 11e. People and things (D2-184)
 
