@@ -17,7 +17,7 @@ nodes:
   hollow:
     name: Hollow
     parcels:
-      h_green: {name: the Green, cover: built, size: 1, text: "two farmhouses and a byre round a green", adj: [upper_field, common]}
+      h_green: {name: the Green, cover: built, size: 2, text: "two farmhouses and a byre round a green", adj: [upper_field, common]}
       upper_field: {name: Upper Field, cover: field, size: 2, text: "the Ashbys' barley on the slope", adj: [low_field],
                     fertility: 0.7, state: {crop: {kind: barley, left: 28, ripe_day: 1}, last_crop: grain}}
       low_field: {name: Low Field, cover: field, size: 2, ground: wet, text: "flat ground by the beck, rushes in the corners",

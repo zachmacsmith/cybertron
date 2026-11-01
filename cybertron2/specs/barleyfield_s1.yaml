@@ -13,7 +13,7 @@ nodes:
       bf_green:
         name: the Green
         cover: built
-        size: 2
+        size: 3
         text: farmhouses, a byre, a cottage and the granary round a green
         adj:
         - north_field

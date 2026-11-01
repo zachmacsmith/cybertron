@@ -197,6 +197,8 @@ def ready(here, tech, kind, key) -> str:
         return ""
     if kind == "building" and y == "repair" and here.buildings()[key]["condition"] >= 2:
         return f"{here.buildings()[key]['name']} is sound"
+    if kind == "parcel" and y == "clear_built" and (here.parcels()[key].get("crop") or {}).get("left", 0) > 1e-9:
+        return f"{here.parcels()[key]['name']} has a crop standing in it"
     return ""
 
 
@@ -311,8 +313,8 @@ def options(here, mind, limit=10):
         lvl = level(mind, tech)
         if t.get("crew") and lvl not in ("rough", "capable", "known"):
             lvl = "known"                                                     # anyone can work on a crew (D2-66)
-        if lvl not in ("rough", "capable", "known") or t["verb"] == "build":
-            continue
+        if lvl not in ("rough", "capable", "known") or t["verb"] == "build" or (t.get("yield") or {}).get("kind") == "clear_built":
+            continue                                                          # building: the build verb's own line (02zh §9)
         why = shortfall(here, mind, tech, TRY[lvl]["inputs"])
         sites = [s for s in where(here, tech) if s[0] == "anywhere" or not ready(here, tech, s[0], s[1])]
         places = ", ".join(sorted({s[2] for s in sites}))

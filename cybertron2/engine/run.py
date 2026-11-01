@@ -253,7 +253,7 @@ def talk(w, names, replies, results) -> dict:
                 PC.store(w, m)["today"]["heard"].append(f"{n} said ({where}): {text}")
             _mentions(w, here, n, hearers, text)
             results[n].append(f"You said ({where}): {text}")
-            here.event("speech", f"{n} spoke {where}", actor=n, salience=0.1, sense="sound")
+            here.event("speech", f"{n} spoke {where}", actor=n, salience=0.1, sense="sound", about=[f"building:{bid}"] if bid else [])
         for t in [t for t in (r.get("tell") or []) if isinstance(t, dict)][:MAX_SAY]:
             text, to = str(t.get("text", ""))[:600], here.person(t.get("to"))
             if to and to not in names and w.s["people"][to]["stage"] == "child":
@@ -377,9 +377,11 @@ def dawn(w) -> None:
         if inc["kind"] == "fire":
             bid = inc["building"]
             b = w.s["buildings"][bid]
+            from cybertron2.engine import buildings as BL
+            safe = BL.vaulted(b, w.goods(b["stock"]))                          # a vault does not burn (D2-49)
             for item, q in list(w.goods(b["stock"]).items()):
                 share = float(inc.get("food", 0.85)) if item in EDIBLE else float(inc.get("other", 0.5))
-                w.apply("destroy", node, src=b["stock"], item=item, qty=q * share, why="fire")
+                w.apply("destroy", node, src=b["stock"], item=item, qty=max(0.0, q - safe.get(item, 0.0)) * share, why="fire")
             w.apply("set", node, ref=("building", bid), field="condition", value=max(0, b["condition"] - int(inc.get("damage", 1))))
             w.apply("set", node, ref=("building", bid), field="fire_hit", value={"day": w.d})   # for its signs (D4-74)
             live = [m for m in w.living() if bid in w.homes(m)]

@@ -713,6 +713,20 @@ BUILDING = [
          text=lambda x: f"a stink of {x.rotting[0]} from {x.nm}'s store"),
     dict(when=lambda x: x.rotting and not x.cold, reach="near", own=0.6, sense="sight", tags=["food"],
          text=lambda x: f"flies at the {x.rotting[0]} in {x.nm}, gone green and slimy"),
+    # extravagance in tiers (D2-171): how far off a fine, rich or grand building is noticed (own; reach "around": next door at most).
+    # Calibrated, clear day, ordinary eye: fine about 1 on its parcel and 0.4 next door; rich 0.6 next door, 0.3 across the place;
+    # grand certain on it and next door, 0.5 across the place. Its look is a presentation choice by structure (TIER_LOOK).
+    dict(when=lambda x: x.tier == "fine", sense="sight", own=4.0, reach="around", tags=["building"],
+         text=lambda x: f"{x.nm} is finely built: {TIER_LOOK['fine'][x.look]}"),
+    dict(when=lambda x: x.tier == "rich", sense="sight", own=6.0, tags=["building"],
+         text=lambda x: f"{x.nm} is richly built: {TIER_LOOK['rich'][x.look]}"),
+    dict(when=lambda x: x.tier == "grand", sense="sight", own=10.0, tags=["building"],
+         text=lambda x: f"{x.nm} stands over everything about it: {TIER_LOOK['grand'][x.look]}"),
+    # a building being rebuilt or added to (02zh §2): the work shows
+    dict(when=lambda x: (x.b.get("works") or {}).get("kind") == "upgrade", sense="sight", own=1.0, tags=["building", "shelter"],
+         text=lambda x: f"{x.nm} is half pulled down and going up again in {x.b['works']['to']}"),
+    dict(when=lambda x: (x.b.get("works") or {}).get("kind") == "room", sense="sight", own=0.8, tags=["building"],
+         text=lambda x: f"a new room going up against {x.nm}" if int(x.b["works"].get("storey", 1)) == 1 else f"a new storey going up on {x.nm}"),
     dict(when=lambda x: x.fits, sense="sight", p=0.05, tags=["building"], text=lambda x: f"{x.nm} has " + ", ".join(x.fits)),
     dict(when=lambda x: x.b["door"] == "barred", sense="sight", p=0.3, tags=["danger"], text=lambda x: f"{x.nm}'s door is barred"),
     dict(when=lambda x: x.b["door"] != "barred", sense="sight", p=0.05, tags=["food"], peek=True,
@@ -835,6 +849,28 @@ def context(here, pid, h=None):
     return x
 
 
+TIER_LOOK = {
+    "fine": {"wattle": "the wattle close-woven and limewashed white", "timber": "its timbers squared and its door-posts carved",
+             "stone": "its stone dressed and laid close", "post": "the post carved from top to foot", "stone_m": "the stone shaped and smoothed",
+             "cairn": "the stones chosen and laid with care"},
+    "rich": {"wattle": "limewashed and painted in colours, the thatch trimmed and patterned",
+             "timber": "carved timbers painted red and ochre, the door studded", "stone": "carved stone about the door and windows",
+             "post": "carved and painted from top to foot", "stone_m": "cut with patterns and stained with ochre",
+             "cairn": "a great heap of picked white stones"},
+    "grand": {"wattle": "a long house of fine work, limewashed and painted", "timber": "a great carved and painted timber house",
+              "stone": "a great house of dressed stone, carved about its doors", "post": "a great carved and painted post, taller than any tree near it",
+              "stone_m": "a huge standing stone, carved and stained", "cairn": "a great white cairn, higher than a house"},
+}
+
+
+# A grand building seen from the road's last stretch coming in (D2-171): sight, plain from far off (own 3: clear day certain, fog
+# about 0.6 on open ground, less in woodland); read by the road's rule (terrain and weather visibility, the eye).
+GRAND_AHEAD = [
+    dict(when=lambda x: True, sense="sight", own=3.0, tags=["building", "travel"],
+         text=lambda x: f"far ahead, above everything at {x.place}: {x.what}, {x.nm}"),
+]
+
+
 def building_context(here, bid):
     from cybertron2.engine.data import FITTINGS
     b = here.buildings()[bid]
@@ -869,6 +905,10 @@ def building_context(here, bid):
     x.makers = {k: " and ".join(v) for k, v in makers.items()}
     x.makers_any = lambda techs: " and ".join(dict.fromkeys(n for t in sorted(techs) for n in makers.get(t, [])))
     x.rotting = [i for i, q in st.items() if ITEMS.get(i, {}).get("rot") and q > 0.2]
+    x.tier = b.get("tier") or "plain"
+    mon = b.get("monument")
+    x.look = {"carved post": "post", "standing stone": "stone_m", "cairn": "cairn"}.get(mon, b["structure"] if b["structure"] in
+                                                                                          ("wattle", "timber", "stone") else "timber")
     return x
 
 

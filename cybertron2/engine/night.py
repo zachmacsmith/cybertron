@@ -25,7 +25,14 @@ def night(w) -> dict:
     rec["deaths"] += [f["killed"] for f in rec["fights"] if f.get("killed")]
     rec["departed"] = today["_departed"] if "_departed" in today else departures(w, today)
     where = sleeping_places(w, today)
+    floor_ = set(today.get("_floor") or [])                                     # in a house without a bed: on its floor (D2-165)
     rec["slept"] = {n: (s["buildings"][b]["name"] if b else "out") for n, b in where.items()}
+    if floor_:
+        rec["floor"] = sorted(floor_)
+    from cybertron2.engine import buildings as BL
+    for n, b in sorted(where.items()):                                          # those inside read what is written there (D2-169)
+        if b:
+            BL.read(w, n, b, "slept")
     for n, b in where.items():                                                  # who slept in the open, for its signs (D4-74)
         if b is None and s["people"][n]["at"] is not None:
             w.apply("set", s["people"][n]["at"], ref=("person", n), field="slept_out", value={"day": w.d, "cold": cold})
@@ -43,7 +50,7 @@ def night(w) -> dict:
             if FO.burn(w, b["node"], b["stock"], heat):
                 lit = True
                 spaces = float(hp["hearth_spaces"]) * hearths + float(hp["ring_spaces"]) * rings
-                warm = 1.0 if b["structure"] == "camp" else min(1.0, spaces / max(1.0, float(b.get("size") or 1)))
+                warm = 1.0 if b["structure"] == "camp" else min(1.0, spaces / max(1.0, float(BL.floor(b) or 1)))   # spaces of floor
                 if not hearths and b["structure"] != "camp":
                     warm = min(warm, 0.5)                                     # a fire ring half-warms a house in the cold
         w.apply("set", b["node"], ref=("building", bid), field="fire", value=lit)
@@ -58,6 +65,8 @@ def night(w) -> dict:
         bid = where.get(name)
         b = s["buildings"][bid] if bid else None
         state = "unsheltered" if b is None or b["condition"] == 0 else ("damaged" if b["condition"] == 1 else "housed")
+        if state == "housed" and (name in floor_ or (b.get("works") or {}).get("kind") == "upgrade"):
+            state = p["beds"]["floor"]                                          # no bed, or the structure being rebuilt (02zh §2, §5)
         if cold and state == "housed" and not b["fire"]:
             state = "no_fuel"
         need = float(p["ration"]) * float((p["shelter_cold"] if cold else p["shelter"]).get(state, 1.0))
@@ -163,12 +172,19 @@ def night(w) -> dict:
             w.apply("set", b["node"], ref=("building", bid), field="condition", value=0)
             w.apply("set", b["node"], ref=("building", bid), field="broke", value={"day": w.d, "to": 0})
             w.event(b["node"], "build", f"{b['name']} has fallen in", about=[f"building:{bid}"], salience=0.3, tags=["shelter"])
-    for bid, b in s["buildings"].items():                                       # breaks (H-5)
-        q = float(p["breaks"]["cold" if cold else "p"])
+    for bid, b in s["buildings"].items():                                       # breaks (H-5), by structure (D2-168)
+        q = float(p["breaks"]["cold" if cold else "p"]) * float(p["breaks"]["structure"].get(b["structure"], 1.0))
         if not b.get("unfinished") and b["condition"] > 0 and w.rng("break", w.d, bid).random() < q:
             w.apply("set", b["node"], ref=("building", bid), field="condition", value=b["condition"] - 1)
             w.apply("set", b["node"], ref=("building", bid), field="broke", value={"day": w.d, "to": b["condition"]})
             rec["breaks"].append(bid)
+            painted = [ln for ln in b.get("lines") or [] if ln.get("how") == "paint"]
+            if b["structure"] == "wattle" and painted:                         # a painted line on wattle fades with each break
+                gone = sorted(painted, key=lambda ln: (int(ln.get("day", -1)), int(ln["slot"])))[0]
+                w.apply("set", b["node"], ref=("building", bid), field="lines", value=[ln for ln in b["lines"] if ln is not gone])
+                ch = list(b.get("changes") or []) + [{"day": w.d, "text": f"the painted words {BL.spot_words(b, int(gone['slot']))} of "
+                                                       f"{b['name']} have faded away with the damp", "by": None}]
+                w.apply("set", b["node"], ref=("building", bid), field="changes", value=ch[-20:])
     _grow(w)
     from cybertron2.engine import farm as FM
     rec["farm"] = FM.night(w)
@@ -261,13 +277,24 @@ def _gear(w, name, where, tents):
     return None
 
 
+STAGE_ORDER = {"elder": 0, "adult": 1, "youth": 2, "child": 3, "infant": 4}
+
+
+def bed_share(w, name) -> float:
+    """The beds one takes (D2-165, defaults to confirm): an infant shares its carer's, two children share one (PHYSICS beds)."""
+    return float(w.p["beds"].get(w.s["people"][name]["stage"], 1.0))
+
+
 def sleeping_places(w, today) -> dict:
-    """{name: building id or None}: members at home always; others need a free bed (05 §3)."""
+    """{name: building id or None}: everyone, members as well as guests, sleeps housed only in a bed (D2-165); members take the beds
+    at home first, the eldest first; a member with no bed there looks for one where it may sleep, else lies on its home's floor (as
+    in a damaged house: `today["_floor"]`); guests and those who chose a place need a free bed (05 §3)."""
     s = w.s
-    out, beds_used = {}, {}
+    out, beds_used, floor_ = {}, {}, set()
     chosen = today.get("sleep") or {}
-    living = w.living()
-    for name in living:                                                         # members sleep at home
+    living = sorted(w.living(), key=lambda n: (STAGE_ORDER.get(s["people"][n]["stage"], 1), n))
+    homeless = {}
+    for name in living:                                                         # members at home, in a bed if one is free
         a = s["people"][name]
         if a["at"] is None or name in (today.get("travel") or {}):
             out[name] = None
@@ -276,27 +303,36 @@ def sleeping_places(w, today) -> dict:
             continue
         home = next((b for b in w.dwellings(name) if s["buildings"][b]["node"] == a["at"]), None)
         if home:
-            out[name] = home
-            beds_used[home] = beds_used.get(home, 0) + 1
-    for name in living:                                                         # then guests and those who chose a place
-        if name in out:
+            need = bed_share(w, name)
+            if int(s["buildings"][home]["fittings"].get("beds", 0)) - beds_used.get(home, 0.0) + 1e-9 >= need:
+                out[name] = home
+                beds_used[home] = beds_used.get(home, 0.0) + need
+            else:
+                homeless[name] = home
+    for name in living:                                                         # then guests, those who chose a place, and members
+        if name in out:                                                         # with no bed at home
             continue
         a = s["people"][name]
         cands = []
         if name in chosen:
             cands.append(chosen[name])
         cands += [bid for bid, b in s["buildings"].items() if b["node"] == a["at"] and not b.get("unfinished")
-                  and "access" in w.rights(name, ("building", bid)) and bid not in cands]
+                  and "access" in w.rights(name, ("building", bid)) and bid not in cands and bid != homeless.get(name)]
         out[name] = None
+        need = bed_share(w, name)
         for bid in cands:
             b = s["buildings"][bid]
             if b.get("unfinished") or not w.can_enter(name, bid):
                 continue
-            free = int(b["fittings"].get("beds", 0)) - beds_used.get(bid, 0)
-            if free > 0:
+            free = int(b["fittings"].get("beds", 0)) - beds_used.get(bid, 0.0)
+            if free + 1e-9 >= need and need > 0 or (need == 0 and bid in w.dwellings(name)):
                 out[name] = bid
-                beds_used[bid] = beds_used.get(bid, 0) + 1
+                beds_used[bid] = beds_used.get(bid, 0.0) + need
                 break
+        if out[name] is None and name in homeless:                              # on the floor at home (D2-165)
+            out[name] = homeless[name]
+            floor_.add(name)
+    today["_floor"] = sorted(floor_)
     return out
 
 

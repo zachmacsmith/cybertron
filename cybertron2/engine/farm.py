@@ -18,7 +18,7 @@ from __future__ import annotations
 import math
 
 from cybertron2.engine import knowledge as KN
-from cybertron2.engine.data import CROP_OF, CROPS, FENCES, ITEMS, SEED_CROP, TECHNIQUES
+from cybertron2.engine.data import CROP_OF, CROPS, FENCES, FITTINGS, ITEMS, SEED_CROP, TECHNIQUES
 from cybertron2.engine.here import Refused, show
 
 ROLES = ("cows", "oxen", "bulls", "young")
@@ -501,6 +501,13 @@ def drive(here, a, party) -> str:
         raise Refused(f"there is no place called {a.get('to')!r} here to drive them to")
     if here.parcels()[to]["cover"] not in ("pasture", "meadow", "field", "scrub", "forest", "built"):
         raise Refused(f"beasts cannot be kept on {here.parcels()[to]['name']}")
+    if here.calendar()["season"] == "winter":                                  # housed in stalls: not driven off without coming in
+        from cybertron2.engine import buildings as BL
+        mine = {c["claimant"] for c in here.claims(("herd", hid))}
+        held = {bid: b for bid, b in here.buildings().items() if mine & {c["claimant"] for c in here.claims(("building", bid))}}
+        share, bid = BL.stall_share(h, held, head(h))
+        if share > 0 and not here.can_enter(bid):
+            raise Refused(f"{h['name']} are in the stalls of {here.buildings()[bid]['name']}, behind its barred door")
     word = str(a.get("item") or "").lower().strip()
     roles = list(ROLES) if word in ("", "all", "the herd", "herd", "them") else [ROLE_OF.get(word)]
     if roles == [None]:
@@ -663,6 +670,14 @@ def _herds(w, rec):
         par = w.s["parcels"][pid]
         need = float(n)
         got = 0.0
+        stalled = 0.0
+        if winter:                                                             # housed in stalls in winter (D2-45; 02zh §4)
+            from cybertron2.engine import buildings as BL
+            mine = {c["claimant"] for c in w.claims_on(("herd", hid))}
+            held = {bid: b for bid, b in w.s["buildings"].items() if b["node"] == node
+                    and mine & {c["claimant"] for c in w.claims_on(("building", bid))}}
+            stalled, _ = BL.stall_share(h, held, n)
+            need *= 1 - stalled * (1 - float(FITTINGS["stalls"]["fodder"]))
         ate = h.get("ate") or {}
         if ate.get("day") == w.d:                                              # what it ate and trampled in a crop (herds.trample)
             got += min(need, float(ate["q"]))
@@ -708,7 +723,8 @@ def _herds(w, rec):
             w.apply("set", node, ref=("herd", hid), field="births", value=round(acc, 4))
         w.apply("set", node, ref=("herd", hid), field="in_milk", value=round(max(0.0, milk), 4))
         dS = (par["res"].get("dung") or {}).get("S", 0.0)                       # dung where they stand
-        w.apply("set_res", node, parcel=pid, key="dung", fields={"S": round(dS + n * float(cp["dung"]) / year, 4)},
+        kept = 1 + stalled * (float(FITTINGS["stalls"]["dung"]) - 1)             # dung kept in the stalls (D2-45)
+        w.apply("set_res", node, parcel=pid, key="dung", fields={"S": round(dS + n * float(cp["dung"]) * kept / year, 4)},
                 init={"S": 0.0, "K": 1e9, "r": 0.0})
         if par["cover"] == "field" and not par.get("crop"):                    # a grazed fallow (D4-39)
             r, level = f["grazed"]

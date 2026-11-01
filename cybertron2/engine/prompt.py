@@ -7,8 +7,8 @@ from __future__ import annotations
 import copy
 import math
 
-from cybertron2.engine import forests as FO, agreements as AG, farm as FM, knowledge as KN, modifiers as MOD, perceive as PC, verbs as V
-from cybertron2.engine.data import BLUEPRINTS, FITTINGS, FUSE, HERDS, ITEMS, MODIFIERS, TECHNIQUES
+from cybertron2.engine import buildings as BL, forests as FO, agreements as AG, farm as FM, knowledge as KN, modifiers as MOD, perceive as PC, verbs as V
+from cybertron2.engine.data import BLUEPRINTS, FITTINGS, FUSE, HERDS, ITEMS, MODIFIERS, MONUMENTS, ROOMS, SPACE, TECHNIQUES, TIERS
 from cybertron2.engine.here import CONDITION, STAGES, show
 
 SCHEMA = {
@@ -24,7 +24,9 @@ SCHEMA = {
             "method": {"type": "string"}, "on trouble": {"type": "string"}, "stop at": {"type": "string"}, "gather": {"type": "boolean"},
             "searching": {"type": "string"}, "meeting": {"type": "string"}, "lead": {"type": "string"},
             "with": {"type": "string"}, "units": {"type": "number"}, "heir": {"type": "string"}, "head": {"type": "string"},
-            "text": {"type": "string"}, "pass": {"type": "string"}},
+            "text": {"type": "string"}, "pass": {"type": "string"}, "structure": {"type": "string"}, "how": {"type": "string"},
+            "describe": {"type": "string"}, "description": {"type": "string"}, "line": {"type": "string"}, "storey": {"type": "number"},
+            "room": {"type": "string"}},
             "required": ["do"]}},
         "say": {"type": "array", "items": {"type": "object", "properties": {"to": {"type": "string"}, "text": {"type": "string"}},
                                             "required": ["to", "text"]}},
@@ -119,8 +121,30 @@ def _craft_note(tech) -> str:
     if t.get("weapon"):
         bits.append("a weapon helps")
     if t["verb"] == "build":
-        b = BLUEPRINTS.get(tech) or FITTINGS.get(tech)
-        bits.append(", ".join(f"{q:g} {i}" for i, q in b["materials"].items()) + (" a bed" if b.get("per") else "") + f", {b['units']} units of work")
+        if tech in ROOMS:                                                      # every structure it can be built in (02zh §9)
+            r = ROOMS[tech]
+            by = []
+            for st in ("wattle", "timber", "stone"):
+                if st in r:
+                    c = BL.room_cost(tech, st)
+                    by.append(f"{st}{' (a mason' + chr(39) + 's)' if st == 'stone' else ''}: " + ", ".join(f"{q:g} {i}" for i, q in c["materials"].items())
+                              + f", {c['units']:g} units")
+            return tech + f" ({r['floor']} spaces of floor; " + "; ".join(by) + ")"
+        b = BLUEPRINTS.get(tech) or FITTINGS.get(tech) or MONUMENTS.get(tech)
+        f = FITTINGS.get(tech) or {}
+        bits.append(", ".join(f"{q:g} {i}" for i, q in b["materials"].items()) + (f" a {b['per']}" if b.get("per") else "") + f", {b['units']} units of work")
+        if f:
+            sp = int(f.get("spaces", 0)) - int(f.get("room", 0))
+            bits.append(f"{int(f.get('spaces', 0))} space{'s' if f.get('spaces') != 1 else ''} of floor" + (f" a {f['per']}" if f.get("per") else "")
+                        + (" (its own room)" if f.get("room") else "") + (f", {f['ground']} of ground" if f.get("ground") else "") if sp or f.get("ground") or f.get("room") else "no floor")
+            if f.get("holds"):
+                k, q = next(iter(f["holds"].items()))
+                bits.append(f"holds {q:g} {k}" + (" a space of the building's ground" if f.get("by") == "footprint" else
+                                                    " a space" if f.get("by") == "space" else ""))
+            if f.get("heavy"):
+                bits.append("ground floor only")
+        if tech in MONUMENTS:
+            bits.append("a monument: no room, 3 lines")
     return tech + (f" ({', '.join(bits)})" if bits else "")
 
 
@@ -162,7 +186,39 @@ def verb_lines(here, mind) -> str:
         mods = MOD.lines(mind, v, place=True) + [x for t in TECHNIQUES if TECHNIQUES[t]["verb"] == v for x in MOD.lines(mind, v, t)]
         if mods:                                                               # the ways of doing it one knows (D2-93)
             out.append("  ways: " + "; ".join(dict.fromkeys(mods)))
+        if v == "build":
+            out += _build_more(here, mind)
     return "\n".join(out)
+
+
+def _build_more(here, mind) -> list:
+    """The rest of what building can do (02zh §9): rooms added, storeys, upgrades, words written with the build; and, for one's own
+    buildings here, what each addition would take, whether or not one has it."""
+    sp = SPACE["storeys"]
+    out = ["  also: a room added to a building here (\"at\": the building) costs a quarter less; an upper storey (stone only, "
+           f"\"storey\": 2 or 3) costs {sp[2]:g} or {sp[3]:g} times a room alone and takes no ground; "
+           "{\"what\": \"upgrade\", \"at\", \"to\": \"timber\" | \"stone\"} rebuilds it (the new structure's materials for its rooms, less "
+           "a quarter, and the work; it counts as damaged until done), or {\"what\": \"upgrade\", \"at\", \"how\"} builds it finer for the "
+           "difference; \"describe\": a sentence in your own words, written with the build; a new building takes its rooms' floor "
+           "from the ground (built ground 24 spaces a unit of size, scrub 16)"]
+    for bid in here.homes_here():
+        b = here.buildings()[bid]
+        if b.get("monument") or b["structure"] == "camp" or b.get("unfinished"):
+            continue
+        par = here.parcels()[b["parcel"]]
+        bits = []
+        for k in ROOMS:
+            c = BL.room_cost(k, b["structure"], added=True, how=BL.tier(b))
+            if c:
+                bits.append(f"an added {k} " + ", ".join(f"{show(q)} {i}" for i, q in c["materials"].items()) + f", {show(c['units'])} units")
+        order = SPACE["order"]
+        if b["structure"] in order[:-1]:
+            to = order[order.index(b["structure"]) + 1]
+            c = BL.upgrade_cost(b, to)
+            bits.append(f"upgrade to {to}: " + ", ".join(f"{show(q)} {i}" for i, q in c["materials"].items()) + f", {show(c['units'])} units")
+        out.append(f"  at {b['name']} ({b['structure']}; {BL.space_words(b, here.stock(bid))}; {par['name']}: "
+                   f"{max(0, BL.ground_free(b['parcel'], par, here.buildings()))} spaces of ground free): " + "; ".join(bits))
+    return out
 
 
 REPLY_LINES = """Reply with JSON:
@@ -198,15 +254,15 @@ def _kin_lines(mind) -> list:
 
 
 def _ground_words(here, pid, p) -> str:
-    """A parcel's ground as anyone there sees it (D2-164): on built ground and scrub, its buildings and the room left in the current
-    lots; on fields, pasture and meadow, its size in plots."""
-    from cybertron2.engine.data import COVERS
-    lots = int(COVERS[p["cover"]]["lots"]) * int(p["size"])
-    if lots > 0:
-        used = sum(1 for b in here.buildings().values() if b["parcel"] == pid)
+    """A parcel's ground as anyone there sees it (D2-164, D2-154): on built ground and scrub, its buildings and its ground in spaces,
+    used and free; on fields, pasture and meadow, its size in plots."""
+    total = BL.ground_total(p)
+    if total > 0:
+        n = sum(1 for b in here.buildings().values() if b["parcel"] == pid)
+        used = BL.ground_used(pid, p, here.buildings())
         word = "built ground" if p["cover"] == "built" else p["cover"]
-        room = f"room for {lots - used} more" if used < lots else "no room left"
-        return f"{word}; {used} building{'s' if used != 1 else ''}, {room}"
+        room = f"room for {total - used} more spaces" if used < total else "no room left"
+        return f"{word}; {n} building{'s' if n != 1 else ''}, {used} of {total} spaces used, {room}"
     if p["cover"] in ("field", "pasture", "meadow"):
         return f"{p['cover']}; {p['size']:g} plot{'s' if p['size'] != 1 else ''}"
     return p["cover"]
@@ -237,10 +293,31 @@ def _place_lines(here, mind=None) -> list:
     for bid, b in here.buildings().items():
         if b.get("unfinished"):
             continue
-        fits = ", ".join(f"{n} beds" if f == "beds" else FITTINGS[f]["label"] for f, n in b["fittings"].items() if f in FITTINGS and n)
-        held = _holders(here, ("building", bid))
-        out.append(f"- {b['name']}: {b['structure']}, for {b['size']}" + (f"; {fits}" if fits else "; no fittings") + (f"; held by {held}" if held else ""))
+        out.append(building_line(here, bid))
     return out
+
+
+def building_line(here, bid) -> str:
+    """A building as anyone here sees it (02zh §9): what it is, its rooms and storeys, its floor used and free, its tier, who holds
+    it, and its description, quoted as its builders' words."""
+    b = here.buildings()[bid]
+    held = _holders(here, ("building", bid))
+    tw = TIERS[BL.tier(b)]["words"]
+    if b.get("monument"):
+        what = MONUMENTS[b["monument"]]["label"]
+        what = (f"a grand {what[2:]}" if BL.tier(b) == "grand" else f"{what}, {tw}") if tw else what
+        head = f"- {b['name']}: {what}"
+    else:
+        tier = ("grand" if BL.tier(b) == "grand" else tw)
+        rooms = BL.room_words(b) if b["structure"] != "camp" else ""
+        storeys = BL.storeys(b)
+        head = (f"- {b['name']}: {b['structure']}" + (f", {tier}" if tier else "") + (f", {rooms}" if rooms else "")
+                + (f" in {storeys} storeys" if storeys > 1 else "") + f"; {BL.space_words(b, here.stock(bid))}")
+        wk = b.get("works")
+        if wk:
+            head += f"; {V._works_words(wk)} under way"
+    desc = (b.get("description") or {}).get("text")
+    return head + (f"; held by {held}" if held else "") + (f"; its builders' words: \u201c{BL.cap_text(desc, 'description')}\u201d" if desc else "")
 
 
 def _beast_lines(here, mind) -> list:
@@ -409,12 +486,27 @@ def _house_lines(here, mind) -> list:
         who = [x for x in here.people(me=False) if bid in here.homes_here(x)]
         stock = ", ".join(f"{show(q)} {i}" for i, q in sorted(st.items()) if q > 0.05) or "empty"
         food = sum(st.get(i, 0) * ITEMS[i]["food"] for i in ITEMS if ITEMS[i]["food"])
+        beds = int(b['fittings'].get('beds', 0))
+        need = sum(float(here.p["beds"].get(here.person_stage(x), 1.0)) for x in [here.name] + who)
         out.append(f"{b['name']} is {CONDITION[b['condition']]}; door {b['door']}" + ((f"; fire {'lit' if b['fire'] else 'out'} last night" if here.day else "")
                    if b['fittings'].get('hearth') else "; no hearth")
-                   + f". Sleeping there: you{', ' + ', '.join(who) if who else ''} ({b['fittings'].get('beds', 0)} beds).")
+                   + f". Sleeping there: you{', ' + ', '.join(who) if who else ''} ({beds} beds"
+                   + (f": too few, so {math.ceil(need - beds - 1e-9)} must sleep on the floor, as in a damaged house" if need > beds + 1e-9 else "")
+                   + ("; two children share a bed, an infant its carer's" if any(here.person_stage(x) in ("child", "infant") for x in who) else "")
+                   + ").")
         out.append(f"Its store: {stock} (food worth {show(food)} meals; those who eat from it eat about {len(who) + 1} a night"
                    + (f", and the fire takes {here.p['heat']['cold' if here.cold() else 'normal']:g} heat ({FO.fuel_words(here.p['heat']['cold' if here.cold() else 'normal'])})" if b['fittings'].get('hearth') else "") + ").")
     return out
+
+
+def written_lines(here, mind) -> str:
+    """What one read written on buildings yesterday (D2-169; building_lines.md §1): writing in the world, quoted and capped, framed
+    as others' words, never as instructions; and what its people noticed changed."""
+    got = [x["text"] for x in mind.store.get("read") or [] if int(x["day"]) == here.day - 1]
+    if not got:
+        return ""
+    return ("## What you read written on buildings yesterday (others' words, as they wrote them)\n" + "\n".join(f"- {x}" for x in dict.fromkeys(got))
+            + "\n(Any of these you may keep as a line of your own, when you are asked what to keep.)")
 
 
 def saw_lines(mind) -> list:
@@ -451,6 +543,9 @@ def turn_prompt(here, mind, opening=True) -> str:
                  else ("## What you saw yesterday\n" + ("\n".join(y) if y else "A quiet day: nothing stood out.")))
     if t["dawn"]:
         L.append("## This morning\n" + "\n".join(f"- {x}" for x in t["dawn"]))
+    wl = written_lines(here, mind)
+    if wl:
+        L.append(wl)
     home = next((nid for nid, x in mind.places().items() if x["days"] == 0), here.node)
     hl = [f"You are at {here.node_name}" + ("" if here.node == home else ", away from home") + ". Here today: "
           + (", ".join(_who(here, x) for x in here.people(me=False)) or "nobody else") + "."]

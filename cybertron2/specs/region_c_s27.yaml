@@ -13,7 +13,7 @@ nodes:
       bf_green:
         name: the Green
         cover: built
-        size: 2
+        size: 3
         side: centre
         height: 1
         text: farmhouses, a byre, a cottage and the granary round a green
@@ -241,7 +241,7 @@ nodes:
       cg_yard:
         name: the Yard
         cover: built
-        size: 1
+        size: 2
         side: centre
         height: 2
         text: a yard with two stone houses and the forge

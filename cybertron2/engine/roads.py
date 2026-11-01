@@ -342,6 +342,13 @@ def _notices(w, members, t, pos, ps):
             snow = 3.0 if EV.snow_lying(w) and x["kind"] == "tracks" else 1.0
             for text in SG.roll(SG.TRACE, SG.trace_context(w, x), rng, mult=0.3 * fade * snow * sight * eye, know=know):
                 _note(w, n, text)
+        if stretch_of(w, t) >= int(w.s["roads"][road_id]["days"]):        # the last stretch coming in: a grand building ahead (D2-171)
+            from cybertron2.engine import layout as LY
+            for bid, b in sorted(w.s["buildings"].items()):
+                if b["node"] == t["to"] and (b.get("tier") or "plain") == "grand" and not b.get("unfinished") and b["condition"] > 0:
+                    x = SimpleNamespace(nm=b["name"], place=w.s["nodes"][t["to"]]["name"], what=LY.tier_words(b).split(", ", 1)[-1])
+                    for text in SG.roll(SG.GRAND_AHEAD, x, rng, know=know, rule=rule):
+                        _note(w, n, text)
         for key, others in ps.items():                                  # other travellers seen far off on the same stretch
             if others == members or key[0] != road_id:
                 continue

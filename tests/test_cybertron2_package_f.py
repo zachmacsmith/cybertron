@@ -102,14 +102,14 @@ def test_travellers_sleeping_out_share_a_fire_of_two_timber_five_need_two():
 def test_a_hearth_warms_twelve_spaces_a_hall_is_partly_cold():
     w = world()
     b = w.s["buildings"]["reed_house"]
-    b["size"] = 12
+    b["rooms"] = [{"kind": "medium room", "floor": 12, "storey": 1}]          # the hearth warms the floor in spaces (02zh)
     w.s["containers"][b["stock"]]["goods"]["timber"] = 10.0
     w.cold_days = {0}
     rec = N.night(w)
     assert rec["hearth"]["reed_house"]["warm"] == 1.0
     w2 = world()
     b2 = w2.s["buildings"]["reed_house"]
-    b2["size"] = 30
+    b2["rooms"] = [{"kind": "hall", "floor": 30, "storey": 1}]
     w2.s["containers"][b2["stock"]]["goods"]["timber"] = 10.0
     w2.cold_days = {0}
     assert N.night(w2)["hearth"]["reed_house"]["warm"] < 0.5

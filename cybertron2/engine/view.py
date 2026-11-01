@@ -181,6 +181,9 @@ def turn(here, mind, opening=True) -> str:
                  else ("## What you saw yesterday\n" + ("\n".join(y) if y else "A quiet day: nothing stood out.")))
     if t["dawn"]:
         L.append("## This morning\n" + "\n".join(f"- {x}" for x in t["dawn"]))
+    wl = PR.written_lines(here, mind)
+    if wl:
+        L.append(wl)
     if full:
         L.append(_here(here, mind, a))
     else:

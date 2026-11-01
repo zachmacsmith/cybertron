@@ -159,6 +159,9 @@ class Here:
         return {"on": LF.on(self._w), "dial": LF.dial(self._w), "gap": LF.in_gap(self._w, self.name), "succession": inst.get("succession"),
                 "order": inst.get("order"), "heir": inst.get("heir")}
 
+    def person_stage(self, x) -> str:
+        return self._w.s["people"][x]["stage"]
+
     def buildings(self) -> dict:
         return {bid: b for bid, b in self._w.s["buildings"].items() if b["node"] == self.node}
 

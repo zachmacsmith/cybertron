@@ -14,7 +14,7 @@ nodes:
       h_green:
         name: the Green
         cover: built
-        size: 1
+        size: 2
         text: two farmhouses and a byre round a green
         adj:
         - upper_field
