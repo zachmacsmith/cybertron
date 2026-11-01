@@ -98,7 +98,8 @@ are built of and what every hearth burns, and the worlds' woods are far too smal
 
 1. Fuel: now worked out as a system in [forests.md](forests.md). Size woods by kind (2a.1), split firewood from timber (2a.2), small woods with forests beyond and charcoal in hearths
    (2a.3)?
-2. Beds for members, with infants sharing and two children a bed (2b)?
+2. Beds for members, with infants sharing and two children a bed (2b)? **Answered 3 Nov: members need beds; seeded houses
+   start with them (D2-165); the sharing rules to confirm.**
 3. A hearth warming 12 spaces, fuel scaling with floor (2c)?
 4. Building ground as a claim, disputed by custom (2d)?
 5. Room bookings as an access leg in agreements, later (2f)?
@@ -110,6 +111,9 @@ are built of and what every hearth burns, and the worlds' woods are far too smal
 
 - 24 Oct: Zach: smaller woods near villages, with forests across several nodes, so getting timber pushes societies out into
   the forests. Added as 2a.3 with charcoal in hearths and the carrying it costs.
+
+- 3 Nov: Zach: household members need beds, and houses start with them (D2-165). Calibration of every building and fitting:
+  [02zf](../../review/37_growth/02zf_buildings_calibration.py).
 
 ## Sources
 

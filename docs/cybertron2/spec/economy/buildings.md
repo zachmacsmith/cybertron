@@ -39,7 +39,7 @@ A **space** is about the floor a bed takes (about 5 m²). Everything is counted 
 | a room | its floor | |
 | a fitting, a store | | its spaces of floor |
 
-People housed are **the beds** in the building (one a bed), not a property of the room.
+People housed are **the beds** in the building (one a bed), not a property of the room. Household members need a bed as guests do, and seeded houses start with beds for their household (D2-165); an infant sharing its carer's bed and two children one bed are proposed (buildings_integration.md §2b).
 
 ### Rooms and structures
 
@@ -159,4 +159,4 @@ and do ("a stone hall with a hearth"), who holds them as they know it, and the r
 [02i_buildings.md](../../../review/37_growth/02i_buildings.md), [02k §3](../../../review/37_growth/02k_fuses_and_gates.md);
 proposals/buildings.md, proposals/shelter.md.
 
-*Current as of 3 Nov 2026: H-5, D2-3, D2-9, D2-20, D2-45, D2-49, D2-56, D2-60, D2-61, D2-154, D2-155, D2-164.*
+*Current as of 3 Nov 2026: H-5, D2-3, D2-9, D2-20, D2-45, D2-49, D2-56, D2-60, D2-61, D2-154, D2-155, D2-164, D2-165.*
