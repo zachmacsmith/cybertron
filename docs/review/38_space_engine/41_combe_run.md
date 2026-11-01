@@ -1,4 +1,4 @@
-# 38.41: Combe, the first run of the belief-built message (c1_combe, 40 days; c2_combe continuing to 80)
+# 38.41: Combe, the first run of the belief-built message (c1_combe, days 0 to 39; c2_combe, days 40 to 79)
 
 Session 37.4, 1 to 2 Nov 2026. Zach: "build out this new belief prompt building system, and then we can do a very small (have
 multiple nodes but only one originally populated, with a family that wants to grow their numbers) but pretty long run, to see if it
@@ -71,14 +71,55 @@ too many models! I want it to be cheap. But it should allow for them to expand t
     passed anything to Hawise (14 days old at day 40).
 - **Margery (Sonnet 5.5) left about half her units unused** for long stretches, though her own memory notes it.
 
+## Days 40 to 79 (c2_combe, continued from the end of day 39 under the same code, `continue --days 80`)
+
+**What happened:**
+
+| Day | |
+|---|---|
+| 42, 48 | Margery conceives; Idonea is born (helped, housed) |
+| 44 | Hawise comes of age (Haiku 5.5); Ivo turns elder (born 52 days before the start, lifespan 96) |
+| 49 to 51 | Hawise, a youth, passes a line to her baby sister while caring for her: "Keep warm by the hearth, and grow strong with your brother and sister." |
+| 53 | Idonea dies of a fever. Ivo leaves for Wenmoor "to claim its empty fields, house and mill for Everard and Hawise", with dried meat and a pack |
+| 54 to 58 | At Wenmoor Ivo repairs the Old House (back to sound: it was a ruin by day 40) and claims the place, then goes home |
+| 59 to 61 | On Ivo's orders Everard and Hawise take the herd and an ox to Wenmoor: repair, plough and sow the Bottoms |
+| 58 to 67 | At Wenmoor they sow barley but carry little food; they forage Wen Meadow bare; Hawise misses meals from day 58 |
+| 62 | Ivo dies of old age at Combe. Nobody at Wenmoor knows: news travels only with people (D4-35), and they go on with his orders |
+| 67 | Hawise dies of hunger at the Old House |
+| 68 | Everard walks home starving, hears of Ivo's death ("Mother, I am sorry about Ivo"), tries to bake bread from grain (refused: bread needs flour, and the only mill is ruined), takes one grain from a store of 64 and sets off back at nightfall with nothing for the night |
+| 69 | Everard dies of hunger on the way |
+| 80 | Margery, an elder, alone at Combe |
+
+**Reading it:**
+
+- **The family did what the world was built for, and it killed the young.** The custom ("every grown child given ground of their own
+  to hold") and the empty valley drew them to Wenmoor; Ivo planned it as a gift to the children. What failed was logistics: nobody
+  carried a harvest's worth of food to a place that would not yield for weeks, the meadow was soon bare, and the two Haiku youths
+  starved within a day of a full store rather than walk home. The decision to stay was obedience to a head they did not know was
+  dead.
+- **Perception worked as designed, and it mattered.** The youths knew their own hunger exactly ("I am starving", self, shown
+  directly); they did not know of Ivo's death until Everard came home; the Old House's empty store and the picked-bare meadow reached
+  them by their own looking. That is the belief-built message doing what it should: a world one sees from where one stands, with
+  real consequences of not knowing.
+- **Weak spots that are the agents', not the engine's:** carrying food for a night on the road (Everard took one grain); bread
+  needs flour, and flour needs a mill (none working); the Haiku youths stayed starving rather than walk a day home.
+- **Possible engine and world questions (for Zach):** unheld buildings fall to ruin within 40 days (the Old House was a ruin by day
+  40 and had to be rebuilt); a world with one mill, idle, means grain is only ever boiled (no bread) until someone repairs it.
+- **Kept lines and passing on:** Hawise passed a line to her sister (the first pass by a sibling); her own lines include "Everard
+  gave me his beans by hand when I was starving at Wenmoor" (a judgment of a person, kept). Ivo reached 24 lines; Everard 19.
+
+**Numbers (days 40 to 79):** daily message median 1,923 characters (the old view 6,604); refused or not done 8.9% of results
+(higher than c1's 7.4%: travel and a new place); units used 63%. Cost for the 40 days $5.34; both halves $11.78 for 80 days.
+Weekly usage at the end: 24%.
+
 ## Cost
 
 $6.44 for 40 days (about 2.7 agents a day on average): $0.16 a day.
 
 ## Open (for the continuation and after)
 
-1. Whether food pressure, a second child and Hawise's coming of age push anyone to Wenmoor (c2_combe, days 40 to 79).
+1. (Answered by c2_combe: they went, and the young starved there.) Whether a second try, with food carried, would hold Wenmoor.
 2. Unheld buildings decaying to ruin within 40 days: a design question for the world (should an empty house last a generation?).
 3. The system text is still the verb manual (14,000 characters): the next lever (agent_view.md, 38.37).
 
-*Current as of 2 Nov 2026 (c1_combe complete; c2_combe running).*
+*Current as of 2 Nov 2026 (c1_combe and c2_combe complete).*
