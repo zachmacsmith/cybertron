@@ -106,7 +106,7 @@ So a world can be a continent without building it all in detail.
 ## 2. The mesh
 
 - **Points:** about 150 m apart, Poisson-disc spaced, from a keyed draw. Each cell is about 2 ha, the land of one plot (a unit of
-  size). A 30 km region is about 40,000 cells.
+  size). A 70 km region is about 220,000 cells; fine detail is made only where needed (§1c).
 - **Cells:** Voronoi cells, with neighbours from the Delaunay graph.
 - **Reproducibility:** every draw is keyed by (seed, layer, cell or feature), so a pin changes only what depends on it.
 
@@ -166,7 +166,7 @@ So a world can be a continent without building it all in detail.
 2. **Land use in rings** (D2-175), outward by distance and suitability:
    - built ground (houses);
    - gardens and closes;
-   - fields on the best soil within about 2 km;
+   - fields on the best soil nearest the village, as many as the target needs (§7, D2-181);
    - meadow on wet flat land by water;
    - pasture;
    - managed wood (coppice);
@@ -175,8 +175,9 @@ So a world can be a continent without building it all in detail.
 
 ## 5. Deriving today's world
 
-1. **Node territory:** the cells nearer, in travel time, to a settlement than to any other, within a few hours' walk out and back
-   (D4-11).
+1. **Node territory:** the settlement's land from the rings (§4), sized by its capacity target (D2-181), together with any land
+   pinned to it. Wild land beyond it is not part of the node: it lies in wild nodes or in road stretches, at a day's remove (D4-11
+   is read as a maximum).
 2. **Wild nodes:** a connected wild area with a resource of note (old forest, ore, peat) is given a node at its most reachable
    point, if it is at least about 10 km² and more than half a day from any settlement.
 3. **Parcels:**
@@ -259,7 +260,7 @@ The run journal freezes the yaml as now. The mesh travels with it for the visual
 | a clay vale's parcels carry heavy soil; a floodplain's fields carry high fertility and height class 0 |
 | "short of wood" gives that settlement the region's lowest wood flow per head |
 | every check in §7 has a failing example that it catches |
-| a 30 km region of 4 settlements generates in under a minute, descriptions cached |
+| a 70 km region of 4 settlements generates in a few minutes at most, descriptions cached |
 | the output runs in today's engine unchanged |
 
 ## Numbers (D2-181; all world settings)
