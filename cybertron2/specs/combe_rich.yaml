@@ -1,0 +1,775 @@
+# Combe, rich start (2 Nov, Zach: "another run that starts with more opus's and more food initially"): combe.yaml with Margery
+# and every child who comes of age on Opus 5.5 (was Sonnet and Haiku), the house store four times fuller (120 grain, 30 beans, 20 dried meat), 80 days.
+name: combe_rich
+seed: 61
+days: 80
+calendar:
+  season: summer
+  day: 3
+  season_days: 8
+cold_days: []
+children:
+  true: true
+  dial: low
+lifespan: 96
+view: beliefs
+llm:
+  week_stop: 0.4
+nodes:
+  combe:
+    name: Combe
+    parcels:
+      cb_green:
+        name: the Green
+        cover: built
+        size: 1
+        side: centre
+        height: 1
+        text: a house and a byre round a trodden green
+        adj:
+        - cb_infield
+        - cb_common
+        - cb_copse
+      cb_infield:
+        name: the Infield
+        cover: field
+        size: 2
+        side: north
+        height: 1
+        holder: Hobb
+        fertility: 1.0
+        text: the Hobbs' barley, walled from the beasts
+        adj:
+        - cb_common
+        state:
+          crop:
+            kind: barley
+            left: 100
+            ripe_day: 5
+          last_crop: legumes
+      cb_common:
+        name: the Common
+        cover: pasture
+        size: 3
+        side: west
+        height: 1
+        text: grazing down to the brook
+        adj:
+        - cb_brook
+        - cb_moor
+        state:
+          plants:
+            K: 3
+            S: 3
+            r: 0.3
+          grass:
+            K: 90
+            S: 70
+            r: 0.32
+      cb_copse:
+        name: Combe Copse
+        cover: forest
+        size: 2
+        side: east
+        height: 2
+        text: ash and hazel on the bank above the house
+        state:
+          wood:
+            kind: managed wood
+          plants:
+            K: 3
+            S: 3
+            r: 0.3
+      cb_moor:
+        name: Combe Moor
+        cover: scrub
+        size: 4
+        side: south
+        height: 3
+        text: gorse and heather up to the skyline
+        state:
+          wood:
+            kind: scrub
+          plants:
+            K: 4
+            S: 4
+            r: 0.3
+          grass:
+            K: 40
+            S: 40
+            r: 0.3
+      cb_brook:
+        name: the Brook
+        cover: water
+        size: 1
+        side: west
+        height: 0
+        text: a quick stony brook
+  wenmoor:
+    name: Wenmoor
+    parcels:
+      wm_green:
+        name: the Old Green
+        cover: built
+        size: 1
+        side: centre
+        height: 1
+        text: grass grown over a green between an empty house and the mill
+        adj:
+        - wm_bottoms
+        - wm_river
+        - wm_meadow
+      wm_bottoms:
+        name: the Bottoms
+        cover: field
+        size: 6
+        side: south
+        height: 0
+        fertility: 1.3
+        text: deep river soil, gone to grass and docks since the fever
+        adj:
+        - wm_meadow
+        - wm_river
+        state:
+          last_crop: fallow
+      wm_meadow:
+        name: Wen Meadow
+        cover: meadow
+        size: 3
+        side: east
+        height: 0
+        text: rich meadow by the water
+        adj:
+        - wm_river
+        state:
+          plants:
+            K: 4
+            S: 4
+            r: 0.3
+          grass:
+            K: 80
+            S: 80
+            r: 0.32
+      wm_river:
+        name: the Wen
+        cover: water
+        size: 1
+        side: west
+        height: 0
+        text: a broad slow river
+  holtwood:
+    name: Holtwood
+    parcels:
+      hw_edge:
+        name: the Wood's Edge
+        cover: meadow
+        size: 1
+        side: south
+        height: 1
+        text: a clearing where the track meets the trees
+        adj:
+        - hw_wood
+        state:
+          plants:
+            K: 3
+            S: 3
+            r: 0.3
+      hw_wood:
+        name: the Holt
+        cover: forest
+        size: 4
+        side: centre
+        height: 2
+        text: old oak and beech, deep and dim
+        state:
+          wood:
+            kind: old forest
+          game:
+            K: 14
+            S: 12
+            r: 0.25
+          plants:
+            K: 8
+            S: 8
+            r: 0.3
+  redscar:
+    name: Redscar
+    unexplored: true
+    parcels:
+      rs_scar:
+        name: the Red Scar
+        cover: rock
+        size: 2
+        side: centre
+        height: 3
+        text: a red-earthed cliff, good grey stone under it, green stains in the rock
+      rs_slope:
+        name: Scar Slope
+        cover: scrub
+        size: 2
+        side: south
+        height: 2
+        text: thin grass and thorn below the cliff
+        adj:
+        - rs_scar
+        state:
+          wood:
+            kind: scrub
+          plants:
+            K: 2
+            S: 2
+            r: 0.3
+          grass:
+            K: 30
+            S: 30
+            r: 0.3
+roads:
+- - combe
+  - wenmoor
+  - 1
+  - terrain: river valley
+    way: the track down the valley
+    stretches:
+      1:
+        landmarks:
+        - ford
+    ends:
+      combe:
+        parcels:
+        - cb_common
+        side: west
+      wenmoor:
+        parcels:
+        - wm_green
+        side: north
+- - combe
+  - holtwood
+  - 1
+  - terrain: woodland
+    way: the path east into the trees
+    ends:
+      combe:
+        parcels:
+        - cb_copse
+        side: east
+      holtwood:
+        parcels:
+        - hw_edge
+        side: south
+- - holtwood
+  - redscar
+  - 1
+  - terrain: hills
+    way: a faint path north up a red-earthed gully
+    ends:
+      holtwood:
+        parcels:
+        - hw_wood
+        side: north
+- - wenmoor
+  - holtwood
+  - 2
+  - terrain: woodland
+    way: a long way round under the trees
+    ends:
+      wenmoor:
+        parcels:
+        - wm_meadow
+        side: east
+buildings:
+  hobb_house:
+    name: Hobb House
+    parcel: cb_green
+    household: Hobb
+    structure: wattle
+    size: 6
+    fittings:
+      beds: 6
+      hearth: 1
+      bins: 1
+    stock:
+      grain: 120
+      beans: 30
+      dried meat: 20
+      timber: 12
+      firewood: 40
+  byre:
+    name: the Byre
+    parcel: cb_green
+    household: Hobb
+    structure: wattle
+    size: 4
+    fittings:
+      bins: 1
+    stock:
+      hay: 20
+      straw: 10
+      dung: 10
+      wooden plough: 1
+      harness: 2
+  old_house:
+    name: the Old House
+    parcel: wm_green
+    structure: timber
+    size: 5
+    condition: 1
+    fittings:
+      beds: 4
+      hearth: 1
+      bins: 1
+    stock: {}
+  the_mill:
+    name: Wen Mill
+    parcel: wm_green
+    structure: stone
+    size: 4
+    condition: 1
+    fittings:
+      millstones: 1
+      water wheel: 1
+      bins: 1
+    stock: {}
+herds:
+  hobb_cattle:
+    name: the Hobb cattle
+    kind: cattle
+    parcel: cb_common
+    cows: 2
+    oxen: 2
+    bulls: 1
+    young: 1
+    in_milk: 1
+    holder: Hobb
+claims: []
+customs:
+- text: 'The Hobbs mean to be a great house: many children, and every grown child given ground of their own to hold.'
+  households:
+  - Hobb
+- text: Whoever clears new ground and sows it holds it, by the old custom, and so do their children.
+  nodes: all
+- text: Wenmoor down the valley was a village until the fever; its fields lie fallow, and its mill stands idle by the river.
+  nodes: all
+- text: Every hearth wants about twelve timber to see a house through winter's cold.
+  nodes: all
+incidents: []
+signs:
+- day: 9
+  node: all
+  about: sky
+  sense: touch
+  text: a white frost on the grass at dawn, the first of the year
+  salience: 0.6
+  tags:
+  - season
+  - farming
+bounds:
+  acting:
+  - 4
+  - 5
+  children_max: 1
+  youths_min: 0
+  per_min: 1
+  per_spread: 9
+sim:
+  start: -100
+  fertility: 0.15
+  leave: 0.5
+cast:
+  head: claude-opus-5-5
+  opus_extra: 0
+  middle: claude-opus-5-5
+  sonnet_extra: 1
+  rest: claude-opus-5-5
+  youth: claude-opus-5-5
+generated:
+  seed: 54
+  try: 0
+tree:
+- name: Jordan
+  sex: m
+  born: -252
+  died: 0
+  cause: old age
+  parents: []
+  partner: Sabina
+  line: Hobb
+  origin: null
+  children:
+  - Idonea
+  - Martin
+  left: null
+- name: Sabina
+  sex: f
+  born: -247
+  died: 0
+  cause: old age
+  parents: []
+  partner: Jordan
+  line: Hobb
+  origin: Ashby
+  children:
+  - Idonea
+  - Martin
+  left: null
+- name: Idonea
+  sex: f
+  born: -173
+  died: null
+  cause: null
+  parents:
+  - Jordan
+  - Sabina
+  partner: null
+  line: Hobb
+  origin: null
+  children: []
+  left: -130
+- name: Martin
+  sex: m
+  born: -163
+  died: 0
+  cause: old age
+  parents:
+  - Jordan
+  - Sabina
+  partner: Philippa
+  line: Hobb
+  origin: null
+  children:
+  - Hawise
+  - Ursula
+  - Emma
+  - Geoffrey
+  left: null
+- name: Philippa
+  sex: f
+  born: -161
+  died: null
+  cause: null
+  parents: []
+  partner: Martin
+  line: Hobb
+  origin: Ashby
+  children:
+  - Hawise
+  - Ursula
+  - Emma
+  - Geoffrey
+  left: null
+  line_born: Hobb
+- name: Hawise
+  sex: f
+  born: -113
+  died: null
+  cause: null
+  parents:
+  - Martin
+  - Philippa
+  partner: null
+  line: Hobb
+  origin: null
+  children: []
+  left: -76
+- name: Ursula
+  sex: f
+  born: -101
+  died: null
+  cause: null
+  parents:
+  - Martin
+  - Philippa
+  partner: null
+  line: Hobb
+  origin: null
+  children: []
+  left: -73
+- name: Emma
+  sex: f
+  born: -93
+  died: null
+  cause: null
+  parents:
+  - Martin
+  - Philippa
+  partner: null
+  line: Hobb
+  origin: null
+  children: []
+  left: -65
+- name: Geoffrey
+  sex: m
+  born: -82
+  died: null
+  cause: null
+  parents:
+  - Martin
+  - Philippa
+  partner: Avice
+  line: Hobb
+  origin: null
+  children:
+  - Ivo
+  - Matthew
+  left: null
+- name: Avice
+  sex: f
+  born: -82
+  died: null
+  cause: null
+  parents: []
+  partner: Geoffrey
+  line: Hobb
+  origin: Ashby
+  children:
+  - Ivo
+  - Matthew
+  left: null
+  line_born: Hobb
+- name: Ivo
+  sex: m
+  born: -52
+  died: null
+  cause: null
+  parents:
+  - Geoffrey
+  - Avice
+  partner: Margery
+  line: Hobb
+  origin: null
+  children:
+  - Everard
+  left: null
+- name: Matthew
+  sex: m
+  born: -49
+  died: null
+  cause: null
+  parents:
+  - Geoffrey
+  - Avice
+  partner: null
+  line: Hobb
+  origin: null
+  children: []
+  left: 0
+- name: Margery
+  sex: f
+  born: -52
+  died: null
+  cause: null
+  parents: []
+  partner: Ivo
+  line: Hobb
+  origin: Ashby
+  children:
+  - Everard
+  left: null
+  line_born: Hobb
+- name: Everard
+  sex: m
+  born: -8
+  died: null
+  cause: null
+  parents:
+  - Ivo
+  - Margery
+  partner: null
+  line: Hobb
+  origin: null
+  children: []
+  left: null
+history:
+- text: Jordan and Sabina Hobb came to Combe and built the first Hobb house
+  who:
+  - Jordan
+  - Sabina
+  day: -192
+- text: 'a hard winter: the frost came early and the stores ran out'
+  kind: winter
+  who: []
+  day: -180
+- text: 'a hard winter: the frost came early and the stores ran out'
+  kind: winter
+  who: []
+  day: -151
+- text: Idonea married into Ashby and left Combe
+  kind: left
+  who:
+  - Idonea
+  day: -130
+- text: 'a hard winter: the frost came early and the stores ran out'
+  kind: winter
+  who: []
+  day: -85
+- text: Hawise married into Ashby and left Combe
+  kind: left
+  who:
+  - Hawise
+  day: -76
+- text: Ursula married into Ashby and left Combe
+  kind: left
+  who:
+  - Ursula
+  day: -73
+- text: Emma married into Ashby and left Combe
+  kind: left
+  who:
+  - Emma
+  day: -65
+- text: 'a hard winter: the frost came early and the stores ran out'
+  kind: winter
+  who: []
+  day: -3
+- text: Jordan died (old age)
+  kind: death
+  who:
+  - Jordan
+  day: 0
+- text: Sabina died (old age)
+  kind: death
+  who:
+  - Sabina
+  day: 0
+- text: Martin died (old age)
+  kind: death
+  who:
+  - Martin
+  day: 0
+- text: Matthew married into Ashby and left Combe
+  kind: left
+  who:
+  - Matthew
+  day: 0
+agents:
+  Ivo:
+    household: Hobb
+    born: -52
+    stage: adult
+    sex: m
+    relations:
+      Philippa: your grandmother
+      Geoffrey: your father
+      Avice: your mother
+      Margery: your wife
+      Everard: your son
+    memories:
+    - 'Your line''s founders: Jordan and Sabina Hobb came to Combe and built the first Hobb house.'
+    - 'Hard winters you remember, when the frost came early and the stores ran out: last winter.'
+    - Great-grandfather Jordan died last winter (old age).
+    - Great-grandmother Sabina died last winter (old age).
+    - Grandfather Martin died last winter (old age).
+    - Brother Matthew married into Ashby, two days' walk away.
+    - Your father Geoffrey and your mother Avice are dead, and your grandmother Philippa before them; Hobb House and all the Hobbs hold are yours
+      and Margery's now.
+    knows:
+      hoe:
+        level: known
+        skill: 1.14
+      milk:
+        level: known
+        skill: 1.08
+      plough:
+        level: known
+        skill: 1.08
+      reap:
+        level: known
+        skill: 1.14
+      select seed:
+        level: known
+        skill: 1.08
+      sow:
+        level: known
+        skill: 1.14
+      weed:
+        level: known
+        skill: 1.14
+    aware_of: {}
+    holdings:
+      crude tool: 1
+      coin: 4
+    concerns:
+    - farming
+    - food
+    - animals
+    - harvest
+    parents:
+    - Geoffrey
+    - Avice
+    partner: Margery
+    model: claude-opus-5-5
+    born_line: Hobb
+    trade: sowing a field broadcast and reaping a crop
+    aim: See the Hobb household through the winter, fed and warm.
+    role: head
+  Margery:
+    household: Hobb
+    born: -52
+    stage: adult
+    sex: f
+    relations:
+      Philippa: of the Hobb household
+      Geoffrey: your father-in-law
+      Avice: your mother-in-law
+      Ivo: your husband
+      Everard: your son
+    memories:
+    - 'Your line''s founders: Jordan and Sabina Hobb came to Combe and built the first Hobb house.'
+    - 'Hard winters you remember, when the frost came early and the stores ran out: last winter.'
+    - Ivo's parents and his grandmother are dead; Hobb House and all the Hobbs hold are yours and Ivo's now.
+    knows:
+      hoe:
+        level: known
+        skill: 1.14
+      milk:
+        level: known
+        skill: 1.08
+      plough:
+        level: known
+        skill: 1.08
+      reap:
+        level: known
+        skill: 1.14
+      select seed:
+        level: known
+        skill: 1.08
+      sow:
+        level: known
+        skill: 1.14
+      weed:
+        level: known
+        skill: 1.14
+    aware_of: {}
+    holdings: {}
+    concerns:
+    - farming
+    - food
+    - animals
+    - harvest
+    partner: Ivo
+    model: claude-opus-5-5
+    born_line: Hobb
+    trade: sowing a field broadcast and reaping a crop
+    aim: Keep your household fed and its house sound.
+  Everard:
+    household: Hobb
+    born: -8
+    stage: child
+    sex: m
+    relations:
+      Philippa: your great-grandmother
+      Geoffrey: your grandfather
+      Avice: your grandmother
+      Ivo: your father
+      Margery: your mother
+    memories:
+    - 'Your line''s founders: Jordan and Sabina Hobb came to Combe and built the first Hobb house.'
+    knows: {}
+    aware_of: {}
+    holdings: {}
+    concerns: []
+    parents:
+    - Ivo
+    - Margery
+    model: null
+    born_line: Hobb
+    trade: ''
