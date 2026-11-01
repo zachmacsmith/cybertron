@@ -537,12 +537,17 @@ class World:
         return False
 
     def takeable(self, name, node=None) -> list:
-        """Containers at this node one may take from: one's hands, then stores where one has withdrawal."""
+        """Containers at this node one may take from: one's hands, then stores where one has withdrawal, then what was left at
+        those stores' doors (goods that overflow at a door stay the house's: D4-89)."""
         node = node or self.at(name)
         out = [self.hands(name)]
+        mine = set()
         for bid, b in self.s["buildings"].items():
             if b["node"] == node and self.may_take(name, b["stock"]):
                 out.append(b["stock"])
+                mine.add(bid)
+        out += [cid for cid, c in self.s["containers"].items() if c.get("kind") == "pile" and c.get("door") in mine
+                and not c.get("hidden") and c.get("node") == node]
         return out
 
     def can_enter(self, name, bid) -> bool:

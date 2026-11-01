@@ -296,3 +296,4 @@ Newest first. Ideas decided or rejected in conversation before 23 Oct are backfi
 | 2 Nov | A fire under no roof in the night's weather (built, then written down) | retrospective, accepted: D4-83 | [fire_weather.md](fire_weather.md) |
 | 3 Nov | The generator, stage 1: a spec for review (today's world format plus the mesh, no engine change) | for review | [generator_stage1.md](generator_stage1.md) |
 | 2 Nov | A baby sleeps with its mother; a partner's death shown only once known (built, then written down) | retrospective, accepted: D4-87, D4-88 | [baby_and_partner_lines.md](baby_and_partner_lines.md) |
+| 2 Nov | How much lies there: heaps by bulk, counted when attended, kept by their house; a begun fitting shown (built, then written down) | retrospective, accepted: D4-89, D4-90, D4-91 | [heap_sizes.md](heap_sizes.md) |

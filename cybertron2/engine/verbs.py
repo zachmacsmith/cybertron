@@ -1080,7 +1080,9 @@ def _take(here, mind, a, party):
             raise Refused(f"you looked over {here.parcels()[here.parcel(src_name)]['name']} and found no {item} lying there")
     if rem:
         c = here.thing(rem)
-        src, theft = rem, False
+        door = c.get("door") if c.get("door") in here.buildings() else None         # left at a door: the house's (D4-89)
+        src, theft = rem, bool(door) and not here.may_take(here.buildings()[door]["stock"])
+        bid = door
         label = f"what {c['of']} left" if c.get("body") else f"what lay at {here.spot_name(c)}"
         have = c["goods"].get(item, 0.0)
         if c.get("by") != here.name:

@@ -63,8 +63,7 @@ capped at 1. What is noticed shows through its signs (D4-48).
 | Thing | Own |
 |---|---|
 | a body | 0.9 (on built ground in a settlement 1.0) |
-| a heap of goods (10 or more) | 0.9 |
-| a small pack | 0.4 |
+| goods in the open, by their weight w | 1 − exp(−w / 4.34): about 0.37 at 2, 0.9 at 10, 1 from 40 (D4-90); buried, at most 0.4 |
 | a herd (also heard) | 0.95 |
 | a camp, used lately | 0.7 |
 | traces: tracks, ashes, ruts | 0.3, fading (below) |
@@ -116,6 +115,19 @@ capped at 1. What is noticed shows through its signs (D4-48).
 | one slipping into a house (a theft) | own 0.4 | calibrate |
 | a break-in heard by a neighbour | own 0.3 | calibrate |
 | night | sight x0.1, sound x1.2 (D2-99) | calibrate |
+
+### How much lies there (D4-90)
+
+Goods in the open read in three degrees, each by the rule:
+- **from afar:** a heap by its size, "a heap" (10 weight or more), "a large heap" (40 or more), "a great heap" (100 or more), "of
+  something"; under 10, "a bundle";
+- **a close look** (reach near): each good with the band it falls in, on the ladder 1, 2, 3, 5, 8, 12, 20, 30, 50, 80, 120, 200,
+  300, 500, 800, 1200, 2000: "a large heap of grain (perhaps 80 to 120) and straw (perhaps 5 to 8)";
+- **attending** to it (by its tag, or to its parcel): a count, to about 1 under 20 and about 5 above: "about 95 grain".
+
+Food spoiling in the open signs by its bulk: rotting meat's smell has own 0.6 × (amount / 10, at least 1, at most 2 in all), and
+from 30 a stench over the whole parcel (own amount / 20, at most 3); a wet heap of grain or other stores (10 or more) a musty smell
+(own amount / 60, at most 1.5); 40 or more left out two days, rats by day (sight, 0.6) and at night (sound, 0.5) (D4-90).
 
 ### Traces (D2-88)
 
@@ -170,4 +182,4 @@ Things they notice, as signs in their daily notice ("a pack lies under the hazel
 [proposals/things_in_places.md](../../proposals/things_in_places.md), [journeys.md](../../proposals/journeys.md),
 [hidden_ways.md](../../proposals/hidden_ways.md), [visibility.md](../../proposals/visibility.md).
 
-*Current as of 2 Nov 2026: D2-85, D2-86, D2-88, D2-89, D2-91, D2-97, D2-98, D2-102, D2-115, D4-53, D4-70, D4-75.*
+*Current as of 2 Nov 2026: D2-85, D2-86, D2-88, D2-89, D2-91, D2-97, D2-98, D2-102, D2-115, D4-53, D4-70, D4-75, D4-90.*

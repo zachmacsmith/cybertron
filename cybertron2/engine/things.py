@@ -8,6 +8,8 @@ land, and (later) fresh traces. A new kind of thing is a kind name, a conspicuou
 """
 from __future__ import annotations
 
+import math
+
 from cybertron2.engine import environment as EV, knowledge as KN
 from cybertron2.engine.data import COVERS, ITEMS, NOTICING, TECHNIQUES, THINGS
 
@@ -61,6 +63,37 @@ def parcel_name(w, c) -> str:
     return w.s["nodes"][c["node"]]["name"] if c.get("node") in w.s["nodes"] else "the side of the road"
 
 
+def band_words(q: float) -> str:
+    """How much of a good a close look judges there is: the band of THINGS["bands"] it falls in ("perhaps 80 to 120")."""
+    b = [float(v) for v in THINGS["bands"]]
+    if q < b[0]:
+        return "a little"
+    for lo, hi in zip(b, b[1:]):
+        if q < hi:
+            return f"perhaps {lo:g} to {hi:g}"
+    return f"more than {b[-1]:g}"
+
+
+def count_words(q: float) -> str:
+    """A count by one who looks it over (attending): to about 1 under 20, else to about 5."""
+    if q < 1:
+        return "less than 1"
+    n = round(q) if q < 20 else 5 * round(q / 5)
+    return f"about {n:g}"
+
+
+def goods_est(goods: dict, how=band_words) -> str:
+    """'grain (perhaps 80 to 120) and straw (perhaps 5 to 8)': each good, the largest first, with how much one judges."""
+    items = [(i, q) for i, q in sorted(goods.items(), key=lambda kv: -kv[1]) if q > 1e-9]
+    return " and ".join(f"{i} ({how(q)})" for i, q in items[:3])
+
+
+def goods_count(goods: dict) -> str:
+    """'about 95 grain and about 10 straw'."""
+    items = [(i, q) for i, q in sorted(goods.items(), key=lambda kv: -kv[1]) if q > 1e-9]
+    return " and ".join(f"{count_words(q)} {i}" for i, q in items[:3])
+
+
 def goods_words(goods: dict) -> str:
     items = [i for i, q in sorted(goods.items(), key=lambda kv: -kv[1]) if q > 1e-9]
     return " and ".join(items[:3]) if items else ""
@@ -96,8 +129,9 @@ def own(w, c) -> float:
         built = w.s["parcels"].get(c.get("parcel"), {}).get("cover") == "built"
         x = float(THINGS["body_built"] if built else THINGS["body"])
     qty = sum(q * max(1, ITEMS.get(i, {}).get("weight", 1)) for i, q in c["goods"].items() if q > 1e-9)
-    if qty > 1e-9:
-        x = max(x, float(THINGS["heap"] if qty >= float(THINGS["heap_min"]) else THINGS["pack"]))
+    if qty > 1e-9:                                                            # by its bulk (heap-sizes proposal); buried, the
+        bulk = 1.0 - math.exp(-qty / float(THINGS["heap_k"]))                   # turned earth shows no more for more under it
+        x = max(x, min(bulk, float(THINGS["pack"])) if c.get("hidden") == "buried" else bulk)
     how = c.get("hidden")
     if how:
         taught, untaught = THINGS["hidden"][how]

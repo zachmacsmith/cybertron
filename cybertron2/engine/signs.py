@@ -1138,15 +1138,17 @@ THING = [
          text=lambda x: f"the grave of {x.of} {x.at}" + (", under a cairn" if x.cairn else "")),
     # ---- goods in the open: a heap
     dict(when=lambda x: x.heap and _OPEN(x) and not x.snowed_over, sense="sight", p=1.0, tags=["food"],
-         text=lambda x: f"a heap of something {x.at}"),
+         text=lambda x: f"{x.size} of something {x.at}"),
     dict(when=lambda x: x.heap and _OPEN(x) and x.snowed_over, sense="sight", p=1.0, tags=["food"],
-         text=lambda x: f"a heap of something {x.at}, under a skin of snow"),
+         text=lambda x: f"{x.size} of something {x.at}, under a skin of snow"),
     dict(when=lambda x: x.heap and _OPEN(x) and x.rained and not x.snowed_over, sense="sight", p=0.5, tags=["food"],
-         text=lambda x: f"a heap of something {x.at}, dark and sodden from the rain"),
+         text=lambda x: f"{x.size} of something {x.at}, dark and sodden from the rain"),
     dict(when=lambda x: (x.heap or x.pack) and _OPEN(x) and x.seed and x.outside and x.weather != "fog", sense="sight", p=0.4,
          tags=["food"], text=lambda x: f"rooks and pigeons busy at something lying {x.at}"),
     dict(when=lambda x: x.heap and _OPEN(x), sense="sight", p=1.0, reach="near", tags=["food"],
-         text=lambda x: f"a heap of {x.goods_words} lies {x.at}"),
+         text=lambda x: f"{x.size} of {x.goods_est} lies {x.at}"),
+    dict(when=lambda x: (x.heap or x.pack or x.at_door) and _OPEN(x), sense="sight", p=1.0, reach="count", tags=["food"],
+         text=lambda x: f"you looked over what lies {x.at}: {x.goods_count}"),       # attended: counted (heap-sizes proposal)
     # ---- a bundle
     dict(when=lambda x: x.pack and _OPEN(x) and not x.snowed_over, sense="sight", p=1.0, tags=["food"],
          text=lambda x: f"a bundle lies {x.at}"),
@@ -1155,7 +1157,7 @@ THING = [
     dict(when=lambda x: x.pack and _OPEN(x) and x.rained and not x.snowed_over, sense="sight", p=0.4, tags=["food"],
          text=lambda x: f"a sodden bundle lies {x.at}"),
     dict(when=lambda x: x.pack and _OPEN(x), sense="sight", p=1.0, reach="near", tags=["food"],
-         text=lambda x: f"a bundle lies {x.at}, with {x.goods_words} in it"),
+         text=lambda x: f"a bundle lies {x.at}, with {x.goods_est} in it"),
     # ---- what the weather and the days have done to goods in the open (close)
     dict(when=lambda x: x.seed and not x.body and x.rained and x.hidden != "buried", sense="sight", p=0.8, reach="near",
          tags=["food"],
@@ -1168,15 +1170,27 @@ THING = [
          text=lambda x: f"the meat {x.at} is frozen hard"),
     dict(when=lambda x: x.rotting_food and not x.body and x.hidden != "buried", sense="smell", p=1.0, reach="near", tags=["food"],
          text=lambda x: f"the stink of meat gone bad {x.at}"),
-    dict(when=lambda x: x.rotting_food and not x.body and x.warm and x.outside and x.hidden != "buried", sense="smell", own=0.6,
+    dict(when=lambda x: x.rotting_food and not x.body and x.warm and x.outside and x.hidden != "buried", sense="smell",
+         own=lambda x: min(2.0, 0.6 * max(1.0, x.rot_qty / 10)),               # stronger, and carrying further, with more of it
          tags=["food"], text=lambda x: "a smell of rot comes and goes on the wind"),
+    dict(when=lambda x: x.rot_qty >= 30 and not x.body and x.outside and x.hidden != "buried", sense="smell",
+         own=lambda x: min(3.0, x.rot_qty / 20), tags=["food", "danger"],
+         text=lambda x: f"a stench of rotting meat hangs over {x.where}; it catches in the throat"),
+    # ---- a large store of food lying out spoils loud (heap-sizes proposal): mould by bulk, then rats
+    dict(when=lambda x: x.seed_qty >= 10 and x.rained and not x.body and x.outside and x.hidden != "buried", sense="smell",
+         own=lambda x: min(1.5, x.seed_qty / 60), tags=["food"],
+         text=lambda x: f"a sour, musty smell of something wet going bad {x.at}"),
+    dict(when=lambda x: x.seed_qty >= 40 and x.age >= 2 and x.outside and not x.snowed_over and x.hidden != "buried", sense="sight",
+         p=0.6, tags=["food"], text=lambda x: f"rats run in and out of the heap {x.at}"),
+    dict(when=lambda x: x.seed_qty >= 40 and x.age >= 2 and x.outside and x.hidden != "buried", sense="sound", p=0.5, night=True,
+         tags=["food"], text=lambda x: f"scrabbling and squeaking in the dark {x.at}: rats at the food"),
     dict(when=lambda x: x.rotting_food and not x.body and x.warm and x.outside and x.hidden != "buried", sense="sound", p=0.4,
          tags=["food"], text=lambda x: f"a buzz of flies {x.at}"),
     # ---- left at a door
     dict(when=lambda x: x.at_door, sense="sight", own=1.0, tags=["food"],
          text=lambda x: f"something has been left at the door of {x.door_name}"),
     dict(when=lambda x: x.at_door, sense="sight", p=1.0, reach="near", tags=["food"],
-         text=lambda x: f"left at the door of {x.door_name}: {x.goods_words}"),
+         text=lambda x: f"left at the door of {x.door_name}: {x.goods_est}"),
     # ---- hidden under brush: a tracker reads cut brush for what it is
     dict(when=lambda x: x.hidden == "under brush", sense="sight", p=1.0, lay="hunt", tags=["food"],
          text=lambda x: f"the brush {x.at} looks heaped up, as if over something"),
@@ -1444,6 +1458,11 @@ def thing_context(w, c):
                         buried_age=w.d - int(c["buried"]) if c.get("buried") is not None else 0,
                         hidden=c.get("hidden"), untaught=bool(c.get("untaught")), goods=dict(c["goods"]),
                         goods_words=TH.goods_words(c["goods"]), qty=qty, heap=qty >= float(THINGS["heap_min"]),
+                        size=("a great heap" if qty >= float(THINGS["heap_great"]) else "a large heap"
+                              if qty >= float(THINGS["heap_large"]) else "a heap"),          # by its bulk (heap-sizes proposal)
+                        goods_est=TH.goods_est(c["goods"]), goods_count=TH.goods_count(c["goods"]),
+                        seed_qty=sum(q for i, q in c["goods"].items() if i in SEED_GOODS),
+                        rot_qty=sum(q for i, q in c["goods"].items() if ITEMS.get(i, {}).get("rot")),
                         pack=0 < qty < float(THINGS["heap_min"]), rot=TH.rotting(w, c),
                         rotting_food=any(ITEMS.get(i, {}).get("rot") and q > 0.2 for i, q in c["goods"].items()),
                         at_door=bool(door) and qty > 0, door_name=w.s["buildings"][door]["name"] if door in w.s["buildings"] else "",
@@ -1742,6 +1761,8 @@ def roll(rows, x, rng, mult=1.0, know=(), near=False, at_node=True, least=False,
         p = p(x) if callable(p) else p
         if reach == "near":
             p = p if near else 0.0
+        elif reach == "count":                                                 # counted only by one attending to it (perceive)
+            p = 0.0
         elif rule is not None:
             p = p * rule(row)
         else:

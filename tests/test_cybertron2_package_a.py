@@ -68,7 +68,10 @@ def test_hiding_untaught_is_twice_as_easy_to_see_and_a_buried_pack_is_almost_nev
     give(w, "Edric", grain=4, coin=10)
     assert "not as well hidden" in do(w, "Edric", do="give", item="grain", qty=4, to="Alder Copse", hidden="under brush")
     pile = next(c for c in w.s["containers"].values() if c["kind"] == "pile")
-    assert pile["untaught"] and abs(TH.own(w, pile) - 0.4 * 0.4) < 1e-9          # untaught x0.4, not x0.2
+    import math
+    from cybertron2.engine.data import THINGS
+    bare = 1 - math.exp(-4 / THINGS["heap_k"])                                    # 4 grain in the open, by its bulk
+    assert pile["untaught"] and abs(TH.own(w, pile) - bare * 0.4) < 1e-9          # untaught x0.4, not x0.2
     do(w, "Edric", do="give", item="coin", qty=10, to="Alder Copse", hidden="buried")
     cache = [c for c in w.s["containers"].values() if c["kind"] == "pile" and c.get("hidden") == "buried"][0]
     assert TH.chance(w, "Sibyl", cache) < 0.01
@@ -236,7 +239,7 @@ def test_no_glimpse_of_a_thing_names_what_it_holds_or_whose_body_it_is():
         for k, st in enumerate(states):
             x = _thing(w, f"t{k}", **st)
             for _, row in SG.true_rows(SG.THING, x):
-                if row.get("reach", "rule") == "near":
+                if row.get("reach", "rule") in ("near", "count"):                 # a close look, or counting it (attended)
                     continue
                 text = row["text"](x)
                 seen += 1

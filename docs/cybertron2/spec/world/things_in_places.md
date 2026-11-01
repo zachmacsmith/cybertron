@@ -52,6 +52,9 @@ place (D4-34): a pile of goods, remains (a body and what it carried), a camp, a 
 A thing at a spot is held by nobody: whoever takes it holds it (`take` from a place, or from someone's remains, as now). The
 leaver's claim is social only. Taking is an act seen by whoever is present.
 
+Goods left at a building's door, as when a store is full, stay that house's (D4-89): those who may take from its store may take,
+use, eat and offer them as part of it; anyone else who takes them commits a theft, known only to those who saw it (D4-81).
+
 ### The dead (D2-87, D2-96)
 
 - The dead leave everything they carried where they die, at a node or on the road (world.p_die; remains on the road since 06c7148).
@@ -110,4 +113,4 @@ Things they notice where they are (information/noticing.md); the bury option whe
 [proposals/things_in_places.md](../../proposals/things_in_places.md), [verb_modifiers.md](../../proposals/verb_modifiers.md),
 [objects_in_world.md](../../proposals/objects_in_world.md).
 
-*Current as of 24 Oct 2026: D2-85, D2-87, D2-93, D2-95, D2-96, D2-111, D4-52.*
+*Current as of 2 Nov 2026: D2-85, D2-87, D2-93, D2-95, D2-96, D2-111, D4-52, D4-89.*

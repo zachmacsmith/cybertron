@@ -245,6 +245,11 @@ def space_words(b, goods) -> str:
     for f, n in (b.get("fittings") or {}).items():
         if f in FITTINGS and n:
             fit.append(f"{n} beds" if f == "beds" else f"{n} stalls" if f == "stalls" else FITTINGS[f]["label"])
+    for f, u in (b.get("fitting_work") or {}).items():                        # a fitting begun: seen, with its work left (wheel fix)
+        if f in FITTINGS:
+            n = int(u.get("n", 1))
+            fit.append(f"{FITTINGS[f]['label'] if n == 1 else f'{n} {f}'} begun, its materials in "
+                       f"(about {float(u['units_left']):.0f} units of work left)")
     a = alloc(b, goods)
     used = fitting_spaces(b) + a["floor_spaces"]
     if a["floor_spaces"]:

@@ -542,6 +542,11 @@ ENV = {
 # Own conspicuousness (information/noticing.md; calibrate); hiding multiplies it (taught, untaught).
 THINGS = {
     "body": 0.9, "body_built": 1.0, "heap": 0.9, "heap_min": 10, "pack": 0.4, "camp": 0.7, "trace": 0.3,
+    # goods in the open (heap-sizes proposal): own = 1 - exp(-weight / heap_k), so 2 weight about 0.37 (the old pack), 10 about
+    # 0.9 (the old heap), 40 and more about 1; a heap is "large" from 40 weight and "great" from 100; a close look judges each good
+    # within a band of this ladder; one who attends to it counts it to about 1 (under 20) or 5 (calibrate)
+    "heap_k": 4.34, "heap_large": 40, "heap_great": 100,
+    "bands": [1, 2, 3, 5, 8, 12, 20, 30, 50, 80, 120, 200, 300, 500, 800, 1200, 2000],
     "body_days": 10,                                                # "dead some days", then bones to the season's end
     "rot_after": 2,                                                 # a body unburied this many days smells of rot
     # a beast that dies (D4-52): its carcass is as conspicuous as a body, a little less once only bones; edible the day after it died,

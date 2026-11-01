@@ -166,7 +166,8 @@ def facts(here) -> list:
             p = row.get("p", 1.0)
             p = p(x) if callable(p) else p
             add(about, row["text"](x), p, row.get("tags", []), row.get("sense", "sight"), thing=cid, reach=row.get("reach", "rule"),
-                knows=row.get("knows"), lay=row.get("lay"), sign=f"thing:{cid}#{i}", own=row.get("own"), night=row.get("night", False))
+                knows=row.get("knows"), lay=row.get("lay"), sign=f"thing:{cid}#{i}",
+                own=row["own"](x) if callable(row.get("own")) else row.get("own"), night=row.get("night", False))
     for e in here.events():
         if e["kind"] == "speech":
             continue
@@ -209,7 +210,7 @@ def chance_of(w, name, f, target=None, mind=None, attending=False, focus=1.0) ->
     about the world goes through here: signs at a spot, things, events, dawn lines, ambient lines, the attended subject."""
     from cybertron2.engine import things as TH
     base = f["salience"] * (knack(mind, f) if mind is not None else 1.0)
-    reach = f.get("reach") if f.get("reach") in ("near", "around") else None
+    reach = f.get("reach") if f.get("reach") in ("near", "around") else ("near" if f.get("reach") == "count" else None)
     if f.get("thing"):
         c = w.s["containers"][f["thing"]]
         return min(1.0, base * TH.chance(w, name, c, target, f.get("sense", "sight"), own_x=f.get("own"), reach=reach,
@@ -381,6 +382,8 @@ def evening(w, attend: dict, today: dict, skip=None) -> dict:
             if f.get("ambient"):
                 continue                                                        # read only when attending to the place
             if f.get("thing"):                                                 # things: the one rule (D2-85, D4-75)
+                if f.get("reach") == "count":
+                    continue                                                    # counted only when attended to (below)
                 if f["text"] in (knows.get(f["thing"]) or {}).get("texts", []):
                     continue                                                    # already known as it is
                 if not SG.readable(f, practised(mind)):
@@ -442,6 +445,9 @@ def evening(w, attend: dict, today: dict, skip=None) -> dict:
                     and (f.get("only") is None or name in f["only"]) and not f.get("ambient")
                     and (not f.get("peek") or subject.startswith("building:"))]
             pool = [f for f in pool if rng.random() < chance_of(w, name, f, mind=mind, attending=True)]
+            pool += [f for f in F if f.get("thing") and f.get("reach") == "count" and subject in f["about"]   # a heap looked over
+                     and rng.random() < chance_of(w, name, f, w.s["parcels"].get(w.s["containers"][f["thing"]].get("parcel"), {}).get("name"),
+                                                  mind=mind, attending=True)]
             pool.sort(key=lambda f: -(f["salience"] + relevance(here, mind, f)))
             texts = set()
             for f in pool:
@@ -608,6 +614,10 @@ def resolve_target(here, x):
     hid = here.herd(s)
     if hid and s:
         return f"herd:{hid}", here.herds()[hid]["name"]
+    from cybertron2.engine import tags as TG                                    # a thing one knows of here, by its tag (D4-68)
+    cid = TG.thing_by_tag(here._w, s.split()[-1].strip("()")) if here.setting("tags") else None
+    if cid and here.tagged_here(s.split()[-1].strip("()")):
+        return f"thing:{cid}", f"what lies there ({here._w.s['containers'][cid].get('tag')})"
     return "place", f"the place in general (you could not find {s!r} to attend to)"
 
 
