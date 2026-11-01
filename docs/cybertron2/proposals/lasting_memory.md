@@ -15,12 +15,18 @@ next stretch, is tested (review 38.39).
 
 - **Places:** **one at first, and more opening over time, scaled by the lifespan** (Zach, 1 Nov). With all places open at once,
   agents fill them in the first one or two stretches and then hardly change them (38.39), so the first lines win.
-  - The schedule runs on the share of adult life lived, as the memory's length does (D4-61), so a 32-day and a 96-day life open
-    places at the same stages: `places = 1 + round((most - 1) * (1 - e^(-k * x)) / (1 - e^(-k)))`, with `x` = (days since coming of
-    age) / (days from coming of age to the end of the lifespan), `k` 3 (the memory's): one place as a youth, the largest rises
-    early, levelling off.
-  - The most a life reaches also scales with the lifespan, since a longer life has more stretches to remember: about one place a
-    stretch's worth of six days, e.g. `most = round(lifespan / 6)`: 5 at lifespan 32, 11 at 64, 16 at 96 (calibrate).
+  - The places open **evenly across life** (Zach, 1 Nov: "just be constantly spread across their lifespan"), not front-loaded:
+    one at coming of age, then one more at equal intervals until the end of the lifespan: `places = 1 + floor((most - 1) * x)`,
+    `x` = (days since coming of age) / (days from coming of age to the end of the lifespan). About one more every 5 to 6 days at
+    any lifespan.
+  - The most a life reaches scales with the lifespan, since a longer life has more stretches to remember:
+    `most = round(lifespan / 6)` (calibrate). Across adult life, sampled at each eighth:
+
+    | Lifespan | Places | One more every |
+    |---|---|---|
+    | 32 | 1, 1, 1, 2, 2, 3, 3, 4, 4 (5 at the end) | 6.5 days |
+    | 64 | 1, 2, 3, 4, 5, 6, 7, 9, 10 (11 at the end) | 5.2 days |
+    | 96 | 1, 2, 4, 6, 7, 9, 11, 13, 14 (16 at the end) | 5.2 days |
   - **People who start a world already grown** would have several empty places at once (the freeze above). Their places open as
     if from the start of the run: one at first, then one more each stretch until they reach the number for their age. (Or the
     generator fills some from their seeded past; for Zach.)
@@ -81,6 +87,8 @@ spec/information/memory.md (D4-61's rule); cybertron2/engine/memory.py, prompt.p
 - 1 Nov 2026: Zach: "the number of memories should scale based on lifespan". The schedule now runs on the share of adult life
   lived (as D4-61's memory length), and the most a life reaches scales with the lifespan; people grown at a world's start get their
   places opened one a stretch.
+- 1 Nov 2026: Zach: "it shouldn't be so many more at the start, but just be constantly spread across their lifespan": the places
+  open evenly across adult life (linear), not on the memory's front-loaded curve.
 
 ## Sources
 
