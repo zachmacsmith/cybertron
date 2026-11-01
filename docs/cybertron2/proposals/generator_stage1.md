@@ -1,6 +1,6 @@
 # Proposal: the generator, stage 1 (a spec for review before it is built)
 
-**Status:** for review (3 Nov). Not to be built until Zach asks (README rule 10). **Owner:** 37.2; to be compiled into
+**Status:** for review (3 Nov); scope, input and seas decided (D2-177). Not to be built until Zach asks (README rule 10). **Owner:** 37.2; to be compiled into
 spec/world/generation.md (37.4's) once decided. **Rests on:** D2-173 (fill in around what a world file gives), D2-174 (a mesh as
 ground truth), D2-175 (rings by default), D4-22, and generator.md §2, §3, §7 and §10.
 
@@ -51,6 +51,56 @@ generate:
 - `n days out` from a named place.
 
 Any word or pin it can't meet is refused, with the reason.
+
+## 1b. The macro layer: the world the region sits in (proposed, 3 Nov)
+
+Zach: sometimes an island, a bay, a mountain range, or a mix; macro features spread across the world, and pinnable. A coarse
+layer comes before everything else.
+
+**The world:**
+- A coarse mesh over a large area (a continent or more: cells of about 5 to 10 km).
+- What each cell carries:
+  - land or sea (with a sea level);
+  - large-scale height (ranges, uplands, basins);
+  - climate gradients (latitude; maritime against continental; the prevailing wind, so wet windward coasts);
+  - the main river basins.
+- **How it's made, in two ways:**
+  1. **Templates** (Azgaar's heightmap templates): parametric shapes (an island, an archipelago, a peninsula, a bay, a range, a
+     lake district, a basin, a delta) placed and blended. Controllable.
+  2. **Plates** (the Experilous planet generator's method): Voronoi plates with motions, mountains where plates meet. More natural
+     placement of ranges, less control.
+
+  Proposed: templates and noise. Plates are optional later; for what we need (a coast, a range, a river system, a climate gradient)
+  they would be overkill.
+
+**The window:** the region played is a window on the macro world. The fine mesh (§2) takes the macro height, upsampled smoothly,
+plus fine noise, so a coast or range runs through the window as part of something larger. It's chosen in one of two ways:
+- **pinned macro features:** "on a coast to the west", "a bay to the south", "inland in a range", "an island", "a river mouth",
+  each placing a template;
+- **scanning the macro world:** scan for the window that best fits the pins. This is a deterministic scan of one generated world,
+  not a seed search.
+
+**Seas, coasts and lakes** (D2-177):
+- sea is land below sea level;
+- coasts come from the macro shape plus fine noise;
+- lakes come from filled hollows (§3);
+- rivers run to the sea or a lake;
+- estuaries and deltas form where large rivers meet the sea.
+
+The mesh records navigability (a river's flow and depth, a coast's shelter) for travel by water later (OPEN L-38).
+
+## 1c. Configurable and large
+
+**Every number is a world setting with a default** (D2-177): cell spacing, region size, settlement count and spacing, ring radius,
+parcels per node, thresholds.
+
+**Larger worlds:**
+- the fine mesh grows with area: 100 km square at 150 m is about 450,000 cells, seconds to a minute in numpy;
+- beyond that, the fine mesh is made only where it's needed (the windows played, round settlements and along routes), each part
+  keyed by place so it's the same whenever made;
+- the macro layer covers the rest coarsely.
+
+So a world can be a continent without building it all in detail.
 
 ## 2. The mesh
 
@@ -211,7 +261,8 @@ The run journal freezes the yaml as now. The mesh travels with it for the visual
 | Number | Proposed |
 |---|---|
 | cell spacing | 150 m (about 2 ha, a plot) |
-| default region | 30 km square, 4 settlements, temperate, no coast |
+| default region | 30 km square, 4 settlements, temperate; a coast only if the macro layer or a pin puts one there |
+| macro cells | about 5 to 10 km |
 | settlement spacing | at least a day's walk unless pinned |
 | ring radius for fields | about 2 km |
 | node territory | out and back in a day |
@@ -221,11 +272,12 @@ The run journal freezes the yaml as now. The mesh travels with it for the visual
 
 ## Open questions (for Zach)
 
-1. Is the scope right: today's format plus the mesh, with no engine change?
-2. Is the input form (§1) and the vocabulary list right?
-3. The numbers above?
+1. ~~Scope~~ and 2. ~~input~~: decided (D2-177).
+3. The numbers above (all world settings)?
 4. The checks (§7): any missing, and should a failed check refuse the world, or only warn?
 5. Descriptions: which model, and how long each (a sentence for a parcel, a few for a node)?
+6. The macro layer (§1b): templates and noise (proposed) rather than plates; a window chosen by pins or by scanning?
+7. Large worlds (§1c): fine detail only where needed, keyed by place?
 
 ## Sources
 
