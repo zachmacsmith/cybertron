@@ -28,6 +28,7 @@ charge).
   | tent | 3 hides, 2 timber poles, 2 units (leatherworker) | 6 | about 30 nights | 2 | about 1.2 (1.4) | none |
   | camp at a site (a lean-to and a fire ring) | 3 timber, 1 unit (basic); a fire burns 1 timber a night | none: it stays where built | about 10 nights, then decays | 4 | about 1.2 (1.5 with the fire lit) | none |
 
+  A camp's store holds 15 weight in all, kept as in the open (D4-84).
   Gear wears a night of its life each night used. A camp stays at its site after its builder leaves; anyone there may use or mend
   it (its holder, if any, may set who: world/holding.md).
 - **Shelter and fire** (D2-159): where one sleeps sets the night's food; a fire there cooks, and in the cold warms.
@@ -68,4 +69,4 @@ Where they can sleep tonight and on what terms ("the inn has beds at 1 food a ni
 
 [02g §4](../../../review/37_growth/02g_resources_and_transport.md), 38.05 §3; proposals/transport_and_lodging.md.
 
-*Current as of 24 Oct 2026: H-5, D2-68, D2-134, D2-159, D4-12, D4-49.*
+*Current as of 3 Nov 2026: H-5, D2-68, D2-134, D2-159, D4-12, D4-49, D4-84.*

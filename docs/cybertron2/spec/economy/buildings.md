@@ -39,7 +39,8 @@ A **space** is about the floor a bed takes (about 5 m²). Everything is counted 
 | a room | its floor | |
 | a fitting, a store | | its spaces of floor |
 
-People housed are **the beds** in the building (one a bed), not a property of the room. Household members need a bed as guests do, and seeded houses start with beds for their household (D2-165); an infant sharing its carer's bed and two children one bed are proposed (buildings_integration.md §2b).
+People housed are **the beds** in the building (one a bed), not a property of the room. Household members need a bed as guests do, and seeded houses start with beds for their household (D2-165); an infant sharing its carer's bed and two children one bed are confirmed (D4-86): an infant shares its carer's bed, two children share one, one without a bed sleeps on the
+floor as in a damaged house, and beds go eldest first.
 
 ### Rooms and structures
 
@@ -91,7 +92,7 @@ does 2 units, more with skill, until its work is done).
 | a cellar | 40 food a space of footprint | x0.25 |
 | a woodshed | 40 timber | kept dry |
 | a vault | 30 weight a space | the house rate; does not burn |
-| a camp | about 10 weight in all (D2-176) | the house rate (under cover); no bins |
+| a camp | 15 weight in all (D4-84) | the open rate; no bins |
 | outside | anything | the open (economy/goods.md: food much faster; timber wet in rain, no use as fuel until dried) |
 
 A building's stores cannot take more than its storage holds; what does not fit is refused, or left outside if put there.
@@ -133,8 +134,8 @@ noticeable (D2-171). Lengths, places by size and the monument: proposals/buildin
 
 ### Seeded worlds
 
-Seeded buildings are given floor enough for what the world file puts in them (beds, fittings, stores), with free space as the file
-says; a seeded village's ground may be full, so growth means building up, on scrub, or clearing.
+Seeded buildings are given floor enough for what the world file puts in them (beds, fittings, stores), and 3 free spaces beyond
+that unless the file gives `free`, while their parcel keeps 6 spaces of ground for building (D4-85); a seeded village's ground may be full, so growth means building up, on scrub, or clearing.
 
 ## Data
 
@@ -170,4 +171,4 @@ and do ("a stone hall with a hearth"), who holds them as they know it, and the r
 [02i_buildings.md](../../../review/37_growth/02i_buildings.md), [02k §3](../../../review/37_growth/02k_fuses_and_gates.md);
 proposals/buildings.md, proposals/shelter.md.
 
-*Current as of 3 Nov 2026: H-5, D2-3, D2-9, D2-20, D2-45, D2-49, D2-56, D2-60, D2-61, D2-154, D2-155, D2-164, D2-165, D2-166, D2-167, D2-168, D2-169, D2-170, D2-171, D2-176.*
+*Current as of 3 Nov 2026: H-5, D2-3, D2-9, D2-20, D2-45, D2-49, D2-56, D2-60, D2-61, D2-154, D2-155, D2-164, D2-165, D2-166, D2-167, D2-168, D2-169, D2-170, D2-171, D4-84, D4-85, D4-86.*
