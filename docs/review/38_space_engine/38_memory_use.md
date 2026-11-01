@@ -11,7 +11,7 @@ memories. Each run's `turns.jsonl` holds the decision and every talk reply; the 
 | Mechanism | Written | Comes back |
 |---|---|---|
 | the conversation | everything of the current stretch (3 days) | in full on every call of the stretch; gone after |
-| stretch memory (D4-28 queue; D4-61 rewrite in d1_duo) | at the end of each stretch, when asked | at every stretch's opening (the queue: the last six, so for 18 days; rewrite: the one memory, for life) |
+| stretch memory: what the agent writes at the end of each stretch of days, when the conversation is about to be cleared (D4-28: a new 150-word memory each stretch, the last six kept; D4-61: one memory rewritten each stretch) | at the end of each stretch, when asked | at every stretch's opening (the queue: the last six, so for 18 days; rewrite: the one memory, for life) |
 | notes (up to 8, about 150 words) | any reply, free | **the pinned one in full every morning; the rest by title only**, in full only if opened (a reply asks; it is shown at the talk step, at most 2 a day) |
 | look-up | any reply | a craft's full card at the talk step |
 | always known | seeded | every opening, for life |
@@ -64,7 +64,8 @@ with 5 nights left. I need an axe badly" (Osric, m1_C); "Owe Everard (Merchant, 
 (Henry, r1). The rare exceptions are lessons and people: "say vs tell: say into Moor House refused for lack of access ... Lesson:
 for Moor ears, use 'tell'" (Jory, d1_duo); "neighbours: Moors here. Richard reap deal. Avice knows cheese/milking" (Jory, w1).
 
-**Stretch memories hold more of what happened between people** (37% mention one, against 13% of notes), and nearly all (94%)
+**Stretch memories hold more of what happened between people** (all but 39 of the 1,982 are D4-28's queue; only d1_duo has
+D4-61's rewritten memory, so this describes the queue) (37% mention one, against 13% of notes), and nearly all (94%)
 also carry quantities: they are where events go, beside the state.
 
 ## 3. When written
