@@ -40,6 +40,16 @@ Goods (grain, timber) are quantities and need none. The tag exists to make refer
 6. **Lifecycle:** a tag dies with its thing. A group that rejoins its herd: "H2 has rejoined the Hobb cattle (H1)". A bundle taken
    up empty: gone. Beliefs keep a dead tag with the day last seen, as for anything else remembered.
 
+7. **Names on top of tags (a second step).** Anyone may name a thing that has a tag: `name {thing: H4, as: "Old Brock"}`. A name is
+   knowledge, not a property of the thing: it is known to the namer, to everyone present when it is given, and to the namer's
+   household (a household shares the names it uses). Others still see the tag and the description. Where one knows a name, the
+   message shows "Old Brock (H4)" and the verbs accept the name. Two households may call one thing by two names; the tag keeps them
+   straight. The same act names a place nobody has named, for whoever first comes to it, in worlds that leave places unnamed.
+8. **Individual beasts: not now.** A group of one is already an individual: an ox that strays alone is its own group with its own
+   tag, and can be named. Splitting by role is readable without ranges (`drive {herd: H1, take: {oxen: 2}}` makes a new group).
+   Beasts as individuals (each with age, sex, milk, owner, name) would change farm.py's milk, ploughing, breeding and capacity,
+   herds.py's splits, merges and roads, and would grow state and messages in worlds with flocks of a hundred.
+
 ## Why
 
 Zach (2 Nov): "each subject that can be acted on [could] have a very short identifier that shows up in brackets when it is
@@ -66,10 +76,13 @@ Evidence from c3_combe_rich (review 38.41):
 
 ## Open questions
 
-1. Strangers' groups and things: a tag per sighting, or none (point 5).
-2. Whether tags may appear in speech, or only in the reply's action fields (they will be copied into speech either way).
-3. Individual beasts: the engine keeps herds as counts by role, so "the brindled cow" is not a thing it holds; out of scope
-   unless herds gain individuals.
+1. Strangers' groups and things. 37.4's view: the world's tag for anyone who perceives the thing. One tag for everyone is what
+   makes talk exact; it lets an observer tell that a stranger's group seen twice is the same one, which neighbours can mostly do by
+   sight anyway.
+2. (Answered by Zach, 2 Nov: speech is the agents' own; they say what they say.)
+3. Individual beasts (point 8): deferred; groups of one carry most of the value.
+4. Whether names spread beyond household and presence: free speech is not parsed (knowledge.md §4e), so a name told in passing
+   does not teach the engine anything; an explicit act (`explain` a name) could.
 
 ## Affects
 
@@ -79,6 +92,10 @@ verbs.md, agent_view.md; spec information/prompts.md, agents/actions.md.
 ## History
 
 - 2 Nov 2026: proposed (37.4) from Zach's question, with the c3_combe_rich evidence.
+- 2 Nov 2026: revised after Zach ("things without names they can name, meaning they can call it by that thing later ... would it
+  be that names are an individual thing, where people hear names from others"; "would individual cattle be too much?"): naming
+  added as a second step, names held as knowledge by the namer, those present and the household (point 7); individual beasts
+  deferred, groups of one standing in (point 8); speech left to the agents.
 
 ## Sources
 
