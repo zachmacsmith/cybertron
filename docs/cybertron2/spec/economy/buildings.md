@@ -91,6 +91,7 @@ does 2 units, more with skill, until its work is done).
 | a cellar | 40 food a space of footprint | x0.25 |
 | a woodshed | 40 timber | kept dry |
 | a vault | 30 weight a space | the house rate; does not burn |
+| a camp | about 10 weight in all (D2-176) | the house rate (under cover); no bins |
 | outside | anything | the open (economy/goods.md: food much faster; timber wet in rain, no use as fuel until dried) |
 
 A building's stores cannot take more than its storage holds; what does not fit is refused, or left outside if put there.
@@ -169,4 +170,4 @@ and do ("a stone hall with a hearth"), who holds them as they know it, and the r
 [02i_buildings.md](../../../review/37_growth/02i_buildings.md), [02k §3](../../../review/37_growth/02k_fuses_and_gates.md);
 proposals/buildings.md, proposals/shelter.md.
 
-*Current as of 3 Nov 2026: H-5, D2-3, D2-9, D2-20, D2-45, D2-49, D2-56, D2-60, D2-61, D2-154, D2-155, D2-164, D2-165, D2-166, D2-167, D2-168, D2-169, D2-170, D2-171.*
+*Current as of 3 Nov 2026: H-5, D2-3, D2-9, D2-20, D2-45, D2-49, D2-56, D2-60, D2-61, D2-154, D2-155, D2-164, D2-165, D2-166, D2-167, D2-168, D2-169, D2-170, D2-171, D2-176.*
