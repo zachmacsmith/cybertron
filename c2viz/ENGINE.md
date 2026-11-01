@@ -316,7 +316,7 @@ noticing.
 
 Two halves, so that every rule stays in the engine:
 
-1. **The model (Python, `c2viz/model.py`)** reads a run's journal, rebuilds the `World` from each day's `d{d}.memory` checkpoint
+1. **The model (Python: `touch.py` the only file that imports the engine, `source.py`, `extract.py`, `timeline.py`, `model.py`)** reads a run's journal, rebuilds the `World` from each day's `d{d}.memory` checkpoint
    (`World(spec)`, then `w.s = checkpoint`), and calls the engine's own functions for everything computed: `calendar`, `cold`,
    `environment.weather / snow_lying / felled / smoky / crop_high / visibility`, `things.spot_of / body_state / rotting /
    carcass_fresh / at_node`, `roads.position / challenge`, `layout.passed / next_door`, `farm.soil_word`, `w.homes`,
@@ -324,7 +324,7 @@ Two halves, so that every rule stays in the engine:
    THINGS, TERRAIN, LANDMARKS, and the spec's space table until the engine has one) and one record a day in the engine's terms.
    Every value is one of: **state** (read), **engine** (an engine function's result) or **spec** (the spec's end-state model,
    derived until built: rooms, footprints, ground in spaces). None is a guess.
-2. **The renderer (JS, `c2viz/pixel.js`)** only draws that record, in layers, each depending on the ones before:
+2. **The renderer (JS, `c2viz/js/`, one module a concern; README "How it is built")** only draws that record, in layers, each depending on the ones before:
    1. **places**: the node graph (roads, days) and each node's ground plan from its parcels' size and `adj` (presentation:
       the plan's geometry, named in §9);
    2. **land**: each parcel by cover and its stocks (S/K), crops by stage and share, works, fences, clearing; the weather and

@@ -60,3 +60,9 @@ engine's state and imports nothing it changes.
   - Checked on two bot runs of the current engine (region_s1 and wide_s7, 14 days each, no model calls); no console errors.
     Found by the model, not visible before: region_s1's Willow Holt starts as scrub and is cleared to a field by day 6; Deep Wood
     is felled to scrub by day 12; Coppergate's yard is overfull under the spec's ground rule.
+- 01 Nov 2026 19:20 UTC: made modular at Zach's instruction (the engine will keep changing). `touch.py` is the only file that imports the
+  engine (`check()` lists what it no longer has); `source.py` the only reader of the journal; `extract.py`, `timeline.py`,
+  `spec_rooms.py`, `schema.py` (SCHEMA.md: the contract), `model.py` (orchestration). The renderer split from one file into
+  fourteen modules (`js/`, explicit imports and exports, bundled in MANIFEST order), the engine's words it knows in `js/vocab.js`.
+  Checked: the same viz.json for both runs and the same pixels for 17 views (hashes before and after); `c2viz/tests` (touchpoints,
+  a 2-day run to the contract with every change replayed, module order) pass.

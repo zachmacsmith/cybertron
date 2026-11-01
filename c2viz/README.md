@@ -12,7 +12,7 @@ Two halves, so every rule stays in the engine:
    where a traveller is (`roads.position`), landmark challenges, holders from claims. Buildings follow the spec's end state
    (rooms, footprints, ground in spaces: economy/buildings.md), read from the state when the engine has rooms and derived by the
    spec's seeding rule until then (marked `derived`). It writes `viz.json`: the engine's tables, the static world, one record a day.
-2. **The renderer** (`pixel.js`) draws only that record, in layers:
+2. **The renderer** (`js/`, bundled by `build.py`) draws only that record, in layers:
    - **places**: each place's ground plan from its parcels' sizes (one scale for all covers), neighbours (`adj`: neighbours share a
      border, others have wild ground between) and sides; a chain of water parcels as one river; the region by travel days;
    - **land**: each parcel by its cover that day and its stocks (S/K): trees in proportion to standing wood and stumps where it was
@@ -44,13 +44,40 @@ python -m c2viz.build RUN                                                       
 `map.html` is a bare preview: the map, labels, hover, day controls; click a place to go in, an exit to follow the road; in a
 place, drag to pan and +/- to zoom. Query: `?day=N&node=<id>&z=<zoom>` (`&full` fits a place to the page).
 
+## How it is built: modular, because the engine will keep changing
+
+```
+cybertron2 engine ── touch.py ──► source.py ─► extract.py ─► model.py ──► viz.json ──► js/ (the renderer) ──► a canvas
+   (only here)        (journal)   timeline.py  spec_rooms.py   (schema.py, SCHEMA.md)     (vocab.js: the engine's words)
+```
+
+- **Where the engine is touched:** `touch.py` is the only file that imports `cybertron2`: every engine function, table and class
+  c2viz uses is named there, and `touch.check()` lists any the engine no longer has. `source.py` is the only reader of the
+  journal's tables. `extract.py` and `timeline.py` read `World.s` (its shape is documented in ENGINE.md).
+- **The contract:** the renderer reads only `viz.json` (SCHEMA.md, `schema.py`); it never sees engine state.
+- **The engine's words** the renderer draws differently (techniques' tools, fittings that show a fire, river names, crop stages,
+  road terrains, quiet events) are all in `js/vocab.js`; an unknown word is drawn plainly.
+- **The spec's end state** for buildings (rooms, spaces, ground) is in `spec_rooms.py` alone, until the engine stores rooms.
+- **When the engine changes:** run `python -m pytest c2viz/tests -q`. It checks the touchpoints, builds a short real run to the
+  contract (every change must replay), and checks the renderer's modules load in order. Then fix, in this order: `touch.py`
+  (a renamed or moved function), `extract.py` / `timeline.py` (a changed state shape), `js/vocab.js` (a new or renamed word).
+  The renderer's other modules should not need to change.
+
 | File | What |
 |---|---|
 | `ENGINE.md` | the engine model the visuals are built on; presentation choices; the audit of the first renderer |
-| `model.py` | the journal to `viz.json`, through the engine's own functions |
-| `layout.py` | presentation positions: places by travel days on the road graph; parcel sites by side and neighbours |
-| `pixel.js` | the renderer (`C2Pixel.geom`, `C2Pixel.plan`, `C2Pixel.world`, `C2Pixel.node`) |
-| `preview.html`, `build.py` | the preview page with the renderer and the data inlined |
+| `SCHEMA.md` | viz.json, the contract between the model and the renderer |
+| `touch.py` | every engine function, table and class c2viz uses; `check()` |
+| `source.py` | the run journal: meta, steps, the world at a step, changes, speech |
+| `extract.py` | a day's records (parcels, buildings, herds, things, people, roads, events) |
+| `timeline.py` | a day as it happened: the work step's changes replayed through the engine, act by act |
+| `spec_rooms.py` | the spec's building model (rooms, spaces, ground), derived until the engine has it |
+| `schema.py` | the contract's version and `validate` |
+| `model.py` | the run to `viz.json` (orchestration and the CLI) |
+| `layout.py` | presentation positions: places by travel days; parcel sites by side and neighbours |
+| `js/` | the renderer, one module a concern, loaded in `js/MANIFEST` order: core, vocab, palette, sprites, buildings, model, roads, geom, land, plan, region, node, day, world, api |
+| `preview.html`, `build.py` | the preview page with the bundled renderer and the data inlined (`--js` writes the bundle alone) |
+| `tests/` | the checks above |
 
 Next (ENGINE.md §11): a person's way through the day (the parcels they pass, which is what they sense in passing), the acts in
 the order the journal has them, and what one agent perceived.
