@@ -1,6 +1,7 @@
 # Proposal: the generator, stage 1 (a spec for review before it is built)
 
-**Status:** fully specced (3 Nov): scope, input and seas (D2-177), the macro layer and large worlds (D2-178), descriptions
+**Status:** built (3 Nov) by 37.2 at Zach's request, with what differs listed in [02zj](../../review/37_growth/02zj_generator_build.md).
+Fully specced (3 Nov): scope, input and seas (D2-177), the macro layer and large worlds (D2-178), descriptions
 (D2-179), checks (D2-180) and numbers (D2-181) decided. Builder's tables in §11 (D2-183 to D2-187). Ready to build when Zach asks (README rule 10). Not to be built until Zach asks (README rule 10). **Owner:** 37.2; to be compiled into
 spec/world/generation.md (37.4's) once decided. **Rests on:** D2-173 (fill in around what a world file gives), D2-174 (a mesh as
 ground truth), D2-175 (rings by default), D4-22, and generator.md §2, §3, §7 and §10.

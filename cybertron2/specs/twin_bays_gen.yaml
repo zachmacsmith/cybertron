@@ -1,0 +1,19 @@
+# A generated world (the landscape generator, stage 1: docs/cybertron2/proposals/generator_stage1.md). Only the generate: block and
+# the settings below are written by hand; the land, the villages, their parcels, the roads, houses, herds and households come from
+#   python -m cybertron2.landgen cybertron2/specs/twin_bays_gen.yaml --out cybertron2/specs/twin_bays.yaml [--people] [--picture x.png]
+# Two bays split by a high spur (D2-188's "twin bays split by a spur"): a village at the head of each bay, the only way between them
+# over the spur's pass; two more villages inland, a wild wood and broken hill country beyond.
+name: twin_bays
+seed: 7
+days: 40
+calendar: {season: summer, day: 3, season_days: 8}
+cold_days: []
+children: {on: true, dial: low}
+lifespan: 64
+generate:
+  seed: 7
+  configuration: twin bays split by a spur
+  settlements: 4
+  places:
+    Northby: {at: north_bay.head}
+    Southby: {at: south_bay.head}

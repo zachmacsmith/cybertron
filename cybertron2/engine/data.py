@@ -94,6 +94,11 @@ COVERS = {
     "built": {"words": "built ground", "ground": 24, "sight": 0.7, "sound": 1.0, "dig": "soft", "ambient": [("sound", "voices and work about the houses", 0.2)]},
     "scrub": {"words": "scrub", "ground": 16, "sight": 0.5, "sound": 0.9, "dig": "stony", "ambient": []},
     "rock": {"words": "rock", "ground": 0, "sight": 0.5, "sound": 0.9, "dig": "stony", "ambient": [("sound", "the ring of picks from {name}", 0.25)]},
+    # D2-185: heath, moor, fen and saltmarsh as covers (the landscape generator's waste land); their own crafts and changes come later
+    "heath": {"words": "heath", "ground": 0, "sight": 0.8, "sound": 1.0, "dig": "soft", "ambient": [("smell", "warm gorse on the air from {name}", 0.12)]},
+    "moor": {"words": "moor", "ground": 0, "sight": 0.9, "sound": 1.0, "dig": "soft", "ambient": [("sound", "curlews calling over {name}", 0.15)]},
+    "fen": {"words": "fen", "ground": 0, "sight": 0.6, "sound": 1.0, "dig": "soft", "ambient": [("sound", "reeds hissing in the wind on {name}", 0.15)]},
+    "saltmarsh": {"words": "saltmarsh", "ground": 0, "sight": 1.0, "sound": 1.0, "dig": "soft", "ambient": [("smell", "salt mud from {name}", 0.15)]},
 }
 
 # How each resource comes back (D4-7) and how it is seen (in words, never numbers: environment/resources.md).
@@ -253,7 +258,7 @@ LINES = {
 # from `tools` means the work cannot be done with it (no mining bare-handed).
 TECHNIQUES = {
     "forage": {"verb": "gather", "label": "foraging (greens, roots, berries, nuts)", "aliases": ["foraging", "gather food"], "basic": True,
-               "at": {"covers": ["forest", "meadow", "pasture", "scrub"]}, "draws": "plants", "yield": {"kind": "stock", "base": 1.2},
+               "at": {"covers": ["forest", "meadow", "pasture", "scrub", "heath", "moor", "fen", "saltmarsh"]}, "draws": "plants", "yield": {"kind": "stock", "base": 1.2},
                "units": 1, "gives": "wild food", "tags": ["food"]},
     "hunt": {"verb": "gather", "label": "hunting game", "aliases": ["hunting"], "basic": True, "at": {"covers": ["forest"]},
              "draws": "game", "yield": {"kind": "chance", "p": 0.35, "range": [2, 6], "by": {"hide": 0.25}},
