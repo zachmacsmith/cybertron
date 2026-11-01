@@ -5,28 +5,43 @@
 
 ## Summary
 
-Price speech by how far it carries rather than by kind. Words to those beside you, in the same building or on the same parcel, are
-free. Words to everyone at the place cost a unit. A private word needs the other person to be at the same place. Move the main
-talk from the morning re-plan to an evening round at the hearth, where housemates hear each other once. The morning keeps one
-short wave for answers.
+The day gets an evening. Everyone who sleeps in one building or camp meets at its hearth after the day's work. There they learn how
+their day went (what they did and got, what they saw on the parcels they worked, whom they met) and talk freely with the house.
+Anyone asked something directly is then woken once to answer. The morning keeps the plan and one wave of answers to private words.
+The second wave goes, both morning and evening. Free speech in common happens only at a gathering: the hearth by default, later a
+place one chooses to spend the evening, or a meeting someone calls. Speech beyond a gathering is a private word (free, capped) or
+calling out to the whole place (a unit).
 
 ## The proposal
 
-1. **Reach sets the price:**
+1. **Who hears is fixed by where one is when speaking**, never by where one will be. Speech comes before the day's work or after
+   it, so "those on my parcel" is not known when one speaks; the parcel is not a reach.
+2. **The evening at the hearth** (after work and the night's settling of who sleeps where, before eating and the night's events):
+   - each person at a hearth is asked once, together: the day's outcome is shown here (the results of their acts, what they saw,
+     whom they met, the day's events), not the next morning;
+   - each may speak to the house (free, everyone at that hearth hears), tell one person (a private word), write a note, and say
+     what they mean to do tomorrow;
+   - then **one wave**: only those asked something directly (a tell, or speech to the house naming them) are woken to answer.
+     A asks, B answers; A reads the answer in the morning.
+3. **The morning:** the decision as now, with dawn's news and what was said last night; private words to people at the same place;
+   **one wave**, in which those told something are woken once to answer and re-plan. No second wave.
+4. **Speech by reach:**
 
    | Speech | Who hears | Cost |
    |---|---|---|
-   | to those beside you (one building, or the parcel where you work that day) | everyone there | free |
-   | to everyone at the place (the node) | everyone at the node | 1 unit (calling round, gathering them) |
-   | a private word (tell) | one person at the same node | free, capped per day as now |
+   | at a gathering (the hearth; later, a chosen evening place or a called meeting) | everyone at it | free |
+   | a private word (tell) | one person at the same node | free, capped per day |
+   | calling out to the whole place | everyone at the node | 1 unit |
 
-2. **An evening round at the hearth:** after the day's work, everyone sleeping in one building is asked once, together, with what
-   each said that day and what happened. Each may speak to the house, tell one person, and set an intention for tomorrow. The
-   framing is not "plan your day". What is said reaches the next morning's message.
-3. **The morning keeps one wave** (today two): enough to answer a tell; most of today's second waves are confirmations ("Yes,
-   Father").
-4. **Option, to test:** merge the evening into the decision, so the household plans tomorrow at the hearth tonight (one call a
-   person a day, as now). Dawn's news (weather, what happened in the night) then reaches the plan a day late.
+5. **Gatherings, for larger places (later):**
+   - the evening place is a choice, home by default: an alehouse, a hall or a neighbour's house instead, if one may go in. Each
+     gathering has its own round, so a town's evening is many rooms at once;
+   - a meeting in the day is an act: one calls it at a building (a council at the hall), those who come spend units on it, and it
+     has a round of its own among those present;
+   - writing a notice (a document at a place, D2-24) is the town-wide channel that lasts.
+6. **The memory request** (every few days) is folded into that evening's hearth call, which saves a call.
+7. **To test against it:** plan tomorrow at the hearth, and wake people at dawn only if something new reached them (a word, an
+   arrival, the night's events). This is cheaper than now, but dawn's weather reaches the plan only when someone is woken.
 
 ## Why
 
@@ -50,9 +65,11 @@ Evidence:
 
 ## Open questions
 
-1. Whether the evening is a separate call or the decision itself (point 4).
-2. Whether talk while working beside someone counts as "beside you" (same parcel, same day).
-3. What to measure: share of talk that is not work; calls per agent-day; DM share; coordination failures (the harvest
+1. Whether the evening is its own call (point 2) or also the plan for tomorrow (point 7).
+2. (Answered by Zach, 2 Nov: not the parcel, since nobody knows who will be there until they act.)
+3. Whether speech to the house in the morning is free as well (the house is the same gathering) or the morning is for private words
+   only.
+4. What to measure: share of talk that is not work; calls per agent-day; DM share; coordination failures (the harvest
    overshoot); whether households talk about aims, kin and the dead.
 
 ## Affects
@@ -63,6 +80,10 @@ information/prompts.md.
 ## History
 
 - 2 Nov 2026: proposed (37.4) after Zach asked about the order and cost of speech and how it compares with cybertron 1.
+- 2 Nov 2026: revised after Zach: the parcel dropped as a reach ("you don't know who will be in your parcel until you have
+  acted"); the evening at the building or camp, where they "chat and plan and talk about what they want" and see the day's
+  outcomes; the second wave of replies removed ("A says to B and then B responds to A"); only those asked something directly are
+  woken in the answer wave; gatherings generalise the hearth for towns (his question about meeting rooms).
 
 ## Sources
 
