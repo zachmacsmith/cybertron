@@ -266,3 +266,19 @@ def test_the_thief_is_named_only_to_those_who_saw_and_the_house_finds_the_loss_b
     for n in owners:
         named = [x for x in PC.store(w, n)["today"]["concerned"] + PC.store(w, n)["today"]["notice"] if "Hamo" in x]
         assert bool(named) == (n in witnesses)                                    # the name only if one saw it
+
+
+def test_the_days_sightings_are_shown_at_the_hearth_and_not_again_next_morning(tmp_path):
+    def reply(key, who, msg):
+        if ".decide." in key:
+            return {"why": "x", "actions": [{"do": "work", "what": "weed", "at": "the Infield"}],
+                    "fallback": [{"do": "gather", "what": "firewood", "at": "Combe Copse"}]}
+        return {"why": "", "actions": [], "memory": "A day."}
+    out, seen = _evening_run(tmp_path, 3, reply)
+    eve = seen["d1.evening.Ivo.1"]
+    assert "## What you saw today" in eve
+    day_lines = [x for x in eve.split("## What you saw today\n", 1)[1].split("\n\n")[0].split("\n") if x.startswith("- ")]
+    morning = seen["d2.decide.Ivo.1"]
+    assert "## Since last evening" in morning and "## What you saw yesterday" not in morning
+    assert not any(x in morning for x in day_lines if len(x) > 12)               # what the hearth showed is not shown again
+    assert R.run(None, out, mode="replay")["mismatches"] == []

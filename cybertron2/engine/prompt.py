@@ -432,7 +432,8 @@ def turn_prompt(here, mind, opening=True) -> str:
         L.append("## What happened yesterday\n" + "\n".join(rec))
     y = saw_lines(mind)
     if here.day > 0:
-        L.append("## What you saw yesterday\n" + ("\n".join(y) if y else "A quiet day: nothing stood out."))
+        L.append(("## Since last evening\n" + ("\n".join(y) if y else "A quiet night: nothing new stood out.")) if here.setting("evening")
+                 else ("## What you saw yesterday\n" + ("\n".join(y) if y else "A quiet day: nothing stood out.")))
     if t["dawn"]:
         L.append("## This morning\n" + "\n".join(f"- {x}" for x in t["dawn"]))
     home = next((nid for nid, x in mind.places().items() if x["days"] == 0), here.node)

@@ -475,7 +475,8 @@ def evening_step(w, names, results, budget, used, talk_log, openings, systems, b
         if a.get("arrived") == w.d and a.get("arrived_by") == "nightfall" and a.get("came_from") in w.s["nodes"]:
             came = w.s["nodes"][a["came_from"]]["name"]
         others = [m for m in called if m != n and keys[m] == keys[n]]
-        t = EVN.prompt(w, n, results[n], left[n], gather[n][1], others, came)
+        PC.store(w, n)["saw_day"] = PR.saw_lines(Mind(w, n))
+        t = EVN.prompt(w, n, results[n], left[n], gather[n][1], others, came, saw=PC.store(w, n)["saw_day"])
         if EVN.plans_at_hearth(w):
             t = t.replace(" Reply with JSON only.", " Put tomorrow's plan of work in \"actions\" too, after the night's acts (and a "
                                                      "\"fallback\"): you will be asked again at dawn only if something new has come. Reply "
@@ -982,6 +983,10 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
             J.commit(w.s, _runner(J, cost, conv, locals()))
             if EVN.on(w):                                                       # the evening at the hearth (D4-65, D4-66)
                 J.open_step(day, "evening")
+                per_day = PC.evening(w, attend, today)                          # the day's noticing, shown at the hearth (D4-82)
+                today["day_seen"] = {node: sorted({f["text"] for f in F}) for node, F in per_day["facts"].items()}
+                for n, lg in per_day["agents"].items():
+                    files["perception"].write(json.dumps({"day": day, "agent": n, "phase": "day", **lg}) + "\n")
                 folded = evening_step(w, names, results, budget, used, talk_log, openings, systems, backend, conv, workers, tally)
                 for n, mrec in folded.items():
                     files["memory"].write(json.dumps({"day": day, **mrec}) + "\n")
@@ -1005,7 +1010,7 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
             rec = N.night(w)
             rec["fuse"] = FU.record(today)
             rec["road"] = road_rec
-            per = PC.evening(w, attend, today)
+            per = PC.evening(w, attend, today, skip=today.get("day_seen"))     # with an evening: only what came after it (D4-82)
             nights = night_lines(w, rec)
             for n in names:
                 m = meta.get(n, {})

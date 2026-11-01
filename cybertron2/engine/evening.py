@@ -70,13 +70,15 @@ def _requests(w, n, since=None) -> list:
     return out
 
 
-def prompt(w, n, results, left, place, others, arrived) -> str:
+def prompt(w, n, results, left, place, others, arrived, saw=None) -> str:
     here, mind = Here(w, n), Mind(w, n)
     L = ["## This evening"]
     L.append(f"You are {place} for the evening" + (f", having come in at nightfall from {arrived}" if arrived else "") + ". "
              + (f"With you: {', '.join(others)}." if others else "Nobody else is with you."))
     did = [x for x in results if not x.startswith(PC.SPEECH)]
     L.append("## Your day\n" + ("\n".join(f"- {x}" for x in did) if did else "You did nothing today."))
+    if saw is not None:                                                        # what one noticed today (D4-82)
+        L.append("## What you saw today\n" + ("\n".join(saw) if saw else "Nothing stood out today."))
     req = _requests(w, n)
     if req:
         L.append("## Waiting on your answer\n" + "\n".join(f"- {x}" for x in req))

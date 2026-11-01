@@ -118,6 +118,9 @@ information/prompts.md.
 - 2 Nov 2026: point 6 (the memory at the evening) withdrawn after a targeted test (review 38.44): the folded call dropped the evening's
   acts and speech and missed what the evening agreed, most in Haiku. D4-80: the memory in its own call after the night; the fold a
   setting, off by default.
+- 2 Nov 2026: Zach: "show the days sightings at the hearth". Built as D4-82 after the noticing rework (D4-75): noticing runs after work
+  for the day (shown at the evening) and after the night for what is new (shown next morning). OPEN L-30 closed but for the morning
+  house-speech question.
 
 ## Sources
 

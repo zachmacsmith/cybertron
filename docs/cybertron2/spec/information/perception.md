@@ -59,6 +59,12 @@ Per agent: what it knows of places, people and things, with when and how it lear
 
 The node in words, never as engine numbers; other places as they knew them, with how old the knowledge is.
 
+### Two passes with an evening (D4-82)
+
+With an evening, the noticing rule runs after the day's work (the day's pass: notices, concerns, the attended subject, glimpses,
+feeling watched, learning by watching, the acting channel) and again after the night with the day pass's facts left out (only new
+lines: the night's signs and events); attention, glimpses and feeling watched belong to the day's pass only.
+
 ### Thefts (D4-81)
 
 The thief is named only to those who saw the theft when it happened (settle.py: those at home, watching the house, or by the rule
@@ -79,4 +85,4 @@ lately".
 
 38.02; proposals/place.md, knowledge.md, seeing.md.
 
-*Current as of 2 Nov 2026: H-7, D2-4, D2-29, D2-85, D2-91, D2-102, D4-6, D4-33, D4-35, D4-47, D4-48, D4-50, D4-73, D4-75, D4-81.*
+*Current as of 2 Nov 2026: H-7, D2-4, D2-29, D2-85, D2-91, D2-102, D4-6, D4-33, D4-35, D4-47, D4-48, D4-50, D4-73, D4-75, D4-81, D4-82.*

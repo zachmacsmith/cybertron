@@ -338,7 +338,7 @@ def dawn(w) -> None:
                 mind.store["log"].append({"day": here.day, "dawn": [e["id"]]})
 
 
-def evening(w, attend: dict, today: dict) -> dict:
+def evening(w, attend: dict, today: dict, skip=None) -> dict:
     """Perception after the day's work, each at its node."""
     living = w.agents_acting()
     by_node, logs = {}, {}
@@ -354,7 +354,7 @@ def evening(w, attend: dict, today: dict) -> dict:
     for name in living:
         here, mind = Here(w, name), Mind(w, name)
         if here.node not in by_node:
-            by_node[here.node] = facts(here)
+            by_node[here.node] = [f for f in facts(here) if not skip or f["text"] not in skip.get(here.node, ())]   # D4-82
         F = by_node[here.node]
         t = mind.store["today"]
         rng = here.rng("notice", here.day, name)
@@ -448,7 +448,7 @@ def evening(w, attend: dict, today: dict) -> dict:
                 if f["text"] not in texts and len(att) < ATTEND_MAX:
                     att.append(f)
                     texts.add(f["text"])
-        if subject or place:
+        if (subject or place) and skip is None:                                # the day's attention: shown at the hearth (D4-82)
             t["attended"] = {"target": label, "lines": [f["text"] for f in att] or ["nothing out of the ordinary"]}
         seen |= {f["id"] for f in att}
         others = [x for x in here.people(me=False) if x in living and f"person:{x}" != subject]
@@ -458,7 +458,7 @@ def evening(w, attend: dict, today: dict) -> dict:
         home = [m for m in here.people() if mind.members and m in mind.members]  # one's household: always there (D4-75)
         seen_people = [x for x in kin + rest if rng.random() < TH.spot_chance(w, name, here.node, TH.spot_of(w, x), float(NOTICING["person"]),
                                                                                inside=home)]
-        for x in seen_people[:int(here.p["glimpse"])]:
+        for x in (seen_people if skip is None else [])[:int(here.p["glimpse"])]:   # glimpses and feeling watched: the day's
             pl = today["worked"].get(x)
             if pl:
                 spot = here.parcels().get(pl[-1]) or here.buildings().get(pl[-1])
@@ -467,7 +467,7 @@ def evening(w, attend: dict, today: dict) -> dict:
                 t["glimpse"].append(f"{x} spent the day at {today['watch'][x]}'s side")
             else:
                 t["glimpse"].append(f"{x} was about the houses")
-        for v in watchers.get(name, []):
+        for v in (watchers.get(name, []) if skip is None else []):
             mutual = str(today["watch"].get(name) or attend.get(name) or "").lower() == v.lower()
             own = 1.0 if today["watch"].get(v) == name else float(here.p["felt_watched"]) * (2 if mutual else 1)
             if here.rng("felt", here.day, name, v).random() < TH.spot_chance(w, name, here.node, None, own, inside=[name]):
@@ -627,7 +627,8 @@ def close_day(w, name, did: list, night_lines: list) -> None:
         seen = set(shown)
         acts = [x for x in acts if x not in seen]
     said = [x.removeprefix("You ") for x in did if x.startswith(("You told ", "You said "))]
-    m["days"].append({"day": w.d, "did": acts + night_lines, "said": said, "heard": list(t["heard"]), "saw": saw, "glimpse": list(t["glimpse"])})
+    m["days"].append({"day": w.d, "did": acts + night_lines, "said": said, "heard": list(t["heard"]), "saw": saw, "glimpse": list(t["glimpse"]),
+                      "saw_day": m.pop("saw_day", [])})                         # what was shown at the hearth (D4-82)
     for line in t["concerned"] + t["learned"] + night_lines:
         low = line.lower()
         if any(k in low for k in ("killed", "died", "beat", "broken into", "taught you", "missed meal", "gave", "missing", "slipped into",

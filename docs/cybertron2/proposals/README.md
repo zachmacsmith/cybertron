@@ -290,3 +290,4 @@ Newest first. Ideas decided or rejected in conversation before 23 Oct are backfi
 | 2 Nov | Events and their aftermath as bundles of signs, four kinds (built, then written down) | retrospective, accepted: D4-74 | [sign_bundles.md](sign_bundles.md) |
 | 2 Nov | Every perceived line by the one noticing rule; sound and smell carry (built, then written down) | retrospective, accepted: D4-75 | [every_line_by_the_rule.md](every_line_by_the_rule.md) |
 | 2 Nov | Who knows of a theft (built, then written down) | retrospective, accepted: D4-81 | [thefts_known.md](thefts_known.md) |
+| 2 Nov | The day's sightings at the hearth | accepted: D4-82 | [speech_order.md](speech_order.md) |

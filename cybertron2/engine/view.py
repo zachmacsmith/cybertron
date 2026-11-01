@@ -132,6 +132,8 @@ def _changes(here, mind, last) -> list:
     names.update({f"building:{b}": x["name"] for b, x in here.buildings().items()})
     seen_before = last.get("seen") or {}
     told = set(PR.saw_lines(mind))                                              # what "What you saw yesterday" already says
+    days = mind.store.get("days") or []
+    told |= set((days[-1].get("saw_day") or []) if days else [])                 # and what the hearth showed (D4-82)
     told |= {x[2:] for x in told if x.startswith("- ")}
     for sub, b in sorted((mind.store.get("beliefs") or {}).items(), key=lambda kv: kv[0]):
         if sub in names and b.get("lines") and b["day"] > int(seen_before.get(sub, -10 ** 6)):
@@ -175,7 +177,8 @@ def turn(here, mind, opening=True) -> str:
         L.append("## What happened yesterday\n" + "\n".join(rec))
     y = PR.saw_lines(mind)
     if here.day > 0:
-        L.append("## What you saw yesterday\n" + ("\n".join(y) if y else "A quiet day: nothing stood out."))
+        L.append(("## Since last evening\n" + ("\n".join(y) if y else "A quiet night: nothing new stood out.")) if here.setting("evening")
+                 else ("## What you saw yesterday\n" + ("\n".join(y) if y else "A quiet day: nothing stood out.")))
     if t["dawn"]:
         L.append("## This morning\n" + "\n".join(f"- {x}" for x in t["dawn"]))
     if full:
