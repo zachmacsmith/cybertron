@@ -1,0 +1,1574 @@
+[
+ {
+  "agent": "Lucy",
+  "arm": "later",
+  "model": "claude-sonnet-5-5",
+  "places": 4,
+  "grow": 2,
+  "log": [
+   {
+    "open": 1,
+    "stretch": [
+     0,
+     2
+    ],
+    "budget_words": 500,
+    "written": 286,
+    "memory": "I am Lucy, a Fenwick of Stannick, wife (partner) of Roger. In-laws Jory (head) and Ellen, who is past bearing. My parents Richard and Avice live at Moor House beside us. Fenwick aim: be the largest family; try with Roger most days (two units on a side seems needed; matching messages can cross, so say the number plainly), keep all fed and warm. State at summer day 5: Fenwick House store ~22 firewood, ~19 grain (13 meals, four eat about 4 a night), ~9 timber, hay. Forage at the Gill and Stannick Moor is picked bare and takes days to return. The Brakes give firewood well (2.5-2.9 a unit). Bare-hand fell gives only ~0.7 timber a unit. Winter wants about 16 timber or 64 firewood per hearth. Harvest: Infield rye is held by the Moors, ripe about summer day 9 or autumn day 1. Richard agreed that Roger and I reap and get a quarter share, same terms as Jory. Be at the Infield at first light when it is ready. I have no tool: try 'make crude tool' (timber plus maybe stone) before harvest, since a copper tool is x1.5 and bare hands only x0.6 for reaping. I weed the Infield for the Moors, which helps the crop and my share. Offer syntax lesson: work offers must be written 'work 2 days', not 'work 2 days reaping'. Goods as '2 bread'. Other: Quarry is near the Moor, and I am competent at quarrying but need a tool. Wynford market is every eighth day, 2 days away. If food runs short, consider game at the Weald or trade at Wynford. Kin elsewhere: Ashe, Rook (Holloway), Wynn, Cotter (Wynford), Reed (Westmere); find partners for grown kin eventually.",
+    "places": [
+     "Fenwick aim: numbers. Try with Roger daily, keep everyone fed and warm; food and fuel first.",
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [
+      "Fenwick aim: numbers. Try with Roger daily, keep everyone fed and warm; food and fuel first."
+     ],
+     "replace": [],
+     "refused": [
+      "Work offers must read 'work 2 days'; no extra words. Make a crude tool before the rye harvest."
+     ]
+    },
+    "cost": 0.0639168
+   },
+   {
+    "open": 1,
+    "stretch": [
+     3,
+     5
+    ],
+    "budget_words": 520,
+    "written": 290,
+    "memory": "I am Lucy, a Fenwick of Stannick, wife (partner) of Roger. In-laws Jory (head) and Ellen, who is past bearing. My parents Richard and Avice live at Moor House beside us. Fenwick aim: be the largest family; try with Roger daily (two units each side are needed; say the number plainly since messages can cross), keep all fed and warm. State at summer day 8: Fenwick House store 35 firewood, 25 timber (fuel past winter target of ~64 firewood-equiv per hearth), only 6.7 grain (~1 night for four, who eat about 4 a night), 12 hay. Food is the pinch. Forage at Gill and Moor is picked bare; Brakes firewood is now used up. Bare-hand fell gives ~0.7 timber a unit. Harvest began summer day 8: I reaped bare-handed for the Moors at the Infield (about 16 rye, put into Moor House). Agreed with Richard: Roger, Jory and I get a quarter share of what we reap. Must collect our share from Moor House stores and check it is paid; bring it to Fenwick House. Agreement A379: I owe the Moors 1 day of work (0 done, though I weeded several days). Crude tool does not help with reaping. Crude tool needs 1 timber and 0.5 stone; I need a tool to quarry (stone), so I have no tool. Ask Richard or Jory to lend one. Jory's tools wear out fast. Offer syntax: work as 'work 2 days', goods '2 bread'. Wynford market every eighth day, 2 days away; the Weald has game. Grain needs a fire; hand mill is in Moor House. Ellen is trying cheese in Fenwick Cellar. Kin elsewhere: Ashe, Rook (Holloway), Wynn, Cotter (Wynford), Reed (Westmere); sister Helewise in Ashby. Find partners for grown kin eventually.",
+    "places": [
+     "Fenwick aim: numbers. Try with Roger daily, keep everyone fed and warm; food and fuel first.",
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.0845928
+   },
+   {
+    "open": 2,
+    "stretch": [
+     6,
+     8
+    ],
+    "budget_words": 530,
+    "written": 299,
+    "memory": "I am Lucy, a Fenwick of Stannick, wife (partner) of Roger. In-laws Jory (head) and Ellen (past bearing). My parents Richard and Avice live at Moor House beside us. Fenwick aim: be the largest family; try with Roger daily (2 units each side needed; say the number plainly; Roger prefers dawn try first), keep all fed and warm. State autumn day 3: Fenwick House store ~38 firewood, 20 timber (fuel past winter target), 8.6 rye (~6 meals; four eat ~4 a night), 4 hay. Food is the pinch. Harvest is done (Infield bare, new rye sown by Richard, ready ~autumn day 12ish; I weeded it for the Moors). Forage at Gill/Moor is picked bare. Bare-hand fell ~0.7 timber a unit. I have no tool (need one to quarry/cut). Crude tool needs 1 timber, 0.5 stone; tool doesn't help reaping. Agreements: Richard owes milk on A711/A722 (1 each daily); he left for Wynford ~autumn day 4, back day 13; from day 10 Avice gives 2 milk per day into Fenwick store. Check it's paid. Agreement A379: I owe the Moors 1 day of work (weeding has been done for Moors; may count). Cheese: Avice teaches Jory, Roger, Ellen at Fenwick Cellar; cheese needs 0.2 salt per batch and a cellar; no salt at Stannick, Richard asked to bring salt from Wynford. I know cheese competently so skipped lessons. Ellen wants to learn quarrying; I can teach (note \"Ellen quarry teach\"); she needs a tool to try. A cow of the Moors is near calving; tell Avice/Richard if seen in trouble. Wynford market every eighth day, 2 days away; the Weald has game. Grain needs fire; hand mill in Moor House. Kin elsewhere: Ashe, Rook (Holloway), Wynn, Cotter (Wynford), Reed (Westmere); sister Helewise in Ashby. Find partners for grown kin eventually.",
+    "places": [
+     "Fenwick aim: numbers. Try with Roger daily, keep everyone fed and warm; food and fuel first.",
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.0782628
+   },
+   {
+    "open": 2,
+    "stretch": [
+     9,
+     11
+    ],
+    "budget_words": 540,
+    "written": 328,
+    "memory": "I am Lucy, a Fenwick of Stannick, wife (partner) of Roger. In-laws Jory (head) and Ellen (past bearing). My parents Richard and Avice live at Moor House beside us. Fenwick aim: be the largest family; try with Roger daily (2 units each side needed; say the number plainly; Roger prefers dawn try first), keep all fed and warm. I am with child and my time is near (autumn day 6): stay in the Yard, rest, call Avice at once when it comes; a birth goes best housed, fed, with someone beside me. After birth, resume daily tries. State autumn day 6: Fenwick House store ~37 firewood, 15 timber (fuel past winter target), only 0.1 rye (food crisis: four eat ~4 a night), 0.3 hay. Food is the pinch: forage at Gill/Moor is picked bare. Offers open: Jory O1062 (2 timber for 2 rye), Ellen O752 (2 timber for 1 bread). Richard owes milk on A711/A722 (1 each daily, arrears 4 each); he went to Wynford ~day 3-4, back day 13, bringing salt for cheese. Avice gives 2 milk daily into Fenwick store meanwhile. Moors' new rye in the Infield ripe ~day 12-13; I weeded it repeatedly for them (A379, 1 day owed, probably paid); quarter-share hoped. Bare-hand fell ~0.7-0.8 timber a unit; no tool (need one to quarry/cut). Crude tool needs 1 timber, 0.5 stone. Avice wants stone from Quarry for a proper cellar; copper tool arrives day 13; I could make a crude tool and quarry later. Cheese needs 0.2 salt per batch and a cellar; I know cheese competently. Ellen learned quarrying from Avice. Fenwick Cellar repaired by Roger. Cow loan: Fenwick paid 6 timber and 4 hay for a Moors milk cow, stays Moors' name. Wynford market every eighth day, 2 days away; the Weald has game. Grain needs fire; hand mill in Moor House. Kin elsewhere: Ashe, Rook (Holloway), Wynn, Cotter (Wynford), Reed (Westmere); sister Helewise in Ashby. Find partners for grown kin eventually.",
+    "places": [
+     "Fenwick aim: numbers. Try with Roger daily, keep everyone fed and warm; food and fuel first.",
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.0777928
+   },
+   {
+    "open": 3,
+    "stretch": [
+     12,
+     14
+    ],
+    "budget_words": 550,
+    "written": 320,
+    "memory": "I am Lucy, a Fenwick of Stannick, wife (partner) of Roger. In-laws Jory (head) and Ellen (past bearing). My parents Richard and Avice live at Moor House beside us. Fenwick aim: be the largest family; try with Roger daily (2 units each side needed; say the number plainly; Roger prefers dawn try first), keep all fed and warm. I am with child and my time is near (since autumn day 6, still waiting at winter day 1): rest, stay inside, no Gill/Quarry/road; call Avice at once when it comes; birth goes best housed, fed, someone beside me. Avice granted me Moor House bed and food for five days from autumn day 7 (ends about winter day 3); I sleep there. After birth, resume daily tries and make a crude tool. Winter day 1 (snow, cold): Fenwick House store ~36.6 firewood, 12.6 timber, only 5.1 rye (3.6 meals, hearth takes 4 heat on cold nights = 8 firewood or 2 timber). Food is the pinch. Richard came home day 14 autumn from Wynford: no salt, no copper tool; he gave 15 rye to Roger, so A711/A722 milk arrears are released and clear. Offers open: Ellen O1472 and Jory O1473 (2 timber for 2 rye each, to anyone). Moor stores: near 70 rye, 100 hay, good firewood. Cattle strayed in gale. Ellen quarries with a crude tool (about 1.8 stone a day) toward a stone cellar; cheese needs stone-walled cellar, bins, and 0.2 salt a batch; I know cheese competently. Salt may come via Ashes at Holloway or Wynford market (every eighth day, 2 days away). Fenwick Cellar is wattle, sound, empty; half-built second cellar needs walls. Cow loan with Moors is square. I weeded Moors' Infield for goodwill; fencing it with wattle. Roger spoke of dry-stone walling; Avice of copper tools. Kin elsewhere: Ashe, Rook (Holloway), Wynn, Cotter (Wynford), Reed (Westmere); sister Helewise in Ashby. Find partners for grown kin eventually.",
+    "places": [
+     "Fenwick aim: numbers. Try with Roger daily, keep everyone fed and warm; food and fuel first.",
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.0920768
+   },
+   {
+    "open": 3,
+    "stretch": [
+     15,
+     17
+    ],
+    "budget_words": 560,
+    "written": 373,
+    "memory": "I am Lucy, a Fenwick of Stannick, wife (partner) of Roger. In-laws Jory (head) and Ellen (past bearing). My parents Richard and Avice live at Moor House beside us. Fenwick aim: be the largest family; try with Roger daily (2 units each side needed; say the number plainly; Roger prefers dawn try first), keep all fed and warm. I am with child and my time is near (waiting since autumn day 6; still no sign at winter day 4): rest, stay inside, no Gill/Quarry/road; call Avice at once when it comes (she works at the Infield, within shout; Roger can run for her). Birth goes best housed, fed, someone beside me. Avice's grant of Moor House shelter and food runs to about winter day 8; I sleep and eat there, not from the thin Fenwick bin. Ask her to renew before it ends. Helewise is a baby of our household (born to us; grown in about 10 days from winter day 4); Jory, Roger or Avice care for her daily. Fenwick House store at winter day 4: 1 crude tool, ~27 firewood, ~22 timber, 3.8 stone, only ~5.7 rye (about 4 meals for 5 eaters); fire takes 4 heat on cold nights (2 timber or 8 firewood). Food is the pinch; Roger has a rye trade in hand with Richard. Moor stores had ~70 rye and 100 hay earlier. Infield rye (held by Moors) ripens about winter day 6-7; reap deal with Richard: quarter-share of what we reap. Reaping bare-handed is as good as with a crude tool. After birth: resume daily tries, make a crude tool (1 unit), reap, and teach Ellen quarrying (she quarries with a crude tool, ~1.8 stone/day toward a stone cellar; cheese needs a stone-walled cellar, bins, 0.2 salt per batch; I know cheese competently). Richard came back from Wynford with no salt and no copper tool; salt may come via Holloway Ashes or Wynford market (every eighth day, 2 days away). Fenwick Cellar is wattle, sound, empty; a second cellar and a new Fenwick house are half built. Roger spoke of dry-stone walling; Avice of copper tools. Kin elsewhere: Ashe, Rook (Holloway), Wynn, Cotter (Wynford), Reed (Westmere); sister Helewise in Ashby. Find partners for grown kin eventually.",
+    "places": [
+     "Fenwick aim: numbers. Try with Roger daily, keep everyone fed and warm; food and fuel first.",
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.0905728
+   },
+   {
+    "open": 4,
+    "stretch": [
+     18,
+     20
+    ],
+    "budget_words": 570,
+    "written": 385,
+    "memory": "I am Lucy, a Fenwick of Stannick, wife (partner) of Roger. In-laws Jory (head) and Ellen (past bearing). My parents Richard and Avice live at Moor House beside us. Fenwick aim: be the largest family; try with Roger daily (2 units each side needed; say the number plainly; Roger prefers dawn try first), keep all fed and warm. I am with child and my time is near (waiting since autumn day 6; still no sign at winter day 7): rest, stay inside, no Gill/Quarry/road; call Avice at once when it comes (she works at the Infield, within shout; Roger can run for her). Birth goes best housed, fed, someone beside me. Avice renewed her grant of Moor House shelter and food through winter day 10; I sleep and eat there, not from the Fenwick bin. Ask her to renew before it ends. Helewise is a child of our household (grown in about 7 days from winter day 7); she needs 1 care unit a day. Care failed once (name/schema problem); name a carer each morning (chain Ellen, Roger, me last). Fenwick House store at winter day 7: 56.9 rye (~40 meals, Richard left 14 rye), 3.5 straw, 5.8 stone, 5 dung, but FIRE IS DIRE: only 5.6 firewood and 6 timber (~2 cold nights; fire needs 4 heat = 2 timber or 8 firewood). Gale on day 7: no felling in wind, hand-gather dead firewood; Jory and Roger fell/gather at Gill. Infield (held by Moors) is reaped; Richard and Avice debate rotation (fallow, beans, rye) and sowing. Reap deal with Richard: quarter-share. Reaping bare-handed is as good as with a crude tool. After birth: resume daily tries, make a crude tool (1 unit), teach Ellen quarrying (stone toward a stone cellar; cheese needs stone-walled cellar, bins, 0.2 salt per batch; I know cheese competently). Jory has an open offer: 2 timber for 1 cheese. No salt or copper tool yet; salt may come via Holloway Ashes or Wynford market (every eighth day, 2 days away). Fenwick Cellar is wattle, sound, empty; a second cellar and a new Fenwick house are half built (Ellen and Roger building). Roger spoke of dry-stone walling; Avice of copper tools. Kin elsewhere: Ashe, Rook (Holloway), Wynn, Cotter (Wynford), Reed (Westmere); sister Helewise in Ashby. Find partners for grown kin eventually.",
+    "places": [
+     "Fenwick aim: numbers. Try with Roger daily, keep everyone fed and warm; food and fuel first.",
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.08824280000000001
+   },
+   {
+    "open": 4,
+    "stretch": [
+     21,
+     23
+    ],
+    "budget_words": 580,
+    "written": 376,
+    "memory": "I am Lucy, a Fenwick of Stannick, wife (partner) of Roger. In-laws Jory (head) and Ellen (past bearing). My parents Richard and Avice live at Moor House beside us. Fenwick aim: be the largest family; try with Roger daily (2 units each side needed; say the number plainly; Roger prefers dawn try first), keep all fed and warm. I am with child and my time is near (waiting since autumn day 6; still no sign at spring day 2): rest, stay inside, no Gill/Quarry/road, no try until through and well. Chain to call when it comes: Avice, Ellen (has done births), Roger, Jory. Avice granted Moor House shelter and food through winter day 10 (the day count; renew before it ends); I sleep at Moor House. Avice stayed home (road-food block: cannot grind rye for the Tor road); Richard went alone to Holloway with coin for salt and a copper tool, back about spring day 5. Helewise is a child of our household (grown in about 4 days from spring day 2); she needs 1 care unit a day; Jory, Ellen or Roger name and do it each morning. Fenwick House store at spring day 2: 41.6 rye (~29 meals), 6.9 firewood, 2.6 timber (fuel thin, ~3 cold nights; hearth needs 1 heat now), 10 dung, 5.8 stone. Roger fetches firewood at Gill; the crude tool circulates (Ellen quarries with it, Jory/Roger fell). Fenwick Cellar (wattle) took damage on spring day 1 night: needs repair (timber). Fenwick's new house is built (1 bed, bins, no hearth). Second cellar half built; Avice asks us to finish ONE half-built shell so her Moor stone cellar unblocks. Infield (Moors) is hoed and dug, fence has gaps (Avice mending). Reap deal with Richard: quarter-share; rye settled, we are square. After birth: resume daily tries, teach Ellen quarrying (I know it competently), stone cellar for cheese (needs bins, 0.2 salt a batch; I make cheese competently). Jory has open offer: 2 timber for 1 cheese. Market at Wynford every eighth day (2 days away). Kin elsewhere: Ashe, Rook (Holloway), Wynn, Cotter (Wynford), Reed (Westmere); sister Helewise married into Ashby. Find partners for grown kin eventually. Old notes: Fenwick aim, Infield watch, Tool plan, Harvest deal, Ellen quarry teach; pinned Birth plan.",
+    "places": [
+     "Fenwick aim: numbers. Try with Roger daily, keep everyone fed and warm; food and fuel first.",
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.0919168
+   }
+  ]
+ },
+ {
+  "agent": "Lucy",
+  "arm": "replace",
+  "model": "claude-sonnet-5-5",
+  "places": 4,
+  "grow": 2,
+  "log": [
+   {
+    "open": 1,
+    "stretch": [
+     0,
+     2
+    ],
+    "budget_words": 500,
+    "written": 233,
+    "memory": "I am Lucy, Fenwick of Stannick, partner of Roger. Household: Jory (head, father-in-law), Ellen (mother-in-law, past bearing), Roger. My parents Richard and Avice are in Moor House next door. Fenwick aim: numbers; try daily with Roger (a try needs both to try; 1-2 units each, we agree each morning). Keep everyone fed and warm. Status summer day 5: Fenwick store ~22 firewood, ~19 grain (13 meals, ~4 eat a night), ~9 timber, 2.7 hay. Winter needs ~16 timber or 64 firewood per hearth. Forage is picked bare at the Gill and Moor; berries take days to return. Brakes still give firewood (about 2.5 per unit). Bare-hand felling gives ~0.7 timber per fell. Rye in the Moors' Infield should be ripe about autumn day 1. Richard agreed that Roger and I reap and get a quarter share of what we reap (same terms as Jory). Be at the Infield at first light when it's ready. I have no tool: try 'make crude tool' (everyone knows it) before the harvest, as tools make reaping x1.5 vs bare hands x0.6. I weeded the Infield for the Moors. Offer syntax: work as 'work 2 days', goods like '2 bread'. 'work 2 days reaping' failed. Ideas: after harvest, bake or grind rye (Moor House has hand mill), make cheese and milk (I'm competent), trade at Wynford market every eighth day, and fell and cut more fuel before winter.",
+    "places": [
+     "Fenwick way: numbers. Try with Roger daily, agree units each morning; keep all fed and warm; food and fuel first.",
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [
+      "Fenwick way: numbers. Try with Roger daily, agree units each morning; keep all fed and warm; food and fuel first."
+     ],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.0628055
+   },
+   {
+    "open": 1,
+    "stretch": [
+     3,
+     5
+    ],
+    "budget_words": 520,
+    "written": 364,
+    "memory": "I am Lucy, Fenwick of Stannick, partner of Roger. Household: Jory (head, father-in-law), Ellen (mother-in-law, past bearing), Roger. My parents Richard and Avice are in Moor House next door. Fenwick aim: numbers; try daily with Roger (a try needs both to try, 2 units each is what we agree; the try must be done by both the same day). Keep everyone fed and warm. Status summer day 8 (harvest day 1): Fenwick House store ~35 firewood, ~25 timber (fuel past winter target of ~64 firewood-equiv), only ~6.7 grain (~1 night of food for 4), 12 hay (cattle). Food is the pinch. Fenwick Cellar (wattle, empty store) is built and ours. Harvest: rye in the Moors' Infield is ripe; Avice called all hands. I reaped bare-handed 5 units on day 8, about 16 rye, all put into Moor House store (for the Moors). Richard's deal: Roger, Jory and I get a quarter share of what we reap. I must collect our quarter share (ask Richard/Avice, take from Moor House only by agreement, not theft) and bring it to Fenwick House. Agreement A379 says I owe the Moors 1 day of work (0 done); weeding/reaping counts, remind them. Crude tools do not help reaping per Avice, so bare hands is fine. Crude tool recipe: 1 timber, 0.5 stone, 1 unit; quarrying needs a tool in hand, so ask someone to lend a tool or get stone another way. Facts: forage at Gill and Moor is picked bare; Brakes firewood is gone too. Bare-hand felling gives ~0.7 timber per fell. Moor House has a hand mill; rye at a lit fire is 0.7 meals a unit; grind to flour (1 meal) and bake bread (1.3). I am competent at cheese, milking, quarrying. Ellen is trying cheese in the Fenwick Cellar; no bigger-batch terms yet. Wynford market every eighth day on the Green (2 days away); Wynns grind for a share. Rye can be sown in autumn and stands winter; barley after mid autumn will not ripen. Next steps: keep reaping until the Infield is done, collect share, grind and bake, keep fuel up, store food in Fenwick Cellar, consider sowing rye, and keep trying daily with Roger.",
+    "places": [
+     "Fenwick way: numbers. Try with Roger daily, agree units each morning; keep all fed and warm; food and fuel first.",
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.0851455
+   },
+   {
+    "open": 2,
+    "stretch": [
+     6,
+     8
+    ],
+    "budget_words": 530,
+    "written": 342,
+    "memory": "I am Lucy, Fenwick of Stannick, partner of Roger. Household: Jory (head, father-in-law), Ellen (mother-in-law, past bearing), Roger. My parents Richard and Avice are in Moor House next door. Fenwick aim: numbers; try daily with Roger (both must try same day; we agree 2 units each, Roger prefers dawn). Keep everyone fed and warm. Status autumn day 3 (5 left in season): harvest of the Moors' Infield is done; new rye is sown there and I weeded it for the Moors. Fenwick House store: ~38 firewood, ~20 timber (fuel is past winter target), 8.6 rye plus 4 milk from Richard (food ok for some nights, still the pinch), 4 hay. Fenwick Cellar (wattle) is ours, empty; a second half-built cellar exists. Richard gave my quarter share (5 rye). Richard went to Wynford (back day 13); from day 10 Avice gives 2 milk a day into Fenwick store (agreements A711/A722). Avice says cheese needs 0.2 salt per batch and we have none; she asked Richard to find salt at Wynford. Ellen and Roger/Jory are learning cheese from Avice. Ellen wants to learn quarrying: I know it (competent), can teach her on a free day (2 units); she needs a tool to try (bare hands cannot quarry). Agreement A379: I owe the Moors 1 day of work; weeding and firewood for Moor House count, remind them. One Moor cow is near calving; tell Avice if she is in trouble. Lesson: read the morning news; yesterday I wasted 4 units at a bare field. Facts: forage at Gill, Moor, Brakes is picked bare. Bare-hand felling ~0.7 timber. Crude tool recipe: 1 timber, 0.5 stone, 1 unit. Moor House has a hand mill; rye at a lit fire 0.7 meals a unit, flour 1, bread 1.3. Wynford market every eighth day, 2 days away; Wynns grind for a share. Rye sown in autumn stands winter; barley after mid autumn will not ripen. Next: keep fed and warm, gather firewood for Moor House to pay A379, grind and bake rye, support salt/cheese plans, try daily with Roger.",
+    "places": [
+     "Fenwick way: numbers. Try with Roger daily, agree units each morning; keep all fed and warm; food and fuel first.",
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.0802495
+   },
+   {
+    "open": 2,
+    "stretch": [
+     9,
+     11
+    ],
+    "budget_words": 540,
+    "written": 333,
+    "memory": "I am Lucy, Fenwick of Stannick, partner of Roger. Household: Jory (head, father-in-law), Ellen (mother-in-law, past bearing), Roger. My parents Richard and Avice are in Moor House next door. I am with child and my time is near (autumn day 6, 2 left in season): stay in the Yard, rest, call Avice at once when labour starts; no road travel. Fenwick aim: numbers; try daily with Roger when able (both must try same day; 2 units, Roger prefers dawn). Keep everyone fed and warm. FOOD IS CRITICAL: Fenwick House store on day 12 had only 0.1 rye; fuel is ample (~37 firewood, ~15 timber). Richard is at Wynford, back day 13; he owes arrears of milk on A711/A722 (4 each paid of 6, 4 in arrears each); Avice gives 2 milk daily into Fenwick store. Jory offers O1062 (2 timber for 2 rye) and Ellen O752 (2 timber for 1 bread) to anyone. Ask Moors for rye/milk help; Richard salt errand for cheese (needs 0.2 salt per batch). Avice asked for stone from the Quarry for a proper cellar; copper tool due day 13 (needs a tool to quarry; crude tool: 1 timber, 0.5 stone, 1 unit). I know quarrying (competent), felling and foraging (competent), cheese, milking. Ellen learned quarrying from Avice; she wanted to learn seed selection too. Agreement A379: I owe the Moors 1 day of work; I have weeded their new Infield rye many times, remind them it counts. Fenwick Cellar (wattle) was repaired by Roger and is sound; second half-built cellar exists. Facts: forage at Gill, Moor, Brakes is picked bare. Bare-hand felling ~0.8 timber. Moor House has a hand mill; rye at lit fire 0.7 meals a unit, flour 1, bread 1.3. Wynford market every eighth day, 2 days away; Wynns grind for a share. Rye sown in autumn stands winter; barley after mid autumn will not ripen. Next: after birth, secure food, grind and bake rye, collect milk arrears, support salt/cheese plans, try daily with Roger again.",
+    "places": [
+     "Fenwick way: numbers. Try with Roger daily, agree units each morning; keep all fed and warm; food and fuel first.",
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.0781935
+   },
+   {
+    "open": 3,
+    "stretch": [
+     12,
+     14
+    ],
+    "budget_words": 550,
+    "written": 356,
+    "memory": "I am Lucy, Fenwick of Stannick, partner of Roger. Household: Jory (head, father-in-law), Ellen (mother-in-law, past bearing), Roger. My parents Richard and Avice are in Moor House next door. I am with child and my time is very near (winter day 1 now, snow, cold). Avice granted me Moor House bed and food for five days from autumn day 6; I sleep there, stay inside by the fire, no road, no Gill, no Quarry, no strain. Call Avice the moment labour starts (Roger or Jory can fetch her). Fenwick aim: numbers; after birth try daily with Roger (both must try same day; 2 units, Roger prefers dawn). FOOD IS THE PINCH: Fenwick House store winter day 1: 5.1 rye (3.6 meals), 36.6 firewood, 12.6 timber; cold fire takes 4 heat (8 firewood or 2 timber) nightly. Ellen and Jory each offer 2 timber for 2 rye to anyone (O1472, O1473). Richard returned autumn day 13 from Wynford with no salt and no copper tool; he gave 15 rye (10 to Roger, 5 to Ellen) and milk arrears A711/A722 are released and clean. Moor stores are about 70 rye, 100 hay; the Moors' cattle strayed in the gale. Cheese needs stone walls, bins and salt (0.2 per batch); Fenwick Cellar is wattle and will not do; Ellen is quarrying with a crude tool toward a stone cellar (cut 1.8 stone). Avice says the Ashes at Holloway may deal in salt/charcoal. Agreement A379: I owe the Moors 1 day of work; I have weeded their Infield often, so it should count. I know quarrying, felling, foraging, cheese and milking (competent). I know of, not how: dry-stone walling (Roger), copper tool (Avice), seed selecting, charcoal, handcart. Forage at Gill, Moor, Brakes was picked bare. Moor House has a hand mill; rye at a lit fire is 0.7 meals a unit, flour 1, bread 1.3. Wynford market every eighth day, 2 days away. Next: after birth, secure food (ask Moors for rye, trade timber for rye), grind and bake rye, make a crude tool (1 timber, 0.5 stone), help the stone cellar and cheese plans, try daily with Roger again.",
+    "places": [
+     "Fenwick way: numbers. Try with Roger daily, agree units each morning; keep all fed and warm; food and fuel first.",
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.0927495
+   },
+   {
+    "open": 3,
+    "stretch": [
+     15,
+     17
+    ],
+    "budget_words": 560,
+    "written": 389,
+    "memory": "I am Lucy, Fenwick of Stannick, partner of Roger. Household: Jory (head, father-in-law), Ellen (mother-in-law, past bearing), Roger, baby Helewise (my sister's namesake child in our household, being cared for daily; Avice, Jory, Roger have taken turns caring). My parents Richard and Avice are in Moor House next door. I am with child and my time is very near (winter day 4, snow, cold), no sign yet. Avice granted me Moor House bed and food; she says it runs to about winter day 8 (renew then). I sleep and eat there, rest fully, no road, no Gill, no Quarry, no strain. Call Avice the moment labour starts (she is at the Infield within shout; Roger or Jory fetch her). Do not sleep at Moor House unless the grant stands. Fenwick aim: numbers; after birth try daily with Roger (both must try same day; 2 units). FOOD IS THE PINCH: Fenwick House store winter day 4: 5.7 rye (4 meals for 5 eaters), 26.7 firewood, 22.5 timber, 3.8 stone, 1 crude tool; cold fire takes 4 heat (2 timber or 8 firewood) nightly. Jory and Ellen offer 2 timber for 2 rye to anyone; Roger is seeking a rye trade with Richard. Richard returned from Wynford with no salt and no copper tool; milk arrears released. Moor stores about 70 rye. Infield rye ripens about winter day 6-7; reap bare-handed (a crude tool does not help); quarter-share deal with Richard for reapers. Cheese needs stone walls, bins and salt (0.2 per batch); Fenwick Cellar is wattle and will not do; Ellen quarries toward a stone cellar; a second cellar is half built. Avice says the Ashes at Holloway may deal in salt/charcoal. A379: I owe Moors 1 day of work (weeding should count). I know quarrying, felling, foraging, cheese, milking (competent). I know of, not how: dry-stone walling, copper tool, seed selecting, charcoal, handcart. Forage at Gill, Moor, Brakes was picked bare. Moor House has a hand mill; rye at a lit fire 0.7 meals a unit, flour 1, bread 1.3. Wynford market every eighth day, 2 days away. Next: after birth, secure food (rye from Moors, timber for rye), reap at the Infield, grind and bake rye, make a crude tool (1 timber, 0.5 stone), teach Ellen quarrying, help stone cellar and cheese plans, try daily with Roger again.",
+    "places": [
+     "Fenwick way: numbers. Try with Roger daily, agree units each morning; keep all fed and warm; food and fuel first.",
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.0913795
+   },
+   {
+    "open": 4,
+    "stretch": [
+     18,
+     20
+    ],
+    "budget_words": 570,
+    "written": 326,
+    "memory": "I am Lucy, Fenwick of Stannick, partner of Roger. Household: Jory (head, father-in-law), Ellen (mother-in-law, past bearing), Roger, Helewise (child, my sister's namesake, about 7 days to grown). Parents Richard and Avice are in Moor House next door. I am with child, time very near (winter day 7, no sign yet). Avice's grant of Moor House shelter and food runs to winter day 10 (renew then, never sleep there without it). I rest fully there: no step, no strain, no work, no trying. Call Avice the moment labour starts (she is at the Infield, within shout; Roger or Jory fetch her). Helewise needs one care unit a day; it failed once through a schema problem with her name. Chain: Ellen named, Roger fallback, me last; several people try so one lands. Fenwick store winter day 7: 56.9 rye (about 40 meals, food safe after Richard left 14 rye), but fuel is dire: 5.6 firewood and 6 timber, about 2 cold nights (fire takes 4 heat nightly: 2 timber or 8 firewood). No felling in gales. Roger and Jory gather firewood and fell at the Gill; the new house and cellar #2 are half built. Jory offers 2 timber for 1 cheese (O1917). Cheese needs stone walls, bins and salt; Fenwick Cellar is wattle. Ashes at Holloway may deal salt/charcoal. Infield rye was reaped; Richard and Avice are discussing the rotation (fallow, beans, rye). I owe Moors 1 day of work (A379). I know quarrying, felling, foraging, cheese, milking (competent). I know of but not how: dry-stone walling, copper tool, seed selecting, charcoal, handcart, ploughing, ditching. Moor House has a hand mill; rye at a lit fire 0.7 meals a unit, flour 1, bread 1.3. Wynford market every eighth day, 2 days away. Next: after birth, make a crude tool (1 timber, 0.5 stone), restock firewood and timber, teach Ellen quarrying, help the stone cellar and cheese plans, repay Moors a day, try daily with Roger again.",
+    "places": [
+     "Fenwick way: numbers. Try with Roger daily, agree units each morning; keep all fed and warm; food and fuel first.",
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.0874035
+   },
+   {
+    "open": 4,
+    "stretch": [
+     21,
+     23
+    ],
+    "budget_words": 580,
+    "written": 338,
+    "memory": "I am Lucy, Fenwick of Stannick, partner of Roger. Household: Jory (head, father-in-law), Ellen (mother-in-law, past bearing, can stand midwife), Roger, Helewise (child, grown in about 4 days from spring day 2). Parents Richard and Avice are in Moor House next door. I am with child, time very near, no sign yet (spring day 2). Avice's grant of Moor House shelter and food runs to winter-count day 10 (renew when it ends; never sleep there without it). Rules until birth: rest, no step, no strain, no work, no trying. Shout chain when labour starts: Avice, then Ellen, Roger, Jory. Avice turned back from the Holloway trip to stay near me; Richard went on alone with coin to buy salt and a copper tool, back around spring day 5. Helewise needs one care unit a day; Jory, Ellen or Roger cover it. Fenwick store spring day 2: 41.6 rye (about 29 meals), 6.9 firewood, 2.6 timber (fire needs only 1 heat nightly now, but fuel is thin), 5.8 stone, 10 dung, 1.5 straw. A crude tool is in Avice's or the Fenwick store; Ellen quarries with it. Fenwick Cellar (wattle) took damage and needs repair; the new house and cellar #2 are half built. Avice asks us to finish ONE half-built shell this spring so her Moor stone cellar unblocks. Jory offers 2 timber for 1 cheese (O1917). Cheese needs stone walls, bins and salt. Infield rye is reaped; the Infield is cropped hard and its fence has gaps. I owe the Moors about 1 day of work (A379; Roger has been hoeing for it). I know quarrying, felling, foraging, cheese and milking (competent). I know of but not how: dry-stone walling, copper tool, seed selecting, charcoal, handcart, ploughing, ditching. Moor House has a hand mill. Wynford market is every eighth day, 2 days away. After birth: make a crude tool (1 timber, 0.5 stone), restock firewood and timber, teach Ellen quarrying, help the stone cellar and cheese plans, repay the Moors a day, try daily with Roger again.",
+    "places": [
+     "Fenwick way: numbers. Try with Roger daily, agree units each morning; keep all fed and warm; food and fuel first.",
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.08970750000000001
+   }
+  ]
+ },
+ {
+  "agent": "Jory",
+  "arm": "later",
+  "model": "claude-sonnet-5-5",
+  "places": 4,
+  "grow": 2,
+  "log": [
+   {
+    "open": 1,
+    "stretch": [
+     0,
+     1
+    ],
+    "budget_words": 550,
+    "written": 332,
+    "memory": "I am Jory Fenwick, head of the Fenwicks in Stannick (Fenwick House, stone, 6 beds, hearth, bins). Household: wife Ellen (past childbearing, said plain; no sadness), son Roger and his wife Lucy. Daughters Rohese and Hawise married into Ashby, two days away. Fenwick aim: largest family; numbers now ride on Roger & Lucy, the daughters' children, and anyone we admit. Try with Ellen is refused (not both grown), don't waste units on it. Neighbours: Moors (Avice, Richard) in Moor House hold the Infield rye; they know cheese, milking, quarrying; I could learn those when stores are stable. Richard's deal: at reaping I reap the Infield rye for a quarter of what I take, paid in grain from the Moor store. He said ripe about 4 days from summer day 4, i.e. at summer's end; he wants me at the Infield at first light when he calls. I'm a master reaper, so be rested and fed. Roger and Lucy may sign on too. Debts: A21, 1 meat owed to Denise of the Rooks at Holloway (1 in arrears). Stores at end of summer day 4: Fenwick House held about 18 firewood, 19 grain, 8.3 timber, 2.7 wild food (food about 14 meals; 4 eat nightly). I also carry 6.2 timber from the Gill, not yet stored, and 2 coin, 1 crude tool. Winter needs about 16 timber per hearth, or four times as much firewood. Fell at the Gill gives about 3 timber per 2 units. Gill forage is picked bare; the Moor still has plentiful wild food. Lucy forages the Brakes and fells a bit. Promise to Ellen: three days of timber felling this week; day 1 done on summer day 4, two more to do. Move carried goods into the store (free, keeps food better). Other: Wynford market every 8th day on the Green; Wynns mill grain for a share. Barley sown after mid-autumn won't ripen; rye stands the winter. Old pass over the Tor is closed by snow in winter.",
+    "places": [
+     "Fenwick aim: largest family. Ellen is past bearing; numbers come through Roger, Lucy, daughters in Ashby, and those we admit.",
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [
+      "Fenwick aim: largest family. Ellen is past bearing; numbers come through Roger, Lucy, daughters in Ashby, and those we admit."
+     ],
+     "replace": [],
+     "refused": [
+      "Richard pays me a quarter of the Infield rye I reap, in grain; he calls me at first light when it's ripe."
+     ]
+    },
+    "cost": 0.05494
+   },
+   {
+    "open": 1,
+    "stretch": [
+     2,
+     4
+    ],
+    "budget_words": 560,
+    "written": 412,
+    "memory": "I am Jory Fenwick, head of the Fenwicks in Stannick (Fenwick House, stone, 6 beds, hearth, bins; Fenwick Cellar built beside it, empty, a second cellar half built). Household: wife Ellen (past childbearing; no sadness; she is learning cheese from Avice), son Roger and his wife Lucy. Daughters Rohese and Hawise married into Ashby, two days away. Fenwick aim: largest family; numbers ride on Roger & Lucy, the daughters' children, and anyone we admit. Try with Ellen is refused; don't waste units on it. Neighbours: Moors (Avice, Richard) in Moor House hold the Infield rye; they know cheese, milking, quarrying. Reap deal: Avice called harvest for summer day 8 at dawn, all hands to the Infield. I reap for a quarter of what I take, paid in grain from the Moor store; Roger and Lucy may sign on. I also owe the Moors 1 day of work (A379); weeding the Infield has been put toward it (about 2 units done); Richard will call the rest at or after harvest. Debt: A21, 1 meat owed to Denise of the Rooks at Holloway. Tools: my crude tool wore out felling; Lucy has none (her quarry try failed; I lack quarrying skill). I have none in hand. Ask Richard or Avice in person to lend one at dawn (the offers failed because I phrased the lend wrongly; speech to Moor House is refused, so go to them by tell or in person). Otherwise make one: crude tool needs stone; bare-handed reaping is x0.6, and I am a master reaper. End of summer day 7 Fenwick store: about 37 firewood, 24.6 timber, 9.6 grain, 12 hay, 5 dung, a little wild food. Food is thin, about 2 nights, so the reap grain is the plan. Timber and firewood are above the winter target (16 timber per hearth). Foraging on the Moor, Gill and Brakes is picked bare and the Moor is grazed short; hay and dead wood are gone locally. Ellen's idea: trade hay or timber to the Moors for a cow in milk. I could hunt for food. Lessons: say to a building I lack access to is refused; offers must be written as goods or work, not as a loan; unused units are wasted, so plan all 7. Other: Wynford market every 8th day on the Green; Wynns mill grain for a share. Barley sown after mid-autumn won't ripen; rye stands the winter. Old pass over the Tor is closed by snow in winter.",
+    "places": [
+     "Fenwick aim: largest family. Ellen is past bearing; numbers come through Roger, Lucy, daughters in Ashby, and those we admit.",
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.089954
+   },
+   {
+    "open": 2,
+    "stretch": [
+     5,
+     7
+    ],
+    "budget_words": 570,
+    "written": 377,
+    "memory": "I am Jory Fenwick, head of the Fenwicks in Stannick (Fenwick House, stone, 6 beds, hearth, bins; Fenwick Cellar beside it, a second cellar half built). Household: wife Ellen (past childbearing; don't try with her), son Roger (named heir) and his wife Lucy. Daughters Rohese and Hawise married into Ashby, two days away. Aim: largest family; numbers ride on Roger & Lucy, the daughters' children, and anyone we admit. Neighbours: Moors (Avice, Richard) in Moor House hold the Infield; they know cheese, milking, quarrying. Richard may be leaving for Wynford; Avice stays. Autumn day 2: Avice taught me cheesemaking (now capable); Roger also taught; Lucy's session was offered for the next day. Ellen is learning too and has the Fenwick Cellar for it. Harvest done (summer day 8): I reaped bare-handed; Richard paid 6 rye and released A379 (cleared). New rye sown in the Infield by Moors after my dung; ripe about autumn day 12-13. I weed/manure the Infield for goodwill. Deals: A711 (4 timber for 6 milk) and A722 (8 hay for 6 milk): Richard owes 1 milk a day each for 6 days from autumn day 2, paid to Ellen. Ellen offered timber for rye/bread to anyone (O751, O752). Debt: A21, 1 meat owed to Denise of the Rooks at Holloway. Store at autumn day 2 end: about 5.3 rye, 40 firewood, 23 timber, 4 hay, 5 dung. Food is the problem (about 4 meals a night needed; little in store); timber and firewood are above the winter target (16 timber per hearth). Foraging at the Moor, Gill and Brakes is picked bare; hay and dead wood are gone locally. Ideas: trade timber for grain or a cow in milk (talk with Richard and Avice), hunt, make cheese from milk. No crude tool in hand (mine wore out; crude tool needs stone; quarrying not known). Ask the Moors to lend one or make one. Lessons: say to a building I lack access to is refused; write offers as goods/work, not loans; unused units are wasted, so plan all units. Other: Wynford market every 8th day on the Green; Wynns mill grain for a share. Barley sown after mid-autumn won't ripen; rye stands the winter. Old pass over the Tor is closed by snow in winter.",
+    "places": [
+     "Fenwick aim: largest family. Ellen is past bearing; numbers come through Roger, Lucy, daughters in Ashby, and those we admit.",
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.110296
+   },
+   {
+    "open": 2,
+    "stretch": [
+     8,
+     10
+    ],
+    "budget_words": 580,
+    "written": 402,
+    "memory": "I am Jory Fenwick, head of the Fenwicks in Stannick (Fenwick House, stone, 6 beds, hearth, bins; Fenwick Cellar, wattle, damaged day 4 and repaired by Ellen; a second cellar half built). Household: wife Ellen (past childbearing), son Roger (named heir), his wife Lucy. Daughters Rohese and Hawise married into Ashby, two days away. Aim: largest family; numbers ride on Roger & Lucy, the daughters' children, and anyone we admit. Neighbours: Moors (Avice, Richard) in Moor House hold the Infield. Richard went to Wynford for salt, back morning of day 13; Avice stays. Skills: I am capable at cheese (Avice taught, day 2) and milking (taught day 5). Ellen is learning cheese and quarrying (capable, but needs a tool). Cheese needs 0.2 salt per batch plus a proper cellar (stone). Crude tool needs 0.5 stone; bare hands cannot quarry or hoe well: chicken-and-egg. Ask Avice to lend a crude tool so Ellen can quarry. Deals: Cow-in-milk loan done (6 timber + 4 hay given; Avice declared it square, no hay owed). The loan cow stays in Moors' name, calves are Moors', returns when they call. I must milk her daily and keep the milk at Fenwick House. A711/A722: Richard's milk, 1 each a day for 6 days; Avice leaves 2 milk daily at Fenwick House; some may be in arrears. Reap deal: I weed/hoe/manure the Infield for a quarter-share of the reap; the rye is ripe about day 13-14 (autumn). Offers out: O752 (2 timber for 1 bread), O1062 (2 timber for 2 rye), O1063 (work 2 days for 4 rye). Debt A21: 1 meat owed to Denise (Rook, Holloway). Store at autumn day 5: about 5.8 rye (about 1.5 nights), 39 firewood, 15.7 timber (target 16 per hearth), 0.3 hay, 5 dung. Food is critical for four people. Forage at the Moor, Gill and Brakes is picked bare; Stannick Moor is grazed bare; the herd was moved to the Yard, then back to the moor. Ideas: trade timber for rye, work for rye, hunt, cheese once salt comes, or go to Wynford market (every 8th day, on the Green). Lessons: say to a building I lack access to is refused; write offers as goods/work; unused units are wasted, so plan all units. Barley sown after mid-autumn won't ripen; rye stands the winter. The old pass over the Tor is closed by snow in winter. The Wynns mill grain for a share.",
+    "places": [
+     "Fenwick aim: largest family. Ellen is past bearing; numbers come through Roger, Lucy, daughters in Ashby, and those we admit.",
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.11435000000000001
+   },
+   {
+    "open": 3,
+    "stretch": [
+     11,
+     13
+    ],
+    "budget_words": 580,
+    "written": 354,
+    "memory": "I am Jory Fenwick, head of the Fenwicks in Stannick (Fenwick House, stone, 6 beds, hearth, bins; Fenwick Cellar, wattle, sound; a second cellar half built). Household: wife Ellen (past childbearing), son Roger (named heir), his wife Lucy (near her time, resting at Moor House under Avice's care). Daughters Rohese and Hawise married into Ashby, two days away. Aim: largest family. Neighbours: Moors (Avice, Richard) in Moor House hold the Infield; Avice has been generous (gave 8 rye, a crude tool). Skills: I am capable at cheese and milking (Avice taught). Ellen is capable at quarrying and holds a crude tool. Cheese needs 0.2 salt per batch plus a stone cellar; Richard back from Wynford, ask about salt. Deals: Cow loan is square per Avice (no hay owed, she confirmed day 7). Loan cow stays at Stannick; I milk her each morning and leave milk at Fenwick House. O1063: I owe Moors 2 days of hoeing; day 1 done (day 7-8 work counted), one more plot to hoe, Avice will release when done. A1205 (tool) was already settled: release was refused as nothing owed; I hold Avice's crude tool. A711/A722: Richard owes me 6 milk each, press him. A21: 1 meat still owed Denise (Rook, Holloway). Store at autumn day 8: about 8 rye (5.6 meals for 4), 38.6 firewood, 12.6 timber plus about 7.4 felled today with the tool (about 20), 0.3 hay, 5 dung. Winter hearth target 16 timber or equivalent: met. Infield rye is ripe to reap in about 5 days; I get a quarter share. Lessons: with a tool, felling gives 3.7 per 2 units; hoe on the Infield yields 0 stone; say to a building I lack access to is refused; write offers as goods/work; unused units are wasted so plan all units. Rye stands the winter; the Tor pass is closed by snow in winter. Wynford market every 8th day; Wynns mill grain for a share. Next: winter begins (5 units a day); finish hoeing for Moors, milk daily, reap the Infield when ripe, make cheese once salt comes, keep Lucy safe and the house fed and warm.",
+    "places": [
+     "Fenwick aim: largest family. Ellen is past bearing; numbers come through Roger, Lucy, daughters in Ashby, and those we admit.",
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.110488
+   },
+   {
+    "open": 3,
+    "stretch": [
+     14,
+     16
+    ],
+    "budget_words": 590,
+    "written": 372,
+    "memory": "I am Jory Fenwick, head of the Fenwicks in Stannick (Fenwick House, stone, 6 beds, hearth, bins; Fenwick Cellar, wattle, sound; a second cellar half built; Ellen is also building a new Fenwick house, half built). Household: wife Ellen (past childbearing, quarrying and building), son Roger (named heir), his wife Lucy, and their baby Helewise (born winter day 2). Lucy and the baby stay at Moor House under Avice's grant, renewed day by day, eating there. Daughters Rohese and Hawise married into Ashby, two days away. Aim: largest family. Neighbours: Moors (Avice, Richard) in Moor House hold the Infield; Avice has been generous. I am capable at cheese and milking (Avice taught). Cheese needs salt (0.2 a batch) and a stone cellar; no salt yet, no road opened. Debts: A21, 1 meat still owed Denise (Rook, Holloway). All milk, hoe and tool agreements with the Moors are closed. Store at winter day 3 night: one crude tool (shared; Ellen, Roger and I pass it round, leave it in Fenwick store at night), about 5 dung, 34 firewood, 0.3 hay, about 10 rye (7 meals), about 25 timber. Hearth burns 2 timber a night in the cold (Ellen's rule: save firewood). Food is the pinch: about 2 nights of rye for 4 eaters. The Infield rye reaps in about 2-3 days; I get a quarter share. The Infield fence is 77 percent done for the Moors; Richard wants it closed before the rye is reaped. Moor cattle were found on Stannick Moor. I posted O1659 (2 timber for 2 rye, to anyone); Avice took one earlier. Lessons: with a tool, felling gives about 3.8 timber per 2 units; bare hands are mostly waste. Stannick Moor and the Gill are picked bare of wild food, so forage yields little. Unused units are wasted, so plan all 5. Baby needs 1 care a day (covered while at Moor House). Rye stands the winter. The Tor pass is closed by snow in winter. Wynford market every 8th day; Wynns mill grain for a share. Next: finish the fence, fell and gather firewood daily, reap the Infield when ripe, trade timber for rye, look for salt when a road opens, and keep the house fed and warm.",
+    "places": [
+     "Fenwick aim: largest family. Ellen is past bearing; numbers come through Roger, Lucy, daughters in Ashby, and those we admit.",
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.11275
+   },
+   {
+    "open": 4,
+    "stretch": [
+     17,
+     19
+    ],
+    "budget_words": 590,
+    "written": 398,
+    "memory": "I am Jory Fenwick, head of the Fenwicks in Stannick (Fenwick House, stone, 6 beds, hearth, bins; Fenwick Cellar, wattle, bins; a second cellar half built by Ellen; a new Fenwick house half built). Household: wife Ellen (past childbearing, quarrying, building), son Roger (named heir), his wife Lucy, and baby Helewise (born winter day 2, now a child). Lucy stays at Moor House under Avice's grant (to day 10), eating there. Daughters Rohese and Hawise married into Ashby, two days away. Aim: largest family. Neighbours: Moors (Avice, Richard) in Moor House hold the Infield; they have been generous. I am capable at cheese and milking (Avice taught). Cheese needs salt (0.2 a batch) and a stone cellar; no salt yet. Debts: A21, 1 meat still owed Denise (Rook, Holloway). Rye harvest done at winter day 5-6: Ellen put 40 rye + 3.5 straw into Fenwick store (about 28 meals) and Richard promised 14 rye more as quarter shares (he admitted they were unpaid). Food is no longer desperate. Infield fence now 100 percent done for the Moors. Store roughly: 5 dung, ~14 firewood, 15 timber, 5.8 stone, plus rye. Hearth burns 2 timber a night in cold. Open offers: O1659 (2 timber for 2 rye, anyone), O1917 (2 timber for 1 cheese, anyone; Richard will trade when his cellar runs). I offered Richard to hoe and sow winter rye on the Infield for a quarter share. The crude tool is shared (Ellen, Roger, Richard, me); leave it in Fenwick store at night. Lessons: with a tool, felling gives ~3.8 timber per 2 units; bare hands mostly waste. Reaping bare-handed as master gave 6.2 rye a unit. IMPORTANT: baby/child care must be named; 'work care' without a valid target was silently dropped and Helewise went uncared one day. Make sure one named person (Ellen, Roger or Lucy) does care each day and check it. Stannick Moor and the Gill are mostly picked bare of wild food. Unused units are wasted, so plan all 5. Rye stands the winter; the Tor pass is closed by snow in winter. Wynford market every 8th day; Wynns mill grain for a share. Next: winter nearly over (2 days left); keep fuel up, check quarter-share pay-out from Richard, hoe and sow Infield if asked, trade timber for cheese or rye, look for salt when a road opens, repay Denise, keep everyone fed and warm.",
+    "places": [
+     "Fenwick aim: largest family. Ellen is past bearing; numbers come through Roger, Lucy, daughters in Ashby, and those we admit.",
+     "Child care must be done by a named person each day; a dropped action left Helewise uncared once.",
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [
+      "Child care must be done by a named person each day; a dropped action left Helewise uncared once."
+     ],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.113514
+   },
+   {
+    "open": 4,
+    "stretch": [
+     20,
+     22
+    ],
+    "budget_words": 600,
+    "written": 408,
+    "memory": "I am Jory Fenwick, head of the Fenwicks in Stannick. Buildings: Fenwick House (stone, 6 beds, hearth, bins); Fenwick Cellar (wattle, bins, took damage in the night spring d1); a second cellar half built (Ellen; the syntax to continue a specific half-built is unsolved, 'small room at the Yard' started a new building instead); the Fenwicks's new house (wattle, finished, 1 bed, bins added spring d1, no hearth); another new house half built. Avice's spring ask: finish ONE half-built shell so her Moor stone cellar unblocks; I suggested the second new house. Household: wife Ellen (past childbearing), son Roger (heir), his wife Lucy (about day 9-10 of her stay at Moor House, pregnant, birth near), baby Helewise (a child now). Daughters Rohese and Hawise married into Ashby. Aim: largest family. Neighbours: Moors (Avice, Richard) hold the Infield; generous; they left for Holloway on spring d1 evening, back in 4-5 days. I promised Richard: if cattle come home, drive them into the Infield and shut the gate. The Infield fence had gaps; Richard and Avice patched them and I mended more. Richard said the crude tool is ours while they are away. Avice said it goes in Moor House store; unclear. Avice will have a copper tool by spring d5. Rye settled with Richard (square). Infield fallow this spring unless bean seed comes from Wynford. Store (spring d1): about 46 rye (32 meals), 6 firewood, 5.8 timber, 1.5 straw, 5.8 stone, 5 dung, 1 crude tool. Hearth needs only 1 heat a night in spring (2 firewood). I began clearing the Brakes for a Fenwick field (about 20 units left). I am capable at cheese and milking; cheese needs salt and a stone cellar, and I have none. Open offers: O1917 (2 timber for 1 cheese) and O1659 (2 timber for 2 rye). Debt A21: 1 meat owed to Denise (Rook, Holloway). Lessons: care for Helewise must be written as work care with Helewise, naming her (it works); one named person each day. Building bins takes 2 units. Notes limit is 8, so forget one before writing a new one. Unused units are wasted, so plan all of them. With a tool, felling gives about 3.8 timber per 2 units. Stannick Moor and the Gill are picked bare of wild food. Wynford market every 8th day; Wynns mill for a share. Next: do cattle duty, finish one shell, make fittings, consider hoeing or clearing, look for salt, repay Denise.",
+    "places": [
+     "Fenwick aim: largest family. Ellen is past bearing; numbers come through Roger, Lucy, daughters in Ashby, and those we admit.",
+     "Child care must be done by a named person each day; a dropped action left Helewise uncared once.",
+     "Cattle duty promise to Richard: drive cattle into the Infield and shut the gate when they come home.",
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [
+      "Cattle duty promise to Richard: drive cattle into the Infield and shut the gate when they come home."
+     ],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.121474
+   }
+  ]
+ },
+ {
+  "agent": "Jory",
+  "arm": "replace",
+  "model": "claude-sonnet-5-5",
+  "places": 4,
+  "grow": 2,
+  "log": [
+   {
+    "open": 1,
+    "stretch": [
+     0,
+     1
+    ],
+    "budget_words": 550,
+    "written": 315,
+    "memory": "I am Jory Fenwick, head of the Fenwicks in Stannick (with Ellen my wife, son Roger and his wife Lucy). Daughters Rohese and Hawise married into Ashby, two days away. Master at building beds, foraging, hoeing, reaping. Aims: Fenwicks to be the largest family: partner young, try for children, keep all fed and warm. Ellen's bearing years are over (try with her was refused: must both be grown adults). Numbers now ride on Roger and Lucy, the daughters' children, and anyone we admit to the house. State (summer day 4): Fenwick House store holds about 8.3 timber, 18 firewood, 19.4 grain, 2.7 wild food. Food about 14 meals, thin for four people eating ~4 a night. Winter needs ~16 timber per hearth, or four times as much firewood. I carry 2 coin and a crude tool. Felling with the crude tool yields about 3 timber per 2 units. Gill forage is picked bare; Stannick Moor forage is plentiful. Pledge: Ellen asked for three days of timber felling this week; agreed. Day 1 done (3 days felled 9 timber on day 4, in hand to store tomorrow). Reap deal: Richard Moor will have me reap the Infield rye at first light when ripe (about 4 days from day 4, around summer's end). I get a quarter of what I reap, paid in grain from the Moor store. Roger and Lucy may sign on. Be rested and fed. Debt: I owe Denise of Rook House, Holloway, 1 meat (A21, in arrears). Neighbours: the Moors (Avice, Richard) hold the Infield and know cheese, milking and quarrying; I might learn from them when stores are stable. Market at Wynford every 8th day on the Green. Wynns grind grain for a share. Barley sown late autumn will not ripen; rye stands winter. Habit: move carried goods into the store (bins keep food 3x better). Attend to Fenwick House or Ellen.",
+    "places": [
+     "Fenwick aim: largest family. Ellen is past bearing. Numbers come through Roger and Lucy, daughters in Ashby, and newcomers admitted.",
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [
+      "Fenwick aim: largest family. Ellen is past bearing. Numbers come through Roger and Lucy, daughters in Ashby, and newcomers admitted."
+     ],
+     "replace": [],
+     "refused": [
+      "Richard Moor: I reap the Infield rye at first light when ripe; I get a quarter, paid in grain. I owe Denise 1 meat."
+     ]
+    },
+    "cost": 0.054838700000000004
+   },
+   {
+    "open": 1,
+    "stretch": [
+     2,
+     4
+    ],
+    "budget_words": 560,
+    "written": 358,
+    "memory": "I am Jory Fenwick, head of the Fenwicks in Stannick (with Ellen my wife, son Roger and his wife Lucy). Daughters Rohese and Hawise married into Ashby, two days away. Master at building beds, foraging, hoeing, reaping. Aims: Fenwicks largest family: keep all fed and warm. Ellen's bearing years are over. Numbers ride on Roger and Lucy, daughters' children, and anyone admitted. State (summer day 7, last day of summer is day 8): Fenwick House store holds about 24.6 timber, 37 firewood, 9.6 grain, 12 hay, some dung; food only ~6.7 meals, under 2 nights for four. Winter fuel target (16 timber per hearth) is met. Food is the problem. Fenwick Cellar built (empty, Ellen's, for cheese; she learned cheese from Avice); a second one is half built. Ellen suggested hunting or trading hay/timber to the Moors for a cow in milk. Tools: my crude tool wore out felling; I have none. Lucy's quarrying failed (no stone). Bare-handed reaping is x0.6. Need a tool: try borrowing from Avice/Richard (they could not be reached by say; speak to them in person with tell, since I have no access to Moor House). Crude tool needs stone; quarrying needs a tool, so ask Moors for stone or a tool. Offers must be written as goods (\"2 grain\") not as loans. Reap deal: Avice called harvest for day 8 dawn; all hands to the Infield. Richard pays me a quarter of what I reap, in grain from the Moor store. Roger and Lucy may sign on. Debts: A379 I owe the Moors 1 day of work (weeded Infield partly toward it; Richard will call the rest at or after harvest). A21: I owe Denise of Rook House, Holloway, 1 meat, in arrears. Neighbours: Moors (Avice, Richard) hold the Infield and know cheese, milking, quarrying; I might learn from them. Market at Wynford every 8th day on the Green. Wynns grind grain for a share. Rye stands winter; late barley will not ripen. Moor and Gill forage are picked bare; the moor is grazed bare. Habit: move carried goods into the store. Felling gives about 3 timber per 2 units with a tool.",
+    "places": [
+     "Fenwick aim: largest family. Ellen is past bearing. Numbers come through Roger and Lucy, daughters in Ashby, and newcomers admitted.",
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.0890967
+   },
+   {
+    "open": 2,
+    "stretch": [
+     5,
+     7
+    ],
+    "budget_words": 570,
+    "written": 377,
+    "memory": "I am Jory Fenwick, head of the Fenwicks in Stannick (Ellen my wife, son Roger my named heir, his wife Lucy). Daughters Rohese and Hawise married into Ashby, two days away. Master at building beds, foraging, hoeing, reaping; competent at felling. Now capable at cheesemaking (Avice taught me, autumn day 2); Roger was also to be taught, Lucy next. Aims: Fenwicks largest family, all fed and warm. Ellen's bearing years are over; numbers ride on Roger and Lucy, daughters' children, and anyone admitted. State (autumn day 2, 6 days left in autumn): Fenwick House store ~5.3 rye, ~40 firewood, ~23 timber, ~4.3 hay, 5 dung. Fuel for winter is well over target (16 timber per hearth). Food is the problem: rye ~3.7 meals, plus milk. Ellen offered timber for rye/bread (3 timber for 3 rye; 2 timber for 1 bread). Fenwick Cellar built (mine, empty); a second is half built (Ellen's work). Moor and Gill forage and moor grazing are picked bare, so foraging yields little. Habit: move carried goods into the store at start of day. Deals: A711 (4 timber) and A722 (8 hay): Richard owes me 1 milk a day each for 6 days from day 8 (summer); Richard sends it via Ellen. A21: I owe Denise of Rook House, Holloway, 1 meat, in arrears. A379 (day owed to Moors) is cleared. Harvest quarter-share paid (6 rye). Richard dunged-in rye sown on Infield; ripe about autumn day 12 or so (~10 days from day 2). Richard goes to Wynford soon; Avice stays, watching a calving cow. Cow-in-milk trade talk with Richard and Avice still open (hay or timber for a cow in milk). Tools: I have no crude tool; Lucy neither. Crude tool needs stone; quarrying needs a tool; ask Moors for a tool or stone. Bare hands: reap x0.6, fell x0.25. Offers must be written as goods (\"2 grain\"), not loans. Say to Moors does not reach Moor House; use tell in person. Neighbours: Moors (Avice, Richard) hold the Infield and know cheese, milking, quarrying; I might learn milking and quarrying from them next. Market at Wynford every 8th day on the Green; Wynns grind grain for a share. Rye stands winter; late barley will not ripen. Unused units last days: use all units.",
+    "places": [
+     "Fenwick aim: largest family. Ellen is past bearing. Numbers come through Roger and Lucy, daughters in Ashby, and newcomers admitted.",
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.1101047
+   },
+   {
+    "open": 2,
+    "stretch": [
+     8,
+     10
+    ],
+    "budget_words": 580,
+    "written": 456,
+    "memory": "I am Jory Fenwick, head of the Fenwicks in Stannick (Ellen my wife, son Roger my named heir, his wife Lucy). Daughters Rohese and Hawise married into Ashby, two days away. Master at building beds, foraging, hoeing, reaping; competent at felling. Capable at cheesemaking (Avice taught me, autumn day 2) and milking (Avice taught me, autumn day 5). Ellen learned/was learning quarrying from Avice and cheese; she is capable of quarrying but needs a tool. Aims: Fenwicks largest family, all fed and warm. Ellen's bearing years are over; numbers ride on Roger and Lucy, daughters' children, and anyone admitted. State (autumn day 5, 3 days left in autumn): Fenwick House store ~5.8 rye (about 4 meals, food CRITICAL for 4 people), ~39 firewood, ~15.7 timber, 0.3 hay, 5 dung. Fuel nearly at winter target (16 timber per hearth). Forage on Moor and Gill picked bare. Moor cattle (6 cows, ox, bull, 3 calves) now graze at the Yard / moor. Cow deal DONE: I gave Moor House 6 timber and 4 hay (really 0.3 hay was in store; Avice declared it fully square, no hay owed). A loan cow in milk is among the herd, in Moors' name, her calves stay Moors', returns when Richard calls. I must now milk her daily and leave milk at Fenwick House; Avice also leaves 2 milk daily at Fenwick House under A711 and A722 (3 of 6 paid each, then more due). Open offers: O1062 (2 timber for 2 rye, anyone), O1063 (work 2 days for 4 rye), Ellen's O752 (2 timber for 1 bread). A21: I owe Denise of Rook House, Holloway, 1 meat, in arrears. Infield rye (Moors' field, sown autumn day 2) ripens about autumn day 12; I weed and hoe it for the Moors; quarter-share paid to me at reap. Same crop as last year; ground tiring. Richard went to Wynford for salt (cheese needs 0.2 salt per batch and a proper stone-walled cellar); back morning of day 13. Fenwick Cellar (wattle, mine) took damage day 4; Ellen repaired; a second cellar is half built. Cheese blocked until salt and a proper cellar. Tools: no crude tool; crude tool needs 0.5 stone; quarrying needs a tool, a chicken-and-egg; ask Moors to lend a tool. Bare hands: reap x0.6, fell x0.25, hoe x0.5. Habits: move carried goods into store at start of day; use all units; offers must be written as goods; use tell in person for Moors. Market at Wynford every 8th day on the Green; Wynns grind grain for a share. Rye stands winter; late barley will not ripen. Winter food plan: buy rye with timber, work for the Moors, seek dried meat or cheese; Roger and Lucy should keep trying for a child.",
+    "places": [
+     "Fenwick aim: largest family. Ellen is past bearing. Numbers come through Roger and Lucy, daughters in Ashby, and newcomers admitted.",
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.1158347
+   },
+   {
+    "open": 3,
+    "stretch": [
+     11,
+     13
+    ],
+    "budget_words": 580,
+    "written": 396,
+    "memory": "I am Jory Fenwick, head of the Fenwicks in Stannick (wife Ellen, heir son Roger, his wife Lucy, near her time, resting at Moor House under Avice's care). Daughters Rohese and Hawise are married into Ashby, two days away. Master at building beds, foraging, hoeing, reaping; competent at felling. Capable (not sure of hand) at cheesemaking and milking, both taught by Avice. Ellen is capable of quarrying and holds a crude tool. Aims: Fenwicks the largest family, all fed and warm; numbers ride on Roger and Lucy, daughters' children, and newcomers admitted. State at end of autumn day 8 (winter begins; work units drop to 5): Fenwick House store about 8 rye (about 5.6 meals for 4), ~38 firewood, ~12.6 timber plus about 7 felled today (target 16 timber per hearth), 0.3 hay, 5 dung, and a crude tool Avice gave me (A1205 settled; release was refused as nothing was owed, so it is closed). Fenwick Cellar (wattle) is sound; a second cellar is half built. Cheese needs salt (0.2 a batch) and a proper stone-walled cellar. Richard is back from Wynford; ask about salt. Deals: the Moors' cow loan is declared square by Avice (no hay owed). I milk the loan cow daily at Stannick Moor, and she stays at Stannick, not going to High Tor. O1063: I owe the Moors 2 days of hoeing; my hoeing yields 0 plots lately, and about 2.6 plots remain unbroken. Avice asked for both days, so do one more hoe plot and ask her to release it. A711 and A722: Richard owes 6 milk each, in arrears. Press him. A21: I still owe Denise (Rook House, Holloway) 1 meat. Infield rye (Moors' field) ripens about autumn day 12-13; I get a quarter share when I reap, and a copper tool reaps x1.5 while bare hands only x0.6. Standing offers: Ellen's O752 (2 timber for 1 bread). Habits: move carried goods into store at the start of the day; use all units; write offers as goods; use tell to speak to the Moors. Wynford market is every 8th day on the Green; the Wynns grind grain for a share. Rye stands winter. Winter food plan: trade timber for rye, work for the Moors, seek dried meat or cheese. Roger and Lucy should keep trying for a child. Walling a parcel round (dry-stone) is something I have only heard of.",
+    "places": [
+     "Fenwick aim: largest family. Ellen is past bearing. Numbers come through Roger and Lucy, daughters in Ashby, and newcomers admitted.",
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.1121687
+   },
+   {
+    "open": 3,
+    "stretch": [
+     14,
+     16
+    ],
+    "budget_words": 590,
+    "written": 298,
+    "memory": "I am Jory Fenwick, head of the Fenwicks in Stannick (wife Ellen, heir son Roger, his wife Lucy, and their new baby Helewise, born winter day 2). Lucy and the baby sleep at Moor House under Avice's grant, renewed day by day. Daughters Rohese and Hawise are married into Ashby, two days away. Master at building beds, foraging, hoeing, reaping; skilled at felling. Capable (not sure of hand) at cheese and milking, taught by Avice. Ellen quarries (3.8 stone put in store) and is building cellar #2 and a new Fenwick house (both half built). Cheese needs salt and a stone-walled cellar. State at winter day 3 end: Fenwick store about 10 rye (7 meals for 4-5), ~34 firewood, ~25 timber, 5 dung, 0.3 hay, one crude tool shared (I take it for fell, then return it to store for Ellen/Roger). Hearth burns 2 timber a night in the cold (Ellen's rule; firewood keeps). Standing offer O1659 (mine) and Ellen's O1472: 2 timber for 2 rye to anyone; Avice took one earlier. Infield rye (Moors') reaps about winter day 5-6; I get a quarter share. The Infield fence is about 77% done; I worked on it for the Moors. Moor cattle were found on Stannick Moor. A21: I still owe Denise (Rook House, Holloway) 1 meat. Other agreements (milk, hoe, tool) are closed. Wynford market is every 8th day; the Wynns grind grain for a share. Rye stands winter. Plan: fell, firewood and forage daily at the Gill; care for the baby if Lucy needs it; bridge food till the reap; look for salt when a road opens (2 coin plus timber). Habits: use all units, move carried goods to store, write offers as goods, use tell for the Moors. Roger and Lucy keep trying for more children.",
+    "places": [
+     "Fenwick aim: largest family. Ellen is past bearing. Numbers come through Roger and Lucy, daughters in Ashby, and newcomers admitted.",
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.11136270000000001
+   },
+   {
+    "open": 4,
+    "stretch": [
+     17,
+     19
+    ],
+    "budget_words": 590,
+    "written": 331,
+    "memory": "I am Jory Fenwick, head of the Fenwicks in Stannick (wife Ellen, heir son Roger, his wife Lucy, and their baby Helewise, born winter day 2). Lucy and Helewise sleep at Moor House under Avice's grant (to day 10, food included). Daughters Rohese and Hawise are married into Ashby, two days away. Master at building beds, foraging, hoeing, reaping; skilled at felling. Capable (not sure of hand) at cheese and milking, taught by Avice. Ellen quarries and is building cellar #2 and a new Fenwick house (both half built). Cheese needs salt and a stone-walled cellar. State at winter day 6: Ellen put 40 rye and 3.5 straw into the Fenwick store (about 28 meals); Richard promised 14 rye as the unpaid harvest quarter shares. Store also holds about 14 firewood, 16 timber, 5.8 stone, 5 dung. Hearth burns 2 timber a night in the cold. One crude tool is shared; it goes back into Fenwick store at nightfall. The Infield rye is reaped and its fence is done (100%) for the Moors; A379 is cleared. Offers open: O1659 (2 timber for 2 rye, anyone) and O1917 (2 timber for 1 cheese; Richard will trade once cellar runs). I offered Richard to hoe and sow winter rye for the Moors on a quarter share. Lessons: \"work care\" must name no child in \"at\"; on day 5 my care did not register and Helewise went uncared. Before leaving, agree who cares for her and confirm it happened. A21: I still owe Denise (Rook House, Holloway) 1 meat. Wynford market is every 8th day; the Wynns grind grain for a share. Rye stands winter. Plan: fell, firewood and forage daily at the Gill; look for salt when a road opens (2 coin plus timber); the soil of the Infield is thin from cropping, so it wants manure. Habits: use all units, move carried goods into store, write offers as goods, use tell for the Moors. Roger and Lucy keep trying for more children.",
+    "places": [
+     "Fenwick aim: largest family. Ellen is past bearing. Numbers come through Roger and Lucy, daughters in Ashby, and newcomers admitted.",
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.10978070000000001
+   },
+   {
+    "open": 4,
+    "stretch": [
+     20,
+     22
+    ],
+    "budget_words": 600,
+    "written": 386,
+    "memory": "I am Jory Fenwick, head of the Fenwicks in Stannick (wife Ellen, heir son Roger, his wife Lucy, baby Helewise born winter day 2). Lucy is near her time (day 9-10 of Avice's grant at Moor House) and may give birth; Avice and Richard leave for Holloway at spring day 1 night, back in 4-5 days. Daughters Rohese and Hawise are married into Ashby. Master at beds, foraging, hoeing, reaping; skilled at felling. Capable at cheese and milking (taught by Avice). Cheese needs salt and a stone cellar. Duties: while Richard and Avice are away I must drive cattle into the Infield and shut the gate if they come home (I agreed aloud). Infield fence had gaps; I mended some on spring day 1, check it. Richard gave the crude tool to the Fenwicks while they are away; Avice wanted it in Moor House store for the stone cellar on return. Avice's spring ask: finish ONE half-built shell on the Yard (we pick new house #2) to unblock her Moor stone cellar. Avice will have a copper tool by spring day 5. Richard decided the Infield is fallow this spring unless bean seed comes from Wynford. Rye accounts with Moors are square. State spring day 1: Fenwick store about 46 rye (about 32 meals), 6 firewood, 5.8 timber, 1.5 straw, 5.8 stone, 5 dung, a crude tool. Spring hearth takes 1 heat a night (2 firewood). New house (finished wattle) has 1 bed and bins. Cellar #1 was damaged in the night. Cellar #2 is half built; the continue syntax is unsolved. I started clearing the Brakes for a Fenwick field (about 20 units left). Offers open: O1917 (2 timber for 1 cheese), O1659 (2 timber for 2 rye). I still owe Denise (Rook House, Holloway) 1 meat (A21). Wynford market every 8th day; the Wynns grind grain for a share. Lessons: for child care use work care with \"with\": \"Helewise\" (it works); confirm who cares each day. Notes max 8: forget one before adding. Pin only an existing note title. Building bins takes 2 units. Habits: use all units, bank carried goods into store, tell the Moors things. Plan: Gill firewood/fell/forage daily, fittings for the new house, clear the Brakes, repair Cellar, look for salt and a bean trade at Wynford, seed selection, copper tool.",
+    "places": [
+     "Fenwick aim: largest family. Ellen is past bearing. Numbers come through Roger and Lucy, daughters in Ashby, and newcomers admitted.",
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.11860670000000001
+   }
+  ]
+ },
+ {
+  "agent": "Gunnild",
+  "arm": "replace",
+  "model": "claude-sonnet-5-5",
+  "places": 4,
+  "grow": 2,
+  "log": [
+   {
+    "open": 1,
+    "stretch": [
+     0,
+     2
+    ],
+    "budget_words": 550,
+    "written": 268,
+    "memory": "I am Gunnild of the Reeds at Westmere (Holm, fen island). Husband and partner Payn; daughters Philippa, Tiffany live with us in Reed House (5 beds, hearth, bins). Master at hunting, felling timber, building a camp, making a pack. Summer days 3-5: store in Reed House by day 5 held about 7 dried meat, 20 grain, 47 firewood, 16 timber, 2.7 hide, so wood for winter is already ample (a hearth wants ~16 timber). Food is the pinch: Fen Meadow was picked over of wild food by day 4. Hunting the Carr often catches nothing (bare hands, no weapon); one hunt gave 1.8 meat. Making a crude weapon or crude tool could help hunting and cutting. Weeding the Holm Field (barley) each day helps the crop. I began clearing new ground at Fen Meadow: about 12 units of work left to make a field (new field would be held by the Reeds). Payn has been seen with a bedroll on his back as if for a journey; the family seems to hunt and fell at the Carr daily. Roads: Wynford 1 day (market every eighth day on the Green; Wynns grind grain for a share); a punt path west through the reeds, 1 day, never followed. Old tales: Ravensholm west past the carr has an unfound hoard; Reeds go further. Barley sown after mid-autumn won't ripen; rye stands winter. Plan going forward: keep food up (hunt, forage, maybe make a crude weapon), keep weeding, finish clearing Fen Meadow, reap barley at harvest, don't overspend on wood. Note: pin needs an existing note title; don't pin a nonexistent one.",
+    "places": [
+     null,
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.041776600000000004
+   },
+   {
+    "open": 1,
+    "stretch": [
+     3,
+     5
+    ],
+    "budget_words": 560,
+    "written": 275,
+    "memory": "I am Gunnild of the Reeds at Westmere (Holm, fen island). Husband and partner Payn; daughters Philippa, Tiffany live with us in Reed House (5 beds, hearth, bins). Master at hunting, felling timber, building a camp, making a pack. End of summer (day 8): the barley was reaped (Payn reaped; I got 3.1 grain by hand). Reed House store about 67 grain, 6 dried meat, 48 firewood, 23 timber, 2.7 hide, 5 straw, 3.6 hay: about 64 meals, so grain and wood for winter are ample (a hearth wants ~16 timber). Meat is low. Hunting the Carr often catches nothing with bare hands (one hunt gave 1.8 meat); Payn now carries a club or spear. A crude weapon or crude tool would help hunting and cutting. Wild food at Fen Meadow and the Carr is picked over and slow to return. Fen Meadow clearing: about 10 units of work left before it is a field held by the Reeds (clearing is 1 unit per action; I have often left units unused, so use all units). Plan: finish clearing Fen Meadow, then sow it with rye (stands winter; barley sown after mid-autumn will not ripen); keep hunting for meat, perhaps dry meat at the hearth; keep timber and firewood stocked; fence the Holm Field. Roads: Wynford 1 day (market every eighth day on the Green; Wynns grind grain for a share); a punt path west through the reeds, 1 day, never followed. Old tales: Ravensholm west past the carr has an unfound hoard; Reeds go further. Note: pin needs an existing note title; I keep one note titled \"Plan: hunt, fell and clear for the household\".",
+    "places": [
+     null,
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.0569786
+   },
+   {
+    "open": 2,
+    "stretch": [
+     6,
+     8
+    ],
+    "budget_words": 570,
+    "written": 284,
+    "memory": "I am Gunnild of the Reeds at Westmere (Holm, fen island). Husband and partner Payn; daughters Philippa, Tiffany live with us in Reed House (5 beds, hearth, bins). Master at hunting, felling timber, building a camp, making a pack. Autumn day 3: barley harvest mostly in (I gather 1-3 grain a day by hand; Payn, Philippa, Tiffany reap too). Reed House store about 101 grain, 4 dried meat, 42 firewood, 22 timber, 3.7 hide, 10 straw, 3.6 hay: about 83 meals, so grain and wood for winter are ample (a hearth wants ~16 timber). Meat is low. The Carr is now thin on game and wild food (hunting gave 1.1 and 2.5 meat on two days, then little left); Fen Meadow wild food is picked over. A crude weapon or crude tool would help hunting and cutting. Fen Meadow clearing: about 9 units of work left before it is a field held by the Reeds (clearing is 1 unit per action; I have often left units unused, so use all 6 units each day). Plan: finish clearing Fen Meadow, then sow it with rye (stands winter; barley sown after mid-autumn will not ripen); hunt for meat when game returns, try wildfowl at the Mere, dry meat at the hearth; keep timber and firewood stocked; Payn is fencing the Holm Field with wattle. Roads: Wynford 1 day (market every eighth day on the Green; Wynns grind grain for a share); a punt path west through the reeds, 1 day, never followed. Old tales: Ravensholm west past the carr has an unfound hoard; Reeds go further. Note: pin needs an existing note title; I keep one note titled \"Plan: hunt, fell and clear for the household\".",
+    "places": [
+     null,
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.056122599999999995
+   },
+   {
+    "open": 2,
+    "stretch": [
+     9,
+     11
+    ],
+    "budget_words": 580,
+    "written": 279,
+    "memory": "I am Gunnild of the Reeds at Westmere (Holm, fen island). Husband and partner Payn; daughters Philippa, Tiffany live with us in Reed House (5 beds, hearth, bins). Master at hunting, felling timber, building a camp, making a pack. Autumn day 6: barley harvest all in. Reed House store about 112 grain, 0.2 dried meat, 35 firewood, 19 timber, 3.7 hide, 14 straw, 3.6 hay: about 79 meals, so grain and wood for winter are ample (a hearth wants ~16 timber). Meat is nearly gone. The Carr is hunted out (game will not breed back soon); Fen Meadow wild food is picked over. Hunting is not allowed at the Mere (refused); wildfowl there may need another method. A crude weapon or crude tool would help hunting and cutting. Fen Meadow clearing: about 7 units of work left before it is a field held by the Reeds (clearing is 1 unit per action; I often leave units unused, so use all 6 units each day). Holm Field fence is about 59 percent done (Payn and I work it). Plan: finish clearing Fen Meadow, then sow it with rye (stands winter; barley sown after mid-autumn will not ripen); keep timber and firewood stocked. Consider a trip to Wynford (1 day; market every eighth day on the Green; Wynns grind grain for a share) to trade grain for meat or cheese, or follow the punt path west through the reeds (1 day, never followed; Ravensholm with its unfound hoard lies west past the carr). Payn was seen with a bedroll on his back as if for a journey. Note: I keep one note titled \"Plan: hunt, fell and clear for the household\".",
+    "places": [
+     null,
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.0540186
+   },
+   {
+    "open": 3,
+    "stretch": [
+     12,
+     14
+    ],
+    "budget_words": 580,
+    "written": 307,
+    "memory": "I am Gunnild of the Reeds at Westmere (Holm, fen island). Husband and partner Payn; daughters Philippa, Tiffany live with us in Reed House (5 beds, hearth, bins). Master at hunting, felling timber, building a camp, making a pack. Winter day 1 now: cold, snow. Reed House store about 90 grain (~63 meals; we eat ~4 a night), 42 firewood, 20 timber, 3.7 hide, 14 straw, 3.6 hay, almost no meat. Cold nights make the hearth take 4 heat (8 firewood or 2 timber) a night, so fuel is the thing to watch: keep felling timber and gathering firewood at the Carr (branches down after the gale; timber plentiful). The Carr is hunted out and picked bare of wild food; Fen Meadow wild food is picked over. Hunting is refused at the Mere; wildfowl there may need another method. A crude weapon or crude tool would help hunting and cutting (young growth needs a tool). Fen Meadow clearing: about 5 units of work left before it is a field held by the Reeds; use all my units each day. Holm Field fence about 90 percent done. Rye (stands winter) is the crop for Fen Meadow once cleared, but we have no rye seed; barley sown now will not ripen. Wilmot of the Cotters (Wynford) visited, owed a meat debt to Gilbert Ashe; he slept at our house and helped clear. Consider a trip to Wynford (1 day; market every eighth day on the Green; Wynns grind grain for a share) to trade grain for meat or cheese and rye seed, or follow the punt path west through the reeds (1 day, never followed; Ravensholm with its unfound hoard lies west past the carr). Payn was seen with a bedroll as if for a journey. I keep one note titled \"Plan: hunt, fell and clear for the household\".",
+    "places": [
+     null,
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.0555666
+   },
+   {
+    "open": 3,
+    "stretch": [
+     15,
+     17
+    ],
+    "budget_words": 590,
+    "written": 269,
+    "memory": "I am Gunnild of the Reeds at Westmere (Holm, fen island). Husband and partner Payn; daughters Philippa, Tiffany. Reed House (5 beds, hearth, bins). Master at hunting, felling timber, building a camp, making a pack. Now winter day 4 ended (cold, snow). Payn went to Wynford for meat; Philippa followed with grain to trade. Tiffany and I are home keeping the fire. Reed House store day 4: about 58 firewood, 23 timber, 68 grain (~48 meals), 3.7 hide, 14 straw, 3.6 hay, no dried meat. Cold nights the hearth takes 4 heat (8 firewood or 2 timber). Fuel is good; keep felling timber (1.1 per unit bare-handed) and gathering firewood at the Carr. The Carr is hunted out of game and picked bare of wild food; hunting at the Mere is refused (not done there). Pin and note names: pin only works with an existing note title; the pinned note is \"Plan: winter wood and clearing\" (use exactly that). Fen Meadow clearing: about 4 units left before it is a field for the Reeds; use all 5 units each day, I wasted 2 on day 4. Rye stands winter but we have no seed; barley sown now will not ripen. A crude weapon or crude tool would help hunting and cutting young growth. Wynford is 1 day away (market every eighth day on the Green; Wynns grind grain for a share): trade grain for meat, cheese, rye seed. Punt path west through the reeds (1 day, never followed; Ravensholm with its unfound hoard lies west past the carr). Wilmot of the Cotters owed a meat debt to Gilbert Ashe.",
+    "places": [
+     null,
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.0589406
+   },
+   {
+    "open": 4,
+    "stretch": [
+     18,
+     20
+    ],
+    "budget_words": 590,
+    "written": 262,
+    "memory": "I am Gunnild of the Reeds at Westmere (Holm, fen island). Husband and partner Payn; daughters Philippa, Tiffany. Reed House (5 beds, hearth, bins). Master at hunting, felling timber, building a camp, making a pack. Winter day 7 ended (last winter day; cold, snow, gale). Store day 7: about 60 firewood, 27 timber, 58 grain (~41 meals, four of us eat ~4 a night), 3.7 hide, 14 straw, 3.6 hay, no dried meat. Cold nights the hearth takes 4 heat (8 firewood or 2 timber). Fuel is good. The Carr is hunted out of game and picked bare of wild food; Fen Meadow is also picked bare (foraging refused). Hunting at the Mere is refused (not done there). Meat is the pinch: Payn considered going to Wynford for meat; trade grain for meat, cheese, rye seed (Wynford 1 day; market every eighth day on the Green; Wynns grind grain for a share). Fen Meadow clearing: about 2 units left before it is a field for the Reeds; use all 5 units each day, I wasted 2 on day 7 after forage was refused. Rye stands winter but we have no seed; barley sown after mid autumn will not ripen. A crude weapon or crude tool would help hunting and cutting young growth. Pin only works with an existing note title; pinned note is \"Plan: winter meat and Fen Meadow\" (use exactly). Punt path west through the reeds (1 day, never followed; Ravensholm with its unfound hoard lies west past the carr). Wilmot of the Cotters owed a meat debt to Gilbert Ashe.",
+    "places": [
+     null,
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.060476600000000005
+   },
+   {
+    "open": 4,
+    "stretch": [
+     21,
+     23
+    ],
+    "budget_words": 600,
+    "written": 285,
+    "memory": "I am Gunnild of the Reeds at Westmere (Holm, fen island). Husband and partner Payn; daughters Philippa, Tiffany. Reed House (5 beds, hearth, bins). Master at hunting, felling timber, building a camp, making a pack; competent at clearing. Spring day 2 ended. Payn went west by the punt path (about winter day 8) to look for game, expected back within two days; he took 4 grain. Store spring day 2: ~56 firewood, ~33 timber, 38 grain (~27 meals, three eat ~3 a night, falling ~10 grain per day), 3.7 hide, 14 straw, 3.6 hay, no dried meat. Warm nights the hearth takes 1 heat. Fuel is good. The Carr is hunted out of game and picked bare of wild food and will not breed back; Fen Meadow is picked bare. Hunting at the Mere is not done (refused). Fen Meadow clearing is finished (0 units left): it is a field for the Reeds, needs sowing; no rye seed. Holm Field barley will be fit to reap about spring day 9-10; its fence has gaps (mend them); weeding done spring day 2. Meat is the pinch; grain will run low in ~9 days until barley harvest. Consider going to Wynford (1 day; market every eighth day on the Green; Wynns grind grain for a share) to trade for meat, cheese, rye seed, or scouting the punt path west (Ravensholm hoard unfound). Use all units each day, don't waste them: hunting in the Carr yields nothing now, so use units for fencing, hoeing, felling, sowing, weeding instead. Pin only works with an existing note title; pinned note is \"Plan: winter meat and Fen Meadow\" (use exactly). Wilmot of the Cotters owed a meat debt to Gilbert Ashe.",
+    "places": [
+     null,
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.061368599999999995
+   }
+  ]
+ },
+ {
+  "agent": "Gunnild",
+  "arm": "later",
+  "model": "claude-sonnet-5-5",
+  "places": 4,
+  "grow": 2,
+  "log": [
+   {
+    "open": 1,
+    "stretch": [
+     0,
+     2
+    ],
+    "budget_words": 550,
+    "written": 250,
+    "memory": "I am Gunnild Reed of Westmere (the Holm, a fen island). Husband/partner Payn; daughters Philippa, Tiffany. Reed House: 5 beds, hearth, bins. Holm Field holds barley. Carr (alder/willow) for hunting, felling, firewood, forage. Fen Meadow is picked over for wild food; I started clearing new ground there (about 12 units of work left to make a field for the Reeds). Mere has wildfowl. State on summer day 5: store about 7 dried meat, ~20 grain, ~50 firewood, ~16 timber, 2.7 hide, plus 1.8 meat. Wood is plentiful for winter (need ~16 timber per hearth); food is the pinch. Hunting at the Carr often catches nothing but sometimes yields meat. Bare-hand felling is slow; a copper tool would help. I should pin using an existing note title only (pin failed when no note matched). Ideas: finish clearing Fen Meadow and sow rye in autumn (rye survives winter; barley sown after mid-autumn will not ripen). Wynford is 1 day away; market day there every eighth day on the Green; Wynns grind grain at the Mill for a share. Harvest hiring: reapers paid in grain. A punt path west through the reeds is unexplored (Reeds were always the ones who went further). Ravensholm hoard legend lies west past the carr. Payn has been seen with a bedroll rolled as if for a journey. Crafts: master at camp building, felling, hunting, packs. Know of but not how: charcoal, cheese, ditching, handcart, milking, ploughing, quarrying, seed selection (could learn from Wynns at Wynford, Ashes, Moors).",
+    "places": [
+     "Reeds hold the Holm Field; food is scarcer than wood; sow rye in autumn, not late barley.",
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [
+      "Reeds hold the Holm Field; food is scarcer than wood; sow rye in autumn, not late barley."
+     ],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.0423179
+   },
+   {
+    "open": 1,
+    "stretch": [
+     3,
+     5
+    ],
+    "budget_words": 560,
+    "written": 301,
+    "memory": "I am Gunnild Reed of Westmere (the Holm, a fen island). Partner Payn; daughters Philippa, Tiffany. Reed House: 5 beds, hearth, bins, held by the Reeds. Holm Field (Reeds' only field) had barley; Payn and I reaped it at end of summer (day 8, gale). Carr (alder/willow): hunting, felling, firewood, forage; game often plentiful but hunting sometimes catches nothing. Fen Meadow: picked over for wild food, good grass for hay; I am clearing it into a new Reed field, about 10 units of work left. Mere has wildfowl. Store on summer day 8: ~67 grain (about 64 meals of food), ~6 dried meat, ~48 firewood, ~23 timber, 2.7 hide, 3.6 hay, 5 straw. Grain is good for now; meat is low. Wood is enough for winter (about 16 timber per hearth). Bare-hand felling is slow (~1 timber per 2 units); a copper tool would help. Plan for autumn: finish clearing Fen Meadow and sow it with rye (rye survives winter; barley sown after mid-autumn will not ripen), keep hunting for meat, gather firewood and timber, cut hay. Note: pin only using an existing note title. Wynford is 1 day away; market every eighth day on the Green; the Wynns grind grain at the Mill for a share. Harvest hiring pays reapers in grain. A punt path west through the reeds is unexplored (Reeds were always the ones who went further); the Ravensholm hoard legend lies west past the carr. Payn has been seen with a bedroll rolled as if for a journey and goes about with a club or spear. Crafts: master at camp building, felling, hunting, packs. Know of but not how: charcoal, cheese, ditching, handcart, milking, ploughing, quarrying, seed selection (learn from Wynns at Wynford, Ashes, Moors). I tend to leave units unused; fill the day's units next time.",
+    "places": [
+     "Reeds hold the Holm Field; food is scarcer than wood; sow rye in autumn, not late barley.",
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.058105899999999995
+   },
+   {
+    "open": 2,
+    "stretch": [
+     6,
+     8
+    ],
+    "budget_words": 570,
+    "written": 317,
+    "memory": "I am Gunnild Reed of Westmere (the Holm, a fen island). Partner Payn; daughters Philippa, Tiffany. Reed House: 5 beds, hearth, bins, held by the Reeds. Holm Field (Reeds' only field) had barley; reaping went on through autumn days 1-3 because much was rotting and flattened; Payn is fencing it with wattle (barely begun). Carr (alder/willow): hunting, felling, firewood, forage; game was plentiful on autumn day 1 but thin by day 2-3; wild food is scarce everywhere. Fen Meadow: good grass for hay; I am clearing it into a new Reed field, about 9 units of work left; Payn also clears it. Mere has wildfowl (Payn tries it). Store on autumn day 3: ~101 grain (about 83 meals of food), ~4 dried meat, ~42 firewood, ~22 timber, 3.7 hide, 3.6 hay, 10 straw. Grain is plentiful; meat is low. Wood is enough for winter (about 16 timber per hearth). Bare-hand felling is slow; a copper tool would help. Plan: finish clearing Fen Meadow and sow it with rye before mid-autumn (rye survives winter; barley sown late will not ripen), hunt for meat when game returns, gather firewood and timber, cut hay. Pin only using an existing note title. Wynford is 1 day away; market every eighth day on the Green; the Wynns grind grain at the Mill for a share. A punt path west through the reeds is unexplored (Reeds were always the ones who went further); the Ravensholm hoard legend lies west past the carr. Payn has been seen with a bedroll rolled as if for a journey. Crafts: master at camp building, felling, hunting, packs. Know of but not how: charcoal, cheese, ditching, handcart, milking, ploughing, quarrying, seed selection (learn from Wynns at Wynford, Ashes, Moors). I tend to leave units unused (left 3 of 6 on day 3): fill all units next time, e.g. clear Fen Meadow 4-5 units, since reaping yields little now.",
+    "places": [
+     "Reeds hold the Holm Field; food is scarcer than wood; sow rye in autumn, not late barley.",
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.0581559
+   },
+   {
+    "open": 2,
+    "stretch": [
+     9,
+     11
+    ],
+    "budget_words": 580,
+    "written": 309,
+    "memory": "I am Gunnild Reed of Westmere (the Holm, a fen island). Partner Payn; daughters Philippa, Tiffany. Reed House: 5 beds, hearth, bins, held by the Reeds. Holm Field (Reeds' only field): barley all reaped by autumn day 5; Payn and I are fencing it with wattle (about 59 parts in a hundred done on day 6). Carr (alder/willow): hunting, felling, firewood, forage; it is hunted out now, little game or wild food left anywhere. The Mere: hunting is refused there (cannot hunt at the Mere). Fen Meadow: good grass for hay; I am clearing it into a new Reed field, about 7 units of work left; Payn also clears it. Plan: finish clearing, then sow rye before mid-autumn ends (rye survives winter; late barley will not ripen). Store on autumn day 6: ~112 grain (about 80 meals), only 0.2 dried meat, ~36 firewood, ~19.5 timber, 3.7 hide, 3.6 hay, 14 straw. Grain is plentiful; meat is nearly gone. Wood is enough for winter (about 16 timber per hearth). Bare-hand felling is slow; a copper tool would help. Wynford is 1 day away; market every eighth day on the Green; the Wynns grind grain at the Mill for a share; could trade grain there for meat or tools. A punt path west through the reeds is unexplored (Reeds were always the ones who went further); the Ravensholm hoard legend lies west past the carr. Payn has been seen with a bedroll rolled as if for a journey. Crafts: master at camp building, felling, hunting, packs. Know of but not how: charcoal, cheese, ditching, handcart, milking, ploughing, quarrying, seed selection (learn from Wynns at Wynford, Ashes, Moors). I keep leaving units unused (4-5 of 6 on days 4-6): always fill all 6 units, e.g. clear Fen Meadow 4-6 units, fence, fell timber, gather firewood. Do not plan hunting at the Mere.",
+    "places": [
+     "Reeds hold the Holm Field; food is scarcer than wood; sow rye in autumn, not late barley.",
+     "Hunting is refused at the Mere; the Carr is hunted out; fill every work unit each day.",
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [
+      "Hunting is refused at the Mere; the Carr is hunted out; fill every work unit each day."
+     ],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.0569819
+   },
+   {
+    "open": 3,
+    "stretch": [
+     12,
+     14
+    ],
+    "budget_words": 580,
+    "written": 297,
+    "memory": "I am Gunnild Reed of Westmere (the Holm, a fen island). Partner Payn; daughters Philippa, Tiffany. Reed House: 5 beds, hearth, bins, held by the Reeds. Holm Field (Reeds' only field): barley reaped; wattle fence round it about 90 parts in a hundred done. Carr (alder/willow): hunting, felling, firewood, forage; it is hunted out and picked bare of wild food; timber and fallen firewood plentiful. The Mere: hunting is refused there. Fen Meadow: good grass for hay; I am clearing it into a new Reed field, about 5 units of work left (Payn and Wilmot also cleared some). Now winter day 1 (cold, snow): sowing rye is too late probably; consider sowing in spring or check what can be sown. Winter fire takes 4 heat a night on cold nights (8 firewood or 2 timber). Store on winter day 1: ~90 grain (about 63 meals, eating about 4 a night), 41.7 firewood, 19.9 timber, 3.7 hide, 3.6 hay, 14 straw, almost no meat. Grain is dropping about 10 a day or less; food will become the worry: trade at Wynford market (every eighth day, on the Green, 1 day away) or explore. Fuel is a worry in cold: gather firewood at the Carr daily, fell timber. Wilmot of the Cotters (Wynford) visited, owing meat debt to Gilbert Ashe; he helped clear Fen Meadow and hoe the Holm Field. A punt path west through the reeds is unexplored; Ravensholm hoard legend lies west. Payn had a bedroll rolled as if for a journey. Crafts: master at camp building, felling, hunting, packs. Know of but not how: charcoal, cheese, ditching, handcart, milking, ploughing, quarrying, seed selection (learn from Wynns, Ashes, Moors). Always fill all work units each day (winter: 5). Bare-hand felling is slow; a copper tool would help.",
+    "places": [
+     "Reeds hold the Holm Field; food is scarcer than wood; sow rye in autumn, not late barley.",
+     "Hunting is refused at the Mere; the Carr is hunted out; fill every work unit each day.",
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.0576219
+   },
+   {
+    "open": 3,
+    "stretch": [
+     15,
+     17
+    ],
+    "budget_words": 590,
+    "written": 302,
+    "memory": "I am Gunnild Reed of Westmere (the Holm, a fen island). Partner Payn; daughters Philippa, Tiffany. Reed House: 5 beds, hearth, bins, held by the Reeds. Holm Field (Reeds' only field): barley reaped; wattle fence whole. Carr (alder/willow): felling, firewood, forage; hunted out, game gone, picked bare of wild food; timber and fallen firewood plentiful. The Mere: hunting is refused there (tried again, refused). Fen Meadow: good grass for hay; I am clearing it into a new Reed field, about 4 units of work left. Winter day 4 (cold, snow): sowing rye is probably too late; sow in spring or check. Winter fire takes 4 heat a night (8 firewood or 2 timber). Store on winter day 4: ~68 grain (about 48 meals), 58 firewood, 23 timber, 3.7 hide, 3.6 hay, 14 straw, no meat. Payn went to Wynford for meat and Philippa followed with grain and timber to trade; Tiffany and I are at home keeping the fire lit. Expect them back soon; Wynford market is every eighth day on the Green. Food is the worry: grain falls steadily; trade or explore. Gather firewood and fell timber at the Carr daily (bare-hand felling is slow; a copper tool would help). Wilmot of the Cotters (Wynford) visited earlier, owing meat debt to Gilbert Ashe. A punt path west through the reeds is unexplored; Ravensholm hoard legend lies west. Crafts: master at camp building, felling, hunting, packs; competent at clearing. Know of but not how: charcoal, cheese, ditching, handcart, milking, ploughing, quarrying, seed selection (learn from Wynns, Ashes, Moors). Always fill all work units each day (winter: 5); I left 2 unused on day 4 because the Mere hunt was refused, so plan only valid actions. Pin/notes: only pin titles of existing notes (pin failed repeatedly); existing note \"Plan: winter wood and clearing\".",
+    "places": [
+     "Reeds hold the Holm Field; food is scarcer than wood; sow rye in autumn, not late barley.",
+     "Hunting is refused at the Mere; the Carr is hunted out; fill every work unit each day.",
+     "Pin only titles of notes that exist; hunting at the Mere is refused, so do not plan it.",
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [
+      "Pin only titles of notes that exist; hunting at the Mere is refused, so do not plan it."
+     ],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.0619559
+   },
+   {
+    "open": 4,
+    "stretch": [
+     18,
+     20
+    ],
+    "budget_words": 590,
+    "written": 304,
+    "memory": "I am Gunnild Reed of Westmere (the Holm, a fen island). Partner Payn; daughters Philippa, Tiffany. Reed House: 5 beds, hearth, bins, held by the Reeds. Holm Field (Reeds' only field): barley reaped; wattle fence whole. Carr (alder/willow): felling, firewood; hunted out, game gone, picked bare of wild food; timber and firewood plentiful. Mere: hunting refused there. Fen Meadow: good grass for hay, picked bare of wild food (forage refused); I am clearing it into a new Reed field, about 2 units of work left (end of winter day 7). Winter ends after day 7; spring next: finish clearing, then sow (rye now too late in winter; sow in spring or check what seed is possible). Winter fire takes 4 heat a night (8 firewood or 2 timber). Store at winter day 7: ~58 grain (about 41 meals, four people eating ~4 a night), 60 firewood, 27 timber, 3.7 hide, 3.6 hay, 14 straw, no meat. Food is the worry: grain falls steadily and game is gone locally. Options: Payn/Philippa trade at Wynford (1 day; market every eighth day on the Green); explore the unexplored punt path west through the reeds (Ravensholm hoard legend lies west). Wilmot of the Cotters (Wynford) visited earlier, owing a meat debt to Gilbert Ashe. Bare-hand felling is slow (1.1 timber per go); a copper tool would help. Crafts: master at camp building, felling, hunting, packs; competent at clearing. Know of but not how: charcoal, cheese, ditching, handcart, milking, ploughing, quarrying, seed selection (learn from Wynns, Ashes, Moors). Lessons: always fill all work units; plan only valid actions (Mere hunt refused, Fen Meadow forage refused as picked bare, Carr hunting yields nothing). Pin only titles of existing notes. Existing notes: \"Plan: winter wood and clearing\", \"Plan: hunt, fell and clear for the household\", \"Plan: winter meat and Fen Meadow\".",
+    "places": [
+     "Reeds hold the Holm Field; food is scarcer than wood; sow rye in autumn, not late barley.",
+     "Hunting is refused at the Mere; the Carr is hunted out; fill every work unit each day.",
+     "Pin only titles of notes that exist; hunting at the Mere is refused, so do not plan it.",
+     "Fen Meadow and the Carr are picked bare of wild food; forage there is refused, so do not plan it."
+    ],
+    "events": {
+     "forget": [],
+     "keep": [
+      "Fen Meadow and the Carr are picked bare of wild food; forage there is refused, so do not plan it."
+     ],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.06445390000000001
+   },
+   {
+    "open": 4,
+    "stretch": [
+     21,
+     23
+    ],
+    "budget_words": 600,
+    "written": 271,
+    "memory": "I am Gunnild Reed of Westmere (the Holm, a fen island). Partner Payn; daughters Philippa, Tiffany. Reed House: 5 beds, hearth, bins, held by the Reeds. Holm Field (Reeds' only field): barley growing, fit to reap about spring day 10; fence has gaps, keep mending; weeding done spring day 2. Fen Meadow: clearing into a new Reed field is now finished (0 units left at spring day 2); next sow it (check seed; barley or rye as the season allows, grain in store can be seed). Carr: hunted out, picked bare, timber and firewood plentiful. Mere: hunting refused. Fen Meadow forage thin. Payn went west by the punt path (around winter day 8) seeking game, expected back in about 2 days; not yet returned at spring day 2. Store at spring day 2: 38 grain (about 27 meals, 3 eating), 56 firewood, 32 timber, 3.7 hide, 3.6 hay, 14 straw, no meat. Food is the worry; grain falls ~5 a day. Options: trade at Wynford (1 day; market every eighth day on the Green), explore west. Wilmot Cotter of Wynford once visited, owing a meat debt to Gilbert Ashe. Crafts: master at camp building, felling, hunting, packs; competent at clearing. Know of but not how: charcoal, cheese, ditching, handcart, milking, ploughing, quarrying, seed selection (learn from Wynns, Ashes, Moors). Lessons: always fill all work units (I wasted units recently; when hunting yields nothing, use units on felling, sowing, hoeing, fencing, hay); plan only valid actions. Pin only titles of existing notes. Notes: \"Plan: winter wood and clearing\", \"Plan: hunt, fell and clear for the household\", \"Plan: winter meat and Fen Meadow\".",
+    "places": [
+     "Reeds hold the Holm Field; food is scarcer than wood; sow rye in autumn, not late barley.",
+     "Hunting is refused at the Mere; the Carr is hunted out; fill every work unit each day.",
+     "Pin only titles of notes that exist; hunting at the Mere is refused, so do not plan it.",
+     "Fen Meadow and the Carr are picked bare of wild food; forage there is refused, so do not plan it."
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.0768661
+   }
+  ]
+ },
+ {
+  "agent": "Gilbert",
+  "arm": "replace",
+  "model": "claude-sonnet-5-5",
+  "places": 4,
+  "grow": 2,
+  "log": [
+   {
+    "open": 1,
+    "stretch": [
+     0,
+     2
+    ],
+    "budget_words": 560,
+    "written": 246,
+    "memory": "I am Gilbert Ashe, head of the Ashes in Holloway, wife and partner Edith. Trade: felling timber, burning charcoal (master), making handcarts (master). Daughters Katherine and Joan married into Ashby, 2 days away. Wilmot of the Cotters (Wynford) owes me 1 meat (agreement A20). Recent days (summer days 3-5): I taught Rose (Rook household) charcoal burning on day 3. Felled timber (about 4.4 per fell at Hanger or Coppice with crude tool) and burned charcoal daily. Edith also burns charcoal and fells. Rose, Denise, Simkin (Rooks) gather firewood and timber nearby. State at end of day 5: I carry about 3-4 charcoal, 8 coin, crude tool, handcart. Ashe House store: about 3.7 charcoal, 1.3 dried meat, 22 firewood, 6.6 grain, low timber (0.7 before my last felling). Food was running low (about 8.7 meals, two eating about 2 a night). Need food: hunt, forage, or trade charcoal for food. Summer ends in about 3 days; winter needs about 16 timber per hearth or 4x firewood. Plans: Build food stock (hunt at Holloway Hanger, forage), keep timber for the hearth, then carry charcoal by handcart along the Weald cart track (1 day) to Wynford (market every eighth day on the Green) to trade for grain and food. Something heavy was moving in the undergrowth of Holloway Hanger at dusk (maybe a beast, game). Roads from Holloway: High Tor 1 day, deer path north (unexplored), the Weald 1 day (cart track). Wynford is 1 day from the Weald.",
+    "places": [
+     null,
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.042829099999999995
+   },
+   {
+    "open": 1,
+    "stretch": [
+     3,
+     5
+    ],
+    "budget_words": 570,
+    "written": 334,
+    "memory": "I am Gilbert Ashe, head of the Ashes in Holloway, wife and partner Edith. Trade: felling timber (master), burning charcoal (master), making handcarts (master), making packs (master). Daughters Katherine and Joan married into Ashby, 2 days away. Wilmot of the Cotters (Wynford) owes me 1 meat (agreement A20). Rooks (Denise, Rose, Simkin) share Holloway. I taught Rose charcoal burning (summer day 3) and handcart making (day 8, one session; she pays in firewood, has put several into my store). Simkin left on the road around day 6. State at end of summer day 8: I carry about 4.7 charcoal, 8 coin, crude tool, handcart, hide, and have just reaped about 8.3 grain from the Hill and Lower Fields (oats; harvest is under way, Edith began it). Ashe House store: no dried meat, about 24 firewood, 6.5 grain (plus new harvest), 4.4 timber, little food (about 5 meals; two of us eat about 2 a night). Hunting at Holloway Hanger has failed several days running; wild food is scarce. There is no hand mill at Ashe House (build one: 2 stone, 2 units; stone is at High Tor or Stannick), so grain cannot be ground to flour; grain is eaten boiled at a lit fire (0.7 a unit). Geography: Holloway has no direct road to Wynford. Go to the Weald (1 day, cart track), then Wynford (1 day, cart track). Market at Wynford every eighth day on the Green. Other roads: High Tor 1 day (pasture, stone), deer path north (unexplored). Wynford has oxen, ploughing, ditching knowledge; Wynns grind grain at their Mill for a share. Plans: Autumn starts next. Winter needs about 16 timber per hearth or 4x firewood; keep timber/firewood for the hearth. Finish reaping, then carry charcoal by handcart via the Weald to Wynford to trade for food (grain, bread, meat) and perhaps a hand mill stone; return in a few days. Tell Edith before leaving. Keep burning charcoal, felling timber (about 4.4 per fell with crude tool; charcoal needs 5 timber).",
+    "places": [
+     null,
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.0692131
+   },
+   {
+    "open": 2,
+    "stretch": [
+     6,
+     8
+    ],
+    "budget_words": 570,
+    "written": 347,
+    "memory": "I am Gilbert Ashe, head of the Ashes in Holloway, wife and partner Edith. Trade: felling timber (master), burning charcoal (master), making handcarts (master), making packs (master). Daughters Katherine and Joan married into Ashby, 2 days away. Wilmot of the Cotters (Wynford) owes me 1 meat (agreement A20). Rooks (Denise, Rose, Simkin) share Holloway. I taught Rose charcoal burning and handcart making (she paid in firewood; she now knows the cart; I settled her reaping with grain). Hill and Lower Fields (oats) are harvested. Ashe House store when I left (autumn day 1): no dried meat, 25 firewood, about 30 grain, 5.8 timber, 2.3 straw. Edith is home; she asked me to bring dried meat and cheese and have grain milled at the Wynns' Mill. No hand mill at Ashe House (build one: 2 stone; stone at High Tor or Stannick). Holloway hunting has failed often; wild food scarce. Geography: Holloway to the Weald 1 day (cart track), Weald to Wynford 1 day (cart track). Market at Wynford every eighth day on the Green. At the Weald, Simkin (Rook) has Rook camp at Weald Edge (4 beds, fire ring, firewood in store); he let me sleep there. Heart of the Weald has timber, dead wood, game, but is picked over for wild food. An old holloway from the Weald leads 2 days to unknown. Simkin asked: tell him Wynford grain/bread prices on my way back (he has 3 coin); tell Rose a handcart would let the Rooks haul timber and meat from the Weald, and that the camp sleeps four. Current state (autumn day 3, travelling): on the road to Wynford, arriving morning of day 10, carrying 12.7 charcoal, 8 coin, crude tool, handcart, hide, about 1.8 wild food. Plan: trade charcoal at Wynford for grain, bread, dried meat, cheese; have grain milled; maybe collect Wilmot's meat; return via the Weald (sleep at Rook camp), report prices to Simkin, home to Holloway. Winter needs about 16 timber per hearth or 4x firewood; keep fuel for the hearth. Keep burning charcoal and felling timber (charcoal needs 5 timber).",
+    "places": [
+     null,
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.0718491
+   },
+   {
+    "open": 2,
+    "stretch": [
+     9,
+     11
+    ],
+    "budget_words": 580,
+    "written": 318,
+    "memory": "I am Gilbert Ashe, head of the Ashes in Holloway, wife and partner Edith. Trade: felling timber (master), burning charcoal (master), making handcarts (master), making packs (master). Daughters Katherine and Joan married into Ashby, 2 days away. Wilmot of the Cotters (Wynford) owes me 1 meat (agreement A20); he promised it by autumn's end. Rooks (Denise, Rose, Simkin) share Holloway. I taught Rose charcoal burning and handcart making. Ashe House store when I left (autumn day 1): no dried meat, 25 firewood, about 30 grain, 5.8 timber, 2.3 straw. Edith is home; she asked for dried meat and cheese and grain milled at the Wynns' Mill. No hand mill at Ashe House (build one: 2 stone; stone at High Tor or Stannick). Holloway hunting often fails. Geography: Holloway to Weald 1 day (cart track), Weald to Wynford 1 day (cart track). Wynford market every eighth day. Simkin's Rook camp at Weald Edge (4 beds, fire ring) is open to me. Wynford trip (autumn days 3-6): at Wynford I reaped Fallow Close (got ~8 grain; Wynns and Cotters disputed the harvest split, 2/3 Cotters, 1/3 Wynns; Warin questioned where my reaped grain went, unresolved). Warin offered 6 charcoal for 20 grain; I got grain somehow (carried 27, left 4 at the Green). No stone, bread, cheese or dried meat obtained. Promised Simkin: 6 grain delivered to Rook House for his 3 coin; settle on arrival in Holloway. Current state (autumn day 6 end): travelling to Holloway with Simkin, arriving morning of day 13, carrying about 6.7 charcoal, 8 coin, 15.2 grain, crude tool, handcart, hide, 0.5 straw. Plan: deliver 6 grain to Rook House for 3 coin, check Ashe House stores and Edith, tell Rose a handcart lets Rooks haul timber and meat from the Weald. Winter nears: need about 16 timber per hearth or 4x firewood; keep fell timber and burn charcoal (needs 5 timber); hunt for meat.",
+    "places": [
+     null,
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.0848391
+   },
+   {
+    "open": 3,
+    "stretch": [
+     12,
+     14
+    ],
+    "budget_words": 590,
+    "written": 279,
+    "memory": "I am Gilbert Ashe, head of the Ashes in Holloway, wife and partner Edith. Trade: felling timber (master), burning charcoal (master), making handcarts (master), making packs (master). Daughters Katherine and Joan married into Ashby, 2 days away. Wilmot of the Cotters (Wynford) owes me 1 meat (agreement A20), overdue. Rooks (Denise, Rose, Simkin) share Holloway; Simkin and Denise are home safe and Simkin paid 3 coin for the 6 grain I left at Rook House (trade settled). I taught Rose charcoal burning and handcart making. Geography: Holloway to Weald 1 day (cart track), Weald to Wynford 1 day (cart track). Wynford market every eighth day. Rook camp at Weald Edge (4 beds, fire ring) is open to me. No hand mill at Ashe House (build: 2 stone; stone at High Tor or Stannick). Holloway hunting often fails. Warin of the Wynns trades grain for charcoal (6 charcoal for 20 grain). Winter day 1 (cold, snow): I carry 8 coin, handcart, 7.7 charcoal(?), hide, some timber - note the store-moves often fail because items sit in my hands, not the house; do not try to move items into hands that are already carried. Ashe House store: about 19 firewood, 42 grain, 15 straw, NO timber. Hearth needs 4 heat a night in cold (8 firewood or 2 timber). Need much more fuel: fell timber at the Coppice (I hold a crude tool earlier; fell 4.4 per action with it, 1.1 bare hands) and give it to Ashe House store with give action (to Ashe House), then burn charcoal as surplus for trade. Edith also fells timber. Plan: stock fuel, hunt for meat, keep trading charcoal for grain/food at Wynford market.",
+    "places": [
+     null,
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.0689351
+   },
+   {
+    "open": 3,
+    "stretch": [
+     15,
+     17
+    ],
+    "budget_words": 590,
+    "written": 258,
+    "memory": "I am Gilbert Ashe, head of the Ashes in Holloway, wife and partner Edith. Trade: felling timber (master), burning charcoal (master), making handcarts (master), making packs (master). Daughters Katherine and Joan married into Ashby, 2 days away. Wilmot of the Cotters (Wynford) owes me 1 meat (agreement A20), overdue. Rooks (Denise, Rose, Simkin) share Holloway; Simkin paid 3 coin for 6 grain (settled). I taught Rose charcoal burning and handcart making. Geography: Holloway to Weald 1 day (cart track), Weald to Wynford 1 day (cart track). Wynford market every eighth day. Rook camp at Weald Edge (4 beds, fire ring) is open to me. No hand mill at Ashe House (build: 2 stone; stone at High Tor or Stannick). Holloway hunting nearly always fails; do not waste units on it. Warin of the Wynns trades grain for charcoal (6 charcoal for 20 grain). Winter day 4 (cold, snow): I carry 7.7 charcoal, 11 coin, handcart, hide. Ashe House store: about 10 firewood, 46 grain, 19 straw, 18 timber (32 meals). Hearth needs 4 heat a night in cold (8 firewood or 2 timber). Bare-hand felling gives only 1.1 timber per action; firewood gathering gives 2.9. Gathered goods go into Ashe House automatically when done for household. Moving items already in house to hands fails; use give to put carried goods in the store. Edith burns charcoal at the Coppice. Plan: keep stocking firewood each day (it is the most efficient fuel gather), sell surplus charcoal at Wynford market for grain/food, consider making a crude tool for faster felling.",
+    "places": [
+     null,
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.0557531
+   },
+   {
+    "open": 4,
+    "stretch": [
+     18,
+     20
+    ],
+    "budget_words": 600,
+    "written": 272,
+    "memory": "I am Gilbert Ashe, head of the Ashes in Holloway, wife and partner Edith. Trade: felling timber (master), burning charcoal (master), making handcarts (master), making packs (master). Daughters Katherine and Joan married into Ashby, 2 days away. Wilmot of the Cotters (Wynford) owes me 1 meat (agreement A20), overdue. Rooks (Denise, Rose, Simkin) share Holloway; Simkin paid 3 coin for 6 grain (settled). I taught Rose charcoal burning and handcart making. Geography: Holloway to Weald 1 day (cart track), Weald to Wynford 1 day (cart track). Wynford market every eighth day. Rook camp at Weald Edge (4 beds, fire ring) is open to me. No hand mill at Ashe House (build: 2 stone; stone at High Tor or Stannick). Holloway hunting nearly always fails; do not waste units on it. Warin of the Wynns trades grain for charcoal (6 charcoal for 20 grain). Bare-hand felling gives only 1.1 timber per action; firewood gathering gives about 3 per action, so it is the most efficient fuel. Gathered goods go into Ashe House automatically when done for household. Moving items already in house to hands fails; use give to put carried goods in the store. Edith burns charcoal at the Coppice. Hearth needs 4 heat a night in cold (8 firewood or 2 timber). Status at winter day 7 end: Ashe House store about 15.7 charcoal, 37 grain, 19 straw, ~19 firewood, little timber (2 timber). I carry 1 charcoal, 11 coin, handcart, hide. Plan: spring is coming; keep stocking firewood, restock timber, sell surplus charcoal at Wynford market for grain/food, consider making a crude tool for faster felling, prepare fields for spring sowing.",
+    "places": [
+     null,
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.0532071
+   },
+   {
+    "open": 4,
+    "stretch": [
+     21,
+     23
+    ],
+    "budget_words": 600,
+    "written": 287,
+    "memory": "I am Gilbert Ashe, head of the Ashes in Holloway, wife and partner Edith. Trade: felling timber (master), burning charcoal (master), making handcarts (master), making packs (master). Daughters Katherine and Joan married into Ashby, 2 days away. Wilmot of the Cotters (Wynford) owes me 1 meat (A20), overdue. Rooks now Denise and Simkin (Rose died of old age, spring day 1; her body was not found at the Coppice to bury). Simkin owes me 8 grain by day 33 (A2269) for 6 grain I lent. Geography: Holloway to Weald 1 day (cart track), Weald to Wynford 1 day (cart track). Wynford market every eighth day. Rook camp at Weald Edge (4 beds, fire ring) open to me. No hand mill at Ashe House (needs 2 stone; stone at High Tor or Stannick). Holloway hunting nearly always fails; do not waste units on it. Warin of the Wynns trades grain for charcoal (6 charcoal for 20 grain). Bare-hand felling gives 1.1 timber per action; firewood gathering gives about 3 per action, most efficient fuel. Gathered goods go into Ashe House automatically when done for household. Moving items from house to hands fails; use give to put carried goods in store. Edith burns charcoal at the Coppice. Spring day 2 status: Ashe House store 15.7 charcoal, 10 firewood, 16.5 grain (food low, about 11 meals), 19 straw, 7.9 timber. I carry 1 charcoal, 11 coin, handcart, hide. Both fields (Hill, Lower) sown with 6 grain each on spring day 1, oats ready about day 8 of spring; hoeing does little (0 progress). Plan: food is short, so take charcoal to Wynford market (2 days) to sell for grain, or trade with Warin; keep firewood stocked; reap oats when ready.",
+    "places": [
+     null,
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.057997099999999996
+   }
+  ]
+ },
+ {
+  "agent": "Gilbert",
+  "arm": "later",
+  "model": "claude-sonnet-5-5",
+  "places": 4,
+  "grow": 2,
+  "log": [
+   {
+    "open": 1,
+    "stretch": [
+     0,
+     2
+    ],
+    "budget_words": 560,
+    "written": 241,
+    "memory": "I am Gilbert, head of the Ashes in Holloway (wife Edith; daughters Katherine and Joan married into Ashby). Trade: felling timber, burning charcoal (master), handcart (master), packs (master). Ashes live by trade: cut and burn, carry and sell, keep word and accounts. State as of summer day 5 (3 days left in summer): I carry ~4 charcoal, 8 coin, crude tool, handcart. Ashe House store: ~3.7 charcoal, 1.3 dried meat, 22 firewood, 6.6 grain, low timber (0.7); food only ~8.7 meals, running low. Need food and timber before winter; each hearth wants ~16 timber for winter. Routine learned: felling at Hanger/Coppice with crude tool yields ~4.4 timber for 2 units; charcoal made at Coppice 1 per make. Hunting gave 0.6 meat and a hide; foraging little. Taught Rose charcoal burning (she offered firewood/hay/weeding in return). Edith also burns charcoal. Neighbours Rooks (Denise, Rose, Simkin) fell and gather nearby. Something heavy moves in Holloway Hanger undergrowth at dusk (maybe a large animal). Debts: Wilmot (Cotter House, Wynford) owes me 1 meat (A20). Plans: Wynford market is every eighth day on the Green; take charcoal by handcart (Weald cart track 1 day to Weald, 1 day to Wynford) and trade for food/grain. Wynford 2 days from home. Secure food first, stockpile timber and firewood for winter, then travel to sell charcoal. Barley sown after mid autumn won't ripen; rye survives winter. Oats fields: Hill Field and Lower Field are held by the Ashes.",
+    "places": [
+     "Ashes live by trade: cut, burn, carry, sell; keep word and accounts; Wynford market every eighth day on the Green.",
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [
+      "Ashes live by trade: cut, burn, carry, sell; keep word and accounts; Wynford market every eighth day on the Green."
+     ],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.0436004
+   },
+   {
+    "open": 1,
+    "stretch": [
+     3,
+     5
+    ],
+    "budget_words": 570,
+    "written": 319,
+    "memory": "I am Gilbert, head of the Ashes in Holloway (wife Edith; daughters Katherine and Joan married into Ashby). Trade: felling timber, burning charcoal (master), handcart (master), packs (master). Ashes live by trade: cut and burn, carry and sell, keep word and accounts. State as of summer day 8 (last day of summer): I carry 4.7 charcoal, 8 coin, crude tool, 0.1 dried meat, handcart, hide. Ashe House store: ~6.5 grain plus newly reaped oats (I reaped 3.8 grain at Hill Field and 4.5 at Lower Field, for the household), ~24 firewood, 4.4 timber, no dried meat; food is low. Each hearth wants ~16 timber for winter; stockpile timber and firewood. Lessons: Route to Wynford is NOT direct: travel to the Weald first (1 day, cart track), then Wynford (1 day). Ashe House has no hand mill, so I cannot grind grain; building one needs 2 stone (stone is at High Tor, 1 day, or Stannick). Grain is poor eaten raw; bread needs flour (10 flour per make). Felling with crude tool gives ~4.4 timber for 2 units; charcoal needs 5 timber per make. Hunting at Holloway Hanger has repeatedly caught nothing lately; foraging is depleted. Dry meat needs 2 meat. People: Taught Rose handcart making (day 8, one session; she pays in firewood, she put ~3 in the store). Earlier taught Rose charcoal. Edith burns charcoal, hunts, reaps. Rooks (Denise, Rose, Simkin) are neighbours; Simkin set off on the road days ago. Debts: Wilmot (Cotter House, Wynford) owes me 1 meat (A20). Plans: Wynford market is every eighth day on the Green. Go via the Weald with the handcart and charcoal, sell charcoal for food and grain, collect Wilmot's meat, consider buying or getting stone for a hand mill. Barley sown after mid autumn won't ripen; rye survives winter. Oat fields Hill Field and Lower Field are held by the Ashes. Something heavy moves in Holloway Hanger at dusk.",
+    "places": [
+     "Ashes live by trade: cut, burn, carry, sell; keep word and accounts; Wynford market every eighth day on the Green.",
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.06968640000000001
+   },
+   {
+    "open": 2,
+    "stretch": [
+     6,
+     8
+    ],
+    "budget_words": 570,
+    "written": 424,
+    "memory": "I am Gilbert, head of the Ashes in Holloway (wife Edith; daughters Katherine and Joan married into Ashby). Trade: felling timber, burning charcoal (master), handcart (master), packs (master). Ashes live by trade: cut and burn, carry and sell, keep word and accounts. State as of autumn day 3 (5 days of autumn left): I am on the road to Wynford (arrive morning of day 10, market day cycle every eighth day on the Green). I carry 12.7 charcoal, 8 coin, crude tool, handcart, hide, ~1.8 wild food. Ashe House store when I left (autumn day 1): ~29.9 grain, 25 firewood, ~5.8 timber, 2.3 straw, no dried meat. Each hearth wants ~16 timber for winter; stockpile timber and firewood when home. Lessons: Route to Wynford is not direct: Holloway -> Weald (1 day, cart track) -> Wynford (1 day). Weight limit on foot 10, 40 on cart track; my load of charcoal is heavy so keep the handcart on tracks. Ashe House has no hand mill; building one needs 2 stone (stone at High Tor 1 day, or Stannick). Grain is poor eaten raw; bread needs flour. Charcoal needs 5 timber per make. Hunting at Holloway Hanger and the Weald often catches nothing; forage at Weald Edge/Heart gives ~1 wild food a try but gets picked over. Weald: Simkin (Rook) has Rook camp at Weald Edge (4 beds, fire ring, he put firewood in its store; I may sleep there). Simkin asked: tell him Wynford grain/bread prices on my way back (he has 3 coin), and tell Rose a handcart would let the Rooks haul timber and meat from the Weald, and the camp sleeps four. An old holloway leaves the Weald (2 days) toward an unseen lake. People: Taught Rose charcoal and handcart (one full session each; she paid in firewood, and reaped Hill Field partly to settle). Edith burns charcoal, hunts, reaps; she gave me charcoal and grain, and asked me to bring back dried meat and cheese and get grain milled at the Wynns' Mill (they keep a share). Rooks (Denise, Rose, Simkin) are neighbours. Debt: Wilmot (Cotter House, Wynford) owes me 1 meat (A20). Plans: At Wynford sell charcoal for food, grain, dried meat, cheese; collect Wilmot's meat; look for stone or a hand mill; note prices for Simkin; return via the Weald to Holloway and stock timber/firewood for winter. Barley sown after mid autumn won't ripen; rye survives winter. Oat fields Hill Field and Lower Field are held by the Ashes (harvested). Something heavy moves in Holloway Hanger at dusk.",
+    "places": [
+     "Ashes live by trade: cut, burn, carry, sell; keep word and accounts; Wynford market every eighth day on the Green.",
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.07396640000000002
+   },
+   {
+    "open": 2,
+    "stretch": [
+     9,
+     11
+    ],
+    "budget_words": 580,
+    "written": 364,
+    "memory": "I am Gilbert, head of the Ashes in Holloway (wife Edith; daughters Katherine and Joan married into Ashby). Trade: felling timber, burning charcoal (master), handcart (master), packs (master). Ashes live by trade: cut and burn, carry and sell, keep word and accounts. State as of autumn day 6 (2 days of autumn left): I am on the road from the Weald to Holloway with Simkin Rook, arriving morning of day 13. I carry 6.7 charcoal, 8 coin, crude tool, handcart, hide, 0.5 straw, ~15 grain. Ashe House store when I left (autumn day 1): ~29.9 grain, 25 firewood, ~5.8 timber, 2.3 straw, no dried meat. Promise: give Simkin 6 grain delivered to Rook House for his 3 coin. At Wynford I traded 6 charcoal for 20 grain with Warin (Wynn). A dispute arose over 8 grain I reaped at Fallow Close (Wynn land, split two-thirds Cotters/one-third Wynns); Warin did not complain of my help but asked where the grain went. I left 4 grain at the Green. Wilmot (Cotter House, Wynford) still owes me 1 meat (A20), promised by autumn's end. Winter needs: each hearth wants ~16 timber or four times that in firewood; stockpile timber and firewood at home, fell and burn charcoal. Lessons: Route to Wynford is Holloway -> Weald (1 day, cart track) -> Wynford (1 day). Weight limit on foot 10, 40 on cart track; keep the handcart on tracks. Ashe House has no hand mill; building one needs 2 stone (High Tor 1 day, or Stannick). Charcoal needs 5 timber per make. Hunting often catches nothing; Weald forage gets picked over. Rook camp at Weald Edge (4 beds, fire ring): I may sleep there. Taught Rose charcoal and handcart (one session each). Rooks (Denise, Rose, Simkin) are neighbours. Richard (Moor, Stannick) wants a copper tool. An old holloway leaves the Weald (2 days) toward an unseen lake. Barley sown after mid autumn won't ripen; rye survives winter. Oat fields Hill Field and Lower Field are held by the Ashes. Something heavy moves in Holloway Hanger at dusk. Plans: reach home, deliver grain to Simkin, restock timber/firewood for winter, burn charcoal for trade, bring dried meat and cheese when possible.",
+    "places": [
+     "Ashes live by trade: cut, burn, carry, sell; keep word and accounts; Wynford market every eighth day on the Green.",
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.0873784
+   },
+   {
+    "open": 3,
+    "stretch": [
+     12,
+     14
+    ],
+    "budget_words": 590,
+    "written": 366,
+    "memory": "I am Gilbert, head of the Ashes in Holloway (wife Edith; daughters Katherine and Joan married into Ashby). Trade: felling timber (master), burning charcoal (master), handcart (master), packs (master). Ashes live by trade: cut and burn, carry and sell, keep word and accounts. State as of winter day 1 (7 days of winter left), day 15: at home in Holloway, snow, cold. Simkin and Denise Rook are back home safe; Simkin paid/agreed 3 coin for the 6 grain I left at Rook House (trade done). I carry about 7.7 charcoal, 8 coin (maybe 11 after Simkin pays), 11.7 timber, 1 handcart, 1 hide, 2.9 firewood. Note: my \"move to hands at Ashe House\" actions are wrong: I already carry these things; to store them use move to store (or give to Ashe House). Ashe House store: ~18.9 firewood, ~42.6 grain, 15 straw, 0 timber. Cold night hearth takes 4 heat (8 firewood or 2 timber) per night; each hearth wants ~16 timber for winter. So: give timber to Ashe House store, gather firewood, fell more timber. Burn charcoal (5 timber per make) for trade; keep it for Wynford market (every eighth day, Green). Wilmot (Cotter House, Wynford) still owes me 1 meat (A20). Wynford traded 6 charcoal for 20 grain with Warin Wynn; dispute over 8 grain from Fallow Close; I left 4 grain at the Green. Lessons: Route to Wynford is Holloway -> Weald (1 day, cart track) -> Wynford (1 day). Weight limit on foot 10, 40 on cart track; keep handcart on tracks. Ashe House has no hand mill; needs 2 stone (High Tor 1 day, or Stannick). Hunting often catches nothing. Rook camp at Weald Edge (4 beds, fire ring) open to me. Taught Rose charcoal and handcart. Richard (Moor, Stannick) wants a copper tool. Old holloway from the Weald (2 days) toward an unseen lake. Barley sown after mid autumn won't ripen; rye survives winter. Oat fields Hill Field and Lower Field held by the Ashes. Something heavy moves in Holloway Hanger at dusk. Plans: store timber, gather firewood daily, fell and burn charcoal, trade at Wynford, bring back dried meat and cheese when possible. Use all work units each day.",
+    "places": [
+     "Ashes live by trade: cut, burn, carry, sell; keep word and accounts; Wynford market every eighth day on the Green.",
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.0721184
+   },
+   {
+    "open": 3,
+    "stretch": [
+     15,
+     17
+    ],
+    "budget_words": 590,
+    "written": 344,
+    "memory": "I am Gilbert, head of the Ashes in Holloway (wife Edith; daughters Katherine and Joan married into Ashby). Trade: felling timber (master), burning charcoal (master), handcart (master), packs (master); hunting competent. Ashes live by trade: cut and burn, carry and sell, keep word and accounts. State as of winter day 4 (4 days of winter left), day 18: at home in Holloway, snow, bitterly cold. I carry 7.7 charcoal, 11 coin, 1 handcart, 1 hide. Ashe House store: ~9.7 firewood, 46 grain, 19 straw, 17.7 timber (about 32 meals). Cold night hearth takes 4 heat (8 firewood or 2 timber); fuel is adequate for the rest of winter but keep gathering firewood and felling timber daily (each fell ~1.1 timber with bare hands; a copper tool would double it). Hunting at Holloway Hanger keeps catching nothing; don't waste units on it, prefer firewood, felling, charcoal. Simkin paid 3 coin for 6 grain (trade done). Wilmot (Cotter House, Wynford) still owes me 1 meat (A20). Edith burns charcoal at the Coppice. Lessons: Route to Wynford is Holloway -> Weald (1 day, cart track) -> Wynford (1 day). Weight limit on foot 10, 40 on cart track; keep handcart on tracks. To store carried goods use move to store (or give to Ashe House); do not move to hands what I already carry. Ashe House has no hand mill; needs 2 stone (High Tor 1 day, or Stannick). Rook camp at Weald Edge (4 beds, fire ring) open to me. Taught Rose charcoal and handcart. Richard (Moor, Stannick) wants a copper tool. Old holloway from the Weald (2 days) toward an unseen lake. Barley sown after mid autumn won't ripen; rye survives winter. Oat fields Hill Field and Lower Field held by the Ashes. Something heavy moves in Holloway Hanger at dusk. Plans: use all work units each day; burn charcoal (5 timber per make) and carry it to Wynford market (every eighth day, Green) in spring; bring back dried meat and cheese when possible; Wynford traded 6 charcoal for 20 grain with Warin Wynn earlier.",
+    "places": [
+     "Ashes live by trade: cut, burn, carry, sell; keep word and accounts; Wynford market every eighth day on the Green.",
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.0596964
+   },
+   {
+    "open": 4,
+    "stretch": [
+     18,
+     20
+    ],
+    "budget_words": 600,
+    "written": 336,
+    "memory": "I am Gilbert, head of the Ashes in Holloway (wife Edith; daughters Katherine and Joan married into Ashby). Trade: felling timber (master), burning charcoal (master), handcart (master), packs (master); hunting competent. Ashes live by trade: cut and burn, carry and sell, keep word and accounts. State as of winter day 7 (last day of winter), day 21: at home in Holloway, snow, cold. I carry ~1 charcoal, 11 coin, 1 handcart, 1 hide. Ashe House store: ~15.7 charcoal, ~37 grain (about 26 meals), 19 straw, timber nearly gone (felled 2.2 on last day), ~19 firewood. Cold night hearth takes 4 heat (8 firewood or 2 timber); keep gathering firewood (about 3 per unit at Holloway Hanger, best yield) and felling timber (~1.1 each with bare hands; a copper tool would double it). Hunting at Holloway Hanger catches nothing; don't waste units. Wilmot (Cotter House, Wynford) still owes me 1 meat (A20). Edith burns charcoal at the Coppice and fells at the Hanger. Lessons: Route to Wynford is Holloway -> Weald (1 day, cart track) -> Wynford (1 day). Weight limit on foot 10, 40 on cart track; keep handcart on tracks. To store carried goods use move to store; do not move to hands what I already carry. Ashe House has no hand mill; needs 2 stone (High Tor 1 day, or Stannick). Rook camp at Weald Edge (4 beds, fire ring) open to me. Taught Rose charcoal and handcart. Richard (Moor, Stannick) wants a copper tool. Old holloway from the Weald (2 days) toward an unseen lake. Barley sown after mid autumn won't ripen; rye survives winter. Oat fields Hill Field and Lower Field held by the Ashes; spring work: hoe and sow them. Something heavy moves in Holloway Hanger at dusk. Plans: use all work units each day; with spring, carry charcoal (5 timber per make) by handcart to Wynford market (every eighth day, Green); bring back dried meat and cheese when possible; Wynford earlier traded 6 charcoal for 20 grain with Warin Wynn.",
+    "places": [
+     "Ashes live by trade: cut, burn, carry, sell; keep word and accounts; Wynford market every eighth day on the Green.",
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.0565084
+   },
+   {
+    "open": 4,
+    "stretch": [
+     21,
+     23
+    ],
+    "budget_words": 600,
+    "written": 398,
+    "memory": "I am Gilbert, head of the Ashes in Holloway (wife Edith; daughters Katherine and Joan married into Ashby). Trade: felling timber (master), burning charcoal (master), handcart (master), packs (master); hunting competent. Ashes live by trade: cut and burn, carry and sell, keep word and accounts. State as of spring day 2 (day 24): at home in Holloway, fog, slush, snow going. I carry ~1 charcoal, 11 coin, 1 handcart, 1 hide. Ashe House store: ~15.7 charcoal, ~16.5 grain (about 11 meals, tight; those eating from it use ~2 a night), 19 straw, ~10 firewood, ~8 timber. Hearth now takes 1 heat a night. Rose (Rook) died of old age on spring day 1; her body lay at the Coppice and the bury cairn action was refused (\"no one lying unburied here\") - perhaps already buried by Rooks. Lent Simkin (Rook) 6 grain: agreement A2269, Rook owes me 8 grain by day 33 (or 4 charcoal). Wilmot (Cotter House, Wynford) still owes 1 meat (A20). Sowed 6 grain each in Hill Field and Lower Field (oats, each ~0.3 plot, ready about day 31-32); rest of both fields (1.9 plots each) still unbroken; hoeing with bare hands breaks 0 per unit, so get a copper tool or stop wasting units on hoe. Oats in Hill Field tire the ground (same crop as last year). Hunting at Holloway Hanger catches nothing; forage yields little (0.4). Food is the pressing problem: plan to carry charcoal by handcart (5 timber per make; cart track road to the Weald 1 day, then Wynford 1 day; limit 10 weight on foot, 40 on cart track) to Wynford market (every eighth day, Green) and trade for grain, dried meat, cheese; earlier traded 6 charcoal for 20 grain with Warin Wynn. Use all work units each day. Lessons: to store carried goods use move to store; do not move to hands what I already carry. Ashe House has no hand mill; needs 2 stone (High Tor 1 day, or Stannick). Rook camp at Weald Edge (4 beds, fire ring) open to me. Taught Rose charcoal and handcart (she is dead). Richard (Moor, Stannick) wants a copper tool. Old holloway from the Weald (2 days) toward an unseen lake. Barley sown after mid autumn won't ripen; rye survives winter. Something heavy moves in Holloway Hanger at dusk. Edith burns charcoal at the Coppice and fells at the Hanger.",
+    "places": [
+     "Ashes live by trade: cut, burn, carry, sell; keep word and accounts; Wynford market every eighth day on the Green.",
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.062070400000000005
+   }
+  ]
+ }
+]

@@ -1,0 +1,826 @@
+[
+ {
+  "agent": "Lucy",
+  "arm": "replace",
+  "model": "claude-opus-5-5",
+  "places": 4,
+  "grow": 2,
+  "log": [
+   {
+    "open": 1,
+    "stretch": [
+     0,
+     2
+    ],
+    "budget_words": 500,
+    "written": 428,
+    "memory": "I am Lucy, grown, of the Fenwicks in Stannick, wife (partner) to Roger. Jory (head) and Ellen are my in-laws; Ellen says her bearing years are over, so Fenwick numbers must come through Roger and me and anyone we welcome into the house. My parents Richard and Avice head Moor House next door. They hold the Infield (rye) and the cattle (6 cows, 1 ox, 1 bull, 2 calves, 3 in milk). Fenwick aim: be the largest family. Try for a child with Roger every day. Roger and I settle our units each morning. Our messages often cross, so confirm the number. A try counts only if both try the same day; Roger thinks two units makes it hold. Find partners for grown kin. Keep everyone fed and warm. Harvest deal: Richard agreed that Roger and I reap the Infield rye for a quarter-share of what we reap (same terms as Jory). Avice will call all hands when it is ripe, about summer day 9 or early autumn. Be at the Infield at first light. Weeding the Infield helps our share too. I have no tool. Make a crude tool before the reap (we have timber, and the Quarry is close). Offer wording that failed: \"work 2 days reaping\". Work must be written exactly \"work 2 days\". Land notes (summer day 5): the Gill and Stannick Moor are picked bare of wild food and take days to come back, so don't waste units foraging there. The Brakes give about 2.5\u20132.9 firewood a unit. Felling bare-handed at the Gill gives only 0.7 timber for 2 units, which is poor. A tool would help a lot. Fenwick store (end of summer day 5): about 27 firewood, about 18.5 grain (about 13 meals), 2.7 hay, about 9.7 timber. We eat about 4 a night, so food is the danger. Fuel is about 60+ firewood-equivalent; a hearth needs about 64 for winter, so we are close. Food options: the rye share, trading with the Moors for milk or cheese (I know cheese-making and milking), hunting in the Weald or Westmere woods, and the Wynford market every 8th day. Old knowledge: the Wynns grind grain at their Mill for a share. Harvest reapers are paid in grain. Rye stands the winter; barley sown after mid-autumn won't ripen. Whoever clears and sows ground holds it. Travellers carry bread or dried meat. Last winter was hard, with early frost. My sister Helewise is in Ashby. There is an old pass over the Tor, snowed shut in winter. The sheep track east crosses green-stained scree (copper?).",
+    "places": [
+     "Try with Roger every day we can; agree units each morning, both must try the same day.",
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [
+      "Try with Roger every day we can; agree units each morning, both must try the same day."
+     ],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.132163
+   },
+   {
+    "open": 1,
+    "stretch": [
+     3,
+     5
+    ],
+    "budget_words": 520,
+    "written": 552,
+    "memory": "I am Lucy, grown, of the Fenwicks in Stannick, wife (partner) to Roger. Jory (head) and Ellen are my in-laws. Ellen's bearing years are over, so Fenwick numbers must come through Roger and me, and anyone we welcome into the house. My parents Richard and Avice head Moor House next door. They hold the Infield (rye) and the cattle (6 cows, 1 ox, 1 bull, 2 calves, 3 in milk). Fenwick aim: be the largest family. Roger and I try for a child every day, 2 units each, and we must try on the same day. Our messages often cross, so confirm the number each morning. Find partners for grown kin. Keep everyone fed and warm. Harvest (summer day 8, a gale): all hands reaped the Infield bare-handed. I reaped 5 units, about 16.4 rye, and it went into Moor House. By Richard's word deal, the Fenwicks get a quarter-share of what we reap, so about 4 rye is owed for my reaping alone, plus Roger's and Jory's. Make sure Richard and Avice pay it out into the Fenwick store. Reaping likely goes on into autumn, so keep at it. Avice says a crude tool does not help with reaping. Agreement A379: I owe the Moors 1 day of work (none done yet). Tools: a crude tool needs 1 timber and 0.5 stone, plus 1 unit of work. Quarrying needs a tool in my hands when I start, and a borrowed tool handed over the same morning arrives too late. Jory's tool wore out; Richard lent him one and then took it back. Still no tool for me. To get one, borrow a tool the evening before, keep it overnight, quarry at dawn, make my own, then return the borrowed one. Offers: work must be written exactly as \"work 2 days\". Stores, Fenwick House on the morning of summer day 8: 35 firewood, 25.4 timber, 6.7 grain (about 4.7 meals), 12.3 hay. Fenwick Cellar (wattle) is built, but its store is empty. Ellen tried making cheese there with 3 milk. Avice says terms for a bigger cheese batch wait until after harvest. I know cheese-making and milking, so offer that to the Moors in trade for food. Fuel is past the winter target (about 64 firewood-equivalent per hearth). Food is the danger, since we eat about 4 a night. Land: the Gill and Stannick Moor are picked bare of wild food. The Brakes' dead wood ran out on summer day 7. Bare-handed felling at the Gill gives only 0.7 timber for 2 units. Food options: - the rye share - milk or cheese from the Moors - hunting in the Weald or Westmere woods - the Wynford market, every 8th day Old knowledge: - The Wynns grind grain at their Mill for a share. - Harvest reapers are paid in grain. - Rye stands the winter. Barley sown after mid-autumn won't ripen. - Whoever clears and sows ground holds it. - Travellers carry bread or dried meat. - Last winter was hard, with early frost. - My sister Helewise is in Ashby. - The old pass over the Tor is snowed shut in winter. - The sheep track east crosses green-stained scree (copper ore?), and I have heard talk of mining copper ore. Copper tools would be far better than crude ones.",
+    "places": [
+     "Try with Roger every day we can; agree units each morning, both must try the same day.",
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.185571
+   },
+   {
+    "open": 2,
+    "stretch": [
+     6,
+     8
+    ],
+    "budget_words": 530,
+    "written": 646,
+    "memory": "I am Lucy, a grown woman of the Fenwicks in Stannick, and Roger is my partner. Jory (head) and Ellen are my in-laws. Ellen's bearing years are over, so Fenwick numbers must come through Roger and me, and through anyone we welcome into the house. My parents, Richard and Avice, head Moor House next door. They hold the Infield (rye) and the cattle (6 cows, 1 ox, 1 bull, 2 calves, 3 in milk; one cow is near calving, so fetch Avice at once if she is in trouble). Fenwick aim: be the largest family. Roger and I try for a child every day, 2 units each, on the same day. The try is best done at dawn, before anything else, because Roger keeps leaving it too late. Confirm it each morning. Find partners for grown kin. Keep everyone fed and warm. Harvest: the Infield rye was all reaped by autumn day 1. I wasted 4 units that day reaping a bare field, so listen to Avice's morning words before I go anywhere. Richard paid our quarter-share: 5 rye to me. Richard has since sown new rye in the Infield (fit to reap about autumn day 13). The ground is tired from rye on rye and fails more often. I weeded it for the Moors. Milk: agreements A711 and A722, Richard gives the Fenwicks 1 milk each per day, 6 times each. Day 9 was paid up (4 milk into Fenwick store). Richard went to Wynford and is back about day 13. Until then Avice puts 2 milk a day into the Fenwick store. Check that it arrives. Cheese: Avice taught Jory, Ellen and Roger. Cheese is refused for want of salt (0.2 a batch), and no cellar here qualifies yet (wattle may not do; stone may be needed). Richard is to seek salt at Wynford. Avice is building bins in Fenwick Cellar from Fenwick timber. Ellen wants to learn quarrying. I am competent and can teach her on a day she sets aside 2 units. She will need a tool to try. Agreement A379: I owe the Moors 1 day of work (none done yet; my firewood and weeding for them may count). Tools: a crude tool takes 1 timber, 0.5 stone and 1 unit of work. Quarrying and cutting need a tool in my hands at the start of the day, and a tool handed over that morning comes too late. So borrow one the evening before, quarry at dawn, make my own, then give the borrowed one back. I still have no tool. Offers: work must be written exactly as \"work 2 days\". Stores, Fenwick House, autumn day 3: about 38 firewood, 20 timber, 8.6 rye plus milk, 4.3 hay, 5 dung. Fuel is past the winter target (16 timber, or 64 firewood, per hearth). Food is the danger: we eat about 4 a night, about 2 nights' food in store. Ellen offers timber for bread or rye to outsiders. Land: the Gill and Stannick Moor are picked almost bare (forage gives 0.1-0.2). The Brakes' dead wood is gone. Gill firewood gives about 2.7 per unit. Bare-handed felling is poor (about 0.8 timber for 2 units).",
+    "places": [
+     "Try with Roger every day we can; agree units each morning, both must try the same day.",
+     "Listen to what Avice says aloud each morning before setting off; plans change overnight.",
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [
+      "Listen to what Avice says aloud each morning before setting off; plans change overnight."
+     ],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.177527
+   },
+   {
+    "open": 2,
+    "stretch": [
+     9,
+     11
+    ],
+    "budget_words": 540,
+    "written": 532,
+    "memory": "I am Lucy, a grown woman of the Fenwicks in Stannick, and Roger is my partner. Jory (head) and Ellen are my in-laws. Ellen's bearing years are over, so Fenwick numbers must come through Roger and me, and through anyone we welcome into the house. My parents, Richard and Avice, head Moor House next door. They hold the Infield (rye) and the cattle (6 cows, 1 ox, 1 bull, 2 calves, 3 in milk). One cow is near calving. WITH CHILD (as of autumn day 6, day 12): my time is near. Stay housed, fed, in the Yard, and do only light work. Call Avice at once when it starts, because she is watching. Do not travel, and keep away from the Gill and the Quarry. Trying for another child is pointless until after the birth. After that, go back to trying with Roger daily (2 units each, at dawn, agreed each morning). Fenwick aim: be the largest family. Find partners for grown kin, and keep every child fed and warm. FOOD CRISIS: on day 12 the Fenwick store held only 0.1 rye, with 4 eating a night. We live on Avice's 2 milk a day and on foraging. Gill and Stannick Moor are picked almost bare (0.1-0.2). Open offers: Jory O1062 (2 timber for 2 rye) and Ellen O752 (2 timber for 1 bread). We are long on fuel: about 37 firewood and 15 timber, past the winter target (16 timber or 64 firewood per hearth). Trade timber for food wherever we can. Richard's new Infield rye should be ready about day 13. Reap it for the Moors for a share (last time the quarter-share was 5 rye). I have weeded it several times for the Moors. The ground is tired from rye on rye. Milk: under A711 and A722 Richard gives 1 milk each a day, 6 times each. By day 12 he had paid 4 of 6 on each, with arrears listed. Avice puts 2 milk a day into the Fenwick store while Richard is at Wynford. He is due back about day 13 with salt for cheese. Press him to settle the arrears. Cheese: Avice taught Jory, Ellen and Roger. It needs 0.2 salt a batch and a proper cellar (stone may be needed; Fenwick Cellar is wattle). Roger repaired Fenwick Cellar on day 11. Its bins are near empty. Avice wants stone for a cellar. A copper tool is expected about day 13. Ellen took Avice's quarrying session. I can still teach her more (I am competent at quarrying). Agreement A379: I owe the Moors 1 day of work. My weeding and firewood for them may count. Tools: a crude tool takes 1 timber, 0.5 stone and 1 unit of work. Quarrying and cutting need a tool in my hands at the start of the day, so borrow one the evening before. I still have no tool. Bare-handed felling gives about 0.8 timber for 2 units, even though I am competent. Gill firewood gives about 2.7 a unit. Offers: work must be written exactly as \"work 2 days\". I once wasted 4 units reaping a bare field, so listen to Avice each morning before I go anywhere.",
+    "places": [
+     "Try with Roger every day we can, unless I am with child; agree units each morning, both must try the same day.",
+     "Listen to what Avice says aloud each morning before setting off; plans change overnight.",
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [
+      [
+       "Try with Roger every day we can; agree units each morning, both must try the same day.",
+       "Try with Roger every day we can, unless I am with child; agree units each morning, both must try the same day."
+      ]
+     ],
+     "refused": []
+    },
+    "cost": 0.17230299999999998
+   },
+   {
+    "open": 3,
+    "stretch": [
+     12,
+     14
+    ],
+    "budget_words": 550,
+    "written": 644,
+    "memory": "I am Lucy, a grown woman of the Fenwicks in Stannick, and Roger is my partner. Jory heads the household and Ellen is his wife; they are my in-laws. Ellen is past bearing, so Fenwick numbers must come through Roger and me, and through anyone we welcome in. My parents, Richard and Avice, head Moor House next door. They hold the Infield (rye) and the cattle (6 cows, 1 ox, 1 bull, 2 calves, 3 in milk). The cattle strayed in the autumn gale and still need driving back. WITH CHILD, and my time is near (winter day 1, day 15). I sleep at Moor House under Avice's grant of shelter and food. She gave it for 5 days from day 12, so it lasts to about day 16; ask her to extend it if the child has not come. Rules: stay indoors by the fire in the snow, no road, no Gill, no Quarry, no strain. Call Avice the moment it starts. A birth goes best housed, fed and with someone beside me. After the birth, care for the child (keep it fed and warm), then go back to trying with Roger daily (2 units each at dawn, agreed each morning). Fenwick aim: be the largest family. Find partners for grown kin, and keep every child fed and warm. WINTER, day 15: the hearth needs 4 heat on a cold night (8 firewood or 2 timber), and Ellen wants it fed from timber. On day 15 the Fenwick store held about 36 firewood, 12.6 timber and 5 rye (3.6 meals), with 4 eating. Roger put more rye in that morning. Richard gave Roger 15 rye in all, which is winter in our bowls. Moor store is strong: about 70 rye and 100 hay. Food is the Fenwick pinch. Open offers: Ellen O1472 and Jory O1473, each 2 timber for 2 rye, to anyone (Ellen withdrew the bread offer). The Gill and Moor were picked bare; Ellen is checking whether they have grown back. Milk: A711 and A722 are fully settled and released. Avice's cow loan to Jory is square, and O1063 (Jory's 2 days of hoeing for the Moors) is paid. A379, the 1 day of work I owe the Moors, may still be open on paper; my weeding and fencing for them should cover it. Richard came back from Wynford on day 14 with no copper tool and no salt; Wynford had neither. Cheese needs 0.2 salt a batch and a stone-walled cellar with bins. Fenwick Cellar is wattle and the cheese work will not go there. Ellen is quarrying stone for a stone cellar (1.8 stone by day 14) with a crude tool. I am competent at cheese and can teach it once a stone cellar and salt exist. Avice thinks the Ashes at Holloway may deal in salt and charcoal; send a trade if anyone goes. Tools: Jory and Roger each hold a crude tool from Avice, and Ellen has one too. I have none. A crude tool takes 1 timber, 0.5 stone and 1 unit of work. Quarrying and cutting need a tool in my hands at the start of the day. A crude tool does not help reaping. Bare-handed felling gives about 0.8 timber for 2 units. Gill firewood gives about 2.7 a unit.",
+    "places": [
+     "Try with Roger every day we can, unless I am with child; agree units each morning, both must try the same day.",
+     "Listen to what Avice says aloud each morning before setting off; plans change overnight.",
+     "After the birth, keep the child housed, fed and warm before any other work.",
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [
+      "After the birth, keep the child housed, fed and warm before any other work."
+     ],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.20158700000000002
+   },
+   {
+    "open": 3,
+    "stretch": [
+     15,
+     17
+    ],
+    "budget_words": 560,
+    "written": 613,
+    "memory": "I am Lucy, a grown woman of the Fenwicks in Stannick. Roger is my partner. Jory heads the household and Ellen is his wife; they are my in-laws. Ellen is past bearing, so Fenwick numbers must come through Roger and me, and through anyone we welcome in. My parents, Richard and Avice, head Moor House next door. They hold the Infield (rye) and the cattle (6 cows, 1 ox, 1 bull, 2 calves, 3 in milk). OUR BABY HELEWISE IS BORN (about winter day 2, day 16). She is of our household and will be grown about day 28. A baby needs 1 unit of care a day (work care at the child) or she may not live. She eats from the Fenwick store. Roger, Jory and Avice have each cared for her on some mornings. Each morning, agree who does her care. If nobody has said, I do it first. Now that the birth is past, try with Roger again every day (2 units each, agreed each morning). Shelter: Avice says her grant of Moor House (shelter and food) runs to about winter day 8 (day 22). But the night report said \"nobody let you in\", so check with her that the grant really stands. Once it ends, sleep at Fenwick House (6 beds; me, Roger, Jory, Ellen and Helewise sleep there). Keep Helewise housed, fed and warm before any other work. Fenwick store on day 18: about 5.7 rye (4 meals for 5 eaters), 26.7 firewood, 22.5 timber, 3.8 stone, 5 dung and 1 crude tool. Food is the pinch. The fire takes 4 heat a cold night (2 timber or 8 firewood). Roger has asked Richard for a rye trade. Jory's O1473 (2 timber for 2 rye, to anyone) is open, and Avice has taken it several times. Moor store is strong (about 70 rye and 100 hay). The Gill and Moor are picked thin of wild food. I am competent at foraging and felling. Gill firewood gives about 2.7 a unit. The new Infield rye should be ripe for reaping about day 20\u201321 (Jory said \"reap in ~3 days\" on day 17). The farms pay reapers in grain. Earlier deal: quarter-share of what we reap for the Moors. Reaping bare-handed is fine, since a crude tool does not help reaping. Building: a new Fenwick house is half built, and Fenwick Cellar #2 is half built. Ellen is quarrying stone for a stone cellar. Cheese needs a stone-walled cellar with bins and 0.2 salt a batch. Fenwick Cellar is wattle and will not serve. I am competent at cheese, milking and quarrying. I promised to teach Ellen quarrying when I am up, and cheese once a stone cellar and salt exist. Richard went to Wynford and came back on day 14 with no salt and no copper; Wynford had neither. Avice thinks the Ashes at Holloway may deal in salt and charcoal. Tools: Jory, Roger and Ellen each hold a crude tool, and there is 1 in the Fenwick store. I have none of my own. A crude tool takes 1 timber, 0.5 stone and 1 unit, and I can make one now. Quarrying and cutting need a tool in my hands at the start of the day. Debts: A711 and A722 (milk) are settled and released. The cow loan and O1063 are square. A379 (1 day of work I owe the Moors) may still be open on paper; my weeding and fencing for them should cover it. The cattle strayed in the autumn gale and may still need driving back. Fenwick aim: be the largest family. Try daily, find partners for grown kin, keep every child fed and warm.",
+    "places": [
+     "Try with Roger every day we can, unless I am with child; agree units each morning, both must try the same day.",
+     "Listen to what Avice says aloud each morning before setting off; plans change overnight.",
+     "Helewise needs one unit of care every day; agree each morning who gives it, and keep her housed, fed and warm first.",
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [
+      [
+       "After the birth, keep the child housed, fed and warm before any other work.",
+       "Helewise needs one unit of care every day; agree each morning who gives it, and keep her housed, fed and warm first."
+      ]
+     ],
+     "refused": []
+    },
+    "cost": 0.202655
+   },
+   {
+    "open": 4,
+    "stretch": [
+     18,
+     20
+    ],
+    "budget_words": 570,
+    "written": 599,
+    "memory": "I am Lucy, a grown woman of the Fenwicks in Stannick. Roger is my partner. Jory heads the household and Ellen is his wife; they are my in-laws. Ellen is past bearing, so Fenwick numbers must come through Roger and me and anyone we welcome in. My parents, Richard and Avice, head Moor House next door. They hold the Infield (rye, now with a whole wattle fence) and the cattle (6 cows, 1 ox, 1 bull, 2 calves, 3 in milk). OUR BABY HELEWISE WAS BORN about day 16 (winter day 2). She is a child of our household and will be grown about day 28. She needs 1 unit of care a day (work care at Helewise) and eats from the Fenwick store. The care chain we agreed: Ellen first, then Roger, then me. Jory sometimes does it too as a second layer, and Avice has often done it first thing. Check every morning that someone is named. One day (day 19) she went without, because Jory's action failed. IMPORTANT: The birth is PAST. On days 17 to 21 I wrongly kept resting as if I were still waiting to give birth (\"no sign yet\"). That was a mistake. I am up now. Go back to work, and try with Roger every day, 2 units each, agreed each morning. Tell Roger plainly that the no-try rule is over. Shelter: Avice renewed her grant of Moor House (shelter and food) to day 10 of winter (about day 24). After that, sleep at Fenwick House (6 beds; me, Roger, Jory, Ellen and Helewise sleep there). Fenwick store on day 21: 56.9 rye (about 40 meals; Richard left 14 rye as the reap pay-out), 5.6 firewood, 6 timber, 5.8 stone, 3.5 straw, 5 dung. Food is fine now. FUEL IS THE PINCH: the fire takes 4 heat a cold night (2 timber or 8 firewood), so there is only about 2 nights left. My first work: fell timber and gather firewood at the Gill (I am competent at felling and foraging; Gill firewood gives about 2.7 a unit). Do not fell in a gale. Jory's offer O1917 (2 timber for 1 cheese) is open. Moor store is strong (rye, hay, wood). The Gill and the Moor are picked thin of wild food. Richard and Avice are deciding the Infield rotation (fallow, beans or rye). Building: a new Fenwick house is half built (Roger and Jory are working on it). Fenwick Cellar #2 is half built (Ellen). Cheese needs a stone-walled cellar with bins and 0.2 salt a batch. The old Fenwick Cellar is wattle and will not serve. Richard found no salt or copper at Wynford. Avice thinks the Ashes at Holloway may deal in salt and charcoal. I am competent at cheese, milking and quarrying. I promised to teach Ellen quarrying now, and cheese once there is a stone cellar and salt. Tools: Jory, Roger and Ellen each hold a crude tool, and there may be one in the Fenwick store. I have none. A crude tool takes 1 timber, 0.5 stone and 1 unit, and I should make one. Quarrying and cutting need a tool in my hands at the start of the day. Debts: A711, A722, the cow loan and O1063 are square. A379 (1 day of work I owe the Moors) may still be open on paper; my earlier work for them should cover it. The cattle strayed in the autumn gale and may still need driving back. Fenwick aim: be the largest family. Try daily, find partners for grown kin, keep every child fed and warm.",
+    "places": [
+     "Try with Roger every day we can, unless I am with child; agree units each morning, both must try the same day.",
+     "Listen to what Avice says aloud each morning before setting off; plans change overnight.",
+     "Helewise needs one unit of care every day; agree each morning who gives it, and keep her housed, fed and warm first.",
+     "The birth is past: rest is over; work, and try with Roger daily unless truly with child."
+    ],
+    "events": {
+     "forget": [],
+     "keep": [
+      "The birth is past: rest is over; work, and try with Roger daily unless truly with child."
+     ],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.19690700000000003
+   },
+   {
+    "open": 4,
+    "stretch": [
+     21,
+     23
+    ],
+    "budget_words": 580,
+    "written": 565,
+    "memory": "I am Lucy, a grown woman of the Fenwicks in Stannick. Roger is my partner. Jory heads the household and Ellen is his wife; they are my in-laws. Ellen is past bearing, so Fenwick numbers must come through Roger and me. My parents, Richard and Avice, head Moor House next door. They hold the Infield (rye) and the cattle (6 cows, 1 ox, 1 bull, 2 calves, 3 in milk). THE BIRTH IS LONG PAST. OUR BABY HELEWISE WAS BORN on winter day 2 (day 16). I AM NOT PREGNANT. Twice now I wasted days resting and calling it \"no sign yet\": days 17 to 21, and again days 22 to 24 (spring days 1 and 2). The pinned note \"Birth plan\" is WRONG and caused this. FIRST THING next morning: forget that note and pin a new one called \"Day plan\". Tell everyone plainly: \"I am up and working. No midwife is needed. Roger, we try today, 2 units each.\" Helewise will be grown about spring day 6 (day 28). Until then she needs 1 unit of care every day (work care at Helewise). Agree each morning who does it: Ellen, Roger, Jory or me. Shelter: Avice's grant of Moor House lasts to about spring day 2. After that, sleep at Fenwick House (6 beds). The new Fenwick house (wattle, 1 bed and bins, no hearth) is finished. A second shell is still half built, and so is Fenwick Cellar #2. Avice asks us to finish ONE half-built shell this spring so her Moor stone cellar is no longer blocked. To carry on a half-built building, use its exact name as the Yard shows it. Fenwick Cellar (wattle) took damage on spring day 1 and needs repair with timber. Fenwick store on spring day 2: 41.6 rye (29 meals), 6.9 firewood, 2.6 timber, 5.8 stone, 10 dung, 1.5 straw. Food is fine. FUEL AND TIMBER ARE LOW. In spring the hearth takes only 1 heat a night, but repairs and building need timber. My first work: fell at the Gill (I am competent at felling; I need a tool to cut and to quarry, but not to fell bare-handed). There is one crude tool, which we share and pass round (Ellen took it to quarry). I should make my own: 1 timber, 0.5 stone, 1 unit. Richard went to Holloway alone with coin to buy salt and a copper tool; he is due back about spring day 5. Avice turned back and is staying at Stannick. A379 (work for the Moors) has been worked off by Roger's hoeing, and the rye account with Avice is settled square. The Infield is dug and manured, ready for seed; its fence has gaps and is being mended. Its soil is thin from hard cropping. The cattle strayed in the autumn gale; if they come home, Jory drives them into the Infield. Cheese needs a stone-walled cellar with bins and 0.2 salt a batch. I am competent at cheese, milking and quarrying. I promised to teach Ellen quarrying now, and cheese once there is a stone cellar and salt. Jory's offer O1917 (2 timber for 1 cheese) is open. The Gill and the Moor are picked thin of wild food. Do not fell in a gale. Fenwick aim: be the largest family. Try with Roger every day, find partners for grown kin, keep every child fed and warm.",
+    "places": [
+     "Try with Roger every day we can, unless I am with child; agree units each morning, both must try the same day.",
+     "Listen to what Avice says aloud each morning before setting off; plans change overnight.",
+     "Helewise needs one unit of care every day; agree each morning who gives it, and keep her housed, fed and warm first.",
+     "I am NOT pregnant; Helewise was born winter day 2. Never rest for a birth; delete any 'Birth plan' note at once."
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [
+      [
+       "The birth is past: rest is over; work, and try with Roger daily unless truly with child.",
+       "I am NOT pregnant; Helewise was born winter day 2. Never rest for a birth; delete any 'Birth plan' note at once."
+      ]
+     ],
+     "refused": []
+    },
+    "cost": 0.202291
+   }
+  ]
+ },
+ {
+  "agent": "Lucy",
+  "arm": "later",
+  "model": "claude-opus-5-5",
+  "places": 4,
+  "grow": 2,
+  "log": [
+   {
+    "open": 1,
+    "stretch": [
+     0,
+     2
+    ],
+    "budget_words": 500,
+    "written": 418,
+    "memory": "I am Lucy Fenwick of Stannick, grown, partner of Roger (son of Jory and Ellen, who head Fenwick House). My parents Richard and Avice Moor hold Moor House, the Infield (rye), and the cattle (6 cows, 1 ox, 1 bull, 2 calves, 3 in milk). I know cheese-making, milking and quarrying. Fenwick aim: numbers. Try for a child with Roger every day. Agree on units with him in the morning. He says a try needs two units to count, so set aside two if I can. Messages cross, so make sure we both give the same. Ellen's bearing years are over, so the Fenwick numbers must come through Roger and me, and anyone we welcome in. Find partners for kin, and keep everyone fed and warm. Stores at Fenwick House at the end of summer day 5 (approx.): ~27 firewood, ~18.5 grain (~13 meals), 2.7 hay, ~9.7 timber. We eat ~4 meals a night, so food runs short (~3 nights). Grain eaten raw is poor; it needs the lit hearth. Fuel ~65 firewood-equivalent, about what one hearth needs for winter (16 timber or 64 firewood). Keep adding. Land notes: the Gill and Stannick Moor are picked bare of wild food (berries take days to come back), so don't forage there for a while. The Brakes give ~2.5-2.9 firewood a unit. Felling at the Gill with bare hands gives only 0.7 timber for 2 units, so it's poor. Weeding the Infield helps the Moors' rye. Harvest deal: Richard agreed that Roger and I reap the Infield rye for a quarter-share of what we reap (same terms as Jory). The rye should be ripe about summer day 9 / early autumn. Be at the Infield at first light when Avice calls. I need a tool: try \"make crude tool\" before reaping (I have no tool; bare-hands reaping is x0.6). A tool would also let me quarry and cut. Offer format: work must be written \"work 2 days\" exactly. Goods as \"4 grain\". My earlier offer was refused for bad wording, but the deal stands by word. Who does what: Jory fells and forages, Ellen keeps the hearth and the cellar, and Roger does hay with Richard, firewood and dung. Avice and Richard weed and cut hay. Ideas if food runs short: trade with the Moors for milk or cheese (I can make cheese at a cellar). Market at Wynford every 8th day, 2 days away by cart track. The Weald and Westmere have game. Harvest reapers are paid in grain.",
+    "places": [
+     "Try for a child with Roger every day; agree units each morning, two each to be sure it counts.",
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [
+      "Try for a child with Roger every day; agree units each morning, two each to be sure it counts."
+     ],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.1332856
+   },
+   {
+    "open": 1,
+    "stretch": [
+     3,
+     5
+    ],
+    "budget_words": 520,
+    "written": 515,
+    "memory": "I am Lucy Fenwick of Stannick, grown, partner of Roger (son of Jory and Ellen, who head Fenwick House). My parents Richard and Avice Moor hold Moor House, the Infield (rye), the hand mill and the cattle (6 cows, 1 ox, 1 bull, 2 calves, 3 in milk). I know cheese-making, milking and quarrying. Fenwick aim: numbers. Ellen's bearing years are over, so the Fenwick numbers come through Roger and me and anyone we welcome in. Try for a child with Roger every day, 2 units each. Agree in the morning and say the same thing, because messages cross. Doing the try early in the day works. Find partners for kin, and keep everyone fed and warm. Harvest (summer day 8): the rye was ripe and all hands reaped bare-handed. I reaped about 16.4 rye in 5 units (about 3.3 a unit) into Moor House. Richard agreed by word to a quarter-share of what Roger and I reap (Jory has the same terms), so about 4 rye is owed to us from my reaping alone. Claim it from Richard/Avice and see it goes into Fenwick House. The reap probably carries on into autumn. Keep reaping for the share while there is rye standing. Agreement A379: I owe the Moors 1 day of work (not yet done). Ask what they want. Stores at Fenwick House, morning of summer day 8: 35 firewood, 25.4 timber (fuel ~86 firewood-equivalent, past the ~64 one hearth needs for winter), 6.7 grain (~4.7 meals), 12.3 hay (for the cattle). We eat ~4 a night, so FOOD is the pinch, not fuel. Rye and grain want the lit hearth (0.7 a unit cooked, 0.2 raw). The Moors have the hand mill (flour is 1 meal). Fenwick Cellar is built (wattle, empty). Ellen is trying cheese there with milk from the Moors. A bigger cheese deal with Avice waits until after harvest, and I am competent at cheese, so offer to make it. Tools: a crude tool takes 1 timber + 0.5 stone, but quarrying needs a tool in hand, so I must borrow one first and hold it in my hand BEFORE the quarry action (order of actions matters). Tools wear out. Avice says a crude tool does not help reaping. A tool is needed for cut and quarry and helps felling. Richard has a tool. Plan: borrow it at dawn, quarry, make my own. Land: the Gill and Stannick Moor are picked bare of wild food. The Brakes ran out of dead wood (summer day 7), so let it recover. Bare-hand felling at the Gill gives only 0.7 timber for 2 units: poor. Wild food is scarce here, so if food runs short: trade with the Moors (milk, cheese, rye), the Wynford market every 8th day (2 days, cart track), or game in the Weald or Westmere. Offer format: work as \"work 2 days\", goods as \"4 grain\". Who does what: Jory fells and forages; Ellen keeps the hearth and the cellar; Roger does hay, firewood and dung, often for Richard; Avice and Richard weed, cut hay and run the harvest.",
+    "places": [
+     "Try for a child with Roger every day; agree units each morning, two each to be sure it counts.",
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.18493359999999998
+   },
+   {
+    "open": 2,
+    "stretch": [
+     6,
+     8
+    ],
+    "budget_words": 530,
+    "written": 605,
+    "memory": "I am Lucy Fenwick of Stannick, grown, partner of Roger (son of Jory and Ellen, who head Fenwick House). My parents Richard and Avice Moor hold Moor House, the Infield (rye), the hand mill and the cattle (6 cows, 1 ox, 1 bull, 2 calves, 3 in milk; one cow is near calving, so fetch Avice if she struggles). I know cheese-making, milking and quarrying (competent) and foraging (competent). Fenwick aim: numbers. Ellen's bearing years are over, so the numbers come through Roger and me and anyone we welcome in. Try for a child with Roger every day, 2 units each, at DAWN as the first action. Roger asked for that. Agree it in the morning in plain words, because messages cross. Find partners for kin, and keep everyone fed and warm. Harvest: the old rye was all in by autumn day 1. I wasted 4 units reaping a bare field that day. Lesson: check that the work still exists, and heed Avice's morning words, because she runs the work here. Richard paid our quarter-share: 5 rye. Richard re-sowed the Infield with rye (it follows rye, the soil is thin, and it fails more often). It looked fit to reap about 11 days after autumn day 1, so late autumn or early winter. Jory manured it. I weed it for the Moors. Our quarter-share terms should hold for the next reap too, so confirm that with Richard. Milk: agreements A711 and A722 bring 2 milk a day from the Moors into Fenwick store, 6 days each. Richard rode to Wynford on autumn day 4 and is back about day 13. Avice gives the milk meanwhile. Ask for milk to go straight into the store (it spoils in hand). A379: I may still owe the Moors 1 day of work, so ask. Cheese: it is refused without 0.2 salt a batch, and no cellar at Stannick qualifies yet (perhaps it needs stone walls?). Richard is seeking salt at Wynford. Avice is building bins in Fenwick Cellar with Fenwick timber. She taught Jory, Ellen and Roger cheese, and offers me a session too, though I already know it. Ellen asked to learn quarrying, and I can teach her (she will need a tool to try). Stores at Fenwick House, autumn day 3: ~38 firewood, 20 timber (fuel is well past the ~64 firewood-equivalent one hearth needs for winter), ~9 rye + 4 milk, 4.3 hay, 5 dung. We eat ~4 a night, so FOOD is the pinch. Ellen offers timber for rye or bread to anyone. Rye wants the lit hearth (0.7 cooked, 0.2 raw). The Moors' hand mill makes flour (1 meal). Since our fuel is ample, my firewood work goes to Moor House (they are short for winter). Tools: a crude tool takes 1 timber + 0.5 stone. Cutting and quarrying need a tool held in hand BEFORE the action. A tool helps felling, but not reaping. Richard has a tool. Plan: borrow it, quarry, make my own. Land: the Gill and Stannick Moor are picked bare of wild food (forage gives ~0.1\u20130.2). Bare-hand felling gives ~0.8 timber for 2 units, which is poor. Firewood at the Gill gives ~2.7 a unit. The Brakes ran out of dead wood (summer day 7). If food runs short: the Moors (milk, rye), the Wynford market every 8th day (2 days), or game in the Weald or Westmere. Who does what: Jory fells, forages and is learning cheese. Ellen keeps the hearth and the cellar and herds. Roger does firewood, hay and dung, often for the Moors. Avice milks, herds and directs the work. Richard sows and trades.",
+    "places": [
+     "Try for a child with Roger every day; agree units each morning, two each to be sure it counts.",
+     "Each morning check that the work is still there, and heed Avice's word on where hands are needed.",
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [
+      "Each morning check that the work is still there, and heed Avice's word on where hands are needed."
+     ],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.1812336
+   },
+   {
+    "open": 2,
+    "stretch": [
+     9,
+     11
+    ],
+    "budget_words": 540,
+    "written": 531,
+    "memory": "I am Lucy Fenwick of Stannick, a grown woman, partner of Roger (son of Jory and Ellen, who head Fenwick House). My parents Richard and Avice Moor hold Moor House, the Infield (rye), the hand mill and the cattle (6 cows, 1 ox, 1 bull, 2 calves, 3 in milk). I am competent at cheese-making, milking, quarrying, foraging and felling. WITH CHILD, TIME NEAR (autumn day 6). Stay housed in the Yard, fed, with someone beside me. No road, no Gill or Quarry, only light work. Call Avice the moment labour starts. Trying for a child is pointless until after the birth. Afterwards, go back to trying with Roger daily (2 units each, at dawn, agreed in plain words each morning). Care for the baby: keep it fed and warm. Fenwick aim: numbers. Ellen's bearing years are over, so the numbers come through Roger and me and anyone we welcome in. Find partners for kin. FOOD CRISIS: on autumn day 6 the Fenwick store held 0.1 rye, with 4 of us eating ~4 a night. Fuel is fine: ~37 firewood and ~15 timber, enough for winter (one hearth needs ~16 timber or ~64 firewood). Open offers: Jory O1062 (2 timber for 2 rye) and Ellen O752 (2 timber for 1 bread). Milk: A711/A722 each give 1 milk a day from Richard, 4 of 6 paid by day 12, but 4 in arrears each (8 owed). Avice leaves 2 milk a day at Fenwick House while Richard is away. Richard rode to Wynford on autumn day 4 and is due back about day 13, maybe with salt and a copper tool. Press him on the arrears and on rye. Food sources: the Moors (milk, rye), the Wynford market every 8th day (2 days away), game in the Weald or Westmere. Stannick Moor and the Gill are picked bare (forage gives ~0.1\u20130.2). Infield: Richard re-sowed it with rye, which should be fit to reap late autumn or early winter. I weed it for the Moors. Our quarter-share of what we reap for the Moors should hold, so confirm it with Richard (last time it paid 5 rye). Check that the work still exists before spending units (I once wasted 4 units reaping a bare field). Heed Avice's morning word, because she runs the work. Cheese: it needs 0.2 salt a batch and a proper cellar (probably stone). Avice wants stone quarried for a cellar. Quarrying and cutting need a tool in hand before the action. A crude tool takes 1 timber + 0.5 stone. I have no tool. Fenwick Cellar is wattle, damaged on day 10 and repaired by Roger on day 11. Its bins are empty. Ellen learned quarrying from Avice and cheese from Avice. Jory and Roger also learned cheese. Yields: bare-hand felling gives ~0.8 timber per 2 units. Firewood at the Gill gives ~2.7 a unit. Rye needs a lit hearth (0.7 cooked). The Moors' hand mill makes flour. A379: I may still owe the Moors 1 day of work, so ask. Who does what: Jory fells and forages. Ellen keeps the hearth and herds. Roger does firewood, foraging and repairs. Avice milks, herds and directs. Richard sows and trades.",
+    "places": [
+     "Try for a child with Roger every day; agree units each morning, two each to be sure it counts.",
+     "Each morning check that the work is still there, and heed Avice's word on where hands are needed.",
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.1759616
+   },
+   {
+    "open": 3,
+    "stretch": [
+     12,
+     14
+    ],
+    "budget_words": 550,
+    "written": 580,
+    "memory": "I am Lucy Fenwick of Stannick, a grown woman and Roger's partner. Roger is the son of Jory and Ellen, who head Fenwick House. My parents, Richard and Avice Moor, hold Moor House, the Infield (rye), the hand mill and the cattle (6 cows, 1 ox, 1 bull, 2 calves; 3 in milk). The cattle strayed in the autumn gale and still need driving back. I am competent at cheese-making, milking, quarrying, foraging and felling. WITH CHILD, TIME NEAR (first noted autumn day 6; still waiting at winter day 1). I sleep at Moor House on Avice's grant, which gives shelter and food for 5 days from autumn day 7, so it runs to about winter day 3. Ask her to extend it if the birth hasn't come. Rules: stay inside by the fire, no road, no Gill, no Quarry, no strain. Call Avice the moment labour starts. After the birth, care for the baby and keep it fed and warm. Then go back to trying with Roger daily (2 units each, agreed in plain words each morning). Fenwick aim: numbers. Ellen is past bearing, so the numbers come through Roger and me and anyone we welcome in. Find partners for kin. WINTER has come (snow on winter day 1). On a cold night the hearth takes 4 heat (8 firewood or 2 timber). Fenwick store on winter day 1: ~36.6 firewood, 12.6 timber, 5.1 rye (~3.6 meals) for 4 eaters, plus Roger's rye from Richard. FOOD IS THE PINCH, not fuel, though fuel will drain faster in the cold. Richard gave Roger 15 rye in total when he came home. Moor House stores: ~70 rye, ~100 hay, good firewood. Open offers: Ellen O1472 and Jory O1473, each 2 timber for 2 rye (to anyone). The milk agreements A711/A722 are paid and released. Richard came back from Wynford on autumn day 8 with no copper tool and no salt. Salt is the first want when a road opens. Avice says the Ashes at Holloway may deal in it. Cheese needs 0.2 salt a batch and a stone cellar with bins. The Fenwick wattle cellar won't serve. Ellen is quarrying stone for a stone cellar (1.8 stone cut so far) with a crude tool. A second Fenwick Cellar stands half built. Jory and Roger each hold a crude tool from Avice (A1205 released). I have no tool. A crude tool takes 1 timber + 0.5 stone. Quarrying and cutting need a tool in hand. Infield: the Moors re-sowed it with rye and a wattle fence is going up round it. I weeded it for the Moors as light work. Our quarter-share deal on what we reap for the Moors held last time (it paid 5 rye). Confirm it again at the next reaping. A379: I may still owe the Moors 1 day of work, so ask. Food sources: the Moors (rye, milk), the Wynford market every 8th day (2 days away), and game in the Weald or Westmere. Stannick Moor and the Gill are picked bare. Rye needs a lit hearth (0.7 cooked). The Moors' hand mill makes flour. Yields: bare-hand felling gives ~0.8 timber per 2 units. Firewood at the Gill gives ~2.7 a unit. Check that the work still exists before spending units. Who does what: Jory fells and forages. Ellen quarries, keeps the hearth and herds. Roger does firewood, foraging, repairs and hoeing for the Moors. Avice milks, herds and directs the work. Richard sows, trades and quarries.",
+    "places": [
+     "Try for a child with Roger every day; agree units each morning, two each to be sure it counts.",
+     "Each morning check that the work is still there, and heed Avice's word on where hands are needed.",
+     "Food runs out before fuel in winter: keep rye coming from the Moors and trade timber for it.",
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [
+      "Food runs out before fuel in winter: keep rye coming from the Moors and trade timber for it."
+     ],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.2015736
+   },
+   {
+    "open": 3,
+    "stretch": [
+     15,
+     17
+    ],
+    "budget_words": 560,
+    "written": 623,
+    "memory": "I am Lucy Fenwick of Stannick, a grown woman and Roger's partner. Roger is the son of Jory and Ellen, who head Fenwick House. My parents, Richard and Avice Moor, hold Moor House, the Infield (rye), the hand mill and the cattle (6 cows, 1 ox, 1 bull, 2 calves; 3 in milk). I am competent at cheese-making, milking, quarrying, foraging and felling. MY BABY IS BORN: Helewise (named for my sister), born about winter day 2, of Fenwick household. I missed that it had happened and went on resting for days. She has no \"with child\" left on me. She grows up about winter day 14. A baby needs 1 unit of care a day (work care at Helewise) or she may not live, and she eats from the Fenwick store. Avice, Jory and Roger have been doing her care. From now on I do it MYSELF each morning first. Then go back to trying with Roger daily (2 units each, agreed in plain words each morning). Fenwick aim: numbers. Ellen is past bearing, so the numbers come through Roger and me and anyone we welcome in. Find partners for kin. SLEEPING: Avice says her grant of Moor House (shelter and food) runs to about winter day 8. But the game said \"nobody let you in\", so ask her plainly to host/grant me (and Helewise) again, or sleep at Fenwick House (6 beds) with the baby, where she is. WINTER: snow, cold nights. The hearth takes 4 heat (2 timber or 8 firewood). Fenwick store on winter day 4: 5.7 rye (about 4 meals) for 5 eaters, 26.7 firewood, 22.5 timber, 3.8 stone, 5 dung, 1 crude tool. FOOD IS THE PINCH. Trade timber for rye from the Moors (Jory's 2 timber for 2 rye offers keep being taken by Avice). Roger asked Richard for a rye trade. Moor House holds plenty of rye and hay. INFIELD: the Moors' rye there is ripe to reap now (reap appeared winter day 4; Jory said reap in about 3 days). Confirm the quarter-share deal with Richard/Avice before reaping (last time it paid me 5 rye). This is the best food chance this winter, so reap hard. A379: I may still owe the Moors 1 day of work, so ask. TOOLS: I have no tool. A crude tool takes 1 timber + 0.5 stone, 1 unit, and there is stone in the Fenwick store now, so make one. Quarrying and cutting need a tool in hand. Jory and Roger share crude tools. CHEESE/SALT: Richard came back from Wynford with no copper tool and no salt. Salt is the first want when a road opens; Avice says the Ashes at Holloway may deal in it. Cheese needs 0.2 salt a batch and a stone cellar with bins. The wattle Fenwick Cellar won't serve. Ellen is quarrying stone for a second cellar, and a new Fenwick house stands half built. Ellen wants to learn quarrying properly, so teach her (2 units). Food sources: the Moors (rye, milk), the Wynford market every 8th day (2 days away), and game in the Weald or Westmere. Stannick Moor and the Gill are picked mostly bare. Rye needs a lit hearth (0.7 cooked). Yields: bare-hand felling gives ~0.8 timber per 2 units; firewood at the Gill gives ~2.7 a unit. Who does what: Jory fells, forages and reaps. Ellen quarries and keeps the hearth. Roger does firewood, felling, and hoeing/fencing for the Moors. Avice milks, sows, fences and directs the work. Richard sows, trades and quarries. The cattle strayed in the autumn gale. Check whether they are back. LESSON: read \"You\" each morning for what has changed (baby, grants, store) before planning. Don't rest blindly when there is work to do.",
+    "places": [
+     "Try for a child with Roger every day; agree units each morning, two each to be sure it counts.",
+     "Each morning check that the work is still there, and heed Avice's word on where hands are needed.",
+     "Food runs out before fuel in winter: keep rye coming from the Moors and trade timber for it.",
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.2059176
+   },
+   {
+    "open": 4,
+    "stretch": [
+     18,
+     20
+    ],
+    "budget_words": 570,
+    "written": 595,
+    "memory": "I am Lucy Fenwick of Stannick, a grown woman and Roger's partner. Roger is the son of Jory and Ellen, who head Fenwick House. My parents, Richard and Avice Moor, hold Moor House (5 beds, a hearth, a hand mill), the Infield (rye) and the cattle (6 cows, 1 ox, 1 bull, 2 calves; 3 in milk). I am competent at cheese-making, milking, quarrying, foraging and felling. BIG MISTAKE TO FIX: I AM NOT WITH CHILD. My baby Helewise (named for my sister) was born about winter day 2. Through winter days 3 to 7 I rested every day, waiting for a birth that had already happened. My pinned \"Birth plan\" note was wrong, so replace it. From now on I WORK every day: care for Helewise first (work care at Helewise, 1 unit), then real work, and I try for a child with Roger again (2 units each, agreed in plain words each morning). Tell the family plainly that I am up and working, and that the \"no step, no strain\" rules are over. Helewise is of the Fenwick household and grows up about winter day 14. Until then she needs 1 unit of care a day. Others' care has sometimes failed to count (Ellen named herself for it; Avice and Jory have done it too), so I do it myself. SLEEPING: Avice granted me shelter and food at Moor House through winter day 10. After that I sleep at Fenwick House (6 beds), where Helewise is. STORE on winter day 7: Richard left 14 rye, which brought Fenwick to 56.9 rye (about 40 meals), so food is fine for now. FUEL IS NOW THE PINCH: 5.6 firewood and 6 timber, and a cold night's hearth takes 4 heat (2 timber or 8 firewood). So I should fell at the Gill (2 units, ~0.8 timber bare-handed) and gather firewood (~2.7 a unit). Don't fell in a gale. The store also holds 5.8 stone, 3.5 straw and 5 dung. TOOLS: I have none. A crude tool takes 1 timber + 0.5 stone and 1 unit, and the Fenwick store has stone, so make one early. Quarrying and cutting need a tool in hand. The Infield rye is reaped. Richard and Avice are deciding what follows (fallow, beans or rye) and will say when to sow. Avice and Roger are hoeing and manuring there for the Moors. I may owe the Moors a day of work (A379), so ask. The Moors paid a quarter-share for reaping. CHEESE/SALT: Jory's offer O1917 stands: 2 timber for 1 cheese. Cheese needs 0.2 salt a batch and a stone cellar with bins, and we have no salt. Avice says the Ashes at Holloway may deal in salt. Ellen is building a second cellar, and a new Fenwick house stands half built. Ellen wants to learn quarrying, so teach her (2 units, once I have a tool). Who does what: Jory fells, forages, builds and is head. Ellen quarries, keeps the hearth and builds. Roger does firewood, felling, hoeing for the Moors and building. Avice milks, sows, fences, and directs the work. Richard sows, trades and quarries. Food sources: the Moors (rye, milk), the Wynford market every 8th day (2 days away), and game in the Weald or Westmere. The Moor and the Gill are picked mostly bare. Fenwick aim: numbers. Ellen is past bearing, so the children come through Roger and me. Find partners for kin. LESSON: read \"You\" each morning before planning (the baby, grants, the store, whether I'm with child) and trust what it says over my notes.",
+    "places": [
+     "Try for a child with Roger every day; agree units each morning, two each to be sure it counts.",
+     "Each morning check that the work is still there, and heed Avice's word on where hands are needed.",
+     "Food runs out before fuel in winter: keep rye coming from the Moors and trade timber for it.",
+     "Read 'You' each morning; if it does not say I am with child, I am not \u2014 care for children, then work."
+    ],
+    "events": {
+     "forget": [],
+     "keep": [
+      "Read 'You' each morning; if it does not say I am with child, I am not \u2014 care for children, then work."
+     ],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.19735760000000002
+   },
+   {
+    "open": 4,
+    "stretch": [
+     21,
+     23
+    ],
+    "budget_words": 580,
+    "written": 683,
+    "memory": "I am Lucy Fenwick of Stannick, a grown woman and Roger's partner. Roger is the son of Jory and Ellen, who head Fenwick House. My parents, Richard and Avice Moor, hold Moor House (5 beds, a hearth, a hand mill), the Infield and the cattle (6 cows, 1 ox, 1 bull, 2 calves; 3 in milk). I am competent at cheese-making, milking, quarrying, foraging and felling. !!! I AM NOT WITH CHILD. I made this mistake TWICE. !!! My baby Helewise was born about winter day 2. From winter day 3 to spring day 2 I rested every day, waiting for a birth that had already happened, and wasted about 30 units of work. The pinned note \"Birth plan\" is FALSE. FIRST THING next morning: forget it (\"forget\": [\"Birth plan\"]) and pin a new note, \"Work plan\". Only \"You\" in the morning report tells the truth. If it does not say \"with child\", I am not. EACH MORNING: (1) work care at Helewise, 1 unit, unless \"You\" says she is grown. She grows up about spring day 6. (2) Tell Roger plainly that I try for a child today, 2 units each, and that we sleep in the same place. (3) Tell the family the \"no step, no strain, rest\" rules are OVER and that I am up and working. (4) Do real work with the rest of my units. SLEEPING: Avice's grant at Moor House has run out (it ran to winter day 10). Sleep at Fenwick House, with Roger and Helewise, so the try counts. STORE at Fenwick House, spring day 2: 41.6 rye (about 29 meals, enough for about 6 nights for 5 people), 6.9 firewood, 2.6 timber, 10 dung, 5.8 stone, 1.5 straw. Food will run short within a week, so I need rye from the Moors, forage, or game. Fuel is thin too: in spring the hearth wants about 1 heat a night (2 firewood or 0.5 timber). Fenwick Cellar took damage on spring day 1 and needs repair (timber). The Fenwicks' new house is finished (wattle, 1 bed, bins). A second house shell and a second cellar stand half built. Avice asks us to finish ONE half-built shell this spring, because it blocks her stone cellar. When continuing a build, use the exact name the Yard shows. TOOLS: there is one crude tool, which Ellen, Roger and Jory pass around (Ellen quarried with it). I should make my own: a crude tool takes 1 timber, 0.5 stone and 1 unit. Quarrying and cutting need a tool in hand. Richard went alone to Holloway with coin to buy a copper tool and salt, and he is due back about spring day 5. Avice turned back and stayed at Stannick. She has no road food, because raw rye is poor eating on the road. INFIELD (the Moors'): it is dug over and manured, ready for seed. The fence has gaps and the stakes are rotting; Avice is mending it. The soil is thin from hard cropping. Ask Avice what to sow and when. Agreement A379 may mean a day of work owed to the Moors (Roger has been working it off by hoeing). CHEESE: Jory's offer O1917 (2 timber for 1 cheese) still stands. Cheese needs 0.2 salt a batch and a cellar with bins. Salt is coming with Richard. Then milk the Moors' cows and make cheese: it is a good food and good for trade.",
+    "places": [
+     "Try for a child with Roger every day; agree units each morning, two each to be sure it counts.",
+     "Each morning check that the work is still there, and heed Avice's word on where hands are needed.",
+     "Food runs out before fuel in winter: keep rye coming from the Moors and trade timber for it.",
+     "Read 'You' each morning; if it does not say I am with child, I am not \u2014 care for children, then work."
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.2067976
+   }
+  ]
+ },
+ {
+  "agent": "Jory",
+  "arm": "replace",
+  "model": "claude-opus-5-5",
+  "places": 4,
+  "grow": 2,
+  "log": [
+   {
+    "open": 1,
+    "stretch": [
+     0,
+     1
+    ],
+    "budget_words": 550,
+    "written": 426,
+    "memory": "I am Jory, head of the Fenwicks of Stannick. I'm a master at foraging, reaping, hoeing and bed-building. Ellen is my partner. Her bearing years are behind her (a try for a child was refused), so the Fenwick numbers must now come through my son Roger and his partner Lucy, through my daughters Rohese and Hawise who married into Ashby, and through anyone we take into the house. Fenwick House: stone, 6 beds, a hearth, bins. At the end of summer day 4 the store held about 18 firewood, 8.3 timber, about 19 grain and 2.7 wild food, roughly 14 meals, which is only a few nights for four of us. I am carrying about 9 timber from the Gill felling (each fell is about 3 timber for 2 units with my crude tool). I MUST move it into the store first thing. I also carry 2 coin and the crude tool. Winter needs about 16 timber per hearth (or 4 times as much firewood). I promised Ellen three days of felling; day 4 was the first. The Gill is picked bare of forage. Stannick Moor was plentiful but thin by day 4. Lucy works the Gill and Brakes for firewood, Roger cuts hay for Richard and gathers dung. Food is the urgent need. REAP DEAL: Richard Moor says the Infield rye ripens at summer's end, about day 7 or 8 of summer. Be at the Infield at first light when he calls, fed and rested. I get a quarter of what I reap, paid in grain from the Moor store. Roger and Lucy could sign on too. Moor House has a hand mill; ask to grind there. Moors (Avice, Richard) are our neighbours. They know cheese-making, milking and quarrying. Ellen hints they may build a cheese cellar, so our timber could be traded. Learning milking or cheese from them would help our food. I owe Denise Rook 1 meat from last winter (A21, in arrears). Pay when I can. Market at Wynford every eighth day on the Green. The Wynns grind grain for a share. Farms hire reapers at harvest for grain. Barley sown after mid-autumn won't ripen; rye stands the winter. Whoever clears and sows new ground holds it. Travellers carry bread or dried meat. Old pass over the Tor is snowbound in winter. The sheep track east crosses green-stained scree (copper ore? a copper tool would double felling). Family aim: be the largest family in the country. Partners young, try daily, find partners for every grown child, keep every child fed and warm.",
+    "places": [
+     "Ellen is past bearing; Fenwick numbers come through Roger and Lucy, daughters in Ashby, and anyone we take into the house.",
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [
+      "Ellen is past bearing; Fenwick numbers come through Roger and Lucy, daughters in Ashby, and anyone we take into the house."
+     ],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.11344939999999999
+   },
+   {
+    "open": 1,
+    "stretch": [
+     2,
+     4
+    ],
+    "budget_words": 560,
+    "written": 475,
+    "memory": "I am Jory, head of the Fenwicks of Stannick. Master at foraging, reaping, hoeing, bed-building; competent at felling. Ellen is my partner; her bearing years are behind her, so Fenwick numbers come through son Roger and his partner Lucy, daughters Rohese and Hawise (married into Ashby, 2 days away), and anyone we take into the house. HOLDINGS (end of summer day 7): Fenwick House is stone, with 6 beds, a hearth and bins. Its store: about 24.6 timber, 37 firewood, 9.6 grain, 12 hay, a little wild food. That is well over the winter fuel target (16 timber a hearth). FOOD IS THE URGENT NEED: under 2 nights' worth for four of us. Ellen finished one Fenwick Cellar (wattle, empty) for cheese. A second is half built. Avice has been teaching Ellen cheese-making. I carry 2 coin, 5 dung and NO TOOL. My crude tool wore out felling. Lucy's quarrying failed, so she has no tool either. REAP: Avice called it. Harvest of the Moors' Infield rye is at dawn on summer day 8, all hands. I get a quarter of what I reap, paid in grain from the Moor store. If I have no tool I reap bare-handed (x0.6). I'm still a master, so go anyway. Roger and Lucy should reap too. Try to borrow a tool from Avice or Richard. Offer format must be like \"2 grain\" for \"1 crude tool\". I can't speak into Moor House (no access); use tell or say to everyone. After the reap: get stone (borrow a tool to quarry) and make crude tools for me and Lucy. AGREEMENTS: A379: I owe the Moors 1 work day. My weeding counted partly; Richard will call the rest at or after harvest. A21: I owe Denise Rook 1 meat from last winter, in arrears. Pay when I can. LAND NOTES: Stannick Moor is grazed bare (no hay, little forage). The Gill is bare of forage but has plenty of tall timber. The Brakes' dead wood is used up for now. The Quarry has good grey stone (needs a tool). Moor House has a hand mill (ask to grind). Ellen's idea: trade hay or timber to the Moors for a cow in milk. Learn milking or cheese from the Moors. WORLD: Wynford market every eighth day on the Green. The Wynns grind grain for a share. Farms hire reapers for grain. Barley sown after mid-autumn won't ripen; rye stands the winter. Whoever clears and sows new ground holds it. Travellers carry bread or dried meat. The old pass over the Tor is snowbound in winter. The sheep track east crosses green-stained scree (copper ore? a copper tool doubles work). Holloway (Ashes, Rooks) knows charcoal and handcarts. FAMILY AIM: be the largest family in the country. Partners young, try daily, find partners for every grown child, keep every child fed and warm.",
+    "places": [
+     "Ellen is past bearing; Fenwick numbers come through Roger and Lucy, daughters in Ashby, and anyone we take into the house.",
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.1857094
+   },
+   {
+    "open": 2,
+    "stretch": [
+     5,
+     7
+    ],
+    "budget_words": 570,
+    "written": 634,
+    "memory": "I am Jory, head of the Fenwicks of Stannick. Master at foraging, reaping, hoeing and bed-building; competent at felling. Since autumn day 2 I am CAPABLE at making cheese (Avice taught me; Roger took the lesson too, Lucy was offered one on autumn day 3). Ellen is my partner and past bearing. Fenwick numbers come through son Roger (named my HEIR) and his partner Lucy, my daughters Rohese and Hawise (married into Ashby, 2 days away), and anyone we take in. HOLDINGS (end of autumn day 2): Fenwick House is stone, with 6 beds, a hearth and bins. Its store: about 5.3 rye, 42 firewood, 23 timber, 4.3 hay and 5 dung. FUEL is well over the winter target of 16 timber a hearth. FOOD IS THE URGENT NEED: 4 of us eat about 4 a night, and we have only a few nights in hand. Fenwick Cellar (wattle) is finished; Ellen was putting bins in it, and cheese is made there. A second cellar is half built (Ellen's work). I carry 2 coin and NO TOOL; Lucy has none either. Get stone from the Quarry (borrow a Moor tool) and make crude tools. AGREEMENTS: - A711 and A722: Richard pays us 1 milk a day each (2 a day) for 6 days, from autumn day 2, in return for 4 timber and 8 hay. Avice sets the milk aside when she milks. - A21: I still owe Denise Rook (Holloway) 1 meat from last winter, in arrears. - A379 (work day owed to the Moors): CLEARED by my harvest day. - The harvest quarter-share was paid in full: 6 rye. - Ellen had open offers out: 3 timber for 3 rye, and 2 timber for 1 bread. Our timber surplus is our trading chip for food. THE MOORS (Avice and Richard, close together, fair dealers): they hold the Infield, Moor House with its hand mill, and the cattle. Richard sowed the Infield with rye behind my dunging. That rye will be ripe for reaping around autumn day 11\u201312, so offer to reap for a share again. Richard was to leave for Wynford on autumn day 3, and we were to talk about getting a cow in milk the night before he went. Avice stays behind and watches a cow heavy in calf. Avice says to put hay out to the cattle because the moor is failing. With milk coming, we can make cheese ourselves (2.5 meals a unit, and it keeps). LAND: Stannick Moor and the Gill are picked BARE of wild food, so foraging there is useless for now. The Gill still has plenty of tall timber and some dead wood. The Brakes' dead wood is used up. The Quarry has good grey stone (needs a tool). The Infield's soil is thin from hard cropping; dung helps it. WORLD: Wynford market is every eighth day on the Green. The Wynns grind grain for a share. Farms hire reapers for grain. Barley sown after mid-autumn won't ripen; rye stands the winter. Whoever clears and sows new ground holds it. Travellers carry bread or dried meat. The old pass over the Tor is snowbound in winter. The sheep track east crosses green-stained scree: maybe copper ore, and a copper tool doubles work. Holloway (the Ashes and the Rooks) knows charcoal and handcarts and has game in its woods. SYSTEM TIPS: Offers must be written like \"2 grain\" for \"1 crude tool\"; lending a tool can't be offered. I can't speak into Moor House, so use tell or say to everyone. The learn action only works if the teacher sets aside time the same day. FAMILY AIM: be the largest family in the country. Take partners young, try for a child daily, find partners for every grown child, and keep every child fed and warm.",
+    "places": [
+     "Ellen is past bearing; Fenwick numbers come through Roger and Lucy, daughters in Ashby, and anyone we take into the house.",
+     "Stannick's wild food runs out fast; Fenwick food must come from grain shares, milk, cheese and trading our timber.",
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [
+      "Stannick's wild food runs out fast; Fenwick food must come from grain shares, milk, cheese and trading our timber."
+     ],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.2398014
+   },
+   {
+    "open": 2,
+    "stretch": [
+     8,
+     10
+    ],
+    "budget_words": 580,
+    "written": 776,
+    "memory": "I am Jory, head of the Fenwicks of Stannick. I am a master at foraging, reaping, hoeing and bed-building, and competent at felling. I am CAPABLE at making cheese (Avice taught me on autumn day 2; Roger learned too) and at MILKING (Avice taught me on autumn day 5). Ellen is my partner and is past bearing. Fenwick numbers come through my son Roger (named HEIR) and his partner Lucy, through my daughters Rohese and Hawise in Ashby (2 days away), and through anyone we take in. HOLDINGS (end of autumn day 5): Fenwick House is stone, with 6 beds, a hearth and bins. Its store holds about 5.8 rye, 39 firewood, 15.7 timber, 0.3 hay and 5 dung, plus 2 milk a day from Avice. FOOD IS CRITICAL: there are 4 of us at 4 meals a night, and only about 1 night is in hand. Fuel is near the winter target (16 timber a hearth, or 4 times that in firewood), and the firewood pile counts toward it. Fenwick Cellar (wattle) was damaged on the night of autumn day 4 (thatch slipping, a wall cracked); Ellen or Roger was repairing it. A second cellar is half built. I carry 2 coin and 1.8 timber, and NO TOOL. None of us has a tool. COW DEAL (DONE, Avice called it fully square): Fenwick paid 6 timber and 4 hay into Moor House. One Moor cow in milk is lent to us. She stays in the Moors' name, all her calves are theirs, and she returns when Richard calls. She runs with the Moor herd on Stannick Moor. I MILK HER EACH DAY myself and put the milk in Fenwick House. Milk is 0.5 a meal and spoils fast, so turn it into cheese when we can. CHEESE is blocked: it needs 0.2 salt a batch, and the wattle cellar may not qualify (a stone cellar may be needed). Richard went to Wynford for salt and returns the morning of autumn day 13. STONE AND TOOLS: a crude tool needs 0.5 stone, and quarrying needs a tool. That is chicken and egg. Ellen is now capable at quarrying. Ask Avice or Richard to hand over a tool for a day, or trade for one. Offers like \"2 timber\" for \"1 crude tool\" work, but lending a tool cannot be offered. AGREEMENTS: - A711 and A722: Richard and Avice pay 1 milk a day each for 6 days (3 of 6 paid by autumn day 5). Avice leaves the milk at Fenwick House. - A21: I still owe Denise Rook (Holloway) 1 meat from last winter, in arrears. - My open offer O1062: 2 timber for 2 rye, to anyone. - Ellen's open offer O752: 2 timber for 1 bread. THE MOORS (Avice and Richard, fair dealers): they hold the Infield, Moor House (with a hand mill) and the cattle (6 cows, ox, bull, 3 calves; a new calf was born autumn day 3). The Infield rye was re-sown behind our dung, but it is the same crop as last year, so the ground is tiring. It should be fit to reap around autumn day 12\u201314. Offer to reap it for a quarter share in rye again. I have weeded and manured it several times for them. Hoeing the sown Infield gave nothing, so don't waste units on that. LAND: Stannick Moor and the Gill are picked bare of wild food, and the moor is grazed bare.",
+    "places": [
+     "Ellen is past bearing; Fenwick numbers come through Roger and Lucy, daughters in Ashby, and anyone we take into the house.",
+     "Stannick's wild food runs out fast; Fenwick food must come from grain shares, milk, cheese and trading our timber.",
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.2527054
+   },
+   {
+    "open": 3,
+    "stretch": [
+     11,
+     13
+    ],
+    "budget_words": 580,
+    "written": 681,
+    "memory": "I am Jory, head of the Fenwicks of Stannick. I am a master at foraging, reaping, hoeing and building beds, and competent at felling. Avice taught me to make cheese and to milk, so I am CAPABLE at both. Roger is capable at cheese too. Ellen is my partner and past bearing. Fenwick numbers come through my son Roger (my named HEIR) and his partner Lucy, through my daughters Rohese and Hawise in Ashby (2 days away), and through anyone we take in. Lucy is NEAR HER TIME. Avice gave her a bed and food at Moor House for 5 days from autumn day 6. If it starts, fetch Avice. HOLDINGS (end of autumn day 8, winter starts next): Fenwick House is stone, with 6 beds, a hearth and bins. Its store holds about 4 rye, about 19 timber, 38 firewood, 0.3 hay and 5 dung. Fuel is over the winter target (16 timber a hearth, or 4 times that in firewood). FOOD IS THIN: 4 eat about 4 meals a night, so only about 1 night of rye is left. Fenwick Cellar (wattle) is sound. A second cellar is half built. I carry 2 coin and 1 CRUDE TOOL (from Avice). Ellen has the other crude tool and quarries at the Quarry (capable). With a tool, felling at the Gill gives about 3.7 timber per 2 units, so it is worth it. HOEING the sown Infield gives 0 every time: do NOT spend units on it. LOAN COW: one Moor cow in milk is lent to Fenwick. She stays in the Moors' name, her calves are theirs, and she returns when Richard calls. Avice declared the deal (6 timber and 4 hay paid) FULLY SQUARE and confirmed again on day 7 that no hay is owed. I milk her each morning (one day it gave 4.5 milk) and put the milk in Fenwick House. Avice said she stays at Stannick when the herd goes to High Tor. On day 7 there were no beasts on the moor to milk, so find where she is. Milk spoils fast; make cheese when we can. Cheese needs 0.2 salt a batch and perhaps a proper (stone) cellar. Richard came back from Wynford on day 8; ask whether he brought salt (I have 2 coin to pay). AGREEMENTS: - A711 and A722: Richard/Moors owe 1 milk a day each. The books show 6 of 6 \"paid\" but also 6 in arrears each. Ask gently. The Moors have been very generous, so don't press hard. - A21: I still owe Denise Rook (Holloway) 1 meat from last winter. - O1063: two days of work owed to the Moors. Hoeing counted as the work, though it gave nothing. Avice said she would release it once day two was done. Check that it is cleared; if not, offer weeding or felling for them instead. - A1205 (a crude tool for 1 timber) is settled. The release was refused because nothing was owed. - Ellen's offer O752 (2 timber for 1 bread) may still be open. THE MOORS (Avice and Richard): fair and generous. They hold the Infield, Moor House (with a hand mill), the cattle (6 cows, an ox, a bull, 3 calves) and Stannick Moor. On day 6 Avice took all our timber-for-rye offers and gave us 8 rye as a gift. They are putting a wattle fence round the Infield.",
+    "places": [
+     "Ellen is past bearing; Fenwick numbers come through Roger and Lucy, daughters in Ashby, and anyone we take into the house.",
+     "Stannick's wild food runs out fast; Fenwick food must come from grain shares, milk, cheese and trading our timber.",
+     "Hoeing an already-sown field gives nothing; spend those units felling with a tool or foraging instead.",
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [
+      "Hoeing an already-sown field gives nothing; spend those units felling with a tool or foraging instead."
+     ],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.2446894
+   },
+   {
+    "open": 3,
+    "stretch": [
+     14,
+     16
+    ],
+    "budget_words": 590,
+    "written": 610,
+    "memory": "I am Jory, head of the Fenwicks of Stannick. I am a master at foraging, reaping, hoeing and building beds, and skilled at felling. Avice taught me cheese-making and milking, so I am CAPABLE at both. Roger is capable at cheese too. Ellen is my partner and past bearing. Roger is my named HEIR. His partner is Lucy. NEW CHILD: HELEWISE was born to Lucy on winter day 2. She grows up in about 11 days, from winter day 3. A baby needs 1 unit of care a day or may not live (work care). Lucy and Helewise are sleeping and eating at Moor House under Avice's grant (day 4 of 5 on winter day 3). Lucy will ask Avice to renew it. Make sure someone gives Helewise care every day. HOLDINGS (end of winter day 3): Fenwick House is stone, with 6 beds, a hearth and bins. Its store holds about 23 timber, about 35 firewood, about 6-10 rye, 0.3 hay, 5 dung, 3.8 stone (Ellen's) and 1 crude tool. The crude tool is shared: whoever uses it puts it back in the store each night. Ellen, Roger and I take turns with it. FOOD IS THIN: about 4-5 eat a night, so there are only 1-2 nights left. The Infield rye ripens about winter day 5-6, and I reap for a share. On cold nights the hearth burns 2 timber (Ellen's rule), and we keep the firewood for later. Fenwick Cellar (wattle) is sound but empty. Cellar #2 is half built. The Fenwicks' new house is half built too; Ellen is building it, 1 unit a day. Ellen cut 3.8 stone toward a stone cellar, which cheese may need. Cheese also needs salt (0.2 a batch). Nobody has brought salt or a copper tool from Wynford yet. I carry 2 coin to trade for salt when a road opens. YIELDS: With the crude tool, felling at the Gill gives about 3.8 timber for 2 units. A firewood turn gives about 2.8. The Gill gives almost no wild food, and Stannick Moor is PICKED BARE. Hoeing the sown Infield gives 0. OFFERS AND AGREEMENTS: - O1659: my offer of 2 timber for 2 rye, to anyone, is open. Avice took the earlier ones (O1473 and others). - A21: I still owe Denise Rook (Holloway) 1 meat from last winter. - A711 and A722 (milk) are RELEASED. - O1063 (two days of hoeing for the Moors) is RELEASED. - A1205 (the tool) is closed. - LOAN COW: one Moor cow in milk is lent to us; the deal is square. Her calves stay the Moors'. The cattle strayed in a gale. Richard found them on Stannick Moor on winter day 3 and is herding them. When I can, milk the loan cow there. - The Infield wattle fence was 77% done for the Moors when I last worked on it. Richard wants it closed before the reap. THE MOORS (Avice and Richard): fair and very generous. They hold the Infield, Moor House (hand mill, about 70 rye, 100 hay), the cattle and Stannick Moor. Richard gave us 15 rye when he came back from Wynford. Avice cared for Lucy through the birth. Repay their kindness with timber, fence work and reaping. Don't press them for anything. PLAN: Each day, first make sure Helewise gets her care unit. Then fell and gather firewood at the Gill with the tool when it is free. Keep a food offer open. Reap the Infield the moment it is ripe. Get salt when a road opens. Later, find partners for the family and try to bring in my daughters' lines (Rohese and Hawise, in Ashby).",
+    "places": [
+     "Ellen is past bearing; Fenwick numbers come through Roger and Lucy, daughters in Ashby, and anyone we take into the house.",
+     "Stannick's wild food runs out fast; Fenwick food must come from grain shares, milk, cheese and trading our timber.",
+     "Hoeing an already-sown field gives nothing; spend those units felling with a tool or foraging instead.",
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.2458294
+   },
+   {
+    "open": 4,
+    "stretch": [
+     17,
+     19
+    ],
+    "budget_words": 590,
+    "written": 647,
+    "memory": "I am Jory, head of the Fenwicks of Stannick. I am a master at foraging, reaping, hoeing and building beds, and skilled at felling. Avice taught me cheese-making and milking, so I am capable at both. Roger is capable at cheese too. Ellen is my partner and is past bearing. Roger is my named HEIR, and Lucy is his partner. CHILD: Helewise, Lucy's daughter, was born on winter day 2. She grows up around winter day 14. Until then she needs 1 unit of care EVERY day. To give it, write work care at \"Helewise\". Writing at \"the Yard\" failed once and she went a day without care. Each morning, name ONE person for her care (Ellen, then Roger, then Lucy) and check the next morning that it was done. Lucy and Helewise sleep and eat at Moor House under Avice's grant, which runs through winter day 10. HOLDINGS (end of winter day 6): Fenwick House is stone, with 6 beds, a hearth and bins. Its store holds about 54 rye (Ellen put in 40 rye and 3.5 straw, and Richard paid 14 rye for the quarter shares), about 19 firewood, about 17 timber, 5 dung, 5.8 stone and 0.3 hay. FOOD IS SECURE for now, at about 4-5 eaters a night. The hearth burns 2 timber on cold nights (Ellen's rule), and we keep the firewood for later. Fenwick Cellar (wattle) now has bins. Ellen is building Cellar #2 and the new house. Cheese needs a cellar and salt (0.2 a batch). Nobody has brought salt or a copper tool from Wynford yet. I carry 2 coin for salt, plus about 0.9 timber, 2.7 firewood and 0.1 wild food in hand (put them in the store). TOOL: There is one crude tool, shared by Ellen, Roger, Richard and me. Whoever has it puts it back in the Fenwick store at nightfall. Say clearly each morning who has it. YIELDS: Felling at the Gill gives about 3.8 timber with the tool, but only 0.9 bare-handed (barely worth it). A firewood turn gives about 2.7. One bare-handed reap gives me about 6.2 grain. The Gill and Stannick Moor have almost no wild food. The Infield rye is reaped. Its soil is pale and thin from cropping rye again and again, so it needs manure or a change of crop. OFFERS AND AGREEMENTS: These offers of mine are open: - O1659: 2 timber for 2 rye, to anyone. - O1917: 2 timber for 1 cheese, to anyone. Richard will trade a cheese once the cellar is running. A21: I still owe Denise Rook (Holloway) 1 meat from last winter. A379 with the Moors is cleared. Earlier milk, hoe and tool deals are closed. A Moor cow in milk is lent to us, and her calves stay the Moors'. The Infield fence is FINISHED (100%) for the Moors. The cattle were last on Stannick Moor, with Richard herding them, and he keeps asking for any sign of them. REAP SHARES: Richard pays a quarter of what we cut. He forgot once, then paid. If we reap again, check the payout that same night. THE MOORS (Avice and Richard) are fair and very generous. They hold the Infield, Moor House (with a hand mill), the cattle and Stannick Moor. Avice cared for Lucy and Helewise. I offered to hoe and sow the Infield with winter rye for them on quarter-share terms. Repay them with timber, work and reaping, and don't press them. PLAN: Make sure Helewise gets her care every day. Use the tool for Gill timber when it is free, and don't waste units felling bare-handed. Get cheese going once the cellar and salt are ready. Get salt and a copper tool at Wynford when the roads open (market there every 8th day). Then find partners for the family and bring in my daughters' lines (Rohese and Hawise, in Ashby).",
+    "places": [
+     "Ellen is past bearing; Fenwick numbers come through Roger and Lucy, daughters in Ashby, and anyone we take into the house.",
+     "Stannick's wild food runs out fast; Fenwick food must come from grain shares, milk, cheese and trading our timber.",
+     "Hoeing an already-sown field gives nothing; spend those units felling with a tool or foraging instead.",
+     "A baby needs one care unit daily: write work care at the child's own name, name one carer each morning, check it took."
+    ],
+    "events": {
+     "forget": [],
+     "keep": [
+      "A baby needs one care unit daily: write work care at the child's own name, name one carer each morning, check it took."
+     ],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.24753340000000001
+   },
+   {
+    "open": 4,
+    "stretch": [
+     20,
+     22
+    ],
+    "budget_words": 600,
+    "written": 700,
+    "memory": "I am Jory, head of the Fenwicks of Stannick. I am a master at foraging, reaping, hoeing and building beds, and skilled at felling. Avice taught me cheese-making and milking, so I am capable at both, and Roger is capable at cheese too. Ellen is my partner and is past bearing. Roger is my named HEIR, and Lucy is his partner. CHILD: Helewise is Lucy's daughter, born on winter day 2. She grows up around spring day 6 and needs 1 care unit EVERY day until then. Writing {\"do\":\"work\",\"what\":\"care\",\"with\":\"Helewise\"} WORKED. Each morning, name ONE carer clearly. Ellen often takes it, so check what she says before I drop it. Lucy may be near another birth (she said \"d9/10\"). Avice is away, so the family must attend her. HOLDINGS (spring day 1): Fenwick House is stone, with 6 beds, a hearth and bins. Its store holds about 46 rye (about 32 meals at 5 eaters a night), about 9 firewood, 5.8 timber, 1.5 straw, 5.8 stone, 5 dung and 0.3 hay. Ellen quarried about 6 more stone today. In spring the hearth needs only 1 heat a night (2 firewood); a cold night takes 4. The Fenwicks' new house is wattle, for 4, with 1 bed and bins, and has no hearth yet. Fenwick Cellar is wattle with bins, is empty, and TOOK DAMAGE last night, so it needs repairing with timber. Two more half-built shells stand on the Yard: Cellar #2 and new house #2. Nobody knows how to continue a specific half-built one, because \"build small room\" started a new building instead. Avice asks us to finish ONE shell this spring, because it blocks her stone cellar. I have started clearing the Brakes into a Fenwick field; about 20 units of work are left. TOOL: One crude tool. Richard said it is ours while the Moors are away, but Avice wanted it kept in the Moor House store, so ask before taking it. Say each morning who has it, and put it back in the store at dusk. Avice will have a copper tool by spring day 5. YIELDS: Felling at the Gill gives about 3.8 timber with the tool, but only 0.9 bare-handed (not worth it). A firewood turn gives about 2.7. A bare-handed reap gives me about 6.2 grain. The Gill and Stannick Moor are picked bare of wild food, and it comes back slowly till spring. A bed takes 2 timber and 2 straw (1 unit); bins take 3 timber (2 units). THE MOORS (Avice and Richard) are fair and very generous. They hold the Infield, Moor House (with a hand mill), the cattle and Stannick Moor. They left for Holloway on the night of spring day 1 and will be back around spring day 5-6. MY DUTY: if the cattle come home, drive them into the Infield and SHUT THE GATE. I mended the fence on spring day 1, but check it for gaps. The Infield lies FALLOW this spring (its soil is thin from rye after rye), unless bean seed comes from Wynford. Rye is square with the Moors, and the quarter shares were paid. A Moor cow in milk is lent to us, and her calves stay the Moors'. Repay the Moors with timber, work and reaping, and don't press them. OFFERS AND DEBTS: O1659 (2 timber for 2 rye) and O1917 (2 timber for 1 cheese) are open. Richard will trade a cheese once the cellar runs. A21: I still owe Denise Rook (Holloway) 1 meat; the Moors are in Holloway now. NOTES: I already have 8 notes.",
+    "places": [
+     "Ellen is past bearing; Fenwick numbers come through Roger and Lucy, daughters in Ashby, and anyone we take into the house.",
+     "Stannick's wild food runs out fast; Fenwick food must come from grain shares, milk, cheese and trading our timber.",
+     "Hoeing an already-sown field gives nothing; spend those units felling with a tool or foraging instead.",
+     "A baby needs one care unit daily: write work care with the child's name, name one carer each morning, check it took."
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [
+      [
+       "A baby needs one care unit daily: write work care at the child's own name, name one carer each morning, check it took.",
+       "A baby needs one care unit daily: write work care with the child's name, name one carer each morning, check it took."
+      ]
+     ],
+     "refused": []
+    },
+    "cost": 0.2645694
+   }
+  ]
+ },
+ {
+  "agent": "Jory",
+  "arm": "later",
+  "model": "claude-opus-5-5",
+  "places": 4,
+  "grow": 2,
+  "log": [
+   {
+    "open": 1,
+    "stretch": [
+     0,
+     1
+    ],
+    "budget_words": 550,
+    "written": 573,
+    "memory": "I am Jory, head of the Fenwicks at Stannick. My wife Ellen; son Roger, partnered with Lucy. Daughters Rohese and Hawise married into Ashby, two days' walk away. Our line's founders, Jory and Ellen Fenwick, built the first Fenwick house here. Fenwick aim: be the largest family in the country by numbers. Ellen's bearing years are behind her (a try was refused, \"must both be grown adults\"; she said it plain, no sadness). So the Fenwick numbers come through Roger and Lucy (they try for a child most days), through the daughters in Ashby, and through anyone we welcome into the house. Keep an eye out for kin or newcomers to admit, and for partners for grandchildren. Keep every child fed and warm. Last winter was hard: the frost came early and the stores ran out. Denise (Rook House, Holloway) lent me 1 meat then. I still owe it (A21, in arrears). Pay it when I can. Summer, end of day 4: Fenwick House store had 18 firewood, 8.3 timber, about 19 grain and 2.7 wild food (roughly 14 meals; four of us eat about 4 a night). I still CARRY about 9.2 timber, 0.1 wild food, 2 coin and a crude tool. PUT THE TIMBER IN THE STORE. A hearth needs about 16 timber (or 4x as much firewood) to get through winter. I promised Ellen three days of felling at the Gill; day 1 is done. One fell (2 units with the crude tool) gives about 3 timber. The Gill is picked bare of forage. Stannick Moor had plenty of wild food on day 3 but very little on day 4. Lucy takes firewood at the Gill and the Brakes. Reap deal: Richard Moor holds the Infield rye. Avice reckons it's ripe right at summer's end (around summer day 8). Richard wants me at the Infield at first light when he calls. My pay is a quarter of what I reap, in grain from the Moor store. I'm a master reaper, so be fed and rested. Roger and Lucy may reap too. Roger has been cutting hay for Richard. Neighbours: the Moors (Avice, Richard) share the Yard. They know cheese, milking and quarrying, and may build a cellar for cheese; our timber could help with that. Learning milking or cheese from Avice would give us food. Other folk I know: the Cotters and Wynns at Wynford, the Ashes and Rooks at Holloway, the Reeds at Westmere. My crafts: master at building beds, foraging, hoeing and reaping. I've seen charcoal, cheese, ditching, handcarts, milking, ploughing, quarrying and seed selection done but can't do them myself. What I know of the world: - Market day at Wynford is every eighth day, on the Green. - The Wynns grind anyone's grain at their Mill and keep a share. - At harvest the farms take on reapers and pay them in grain. - Barley sown after mid-autumn won't ripen; rye stands the winter. - Whoever clears new ground and sows it holds it, and so do their children. - Travellers carry bread or dried meat, because grain is poor eating without a fire. - There's an old pass over the Tor to high grazing, closed by snow in winter. - The sheep track east from Stannick crosses scree with green-stained stones (maybe copper). - Roads: High Tor 1 day; Wynford 2 days (cart track); Holloway 2 days via High Tor; Westmere 3; the Weald 3.",
+    "places": [
+     "Fenwicks aim to be the largest family by numbers: partner young, try for children, keep every child fed and warm.",
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [
+      "Fenwicks aim to be the largest family by numbers: partner young, try for children, keep every child fed and warm."
+     ],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.119252
+   },
+   {
+    "open": 1,
+    "stretch": [
+     2,
+     4
+    ],
+    "budget_words": 560,
+    "written": 689,
+    "memory": "I am Jory, head of the Fenwicks at Stannick. My wife is Ellen. My son Roger is partnered with Lucy. My daughters Rohese and Hawise married into Ashby, two days' walk away. Our line's founders, Jory and Ellen Fenwick, built the first Fenwick house here. Fenwick aim: be the largest family in the country by numbers. Ellen's bearing years are behind her; she told me plain, with no sadness. So our numbers must come through Roger and Lucy (they try for a child most days), through the daughters in Ashby, and through anyone we welcome into the house. Watch for kin or newcomers to admit, and for partners for grandchildren. Keep every child fed and warm. Last winter was hard: the frost came early and the stores ran out. Denise (Rook House, Holloway) lent me 1 meat then. I still owe it (A21, in arrears). Pay it when I can. End of summer day 7, Fenwick House store: about 24.6 timber and 37 firewood, which is well over the 16 timber a hearth needs for winter. My three-day timber pledge to Ellen is DONE. Food is thin: about 9.6 grain and 12 hay, roughly 6\u20137 meals, and four of us eat about 4 a night. I carry 2 coin and 5 dung. I have NO TOOL: my crude tool wore out felling at the Gill. Lucy has no tool either; her quarrying failed. A crude tool needs stone, and quarrying needs a tool, so I must borrow one from the Moors or buy one. Ellen built Fenwick Cellar in the Yard (wattle, empty, no fittings) for cheese. Avice has been teaching her cheesemaking. A second cellar stands half built. Ellen's idea: trade hay or timber to the Moors for a cow in milk. Reap: Avice called the Infield rye ripe, with all hands at the Infield at dawn on summer day 8 (Richard said it might be day 8 or 9). My pay is a quarter of what I reap, in grain from the Moor store. I'm a master reaper (bare hands x0.6, a tool helps). Roger and Lucy reap too. I also owe the Moors 1 day of work (A379). I put weeding toward it, and Richard will call the rest at harvest or just after. The land, as of day 7: the Gill and Stannick Moor are picked bare of forage. The Moor is grazed too short for hay. The Brakes have no dead wood left. The Gill still has plenty of standing timber. One fell takes 2 units with a tool and gives about 3.3 timber. Lessons: - I can't speak in Moor House (no access); say things to \"everyone\" instead. - Write offers as goods/work only (e.g. \"2 grain\", \"work 1 days\"). \"Lend\" can't be read. - Don't plan to move goods I haven't gathered. Neighbours: the Moors (Avice, Richard) share the Yard. They know cheese, milking and quarrying, and have a hand mill. Other folk I know: the Cotters and Wynns at Wynford, the Ashes and Rooks at Holloway, the Reeds at Westmere. My crafts: master at building beds, foraging, hoeing and reaping; competent at felling. I've seen charcoal, cheese, ditching, handcarts, milking, ploughing, quarrying and seed selection done, but I can't do them myself. What I know of the world: - Market day at Wynford is every eighth day, on the Green.",
+    "places": [
+     "Fenwicks aim to be the largest family by numbers: partner young, try for children, keep every child fed and warm.",
+     null,
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.199736
+   },
+   {
+    "open": 2,
+    "stretch": [
+     5,
+     7
+    ],
+    "budget_words": 570,
+    "written": 686,
+    "memory": "I am Jory, head of the Fenwicks at Stannick. My wife is Ellen. My son Roger, whom I named heir, is partnered with Lucy. My daughters Rohese and Hawise married into Ashby, two days' walk away. Our line's founders, Jory and Ellen Fenwick, built the first Fenwick house here. Fenwick aim: be the largest family in the country by numbers. Ellen's bearing years are behind her, so our numbers must come through Roger and Lucy (they try for a child most days), through the daughters in Ashby, and through anyone we welcome into the house. Watch for kin or newcomers to admit, and for partners for grandchildren. Keep every child fed and warm. Debts: I owe Denise (Rook House, Holloway) 1 meat from last winter (A21, in arrears). Pay it when I can. A379 (a day of work for the Moors) is CLEARED: Richard released it after the harvest. Harvest (summer day 8): I reaped about 23 rye bare-handed into the Moor store. Richard paid my quarter-share, 6 rye, and rounded it up. The Moors pay fairly and generously. Milk deals with Richard, from autumn day 2: A711 (I gave 4 timber) and A722 (I gave 8 hay). Each pays 1 milk a day for 6 days, so 2 milk a day reach Fenwick until about autumn day 7. Avice milks and sets our share aside. CHEESE: Avice taught me on autumn day 2, so I am now CAPABLE at making cheese. Roger had a lesson too, and Lucy was offered one. Ellen is learning as well. Fenwick Cellar (wattle) is where the cheese gets made, and Ellen was finishing bins there. A second cellar stands half built. Cheese is 2.5 meals a unit: turning milk into cheese is our road to winter food. Still to talk over with the Moors: a cow in milk of our own, for hay or timber. Richard went to Wynford around autumn day 3. Avice stays and watches a cow that is heavy in calf. Fenwick House store, end of autumn day 2: about 5.3 rye, 42 firewood, 23 timber, 4.3 hay, 5 dung. Fuel is well past the 16 timber a hearth needs for winter. FOOD IS THE DANGER: four of us eat 4 a night, and the store was near nothing. Ellen offered 3 timber for 3 rye and 2 timber for 1 bread. Our spare timber is what we trade with. The land: the Gill and Stannick Moor are picked BARE of forage (don't plan foraging there). The Moor is grazed too short for hay, and hay can only be cut in summer anyway. The Brakes have no dead wood. The Gill still has standing timber and some dead wood (about 2.7 firewood a unit). Bare-handed felling gives only about 0.8 timber. The Moors sowed rye in the Infield in autumn, which I dunged first, and the soil was thin from hard cropping. The next reap is about autumn day 12. I have NO TOOL, and Lucy has none. A crude tool needs stone, and quarrying needs a tool. I should borrow a Moor tool for a unit, quarry, and make one. Richard wants his tool back the same day. Ideas: hunt for meat (to repay Denise too), trade timber for food, and go to Wynford market (every eighth day, on the Green; 2 days off) with timber or coin. I carry 2 coin.",
+    "places": [
+     "Fenwicks aim to be the largest family by numbers: partner young, try for children, keep every child fed and warm.",
+     "Turn milk into cheese for winter: it keeps, and is 2.5 meals a unit.",
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [
+      "Turn milk into cheese for winter: it keeps, and is 2.5 meals a unit."
+     ],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.238124
+   },
+   {
+    "open": 2,
+    "stretch": [
+     8,
+     10
+    ],
+    "budget_words": 580,
+    "written": 646,
+    "memory": "I am Jory, head of the Fenwicks at Stannick. Ellen is my wife. My son Roger, my named heir, is partnered with Lucy. Our daughters Rohese and Hawise married into Ashby, two days' walk away. Our line's founders, Jory and Ellen Fenwick, built the first Fenwick house here. Fenwick aim: be the largest family in the country by numbers. Ellen is past bearing, so our numbers must come through Roger and Lucy (push them to try for a child every night), through the Ashby daughters, and through anyone we take into the house. Keep watch for newcomers to admit and for partners for grandchildren. DEBTS: I owe Denise (Rook House, Holloway) 1 meat from last winter (A21, in arrears). Pay it when I can, maybe by hunting. MOORS (Richard and Avice, Moor House): they deal fairly and generously. Harvest, summer day 8: I reaped about 23 rye for them, they paid a quarter-share of 6, and A379 is cleared. Milk deals A711 (4 timber) and A722 (8 hay) each pay 1 milk a day for 6 days. About 3 of 6 were paid by autumn day 5, and Avice leaves 2 milk at Fenwick House each morning. COW LOAN (autumn day 3-4): I paid 6 timber and hay into Moor House, and Avice called it fully square, so no hay is owed. A Moor milk cow runs with the Moor herd on the moor for our use. She stays in the Moors' name, all her calves are theirs, and she goes back when Richard calls her. We milk her ourselves and put the milk in Fenwick House. Richard went to Wynford to look for SALT and is due back the morning of autumn day 13. A Moor calf was born on autumn day 3. CRAFTS: Avice taught me cheese (autumn day 2) and MILKING (autumn day 5), so I am capable at both. Roger has had a cheese lesson. Ellen learned cheese, and is now capable at QUARRYING, but she needs a tool. Cheese needs 0.2 salt a batch, which we don't have, and a proper cellar (the wattle one doesn't count; stone may be needed). Cheese is 2.5 meals a unit and keeps, so milk into cheese is our winter food. I also heard Richard speak of mining copper ore. The sheep track east has green-stained scree, which may mean copper. TOOLS: none of us has a tool. A crude tool needs 0.5 stone, and you can't quarry bare-handed. Borrow a Moor tool for a day so Ellen can quarry, then I make crude tools. Bare-handed hoeing does almost nothing (0 plots on autumn day 5), and bare-handed felling gives about 0.8 timber a unit. BUILDINGS: Fenwick House (stone, 6 beds, hearth, bins). Fenwick Cellar (wattle) was damaged on the night of autumn day 4, and Ellen or Roger repaired it. A second cellar stands half built. STORE, autumn day 5: about 5.8 rye, 39 firewood, about 15.7 timber, 0.3 hay, 5 dung, plus milk. FOOD IS THE DANGER: four of us eat 4 a night, so there are only about 1-2 nights of food. Fuel is fine (16 timber a hearth for winter, and the firewood adds plenty). Offer O1062 is open: 2 timber for 2 rye. Timber is what we trade. LAND: the Gill and Stannick Moor are picked BARE of forage. The moor is grazed bare too. The Brakes have no dead wood. The Gill still has standing timber and some dead wood. The Moors' Infield rye was sown early autumn on tired ground and should be ripe to reap about autumn day 12-14. Reapers get paid in grain, so be there. IDEAS FOR FOOD: hunt; trade timber for rye or bread; Wynford market every eighth day on the Green (2 days away, cart track), with timber or my 2 coin; work for the Moors for rye; milk the loan cow daily.",
+    "places": [
+     "Fenwicks aim to be the largest family by numbers: partner young, try for children, keep every child fed and warm.",
+     "Turn milk into cheese for winter: it keeps, and is 2.5 meals a unit.",
+     null,
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.24358
+   },
+   {
+    "open": 3,
+    "stretch": [
+     11,
+     13
+    ],
+    "budget_words": 580,
+    "written": 591,
+    "memory": "I am Jory, head of the Fenwicks at Stannick. Ellen is my wife. My son Roger is my named heir and is partnered with Lucy. Lucy is HEAVY WITH CHILD and her time is near. Avice gave her Moor House to use (shelter and food) for 5 days from autumn day 7, and will attend the birth. Our daughters Rohese and Hawise married into Ashby, two days away. Fenwick aim: be the largest family by numbers. Ellen is past bearing, so our numbers come through Roger and Lucy (push them to try every night), the Ashby daughters, and anyone we admit. Watch for newcomers to admit and for partners for the grandchildren. DEBTS: I owe Denise (Rook House, Holloway) 1 meat from last winter (A21, in arrears). Pay it when I can, by hunting. O1063: I owe the Moors 2 days of hoeing. My hoeing on autumn days 7-8 turned 0 plots, even once I had a tool in hand. Ask Avice whether she counts it done, or hoe more units at once. MOORS (Richard and Avice, Moor House): very fair and generous, and our best friends. They have fed us through the autumn: 8 rye given outright, my timber-for-rye offers taken, and a crude tool. On autumn day 7 Avice confirmed the COW LOAN IS SQUARE and no hay is owed. The loan cow stays at Stannick even when their herd goes to High Tor. I milk her each morning (capable, taught by Avice) and the milk goes into Fenwick House; I got 4.5 milk the first day. The cow and her calves stay the Moors'. She goes back when Richard calls her. The milk deals A711 and A722 are done, all 6 of 6 paid. Richard came back from Wynford on autumn day 8. Ask him about the SALT he went for. CRAFTS: I am capable at cheese and milking. Ellen is capable at quarrying and has her own crude tool. Roger has had a cheese lesson. Cheese needs 0.2 salt a batch and a proper cellar (stone, not wattle). Milk into cheese is our winter food. Richard knows copper mining. The green-stained scree on the sheep track east may mean copper. TOOLS: I carry a crude tool now (Avice's; A1205 settled). With it, 2 units of felling at the Gill gave 3.7 timber, against about 0.9 bare-handed. It also lets me cut young growth for firewood. Tools wear out, so get stone from Ellen to make more (a crude tool needs 0.5 stone). BUILDINGS: Fenwick House (stone, 6 beds, hearth, bins), sound. Fenwick Cellar (wattle) is sound. A second cellar stands half built. The Moors are putting up a wattle fence round the Infield. STORE, end of autumn: about 8 rye (5.6 meals), about 20 timber, 38.6 firewood, 0.3 hay, 5 dung, plus milk. That is ~4 eaters, so only 1-2 days of rye, but the daily milk helps. Fuel meets the winter target (16 timber a hearth, plus firewood). Winter starts now: 5 work units a day, and cold nights take 4 heat. LAND: the Gill and Stannick Moor are picked bare of forage. The Gill has plenty of standing timber. The Moors' Infield rye should be ripe about 5 days into winter. I'm a master reaper, so be there: reapers are paid in grain, a quarter-share last time. FOOD IDEAS: milk daily; reap the Moors' rye; trade timber (our main trade good) for rye or bread; Wynford market every eighth day on the Green (2 days away, cart track), with timber or my 2 coin; hunt.",
+    "places": [
+     "Fenwicks aim to be the largest family by numbers: partner young, try for children, keep every child fed and warm.",
+     "Turn milk into cheese for winter: it keeps, and is 2.5 meals a unit.",
+     "Never work bare-handed when a tool can be had: a crude tool quadruples felling.",
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [
+      "Never work bare-handed when a tool can be had: a crude tool quadruples felling."
+     ],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.24426799999999999
+   },
+   {
+    "open": 3,
+    "stretch": [
+     14,
+     16
+    ],
+    "budget_words": 590,
+    "written": 618,
+    "memory": "I am Jory, head of the Fenwicks at Stannick. Ellen is my wife (past bearing). Son Roger is my named heir, partnered with Lucy. GRANDDAUGHTER HELEWISE born winter day 2 to Lucy. She is grown in about 11 days from winter day 3. A baby needs 1 unit of care a day (work care) or may not live. Lucy and Helewise were staying at Moor House under Avice's grant (food included), which ends about winter day 4. Lucy will ask Avice to renew it; otherwise they eat from the Fenwick store. Daughters Rohese and Hawise married into Ashby, two days away. Fenwick aim: be the largest family by numbers. Push Roger and Lucy to keep trying. Find partners for grandchildren. Admit newcomers. DEBTS: I owe Denise (Rook House, Holloway) 1 meat from last winter (A21, in arrears). Pay it by hunting when I can. All Moor agreements are closed: milk A711/A722, hoeing O1063, tool A1205, cow loan (square). MOORS (Richard and Avice, Moor House): fair, generous, our best friends. They have fed us often with rye, and they take my 2-timber-for-2-rye offers (Avice took one winter day 2). They have about 70 rye, 100 hay and good firewood. No salt and no copper tool came from Wynford. Salt is still the first want when a road opens (we can offer 2 coin and timber). The Ashes at Holloway may deal in salt. Their cattle strayed in the gale and were found on Stannick Moor. Richard herds and milks them there until the Infield fence is closed and the rye reaped. I am helping with the wattle fence round the Infield: about 77% done on winter day 3. INFIELD RYE: ripe about winter day 5-6. I'm a master reaper, so be there at first light. Reapers are paid in grain, a quarter-share last time. That is our food bridge. CRAFTS: I am capable at cheese and milking (taught by Avice). Ellen is capable at quarrying. Roger has had a cheese lesson. Cheese needs 0.2 salt a batch and a stone cellar. Richard knows copper mining. The green-stained scree on the sheep track east may mean copper. I am now skilled at felling. TOOLS: There is ONE crude tool, kept in the Fenwick House store and shared between me, Roger and Ellen. Take it to hands, use it, put it back. With the tool, 2 units of felling at the Gill gives about 3.8 timber, against about 0.9 bare-handed. Firewood gives about 2.8 a unit without a tool. A crude tool needs 0.5 stone to make. Ellen has stone, so make a second tool when we can. BUILDINGS: Fenwick House (stone, 6 beds, hearth, bins) is sound. Fenwick Cellar (wattle, 4 spaces, no fittings) is sound. A second cellar stands half built. The Fenwicks' new house is half built; Ellen is working on it. Ellen has cut 3.8 stone, now in the Fenwick store, for a stone cellar. Cheese needs stone walls and bins. STORE (end of winter day 3): about 10 rye, a little wild food, about 25 timber, about 35 firewood, 0.3 hay, 5 dung, 1 crude tool. That is about 7 meals for 4-5 eaters: very thin until the reap. Hearth rule (Ellen's): on cold nights burn 2 timber (4 heat), not firewood; save firewood for weeks ahead. The Gill and Stannick Moor are picked bare of forage. The Gill has plentiful timber, and the Brakes has firewood. FOOD IDEAS: reap the Infield; timber-for-rye offers (2 for 2); Wynford market every eighth day (2 days away, cart track); hunt; milk into cheese once we have salt and a stone cellar. Winter: 5 work units a day, cold nights. Winter has 8 days; day 3 is now done.",
+    "places": [
+     "Fenwicks aim to be the largest family by numbers: partner young, try for children, keep every child fed and warm.",
+     "Turn milk into cheese for winter: it keeps, and is 2.5 meals a unit.",
+     "Never work bare-handed when a tool can be had: a crude tool quadruples felling.",
+     null
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.244832
+   },
+   {
+    "open": 4,
+    "stretch": [
+     17,
+     19
+    ],
+    "budget_words": 590,
+    "written": 645,
+    "memory": "I am Jory, head of the Fenwicks at Stannick. Ellen is my wife (past bearing). Son Roger is my named heir, partnered with Lucy. GRANDDAUGHTER HELEWISE was born winter day 2 to Lucy. She will be grown about winter day 14 (8 days from winter day 6). Until then she needs 1 unit of care EVERY day or she may not live. Name each morning who does it: Ellen, Roger or Lucy. HOW TO CARE: work {what: care, at: \"Helewise\"}. The child's name goes in \"at\". \"at: the Yard\" was refused, and leaving \"at\" out did nothing, so she went uncared for on winter day 5. Lucy and Helewise sleep and eat at Moor House under Avice's grant, which runs to winter day 10. Daughters Rohese and Hawise married into Ashby, two days away. FENWICK AIM: be the largest family by numbers. Push Roger and Lucy to keep trying for children. Find partners for the grandchildren. Admit newcomers. DEBTS: I owe Denise (Rook House, Holloway) 1 meat from last winter (A21, in arrears). I will pay it by hunting when I can. MOORS (Richard and Avice, Moor House): fair and generous, our best friends. A379 is cleared. All other Moor agreements are closed. Avice takes my 2-timber-for-2-rye offers. The INFIELD RYE was reaped on winter days 4-5. A master reaper gets 6.2 rye a unit bare-handed. The quarter shares were not paid on their own: I had to ask, and then Richard gave 14 rye. LESSON: chase reap pay the same night. Ellen also brought 40 rye and 3.5 straw into the Fenwick store, so food is secure for now, about 30+ meals. The Infield wattle fence is finished (100%), so the Moor cattle can come back from Stannick Moor. The Infield soil is pale and tired from cropping rye on rye. I offered Richard to hoe and sow it for a quarter share; I'm a master at the hoe. Richard will trade me 1 cheese for 2 timber once a cellar runs (my offer O1917). O1659 is also open: 2 timber for 2 rye to anyone. SALT is still the first want when a road opens. We can offer 2 coin and timber. The Ashes at Holloway may deal in salt. Wynford market is every eighth day, 2 days away by cart track. The green-stained scree on the sheep track east may mean copper. Richard knows copper mining. CRAFTS: I am capable at cheese and milking (taught by Avice). I am skilled at felling, and a master at reaping, hoeing, foraging and building beds. Ellen is capable at quarrying. Roger has had a cheese lesson. Cheese needs 0.2 salt a batch and a stone cellar. TOOLS: There is ONE crude tool, shared by me, Roger, Ellen and sometimes Richard. It is often in someone's hands and not in the store, so ask before planning on it. With the tool, 2 units of felling at the Gill gives about 3.8 timber; bare-handed it gives 0.9. Firewood is about 2.7 a unit bare-handed. A crude tool needs 0.5 stone. Make a second tool: the store has 5.8 stone. BUILDINGS: Fenwick House (stone, 6 beds, hearth, bins) is sound. Fenwick Cellar (wattle) now has bins. Ellen is building cellar #2. The new house is half built. STORE (winter day 6): about 55 rye, 3.5 straw, about 16 timber, about 20 firewood, 5.8 stone, 5 dung, 0.3 hay. Hearth rule: on cold nights burn 2 timber (4 heat). The Gill and the Moor are picked almost bare of forage (0.1 a unit). The Gill still has timber. The Brakes has firewood. NEXT: keep fuel coming for the rest of winter (2 days left after day 6, then spring). In spring, hoe and sow with the Moors, or clear our own ground and sow it; whoever clears and sows holds the land. Hunt for Denise's meat. Go for salt.",
+    "places": [
+     "Fenwicks aim to be the largest family by numbers: partner young, try for children, keep every child fed and warm.",
+     "Turn milk into cheese for winter: it keeps, and is 2.5 meals a unit.",
+     "Never work bare-handed when a tool can be had: a crude tool quadruples felling.",
+     "To care for a baby: work care with at set to the child's name; check it was done next morning."
+    ],
+    "events": {
+     "forget": [],
+     "keep": [
+      "To care for a baby: work care with at set to the child's name; check it was done next morning."
+     ],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.250268
+   },
+   {
+    "open": 4,
+    "stretch": [
+     20,
+     22
+    ],
+    "budget_words": 600,
+    "written": 721,
+    "memory": "I am Jory, head of the Fenwicks at Stannick. Ellen is my wife and partner (past bearing). Son Roger is my named heir, partnered with Lucy. Daughters Rohese and Hawise married into Ashby, two days away. HELEWISE (Lucy's daughter, born winter day 2) grows up about spring day 6. Until then she needs 1 unit of care EVERY day. Each morning, name clearly who does it (me, Ellen or Roger). The way that worked: work {what: care, with: \"Helewise\"}; \"at: Helewise\" may also work. Check next morning that it was done. Lucy spoke of \"day 9 of 10, no sign yet\", so she may be close to another birth. Plan who cares for her and the new baby, because Avice is away. FENWICK AIM: be the largest family by numbers. Roger and Lucy keep trying for children. Find partners for the grandchildren. Admit newcomers. MOORS (Richard and Avice, Moor House): fair and generous, our best friends. They left for Holloway on the night of spring day 1 and will be back about spring day 5 or 6. MY PROMISE: if the cattle come home, drive them into the Infield and shut the gate. Watch Stannick Moor. The Infield fence had gaps on spring day 1. Richard, Avice and I mended it, so check it is whole. Richard rested the Infield (fallow) this spring because the soil is tired. He may sow beans if bean seed comes from Wynford. The rye is square between us. Avice will have a copper tool by spring day 5. Her ask: finish ONE of the half-built shells on the Yard so her stone cellar is no longer blocked. Richard will trade me 1 cheese for 2 timber once a cellar runs (offer O1917). O1659 is also open: 2 timber for 2 rye. LESSON: get any reaping pay the same night. DEBT: I owe Denise (Rook House, Holloway) 1 meat (A21, in arrears). I will pay it by hunting. TOOLS: There is one crude tool. Richard said it is ours to use while they are away. Ellen had it on spring day 1 for quarrying and puts it in the Fenwick store at dusk. Ask before planning on it. With the tool, 2 units of felling gives about 3.8 timber; bare-handed it gives 0.9. Firewood is about 2.7 a unit by hand. Make a second crude tool (0.5 stone; we have stone). BUILDINGS: Fenwick House (stone, 6 beds, hearth, bins) is sound. Fenwick Cellar (wattle, bins) TOOK DAMAGE on the night of spring day 1, so repair it with timber. The new house (wattle, for 4) is finished and has 1 bed and bins. It needs a hearth, which takes a trade. Still half built: cellar #2 and new house #2. We don't know how to carry on a particular half-built building: \"build small room at the Yard\" started a new one instead. Ask Avice. My choice for Avice's ask is new house #2. LAND: I started clearing at the Brakes for a Fenwick field, about 20 units of work left. By custom, whoever clears and sows the ground holds it. Clear it and then sow rye or beans (rye stands the winter; barley sown after mid-autumn won't ripen). STORE (spring day 1): about 46 rye (about 32 meals; 5 eat about 5 a night), about 9 firewood, 5.8 timber, 1.5 straw, about 5.8 stone (plus Ellen's quarrying), 5 dung, 0.3 hay. In spring the hearth needs only 1 heat a night; on cold nights it takes 2 timber. Forage is picked bare at the Gill and on the Moor, and will come back slowly.",
+    "places": [
+     "Fenwicks aim to be the largest family by numbers: partner young, try for children, keep every child fed and warm.",
+     "Turn milk into cheese for winter: it keeps, and is 2.5 meals a unit.",
+     "Never work bare-handed when a tool can be had: a crude tool quadruples felling.",
+     "To care for a baby: work care with at set to the child's name; check it was done next morning."
+    ],
+    "events": {
+     "forget": [],
+     "keep": [],
+     "replace": [],
+     "refused": []
+    },
+    "cost": 0.272116
+   }
+  ]
+ }
+]

@@ -89,6 +89,10 @@ spec/information/memory.md (D4-61's rule); cybertron2/engine/memory.py, prompt.p
   places opened one a stretch.
 - 1 Nov 2026: Zach: "it shouldn't be so many more at the start, but just be constantly spread across their lifespan": the places
   open evenly across adult life (linear), not on the memory's front-loaded curve.
+- 1 Nov 2026: test finished as far as run (38.39; stopped at Zach's word): with places opening over time, Opus 5.5 fills each new
+  place from the latest stretch and uses replacing to correct lines (Lucy's false belief that she was still with child); the
+  forget-now-add-later rule stops those corrections (1 change in 32 stretches with places open at once). Leaning: **replace at
+  once**. Sonnet 5.5 leaves opened places empty: whether the request should ask outright when a place opens stays open (untested).
 
 ## Sources
 
