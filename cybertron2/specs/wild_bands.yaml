@@ -15,7 +15,7 @@ evening: true
 tags: true
 ages: true
 llm:
-  week_stop: 0.4
+  week_stop: 0.6
 cold_days: []
 incidents: []
 claims: []
@@ -639,87 +639,87 @@ roads:
   - w2
   - 1
   - terrain: woodland
-    way: a track along the river
+    way: an old drove road along the river
 - - w1
   - w4
   - 1
   - terrain: river valley
-    way: a stony path along the river
+    way: a hollow way along the river
 - - w2
   - w3
   - 1
   - terrain: woodland
-    way: a trail along the river
+    way: a ridge path along the river
 - - w2
   - w5
   - 1
   - terrain: river valley
-    way: an old drove road along the river
+    way: a sunken lane along the river
 - - w3
   - w10
   - 1
   - terrain: woodland
-    way: a hollow way along the river
+    way: a deer path up the fell
 - - w3
   - w6
   - 1
   - terrain: river valley
-    way: a ridge path along the river
+    way: a track up the fell
 - - w10
   - w11
   - 1
   - terrain: river valley
-    way: a sunken lane along the river
+    way: a stony path up the fell
 - - w4
   - w5
   - 1
   - terrain: woodland
-    way: a deer path up the fell
+    way: a trail up the fell
 - - w4
   - w7
   - 1
   - terrain: river valley
-    way: a track up the fell
+    way: an old drove road up the fell
 - - w5
   - w6
   - 1
   - terrain: woodland
-    way: a stony path up the fell
+    way: a hollow way up the fell
 - - w5
   - w8
   - 1
   - terrain: river valley
-    way: a trail up the fell
+    way: a ridge path up the fell
 - - w6
   - w11
   - 1
   - terrain: woodland
-    way: an old drove road up the fell
+    way: a sunken lane up the fell
 - - w6
   - w9
   - 1
   - terrain: river valley
-    way: a hollow way up the fell
+    way: a deer path through bracken
 - - w11
   - w12
   - 1
   - terrain: river valley
-    way: a ridge path up the fell
+    way: a track through bracken
 - - w7
   - w8
   - 1
   - terrain: woodland
-    way: a sunken lane up the fell
+    way: a stony path through bracken
 - - w8
   - w9
   - 1
   - terrain: woodland
-    way: a deer path through bracken
+    way: a trail through bracken
 - - w9
   - w12
   - 1
   - terrain: woodland
-    way: a track through bracken
+    way: an old drove road through bracken
 buildings:
   band_camp:
     name: the band's camp

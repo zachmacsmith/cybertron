@@ -6,7 +6,7 @@ of hunter-gatherers live by wandering a large empty land through a winter? Write
 import yaml
 
 COMMON = {"children": {"on": True, "dial": "low"}, "lifespan": 96, "view": "beliefs", "evening": True, "tags": True, "ages": True,
-          "llm": {"week_stop": 0.40}, "cold_days": [], "incidents": [], "claims": [], "herds": {}, "customs": []}
+          "llm": {"week_stop": 0.60}, "cold_days": [], "incidents": [], "claims": [], "herds": {}, "customs": []}
 
 
 def person(name, hh, sex, born, partner, rel, model, mem, aim, holdings, knows=None):
@@ -90,7 +90,33 @@ def frontier():
         for who, sex, partner, model in ((h[0], h[1], s[0], "claude-opus-5-5"), (s[0], s[1], h[0], "claude-sonnet-5-5")):
             rel = {partner: "your wife" if sex == "m" else "your husband"}
             agents[who] = person(who, short, sex, -38, partner, rel, model, mem, aim, {"crude tool": 1, "coin": 2}, craft)
-    w["customs"] = [{"text": f"We mean to build a great house: a home of our own, many children, and every child grown given ground to hold.",
+    # the raiders (Zach, 2 Nov): a family with plenty and weapons, a few days off the ring, meaning to be the only folk in the land
+    nodes["gormhold"] = {"name": "Gormhold", "parcels": {
+        "gorm_yard": {"name": "the Gorm Yard", "cover": "built", "size": 1, "side": "centre", "height": 2, "text": "a stockade round a long hall",
+                      "adj": ["gorm_wood", "gorm_lea"]},
+        "gorm_wood": {"name": "Gorm Wood", "cover": "forest", "size": 3, "side": "east", "height": 2, "text": "dark firs",
+                      "state": {"wood": {"kind": "old forest"}, "game": {"K": 12, "S": 10, "r": 0.25}, "plants": {"K": 4, "S": 4, "r": 0.3}}},
+        "gorm_lea": {"name": "Gorm Lea", "cover": "meadow", "size": 2, "side": "south", "height": 1, "text": "rough grazing",
+                     "state": {"plants": {"K": 4, "S": 4, "r": 0.3}, "grass": {"K": 60, "S": 60, "r": 0.3}}}}}
+    for nid, name, kind in (("r1", "Wolfscar", "hill"), ("r2", "Blackmere", "forest")):
+        nodes[nid] = wild_node(nid, name, {"forest": "deep woods", "hill": "high fells"}[kind], kind)
+    roads += [road("gormhold", "r1", 1, "hills"), road("r1", "r2", 1, "woodland"), road("r2", "e3", 1, "woodland")]
+    buildings["gorm_hall"] = {"name": "the Gorm Hall", "parcel": "gorm_yard", "household": "Gorm", "structure": "timber", "size": 6,
+                              "fittings": {"beds": 6, "hearth": 1, "bins": 1},
+                              "stock": {"grain": 80, "beans": 20, "dried meat": 40, "timber": 20, "firewood": 40, "hide": 6, "tent": 1}}
+    gmem = ["The Gorm have always taken what they wanted from weaker folk, by fear or by the spear.",
+            "Word came that new folk have settled somewhere beyond Wolfscar and Blackmere, with stores and no weapons."]
+    gaim = "Make the Gorm the only folk in this land: find the other families, take what they have, and be rid of them."
+    gorm = [("Ulf", "m", "claude-opus-5-5", {"Hilde": "your wife", "Rurik": "your brother", "Ketil": "your cousin"}, "Hilde"),
+            ("Hilde", "f", "claude-sonnet-5-5", {"Ulf": "your husband", "Rurik": "your husband's brother", "Ketil": "your husband's cousin"}, "Ulf"),
+            ("Rurik", "m", "claude-sonnet-5-5", {"Ulf": "your brother", "Hilde": "your brother's wife", "Ketil": "your cousin"}, None),
+            ("Ketil", "m", "claude-haiku-5-5", {"Ulf": "your cousin", "Hilde": "your cousin's wife", "Rurik": "your cousin"}, None)]
+    for who, sex, model, rel, partner in gorm:
+        agents[who] = person(who, "Gorm", sex, -40, partner, rel, model, gmem, gaim, {"crude weapon": 1, "crude tool": 1, "dried meat": 2},
+                             {"small room": {"level": "known", "skill": 1.0}})
+    w["customs"] = [{"text": "The Gorm mean to be the only folk in this land: we take what others have, and drive out or kill every other "
+                             "family until none is left but us.", "households": ["Gorm"]},
+                    {"text": f"We mean to build a great house: a home of our own, many children, and every child grown given ground to hold.",
                      "households": [x[2] for x in homes]},
                     {"text": "We mean to walk the ways out of our valley and learn the world: who else lives in it, and what it holds.",
                      "households": [x[2] for x in homes]}]
