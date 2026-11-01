@@ -71,6 +71,12 @@ VERB = {
              "doc": "as head, name who heads the household after you; when a head has died, each grown member names the new head"},
     "order": {"args": '{"what": forage | herd | hay | nothing, "at"?: a place here}', "cost": 0, "when": "children",
               "doc": "as head, set your household's children to a small work each day, until you change it"},
+    "meet": {"args": '{"at": a building or a place here, "about"?: what it is for}', "cost": 0, "when": "evening",
+             "doc": "call a meeting for the start of tomorrow, before the day's work, for everyone at this place: whoever comes gives a "
+                    "unit to it; all who come hear what is said there, and witness what is offered"},
+    "come": {"args": '{"to"?: the meeting called for this morning}', "cost": 1, "when": "evening",
+             "doc": "go to the meeting called for this morning: before the day's work you talk there with all who come, and may change "
+                    "your plan"},
     "rest": {"args": "", "cost": 0, "doc": ""},
 }
 VERBS = tuple(VERB)
@@ -81,7 +87,7 @@ FREE = tuple(v for v, d in VERB.items() if d["cost"] == 0)
 def verb_here(here, verb) -> bool:
     when = VERB[verb].get("when")
     return not when or (when == "roads" and bool(here.roads())) or (when == "herds" and any(FM.head(h) > 0 for h in here.herds().values())) \
-        or (when == "children" and here.children_on())
+        or (when == "children" and here.children_on()) or (when == "evening" and bool(here.setting("evening")))
 
 
 def verb_units(p, verb):
@@ -1157,6 +1163,30 @@ def _name(here, mind, a, party):
     raise Refused('say "heir" or "head"' + (', or "thing" and "as" to name a group of beasts or a thing' if _tags(here) else ""))
 
 
+def _meet(here, mind, a, party):
+    """Call a meeting for tomorrow morning at a building or a place here (D4-77)."""
+    at = a.get("at") or a.get("to")
+    bid = here.building(at)
+    pid = None if bid else here.parcel(at)
+    if bid is None and pid is None:
+        raise Refused(f"say where to meet: a building or a place here, not {at!r}")
+    name = here.buildings()[bid]["name"] if bid else here.parcels()[pid]["name"]
+    about = " ".join(str(a.get("about") or "").split())[:160]
+    here.apply("set", ref=("building", bid) if bid else ("parcel", pid), field="meeting",
+               value={"day": here.day + 1, "by": here.name, "about": about, "at": name})
+    here.event("meeting", f"{here.name} called a meeting at {name} for tomorrow morning" + (f" about {about}" if about else ""),
+               actor=here.name, salience=0.5, sense="sound", tags=["talk"])
+    return f"You called a meeting at {name} for tomorrow morning, before the day's work" + (f", about {about}" if about else "") + \
+        ": everyone here will hear of it, and whoever comes gives a unit to it."
+
+
+def _come(here, mind, a, party):
+    m = here.meeting_today()
+    if m is None:
+        raise Refused("no meeting has been called here for this morning")
+    return f"You went to the meeting at {m['at']} this morning."
+
+
 def _order(here, mind, a, party):
     from cybertron2.engine.data import LIFE
     hh = here.household()
@@ -1181,5 +1211,5 @@ HANDLERS = {"gather": _gather, "work": _work, "make": _make, "build": _build, "m
             "leave_household": _leave_household, "found": _found, "claim": _claim, "sleep": _sleep, "set": _set, "travel": _travel,
             "watch": _watch, "teach": _teach, "learn": _learn, "attack": _attack, "guard": _guard, "fire": _fire, "rest": _rest,
             "drive": lambda here, mind, a, party: FM.drive(here, a, party), "partner": _partner, "part": _part, "try": _try,
-            "name": _name, "order": _order}
+            "name": _name, "order": _order, "meet": _meet, "come": _come}
 assert set(HANDLERS) == set(VERB)

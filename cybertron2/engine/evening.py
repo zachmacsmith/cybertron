@@ -17,7 +17,7 @@ from cybertron2.engine.here import Here, Mind
 from cybertron2.engine.world import Refused
 
 NIGHT_VERBS = ("sleep", "host", "grant", "revoke", "admit", "join", "leave_household", "found", "partner", "part", "try", "fire", "set",
-               "accept", "withdraw", "release", "give", "move", "name", "travel", "rest", "order", "claim")
+               "accept", "withdraw", "release", "give", "move", "name", "travel", "rest", "order", "claim", "meet")
 MAX = 3
 
 
@@ -155,3 +155,60 @@ def apply(w, n, reply, gather, names, results, left, box) -> int:
 def snapshot(w) -> dict:
     t = w.s["today"]
     return {"try": len(t["try"]), "partner": len(t["partner"]), "joins": len(t["joins"])}
+
+
+# ---------------------------------------------------------------------- planning at the hearth (`evening: plan`, D4-77)
+def plans_at_hearth(w) -> bool:
+    return str((w.spec or {}).get("evening")) == "plan"
+
+
+def split_plan(reply) -> tuple:
+    """An evening reply's acts: those for tonight, and the rest as tomorrow's plan."""
+    acts = [a for a in (reply.get("actions") or []) if isinstance(a, dict)]
+    night = [a for a in acts if str(a.get("do", "")).lower() in NIGHT_VERBS and not (str(a.get("do", "")).lower() == "travel"
+                                                                                    and str(a.get("when") or "").lower() == "morning")]
+    return night, [a for a in acts if a not in night]
+
+
+def needs_morning(w, n) -> bool:
+    """With the plan made at the hearth, one is asked again at dawn only if something new reached one: a sign at dawn, something
+    that concerned one, a night that touched one's household (a birth, a death, a missed meal), or a meeting called."""
+    t = PC.store(w, n)["today"]
+    if t.get("dawn") or t.get("concerned"):
+        return True
+    log = (w.s.get("log") or [{}])[-1] if w.s.get("log") else {}
+    hh = w.household_of(n)
+    near = {m for m in w.living() if hh and w.household_of(m) == hh} | {n}
+    life = log.get("life") or {}
+    if any(x in near for x in (log.get("missed") or [])) or any(d in near or d == n for d in (log.get("deaths") or [])):
+        return True
+    if any(b.get("mother") in near for b in life.get("births") or []) or life.get("deaths"):
+        return True
+    return Here(w, n).meeting_today() is not None
+
+
+# ---------------------------------------------------------------------- a meeting called for the morning (D4-77)
+def meeting_block(w, n) -> str:
+    m = Here(w, n).meeting_today()
+    if not m:
+        return ""
+    return (f"## A meeting this morning\n{m['by']} has called everyone here to meet at {m['at']} before the day's work"
+            + (f", about {m['about']}" if m.get("about") else "") + ". To go, put {\"do\": \"come\"} in your plan: it takes a unit, and "
+            "before work you talk there with all who come, and may change your plan.")
+
+
+def meeting_prompt(w, n, m, present, said) -> str:
+    L = [f"## The meeting at {m['at']}, called by {m['by']}" + (f" about {m['about']}" if m.get("about") else "")]
+    L.append("Here: " + ", ".join(present) + ".")
+    if said:
+        L.append("Said so far:\n" + "\n".join(f"- {x}" for x in said))
+    L.append("Speak with \"say\" (everyone here hears it; free); make or answer offers (\"offers\"; what is offered here, all here "
+             "witness); and give your whole plan for the day again in \"actions\" if it changes. Reply with JSON only.")
+    return "\n\n".join(L)
+
+
+def witness(w, present, line) -> None:
+    for m in present:
+        st = PC.store(w, m)
+        st["lasting"] = (st.get("lasting") or []) + [f"{PC._day(w, w.d)}: witnessed at the meeting: {line}"]
+        st["lasting"] = st["lasting"][-14:]

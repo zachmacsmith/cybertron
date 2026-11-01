@@ -56,9 +56,10 @@ def test_a_thing_lying_about_is_tagged_and_taken_by_its_tag():
     assert TH.find(w, "Ivo", "T1", "grain") == cid
 
 
-def _evening_run(tmp_path, days, reply):
+def _evening_run(tmp_path, days, reply, **extra):
     s = load_spec(SPEC)
     s.update(evening=True, tags=True, ages=True)
+    s.update(extra)
     p = tmp_path / "spec.json"
     p.write_text(json.dumps(s))
     out = tmp_path / "run"
@@ -196,4 +197,51 @@ def test_units_left_over_go_to_ones_own_fallback(tmp_path):
     T = {t["agent"]: t for t in (json.loads(x) for x in open(out / "turns.jsonl")) if "units" in t}
     ivo = T["Ivo"]
     assert any(r.endswith("(your fallback)") for r in ivo["results"]) and ivo["used"] == ivo["units"]
+    assert R.run(None, out, mode="replay")["mismatches"] == []
+
+
+def test_a_meeting_called_at_the_evening_is_held_next_morning_for_those_who_come(tmp_path):
+    def reply(key, who, msg):
+        if key.startswith("d0.evening.") and who == "Ivo" and "## This evening" in msg:
+            return {"why": "x", "actions": [{"do": "meet", "at": "the Green", "about": "the harvest"}]}
+        if key.startswith("d1.") and "## The meeting at the Green" in msg:
+            return {"why": "x", "actions": [], "say": [{"to": "everyone", "text": f"{who} will reap."}]}
+        if key.startswith("d1.decide."):
+            assert "## A meeting this morning" in msg
+            return {"why": "x", "actions": [{"do": "come"}, {"do": "gather", "what": "firewood", "at": "Combe Copse"}]}
+        return {"why": "", "actions": [], "memory": "A day."}
+    out, seen = _evening_run(tmp_path, 2, reply)
+    met = [k for k, m in seen.items() if "## The meeting at the Green" in m]
+    assert {k.split(".")[3] for k in met} >= {"Ivo", "Margery"}
+    assert any("Said so far" in seen[k] and "will reap" in seen[k] for k in met)  # a second round: what was said
+    T = {(t["day"], t["agent"]): t for t in (json.loads(x) for x in open(out / "turns.jsonl")) if "units" in t}
+    assert any(r.startswith("You went to the meeting") for r in T[(1, "Ivo")]["results"])
+    assert R.run(None, out, mode="replay")["mismatches"] == []
+
+
+def test_the_memory_is_written_at_the_evening_on_the_last_day_of_a_stretch(tmp_path):
+    def reply(key, who, msg):
+        if ".evening." in key and "## This evening" in msg and "Kept for good" in msg or ".evening." in key and "keep for good" in msg.lower():
+            return {"why": "x", "actions": [], "memory": f"{who} remembers the days."}
+        return {"why": "", "actions": [], "memory": "A day."}
+    out, seen = _evening_run(tmp_path, 4, reply)
+    M = [json.loads(x) for x in open(out / "memory.jsonl")]
+    assert any(m["prompt"] == "(at the evening)" and m["memory"].endswith("remembers the days.") for m in M)
+    assert not any(".memory." in k for k in seen)                                # no separate memory call
+    assert R.run(None, out, mode="replay")["mismatches"] == []
+
+
+def test_with_the_plan_made_at_the_hearth_the_morning_call_is_skipped_unless_needed(tmp_path):
+    from cybertron2.engine import evening as EVN
+    def reply(key, who, msg):
+        if ".evening." in key and "## This evening" in msg:
+            return {"why": "x", "actions": [{"do": "sleep", "at": "Hobb House"}, {"do": "gather", "what": "firewood", "at": "Combe Copse"}]}
+        return {"why": "x", "actions": [], "memory": "A day."}
+    out, seen = _evening_run(tmp_path, 3, reply, evening="plan")
+    T = {(t["day"], t["agent"]): t for t in (json.loads(x) for x in open(out / "turns.jsonl")) if "units" in t}
+    skipped = [(d, a) for (d, a), t in T.items() if d > 0 and t["prompt"] == "(no morning call: planned at the hearth)"]
+    for d, a in skipped:                                                         # the plan made at the hearth was done
+        assert any("firewood" in r for r in T[(d, a)]["results"])
+    called = [(d, a) for (d, a) in T if d > 0 and (d, a) not in skipped and a in ("Ivo", "Margery")]
+    assert skipped or called                                                     # either way, a day was played
     assert R.run(None, out, mode="replay")["mismatches"] == []

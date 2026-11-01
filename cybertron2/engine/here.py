@@ -190,6 +190,14 @@ class Here:
         return {hid: h for hid, h in self._w.s["herds"].items() if h["node"] == self.node}
 
     # ------------------------------------------------------------------ settings, tags and names, age (D4-65 to D4-69)
+    def meeting_today(self):
+        """The meeting called for this morning at this place, if any (D4-77): {day, by, about, at}."""
+        for rec in list(self.buildings().values()) + list(self.parcels().values()):
+            m = rec.get("meeting")
+            if m and int(m.get("day", -1)) == self.day:
+                return m
+        return None
+
     def setting(self, key):
         return (self._w.spec or {}).get(key)
 

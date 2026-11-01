@@ -452,7 +452,7 @@ def evening_step(w, names, results, budget, used, talk_log, openings, systems, b
     """The evening at the hearth (evening.py): one call each, together, then one wave of answers for those asked something."""
     called = EVN.who_is_called(w, names)
     if not called:
-        return
+        return {}
     arrive_evening(w)
     gather = {n: EVN.gathering(w, n) for n in called}
     keys = {n: g[0] for n, g in gather.items()}
@@ -460,13 +460,30 @@ def evening_step(w, names, results, budget, used, talk_log, openings, systems, b
     for n in called:
         PC.store(w, n)["evening_shown"] = [x for x in results[n] if not x.startswith(PC.SPEECH)]
     texts = {}
+    fold = [n for n in called if conv.ends(n, w.d) and w.d < w.days - 1]          # the memory request at the evening (D4-77)
+    spans, mem_texts = {}, {}
+    for n in fold:
+        spans[n] = f"{PC._day(w, conv.c[n]['day0'] if n in conv.c else w.d)} to {PC._day(w, w.d)}"
+        t = (MEM.request(w, n, Mind(w, n), results[n], [], spans[n]) if MEM.rewriting(w, n)
+             else PR.memory_prompt(Mind(w, n), results[n], [], spans[n]))
+        mem_texts[n] = t.replace(" Reply with JSON only.", "") + "\n\n" + MEM.kept_request(w, n)
     for n in called:
         a = w.s["people"][n]
         came = None
         if a.get("arrived") == w.d and a.get("arrived_by") == "nightfall" and a.get("came_from") in w.s["nodes"]:
             came = w.s["nodes"][a["came_from"]]["name"]
         others = [m for m in called if m != n and keys[m] == keys[n]]
-        texts[n] = TG.render(w, n, EVN.prompt(w, n, results[n], left[n], gather[n][1], others, came))
+        t = EVN.prompt(w, n, results[n], left[n], gather[n][1], others, came)
+        if EVN.plans_at_hearth(w):
+            t = t.replace(" Reply with JSON only.", " Put tomorrow's plan of work in \"actions\" too, after the night's acts (and a "
+                                                     "\"fallback\"): you will be asked again at dawn only if something new has come. Reply "
+                                                     "with JSON only.")
+        skipped = (w.s["today"].get("skipped_morning") or {}).get(n)
+        if skipped:                                                              # what the morning would have shown, not asked then
+            t = skipped.replace("Plan your day. Reply with JSON only.", "").rstrip() + "\n\n" + t
+        if n in mem_texts:
+            t = t.replace(" Reply with JSON only.", "") + "\n\n" + mem_texts[n] + "\n\nReply with JSON only."
+        texts[n] = TG.render(w, n, t)
     since = EVN.snapshot(w)
     rr, mm, ee = _parallel(lambda n: decide(w, n, texts[n], openings.get(n, texts[n]) + "\n\n" + texts[n], systems.get(n), backend, conv,
                                             kind="evening"), {n: (n,) for n in called}, workers, tally)
@@ -477,13 +494,33 @@ def evening_step(w, names, results, budget, used, talk_log, openings, systems, b
                                            "error": ee.get(n)})
         if n in ee:
             continue
-        spent = EVN.apply(w, n, rr.get(n) or {}, keys, called, results[n], left[n], box)
+        r = dict(rr.get(n) or {})
+        if EVN.plans_at_hearth(w):
+            night_acts, tomorrow = EVN.split_plan(r)
+            r["actions"] = night_acts
+            w.apply("set", w.at(n), ref=("person", n), field="plan_next",
+                    value={"day": w.d + 1, "actions": tomorrow, "fallback": [x for x in (r.get("fallback") or []) if isinstance(x, dict)]})
+        spent = EVN.apply(w, n, r, keys, called, results[n], left[n], box)
         used[n] = used.get(n, 0) + spent
         left[n] -= spent
+    folded = {}
+    for n in fold:
+        if n in ee:
+            continue
+        r = rr.get(n) or {}
+        text = str(r.get("memory") or "").strip()
+        if MEM.rewriting(w, n):
+            MEM.keep(w, n, text, spans[n])
+        elif text:
+            PC.own_memory(w, n, spans[n], text)
+        kept_out = MEM.kept_apply(w, n, r)
+        w.s["today"].setdefault("memory_done", {})[n] = True
+        folded[n] = {"agent": n, "span": spans[n], "memory": text, "kept": kept_out, "kept_lines": MEM.kept_lines_text(w, n),
+                     "prompt": "(at the evening)", "usage": None, "error": None}
     asked = {n: EVN._requests(w, n, since) for n in called}
     woken = sorted(n for n in called if (box.get(n) or {}).get("heard") or asked[n])
     if not woken:
-        return
+        return folded
     texts2 = {n: TG.render(w, n, EVN.answer_prompt(w, n, (box.get(n) or {}).get("heard", []), asked[n], left[n])) for n in woken}
     rr, mm, ee = _parallel(lambda n: decide(w, n, texts2[n], openings.get(n, texts2[n]) + "\n\n" + texts2[n], systems.get(n), backend, conv,
                                             kind="evening"), {n: (n,) for n in woken}, workers, tally)
@@ -495,6 +532,64 @@ def evening_step(w, names, results, budget, used, talk_log, openings, systems, b
             continue
         spent = EVN.apply(w, n, rr.get(n) or {}, keys, called, results[n], left[n], late)
         used[n] = used.get(n, 0) + spent
+    return folded
+
+
+def meeting_step(w, names, replies, results, talk_log, openings, systems, backend, conv, workers, tally) -> None:
+    """A meeting called for this morning (D4-77): those whose plan has `come` meet before work, for up to MEETING_WAVES rounds; all
+    present hear what is said; what is offered there they witness; each may give their whole plan again."""
+    by_node = {}
+    for n in names:
+        if w.at(n) is None or not w.s["people"][n]["alive"]:
+            continue
+        if any(str(a.get("do", "")).lower() == "come" for a in (replies[n].get("actions") or []) if isinstance(a, dict)):
+            by_node.setdefault(w.at(n), []).append(n)
+    for node, present in sorted(by_node.items()):
+        m = Here(w, present[0]).meeting_today()
+        if m is None or len(present) < 2:
+            continue
+        said = []
+        for wave in range(MEETING_WAVES):
+            texts = {n: TG.render(w, n, EVN.meeting_prompt(w, n, m, present, said)) for n in present}
+            rr, mm, ee = _parallel(lambda n: decide(w, n, texts[n], openings.get(n, texts[n]) + "\n\n" + texts[n], systems.get(n), backend,
+                                                    conv, kind="meeting"), {n: (n,) for n in present}, workers, tally)
+            spoke = False
+            for n in present:
+                r = rr.get(n) or {}
+                talk_log.setdefault(n, []).append({"wave": f"meeting {wave}", "prompt": texts[n], "reply": r,
+                                                   "usage": (mm.get(n) or {}).get("usage"), "error": ee.get(n)})
+                if n in ee:
+                    continue
+                for x in [x for x in (r.get("say") or []) if isinstance(x, dict) and str(x.get("text", "")).strip()][:MAX_SAY]:
+                    line = f"{n}: {str(x['text'])[:600]}"
+                    said.append(line)
+                    results[n].append(f"You said (at the meeting): {str(x['text'])[:600]}")
+                    for h in present:
+                        if h != n:
+                            PC.store(w, h)["today"]["heard"].append(f"{n} said at the meeting: {str(x['text'])[:600]}")
+                    spoke = True
+                for o in [o for o in (r.get("offers") or []) if isinstance(o, dict)][:3]:
+                    try:
+                        line = AG.make_offer(Here(w, n), Mind(w, n), o)
+                    except Refused as e:
+                        results[n].append(f"Refused: offer: {e}")
+                        continue
+                    results[n].append(line)
+                    if line.startswith("You offered "):
+                        oid = line[len("You offered "):].split(":")[0]
+                        EVN.witness(w, present, f"{n} offered {AG.offer_text(Here(w, n), oid)}")
+                        said.append(f"{n} offered: {AG.offer_text(Here(w, n), oid)}")
+                        spoke = True
+                if isinstance(r.get("actions"), list) and r["actions"]:
+                    acts = [a for a in r["actions"] if isinstance(a, dict)]
+                    if not any(str(a.get("do", "")).lower() == "come" for a in acts):
+                        acts = [{"do": "come"}] + acts                           # one was there: the unit is given
+                    replies[n] = {**replies[n], "actions": acts}
+            if not spoke:
+                break
+
+
+MEETING_WAVES = 3
 
 
 def night_lines(w, rec) -> dict:
@@ -730,9 +825,25 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
             turn = VW.turn if VW.on(w) else PR.turn_prompt                     # the message from beliefs (38.40 §9), or as before
             openings = {n: TG.render(w, n, turn(Here(w, n), Mind(w, n), opening=True)) for n in names}
             users = {n: TG.render(w, n, turn(Here(w, n), Mind(w, n), opening=False)) for n in names}
+            if EVN.on(w):                                                       # a meeting called for this morning (D4-77)
+                for n in names:
+                    blk = EVN.meeting_block(w, n)
+                    if blk:
+                        users[n] = users[n].replace("Plan your day. Reply with JSON only.", blk + "\n\nPlan your day. Reply with JSON only.")
+                        openings[n] = openings[n].replace("Plan your day. Reply with JSON only.", blk + "\n\nPlan your day. Reply with JSON only.")
+            planned = {}
+            if EVN.plans_at_hearth(w):                                          # planned at the hearth: asked at dawn only if needed
+                for n in names:
+                    pn = w.s["people"][n].get("plan_next") or {}
+                    if int(pn.get("day", -1)) == day and not EVN.needs_morning(w, n):
+                        planned[n] = {"why": "(planned at the hearth last night)", "actions": pn.get("actions") or [],
+                                      "fallback": pn.get("fallback") or []}
+                        today.setdefault("skipped_morning", {})[n] = users[n]
             tally = Tally(float(((w.spec.get("llm") or {}).get("fail_stop_fraction")) or 0.5), len(names))
             replies, meta, errors = _parallel(lambda n: decide(w, n, users[n], openings[n], systems[n], backend, conv),
-                                              {n: (n,) for n in names}, workers, tally)
+                                              {n: (n,) for n in names if n not in planned}, workers, tally)
+            for n, r in planned.items():
+                replies[n], meta[n] = r, {"sent": "(no morning call: planned at the hearth)"}
             first = {n: dict(replies[n]) for n in names}
             results = {n: ([f"(Your reply could not be used, so you did nothing: {errors[n][:160]})"] if n in errors else []) for n in names}
             for n in names:
@@ -770,6 +881,8 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
                 woken = talk(w, names, {**{m: {} for m in names}, **late}, results)
                 if wave == waves - 1:
                     break
+            if EVN.on(w):
+                meeting_step(w, names, replies, results, talk_log, openings, systems, backend, conv, workers, tally)
             J.commit(w.s, _runner(J, cost, conv, locals()))
             J.open_step(day, "work")
             attend = {n: replies[n].get("attend") for n in names if replies[n].get("attend")}
@@ -867,7 +980,9 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
             J.commit(w.s, _runner(J, cost, conv, locals()))
             if EVN.on(w):                                                       # the evening at the hearth (D4-65, D4-66)
                 J.open_step(day, "evening")
-                evening_step(w, names, results, budget, used, talk_log, openings, systems, backend, conv, workers, tally)
+                folded = evening_step(w, names, results, budget, used, talk_log, openings, systems, backend, conv, workers, tally)
+                for n, mrec in folded.items():
+                    files["memory"].write(json.dumps({"day": day, **mrec}) + "\n")
                 J.commit(w.s, _runner(J, cost, conv, locals()))
             J.open_step(day, "settle")
             today["partners"] = LF.settle(w, today)                             # partnerships both chose (D2-140)
@@ -902,7 +1017,8 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
                 PC.close_day(w, n, results[n], nights.get(n, []))
             J.commit(w.s, _runner(J, cost, conv, locals()))
             J.open_step(day, "memory")
-            ending = [n for n in names if w.s["people"][n]["alive"] and conv.ends(n, day) and day < w.days - 1]   # set off tonight too
+            ending = [n for n in names if w.s["people"][n]["alive"] and conv.ends(n, day) and day < w.days - 1
+                      and n not in today.get("memory_done", {})]                 # set off tonight too; not if written at the evening
             if ending:
                 spans = {n: f"{PC._day(w, conv.c[n]['day0'] if n in conv.c else day)} to {PC._day(w, day)}" for n in ending}
                 rewrite = {n: MEM.rewriting(w, n) for n in ending}            # D4-61: one memory, rewritten (append for weak models)
