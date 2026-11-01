@@ -376,6 +376,77 @@ From 37.2's knowledge, not checked against the sources on 3 Nov.
 - **Settlement geography:** von Thünen's land-use rings; Christaller's central place theory (spacing, and which place becomes the
   market); least-cost paths for roads.
 
+## 10. The terrain catalogue (discussion, 3 Nov)
+
+**Terrains and covers are different things.**
+- A **terrain** is what the land is: its soil, water, slope, exposure, resources and hazards. It comes from the physical layers.
+- A **cover** is what the land is used as now: field, pasture, forest, built ground and so on. It changes with work.
+
+A terrain sets which covers a place can take and how well each does. This extends 38.04 §2's node kinds. Terrains marked new were
+missing.
+
+**The parameters a terrain sets**, each chosen because it ends in leverage:
+
+| Parameter | Values | What it changes |
+|---|---|---|
+| soil texture (workability) | light (sand), loam, heavy (clay), thin (chalk, stone) | the work of breaking the soil; heavy soil needs an ox team for good yields; light soil dries out in drought |
+| soil fertility | a range (about 0.6 to 1.4 of the plot's base) | yields, before cropping wears it down (D4-39) |
+| wetness | dry, moist, wet, flooded in season | floods, waterlogging, meadows, fens worth draining |
+| slope and altitude | flat to steep; low to high | ploughability (terraces on slopes, D2-66), a shorter growing season and harder winters high up |
+| exposure | sheltered to open | the cold rules and the cost of a night out (H-5, D4-12) |
+| resources | by terrain (below) | supply chains |
+| grazing by season | summer only, all year, winter only | when and where herds can be |
+| travel | a cost factor and the cover it gives | roads' pace, hidden ways, sight |
+| hazards | flood, drought, frost hollow, fire, rockfall | the scheduler's exposure (D2-69) |
+
+**The terrains:**
+
+| Terrain | Soil, water, slope | Covers it takes | Resources | Leverage it creates |
+|---|---|---|---|---|
+| river floodplain | deep, rich, wet; floods in wet years | meadow, field (at risk), water | fish, reeds, hay; a mill's flow; fords | the best and riskiest land; mills and fords |
+| **river terrace** (new) | light loam, dry, flat, above the flood | field, built ground | gravel | the natural village site |
+| **clay vale** (new) | heavy, rich, moist | field (with an ox team), pasture, woodland | clay | ox holders decide who can farm it well |
+| lowland loam | loam, moist, gentle | field, pasture, woodland | | the ordinary farmland |
+| **sandy heath** (new) | light, poor, dry | heath (rough grazing), scrub, poor field | heather, bracken, turf | marginal land for the land-poor; dries out first in drought |
+| **chalk or limestone down** (new) | thin, dry, springs at the foot | pasture, poor field | building stone, flint | spring-line villages: water is the chokepoint |
+| woodland | moderate, moist | forest (copse, coppice), clearable to field | timber, firewood, game; pig fattening (later) | fuel and building supply |
+| deep forest | moderate, wet, unsettled | old forest | old timber, big game | a barrier with value; frontier |
+| hills | thin, stony, sloping, colder | pasture, poor field, rock | stone, ore | stone and metal |
+| **upland summer pasture** (new) | thin, high, open; snow in winter | pasture in summer only | | herds moved up and back each year: commons, herders, seasonal leverage (moving livestock flagged, OPEN L-36) |
+| moor | peaty, wet, high, open | rough grazing | peat (fuel) | fuel where wood is short |
+| fen | peaty, waterlogged, flat | fen; field once drained (a works project) | fish, fowl, reeds | draining is collective work: an institution |
+| coast and **saltmarsh** (saltmarsh new) | salt, wet, flat | saltmarsh grazing, beach | salt, fish | salt keeps food: a long-distance trade good |
+| pass, gorge | rock, steep | none | | chokepoints for travel |
+
+**How they shape societies:**
+- **A small village** lives on the mix of terrains in its reach. One terrain means correlated risk. A village on the line between two
+  (a terrace above a floodplain, the foot of a down) is buffered. The generator should site villages on these lines (§2c), as
+  history did.
+- **A region** specialises by terrain and trades:
+  - upland cattle, stone and ore against lowland grain;
+  - forest timber and charcoal against grain;
+  - coastal salt and fish against everything.
+
+  Its terrains buffer each other against the year: a drought spares the floodplain, and a wet year spares the hills. So trade,
+  marriage and credit between them work as insurance, and whoever holds the line between them (a ford, a pass, a market) gains.
+- **Supply chains.** Terrain sets each link of a chain apart, so carrying binds and the junctions are worth holding:
+
+| Chain | Where each link sits |
+|---|---|
+| grain, mill, bread | floodplain or vale; a river with a drop, often where the hills meet the valley; the village or town |
+| timber, charcoal, smelting, tools | woodland; at the wood (charcoal is light); the hills, where the ore is; the smith |
+| stone, then halls, mills, walls | hills, downs or rock; village-scale building (D2-166) |
+| salt, then salted meat and cheese, then travel food | coast; pastoral land; roads and towns |
+| hides, then harness and parchment | pastoral land; farms and, later, writing |
+
+  The generator's check (§7) asks that each chain's links lie in different places, and that at least one place where two chains
+  meet is worth holding.
+
+**Later, flagged:**
+- livestock kinds beyond cattle (sheep for downs and uplands, pigs for woodland, horses) and herds moved with the seasons (L-36);
+- wildlife by terrain: kinds of game and predators (L-37);
+- water as a need, and sickness (L-23, Q-16).
+
 ## Open questions (for Zach)
 
 1. ~~A mesh kept as ground truth~~: decided (D2-174).
@@ -386,6 +457,8 @@ From 37.2's knowledge, not checked against the sources on 3 Nov.
 5. ~~Land-use rings as the default~~: decided (D2-175).
 6. Roads only (A) or across country (C) (§6): not needed to build the generator.
 7. Places finer with use: split on use (8a), fine places grouped when shown (8b), or counts (8c)?
+8. The terrain catalogue (§10): the terrains, their parameters, and the new ones (terrace, clay vale, heath, downs, upland
+   summer pasture, saltmarsh)?
 
 ## History
 
@@ -396,6 +469,8 @@ From 37.2's knowledge, not checked against the sources on 3 Nov.
   or the world's (§6); what would erosion and climate simulation add, given that terrain matters for leverage (§7). Written.
 - 3 Nov: Zach: how nodes as labels differ; across country or roads only, a big divergence; would wild places get finer when
   cleared; build the generator without deciding; outline the split to look at. Added §6's two ways and §8 (three ways, compared).
+- 3 Nov: Zach: which terrains, their parameters, what is missing, how they shape villages, regions and supply chains; then
+  settle the catalogue and write stage 1 in full for review. Added §10; stage 1 in [generator_stage1.md](generator_stage1.md).
 
 ## Sources
 
