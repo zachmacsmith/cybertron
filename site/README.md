@@ -1,5 +1,8 @@
 # site
 
+This is the current site (the pixel-art night village). The old broadsheet site is archived in
+`archive/site-broadsheet/`; do not use it.
+
 The Cybertron website: static HTML, CSS and ES modules (no node, no bundler), reading runs straight from the Hugging Face dataset.
 The look is a pixel-art village at night: every run is drawn as its own generated village, every agent as a villager.
 
