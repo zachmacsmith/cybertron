@@ -292,3 +292,4 @@ Newest first. Ideas decided or rejected in conversation before 23 Oct are backfi
 | 2 Nov | Who knows of a theft (built, then written down) | retrospective, accepted: D4-81 | [thefts_known.md](thefts_known.md) |
 | 2 Nov | The day's sightings at the hearth | accepted: D4-82 | [speech_order.md](speech_order.md) |
 | 3 Nov | Buildings people make their own: descriptions and lines written on them, a monument, fine work | accepted in part: D2-169 | [building_lines.md](building_lines.md) |
+| 3 Nov | The landscape generator: a world under the graph, filled in around what a world file gives | accepted in part: D2-173 | [generator.md](generator.md) |
