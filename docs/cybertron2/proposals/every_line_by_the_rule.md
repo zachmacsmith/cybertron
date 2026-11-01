@@ -84,6 +84,10 @@ data.NOTICING; spec information/noticing.md, perception.md, signs.md.
 
 - 2 Nov 2026: built at Zach's request while the 18 bundles of review 38.43 were being built (D4-74); written down after
   (retrospective). Replaces in part D4-71's fixed chances by reach.
+- 2 Nov 2026 (37.4): attention for what one works on raised from 3 to 6 (NOTICING attention "working"), to keep the chances comparable
+  to before as Zach asked ("they should still end up with similar or comparable probabilities"): a reaper of a ripe crop now reads
+  "the ears rub out hard in the hand" and "it must be cut tomorrow" at 1.0 and "going down in swathes" at 0.96 (0.6, 0.6 and 0.48 at
+  3; certain before the rule); weaker lines of the same parcel stay lower (0.3 to 0.52).
 
 ## Sources
 

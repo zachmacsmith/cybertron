@@ -497,7 +497,7 @@ NOTICING = {
     "attention": {"place": 3.0, "search": 5.0,
                   # D4-75: a close look at what lies where one is (a sign's reach "near"); things in one's own house; a subject one
                   # attends to (a person, a house, a herd: one seeks it out, so presence is at least "about"); what one worked on
-                  "close": 2.0, "own house": 3.0, "subject": 5.0, "working": 3.0},
+                  "close": 2.0, "own house": 3.0, "subject": 5.0, "working": 6.0},
     # D4-75: sound and smell carry beyond the parcel: presence by steps in the parcel graph from where one was today (0: the parcel
     # itself, 1: next door, ...; the last value for anything further), times the sense's visibility (weather, cover, night, masking)
     "carry": {"sound": [0.5, 0.45, 0.2, 0.1, 0.05], "smell": [0.5, 0.3, 0.12, 0.05, 0.0]},
