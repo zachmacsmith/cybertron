@@ -401,4 +401,4 @@ From 37.2's knowledge, not checked against the sources on 3 Nov.
 
 [38.04 §2, §5, §6](../../review/38_space_engine/04_places_design.md); spec/world/generation.md (D4-22);
 [environment_state.md](environment_state.md) (L-23); [parcel_graph.md](parcel_graph.md); [road_layout.md](road_layout.md);
-OPEN L-32 to L-34; D2-70, D2-104 to D2-107, D2-156, D2-161, D4-11.
+OPEN L-33 to L-35; D2-70, D2-104 to D2-107, D2-156, D2-161, D4-11.
