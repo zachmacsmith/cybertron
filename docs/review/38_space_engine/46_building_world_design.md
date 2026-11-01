@@ -109,6 +109,11 @@ its replay.
   to taking the Arderns' hay. Now the Hearnes hold grain 40 and beans 10 (about 8 days) and the Masons grain 16 and beans 4 (about 7),
   so each household reaches the harvest; the lord's surplus is unchanged. (An earlier start, wb1_wenbridge_aborted, stopped on day 1
   for a schema fault: one who knew nobody got empty enums, fixed in prompt.py.)
+- **Second recalibration, after wb1 was paused at day 14 ($11.74; Odo and Rob dead of hunger, no building).** Totals were near
+  1.0 of demand, but the lord paid his grain out as wages, the harvest overflowed the hut and rotted, and the newcomers' camp
+  could not keep fuel. Now: the Hall holds grain 160, Wright 16, the Masons 24, the newcomers 12 each, the Long Field 240 (60 a
+  plot): stores 215 meals and the harvest 170 to 210, about 1.1 of demand. With D4-89 to D4-92 (overflow stays the house's, heaps
+  by bulk, the begun wheel shown, a fire burns its woodpile at the door). The paused run is runs/wb1_wenbridge_paused.
 - The building test's beds check names the Hearne hut's missing bed as intended (`CROWDED` in test_cybertron2_buildings.py).
 
 *Current as of 2 Nov 2026 (world file built; live run wb1 started).*

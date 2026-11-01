@@ -47,7 +47,8 @@ def night(w) -> dict:
                 heat = float(hp["camp"]) * weather_fuel(w)
             else:
                 heat = float(hp["cold" if cold else "normal"]) * max(1, hearths + rings)
-            if FO.burn(w, b["node"], b["stock"], heat):
+            piles = [cid for cid, c in s["containers"].items() if c.get("kind") == "pile" and c.get("door") == bid and not c.get("hidden")]
+            if any(FO.burn(w, b["node"], cid, heat) for cid in [b["stock"]] + piles):   # its store, then its woodpile at the door (D4-89)
                 lit = True
                 if b["structure"] == "camp" and fire_goes_out(w, ("camp", bid), rings > 0):
                     rec.setdefault("fire_out", []).extend(sleepers)              # cooked on, but cold by morning (D4-83)

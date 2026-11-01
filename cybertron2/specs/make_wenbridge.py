@@ -30,7 +30,7 @@ def world():
             "wb_wen": {"name": "the Wen", "cover": "water", "size": 1, "side": "west", "height": 0, "text": "a broad river, quick at the weir"},
             "wb_field": {"name": "the Long Field", "cover": "field", "size": 4, "side": "south", "height": 1, "holder": "Hearne",
                          "fertility": 1.1, "text": "the village's one field, in strips", "adj": ["wb_mead"],
-                         "state": {"crop": {"kind": "barley", "left": 200, "ripe_day": 5}, "last_crop": "beans"}},
+                         "state": {"crop": {"kind": "barley", "left": 240, "ripe_day": 5}, "last_crop": "beans"}},
             "wb_mead": {"name": "Mill Mead", "cover": "meadow", "size": 3, "side": "east", "height": 1, "holder": "Ardern",
                         "text": "the lord's hay meadow", "state": {"plants": {"K": 4, "S": 4, "r": 0.3}, "grass": {"K": 80, "S": 80, "r": 0.32}}},
             "wb_bank": {"name": "Gorse Bank", "cover": "scrub", "size": 2, "side": "east", "height": 2,
@@ -51,18 +51,18 @@ def world():
     w["buildings"] = {
         "ardern_hall": {"name": "the Ardern Hall", "parcel": "wb_hall", "household": "Ardern", "structure": "stone",
                         "rooms": [{"kind": "hall"}], "fittings": {"beds": 3, "hearth": 1, "bins": 2},
-                        "stock": {"grain": 120, "beans": 30, "timber": 20, "firewood": 40, "copper": 2, "coin": 0}},
+                        "stock": {"grain": 160, "beans": 30, "timber": 20, "firewood": 40, "copper": 2, "coin": 0}},
         "mill_house": {"name": "the Mill House", "parcel": "wb_garth", "household": "Ardern", "structure": "timber",
                        "rooms": [{"kind": "medium room"}], "fittings": {"millstones": 1},
                        "fitting_work": {"water wheel": {"n": 1, "units_left": 150}}, "stock": {}},
         "wright_house": {"name": "Wright's House", "parcel": "wb_green", "household": "Wright", "structure": "timber",
                          "rooms": [{"kind": "medium room"}], "fittings": {"beds": 2, "hearth": 1, "bins": 1},
-                         "stock": {"grain": 10, "timber": 10, "firewood": 20}},
+                         "stock": {"grain": 16, "timber": 10, "firewood": 20}},
         "hearne_hut": {"name": "the Hearne hut", "parcel": "wb_green", "household": "Hearne", "structure": "wattle",
                        "rooms": [{"kind": "small room"}], "fittings": {"beds": 3, "hearth": 1, "bins": 1},
                        "stock": {"grain": 40, "beans": 10, "straw": 4, "firewood": 20}},
         "mason_cottage": {"name": "the Masons' cottage", "parcel": "wb_green", "household": "Mason", "structure": "wattle", "condition": 1,
-                          "rooms": [{"kind": "small room"}], "fittings": {"beds": 2, "fire ring": 1}, "stock": {"grain": 16, "beans": 4, "stone": 10}},
+                          "rooms": [{"kind": "small room"}], "fittings": {"beds": 2, "fire ring": 1}, "stock": {"grain": 24, "beans": 4, "stone": 10}},
         "new_camp": {"name": "the newcomers' camp", "parcel": "wb_bank", "household": "Newcome", "structure": "camp", "size": 4,
                      "fittings": {"beds": 4, "fire ring": 1}, "lasts_until": 10, "stock": {"firewood": 6, "beans": 4}}}
     w["claims"] = []
@@ -105,11 +105,11 @@ def world():
         "Rob": person("Newcome", "m", -40, "Mary", {"Mary": "your wife"}, "claude-sonnet-5-5",
                       ["You and Mary came to Wenbridge this summer from a burned-out farm, with tools and a little grain.",
                        "Your camp on Gorse Bank will not stand into the winter."],
-                      "Make a home in Wenbridge before winter, and ground of your own.", {"crude tool": 1, "grain": 8},
+                      "Make a home in Wenbridge before winter, and ground of your own.", {"crude tool": 1, "grain": 12},
                       K("small room", "sow", "reap", "hoe", "weed")),
         "Mary": person("Newcome", "f", -38, "Rob", {"Rob": "your husband"}, "claude-haiku-5-5",
                        ["Gorse Bank is nobody's; the Green is full of houses."], "A roof and a hearth of your own before the snow.",
-                       {"grain": 8, "beans": 2}, K("small room", "sow", "reap")),
+                       {"grain": 12, "beans": 2}, K("small room", "sow", "reap")),
     }
     for a in agents.values():                                                  # the youths are youths
         if a["born"] > -36:

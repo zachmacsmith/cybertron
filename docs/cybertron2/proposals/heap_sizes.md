@@ -1,6 +1,6 @@
 # How much lies there: heaps seen by their bulk, counted when attended, and kept by their house
 
-**Status:** retrospective, accepted: D4-89, D4-90, D4-91 (2 Nov)
+**Status:** retrospective, accepted: D4-89, D4-90, D4-91, D4-92 (2 Nov)
 **Owner:** 37.4
 
 ## Summary
@@ -60,6 +60,7 @@ signs.py (THING rows, the count reach), perceive.py (count rows on attending; at
 ## History
 
 - 2 Nov 2026: built at Zach's request during the wb1 pause; written down the same session (retrospective).
+- 2 Nov 2026: D4-92 added with the Wenbridge recalibration: a house's fire burns its woodpile at the door after its store, so a camp (10 weight of store) can keep fuel outside. night.py; a test in test_cybertron2_heap_senses.py.
 
 ## Sources
 

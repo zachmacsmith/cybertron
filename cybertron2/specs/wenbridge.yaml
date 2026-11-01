@@ -76,7 +76,7 @@ nodes:
         state:
           crop:
             kind: barley
-            left: 200
+            left: 240
             ripe_day: 5
           last_crop: beans
       wb_mead:
@@ -199,7 +199,7 @@ buildings:
       hearth: 1
       bins: 2
     stock:
-      grain: 120
+      grain: 160
       beans: 30
       timber: 20
       firewood: 40
@@ -231,7 +231,7 @@ buildings:
       hearth: 1
       bins: 1
     stock:
-      grain: 10
+      grain: 16
       timber: 10
       firewood: 20
   hearne_hut:
@@ -262,7 +262,7 @@ buildings:
       beds: 2
       fire ring: 1
     stock:
-      grain: 16
+      grain: 24
       beans: 4
       stone: 10
   new_camp:
@@ -628,7 +628,7 @@ agents:
     aware_of: {}
     holdings:
       crude tool: 1
-      grain: 8
+      grain: 12
     concerns:
     - food
     - shelter
@@ -660,7 +660,7 @@ agents:
         skill: 1.0
     aware_of: {}
     holdings:
-      grain: 8
+      grain: 12
       beans: 2
     concerns:
     - food

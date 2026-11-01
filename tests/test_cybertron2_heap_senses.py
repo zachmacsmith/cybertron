@@ -92,3 +92,14 @@ def test_goods_left_at_a_door_stay_the_houses_to_use_sell_and_lose_by_theft():
     assert "not yours to take from" in out and w.s["today"]["thefts"][-1]["building"] == "hearne_hut"
     out = V.do(Here(w, "Tom"), Mind(w, "Tom"), {"do": "take", "item": "grain", "qty": 5, "from": "the Green"})
     assert out.startswith("You took 5 grain") and "not yours" not in out
+
+
+def test_a_camps_fire_burns_its_woodpile_at_the_door_when_its_store_has_none():
+    from cybertron2.engine import night as N
+    w = _w()
+    camp = w.s["buildings"]["new_camp"]
+    w.apply("destroy", "wenbridge", src=camp["stock"], item="firewood", qty=w.goods(camp["stock"]).get("firewood", 0), why="test")
+    cid = w.apply("new_thing", "wenbridge", node="wenbridge", parcel="wb_bank", kind="pile", by=None, door="new_camp")
+    w.apply("create", "wenbridge", dst=cid, item="firewood", qty=20, why="test")
+    rec = N.night(w)
+    assert rec["hearth"]["new_camp"]["lit"] and w.goods(cid)["firewood"] < 20
