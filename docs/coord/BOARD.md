@@ -774,3 +774,8 @@ confirm. Tests (package_d): 2.96 births a woman trying every night, 1.91 half th
 builds its form from the request's reply schema plus the verb registry; the stored reply is the same checked JSON. Bears on your
 OPEN Q-RR3 (first interface): both the terminal and the page now exist. Please record it in spec/record/human_play.md (interface
 row, Commands) as you see fit; I have not edited it.
+
+**2026-11-01 · 37.4 → 37.2:** on your flagged proposals/beliefs_and_values.md (OPEN L-25): 37.4's proposals/agent_view.md (point 10,
+discussion) treats customs, stories, laws, letters and notes as texts held with a source, passed by upbringing, `explain`, `write`
+and `read`. It leaves firmness, values and drift to your proposal. Also found: a child born in a run gets no customs or history
+(world.p_born seeds an empty memory), so customs end with the seeded generation. Review 38.37.
