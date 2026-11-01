@@ -27,9 +27,19 @@ next stretch, is tested (review 38.39).
     | 32 | 1, 1, 1, 2, 2, 3, 3, 4, 4 (5 at the end) | 6.5 days |
     | 64 | 1, 2, 3, 4, 5, 6, 7, 9, 10 (11 at the end) | 5.2 days |
     | 96 | 1, 2, 4, 6, 7, 9, 11, 13, 14 (16 at the end) | 5.2 days |
-  - **People who start a world already grown** would have several empty places at once (the freeze above). Their places open as
-    if from the start of the run: one at first, then one more each stretch until they reach the number for their age. (Or the
-    generator fills some from their seeded past; for Zach.)
+  - **People who start a world already grown** get the number of places for their age, filled first with what the world seeds
+    them with (below); the rest stay empty to fill as they go.
+- **Seeding** (Zach, 1 Nov: "when a world starts, we should be able to choose which long-term memories that we seed them with";
+  "this would replace the current customs"):
+  - A world file may give anyone lines kept for good: per person (`kept: [lines]`), and per household or place, as customs are
+    given now (`{text, nodes?, households?}`, D4-57). The generator may write them from each person's seeded past (D4-21).
+  - **Customs become seeded kept lines.** Today a custom is a fixed sentence in "What you remember", shown every stretch, which
+    nobody can let go of (perceive.seed_knowledge). As a kept line it is each holder's own: shown the same way, but it takes a
+    place, and the holder may forget it or trade it for something that matters more. So a custom lasts while people keep it, and a
+    village's custom is what most there still hold. "What you remember" keeps the seeded history (founders, hard winters, kin
+    married away).
+  - Seeded lines count against the places for one's age; a world that seeds more than that gives that person as many places as
+    its seeded lines.
 - **A line:** one sentence, at most about 25 words (cut beyond), in the agent's words.
 - **Shown:** under its own heading at every opening, before the memory; and at the end of each stretch, in the memory request,
   numbered, with the empty places shown as empty: "Kept for good (3 of 5 places): 1. ... 2. ... 3. ... 4. (empty) 5. (empty)".
@@ -76,10 +86,15 @@ working ledger (77% rewrites; 58% never read back: 38.38).
 4. Whether a line can be told to someone, or passed to a child at coming of age (the upbringing channel of a beliefs and values
    design: Zach's redesign of proposals/beliefs_and_values.md, OPEN L-25).
 5. Haiku agents, on the memory queue (D4-61): the same places, or none.
+6. Customs as seeded kept lines replace D4-57's mechanism (and the village customs before it, D2-30): to be decided with this
+   proposal; then D4-57 is marked replaced. How it meets Zach's redesign of beliefs and values (OPEN L-25): whether a child coming
+   of age takes some of its household's kept lines (today a child born in a run gets no customs at all).
 
 ## Affects
 
-spec/information/memory.md (D4-61's rule); cybertron2/engine/memory.py, prompt.py (`_memory_sections`), run.py (the memory step).
+spec/information/memory.md (D4-61's rule); spec/seeding/populations.md and world files' `customs` (D4-57, D2-30); proposals/
+household_customs.md; cybertron2/engine/memory.py, prompt.py (`_memory_sections`), run.py (the memory step), perceive.py
+(`seed_knowledge`), generate.py.
 
 ## History
 
@@ -103,6 +118,9 @@ spec/information/memory.md (D4-61's rule); cybertron2/engine/memory.py, prompt.p
   given as a clause after the memory instruction), Zach: "I don't think we should tell them the content. I think the purpose
   'what you want to remember for good' is important, but I do think we should also say something short about the option to
   forget and trade off more important new memories for older ones." Wording rewritten to that; untested.
+- 1 Nov 2026: Zach: a world should choose the kept lines people start with, and "this would replace the current customs". Added
+  seeding (per person, household or place; the generator may write them); customs become seeded kept lines each holder may let
+  go; grown people start with places for their age, filled first with what is seeded.
 
 ## Sources
 

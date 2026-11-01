@@ -49,6 +49,8 @@ information/memory.md (what is seeded); world files.
   is to have as many as you can: take partners young, try for a child every day you can"). The generator also takes a line's own
   `aim` for its adults and youths, but under D4-29 no aim reaches a prompt, so that is data only; the customs are what the agents
   read.
+- 1 Nov 2026: Zach proposed that customs become lines kept for good, seeded per household or place and each holder's own to let go
+  ([lasting_memory.md](lasting_memory.md), discussion); if decided, this mechanism is replaced.
 
 ## Sources
 
