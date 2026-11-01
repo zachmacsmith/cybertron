@@ -1,6 +1,7 @@
 # Proposal: the generator, stage 1 (a spec for review before it is built)
 
-**Status:** for review (3 Nov); scope, input and seas decided (D2-177). Not to be built until Zach asks (README rule 10). **Owner:** 37.2; to be compiled into
+**Status:** for review (3 Nov); scope, input and seas (D2-177), the macro layer and large worlds (D2-178), descriptions
+(D2-179) decided. Not to be built until Zach asks (README rule 10). **Owner:** 37.2; to be compiled into
 spec/world/generation.md (37.4's) once decided. **Rests on:** D2-173 (fill in around what a world file gives), D2-174 (a mesh as
 ground truth), D2-175 (rings by default), D4-22, and generator.md §2, §3, §7 and §10.
 
@@ -70,8 +71,8 @@ layer comes before everything else.
   2. **Plates** (the Experilous planet generator's method): Voronoi plates with motions, mountains where plates meet. More natural
      placement of ranges, less control.
 
-  Proposed: templates and noise. Plates are optional later; for what we need (a coast, a range, a river system, a climate gradient)
-  they would be overkill.
+  Decided: templates and noise (D2-178). Plates are flagged for later, probably deferred indefinitely (OPEN L-39). For what
+  we need (a coast, a range, a river system, a climate gradient) they would be overkill.
 
 **The window:** the region played is a window on the macro world. The fine mesh (§2) takes the macro height, upsampled smoothly,
 plus fine noise, so a coast or range runs through the window as part of something larger. It's chosen in one of two ways:
@@ -207,6 +208,8 @@ Each node, parcel, stretch and landmark gets a description written by a model fr
 - what a local would say of it.
 
 **How they're kept:**
+- written by the current Sonnet model (`describe.model`), at temperature 0: a parcel, stretch or landmark in one sentence (at most
+  about 25 words), a node in two or three (D2-179);
 - each is cached by the hash of its facts and frozen into the output (D2-173);
 - the facts are stored beside the words, so signs and text never disagree;
 - re-generating with the same facts reuses the text.
@@ -275,9 +278,7 @@ The run journal freezes the yaml as now. The mesh travels with it for the visual
 1. ~~Scope~~ and 2. ~~input~~: decided (D2-177).
 3. The numbers above (all world settings)?
 4. The checks (§7): any missing, and should a failed check refuse the world, or only warn?
-5. Descriptions: which model, and how long each (a sentence for a parcel, a few for a node)?
-6. The macro layer (§1b): templates and noise (proposed) rather than plates; a window chosen by pins or by scanning?
-7. Large worlds (§1c): fine detail only where needed, keyed by place?
+5. ~~Descriptions~~ (D2-179), 6. ~~the macro layer~~ and 7. ~~large worlds~~ (D2-178): decided.
 
 ## Sources
 
