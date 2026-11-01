@@ -411,7 +411,11 @@ def _slaughter(here, key, out, a, y):
     gives = y["gives"][role]
     for item, q in gives.items():
         here.apply("create", dst=out, item=item, qty=q, why="slaughter")
-    word = f"You slaughtered a {ROLE_WORD[role][0]} of {h['name']}: " + ", ".join(f"{q:g} {i}" for i, q in gives.items()) + "."
+    rec = here.parcels()[key].get("slaughter") or {}                          # the day's kills on this ground, for its signs (D4-71)
+    kills = list(rec.get("kills") or []) if rec.get("day") == here.day else []
+    kills.append({"beast": ROLE_WORD[role][0], "herd": h["name"], "by": here.name})
+    here.apply("set", ref=("parcel", key), field="slaughter", value={"day": here.day, "kills": kills})
+    word =f"You slaughtered a {ROLE_WORD[role][0]} of {h['name']}: " + ", ".join(f"{q:g} {i}" for i, q in gives.items()) + "."
     return 0.0, None, word, ("herd", hid)
 
 

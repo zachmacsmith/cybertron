@@ -228,6 +228,18 @@ def close(w, name, c, target=None) -> bool:
     return presence(w, name, pid, 1.0) >= 0.5 and spot_of(w, name) == pid or attention(w, name, pid, target) > 1.0
 
 
+def near_spot(w, name, parcel, target=None, around=False) -> bool:
+    """For a sign's reach at a spot (D4-71): "near" is one who was there today (worked there, was about it, or attended to it);
+    "around" also one who crossed it or worked next to it."""
+    if parcel not in w.s["parcels"]:
+        return False
+    from cybertron2.engine import layout as LY
+    if parcel in LY.worked_parcels(w, name) or attention(w, name, parcel, target) > 1.0:
+        return True
+    pr = presence(w, name, parcel, 1.0)
+    return pr >= float(NOTICING["presence"]["about"]) or (around and pr >= float(NOTICING["presence"]["next door"]))
+
+
 def spot_chance(w, name, node, parcel, own_x, target=None, sense="sight", inside=(), everyone=False, eye_on="things") -> float:
     """The noticing rule (information/noticing.md, D4-53): own x visibility x presence x attention x eye, for every sign. `inside`:
     those always there (who live in the house, the household); `everyone`: open to all at the node (the sky)."""

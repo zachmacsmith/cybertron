@@ -350,9 +350,16 @@ def evening(w, attend: dict, today: dict) -> dict:
                 if f["about"] and f["about"][0] == f"person:{name}":
                     continue                                                    # oneself
                 sp = f["spot"]
-                p = f["salience"] * knack(mind, f) * TH.spot_chance(w, name, sp["node"], sp["parcel"], sp["own"], tgt_raw, f.get("sense", "sight"),
-                                                                    inside=sp.get("inside") or (), everyone=sp.get("everyone", False),
-                                                                    eye_on="bare" if f.get("eye") else "things")
+                reach = f.get("reach", "rule")                                 # D4-71: near, around, the node, or the rule
+                if reach == "node":
+                    p = f["salience"] * knack(mind, f)
+                elif reach in ("near", "around"):
+                    p = f["salience"] * knack(mind, f) if TH.near_spot(w, name, sp["parcel"], tgt_raw, around=reach == "around") else 0.0
+                else:
+                    p = f["salience"] * knack(mind, f) * TH.spot_chance(w, name, sp["node"], sp["parcel"], sp["own"], tgt_raw,
+                                                                        f.get("sense", "sight"), inside=sp.get("inside") or (),
+                                                                        everyone=sp.get("everyone", False),
+                                                                        eye_on="bare" if f.get("eye") else "things")
                 if rng.random() < min(1.0, p):
                     cand.append((1.0 + f["salience"], f))
                 continue
@@ -482,7 +489,8 @@ def evening(w, attend: dict, today: dict) -> dict:
         for key in today["worked"].get(name, []):                               # acting: what one worked on, one sees (38.40 §9)
             sub = f"parcel:{key}" if key in w.s["parcels"] else f"building:{key}"
             rows = sorted((f for f in F if sub in (f.get("about") or []) and not f.get("event") and not f.get("thing")
-                           and not f.get("actor") and not f.get("ambient") and _can_read(mind, f)), key=lambda f: -f["salience"])
+                           and not f.get("actor") and not f.get("ambient") and _can_read(mind, f)
+                           and (f.get("only") is None or name in f["only"])), key=lambda f: -f["salience"])
             if rows:
                 b = mind.store["beliefs"].setdefault(sub, {"day": here.day, "lines": [], "ids": []})
                 if b["day"] != here.day:

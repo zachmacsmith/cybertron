@@ -275,6 +275,45 @@ CARCASS = [
 ]
 
 
+# A beast slaughtered on a parcel (D4-71): the kill itself that day, and what it leaves on the ground that day and the next. Read from
+# the parcel's record of the day's kills (which beast, of which herd, by whom: farm._slaughter); blood, guts and crows are how such a
+# record shows, a presentation choice. Read by the noticing rule with each row's reach (below): hard to miss for those on the parcel,
+# heard by those beside it, a bellow cut short for the rest of the place. `who`: "others" rows are not read by those who did the
+# killing (their own result line tells them what they did), "doer" rows only by them; rows without it by anyone. Context:
+# slaughter_context.
+SLAUGHTER = [
+    # the kill, today
+    dict(when=lambda x: x.today, who="others", reach="near", sense="sight", p=1.0, tags=["animals", "food"],
+         text=lambda x: f"{x.by} killed {x.of} on {x.nm} today: {x.it} went down kicking, and the blood ran out on the ground"),
+    dict(when=lambda x: x.today, who="others", reach="near", sense="sight", p=0.8, tags=["animals", "food"],
+         text=lambda x: f"{x.it} {x.was} butchered where {x.they} fell on {x.nm}: the hide stripped off, the guts heaped steaming on {x.ground}, "
+                        "the meat cut from the bone"),
+    dict(when=lambda x: x.today, reach="near", sense="smell", p=0.9, tags=["animals", "food"],
+         text=lambda x: f"the hot, iron smell of blood and opened guts on {x.nm}"),
+    dict(when=lambda x: x.today, who="others", reach="around", sense="sound", p=lambda x: 0.95 * x.hear, tags=["animals"],
+         text=lambda x: f"{x.bellow} on {x.nm}, a heavy fall, then quiet: a beast killed there"),
+    dict(when=lambda x: x.today, who="others", reach="node", sense="sound", p=lambda x: 0.4 * x.hear, tags=["animals"],
+         text=lambda x: f"a beast's bellow from toward {x.nm}, cut off short"),
+    dict(when=lambda x: x.today, who="doer", reach="near", sense="touch", p=1.0, tags=["animals", "food"],
+         text=lambda x: f"{x.it} kicked as {x.they} went down, and {x.its} blood ran hot over your hands: you are red to the elbows "
+                        "and stink of it"),
+    dict(when=lambda x: x.today and x.herd_here, own=0.95, sense="sight", p=0.4, tags=["animals"], knack="herd",
+         text=lambda x: f"{x.herd_here} are uneasy on {x.nm}, bunched and snorting at the smell of blood"),
+    dict(when=lambda x: x.today and x.dogs, reach="node", sense="sound", p=0.5, tags=["animals"],
+         text=lambda x: f"the dogs are wild at the smell of blood from {x.nm}, barking and straining to get at it"),
+    # what is left on the ground, today and tomorrow
+    dict(when=lambda x: x.weather != "fog", own=0.9, sense="sight", p=0.6, tags=["animals"],
+         text=lambda x: f"crows and kites dropping onto {x.nm}, after the leavings of a slaughter"),
+    dict(when=lambda x: x.snow, reach="near", sense="sight", p=0.9, tags=["animals"],
+         text=lambda x: f"blood in the snow on {x.nm}, trodden pink where a beast was killed"),
+    dict(when=lambda x: x.yesterday and not x.snow, reach="near", sense="sight", p=0.8, tags=["animals"],
+         text=lambda x: f"a dark patch soaked into the ground on {x.nm}" + (", flies on it" if x.warm else "")
+                        + ": the blood of the beast killed there yesterday"),
+    dict(when=lambda x: x.yesterday and x.warm, reach="near", sense="smell", p=0.6, tags=["animals"],
+         text=lambda x: f"a smell of old blood and offal hangs over {x.nm}"),
+]
+
+
 # ---------------------------------------------------------------------- the sky and the season
 SKY = [
     dict(when=lambda x: x.cold and x.first_cold, sense="touch", p=0.85, tags=["season", "shelter", "farming"],
@@ -532,6 +571,11 @@ PERSON = [
          text=lambda x: f"{x.who} was chewing raw grain: no fire to cook it on"),
     dict(when=lambda x: x.partner, sense="sight", p=0.06, tags=["family"],
          text=lambda x: f"{x.who} and {x.partner} keep close together"),
+    # one who slaughtered a beast today (D4-71)
+    dict(when=lambda x: x.bloodied, sense="sight", p=0.6, tags=["animals", "food"],
+         text=lambda x: f"{x.who} has blood to the elbows and down their front, from butchering a beast"),
+    dict(when=lambda x: x.bloodied, sense="smell", p=0.3, tags=["animals", "food"],
+         text=lambda x: f"{x.who} smells of blood and guts"),
 ]
 
 
@@ -638,6 +682,8 @@ def person_context(here, who):
     x.failing = x.stage == "elder" and d is not None and d - LF.elder_from(L) >= L // 4
     x.ate_raw = p.get("ate_raw") == here.day - 1
     x.partner = a.get("partner") if a.get("partner") in here.people() else None
+    x.bloodied = any((par.get("slaughter") or {}).get("day") == here.day and who in {k["by"] for k in par["slaughter"].get("kills") or []}
+                     for par in here.parcels().values())
     x.gear = [i for i, q in a["carried"].items() if q >= 1 and ITEMS[i].get("seen") and not ITEMS[i].get("camp")]
     x.load = [(i, q) for i, q in a["carried"].items() if q >= 2 and ITEMS[i]["weight"] > 0]
     x.travel_gear = next((i for i, q in a["carried"].items() if q >= 1 and ITEMS[i].get("camp")), None)
@@ -721,6 +767,7 @@ def facts(here, add) -> None:
         if FM.head(h) > 0:
             emit(HERD, context(here, h["parcel"], h), [f"herd:{hid}", f"parcel:{h['parcel']}"], parcel=h["parcel"])
     _herds_out(here, add)
+    _slaughtered(here, add)
     for bid, b in here.buildings().items():
         live = [x for x in here.people() if bid in here.homes_here(x)]
         if b.get("unfinished"):
@@ -741,6 +788,8 @@ def facts(here, add) -> None:
 #   reach: how the row is reached. "rule" (default): its p times the noticing rule's chance (things.chance: the thing's own
 #          conspicuousness x the place's sight x presence x attention x the eye); "near": its p, only for one who worked at the spot
 #          or searched it (a close look: what is in a pack, whose body it is); "node": its p, for anyone at the node (a smell).
+#          Rows at a spot (spot_rows) take the same reach (D4-71): "near" for one who was at that parcel today (worked there, was
+#          about it, attended to it), "around" also for one who crossed it or worked next to it (things.near_spot).
 #   knows: a technique; the row is read only by one who knows it (an expert's reading); `lay: tech` rows only by one who does not.
 # A thing is known once any of its rows is noticed; what one remembers is the text one noticed (a glimpse or a close look).
 # =====================================================================================================================================
@@ -1184,13 +1233,16 @@ def fence_context(w, pid):
                            herd_in=herd_in)
 
 
-def spot_rows(here, rows, x, about, node, parcel, add, concerns=(), only=None, **extra) -> None:
-    """Emit a bundle read by the noticing rule at a spot: each true row as a fact carrying its own conspicuousness."""
+def spot_rows(here, rows, x, about, node, parcel, add, concerns=(), only=None, who=None, name="spot", **extra) -> None:
+    """Emit a bundle read by the noticing rule at a spot: each true row as a fact carrying its own conspicuousness, and its reach
+    when it is not the rule's (D4-71). `who` maps a row's `who` to the only people who read it (else `only`)."""
     for i, row in true_rows(rows, x):
         p = row["p"](x) if callable(row["p"]) else row["p"]
+        reach = row.get("reach", "rule")
         add(about, row["text"](x), p, row.get("tags", []), row.get("sense", "sight"), concerns=list(concerns), knack=row.get("knack"),
-            spot={"node": node, "parcel": parcel, "own": float(row["own"])}, only=only, gate=parcel if row.get("gate") else None,
-            sign=f"{about[0]}#spot{i}", **extra)
+            spot={"node": node, "parcel": parcel, "own": float(row.get("own", 1.0))}, only=(who or {}).get(row.get("who"), only),
+            gate=parcel if row.get("gate") else None, sign=f"{about[0]}#{name}{i}", **({"reach": reach} if reach != "rule" else {}),
+            **extra)
 
 
 def carcass_context(w, c):
@@ -1208,6 +1260,42 @@ def carcass_context(w, c):
                            meat=c["goods"].get("meat", 0) > 0, cold=w.cold(), warm=not w.cold(), weather=EV.weather(w),
                            snow=EV.snow_lying(w), dogs=not on_road and any(b["node"] == c.get("node") and b["fittings"].get("dog")
                                                                             for b in w.s["buildings"].values()))
+
+
+def slaughter_context(here, pid):
+    """A parcel where beasts were slaughtered today or yesterday (D4-71): which beasts, of which herd, by whom; how far a sound carries
+    there today; a herd still on it; dogs at the place; the weather on it."""
+    from cybertron2.engine import environment as EV
+    w = here._w
+    p = here.parcels()[pid]
+    rec = p.get("slaughter") or {}
+    kills = list(rec.get("kills") or [])
+    age = here.day - int(rec.get("day", -10))
+    n = len(kills)
+    beast = kills[-1]["beast"] if kills else "beast"
+    herds = list(dict.fromkeys(k["herd"] for k in kills))
+    of = (f"a {beast}" if n == 1 else f"{_num(n)} beasts") + (f" of {herds[0]}" if len(herds) == 1 else "")
+    herd_here = next((h["name"] for h in here.herds().values() if h.get("parcel") == pid and FM.head(h) > 0), "")
+    return SimpleNamespace(nm=p["name"], n=n, beast=beast, of=of, by=" and ".join(dict.fromkeys(k["by"] for k in kills)),
+                           doers=sorted({k["by"] for k in kills}), today=age == 0, yesterday=age == 1,
+                           it=f"the {beast}" if n == 1 else "the beasts", they="it" if n == 1 else "they", its="its" if n == 1 else "their",
+                           was="was" if n == 1 else "were",
+                           bellow=("a calf bawling" if beast == "calf" else f"a {beast} bellowing") if n == 1 else "beasts bellowing",
+                           ground="the grass" if p["cover"] in ("pasture", "meadow") else "the ground",
+                           hear=min(1.0, EV.visibility(w, here.node, pid, "sound", quiet=False)), herd_here=herd_here,
+                           weather=EV.weather(w), snow=EV.snow_lying(w), warm=not here.cold(),
+                           dogs=any(b["node"] == here.node and b["fittings"].get("dog") for b in w.s["buildings"].values()))
+
+
+def _slaughtered(here, add) -> None:
+    """The signs of a slaughter on each parcel here, today and the day after (D4-71): by the noticing rule, each row by its reach."""
+    for pid, p in here.parcels().items():
+        rec = p.get("slaughter") or {}
+        if rec.get("kills") and 0 <= here.day - int(rec.get("day", -10)) <= 1:
+            x = slaughter_context(here, pid)
+            others = [m for m in here.people() if m not in x.doers]
+            spot_rows(here, SLAUGHTER, x, [f"parcel:{pid}"], here.node, pid, add, who={"others": others, "doer": x.doers},
+                      name="slaughter")
 
 
 def road_context(w, name, t, pos):
