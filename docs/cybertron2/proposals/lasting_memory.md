@@ -13,9 +13,17 @@ next stretch, is tested (review 38.39).
 
 ## The proposal
 
-- **Places:** **one at first, and more opening over time** (Zach, 1 Nov), on the memory's curve (D4-61: largest rises early,
-  levelling off) up to about 12 for an elder (calibrate). With all places open at once, agents fill them in the first one or two
-  stretches and then hardly change them (38.39), so the first lines win.
+- **Places:** **one at first, and more opening over time, scaled by the lifespan** (Zach, 1 Nov). With all places open at once,
+  agents fill them in the first one or two stretches and then hardly change them (38.39), so the first lines win.
+  - The schedule runs on the share of adult life lived, as the memory's length does (D4-61), so a 32-day and a 96-day life open
+    places at the same stages: `places = 1 + round((most - 1) * (1 - e^(-k * x)) / (1 - e^(-k)))`, with `x` = (days since coming of
+    age) / (days from coming of age to the end of the lifespan), `k` 3 (the memory's): one place as a youth, the largest rises
+    early, levelling off.
+  - The most a life reaches also scales with the lifespan, since a longer life has more stretches to remember: about one place a
+    stretch's worth of six days, e.g. `most = round(lifespan / 6)`: 5 at lifespan 32, 11 at 64, 16 at 96 (calibrate).
+  - **People who start a world already grown** would have several empty places at once (the freeze above). Their places open as
+    if from the start of the run: one at first, then one more each stretch until they reach the number for their age. (Or the
+    generator fills some from their seeded past; for Zach.)
 - **A line:** one sentence, at most about 25 words (cut beyond), in the agent's words.
 - **Shown:** under its own heading at every opening, before the memory; and at the end of each stretch, in the memory request,
   numbered, with the empty places shown as empty: "Kept for good (3 of 5 places): 1. ... 2. ... 3. ... 4. (empty) 5. (empty)".
@@ -70,6 +78,9 @@ spec/information/memory.md (D4-61's rule); cybertron2/engine/memory.py, prompt.p
   stretches and then hardly moved (forgetting and replacing rare); under forget-now-add-later many new lines found no place
   because agents added without forgetting. Zach: "they should definitely open up over time. they should start with just one, and
   then get some more over time". Places now start at one; retested with places opening over time (38.39).
+- 1 Nov 2026: Zach: "the number of memories should scale based on lifespan". The schedule now runs on the share of adult life
+  lived (as D4-61's memory length), and the most a life reaches scales with the lifespan; people grown at a world's start get their
+  places opened one a stretch.
 
 ## Sources
 
