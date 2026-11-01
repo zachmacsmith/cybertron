@@ -575,6 +575,8 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
         if mode == "continue":
             at = json.loads(dict(JN.read(src, "SELECT key, value FROM meta"))["continue"])["at"]
             restored = JN.checkpoint(src, at)
+            if days:                                                        # played on past the world's own length
+                spec["days"] = int(days)
         if mode == "replay":                                                # never touch the run itself
             import shutil
             import tempfile
@@ -605,6 +607,8 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
         J.until = until
     elif mode == "continue":
         J.until = until
+        if days:
+            J.meta("spec", spec)                                            # a later resume plays to the new length
     else:
         J.resume(strict=mode == "replay", until=until)
     J.after_commit = lambda step: BR.after_commit(w, J, step)
@@ -889,6 +893,7 @@ def main(argv=None):
     c.add_argument("--out", required=True)
     c.add_argument("--backend")
     c.add_argument("--workers", type=int, default=12)
+    c.add_argument("--days", type=int, help="play on to this many days in all (past the world's own length)")
     b = sub.add_parser("branches")
     b.add_argument("run")
     e = sub.add_parser("export")
@@ -947,7 +952,7 @@ def main(argv=None):
             print(o if args.no_play else run(None, o, args.backend, workers=args.workers, mode="resume"))
     elif args.cmd == "continue":
         BR.continue_(args.run, args.at, args.out)
-        print(run(None, args.out, args.backend, workers=args.workers, mode="continue"))
+        print(run(None, args.out, args.backend, days=args.days, workers=args.workers, mode="continue"))
     elif args.cmd == "branches":
         print(json.dumps(BR.branches(args.run), indent=1))
     elif args.cmd in ("export", "import", "publish", "fetch"):
