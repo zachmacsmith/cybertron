@@ -39,8 +39,14 @@ next stretch, is tested (review 38.39).
   - **forget now, add later:** an emptied place is free only from the next stretch ("emptied; free from the next stretch"), so a
     line is not swapped out on impulse (Zach's hypothesis, 1 Nov: "so they don't always overwrite").
 - **Asked, not optional:** the memory request asks about them every time (optional fields reach few models: 38.38).
-- **What it is for**, said once in the request: what one means to know for years: people, lessons, promises, what one holds
-  true. Nothing is put there by the engine.
+- **The wording** (Zach, 1 Nov): the purpose only, never what to keep ("we shouldn't tell them the content"), and one short line on
+  letting an old line go for a more important new one. Proposed:
+
+  > Kept for good: what you want to remember for good, a sentence each (at most 25 words), kept word for word whatever you rewrite.
+  > When your places are full, you can forget one to keep something that matters more. ("keep": [new lines]; "forget": [numbers];
+  > a place you empty can be filled at once.)
+
+  It is asked as its own question after the memory, not as a clause of it. Nothing is put there by the engine.
 
 ## Why
 
@@ -93,6 +99,10 @@ spec/information/memory.md (D4-61's rule); cybertron2/engine/memory.py, prompt.p
   place from the latest stretch and uses replacing to correct lines (Lucy's false belief that she was still with child); the
   forget-now-add-later rule stops those corrections (1 change in 32 stretches with places open at once). Leaning: **replace at
   once**. Sonnet 5.5 leaves opened places empty: whether the request should ask outright when a place opens stays open (untested).
+- 1 Nov 2026: after reading the test's prompt (38.39: its only guidance was "what you mean to know for years, word for word",
+  given as a clause after the memory instruction), Zach: "I don't think we should tell them the content. I think the purpose
+  'what you want to remember for good' is important, but I do think we should also say something short about the option to
+  forget and trade off more important new memories for older ones." Wording rewritten to that; untested.
 
 ## Sources
 
