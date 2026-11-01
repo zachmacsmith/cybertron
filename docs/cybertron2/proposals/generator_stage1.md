@@ -1,7 +1,7 @@
 # Proposal: the generator, stage 1 (a spec for review before it is built)
 
-**Status:** for review (3 Nov); scope, input and seas (D2-177), the macro layer and large worlds (D2-178), descriptions
-(D2-179) decided. Not to be built until Zach asks (README rule 10). **Owner:** 37.2; to be compiled into
+**Status:** fully specced (3 Nov): scope, input and seas (D2-177), the macro layer and large worlds (D2-178), descriptions
+(D2-179), checks (D2-180) and numbers (D2-181) decided. Ready to build when Zach asks (README rule 10). Not to be built until Zach asks (README rule 10). **Owner:** 37.2; to be compiled into
 spec/world/generation.md (37.4's) once decided. **Rests on:** D2-173 (fill in around what a world file gives), D2-174 (a mesh as
 ground truth), D2-175 (rings by default), D4-22, and generator.md §2, §3, §7 and §10.
 
@@ -222,19 +222,22 @@ Each node, parcel, stretch and landmark gets a description written by a model fr
 - food's share of work, in range;
 - road lengths in days, where pinned.
 
-**Checks** before a world is used. A failure is reported with the reason, and the world isn't written:
+**Checks** in two kinds (D2-180):
+- **Physics checks refuse** a world that fails them.
+- **Design checks warn** unless the world file requires them (`require: [dependence, chokepoint, ...]`), so a null arm such as
+  D2-137's dependence null can break them on purpose. By default, access gates and capacity are required.
 
-| Check |
-|---|
-| every river runs downhill to a lake, the coast or the edge |
-| each terrain fits its height, moisture and soil |
-| capacity in range for each settlement |
-| no settlement is self-sufficient: each lacks at least one of food, fuel, stone or metal that another has (scenario_design §1) |
-| each supply chain's links lie in different places, and at least one junction of two chains is worth holding (§10) |
-| at least one chokepoint (a ford, a pass, a narrows) on the roads between settlements |
-| every access gate reachable (scenario_design's dry run, by bots) |
-| 6 to 15 parcels per node |
-| every pin met, or the world refused |
+| Check | Kind |
+|---|---|
+| every river runs downhill to a lake, the sea or the edge | physics |
+| each terrain fits its height, moisture and soil | physics |
+| every pin met | physics |
+| capacity in range for each settlement | design (required by default) |
+| every access gate reachable (scenario_design's dry run, by bots) | design (required by default) |
+| no settlement is self-sufficient: each lacks at least one of food, fuel, stone or metal that another has (scenario_design §1) | design |
+| each supply chain's links lie in different places, and at least one junction of two chains is worth holding (generator.md §10) | design |
+| at least one chokepoint (a ford, a pass, a narrows) on the roads between settlements | design |
+| 6 to 15 parcels per node | design |
 
 ## 8. Output
 
@@ -259,25 +262,46 @@ The run journal freezes the yaml as now. The mesh travels with it for the visual
 | a 30 km region of 4 settlements generates in under a minute, descriptions cached |
 | the output runs in today's engine unchanged |
 
-## Numbers to settle (all data, calibrate)
+## Numbers (D2-181; all world settings)
 
-| Number | Proposed |
+| Number | Default |
 |---|---|
-| cell spacing | 150 m (about 2 ha, a plot) |
-| default region | 30 km square, 4 settlements, temperate; a coast only if the macro layer or a pin puts one there |
-| macro cells | about 5 to 10 km |
-| settlement spacing | at least a day's walk unless pinned |
-| ring radius for fields | about 2 km |
-| node territory | out and back in a day |
+| cell spacing | about 150 m (about 2 ha, a unit of size) |
+| region | about 70 km square, 4 settlements, temperate; a coast only where the macro layer or a pin puts one |
+| a road day | about 25 to 30 km on a road, slower across country by terrain |
+| settlement spacing | at least a day's walk, unless pinned |
+| a settlement's land | sized by its capacity target (D2-161), in rings outward; the rest is wild |
 | a wild node | at least about 10 km², more than half a day from a settlement |
 | parcels per node | 6 to 15 |
-| river threshold, incision, wetness and spring thresholds | by trial on a few seeds, then fixed |
+| macro cells | about 5 to 10 km |
+| river, incision, wetness and spring thresholds | by trial on a few seeds, then fixed |
+
+## 10. Checked against the earlier designs (3 Nov)
+
+| Number | The earlier reasoning | Holds? |
+|---|---|---|
+| cells of about 2 ha | a unit of size is about 2 ha, the land of one plot of 16 seed (02z; D4-40, D2-59) | yes: one cell is one unit of size |
+| villages a day or more apart | travel binds trade between villages, so they need each other (scenario_design §1; D4-9; 02t: roads of 1 to 3 days, a forest a day out) | yes |
+| a region of 30 km (first proposed) | 02t's region has roads of up to 3 days (Coppergate to Ashwood) | **no:** 3 days is about 75 to 90 km, so the default is now about 70 km |
+| fields within about 2 km (first proposed) | the seeded villages hold about 25 to 30 units of size in all (Barleyfield: 28, about 56 ha, for about 16 people), and capacity is set at 60 to 70% of flows (D2-161) | **no:** 2 km round a village is about 1,250 ha. With no cost to distance inside a node, all of it would count, and food and fuel would stop binding. So a settlement's land is sized by its target, and the rest is wild |
+| wild nodes of at least 10 km², more than half a day out | 02t's Ashwood forest a day out; camps (D2-68) | yes |
+| 6 to 15 parcels per node | Barleyfield has 12; the overview must stay readable (D2-116) | yes |
+| node = there and back before nightfall (D4-11) | a maximum for routine places, not a territory | yes, read as a maximum |
+
+**What this shows.** The earlier designs describe a sparse world:
+- small villages, each farming tens of hectares;
+- a day or more of wild land between them.
+
+That is far sparser than a medieval countryside, where villages stood 2 to 5 km apart. The sparseness is what makes travel bind and
+villages need each other.
+
+**A realistic-density world** would put several villages within one node's day. Trade between them would then be free, unless
+distance inside a node had a cost (OPEN L-35). So realistic density is a later option that waits on L-35, not a default.
 
 ## Open questions (for Zach)
 
 1. ~~Scope~~ and 2. ~~input~~: decided (D2-177).
-3. The numbers above (all world settings)?
-4. The checks (§7): any missing, and should a failed check refuse the world, or only warn?
+3. ~~The numbers~~ (D2-181, with the two changes in §10) and 4. ~~the checks~~ (D2-180): decided.
 5. ~~Descriptions~~ (D2-179), 6. ~~the macro layer~~ and 7. ~~large worlds~~ (D2-178): decided.
 
 ## Sources
