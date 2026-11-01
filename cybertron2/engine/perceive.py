@@ -482,7 +482,7 @@ def evening(w, attend: dict, today: dict) -> dict:
         for key in today["worked"].get(name, []):                               # acting: what one worked on, one sees (38.40 §9)
             sub = f"parcel:{key}" if key in w.s["parcels"] else f"building:{key}"
             rows = sorted((f for f in F if sub in (f.get("about") or []) and not f.get("event") and not f.get("thing")
-                           and not f.get("actor") and _can_read(mind, f)), key=lambda f: -f["salience"])
+                           and not f.get("actor") and not f.get("ambient") and _can_read(mind, f)), key=lambda f: -f["salience"])
             if rows:
                 b = mind.store["beliefs"].setdefault(sub, {"day": here.day, "lines": [], "ids": []})
                 if b["day"] != here.day:

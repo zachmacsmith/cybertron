@@ -176,7 +176,8 @@ def care_gifts(w, today) -> dict:
         said = [o for o in offers if str(o.get("pass") or "").strip()]
         if said:
             win = max(said, key=lambda o: (o["meals"], o["draw"]))
-            room = len(MEM.kept(w, child)["lines"]) < int(MEM.kept_settings(w)["childhood"])
+            passed = sum(1 for x in MEM.kept(w, child)["lines"] if str(x.get("source", "")).startswith("from "))
+            room = passed < int(MEM.kept_settings(w)["childhood"])                 # the limit counts lines passed on, not seeded ones
             text = MEM.line(win["pass"], MEM.kept_settings(w)["words"])
             if room:
                 MEM.seed_line(w, child, text, f"from {win['by']}")

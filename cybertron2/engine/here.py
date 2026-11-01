@@ -145,7 +145,8 @@ class Here:
         from cybertron2.engine import memory as MEM
         k = MEM.kept(self._w, x)
         return {"lines": [(l["text"], l["source"]) for l in k["lines"]],
-                "room": max(0, int(MEM.kept_settings(self._w)["childhood"]) - len(k["lines"]))}
+                "room": max(0, int(MEM.kept_settings(self._w)["childhood"])
+                            - sum(1 for l in k["lines"] if str(l.get("source", "")).startswith("from ")))}
 
     def children_on(self) -> bool:
         from cybertron2.engine import life as LF
