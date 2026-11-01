@@ -154,18 +154,20 @@ def _detect_raid(w, today, e) -> dict:
     bid, node = e["building"], e["node"]
     b = w.s["buildings"][bid]
     where = sleeping_places(w, today)
-    sound = EV.visibility(w, node, b["parcel"], "sound", night=True, quiet=False)
+    from cybertron2.engine import things as TH                                 # by the one rule (D4-75): own by role (D2-81)
     riders = float(FUSE["raid"]["riders"]["detect"]) if e.get("riders") else 1.0
     out = {}
     for n in w.present(node):
         if n == e["by"] or w.s["people"][n]["stage"] == "child" or n in (today.get("travel") or {}):
             continue
         if (today.get("guards") or {}).get(n) == bid:
-            p, role = float(d["watcher"]), "watcher"
+            p, role = TH.spot_chance(w, n, node, b["parcel"], float(d["watcher"]), inside=[n]), "watcher"
         elif where.get(n) == bid:
-            p, role = (float(d["dog"]) if b["fittings"].get("dog") else float(d["inside"].get(b["structure"], 0.3))), "inside"
+            own = float(d["dog"]) if b["fittings"].get("dog") else float(d["inside"].get(b["structure"], 0.3))
+            p, role = TH.spot_chance(w, n, node, b["parcel"], own, inside=[n]), "inside"
         elif where.get(n) and w.s["buildings"][where[n]]["node"] == node:
-            p, role = float(d["neighbour"]) * sound, "neighbour"
+            p, role = TH.spot_chance(w, n, node, b["parcel"], float(d["neighbour"]), sense="sound", night=True, quiet=False,
+                                     cap=False), "neighbour"
         else:
             continue
         if w.rng("fuse-detect", w.d, e["id"], n).random() < min(1.0, p * riders):    # what it senses: signs.NIGHT (D4-48)

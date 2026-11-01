@@ -197,7 +197,10 @@ def settle_thefts(w, today, attend) -> None:
                 continue
             tgt = str(today["watch"].get(x) or attend.get(x) or "").lower()
             at_home = st["building"] in w.homes(x) and not today["worked"].get(x) and not today["watch"].get(x)
-            p = 0.8 if b["name"].lower() in tgt else 0.45 if at_home else 0.3 if tgt in ("place", "the place") else 0.05
+            from cybertron2.engine import things as TH                      # by the one rule (D4-75): one slipping into a house
+            from cybertron2.engine.data import NOTICING
+            p = TH.spot_chance(w, x, node, b["parcel"], float(NOTICING["theft"]), tgt, inside=[x] if at_home else (),
+                               attending=b["name"].lower() in tgt or tgt in ("place", "the place"))
             if w.rng("steal-seen", w.d, x, st["by"]).random() < p:
                 seen.append(x)
         owners = [m for m in w.living() if st["building"] in w.homes(m)]

@@ -173,15 +173,22 @@ def eye(w, name, on="things") -> float:
 
 
 # ---------------------------------------------------------------------- the noticing rule (D2-85, D2-102, D4-53, D4-75)
-def steps(w, name, parcel):
-    """Steps in the parcel graph from where one was today (the parcels one worked, crossed, or one's spot) to `parcel` (D4-75);
-    None if it is not at one's node."""
+def night_spot(w, name):
+    """Where one is in the night (D4-75): the parcel of the house one sleeps in, else where one was."""
+    from cybertron2.engine.night import sleeping_places
+    bid = sleeping_places(w, w.s.get("today") or {}).get(name)
+    return w.s["buildings"][bid]["parcel"] if bid in w.s["buildings"] else spot_of(w, name)
+
+
+def steps(w, name, parcel, night=False):
+    """Steps in the parcel graph from where one was today (the parcels one worked, crossed, or one's spot; in the night, where one
+    sleeps) to `parcel` (D4-75); None if it is not at one's node."""
     from cybertron2.engine import layout as LY
     a = w.s["people"][name]
     par = w.s["parcels"].get(parcel)
     if par is None or a["at"] is None or par["node"] != a["at"]:
         return None
-    start = set(LY.worked_parcels(w, name)) | set(LY.passed(w, name)) | {spot_of(w, name)}
+    start = {night_spot(w, name)} if night else set(LY.worked_parcels(w, name)) | set(LY.passed(w, name)) | {spot_of(w, name)}
     seen, ring, d = {parcel}, [parcel], 0
     while ring:
         if start & set(ring):
@@ -192,16 +199,21 @@ def steps(w, name, parcel):
     return None
 
 
-def presence(w, name, parcel, own_x=1.0, sense="sight", within=None, attending=False) -> float:
+def presence(w, name, parcel, own_x=1.0, sense="sight", within=None, attending=False, night=False) -> float:
     """Where the observer was and what it did there today (D2-85, D2-115); for sound and smell, how far it carries in steps of the
-    parcel graph (D4-75); `within`: the furthest step the sign is read from; `attending`: one sought it out (at least "about")."""
+    parcel graph (D4-75); `within`: the furthest step the sign is read from; `attending`: one sought it out (at least "about");
+    `night`: a sign in the night, read from where one sleeps."""
     pr = NOTICING["presence"]
     lim = NOTICING["within"].get(sense)
     lim = within if lim is None else (lim if within is None else min(lim, within))
-    d = steps(w, name, parcel) if (lim is not None or sense in NOTICING["carry"]) else None
+    d = steps(w, name, parcel, night) if (night or lim is not None or sense in NOTICING["carry"]) else None
     if lim is not None and (d is None or d > lim):
         return 0.0
-    best = _presence_here(w, name, parcel, own_x)
+    if night:
+        best = 0.0 if d is None else float(pr["about"]) if d == 0 else float(pr["next door"]) if d == 1 and own_x >= float(
+            NOTICING["next_door_min"]) else float(pr["elsewhere"]) if own_x >= float(NOTICING["elsewhere_min"]) else 0.0
+    else:
+        best = _presence_here(w, name, parcel, own_x)
     if attending:
         best = max(best, float(pr["about"]))
     carry = NOTICING["carry"].get(sense)
@@ -255,7 +267,7 @@ def hidden_factor(c) -> float:
 
 
 def spot_chance(w, name, node, parcel, own_x, target=None, sense="sight", inside=(), everyone=False, eye_on="things", reach=None,
-                night=False, attending=False, focus=1.0, sky=False, cap=True) -> float:
+                night=False, attending=False, focus=1.0, sky=False, cap=True, quiet=None) -> float:
     """The one noticing rule (information/noticing.md, D4-53, D4-75), for every perceived line about the world:
     own x the sense's visibility x presence x attention x the eye (sight only), capped at 1.
 
@@ -281,8 +293,9 @@ def spot_chance(w, name, node, parcel, own_x, target=None, sense="sight", inside
         return min(top, x * e if eye_on != "things" else x)
     if parcel not in w.s["parcels"]:
         return 0.0
-    vis = EV.visibility(w, node, parcel, sense, night=night, quiet=own_x < float(N["loud"]))   # a loud sound is not masked
-    pres = presence(w, name, parcel, own_x, sense, within=N["reach"].get(reach) if reach else None, attending=attending)
+    quiet = own_x < float(N["loud"]) if quiet is None else quiet                       # a loud sound is not masked
+    vis = EV.visibility(w, node, parcel, sense, night=night, quiet=quiet)
+    pres = presence(w, name, parcel, own_x, sense, within=N["reach"].get(reach) if reach else None, attending=attending, night=night)
     return min(top, own_x * vis * pres * att * e)
 
 

@@ -79,3 +79,14 @@ def test_an_attended_subject_is_mostly_seen():
     plain = PC.chance_of(w, "Margery", f)
     sought = PC.chance_of(w, "Margery", f, attending=True)
     assert sought > 0.6 and sought > 5 * plain
+
+
+def test_a_sign_in_the_night_is_read_from_where_one_sleeps_and_a_break_in_heard_as_before():
+    w = _world()
+    _at(w, "Everard", ["cb_copse"])                                                 # by day two steps from the Common
+    assert TH.steps(w, "Everard", "cb_common") == 2
+    assert TH.steps(w, "Everard", "cb_common", night=True) == 1                     # asleep in Hobb House, on the Green
+    from cybertron2.engine.data import FUSE
+    p = TH.spot_chance(w, "Everard", "combe", "cb_green", float(FUSE["raid"]["detect"]["neighbour"]), sense="sound", night=True,
+                       quiet=False)
+    assert abs(p - 0.18) < 1e-9                                                     # as D2-81's 0.15 x the night's sound was
