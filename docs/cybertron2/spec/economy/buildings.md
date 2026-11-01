@@ -112,6 +112,12 @@ The build verb lists every blueprint and fitting the agent knows, with its full 
 room: 8 timber (you have 2), 6 units of work; a house needs a room, beds and a hearth or fire ring"), and each building's floor:
 used and free ("Reed House: 12 spaces, 9 used: 6 beds, a hearth, bins, a hand mill; 3 free").
 
+### What people write on buildings (D2-169)
+
+Every building carries a **description** and **lines** written by people: anyone who enters or attends to it reads them, and
+anyone who can reach it may change or deface them, at a cost in work and seen. Lengths, costs, the monument (a building with no
+room) and fine work are proposed: proposals/building_lines.md.
+
 ### Shelter and upkeep
 
 - **Shelter:** sleeping in a house you may use, with its fire lit in the cold, gives the full ration rule; sleeping without shelter
@@ -161,4 +167,4 @@ and do ("a stone hall with a hearth"), who holds them as they know it, and the r
 [02i_buildings.md](../../../review/37_growth/02i_buildings.md), [02k §3](../../../review/37_growth/02k_fuses_and_gates.md);
 proposals/buildings.md, proposals/shelter.md.
 
-*Current as of 3 Nov 2026: H-5, D2-3, D2-9, D2-20, D2-45, D2-49, D2-56, D2-60, D2-61, D2-154, D2-155, D2-164, D2-165, D2-166, D2-167, D2-168.*
+*Current as of 3 Nov 2026: H-5, D2-3, D2-9, D2-20, D2-45, D2-49, D2-56, D2-60, D2-61, D2-154, D2-155, D2-164, D2-165, D2-166, D2-167, D2-168, D2-169.*
