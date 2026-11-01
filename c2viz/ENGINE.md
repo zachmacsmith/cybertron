@@ -346,6 +346,18 @@ Two halves, so that every rule stays in the engine:
   by building when full, leaving lanes and yards.
 - **Where in a parcel** a building stands (its lot, spread through the parcel, kept from the day it first stands), a person
   stands (around the parcel the engine says they are on), a beast grazes.
+- **Buildings' looks:** walls and roofing follow the structure (wattle: daub on hazel under thatch; timber: an oak frame on a stone
+  footing under thatch or shingles; stone: coursed rubble under stone slates, sometimes thatch); rooms set the boxes; storeys
+  only in stone; state from condition, unfinished, new, door; fittings as they show outside. The roof's form (gabled, hipped, a
+  gable to the front) and the roofing where the structure allows a choice are presentation: each village leans to one, each
+  house varies, by hash.
+- **Villages:** a green with a well in the middle of the built ground, every road running out from it through its end's parcel;
+  houses placed with their doors a few paces off a road, near the green, clear of roads and green; a house the built ground
+  cannot hold stands on open ground beside it (and says so).
+- **Terraces:** the region's landscape height is cut into levels (the site's terraces: a lit lip, a cliff face down to the south,
+  dark side edges, each level its own green), with a slow undulation under everything so a world that says little still has a
+  few levels; each place stands level on its own ground; woods are masses of a slow noise over the landscape's forest; roads
+  ramp over cliff faces and are edged. A place close up stands in the same landscape, sampled from the region's.
 - **Roads' ways:** a curve through a few waypoints set off to either side of the straight line (deterministic per road); on the
   region's map each day's stretch, its landmarks and any river at a ford or bridge sit on that way.
 - **Height** (a word in the engine) as terraces and cliff faces: a parcel above its neighbours to the south shows a face.
