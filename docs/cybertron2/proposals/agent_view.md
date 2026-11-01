@@ -112,6 +112,11 @@ seeing.md §1, senses.md; cybertron2/engine/prompt.py, perceive.py, knowledge.py
 
 - 1 Nov 2026: point 10 added after Zach asked whether customs and what people write down or pass on fit here: texts as a second kind
   of belief, with their channels; the born child's empty memory found.
+- 1 Nov 2026: Zach asked for a taxonomy of what agents need to know and how it scales; review 38.40 gives seven kinds (self; here
+  and now; remembered world; people and ties; how the world works; one's own mind; means of acting), each with its channel,
+  certainty and scaling driver; the upbringing test for common knowledge (rules move into seeded memory and customs); cached and
+  updating layers with deltas within a stretch; presence by proximity; and the lessons of cybertron 1 and 2. To be folded into this
+  proposal if Zach takes the frame.
 
 ## Sources
 
