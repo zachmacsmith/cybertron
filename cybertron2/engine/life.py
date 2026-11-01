@@ -436,7 +436,7 @@ def _young(w, today, rec, where, out):
             if name in rec["missed"]:
                 p *= float(inf["hungry"])
             bid = where.get(name)
-            if w.cold() and (bid is None or not w.s["buildings"][bid].get("fire")):
+            if w.cold() and (bid is None or not w.s["buildings"][bid].get("fire") or w.s["buildings"][bid].get("fire_out") == w.d):
                 p *= float(inf["cold"])
         else:
             p = float(LIFE["child"]["dies"])

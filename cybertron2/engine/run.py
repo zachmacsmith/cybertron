@@ -609,6 +609,8 @@ def night_lines(w, rec) -> dict:
             L.append(f"You slept at {slept}.")
         if n in rec.get("open_fire", []):
             L.append(f"You lit a fire in the open ({float(w.p['heat']['open']):g} heat from what you carried); up to {w.p['heat']['share']} slept by it.")
+        if n in rec.get("fire_out", []):
+            L.append("The night's weather put the fire out: you lay cold till morning.")
         if n in rec["missed"]:
             L.append("You went to bed without enough to eat: a missed meal.")
             raw = rec.get("uncooked", {}).get(n)

@@ -43,16 +43,21 @@ def night(w) -> dict:
         lit, warm = False, 0.0
         if sleepers and any(b["fittings"].get(f_) for f_ in FIRE):
             hearths, rings = int(b["fittings"].get("hearth") or 0), int(b["fittings"].get("fire ring") or 0)
-            if b["structure"] == "camp":                                      # a camp's fire (D4-49)
-                heat = float(hp["camp"])
+            if b["structure"] == "camp":                                      # a camp's fire (D4-49), in the weather (D4-83)
+                heat = float(hp["camp"]) * weather_fuel(w)
             else:
                 heat = float(hp["cold" if cold else "normal"]) * max(1, hearths + rings)
             if FO.burn(w, b["node"], b["stock"], heat):
                 lit = True
+                if b["structure"] == "camp" and fire_goes_out(w, ("camp", bid), rings > 0):
+                    rec.setdefault("fire_out", []).extend(sleepers)              # cooked on, but cold by morning (D4-83)
+                    w.apply("set", b["node"], ref=("building", bid), field="fire_out", value=w.d)
                 spaces = float(hp["hearth_spaces"]) * hearths + float(hp["ring_spaces"]) * rings
                 warm = 1.0 if b["structure"] == "camp" else min(1.0, spaces / max(1.0, float(BL.floor(b) or 1)))   # spaces of floor
                 if not hearths and b["structure"] != "camp":
                     warm = min(warm, 0.5)                                     # a fire ring half-warms a house in the cold
+        if lit and b.get("fire_out") == w.d:
+            warm = 0.0
         w.apply("set", b["node"], ref=("building", bid), field="fire", value=lit)
         w.apply("set", b["node"], ref=("building", bid), field="warm", value=warm)
         if sleepers:
@@ -89,9 +94,10 @@ def night(w) -> dict:
             out_ = p["camping"][gear]
             need = float(p["ration"]) * float(out_[1] if cold else out_[0])
             fall = float(out_[2])
-            if cold and name in fires and gear != "camp":                    # a fire in the open warms (D2-159)
+            gone = name in (rec.get("fire_out") or [])                       # the fire went out in the night (D4-83)
+            if cold and name in fires and gear != "camp" and not gone:      # a fire in the open warms (D2-159)
                 need, fall = float(p["ration"]) * float(p["camping_fire"].get(gear, out_[1])), 0.0
-            if gear == "camp" and cold and b is not None and not b["fire"]:
+            if gear == "camp" and cold and b is not None and (not b["fire"] or gone):
                 need, fall = float(p["ration"]) * float(p["camping"]["out"][1]), 0.0
             rec.setdefault("camped", {})[name] = gear
         if state == "unsheltered" and name in (road.get("fed") or {}):          # fed on the way at a good place (D2-109)
@@ -358,12 +364,30 @@ def open_fires(w, today, where, rec) -> set:
             if not queue or n in warmed:
                 continue
             place = w.place_of(("person", n))
-            if FO.burn(w, place, w.hands(n), float(hp["open"]), why="fire"):
+            if FO.burn(w, place, w.hands(n), float(hp["open"]) * weather_fuel(w), why="fire"):
                 rec.setdefault("open_fire", []).append(n)
                 by = [n] + [x for x in queue if x != n and x not in warmed][: int(hp["share"]) - 1]
                 warmed.update(by)
                 queue = [x for x in queue if x not in warmed]
+                if fire_goes_out(w, ("open", n), False):                         # rain or wind took it in the night (D4-83)
+                    rec.setdefault("fire_out", []).extend(by)
     return warmed
+
+
+def weather_fuel(w) -> float:
+    """What a fire under no roof burns tonight against the dry night's (D4-83): rain and wind wet it, lying snow wets the wood."""
+    from cybertron2.engine import environment as EV
+    hp = w.p["heat"]
+    x = float((hp.get("weather") or {}).get(EV.weather(w), {}).get("fuel", 1.0))
+    return x * (float(hp.get("snow_lying_fuel", 1.0)) if EV.snow_lying(w) else 1.0)
+
+
+def fire_goes_out(w, key, ring) -> bool:
+    """Whether a fire under no roof goes out in the night (D4-83): a chance in a downpour or a gale, less with a fire ring."""
+    from cybertron2.engine import environment as EV
+    hp = w.p["heat"]
+    q = float((hp.get("weather") or {}).get(EV.weather(w), {}).get("out", 0.0)) * (float(hp.get("ring_keeps", 1.0)) if ring else 1.0)
+    return q > 0 and w.rng("fire-out", w.d, *key).random() < q
 
 
 def _eat(w, place, stores, need, hearth=True) -> float:

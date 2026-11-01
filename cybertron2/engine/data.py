@@ -456,7 +456,12 @@ PHYSICS = {
     "fuel": {"normal": 0.5, "cold": 2.0, "camp": 1.0, "open": 2.0},     # in timber; in heat (D2-157): below
     "camping_fire": {"out": 1.6, "bedroll": 1.5, "tent": 1.25},            # in the cold by a fire in the open (D2-159)
     "heat": {"normal": 1.0, "cold": 4.0, "camp": 2.0, "open": 4.0, "order": ["firewood", "timber", "charcoal"],
-             "share": 4, "hearth_spaces": 12, "ring_spaces": 6, "ring_cold": 1.15},   # D2-157, D2-159     # D4-49: a camp's fire 1 a night; a fire in the open 2 (calibrate)
+             "share": 4, "hearth_spaces": 12, "ring_spaces": 6, "ring_cold": 1.15,
+             # D4-83: the night's weather on a fire under no roof (a camp, or in the open): more fuel, and a chance it goes out in the
+             # night, taking its warmth (a fire ring keeps it in a little better); a sound house's hearth is not touched (calibrate)
+             "weather": {"rain": {"fuel": 1.5, "out": 0.0}, "heavy rain": {"fuel": 1.5, "out": 0.5}, "gale": {"fuel": 1.5, "out": 0.5},
+                         "snow": {"fuel": 1.25, "out": 0.0}},
+             "snow_lying_fuel": 1.15, "ring_keeps": 0.8},   # D2-157, D2-159     # D4-49: a camp's fire 1 a night; a fire in the open 2 (calibrate)
     "land_blind": 0.25,                                                  # D4-50: share with no eye for how bare a place is (calibrate)
     "house_spoil": 0.3,
     "cellar_spoil": 0.25,                                                # D2-45: a quarter of the house rate
