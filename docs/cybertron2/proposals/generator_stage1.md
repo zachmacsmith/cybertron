@@ -1,7 +1,7 @@
 # Proposal: the generator, stage 1 (a spec for review before it is built)
 
 **Status:** fully specced (3 Nov): scope, input and seas (D2-177), the macro layer and large worlds (D2-178), descriptions
-(D2-179), checks (D2-180) and numbers (D2-181) decided. Ready to build when Zach asks (README rule 10). Not to be built until Zach asks (README rule 10). **Owner:** 37.2; to be compiled into
+(D2-179), checks (D2-180) and numbers (D2-181) decided. Builder's tables in §11 (D2-183 to D2-187). Ready to build when Zach asks (README rule 10). Not to be built until Zach asks (README rule 10). **Owner:** 37.2; to be compiled into
 spec/world/generation.md (37.4's) once decided. **Rests on:** D2-173 (fill in around what a world file gives), D2-174 (a mesh as
 ground truth), D2-175 (rings by default), D4-22, and generator.md §2, §3, §7 and §10.
 
@@ -13,7 +13,8 @@ Stage 1 makes a world from a world file with gaps. It writes:
 - **the mesh beside it:** the ground truth;
 - **a report of what was pinned, what was generated and what was checked.**
 
-**Engine changes:** none. People come from today's generate.py, settled at the generated sites.
+**Engine changes:** data only (four new covers, D2-185). People come from generate.py, extended to several nodes and settled at the
+generated sites (§11e).
 
 **Not in stage 1:**
 - the tier 1 environment (year severity, soil moisture, floods, river level): stage 2;
@@ -304,6 +305,207 @@ villages need each other.
 
 **A realistic-density world** would put several villages within one node's day. Trade between them would then be free, unless
 distance inside a node had a cost (OPEN L-35). So realistic density is a later option that waits on L-35, not a default.
+
+## 11. Tables for the builder (3 Nov)
+
+Every value here is data and marked calibrate. First values are to be tuned by trial on a few seeds, then fixed. Where a magnitude
+already exists in the engine or the hand-made worlds, the generator takes it from there rather than inventing it.
+
+### 11a. Terrain scores
+
+**Inputs per cell:**
+- h: height in metres;
+- s: slope in degrees;
+- m: moisture, 0 to 1;
+- w: wetness, 0 to 1;
+- tex: soil texture (sand, loam, clay, chalk);
+- f: height above the nearest large river, in metres;
+- c: distance to the sea, in km;
+- d: distance from the nearest settlement, in km (after siting).
+
+Each terrain scores 1 for each of its conditions met and loses for each missed, weighted. The best score wins, and a pin adds or
+sets.
+
+| Terrain | Conditions (first values) |
+|---|---|
+| river floodplain | f < 2; beside a river of large flow; s < 2 |
+| river terrace | 2 ≤ f < 8; within 1.5 km of a river; s < 4; tex loam or sand |
+| clay vale | tex clay; h < 150; s < 5; m ≥ 0.4 |
+| lowland loam | tex loam; h < 200; s < 6 |
+| sandy heath | tex sand; m < 0.45 |
+| chalk or limestone down | tex chalk; 80 ≤ h ≤ 300; 3 ≤ s ≤ 15 |
+| woodland | m ≥ 0.5; s < 15; w < 0.7 |
+| deep forest | woodland's conditions, and d > 15 (decided after siting) |
+| hills | 250 ≤ h ≤ 600, or s ≥ 10 |
+| upland summer pasture | h ≥ 450; s < 15 |
+| moor | h ≥ 300; m ≥ 0.6; w ≥ 0.6 |
+| fen | h < 50; w ≥ 0.8; s < 1 |
+| coast | c < 1; h < 20 |
+| saltmarsh | c < 2; h < 3; w ≥ 0.7 |
+| rock | s ≥ 30 |
+
+Passes and gorges aren't cell terrains. They're found on routes (11f).
+
+### 11b. Terrain and land use to the engine's covers and resources
+
+**Covers.** The engine's eight covers, plus heath, moor, fen and saltmarsh as data (D2-185). The land use from the rings (§4)
+chooses the cover, and the terrain limits which are possible:
+
+| Land use | Cover | Terrains it may sit on |
+|---|---|---|
+| built ground | built | terrace, loam, vale, down, coast (scrub where cleared) |
+| fields | field | floodplain, terrace, vale, loam; poor on heath, down and hills |
+| meadow | meadow | floodplain; the edges of fen |
+| pasture | pasture | any not waterlogged; downs, hills, upland (summer) |
+| managed wood, copse | forest (`managed wood`, `copse`) | woodland, near the settlement |
+| wild wood | forest (`old forest`) | woodland, deep forest |
+| waste | scrub, heath, moor, fen, saltmarsh, rock | by terrain |
+| water | water | rivers, lakes, the sea |
+
+**Resources:**
+- **Magnitudes** per unit of size come from the engine's tables (data.FORESTS for wood; RESOURCES' regimes) and from the averages,
+  by cover and kind, of the hand-made worlds (hollins2, region_c, wide). The builder computes these once into a reference table.
+- **Plants, game and grass:** {K, S, r} per parcel, as those worlds have them.
+- **Stone:** `quarry` (endless) on rock, downs and hills.
+- **Ore:** `seam` (finite) on hills, within the geology mask's ore belts, at region_c's Coppergate seam size.
+- **The new covers in stage 1:** low plants and grass only. Peat, reeds and salt come in stage 2.
+
+### 11c. The vocabulary
+
+| Word | What it does |
+|---|---|
+| `plenty of`, `short of` *wood / food / stone / grazing / water* | the settlement's share of that flow: the region's top quarter, or its bottom quarter |
+| `rich`, `poor` *soil* | fertility at about 1.2 to 1.4, or 0.6 to 0.8 |
+| `wet`, `dry` | moisture and wetness raised or lowered for the settlement's land |
+| `sheltered`, `exposed` | a site in a hollow, or on open high ground |
+| `on a river`, `by a ford`, `a mill site` | the site placed on a river; a ford on its road; a river with a drop within its land |
+| `by the sea`, `on an island`, `in the hills` | a macro template (11d) placed to make it so |
+| `a hill village`, `a forest hamlet`, `a fen village` | the settlement's terrain set |
+| `at a crossroads`, `remote` | the most roads meet there; at least two days from the others |
+| `n days out` *from a place* | road length to it |
+| `land-pressed`, `land-rich` | its capacity target at 0.8 to 0.9, or 0.4 to 0.5 (D2-16) |
+
+### 11d. Macro templates (D2-178)
+
+| Template | Parameters | Shape |
+|---|---|---|
+| coast | side, how jagged | sea beyond a line |
+| island, archipelago | size, count | land blobs in sea |
+| peninsula | side, width | land with sea on three sides |
+| bay | side, depth | sea cut into a coast |
+| range | line, height, width | a ridge; passes at its low points |
+| upland | area, height | a plateau |
+| basin | area, depth | low land ringed by higher |
+| lake district | area, number of lakes | many hollows that fill |
+| river mouth or delta | river, coast | a large river reaching the sea, with a low wet fan |
+| plain | area | low and gentle |
+
+**How they combine:**
+- templates blend by taking the highest of the shapes, plus noise;
+- every parameter has a default, and any can be pinned.
+
+### 11e. People and things (D2-184)
+
+- **Population:** each settlement's people follow its capacity target (§7). Households are about 4 to 6 people.
+- **Settling:** generate.py settles founders and grows the tree. Stage 1 extends it from one node to several, with marriages and kin
+  between neighbouring villages (D4-21: one tree for the whole population).
+- **Houses:**
+  - a house for each household, with a bed for each member (D4-86) and the free floor of D4-85;
+  - a hearth and bins;
+  - other fittings by trade.
+- **Stores and crops** as in the hand-made worlds (D2-13): last year's grain and seed, fuel, crops in the ground for the season.
+- **Herds:** as pasture and hay can carry (D4-45), with oxen where the soil is heavy.
+- **Claims:** fields in plot shares to households (D2-163); the common pasture to the village, or held by none.
+- **Trades where their resources are:**
+  - a smith within a day of a seam, with an anvil;
+  - a mason by a quarry;
+  - a carpenter by managed wood;
+  - a trapper by forest;
+  - a miller at a mill site.
+
+### 11f. Roads in detail (D2-182)
+
+- **Pace by cover** (km an hour):
+
+| Cover | Pace |
+|---|---|
+| road | 4 |
+| field, built | 3.5 |
+| pasture, heath, down | 3 |
+| woodland | 2 |
+| moor, fen, saltmarsh | 1.5 |
+
+  Slope multiplies the time by (1 + s / 10).
+- **A road day** is 8 hours of walking. An edge's days are its hours / 8, rounded, at least 1.
+- **Rivers** are crossed only at a ford: a reach no wider than about 30 m and no deeper than about 1 m, from its flow.
+- **An edge's terrain** (data.TERRAIN) comes from the cells most crossed:
+  - farmland, woodland or plain;
+  - marsh for fen, moor and saltmarsh;
+  - hills where the slope is steep;
+  - mountain at h ≥ 600;
+  - river valley along a river.
+- **Landmarks** (data.LANDMARKS):
+
+| Landmark | Where it's found |
+|---|---|
+| ford | where a road crosses a river (as above) |
+| pass | the highest point of a road over a ridge, with land at least 100 m lower on both sides |
+| narrows | slopes of at least 20° on both sides within 200 m |
+| spring | a spring cell within 300 m of the road |
+| meadow, fruit trees | a good place near mid-day on the road |
+| hollow | a sheltered low point |
+
+- **Hidden ways:**
+  - between neighbouring places with no road, a path is made when it is no more than 1.2 times a road's time and at least half
+    under cover;
+  - wild nodes get one or two each.
+
+### 11g. Names (D2-186)
+
+**Settlements and landmarks** take a first part and an ending from lists in data, chosen by their facts:
+- **endings by site:**
+  - -ford (a ford), -ley (a woodland clearing), -den (a valley pasture), -mere (a lake), -wick (a dairy farm);
+  - -ton or -ham (a settlement), -by, -hope (a hidden valley), -combe (a short valley), -holt (a wood);
+- **first parts by the land:** Ash-, Oak-, Birch-, Stan- (stone), Mar- (mere), Brook-, Holl- (hollow), Fen-, Hay-, Mill-, Salt-,
+  Cold-, Wether- (sheep).
+
+**Parcels** take patterns by cover, shape, side and feature:
+- the Long Field, North Field, Brook Meadow;
+- the Common, the Hanger (a wood on a steep slope);
+- the Moss (a moor), Holloway.
+
+**Landmarks** are named from their place: "the Ford at X", "X Pass".
+
+**The rules:**
+- names are chosen by keyed draws;
+- no name repeats within a world;
+- the style is a world setting.
+
+### 11h. What each settlement knows at the start (D2-187)
+
+- road neighbours, fully;
+- villages two roads away, by name and a line;
+- stopping places on roads;
+- wild nodes off the roads, unexplored (D4-47), except to the households whose trade uses them (a hunter its hunting ground, a
+  woodcutter its wood);
+- hidden ways, known to one or two of those who would use them.
+
+### 11i. How the checks are computed (D2-180)
+
+| Check | Computed as |
+|---|---|
+| dependence | for each settlement, each of food, fuel, stone and metal: its own land's supply against its need; it must lack at least one that another settlement within two roads has in surplus |
+| supply chains | for each chain (grain, mill, bread; timber, charcoal, ore, smith; stone, building; salt, keeping food), the nodes holding its links are not all one node |
+| a junction worth holding | a node or landmark on the cheapest routes of at least two chains' goods, between their suppliers and their users |
+| chokepoint | a landmark or node whose loss cuts the roads between two settlements, or lengthens the route by a day or more |
+| capacity | capacity.py for each node, at 60 to 70% of its scarcest flow |
+| access gates | the bot dry run of scenario_design |
+| parcels per node | 6 to 15 |
+
+### 11j. The base file
+
+A generated world extends a chosen base world file (as specs can already: `extends`) for the calendar, lifespan, children setting
+and the rest. The generator writes only places, roads, resources, buildings and people.
 
 ## Open questions (for Zach)
 
