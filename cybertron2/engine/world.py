@@ -6,8 +6,9 @@ State (World.s, plain JSON):
     nodes        {id: {name, text}}
     roads        {id: {a, b, days}}
     parcels      {id: {node, name, cover, size, adj, text, res: {plants|game|wood|seam|quarry: {S, K, r}}, crop?, fertility}}
-    buildings    {id: {node, parcel, name, structure, size, fittings {name: n}, condition, door, fire, stock (container id),
-                       unfinished?: {blueprint, units_left, materials_left, by}}}
+    buildings    {id: {node, parcel, name, structure, size (its floor), rooms [{kind, floor, storey}], fittings {name: n}, condition,
+                       door, fire, stock (container id), tier, description, lines, changes, works?, mending?, monument?,
+                       unfinished?: {blueprint, units_left, materials_left, by}}}       (buildings.py; review 02zh)
     herds        {id: {node, parcel, home, name, kind, count, in_milk, milked: {day, n}}}
     containers   {id: {kind: hands|stock|remains, of, node?, goods {item: qty}, wear {item: uses}}}
     people       {name: {stage, sex, model, hunger, missed, frailty, attack, defence, wounded, alive, died, cause, hands, at,
@@ -219,6 +220,8 @@ class World:
         from cybertron2.engine import things as TH
         for who, cid in self.s.pop("_seed_things", []):                        # who knows where a seeded thing lies
             TH.remember(self, who, cid, "put")
+        from cybertron2.engine import buildings as BL
+        BL.install(self)                                                       # what does not fit in a store lies at its door (D2-155)
 
     def _person(self, name, a):
         """A person's record and hands (D2-139: `born` a day, negative before the run; the stage follows it when given)."""
@@ -245,14 +248,26 @@ class World:
             "pregnant": a.get("pregnant"), "gap_until": a.get("gap_until"), "order": None}
 
     def _new_building(self, bid, b):
+        from cybertron2.engine import buildings as BL
         s = self.s
         cid = f"stock:{bid}"
-        s["containers"][cid] = {"kind": "stock", "of": bid, "goods": {k: float(v) for k, v in (b.get("stock") or {}).items()}, "wear": {}}
+        goods = {k: float(v) for k, v in (b.get("stock") or {}).items()}
+        s["containers"][cid] = {"kind": "stock", "of": bid, "goods": goods, "wear": {}}
+        fittings = {FITTING_ALIAS.get(k, k): v for k, v in (b.get("fittings") or {}).items()}
+        rooms = BL.seed_rooms(b, fittings, goods)                              # floor enough for what is in it (02zh §1)
         s["buildings"][bid] = {"node": self.node_of(b["parcel"]), "parcel": b["parcel"], "name": b.get("name", bid),
-                               "structure": b.get("structure", "wattle"), "size": int(b.get("size", b.get("beds", 4))),
-                               "fittings": {FITTING_ALIAS.get(k, k): v for k, v in (b.get("fittings") or {}).items()},
-                               "condition": int(b.get("condition", 2)),
-                               "door": b.get("door", "open"), "fire": False, "stock": cid, "unfinished": b.get("unfinished")}
+                               "structure": b.get("structure", "wattle"), "size": sum(int(r["floor"]) for r in rooms),
+                               "rooms": rooms, "fittings": fittings, "condition": int(b.get("condition", 2)),
+                               "door": b.get("door", "open"), "fire": False, "stock": cid, "unfinished": b.get("unfinished"),
+                               "tier": b.get("tier", "plain"), "description": None, "lines": [], "changes": []}
+        if b.get("monument"):
+            s["buildings"][bid]["monument"] = b["monument"]
+        if b.get("description"):                                                # seeded words (a world file)
+            s["buildings"][bid]["description"] = {"text": str(b["description"]), "by": b.get("household") or "", "day": -1}
+        for i, ln in enumerate(b.get("lines") or []):
+            ln = {"text": ln} if isinstance(ln, str) else dict(ln)
+            s["buildings"][bid]["lines"].append({"slot": int(ln.get("slot", i)), "text": str(ln["text"]), "by": ln.get("by", ""),
+                                                 "day": -1, "how": ln.get("how", "paint"), "was": None})
         if b.get("lasts_until") is not None:                                    # a seeded camp that will fall (world file)
             s["buildings"][bid]["lasts_until"] = int(b["lasts_until"])
 

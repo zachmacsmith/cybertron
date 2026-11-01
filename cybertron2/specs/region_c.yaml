@@ -18,7 +18,7 @@ nodes:
   barleyfield:
     name: Barleyfield
     parcels:
-      bf_green: {name: the Green, cover: built, size: 2, side: centre, height: 1,
+      bf_green: {name: the Green, cover: built, size: 3, side: centre, height: 1,
                  text: "farmhouses, a byre, a cottage and the granary round a green", adj: [north_field, bf_pasture, east_field]}
       north_field: {name: North Field, cover: field, size: 5, side: north, height: 1, holder: Reed, fertility: 1.05,
                     text: "the Reeds' barley, ploughed, dunged and even", adj: [bean_field, bf_pasture],
@@ -56,7 +56,7 @@ nodes:
   coppergate:
     name: Coppergate
     parcels:
-      cg_yard: {name: the Yard, cover: built, size: 1, side: centre, height: 2, text: "a yard with two stone houses and the forge",
+      cg_yard: {name: the Yard, cover: built, size: 2, side: centre, height: 2, text: "a yard with two stone houses and the forge",
                 adj: [the_seam, cg_scrub]}
       the_seam: {name: the Seam, cover: rock, size: 1, side: north, height: 3, holder: Moor, text: "a green-stained seam in the hillside",
                  state: {seam: {S: 80, K: 80}}}

@@ -5,10 +5,12 @@ ITEMS       good -> {weight, food (meals a unit), spoil (share lost a night in h
             before a tool or weapon is worn out), seen (noticed when carried), cook (eaten only at a lit hearth), fodder (a beast's
             day of feed a unit)}
 CROPS       crop -> {seed (the good sown), gives, share (of the year it grows), hardy, takes and restores (the soil), names}
-COVERS      cover -> {words, lots (buildings per size), ambient [(sense, text, salience)]}
+COVERS      cover -> {words, ground (spaces for buildings a unit of size: D2-154), ambient [(sense, text, salience)]}
 RESOURCES   what a parcel can hold -> {regime (D4-7), words by level}
-FITTINGS    fitting -> {label, materials, units, needs (another fitting), basic, does}
-BLUEPRINTS  building -> {label, materials, units, size (people), structure, basic}
+FITTINGS    fitting -> {label, materials, units, needs (another fitting), basic, does, spaces (of floor), holds (a store), heavy (ground floor)}
+BLUEPRINTS  building -> {label, materials, units, structure, basic}: the rooms (ROOMS gives their costs by structure) and a camp
+ROOMS       room -> {floor, places (lines), by structure: {materials, units, trade}} (D2-154, D2-166)
+MONUMENTS, TIERS, LINES, SPACE, STORES   the rest of the building package (review 02zh; D2-154 to D2-171)
 TECHNIQUES  name -> {verb, label, aliases, basic, at {covers | fittings | building}, draws (a resource), yield {kind, ...}, tools
             {grade: multiplier} (bare hands: "bare"; absent grade: refused), weapon, wear (a use), inputs, gives, units, tags}
 PHYSICS     the numbers of the day and the night
@@ -20,7 +22,8 @@ ITEMS = {
                                                                        # 0.5% a day in a house, less in bins, a cellar, a granary (D2-58)
     "rye": {"weight": 1, "food": 0.7, "spoil": 0.0167, "cook": True, "raw": 0.2, "decay": "grain"},    # winter grain (D2-53)
     "beans": {"weight": 1, "food": 0.6, "spoil": 0.0167, "cook": True, "raw": 0.0, "decay": "grain"},  # legumes: less food, restore the soil (D2-53)
-    "flour": {"weight": 1, "food": 1.0, "spoil": 0.0167, "cook": True, "raw": 0.5, "decay": "grain"},  # ground grain, eaten as porridge (D2-60)
+    "flour": {"weight": 1, "food": 1.0, "spoil": 0.0167, "cook": True, "raw": 0.5, "decay": "grain"},  # mill flour: porridge, and bread (D2-60, D2-167)
+    "meal": {"weight": 1, "food": 1.0, "spoil": 0.0167, "cook": True, "raw": 0.5, "decay": "grain"},   # hand-ground: porridge only, no bread (D2-167)
     "bread": {"weight": 1, "food": 1.3, "spoil": 0.05, "decay": "bread"},                # keeps, eaten without a hearth (D2-60)
     "dried meat": {"weight": 1, "food": 3.0, "spoil": 0.02, "decay": "dried meat"},           # meat dried to half its weight (D2-62)
     "cheese": {"weight": 1, "food": 2.5, "spoil": 0.02, "decay": "cheese"},               # 6 milk (D2-47, D2-56)
@@ -81,16 +84,16 @@ TOOLS = tuple(sorted((i for i, v in ITEMS.items() if v.get("tool")), key=lambda 
 WEAPONS = tuple(i for i, v in ITEMS.items() if v.get("weapon"))
 
 COVERS = {
-    "forest": {"words": "woodland", "lots": 0, "sight": 0.35, "sound": 0.7, "dig": "soft",
+    "forest": {"words": "woodland", "ground": 0, "sight": 0.35, "sound": 0.7, "dig": "soft",
                "ambient": [("sound", "birdsong and the creak of trees from {name}", 0.2), ("smell", "leaf mould on the air from {name}", 0.15)]},
-    "field": {"words": "fields", "lots": 0, "sight": 1.0, "sound": 1.0, "dig": "soft", "ambient": [("sight", "{name} stretching out beyond the houses", 0.1)]},
-    "pasture": {"words": "pasture", "lots": 0, "sight": 1.0, "sound": 1.0, "dig": "soft",
+    "field": {"words": "fields", "ground": 0, "sight": 1.0, "sound": 1.0, "dig": "soft", "ambient": [("sight", "{name} stretching out beyond the houses", 0.1)]},
+    "pasture": {"words": "pasture", "ground": 0, "sight": 1.0, "sound": 1.0, "dig": "soft",
                 "ambient": [("sound", "cattle lowing on {name}", 0.35), ("smell", "dung and trodden grass from {name}", 0.15)]},
-    "meadow": {"words": "meadow", "lots": 0, "sight": 1.0, "sound": 1.0, "dig": "soft", "ambient": [("sound", "insects in the long grass of {name}", 0.15)]},
-    "water": {"words": "water", "lots": 0, "sight": 1.0, "sound": 1.0, "dig": "soft", "ambient": [("sound", "water running over stones in {name}", 0.3)]},
-    "built": {"words": "built ground", "lots": 6, "sight": 0.7, "sound": 1.0, "dig": "soft", "ambient": [("sound", "voices and work about the houses", 0.2)]},
-    "scrub": {"words": "scrub", "lots": 4, "sight": 0.5, "sound": 0.9, "dig": "stony", "ambient": []},
-    "rock": {"words": "rock", "lots": 0, "sight": 0.5, "sound": 0.9, "dig": "stony", "ambient": [("sound", "the ring of picks from {name}", 0.25)]},
+    "meadow": {"words": "meadow", "ground": 0, "sight": 1.0, "sound": 1.0, "dig": "soft", "ambient": [("sound", "insects in the long grass of {name}", 0.15)]},
+    "water": {"words": "water", "ground": 0, "sight": 1.0, "sound": 1.0, "dig": "soft", "ambient": [("sound", "water running over stones in {name}", 0.3)]},
+    "built": {"words": "built ground", "ground": 24, "sight": 0.7, "sound": 1.0, "dig": "soft", "ambient": [("sound", "voices and work about the houses", 0.2)]},
+    "scrub": {"words": "scrub", "ground": 16, "sight": 0.5, "sound": 0.9, "dig": "stony", "ambient": []},
+    "rock": {"words": "rock", "ground": 0, "sight": 0.5, "sound": 0.9, "dig": "stony", "ambient": [("sound", "the ring of picks from {name}", 0.25)]},
 }
 
 # How each resource comes back (D4-7) and how it is seen (in words, never numbers: environment/resources.md).
@@ -125,42 +128,122 @@ FORESTS = {
 }
 
 CLEARING = {"meadow": 6.0, "pasture": 6.0, "scrub": 10.0,      # units of work a unit of size to make it a field (calibrate)
-            "fertility": {"meadow": 1.1, "pasture": 1.0, "scrub": 0.85}}   # what the new field starts at, unless the land says
+            "fertility": {"meadow": 1.1, "pasture": 1.0, "scrub": 0.85},   # what the new field starts at, unless the land says
+            # clearing for building (02zh §8; proposed, calibrate): units a unit of size to make it built ground; farmland stops being
+            # farmland; a wood must be felled to scrub first, and grubbing its roots out is the dearer work
+            "built": {"field": 4.0, "pasture": 4.0, "meadow": 4.0, "scrub": 10.0}}
 
-# Fittings and blueprints: recipes.md §3 (a proposal; calibrate). A building is its structure and its fittings (D2-9).
+# Fittings and blueprints: recipes.md §3 (a proposal; calibrate). A building is its structure, its rooms and its fittings (D2-9).
+# Every fitting takes floor (`spaces`; `per`: so many a bed or a stall), a store holds so much (`holds`: {kind: qty} a fitting, or
+# `by`: a space of the building's footprint, or of the fitting's own floor); `heavy` ones stand on the ground floor (02zh §2); a
+# woodshed is a lean-to taking `ground` from the parcel; a vault is a stone room of its own (`room`: its floor, on the ground floor).
+# Spaces: D2-154 (decided; calibrate); stores: D2-155; the cellar's cost D2-155; beds, stalls, woodshed, vault: proposed (02zh §4);
+# the water wheel's cost D2-166.
 FITTINGS = {
-    "beds": {"label": "beds", "materials": {"timber": 2, "straw": 2}, "units": 1, "per": "bed", "basic": True,
-             "does": "housed when sleeping here, one a bed"},                                                  # D2-56
-    "hearth": {"label": "a hearth", "materials": {"stone": 4}, "units": 3, "basic": False, "trade": "mason", "fire": True,
+    "beds": {"label": "beds", "materials": {"timber": 1, "straw": 2}, "units": 1, "per": "bed", "basic": True, "spaces": 1,
+             "does": "housed when sleeping here, one a bed"},                                                  # D2-56; 02zh §4 (proposed)
+    "hearth": {"label": "a hearth", "materials": {"stone": 4}, "units": 3, "basic": False, "trade": "mason", "fire": True, "spaces": 1,
                "does": "warmth (burns timber), porridge and baking"},
-    "bins": {"label": "bins", "materials": {"timber": 3}, "units": 1, "basic": True, "does": "a store for food", "spoil": 0.5},
-    "hand mill": {"label": "a hand mill", "materials": {"stone": 2}, "units": 2, "basic": True, "does": "grinding grain by hand",
-                  "aliases": ["quern"]},                                                                     # D2-61
-    "granary": {"label": "a granary floor", "materials": {"timber": 6}, "units": 4, "basic": True, "spoil": 0.2,
-                "does": "grain keeps longest, raised and dry"},                                              # D2-58
-    "fire ring": {"label": "a fire ring", "materials": {"stone": 1}, "units": 1, "basic": True, "fire": True,
+    "bins": {"label": "bins", "materials": {"timber": 3}, "units": 1, "basic": True, "does": "a store for food (60)", "spoil": 0.5,
+             "spaces": 1, "holds": {"food": 60}},
+    "hand mill": {"label": "a hand mill", "materials": {"stone": 2}, "units": 2, "basic": True, "spaces": 1,
+                  "does": "grinding grain by hand into meal (porridge, not bread)", "aliases": ["quern"]},          # D2-61, D2-167
+    "granary": {"label": "a granary floor", "materials": {"timber": 6}, "units": 4, "basic": True, "spoil": 0.2, "spaces": 3,
+                "holds": {"grain": 300}, "does": "grain keeps longest, raised and dry (300)"},                         # D2-58, D2-155
+    "fire ring": {"label": "a fire ring", "materials": {"stone": 1}, "units": 1, "basic": True, "fire": True, "spaces": 1,
                   "does": "a fire in the open for warmth and cooking (burns timber)"},                              # D2-68: a camp's fire
-    "oven": {"label": "a stone oven", "materials": {"stone": 6}, "units": 4, "basic": False, "trade": "mason",
+    "oven": {"label": "a stone oven", "materials": {"stone": 6}, "units": 4, "basic": False, "trade": "mason", "spaces": 2,
              "does": "baking bread in batches"},                                                             # D2-60
     "anvil": {"label": "an anvil and bellows", "materials": {"stone": 6, "hide": 2, "timber": 1}, "units": 4, "needs": "hearth",
-              "basic": False, "trade": "smith", "does": "a smithy: smelting and smithing"},
-    "cellar": {"label": "a cellar", "materials": {"stone": 8}, "units": 8, "basic": False, "trade": "mason", "spoil": 0.25,
-               "does": "food keeps at a quarter of the house rate"},
-    "millstones": {"label": "dressed millstones", "materials": {"stone": 10}, "units": 10, "basic": False, "trade": "mason",
-                   "does": "an ox mill: an ox turns them (D2-61)"},
-    "water wheel": {"label": "a water wheel", "materials": {"timber": 15, "copper": 1}, "units": 12, "needs": "millstones", "site": "water",
-                    "basic": False, "trade": "carpenter", "does": "a water mill: the river turns the millstones (D2-61)"},
+              "basic": False, "trade": "smith", "spaces": 2, "heavy": True, "does": "a smithy: smelting and smithing"},
+    "cellar": {"label": "a cellar", "materials": {"stone": 4}, "units": 6, "basic": False, "trade": "mason", "spoil": 0.25, "spaces": 0,
+               "heavy": True, "holds": {"food": 40}, "by": "footprint",
+               "does": "food keeps at a quarter of the house rate (40 a space of the building's ground)"},          # D2-45, D2-155
+    "millstones": {"label": "dressed millstones", "materials": {"stone": 10}, "units": 10, "basic": False, "trade": "mason", "spaces": 3,
+                   "heavy": True, "does": "an ox mill: an ox turns them (D2-61)"},
+    "water wheel": {"label": "a water wheel and leat", "materials": {"timber": 60, "stone": 20, "copper": 2}, "units": 250,
+                    "needs": "millstones", "site": "water", "basic": False, "trade": "carpenter", "spaces": 0, "heavy": True,
+                    "does": "a water mill: the river turns the millstones (D2-61)"},                                  # D2-166
+    "stalls": {"label": "stalls", "materials": {"timber": 1}, "units": 1, "per": "stall", "basic": True, "spaces": 2, "heavy": True,
+               "does": "beasts housed in winter, one a stall: less fodder, dung kept, not driven off without coming in"},   # D2-45
+    "woodshed": {"label": "a woodshed", "materials": {"timber": 2}, "units": 1, "basic": True, "spaces": 0, "ground": 2,
+                 "holds": {"timber": 40}, "does": "a lean-to against the building: 40 timber kept dry"},
+    "vault": {"label": "a vault", "materials": {"stone": 40}, "units": 30, "basic": False, "trade": "mason", "spaces": 4, "room": 4,
+              "heavy": True, "holds": {"weight": 30}, "by": "space", "fireproof": True,
+              "does": "a stone room of its own on the ground floor: 30 weight a space kept, safe from fire (D2-49)"},
 }
 FITTING_ALIAS = {a: f for f, d in FITTINGS.items() for a in d.get("aliases", [])}
+# Rooms by structure (spec/economy/buildings.md "Rooms and structures"; D2-154 floors, D2-166 the large and stone ones; calibrate).
+# A building's structure is one material for all its rooms; wattle takes a small room only; stone is a mason's work (D2-3).
+ROOMS = {
+    "small room": {"floor": 6, "places": 2,
+                   "wattle": {"materials": {"timber": 8}, "units": 6},
+                   "timber": {"materials": {"timber": 8, "stone": 2}, "units": 6},
+                   "stone": {"materials": {"stone": 30, "timber": 4}, "units": 40, "trade": "mason"}},
+    "medium room": {"floor": 12, "places": 4,
+                    "timber": {"materials": {"timber": 15, "stone": 4}, "units": 15, "trade": "carpenter"},
+                    "stone": {"materials": {"stone": 60, "timber": 8}, "units": 90, "trade": "mason"}},
+    "hall": {"floor": 30, "places": 8,
+             "timber": {"materials": {"timber": 80, "stone": 20}, "units": 200, "trade": "carpenter"},
+             "stone": {"materials": {"stone": 150, "timber": 20}, "units": 250, "trade": "mason"}},
+}
 BLUEPRINTS = {
-    "small room": {"label": "a small room, wattle and timber", "materials": {"timber": 8}, "units": 6, "size": 4, "structure": "wattle",
-                   "basic": True},
-    "medium room": {"label": "a medium room, timber on stone", "materials": {"timber": 15, "stone": 4}, "units": 15, "size": 10,
-                    "structure": "timber", "basic": False, "trade": "carpenter"},
-    "hall": {"label": "a hall, timber on stone", "materials": {"timber": 30, "stone": 10}, "units": 30, "size": 25,
+    "small room": {"label": "a small room (wattle, timber or stone)", "materials": dict(ROOMS["small room"]["wattle"]["materials"]),
+                   "units": 6, "structure": "wattle", "basic": True},
+    "medium room": {"label": "a medium room (timber on stone, or stone)", "materials": dict(ROOMS["medium room"]["timber"]["materials"]),
+                    "units": 15, "structure": "timber", "basic": False, "trade": "carpenter"},
+    "hall": {"label": "a hall (timber on stone, or stone)", "materials": dict(ROOMS["hall"]["timber"]["materials"]), "units": 200,
              "structure": "timber", "basic": False, "trade": "carpenter"},
     "camp": {"label": "a camp (a lean-to and a fire ring)", "materials": {"timber": 3}, "units": 1, "size": 4, "structure": "camp",
              "basic": True, "fittings": {"beds": 4, "fire ring": 1}, "lasts": 10},                                  # D2-68
+}
+# The building package (review 02zh; spec/economy/buildings.md; D2-154, D2-155, D2-165 to D2-171). All numbers calibrate.
+SPACE = {
+    "added": 0.75,                    # D2-154: a room added to a building costs a quarter less in materials and work
+    "storeys": {2: 1.5, 3: 2.0},      # D2-154, D2-3: an upper storey's room costs this times the room alone; stone only
+    "upgrade": 0.75,                  # 02zh §2: the new structure's materials for its rooms, less a quarter, and the work (proposed)
+    "order": ["wattle", "timber", "stone"],
+    "camp_floor": 4,                  # a camp's lean-to (D2-68): its ground on built ground or scrub; no limit on what lies in it
+    "monument_ground": 1,             # building_lines.md §2 (proposed): on built ground or scrub; none elsewhere
+    "seed_free": 0,                   # 02zh §1: free floor a seeded building is given beyond its contents, unless its file says (`free`)
+}
+# Storage (D2-155): what each kind of store takes, in the order goods are put away; free floor holds 30 weight a space of any goods.
+STORES = {
+    "kinds": {"grain": ["grain", "rye", "beans"], "timber": ["timber", "firewood"]},   # "food": every edible good; "weight": any good
+    "order": ["granary", "cellar", "bins", "woodshed", "vault"],
+    "floor": 30,                      # weight a space of free floor
+    "words": {"granary": ("the granary floor holds", "are on it"), "cellar": ("the cellar holds", "are in it"),
+              "bins": ("the bins hold", "are in them"), "woodshed": ("the woodshed holds", "are in it"),
+              "vault": ("the vault holds", "are in it")},
+}
+# Monuments: a building with no room (building_lines.md §2; proposed): a description and 3 lines.
+MONUMENTS = {
+    "carved post": {"label": "a carved post", "materials": {"timber": 2}, "units": 2, "basic": True, "structure": "timber",
+                    "aliases": ["post", "a post", "carved pole"]},
+    "standing stone": {"label": "a standing stone", "materials": {"stone": 4}, "units": 4, "basic": False, "trade": "mason",
+                       "structure": "stone", "aliases": ["stone", "a stone", "menhir"]},
+    "cairn": {"label": "a cairn", "materials": {"stone": 6}, "units": 3, "basic": True, "structure": "stone",
+              "aliases": ["a cairn", "heap of stones"]},
+}
+# Extravagance in tiers (D2-171; calibrate): materials and work multiplied; noticed further (signs.BUILDING, layout, roads).
+TIERS = {
+    "plain": {"materials": 1.0, "work": 1.0, "words": ""},
+    "fine": {"materials": 1.5, "work": 2.0, "words": "finely built"},
+    "rich": {"materials": 2.5, "work": 4.0, "words": "richly built"},
+    "grand": {"materials": 4.0, "work": 8.0, "words": "grand"},
+}
+TIER_ORDER = ("plain", "fine", "rich", "grand")
+# What people write on buildings (D2-169, D2-170; building_lines.md, proposed; calibrate): places for lines by room, caps, the cost
+# of each engraving, and where on a building each place is (a presentation choice, in order).
+LINES = {
+    "places": {"monument": 3},        # rooms: ROOMS[room]["places"]
+    "words": {"description": 25, "line": 30}, "chars": 240,
+    "units": {"paint": 2, "carve": 4, "stone": 6}, "other": 1,     # D2-170: changing or erasing another's: the same plus 1
+    "carve_tools": {"crude": 1.0, "copper": 1.0}, "carve_wear": 1,
+    "spots": {"building": ["over the door", "on the doorpost", "on the east wall", "on the west wall", "on the north wall",
+                           "on the south wall", "on the roof beam", "on the hearthstone"],
+              "monument": ["on its face", "on its back", "on its side"]},
+    "how": {"paint": "Painted", "carve": "Carved", "stone": "Cut into the stone"},
 }
 
 # Techniques: one handler reads these (38.17 §5). Tool multipliers by grade (recipes.md §8); "bare" is bare hands; a grade missing
@@ -261,10 +344,17 @@ TECHNIQUES = {
                                                           "bulls": {"meat": 50, "hide": 2}, "young": {"meat": 10, "hide": 1}}},
                   "units": 2, "gives": "meat", "tags": ["food", "animals"]},
     "repair": {"verb": "work", "label": "repairing a building", "aliases": ["mend"], "basic": True, "at": {"building": True},
-               "yield": {"kind": "repair"}, "inputs": {"timber": 2}, "units": 2, "gives": "", "tags": ["building", "shelter"]},
+               "yield": {"kind": "repair"}, "units": 2, "gives": "", "tags": ["building", "shelter"]},
+               # its materials and work by the building's size (D2-168: PHYSICS repair); each action does 2 units until it is mended
+    "clear for building": {"verb": "work", "label": "clearing ground for building (turf, roots and stones out)", "basic": True,
+                     "aliases": ["clear to build", "building ground", "clear a building plot", "make built ground", "grub out roots"],
+                     "at": {"covers": ["field", "pasture", "meadow", "scrub"]}, "draws": "plot", "yield": {"kind": "clear_built"},
+                     "tools": {"bare": 0.4, "crude": 1.0, "copper": 1.5}, "wear": 1, "units": 1, "gives": "",
+                     "tags": ["building"]},                                             # 02zh §8: CLEARING["built"]
     # Grinding and the mill ladder (D2-60, D2-61; recipes.md §16, 02n §3, calibrate): a hand mill, an ox mill, a water mill
-    "grind": {"verb": "make", "label": "grinding grain at a hand mill", "aliases": ["grinding", "hand mill", "quern"], "basic": True,
-              "at": {"fittings": ["hand mill"]}, "inputs": {"grain": 8}, "units": 1, "gives": {"flour": 8}, "tags": ["food", "cooking"]},
+    "grind": {"verb": "make", "label": "grinding grain into meal at a hand mill", "aliases": ["grinding", "hand mill", "quern"], "basic": True,
+              "at": {"fittings": ["hand mill"]}, "inputs": {"grain": 3}, "units": 1, "gives": {"meal": 3}, "tags": ["food", "cooking"]},
+              # D2-167: about 3 grain a unit, and meal makes porridge, not bread (calibrate)
     "mill": {"verb": "make", "label": "milling grain at dressed millstones turned by an ox", "aliases": ["milling", "ox mill"], "basic": True,
              "at": {"fittings": ["millstones"]}, "animals": {"oxen": 1}, "inputs": {"grain": 16}, "units": 1, "gives": {"flour": 16},
              "tags": ["food", "cooking"]},
@@ -326,13 +416,23 @@ TECHNIQUES.update({
     "method: cairn": {"verb": "modifier", "label": "raising a cairn of stones over the dead", "aliases": ["cairn"], "basic": True,
                       "modifies": ["work:bury"], "key": "method", "value": "cairn", "changes": {"inputs": {"stone": 3}},
                       "units": 2, "gives": "", "tags": ["death"]},                                    # D2-96
+    # extravagance in tiers (D2-171): a building or monument built finely, richly or grandly (TIERS: materials and work multiplied)
+    "how: fine": {"verb": "modifier", "label": "building it finely (materials x1.5, work x2; seen from next door)", "aliases": ["finely"],
+                  "basic": True, "modifies": ["build"], "key": "how", "value": "fine", "changes": {"tier": "fine"}, "units": 0,
+                  "gives": "", "tags": ["building"]},
+    "how: rich": {"verb": "modifier", "label": "building it richly (materials x2.5, work x4; named to all who come)", "aliases": ["richly"],
+                  "basic": True, "modifies": ["build"], "key": "how", "value": "rich", "changes": {"tier": "rich"}, "units": 0,
+                  "gives": "", "tags": ["building"]},
+    "how: grand": {"verb": "modifier", "label": "building it grandly (materials x4, work x8; seen from the road coming in)",
+                   "aliases": ["grandly"], "basic": True, "modifies": ["build"], "key": "how", "value": "grand", "changes": {"tier": "grand"},
+                   "units": 0, "gives": "", "tags": ["building"]},
     "bury": {"verb": "work", "label": "burying the dead", "aliases": ["burial", "bury the dead", "bury the body"], "basic": True,
              "at": {"things": "body"}, "yield": {"kind": "bury"}, "units": 2, "units_by": "bury", "gives": "", "tags": ["death"]},   # D2-96
 })
 MODIFIERS = {t for t, d in TECHNIQUES.items() if d.get("modifies")}
 
 # Building and fitting are techniques too, for knowledge (basic or a trade), with their costs in BLUEPRINTS and FITTINGS.
-for _k, _b in list(BLUEPRINTS.items()) + list(FITTINGS.items()):
+for _k, _b in list(BLUEPRINTS.items()) + list(FITTINGS.items()) + list(MONUMENTS.items()):
     TECHNIQUES.setdefault(_k, {"verb": "build", "label": "building " + _b["label"], "aliases": [], "basic": _b.get("basic", False),
                                "units": _b["units"], "gives": "", "tags": ["building", "shelter"], "trade": _b.get("trade")})
 
@@ -359,7 +459,9 @@ PHYSICS = {
     "land_blind": 0.25,                                                  # D4-50: share with no eye for how bare a place is (calibrate)
     "house_spoil": 0.3,
     "cellar_spoil": 0.25,                                                # D2-45: a quarter of the house rate
-    "breaks": {"p": 0.02, "cold": 0.08},
+    "breaks": {"p": 0.02, "cold": 0.08, "structure": {"wattle": 1.5, "timber": 1.0, "stone": 0.4, "camp": 1.0}},   # D2-168 (proposed)
+    # D2-165 (defaults for Zach to confirm): the beds each sleeper takes; without one, the floor, as in a damaged house
+    "beds": {"infant": 0.0, "child": 0.5, "youth": 1.0, "adult": 1.0, "elder": 1.0, "floor": "damaged"},
     "hunger_yield": {"0": 1.0, "-1": 0.75, "-2": 0.5},
     "frailty": [0.25, 0.55],
     "hazard": {"step": 0.15, "max_rounds": 4},
@@ -388,7 +490,7 @@ PHYSICS = {
                "stray": 0.2, "hungry_milk": 0.7, "starve_nights": 4},
                # 02o (calibrate): births a cow a year, a cow in milk 0.6 of the year, dung for 2 plots a head a year, 2 head a plot of
                # pasture in summer, an unwatched herd strays
-    "repair": {"timber": 2},
+    "repair": {"per": 4, "min": 2},           # D2-168: 1 timber (stone for stone) and 1 unit for every 4 spaces of floor, at least 2 and 2
     "bury": {"soft": 2, "stony": 4, "frozen": 6},                        # D2-96: units of work by the ground and the cold (calibrate)
     "untaught": 0.5,                                                     # D2-93: an untaught try works half as well (calibrate)
 }

@@ -199,7 +199,7 @@ def _event_at(here, e, about) -> dict:
             break
     if parcel is None and e.get("actor") in w.s["people"] and w.at(e["actor"]) == here.node:
         parcel = TH.spot_of(w, e["actor"])
-    return {"node": here.node, "parcel": parcel, "own": 1.0, "inside": inside, "everyone": ext == "node" or parcel is None}
+    return {"node": here.node, "parcel": parcel, "own": float(e.get("own", 1.0)), "inside": inside, "everyone": ext == "node" or parcel is None}
 
 
 def chance_of(w, name, f, target=None, mind=None, attending=False, focus=1.0) -> float:
@@ -540,6 +540,13 @@ def evening(w, attend: dict, today: dict, skip=None) -> dict:
                         b["ids"].append(f["id"])
                         b["lines"].append(f["text"])
         _update_known(here, mind, F)
+        from cybertron2.engine import buildings as BL                          # what is written where one went in today (D2-169)
+        went = BL.entered(w, name) | {k for k in today["worked"].get(name, []) if k in w.s["buildings"]}
+        if subject and str(subject).startswith("building:") and subject[9:] in w.s["buildings"]:
+            went.add(subject[9:])
+        for bid in sorted(went):
+            if w.s["buildings"][bid]["node"] == here.node:
+                BL.read(w, name, bid, "day")
         logs[name] = {"notice": [f["id"] for f in notice], "attended": [f["id"] for f in att], "concerned": [f["id"] for f in con],
                       "target": label}
         mind.store["log"].append({"day": here.day, **logs[name]})

@@ -7,8 +7,8 @@ Each handler: (here, mind, a) -> result line. Refusals name what is short and co
 from __future__ import annotations
 
 import math
-from cybertron2.engine import farm as FM, knowledge as KN, modifiers as MOD, perceive as PC, things as TH
-from cybertron2.engine.data import BLUEPRINTS, COVERS, FITTINGS, ITEMS, TECHNIQUES, TRY
+from cybertron2.engine import buildings as BL, farm as FM, knowledge as KN, modifiers as MOD, perceive as PC, things as TH
+from cybertron2.engine.data import BLUEPRINTS, COVERS, FITTINGS, ITEMS, LINES, MONUMENTS, ROOMS, SPACE, TECHNIQUES, TIERS, TRY
 from cybertron2.engine.here import Refused, show
 
 # The registry (cybertron 1's action_registry): arguments, cost (units, a physics path, or "craft"), the line in the manual, and
@@ -77,6 +77,12 @@ VERB = {
     "come": {"args": '{"to"?: the meeting called for this morning}', "cost": 1, "when": "evening",
              "doc": "go to the meeting called for this morning: before the day's work you talk there with all who come, and may change "
                     "your plan"},
+    "write": {"args": '{"at": a building or monument here, "text": a sentence (about 30 words), "line"?: which place (its number, or where it is: "over the door"), to replace a line, "how"?: paint | carve (with a tool; in stone, a mason\'s), "description"?: text in place of "text", to replace its description}',
+              "cost": "write", "doc": "write a line on a building or monument (each building has so many places: a small room 2, a "
+                                      "medium room 4, a hall 8, a monument 3); whoever goes in, or looks it over, reads it. Painting "
+                                      "takes 2 units, carving 4 (6 in stone), changing another's words 1 more; it is seen being done"},
+    "erase": {"args": '{"at": a building or monument here, "line": which place}', "cost": "write",
+              "doc": "scratch out a line written there: the work it took to write, 1 more if it is another's; it is seen being done"},
     "rest": {"args": "", "cost": 0, "doc": ""},
 }
 VERBS = tuple(VERB)
@@ -92,7 +98,7 @@ def verb_here(here, verb) -> bool:
 
 def verb_units(p, verb):
     c = VERB[verb]["cost"]
-    if c in ("craft", "units"):
+    if c in ("craft", "units", "write"):
         return None
     if isinstance(c, list):
         x = p
@@ -111,6 +117,8 @@ def cost(here, a) -> int:
         return n
     if VERB[v]["cost"] == "units":                                            # as many as one chooses to spend (D2-146)
         return _units(a.get("units"))
+    if VERB[v]["cost"] == "write":                                            # a line's own engraving (D2-170)
+        return max(1, write_units(here, a, erase=v == "erase"))
     tech = KN.resolve(a.get("what"), a.get("do"))
     if tech is None:
         return 1
@@ -215,6 +223,18 @@ def _out(here, party) -> str:
             return here.hands
         raise Refused(f"{party} has nothing here to put it into")
     return cid                                                              # putting into another's store is a gift (D4-23)
+
+
+def _full_note(here, out, item, q) -> str:
+    """Into a store that cannot hold it all: what went in, and that the rest lies outside its door (D2-155)."""
+    if not out.startswith("stock:"):
+        return ""
+    bid = out[len("stock:"):]
+    b = here.buildings()[bid]
+    room = BL.room_for(b, here.stock(bid), item)
+    if room + 1e-9 >= q:
+        return ""
+    return f" ({show(room)} {item} went into {b['name']}; it is full ({BL.full_words(b, here.stock(bid), item)}), and the rest lies outside its door)"
 
 
 def _src(here, party, out):
@@ -389,12 +409,11 @@ def _technique(here, mind, a, party, verb):
         here.apply("set_thing", cid=key, field="cairn", value=cairn)
         word = f"You buried {c['of']} at {here.spot_name(c)}" + (" under a cairn of stones." if cairn else ".")
         thing = ("parcel", c["parcel"]) if c.get("parcel") else thing
-    elif y["kind"] == "repair":
-        b = here.buildings()[key]
-        _consume(here, t.get("inputs") or {}, extra=b["stock"] if here.may_take(b["stock"]) else None)
-        here.apply("set", ref=("building", key), field="condition", value=b["condition"] + 1)
-        word = f"You repaired {b['name']}: it is now {('ruined', 'damaged', 'sound')[b['condition']]}."
+    elif y["kind"] == "repair":                                              # by its size and structure (D2-168)
+        word = _repair(here, key, m)
         thing = ("building", key)
+    elif y["kind"] == "clear_built":                                          # new ground for building (02zh §8)
+        word = _clear_built(here, key, place_name, m * tm, party)
     what = PC.LAND_DRAWS.get(t.get("draws")) if kind == "parcel" and y["kind"] in ("stock", "chance") else None
     if what:                                                                    # what working it showed of the place (D4-50)
         if y["kind"] == "chance":
@@ -402,6 +421,7 @@ def _technique(here, mind, a, party, verb):
         else:
             PC.remember_land(mind, here.day, key, what, "thin" if got < 0.5 * y["base"] else "good", "found")
     if got > 0 and gives:
+        suffix = _full_note(here, out, gives, got) + suffix
         here.apply("create", dst=out, item=gives, qty=got, why=tech)
     if tool and t.get("wear"):
         here.apply("wear", container=here.hands, item=tool, uses=t["wear"])
@@ -450,9 +470,11 @@ def _make(here, mind, a, party):
         ok = here.rng("make", here.day, here.name, tech, i).random() < TRY[lvl]["chance"]
         rose = KN.tried(here, mind, tech, ok, units=t["units"])
         if ok:
+            full = ""
             for item, q in t["gives"].items():
+                full += _full_note(here, out, item, q)
                 here.apply("create", dst=out, item=item, qty=q, why=tech)
-            res.append(f"You made {', '.join(f'{q:g} {it}' for it, q in t['gives'].items())}" + (f" at {site[2]}" if site[1] else "") + "."
+            res.append(f"You made {', '.join(f'{q:g} {it}' for it, q in t['gives'].items())}" + (f" at {site[2]}" if site[1] else "") + full + "."
                        + (f" (You are now {rose} at it.)" if rose else ""))
         else:
             res.append(f"Your try at {KN.label(tech)} failed and the materials are spoilt." + (f" (You are now {rose} at it.)" if rose else ""))
@@ -462,65 +484,330 @@ def _make(here, mind, a, party):
     return " ".join(res)
 
 
-# ---------------------------------------------------------------------- building (D2-9, recipes.md §3)
+# ---------------------------------------------------------------------- building (D2-9, recipes.md §3; review 02zh, D2-154 to D2-171)
+STRUCTURE_WORDS = {"wattle": "wattle", "wattle and daub": "wattle", "timber": "timber", "wood": "timber", "wooden": "timber",
+                   "stone": "stone", "masonry": "stone"}
+MONUMENT_ALIAS = {x: k for k, d in MONUMENTS.items() for x in [k] + d.get("aliases", [])}
+UPGRADE = ("upgrade", "rebuild", "raise", "improve")
+
+
+def _mason(mind):
+    """Building in stone is a mason's work (D2-3): the best level one has at any mason's craft (a hearth, an oven, quarrying...)."""
+    lv = [KN.level(mind, t) for t, d in TECHNIQUES.items() if d.get("trade") == "mason" and d["verb"] != "modifier"]
+    lv = [x for x in lv if x in ("rough", "capable", "known")]
+    if not lv:
+        raise Refused("building in stone is a mason's work, and you know no mason's craft (a hearth, an oven, quarrying, walling)")
+    return max(lv, key=lambda x: ("rough", "capable", "known").index(x))
+
+
+def _lvl_for(mind, tech, structure=None):
+    """The level one works at: in stone, as a mason; a mason's fitting or monument by that craft, or else as a mason; otherwise
+    the technique itself (a carpenter's for a timber medium room or hall)."""
+    if structure == "stone":
+        return _mason(mind)
+    if TECHNIQUES.get(tech, {}).get("trade") == "mason":
+        lv = KN.level(mind, tech)
+        return lv if lv in ("rough", "capable", "known") else _mason(mind)
+    return _level(mind, tech)
+
+
+def _how(here, mind, a):
+    if str(a.get("how") or "").strip().lower() in ("plain", "none", ""):
+        a = {k: v for k, v in a.items() if k != "how"}
+    mods = MOD.resolve(here, mind, "build", a)
+    return mods.get("tier") or "plain", mods
+
+
+def _ground_check(here, pid, need, what):
+    par = here.parcels()[pid]
+    total = BL.ground_total(par)
+    if total <= 0:
+        raise Refused(f"{par['name']} is {par['cover']}, not ground for building: build on built ground or scrub, or clear it first "
+                      "(work clear for building)")
+    free = BL.ground_free(pid, par, here.buildings())
+    if free < need:
+        raise Refused(f"there is no room left to build on {par['name']}: {total - free} of its {total} spaces are taken, and {what} "
+                      f"needs {need} (build up in stone, build elsewhere, or clear more ground)")
+
+
 def _build(here, mind, a, party):
     what = str(a.get("what") or "").strip().lower()
-    if what not in BLUEPRINTS and what not in FITTINGS:
-        raise Refused(f"{a.get('what')!r} is not something you build (buildings: {', '.join(BLUEPRINTS)}; fittings: {', '.join(FITTINGS)})")
-    lvl = _level(mind, what)
+    what = MONUMENT_ALIAS.get(what, what)
+    if what in UPGRADE:
+        return _upgrade(here, mind, a, party)
+    if what in ("storey", "upper storey", "second storey", "third storey"):
+        what = str(a.get("room") or "small room").strip().lower()
+        a = {**a, "storey": a.get("storey") or (3 if "third" in str(a.get("what")) else 2)}
+    if what not in BLUEPRINTS and what not in FITTINGS and what not in MONUMENTS:
+        raise Refused(f"{a.get('what')!r} is not something you build (rooms: {', '.join(r for r in BLUEPRINTS)}; fittings: "
+                      f"{', '.join(FITTINGS)}; monuments: {', '.join(MONUMENTS)}; or upgrade a building)")
     owner = party or here.name
     at = a.get("at")
-    if what in BLUEPRINTS:
-        bp = BLUEPRINTS[what]
+    if what in BLUEPRINTS or what in MONUMENTS:
         bid = here.building(at) if at else None
         if bid and here.buildings()[bid].get("unfinished"):                      # carry on
-            return _build_work(here, mind, bid, lvl)
+            u = here.buildings()[bid]["unfinished"]
+            return _build_work(here, mind, bid, _lvl_for(mind, u["blueprint"], here.buildings()[bid]["structure"]))
+        if bid and what in BLUEPRINTS and what != "camp":
+            return _add_room(here, mind, a, party, bid, what)
+        if bid:
+            raise Refused(f"{at} is a building: say a place on built ground or scrub here to put up a new one")
         pid = here.parcel(at) if at else None
         if pid is None:
-            lots = [p for p, x in here.parcels().items() if COVERS[x["cover"]]["lots"] > 0]
-            raise Refused(f"say where to build: a place on built ground or scrub here ({', '.join(here.parcels()[p]['name'] for p in lots) or 'none'})")
-        par = here.parcels()[pid]
-        used = sum(1 for b in here.buildings().values() if b["parcel"] == pid)
-        if bp.get("structure") == "camp":                                        # a camp goes up anywhere but on water (D2-68)
-            if par["cover"] == "water":
-                raise Refused("you cannot camp on water")
-        elif used >= COVERS[par["cover"]]["lots"] * par["size"]:
-            raise Refused(f"there is no room left to build on {par['name']}")
+            lots = [p for p, x in here.parcels().items() if BL.ground_total(x) > 0]
+            raise Refused(f"say where to build: a place on built ground or scrub here ({', '.join(here.parcels()[p]['name'] for p in lots) or 'none'})"
+                          " or, to add a room, a building here")
+        if what in MONUMENTS:
+            return _monument(here, mind, a, party, pid, what)
+        return _new_building(here, mind, a, party, pid, what, owner)
+    return _fitting(here, mind, a, party, what)
+
+
+def _new_building(here, mind, a, party, pid, what, owner):
+    bp = BLUEPRINTS[what]
+    par = here.parcels()[pid]
+    who = here.households()[party]['name'] if party in here.households() else here.name
+    if bp.get("structure") == "camp":                                        # a camp goes up anywhere but on water (D2-68)
+        lvl = _level(mind, what)
+        if par["cover"] == "water":
+            raise Refused("you cannot camp on water")
+        if BL.ground_total(par) > 0 and BL.ground_free(pid, par, here.buildings()) < int(SPACE["camp_floor"]):
+            raise Refused(f"there is no room left to camp on {par['name']}")
         _consume(here, bp["materials"], TRY[lvl]["inputs"], here.party_container(party) if party else None)
-        who = here.households()[party]['name'] if party in here.households() else here.name
-        name = str(a.get("name") or "").strip()[:40] or (f"{who}'s camp on {par['name']}" if bp.get("structure") == "camp" else f"{who}'s new house")
-        bid = here.apply("raise", node=here.node, parcel=pid, rec={"name": name, "structure": bp["structure"], "size": bp["size"],
-                                                                     "fittings": {}, "unfinished": {"blueprint": what, "units_left": bp["units"]}})
+        name = str(a.get("name") or "").strip()[:40] or f"{who}'s camp on {par['name']}"
+        bid = here.apply("raise", node=here.node, parcel=pid, rec={"name": name, "structure": "camp", "fittings": {},
+                                                                     "unfinished": {"blueprint": what, "units_left": bp["units"]}})
         here.apply("claim", thing=("building", bid), claimant=owner, rights="all", grounds="built")
         here.event("build", f"{here.name} began building {bp['label']} on {par['name']}", actor=here.name, about=[f"building:{bid}"],
                    salience=0.5, tags=["building"])
         return _build_work(here, mind, bid, lvl, started=True)
-    # a fitting in a building here
-    f = FITTINGS[what]
-    bid = here.building(at) if at else (here.homes_here() or [None])[0]
-    if bid is None:
-        inside = ", ".join(x["name"] for x in here.buildings().values() if not x.get("unfinished"))
-        raise Refused(f"{f['label']} is fitted inside a building, not built on open ground: say which building in \"at\""
-                      + (f" ({inside})" if inside else " (there is none here yet: build a small room first)"))
+    structure = STRUCTURE_WORDS.get(str(a.get("structure") or bp["structure"]).strip().lower())
+    if structure is None:
+        raise Refused(f"a building is wattle, timber or stone, not {a.get('structure')!r}")
+    if structure not in ROOMS[what]:
+        raise Refused(f"a {what} is too large for wattle: build it in timber (on a stone footing) or in stone")
+    how, mods = _how(here, mind, a)
+    lvl = _lvl_for(mind, what, structure)
+    floor = int(ROOMS[what]["floor"])
+    _ground_check(here, pid, floor, f"a {what}")
+    cost = BL.room_cost(what, structure, how=how)
+    _consume(here, cost["materials"], TRY[lvl]["inputs"], here.party_container(party) if party else None)
+    name = str(a.get("name") or "").strip()[:40] or f"{who}'s new house"
+    rec = {"name": name, "structure": structure, "fittings": {}, "tier": how, "rooms": [{"kind": what, "floor": floor, "storey": 1}],
+           "unfinished": {"blueprint": what, "units_left": cost["units"]}}
+    bid = here.apply("raise", node=here.node, parcel=pid, rec=rec)
+    if a.get("describe"):                                                     # the description, written with the build (D2-169)
+        here.apply("set", ref=("building", bid), field="description",
+                   value={"text": BL.cap_text(a["describe"], "description"), "by": here.name, "day": here.day})
+    here.apply("claim", thing=("building", bid), claimant=owner, rights="all", grounds="built")
+    tw = TIERS[how]["words"]
+    here.event("build", f"{here.name} began building a {what} in {structure}" + (f", {tw}" if tw and how != "grand" else
+                                                                                      (", on a grand scale" if how == "grand" else ""))
+               + f", on {par['name']}", actor=here.name, about=[f"building:{bid}"], salience=0.5, tags=["building"])
+    MOD.practise(here, mind, mods)
+    return _build_work(here, mind, bid, lvl, started=True)
+
+
+def _monument(here, mind, a, party, pid, what):
+    d = MONUMENTS[what]
+    par = here.parcels()[pid]
+    if par["cover"] == "water":
+        raise Refused("a monument cannot stand in water")
+    how, mods = _how(here, mind, a)
+    lvl = _lvl_for(mind, what)
+    if BL.ground_total(par) > 0:
+        _ground_check(here, pid, int(SPACE["monument_ground"]), d["label"])
+    t = TIERS[how]
+    _consume(here, {i: q * float(t["materials"]) for i, q in d["materials"].items()}, TRY[lvl]["inputs"],
+             here.party_container(party) if party else None)
+    name = str(a.get("name") or "").strip()[:40] or f"the {what} on {par['name']}"
+    bid = here.apply("raise", node=here.node, parcel=pid, rec={"name": name, "structure": d["structure"], "fittings": {}, "rooms": [],
+                                                                 "monument": what, "tier": how,
+                                                                 "unfinished": {"blueprint": what, "units_left": float(d["units"]) * float(t["work"])}})
+    if a.get("describe"):
+        here.apply("set", ref=("building", bid), field="description",
+                   value={"text": BL.cap_text(a["describe"], "description"), "by": here.name, "day": here.day})
+    here.apply("claim", thing=("building", bid), claimant=party or here.name, rights="all", grounds="built")
+    here.event("build", f"{here.name} began raising {d['label']} on {par['name']}", actor=here.name, about=[f"building:{bid}"],
+               salience=0.5, tags=["building"])
+    MOD.practise(here, mind, mods)
+    return _build_work(here, mind, bid, lvl, started=True)
+
+
+def _usable(here, bid):
     b = here.buildings()[bid]
     if b.get("unfinished"):
         raise Refused(f"{b['name']} is not finished")
     if not here.can_enter(bid):
         raise Refused(f"you cannot get into {b['name']}")
+    return b
+
+
+def _add_room(here, mind, a, party, bid, what):
+    """A room added to a building: a quarter less (D2-154); on an upper storey in stone only, at 1.5 and 2 times (D2-3)."""
+    b = _usable(here, bid)
+    if b.get("monument"):
+        raise Refused(f"{b['name']} is a monument: it has no rooms")
+    if b["structure"] == "camp":
+        raise Refused(f"{b['name']} is a camp: build a house to add rooms to")
+    storey = max(1, int(_qty(a.get("storey"), 1)))
+    wk = b.get("works")
+    if wk:
+        if wk.get("kind") == "room" and wk.get("room") == what and int(wk.get("storey", 1)) == storey:
+            return _works_progress(here, mind, bid)
+        raise Refused(f"{_works_words(wk)} is under way at {b['name']}: finish it first")
+    if what not in ROOMS or b["structure"] not in ROOMS[what]:
+        raise Refused(f"a {what} is too large for a wattle building: upgrade {b['name']} to timber or stone first")
+    floor = int(ROOMS[what]["floor"])
+    if storey > 1:
+        if b["structure"] != "stone":
+            raise Refused(f"only a stone building takes an upper storey (D2-3): {b['name']} is {b['structure']}; upgrade it to stone first")
+        if storey > max(SPACE["storeys"]):
+            raise Refused(f"a building stands at most {max(SPACE['storeys'])} storeys")
+        below = BL.floor(b, storey - 1)
+        if BL.floor(b, storey) + floor > below:
+            raise Refused(f"storey {storey} of {b['name']} can hold no more floor than the one below it ({below} spaces; "
+                          f"{BL.floor(b, storey)} built)")
+    else:
+        _ground_check(here, b["parcel"], floor, f"a {what}")
+    how = BL.tier(b)
+    lvl = _lvl_for(mind, what, b["structure"])
+    cost = BL.room_cost(what, b["structure"], added=True, storey=storey, how=how)
+    _consume(here, cost["materials"], TRY[lvl]["inputs"], b["stock"] if here.may_take(b["stock"]) else
+             (here.party_container(party) if party else None))
+    here.apply("set", ref=("building", bid), field="works", value={"kind": "room", "room": what, "floor": floor, "storey": storey,
+                                                                     "units_left": cost["units"], "tech": what, "by": here.name})
+    here.record("build", what, party)
+    return _works_progress(here, mind, bid, started=True)
+
+
+def _upgrade(here, mind, a, party):
+    """A building's structure raised (wattle to timber, timber to stone), or its tier raised by the difference (02zh §2, D2-171)."""
+    at = a.get("at")
+    bid = here.building(at) if at else (here.homes_here() or [None])[0]
+    if bid is None:
+        raise Refused("say which building here to upgrade (\"at\")")
+    b = _usable(here, bid)
+    if b["structure"] == "camp":
+        raise Refused(f"{b['name']} is a camp: it cannot be rebuilt")
+    wk = b.get("works")
+    to = STRUCTURE_WORDS.get(str(a.get("to") or a.get("structure") or "").strip().lower())
+    how = str(a.get("how") or "").strip().lower() or None
+    if wk:
+        if wk.get("kind") in ("upgrade", "tier"):
+            return _works_progress(here, mind, bid)
+        raise Refused(f"{_works_words(wk)} is under way at {b['name']}: finish it first")
+    if to and how:
+        raise Refused("one thing at a time: a new structure (\"to\") or a finer tier (\"how\")")
+    if how:
+        mods = MOD.resolve(here, mind, "build", a)
+        how = mods.get("tier") or how
+        if how not in TIERS or not BL.tier_up(how, BL.tier(b)):
+            raise Refused(f"{b['name']} is already {BL.tier(b)}; it can be raised to " +
+                          (", ".join(t for t in TIERS if BL.tier_up(t, BL.tier(b))) or "nothing finer"))
+        cost = BL.tier_cost(b, how)
+        tech = b.get("monument") or (b["rooms"][0]["kind"] if b.get("rooms") else "small room")
+        lvl = _lvl_for(mind, tech, b["structure"] if b["structure"] == "stone" else None)
+        _consume(here, cost["materials"], TRY[lvl]["inputs"], b["stock"] if here.may_take(b["stock"]) else None)
+        here.apply("set", ref=("building", bid), field="works", value={"kind": "tier", "to": how, "units_left": cost["units"],
+                                                                         "tech": tech, "by": here.name})
+        here.record("build", "upgrade", party)
+        return _works_progress(here, mind, bid, started=True)
+    if b.get("monument"):
+        raise Refused(f"{b['name']} is a monument: raise its tier (\"how\") instead")
+    order = SPACE["order"]
+    if to is None:
+        nxt = order[order.index(b["structure"]) + 1] if b["structure"] in order[:-1] else None
+        raise Refused(f"say what to upgrade {b['name']} to: \"to\": " + (nxt or "nothing: it is stone already")
+                      + "; or \"how\": fine, rich or grand")
+    if order.index(to) <= order.index(b["structure"]):
+        raise Refused(f"{b['name']} is {b['structure']} already")
+    cost = BL.upgrade_cost(b, to)
+    big = next((r["kind"] for r in b["rooms"] if r["kind"] in ("hall", "medium room")), "small room")
+    lvl = _mason(mind) if to == "stone" else _level(mind, big)
+    _consume(here, cost["materials"], TRY[lvl]["inputs"], b["stock"] if here.may_take(b["stock"]) else None)
+    here.apply("set", ref=("building", bid), field="works", value={"kind": "upgrade", "to": to, "units_left": cost["units"],
+                                                                     "tech": big, "by": here.name})
+    here.record("build", "upgrade", party)
+    return _works_progress(here, mind, bid, started=True)
+
+
+def _works_words(wk) -> str:
+    if wk["kind"] == "room":
+        return f"a {wk['room']}" + (f" on storey {wk['storey']}" if int(wk.get("storey", 1)) > 1 else "")
+    if wk["kind"] == "upgrade":
+        return f"rebuilding in {wk['to']}"
+    return f"work to make it {TIERS[wk['to']]['words']}"
+
+
+def _works_progress(here, mind, bid, started=False):
+    """Work on a room, a rebuilding or a finer finish, two units an action (more with skill), until done; it counts when done."""
+    b = here.buildings()[bid]
+    wk = dict(b["works"])
+    done = round(2 * KN.skill(mind, wk.get("tech") or "small room") * here.yield_mult(), 2)
+    wk["units_left"] = round(max(0.0, float(wk["units_left"]) - done), 2)
+    words = _works_words(wk)
+    if wk["units_left"] > 1e-9:
+        here.apply("set", ref=("building", bid), field="works", value=wk)
+        here.event("build", f"{here.name} was working on {words} at {b['name']}", actor=here.name, about=[f"building:{bid}"],
+                   salience=0.25, tags=["building"])
+        return ("You began " if started else "You worked on ") + f"{words} at {b['name']}: about {show(wk['units_left'])} units of work left."
+    here.apply("set", ref=("building", bid), field="works", value=None)
+    if wk["kind"] == "room":
+        rooms = BL.rooms(b) + [{"kind": wk["room"], "floor": int(wk["floor"]), "storey": int(wk.get("storey", 1))}]
+        here.apply("set", ref=("building", bid), field="rooms", value=rooms)
+        here.apply("set", ref=("building", bid), field="size", value=sum(int(r["floor"]) for r in rooms))
+        out = f"You finished {words} at {b['name']}: it has {BL.floor(here.buildings()[bid])} spaces of floor now."
+    elif wk["kind"] == "upgrade":
+        here.apply("set", ref=("building", bid), field="structure", value=wk["to"])
+        out = f"You finished rebuilding {b['name']} in {wk['to']}: its rooms, fittings, stores and writing are as they were."
+    else:
+        here.apply("set", ref=("building", bid), field="tier", value=wk["to"])
+        out = f"You finished the work on {b['name']}: it is {TIERS[wk['to']]['words']} now."
+    KN.tried(here, mind, wk.get("tech") or "small room", True)
+    here.event("build", f"{here.name} finished {words} at {b['name']}", actor=here.name, about=[f"building:{bid}"], salience=0.5,
+               tags=["building"])
+    return out
+
+
+def _fitting(here, mind, a, party, what):
+    f = FITTINGS[what]
+    at = a.get("at")
+    bid = here.building(at) if at else (here.homes_here() or [None])[0]
+    if bid is None:
+        inside = ", ".join(x["name"] for x in here.buildings().values() if not x.get("unfinished"))
+        raise Refused(f"{f['label']} is fitted inside a building, not built on open ground: say which building in \"at\""
+                      + (f" ({inside})" if inside else " (there is none here yet: build a small room first)"))
+    b = _usable(here, bid)
+    if b.get("monument"):
+        raise Refused(f"{b['name']} is a monument: nothing is fitted in it")
+    lvl = _lvl_for(mind, what)
     if f.get("needs") and not b["fittings"].get(f["needs"]):
         raise Refused(f"{f['label']} needs {FITTINGS[f['needs']]['label']} first")
-    if f.get("site") and not any(here.parcels()[x]["cover"] == f["site"] for x in [b["parcel"]] + here.parcels()[b["parcel"]]["adj"]):
+    if f.get("site") and not any(here.parcels()[x]["cover"] == f["site"] for x in [b["parcel"]] + here.parcels()[b["parcel"]]["adj"]
+                                 if x in here.parcels()):
         raise Refused(f"{f['label']} needs a building by {f['site']}")
     under = dict(b.get("fitting_work") or {})
     if what in under:                                                          # carry on one under way: no more materials (02zg)
         return _fitting_work(here, mind, bid, what, lvl)
+    camp = b["structure"] == "camp"
+    sp = int(f.get("spaces", 0)) - int(f.get("room", 0))                       # a vault brings its own room
+    free = BL.free_floor(b, here.stock(bid)) if not camp else 99
     n = max(1, int(_qty(a.get("qty"), 1))) if f.get("per") else 1
     if f.get("per"):
-        n = min(n, max(0, b["size"] - int(b["fittings"].get(what, 0))))
+        n = min(n, free // sp) if sp > 0 else n
         if n <= 0:
-            raise Refused(f"{b['name']} has as many {f['label']} as it holds people ({b['size']})")
+            raise Refused(f"{b['name']} has no free floor for {f['label']} ({sp} space{'s' if sp != 1 else ''} a {f['per']}): "
+                          f"{BL.space_words(b, here.stock(bid))}. Add a room, or make room")
     elif b["fittings"].get(what):
         raise Refused(f"{b['name']} already has {f['label']}")
+    elif sp > free:
+        raise Refused(f"{b['name']} has no free floor for {f['label']} (it takes {sp} space{'s' if sp != 1 else ''}): "
+                      f"{BL.space_words(b, here.stock(bid))}. Add a room, or make room")
+    if f.get("heavy") and not camp and BL.fitting_spaces(b, heavy=True) + int(f.get("spaces", 0)) * n > BL.footprint(b) + int(f.get("room", 0)):
+        raise Refused(f"{f['label']} goes on the ground floor, and {b['name']}'s ground floor has no room for it")
+    if f.get("ground") or f.get("room"):
+        _ground_check(here, b["parcel"], int(f.get("ground", 0)) + int(f.get("room", 0)) * n, f["label"])
     _consume(here, f["materials"], TRY[lvl]["inputs"] * n, b["stock"] if here.may_take(b["stock"]) else None)
     ok = here.rng("build", here.day, here.name, what).random() < TRY[lvl]["chance"]
     KN.tried(here, mind, what, ok)
@@ -553,6 +840,10 @@ def _fitting_work(here, mind, bid, what, lvl, started=False):
     fit = dict(b["fittings"])
     fit[what] = int(fit.get(what, 0)) + n
     here.apply("set", ref=("building", bid), field="fittings", value=fit)
+    if f.get("room"):                                                          # a vault: a stone room of its own (02zh §4)
+        rooms = BL.rooms(b) + [{"kind": what, "floor": int(f["room"]), "storey": 1} for _ in range(n)]
+        here.apply("set", ref=("building", bid), field="rooms", value=rooms)
+        here.apply("set", ref=("building", bid), field="size", value=sum(int(r["floor"]) for r in rooms))
     here.event("build", f"{here.name} put {words} into {b['name']}", actor=here.name, about=[f"building:{bid}"], salience=0.3, tags=["building"])
     return f"You put {words} into {b['name']}."
 
@@ -567,7 +858,7 @@ def _build_work(here, mind, bid, lvl, started=False):
         here.event("build", f"{here.name} was working on {b['name']}", actor=here.name, about=[f"building:{bid}"], salience=0.2,
                    tags=["building"])
     if u["units_left"] <= 1e-9:
-        bp = BLUEPRINTS[u["blueprint"]]
+        bp = BLUEPRINTS.get(u["blueprint"]) or MONUMENTS.get(u["blueprint"]) or {}
         here.apply("set", ref=("building", bid), field="unfinished", value=None)
         here.apply("set", ref=("building", bid), field="built_day", value=here.day)
         if bp.get("fittings"):                                                 # a blueprint that comes fitted (a camp: D2-68)
@@ -578,9 +869,155 @@ def _build_work(here, mind, bid, lvl, started=False):
         KN.tried(here, mind, u["blueprint"], True)
         if bp.get("fittings"):
             return f"You made {b['name']}: shelter for {bp['size']} with a fire, for about {bp['lasts']} nights."
-        return f"You finished {b['name']}. It has no fittings yet: beds, a hearth and bins make it a house."
+        if b.get("monument"):
+            return (f"You finished {b['name']}. It has room for {BL.places(b)} lines written on it (write {{\"at\": \"{b['name']}\", "
+                    "\"text\"}).")
+        return (f"You finished {b['name']}: {BL.floor(b)} spaces of floor, all free. It has no fittings yet: beds, a hearth and bins "
+                "make it a house.")
     here.apply("set", ref=("building", bid), field="unfinished", value=u)
     return ("You began " if started else "You worked on ") + f"{b['name']}: about {show(u['units_left'])} units of work left."
+
+
+# ---------------------------------------------------------------------- writing on buildings (D2-169, D2-170; building_lines.md)
+def _writing_site(here, at):
+    bid = here.building(at) if at else None
+    if bid is None:
+        names = ", ".join(b["name"] for b in here.buildings().values() if not b.get("unfinished")) or "none"
+        raise Refused(f"say which building or monument here to write on (\"at\": {names})")
+    b = here.buildings()[bid]
+    if b.get("unfinished"):
+        raise Refused(f"{b['name']} is not finished")
+    if b["condition"] <= 0:
+        raise Refused(f"{b['name']} is a ruin: there is nothing left to write on")
+    if b["structure"] == "camp":
+        raise Refused(f"{b['name']} is a lean-to of branches: there is nothing to write on")
+    return bid, b
+
+
+def _slot_of(b, x):
+    """A line's place: its number (1 up) or where it is ("over the door")."""
+    if x is None or str(x).strip() == "":
+        return None
+    s = str(x).strip().lower()
+    try:
+        k = int(float(s)) - 1
+        return k if 0 <= k < BL.places(b) else -1
+    except ValueError:
+        pass
+    for k in range(BL.places(b)):
+        if BL.spot_words(b, k) in s or s in BL.spot_words(b, k):
+            return k
+    return -1
+
+
+def _write_how(b, a):
+    how = str(a.get("how") or "paint").strip().lower()
+    how = {"painted": "paint", "painting": "paint", "carved": "carve", "carving": "carve", "cut": "carve", "engrave": "carve"}.get(how, how)
+    if how not in ("paint", "carve"):
+        raise Refused("a line is painted (\"how\": \"paint\") or carved (\"how\": \"carve\", with a tool)")
+    return "stone" if how == "carve" and b["structure"] == "stone" else how
+
+
+def write_units(here, a, erase=False) -> int:
+    """The work of a line (D2-170): painting 2, carving 4, in stone 6; another's line, or the description, the same plus 1."""
+    try:
+        bid, b = _writing_site(here, a.get("at"))
+    except Refused:
+        return 0
+    if erase:
+        k = _slot_of(b, a.get("line"))
+        ln = next((x for x in b.get("lines") or [] if int(x["slot"]) == k), None)
+        if ln is None:
+            return 0
+        return int(LINES["units"][ln.get("how", "paint")]) + (int(LINES["other"]) if ln.get("by") != here.name else 0)
+    if a.get("description") is not None and a.get("text") is None:
+        d = b.get("description") or {}
+        return int(LINES["units"]["paint"]) + (int(LINES["other"]) if d and d.get("by") != here.name else 0)
+    try:
+        how = _write_how(b, a)
+    except Refused:
+        return 0
+    k = _slot_of(b, a.get("line"))
+    ln = next((x for x in b.get("lines") or [] if int(x["slot"]) == k), None) if k is not None else None
+    return int(LINES["units"][how]) + (int(LINES["other"]) if ln and ln.get("by") != here.name else 0)
+
+
+def _write(here, mind, a, party):
+    bid, b = _writing_site(here, a.get("at"))
+    if a.get("description") is not None and a.get("text") is None:           # the description replaced (D2-169)
+        text = BL.cap_text(a["description"], "description")
+        if not text:
+            raise Refused("say what to write (\"description\": text)")
+        old = b.get("description") or {}
+        here.apply("set", ref=("building", bid), field="description",
+                   value={"text": text, "by": here.name, "day": here.day, "was": old.get("text")})
+        if old and old.get("by") != here.name:
+            _changed(here, bid, b, f"the words describing {b['name']} have been changed")
+        here.event("write", f"{here.name} was painting new words on {b['name']}", actor=here.name, about=[f"building:{bid}"],
+                   salience=0.6, tags=["building"], own=2.0)
+        here.record("write", "description", party, site=bid)
+        return f"You wrote on {b['name']}: “{text}”."
+    text = BL.cap_text(a.get("text"), "line")
+    if not text:
+        raise Refused("say what to write (\"text\")")
+    how = _write_how(b, a)
+    lines = [dict(x) for x in b.get("lines") or []]
+    k = _slot_of(b, a.get("line"))
+    if k == -1:
+        raise Refused(f"{b['name']} has {BL.places(b)} places for lines: say one by its number (1 to {BL.places(b)}) or where it is")
+    if k is None:
+        used = {int(x["slot"]) for x in lines}
+        k = next((i for i in range(BL.places(b)) if i not in used), None)
+        if k is None:
+            raise Refused(f"every place on {b['name']} is written on ({BL.places(b)}): replace one (\"line\": its number) or erase one")
+    if how in ("carve", "stone"):
+        tool, m = here.best_tool(LINES["carve_tools"])
+        if tool is None:
+            raise Refused("carving needs a tool in your hands")
+        if how == "stone":
+            _mason(mind)
+        here.apply("wear", container=here.hands, item=tool, uses=float(LINES["carve_wear"]))
+    old = next((x for x in lines if int(x["slot"]) == k), None)
+    lines = [x for x in lines if int(x["slot"]) != k] + [{"slot": k, "text": text, "by": here.name, "day": here.day, "how": how,
+                                                          "was": old["text"] if old else None, "was_by": old["by"] if old else None}]
+    here.apply("set", ref=("building", bid), field="lines", value=sorted(lines, key=lambda x: int(x["slot"])))
+    spot = BL.spot_words(b, k)
+    verb = {"paint": "painting", "carve": "carving", "stone": "cutting"}[how]
+    if old and old.get("by") != here.name:
+        _changed(here, bid, b, f"the line {spot} of {b['name']} has been " + ("painted over" if how == "paint" else "cut away")
+                 + " and new words put there")
+    here.event("write", f"{here.name} was {verb} words {spot} of {b['name']}", actor=here.name, about=[f"building:{bid}"],
+               salience=0.6 if not old else 0.8, tags=["building"], own=2.0)
+    here.record("write", how, party, site=bid)
+    return f"You {'painted' if how == 'paint' else 'carved'} {spot} of {b['name']}: “{text}”."
+
+
+def _erase(here, mind, a, party):
+    bid, b = _writing_site(here, a.get("at"))
+    k = _slot_of(b, a.get("line"))
+    ln = next((x for x in b.get("lines") or [] if int(x["slot"]) == k), None) if k is not None else None
+    if ln is None:
+        have = "; ".join(f"{int(x['slot']) + 1}: {BL.spot_words(b, int(x['slot']))}" for x in b.get("lines") or []) or "none"
+        raise Refused(f"say which line of {b['name']} to scratch out (\"line\": {have})")
+    if ln.get("how") in ("carve", "stone"):
+        tool, m = here.best_tool(LINES["carve_tools"])
+        if tool is None:
+            raise Refused("scratching out a carved line needs a tool in your hands")
+        here.apply("wear", container=here.hands, item=tool, uses=float(LINES["carve_wear"]))
+    here.apply("set", ref=("building", bid), field="lines", value=[x for x in b["lines"] if int(x["slot"]) != k])
+    spot = BL.spot_words(b, k)
+    if ln.get("by") != here.name:
+        _changed(here, bid, b, f"the line {spot} of {b['name']} has been scratched out")
+    here.event("write", f"{here.name} was scratching out the words {spot} of {b['name']}", actor=here.name, about=[f"building:{bid}"],
+               salience=0.9, tags=["building"], own=2.0)
+    here.record("erase", ln.get("how"), party, site=bid, was=ln["text"], was_by=ln.get("by"))
+    return f"You scratched out the line {spot} of {b['name']} (it said: “{ln['text']}”)."
+
+
+def _changed(here, bid, b, text):
+    """What its people will notice the next time they see it (building_lines.md §3)."""
+    ch = list(b.get("changes") or []) + [{"day": here.day, "text": text, "by": here.name}]
+    here.apply("set", ref=("building", bid), field="changes", value=ch[-20:])
 
 
 # ---------------------------------------------------------------------- goods
@@ -611,6 +1048,11 @@ def _move(here, mind, a, party):
     if have <= 1e-9:
         raise Refused(f"there is no {item} " + ("in your hands" if verb == "put" else f"in {b['name']}"))
     q = round(min(_qty(a.get("qty"), have), have), 6)
+    if verb == "put":                                                          # a store holds so much (D2-155)
+        room = BL.room_for(b, here.stock(bid), item)
+        if room + 1e-9 < q:
+            raise Refused(f"{b['name']} cannot take {show(q)} {item}: {BL.full_words(b, here.stock(bid), item)}"
+                          + (f" (room for {show(room)} more)" if room > 0.05 else ""))
     here.apply("transfer", src=src, dst=dst, item=item, qty=q)
     here.event("store", f"{here.name} {verb} {item} {'into' if verb == 'put' else 'from'} {b['name']}", actor=here.name,
                about=[f"building:{bid}"], salience=0.1, tags=["food"] if ITEMS[item]["food"] else [])
@@ -715,6 +1157,7 @@ def _give(here, mind, a, party):
 
 def _into_store(here, bid, item, q, party, hh):
     b = here.buildings()[bid]
+    full = _full_note(here, b["stock"], item, q)                              # what does not fit lies at its door (D2-155)
     here.apply("transfer", src=here.hands, dst=b["stock"], item=item, qty=q)
     owners = here.households()[hh]["name"] if hh else None
     here.event("give", f"{here.name} put {q:g} {item} into {b['name']}" + (f", for {owners}" if owners else ""), actor=here.name,
@@ -722,7 +1165,7 @@ def _into_store(here, bid, item, q, party, hh):
                concerns=list(here.institution(hh)["members"]) if hh else [])
     here.today()["left"].append({"by": here.name, "item": item, "qty": q, "building": bid})   # its household finds it in the morning
     here.record("give", None, party, to=hh or bid, item=item, qty=q)
-    return f"You gave {q:g} {item} to {owners}: it is in {b['name']}." if owners else f"You left {q:g} {item} at {b['name']}."
+    return (f"You gave {q:g} {item} to {owners}: it is in {b['name']}" if owners else f"You left {q:g} {item} at {b['name']}") + full + "."
 
 
 def _put_down(here, mind, a, item, q, pid, door=None):
@@ -1030,6 +1473,50 @@ def _withdraw(here, mind, a, party):
     return AG.withdraw(here, a)
 
 
+def _repair(here, bid, m) -> str:
+    """A break mended (D2-168): its materials when the mending starts (1 timber, stone for stone, for every 4 spaces of floor, at
+    least 2), then its work, two units an action, until it is mended a step."""
+    b = here.buildings()[bid]
+    md = dict(b.get("mending") or {})
+    if not md:
+        need = BL.repair_need(b)
+        _consume(here, need["materials"], extra=b["stock"] if here.may_take(b["stock"]) else None)
+        md = {"units_left": float(need["units"]), "day": here.day}
+    md["units_left"] = round(max(0.0, float(md["units_left"]) - 2 * m), 2)
+    if md["units_left"] > 1e-9:
+        here.apply("set", ref=("building", bid), field="mending", value=md)
+        return f"You worked on mending {b['name']}: about {show(md['units_left'])} units of work left."
+    here.apply("set", ref=("building", bid), field="mending", value=None)
+    here.apply("set", ref=("building", bid), field="condition", value=b["condition"] + 1)
+    return f"You repaired {b['name']}: it is now {('ruined', 'damaged', 'sound')[b['condition']]}."
+
+
+def _clear_built(here, pid, name, done, party) -> str:
+    """A unit of clearing for building (02zh §8): a field, pasture or meadow (4 units a unit of size), or scrub (10: grubbing out the
+    roots of a felled wood) becomes built ground, and stops being farmland; held by whoever cleared it if nobody held it (D4-60)."""
+    from cybertron2.engine.data import CLEARING
+    p = here.parcels()[pid]
+    need = float(CLEARING["built"][p["cover"]]) * float(p["size"])
+    got = round(float(p.get("clearing_built") or 0.0) + done, 2)
+    if got + 1e-9 < need:
+        here.apply("set", ref=("parcel", pid), field="clearing_built", value=got)
+        return f"You cleared ground for building at {name}: about {max(0, round(need - got, 1)):g} units of work left before it is built ground."
+    cover = p["cover"]
+    for f, v in (("cover", "built"), ("clearing_built", None), ("clearing", None), ("was", cover), ("crop", None)):
+        here.apply("set", ref=("parcel", pid), field=f, value=v)
+    if "grass" in p["res"]:
+        here.apply("set_res", parcel=pid, key="grass", fields={"S": 0.0, "K": 0.0})
+    who = party or here.household() or here.name
+    held = bool(here.claims(("parcel", pid)))
+    if not held:
+        here.apply("claim", thing=("parcel", pid), claimant=who, rights="all", grounds="cleared")
+    total = BL.ground_total(here.parcels()[pid])
+    here.event("work", f"{here.name} finished clearing {name} for building: it is built ground now", actor=here.name,
+               about=[f"parcel:{pid}"], salience=0.6, tags=["building"])
+    return (f"You finished clearing {name}: it is built ground now, {total} spaces for building"
+            + ("." if held else ", and yours: you cleared it."))
+
+
 # ---------------------------------------------------------------------- clearing new ground (Zach, 24 Oct)
 def _clear(here, pid, name, done, party) -> str:
     """A unit of clearing: progress on the parcel; when its work is done it is a field, fallow, held by whoever cleared it by the
@@ -1242,5 +1729,5 @@ HANDLERS = {"gather": _gather, "work": _work, "make": _make, "build": _build, "m
             "leave_household": _leave_household, "found": _found, "claim": _claim, "sleep": _sleep, "set": _set, "travel": _travel,
             "watch": _watch, "teach": _teach, "learn": _learn, "attack": _attack, "guard": _guard, "fire": _fire, "rest": _rest,
             "drive": lambda here, mind, a, party: FM.drive(here, a, party), "partner": _partner, "part": _part, "try": _try,
-            "name": _name, "order": _order, "meet": _meet, "come": _come}
+            "name": _name, "order": _order, "meet": _meet, "come": _come, "write": _write, "erase": _erase}
 assert set(HANDLERS) == set(VERB)

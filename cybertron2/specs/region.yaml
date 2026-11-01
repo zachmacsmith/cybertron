@@ -33,7 +33,7 @@ nodes:
   barleyfield:
     name: Barleyfield
     parcels:
-      bf_green: {name: the Green, cover: built, size: 2, text: "farmhouses, a byre, a cottage and the granary round a green", adj: [north_field, bf_pasture]}
+      bf_green: {name: the Green, cover: built, size: 3, text: "farmhouses, a byre, a cottage and the granary round a green", adj: [north_field, bf_pasture]}
       north_field: {name: North Field, cover: field, size: 5, text: "the Reeds' barley, ploughed, dunged and even", adj: [east_field],
                     fertility: 1.05, state: {crop: {kind: barley, left: 210, ripe_day: 2, broken: 5}, last_crop: legumes}}
       bean_field: {name: Bean Field, cover: field, size: 2, text: "the Reeds' beans", adj: [north_field],
@@ -59,7 +59,7 @@ nodes:
   coppergate:
     name: Coppergate
     parcels:
-      cg_yard: {name: the Yard, cover: built, size: 1, text: "a yard with two houses and the forge", adj: [the_seam, cg_scrub]}
+      cg_yard: {name: the Yard, cover: built, size: 2, text: "a yard with two houses and the forge", adj: [the_seam, cg_scrub]}
       the_seam: {name: the Seam, cover: rock, size: 1, text: "a green-stained seam in the hillside", state: {seam: {S: 80, K: 80}}}
       cg_quarry: {name: the Quarry, cover: rock, size: 1, text: "a face of grey stone", adj: [the_seam], state: {quarry: {S: 0, K: 0}}}
       cg_scrub: {name: the Hillside, cover: scrub, size: 2, text: "thorn and gorse", adj: [cg_pasture], state: {plants: {K: 5, S: 4, r: 0.3}}}
