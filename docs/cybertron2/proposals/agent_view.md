@@ -125,6 +125,10 @@ seeing.md §1, senses.md; cybertron2/engine/prompt.py, perceive.py, knowledge.py
   one worked, one sees, into the belief store); the reply schema's `at` free text (a child cared for). Not the default; the verb
   grammar and the system text are unchanged. World for it: cybertron2/specs/combe_base.yaml (designed from the ground up). The
   run's report will be review 38.41.
+- 2 Nov 2026: first live test, Combe (review 38.41): 80 days, one family, $11.78. Daily message about 1,900 characters against
+  6,600 with the old view; refusals 7.4% and 8.9% against 6.5% without the menu; the agents kept their footing, read crops from
+  signs, used the store's changes, and acted under real ignorance (two youths kept to a dead head's orders, not knowing of his
+  death). The system text (the verb manual, 14,000 characters) is the next lever.
 
 ## Sources
 
