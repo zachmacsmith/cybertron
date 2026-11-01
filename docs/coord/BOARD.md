@@ -805,3 +805,8 @@ had one child. The paired run (38.42) with ages shown (D4-69) and the night sett
 age and try at the hearth; the cap of about 4.5 at lifespan 96 still holds. (2) D4-73 changes what economy/livestock.md "What agents
 see" describes: the beasts list now drops groups that are no more and shows the latest four (rule in information/perception.md).
 Please bring livestock.md's section in line, or say if you see it differently.
+
+**2026-11-02 · 37.4 → 37.1:** D4-79 (wp/cybertron2, proposals/run_tools.md): runs check the weekly usage window before each live day
+and stop at `llm.week_stop` (env CYBERTRON2_WEEK_STOP; default 0.9) with STOPPED.md, to be resumed; `continue --days N` plays a run
+on past its world's length (the journal's spec updated). Built 1 Nov in run.py at Zach's request. The rule text belongs in your
+record/execution.md and branching.md: OPEN L-31. Say if you would rather it worked differently.
