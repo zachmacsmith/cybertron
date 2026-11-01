@@ -43,6 +43,9 @@ is in proposals.
 | choose the next crop, graze the fallow | no | restores fertility; varying the crop lowers the chance it fails | seed of another crop; cattle to graze |
 | reap | yes | the crop becomes grain carried by the reaper (D4-23: a crop belongs to nobody until reaped) | the crop ripe and within its window |
 
+- **A field carries one crop for each holding on it** (D2-172, with plot shares, D2-163): each holder's plots carry their own
+  crop, fertility and work; sowing, breaking, weeding and manuring go to one's own plots unless one names others'; a herd on the
+  field tramples or grazes whatever stands; a common rotation is custom or agreement.
 - **Crops** (D2-53): grain, winter grain (hardy), legumes (restore the soil; less food), a garden (fast; spoils) and hay (fodder).
   A crop ripens a fixed number of days after the day it is sown; one still growing when winter comes dies unless it is hardy.
   The same crop sown twice running on a plot is likelier to fail.
@@ -183,4 +186,4 @@ the soil in words ("tired", "good"), their seed in store, their tools and whethe
 [02l_farming.md](../../../review/37_growth/02l_farming.md), [02j_end_uses.md](../../../review/37_growth/02j_end_uses.md),
 [02d_ladders.md](../../../review/37_growth/02d_ladders.md); proposals/farming.md, proposals/tools.md.
 
-*Current as of 3 Nov 2026: H-6, D2-11 to D2-19, D2-23, D2-42, D2-43, D2-46, D2-47, D2-48, D2-52, D2-53, D2-54, D2-58, D2-59, D2-60, D2-61, D2-62, D2-64, D2-65, D2-66, D2-67, D2-130, D2-156, D2-157, D2-167.*
+*Current as of 3 Nov 2026: H-6, D2-11 to D2-19, D2-23, D2-42, D2-43, D2-46, D2-47, D2-48, D2-52, D2-53, D2-54, D2-58, D2-59, D2-60, D2-61, D2-62, D2-64, D2-65, D2-66, D2-67, D2-130, D2-156, D2-157, D2-167, D2-172.*
