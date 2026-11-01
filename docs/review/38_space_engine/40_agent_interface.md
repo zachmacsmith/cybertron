@@ -141,6 +141,83 @@ And one check to build with it: **a leak audit**. For each act that succeeds, as
 a store it never saw, a crop state nobody noticed, a person it never met. Today the menu and presence would fail it everywhere; a
 belief-rendered prompt should pass it by construction.
 
+## 9. The material redesign of perception (Zach: "what should we show them directly, what indirectly through senses, and what
+## should just live in their memories")
+
+**Three routes, one rule each:**
+
+| Route | What | Rule |
+|---|---|---|
+| **Shown directly** (the engine reads the truth) | one's own body, what one carries, one's units and voice, one's standing, one's own deals and offers as a party, the day and the weather, the results of one's own acts | only what a person knows of itself without looking; never anything outside the body except the day |
+| **Through the senses into beliefs** (the engine writes a belief, the prompt renders beliefs) | every fact about the world outside oneself: places and their layout, who is here, the states of fields, stores, buildings, herds, land, things lying; other people's condition | a fact reaches the agent only by a channel, with its day and how it came; the prompt never reads the true state |
+| **Memory only** (the engine keeps nothing for the agent) | what was said, what others did, one's opinions, plans, the social life of the village | lives in the conversation, then in the agent's own memory, kept lines and notes; the engine records it in the journal but never re-presents it |
+
+**Modules (in cybertron2/engine):**
+
+1. `beliefs.py`, one store a person: entries keyed by (subject, aspect), each {value, words, day, how, source}. Subjects are
+   references (parcel, building, herd, person, place, thing, road); `how` is saw, worked, heard (with who), found, seeded. It
+   replaces the five stores (land bareness, beasts known, things lying, home while away, places and "as you last saw them").
+2. Channels that write to it, each a function called at a fixed point of the day:
+   - **presence** (arriving, and each morning): the conspicuous structure of where one is: its parcels, buildings and ways (sure
+     sight), and who is here by proximity (same parcel or building, household, those one dealt with today; the rest as a count);
+   - **signs** (as now, signs.py and the noticing rule): states, by chance, sense, attention, knack, into beliefs;
+   - **acting** (the work step): what one worked, one knows: the field one reaped (its state, exactly enough to have done it), the
+     store one took from or put into (its contents, as seen), the herd one drove; the parcels passed on one's route by signs (D4-62);
+   - **results**: refusals and outcomes become beliefs where they say something about the world ("the Gill is picked bare");
+   - **speech**: a mention of a place, a craft or a thing by someone who knows it becomes a belief "told by X" (knowledge.md §4e);
+     what was said stays in memory only;
+   - **seeding**: the world file's start, from where each person stands.
+3. `view.py`, the renderer, replacing turn_prompt's reading of state:
+   - **the opening** renders the whole of what one believes, by kind and budget (here, one's household and house, one's beasts and
+     fields, elsewhere, people);
+   - **each day** renders self (direct), then **what changed since the last message**: new or changed beliefs, events noticed by
+     tier, one's results, what was heard; unchanged beliefs are not repeated (each belief keeps the day it was last shown);
+   - **selection** by salience x relevance within a per-kind budget; concerns always.
+4. What goes: KN.options (the menu); the exact house store when away (already a belief) and when present unless one is in it;
+   `_place_lines`' reading of the parcels' true state; the daily re-render; the schema's lists of names.
+5. Checks built with it: **a leak audit** in the tests (an agent's successful act may use only what its beliefs or self held: a
+   scripted bot that acts on true state must fail where a believing agent would not know); **golden prompts** for a few seeded
+   days; replay unchanged (the channels are deterministic, keyed draws).
+
+**One honest gap:** one's own store at home. A household member at home sees the bins every day; treating it as a belief seen each
+morning by presence (sure sight inside one's own house) gives the same exactness as now while away-from-home stays a dated belief.
+
+## 10. One continuous conversation for a whole life, 1-hour cache, no memory modules (Zach, exploratory)
+
+Prices (per million tokens, first-party API): Opus 5.5 input $4, output $20, cache read $0.20 (0.05x), 1-hour write $8 (2x); Sonnet
+5.5 $2, $10, read $0.20, 1-hour write $4; Haiku 5.5 $0.10, $0.50 for prompts up to 100K tokens and $0.50, $2.50 beyond; Opus 4.7
+$5/$25; Sonnet 4.6 $3/$15; context 1M for all of these, **200K for Haiku 4.5**. (Runs go through the claude CLI, so these are its
+"cc_equiv" dollars against the subscription; the CLI already writes 1-hour cache, review 20.)
+
+Measured in d1_duo: a day adds 12,000 to 24,000 tokens to a conversation (the day's message, the replies with their thinking, the
+talk), at 2 to 3 calls a day; one call already reached 92,000 tokens inside a 3-day stretch. Modelled for one agent, 3 calls a day,
+a 5,000-token system text, against today's 3-day stretches (as measured, priced at the same model):
+
+| Model | Growth a day | 30 days | 60 days | 120 days |
+|---|---|---|---|---|
+| Opus 5.5 | 12K | $9.9 vs $8.0 (x1.2); 365K context | $26 vs $16 (x1.6); 725K | $79 vs $32 (x2.4); 1.4M: over the window |
+| Opus 5.5 | 25K | $17 vs $8 (x2.1); 755K | $47 vs $16 (x2.9); 1.5M: over | $148 vs $32 (x4.6) |
+| Sonnet 5.5 | 12K | $7.9 vs $5.4 (x1.5) | $22 vs $11 (x2.1) | $70 vs $22 (x3.3); over |
+| Haiku 5.5 | 12K | $0.3 vs $0.2 | $0.9 vs $0.4 | $3.2 vs $0.7 |
+
+**Money is not the obstacle at short lives** (Opus 5.5's cheap cache reads make 30 days only 1.2x). The obstacles:
+
+1. **The window.** At 12K to 25K a day, 1M tokens is reached in 40 to 80 days; Haiku 4.5's 200K in 8 to 16. Lifespans here are 32
+   to 96 days, and runs span generations. So a lifetime stream needs compaction anyway, and server-side compaction is a memory
+   module written by a summariser outside the world, not by the agent: the thing D4-61 was built to avoid.
+2. **Gaps.** The 1-hour cache dies with any pause over an hour (a usage-limit stop, an overnight resume, a fork): each agent's
+   whole history is written again at 2x (at 500K tokens, $4 an Opus agent, about $56 for the duo world, every resume or fork).
+3. **Quality.** Whether a model decides as well with 500K tokens of its own past in front of it is unknown; long contexts dilute
+   attention, and the day's facts compete with weeks of old ones. Testable, not known.
+4. **What the simulation studies.** Total recall removes forgetting, and with it the worth of notes, kept lines, documents, customs
+   passed on and witnesses: the information asymmetries that memory makes are part of what cybertron studies. A transcript is also
+   not what a person remembers; Zach's "every social interaction lives in memory" is met by the stretch's conversation and the
+   agent's own memory, not by verbatim recall forever.
+
+**What it does point to:** the stretch length is the real dial, with today's 3 days at one end and a lifetime at the other.
+Longer stretches (say 7 to 10 days) keep more verbatim context at a cost that grows roughly with the stretch length, while the
+agent's own memory and kept lines carry the long run. Worth one comparison when the redesign is in.
+
 ## 8. What this asks of Zach
 
 1. The seven kinds as the frame for agent_view.md (the redesign), with one pipeline (state to channels to beliefs to render).
