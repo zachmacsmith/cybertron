@@ -54,7 +54,7 @@ about the world reaches it through the senses**, as beliefs with a date. Senses 
 7. **It does not repeat what the doer already knows.** The doer of an act reads its result line; a sign of the act is for others
    (and for the doer only as a felt or bodily line the result does not give, e.g. blood on one's hands).
 8. **It stays quiet when nothing matters.** Ambient lines cost reading and are ignored. Keep their chance low, or let the "Now"
-   section (the day and the weather, D4-27 senses that anyone awake has) carry them.
+   section (the day and the weather, which anyone awake there senses) carry them.
 
 ## Checklist for adding a bundle
 
