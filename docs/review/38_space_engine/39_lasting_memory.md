@@ -63,6 +63,31 @@ with places opening over time).
 - **Sonnet 5.5 leaves the opened places empty**: the line "More places open as you grow older" does not prompt it; four of eight
   runs kept one line all along, two kept none, only Gunnild (later) filled all four. Consistent with 38.38: Sonnet 5.5 does not use optional memory.
 
+## Where kept lines came from, and what was not kept (no new calls; Zach: "if things ended up there, did they originate in days
+between remembering, were they in short term memory until being saved, and were there things in short term memory that would have
+been better saved?")
+
+- **Tracing by words fails for most lines:** 57% of the 100 lines kept across the four tests are in the agent's own words, distilled
+  rather than quoted ("a crude tool quadruples felling"), so their distinctive words never appear in the days; 20% are general
+  lessons; 14% copy what they always know (the household's aim from its custom, shown every stretch anyway); 7% match the stretch
+  just ended. So the subject of each line was followed by hand (Opus 5.5, places opening over time, Lucy and Jory).
+- **Two kinds of line, two routes:**
+  - **Lessons distilled from something that recurred for many stretches**, carried in the rewritten memory all along, and saved
+    when a place opened: wild food picked bare (in the days of every stretch, in the memory after 7 of 8), the crude tool and
+    cheese (every stretch, every memory), hoeing a sown field (days of stretches 1, 2, 4, 7; memory 1 to 6; kept at stretch 5).
+  - **Corrections and events, saved at once:** the birth and Lucy's false belief that she was still with child (in the days from
+    stretch 5, in the memory from 7, kept at 7 and 8).
+- **What the rewritten memory carried for 3 or more rewrites, about people, promises or events, and was never kept** (5 to 11 such
+  sentences per run): "Roger is my named heir" (all 8 rewrites, never kept in either growth run); "the Moors are fair and very
+  generous" (7); "I owe Denise Rook 1 meat (A21)" (8; kept only with all places open); "I promised to teach Ellen quarrying" (4 to
+  6); kin and holdings (8).
+- **So the split agents made:** the memory holds facts about their world (kin, holdings, debts, the heir, judgments of people,
+  promises), and over these 23 days held them through every rewrite; kept lines hold rules to live by, corrections and lessons,
+  many about the game's controls ("write work offers exactly as 'work 2 days'"). By the proposal's stated purpose ("people,
+  lessons, promises, what one holds true") the heir, the debt, the promise and the judgment of the Moors belong in kept lines
+  as much as the lessons do; the agents left them where they already were. Whether that costs anything shows only over a horizon
+  long enough for the rewrite to drop them, which 23 days is not.
+
 ## Reading
 
 1. Places opening over time (Zach's direction) fix the first-lines-win problem, for a model that uses them.
