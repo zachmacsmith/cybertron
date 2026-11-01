@@ -125,6 +125,8 @@ def come_of_age(w, name) -> None:
     if w.spec.get("bots"):
         model = "bot"
     w.apply("set", w.place_of(("person", name)), ref=("person", name), field="model", value=model)
+    from cybertron2.engine import memory as MEM
+    MEM.come_of_age(w, name)                                                    # its childhood lines and one place more (D4-64)
     m = w.s["mind"][name]
     lines = list(dict.fromkeys((m.get("childhood") or [])))[-6:]
     if lines:
@@ -139,6 +141,50 @@ def come_of_age(w, name) -> None:
                            "source": f"you grew up watching {other} at it", "since": w.d}
     w.event(w.at(name) or w.place_of(("person", name)), "grown", f"{name} is grown now, a youth", actor=name, salience=0.4,
             tags=["family"], concerns=w.members(hh) if hh else [])
+
+
+# ---------------------------------------------------------------------- care: the largest care's food, and passing on (D4-64)
+def care_gifts(w, today) -> dict:
+    """At nightfall, before anyone eats: for each child, of those who cared for it today and are with it, the one who gives the most
+    food (in meals, from what they still carry) gives all of it, into the child's hands, and the child eats it all tonight; of those
+    who passed a sentence on, the one giving the most food has theirs kept as the child's line (a tie by a keyed draw); each line adds
+    a place, up to the world's limit. Returns {fed: {child: meals}, passed: [{child, by, text, kept, why}]}."""
+    from cybertron2.engine import memory as MEM
+    from cybertron2.engine.data import ITEMS
+    out = {"fed": {}, "passed": []}
+    gifts = today.get("care_gift") or {}
+    for child in sorted(gifts):
+        if child not in w.s["people"] or not w.s["people"][child]["alive"] or w.s["people"][child]["stage"] not in MINOR:
+            continue
+        here = w.place_of(("person", child))
+        offers = []
+        for g in gifts[child]:
+            by = g["by"]
+            if not w.s["people"][by]["alive"] or w.place_of(("person", by)) != here:
+                continue
+            item, have = g.get("item"), 0.0
+            if item in ITEMS and float(ITEMS[item]["food"]) > 0:
+                have = min(float(g.get("qty") or 0.0), float(w.goods(w.hands(by)).get(item, 0.0)))
+            meals = have * float(ITEMS[item]["food"]) if have > 1e-9 else 0.0
+            offers.append({**g, "have": have, "meals": meals, "draw": w.rng("care", w.d, child, by).random()})
+        if not offers:
+            continue
+        top = max(offers, key=lambda o: (o["meals"], o["draw"]))
+        if top["meals"] > 1e-9:
+            w.apply("transfer", here, src=w.hands(top["by"]), dst=w.hands(child), item=top["item"], qty=top["have"])
+            out["fed"][child] = top["meals"]
+        said = [o for o in offers if str(o.get("pass") or "").strip()]
+        if said:
+            win = max(said, key=lambda o: (o["meals"], o["draw"]))
+            room = len(MEM.kept(w, child)["lines"]) < int(MEM.kept_settings(w)["childhood"])
+            text = MEM.line(win["pass"], MEM.kept_settings(w)["words"])
+            if room:
+                MEM.seed_line(w, child, text, f"from {win['by']}")
+            out["passed"].append({"child": child, "by": win["by"], "text": text, "kept": room, "why": "" if room else "full"})
+            for o in said:
+                if o is not win:
+                    out["passed"].append({"child": child, "by": o["by"], "text": MEM.line(o["pass"]), "kept": False, "why": win["by"]})
+    return out
 
 
 # ---------------------------------------------------------------------- the day: partners, children's work

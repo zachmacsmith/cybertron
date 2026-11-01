@@ -29,7 +29,7 @@ WAVES = 2
 
 def blank_today() -> dict:
     return {"worked": {}, "thefts": [], "left": [], "joins": [], "admits": [], "sleep": {}, "travel": {}, "watch": {}, "teach": [],
-            "learn": [], "fights": [], "guards": {}, "fire": {}, "partner": [], "try": [], "care": {}, "care_by": {}, "route": {}}
+            "learn": [], "fights": [], "guards": {}, "fire": {}, "partner": [], "try": [], "care": {}, "care_by": {}, "care_gift": {}, "route": {}}
 
 
 # ---------------------------------------------------------------------- a scripted bot (smoke tests only)
@@ -424,6 +424,16 @@ def night_lines(w, rec) -> dict:
                 L.append(f"In the night you gave birth to {kind}, {b['child']}" + ("." if child.get("alive", True) else ", who did not live."))
             elif n == child.get("father") or n in (child.get("parents") or []):
                 L.append(f"In the night {b['mother']} gave birth to your {kind[2:] if kind != 'a child' else 'child'}, {b['child']}.")
+        care = rec.get("care") or {}
+        for x in care.get("passed") or []:                                     # what one passed on to a child (D4-64)
+            if x["by"] != n:
+                continue
+            if x["kept"]:
+                L.append(f"{x['child']} will keep what you passed on: “{x['text']}”.")
+            elif x["why"] == "full":
+                L.append(f"{x['child']} holds as much as a child can; what you passed on was not kept.")
+            else:
+                L.append(f"{x['child']} will keep what {x['why']} passed on today, not yours.")
         if n in ((rec.get("life") or {}).get("lost") or []):
             L.append("You lost the child you were carrying.")
         if n in rec["deaths"]:
@@ -750,6 +760,8 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
                 rewrite = {n: MEM.rewriting(w, n) for n in ending}            # D4-61: one memory, rewritten (append for weak models)
                 texts = {n: (MEM.request(w, n, Mind(w, n), results[n], nights.get(n, []), spans[n]) if rewrite[n]
                              else PR.memory_prompt(Mind(w, n), results[n], nights.get(n, []), spans[n])) for n in ending}
+                texts = {n: t.replace(" Reply with JSON only.", "") + "\n\n" + MEM.kept_request(w, n) + "\n\nReply with JSON only."
+                         for n, t in texts.items()}                             # kept for good, its own question (D4-64)
                 keep = {n: json.loads(conv.c[n]["schema"]) for n in ending if n in conv.c}   # the stretch's own schema: it continues
                 mr, mm, me = _parallel(lambda n: decide(w, n, texts[n], openings[n] + "\n\n" + texts[n], systems[n], backend, conv,
                                                         schema=keep.get(n), transit=True, kind="memory"),
@@ -760,9 +772,11 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
                         MEM.keep(w, n, text, spans[n])
                     elif text:
                         PC.own_memory(w, n, spans[n], text)
+                    kept_out = MEM.kept_apply(w, n, mr.get(n) or {})
                     u = (mm.get(n) or {}).get("usage") or {}
                     cost += float(u.get("cc_equiv_usd") or 0.0)
-                    files["memory"].write(json.dumps({"day": day, "agent": n, "span": spans[n], "memory": text, "prompt": texts[n],
+                    files["memory"].write(json.dumps({"day": day, "agent": n, "span": spans[n], "memory": text, "kept": kept_out,
+                                                      "kept_lines": MEM.kept_lines_text(w, n), "prompt": texts[n],
                                                       "usage": u, "thinking": (mm.get(n) or {}).get("thinking"), "error": me.get(n)}) + "\n")
             for n, lg in per["agents"].items():
                 files["perception"].write(json.dumps({"day": day, "agent": n, **lg}) + "\n")

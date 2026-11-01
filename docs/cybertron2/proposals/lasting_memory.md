@@ -156,6 +156,13 @@ on the board).
   of age they should have just childhood ones + 1 after the first memory, then the rest is decided by the scheduler"; "I think this
   new design works better. Turn this proposal into a spec to be built soon." Spec: information/memory.md (Kept for good),
   seeding/populations.md (customs), life/birth_and_death.md (passing on with care). Open: OPEN Q-K1 to Q-K3.
+- 1 Nov 2026: Zach answered: the child eats all the food of the largest care (Q-K1); Haiku agents flagged for later (L-28); "it
+  should be clear there is a place open, otherwise it is up to them" (Q-K3: the request says when a place has opened). **Built**
+  (37.4): memory.py (places, seeding, the request's question, keep and drop), perceive.seed_knowledge (customs and `kept` as kept
+  lines for those alive at the start), verbs._care (`item`, `qty`, `pass`), life.care_gifts and night.py (the largest care feeds
+  the child all of it; the line of the one giving most kept), life.come_of_age (places from the childhood lines and one more),
+  prompt.py (the opening's "Kept for good"; the carer's line on passing on; `keep`, `drop`, `pass` in the schema; the notes keep
+  `forget`), run.py (the request and night lines), play.html; tests/test_cybertron2_kept.py.
 
 ## Sources
 

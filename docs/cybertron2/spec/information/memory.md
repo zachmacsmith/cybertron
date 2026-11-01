@@ -45,11 +45,13 @@ the end of each stretch it writes, in its own words, what it wants to remember, 
 - **Changed only at the memory request**, by the person, asked as its own question after the memory:
 
   > Kept for good: what you want to remember for good, a sentence each (at most 25 words), kept word for word whatever you rewrite.
-  > When your places are full, you can forget one to keep something that matters more. ("keep": [new lines]; "forget": [numbers];
-  > a place you empty can be filled at once.)
+  > When your places are full, you can forget one to keep something that matters more. ("keep": [new lines]; "drop": [the numbers
+  > of lines to forget]; a place you empty can be filled at once.)
 
-  `forget` empties places (fixed lines excepted); `keep` fills empty places in order; a line with no empty place is not kept, and
-  the next request says so. Nothing says what to keep, and the engine puts nothing there itself.
+  `drop` empties places (fixed lines excepted; the reply's `forget` stays the notes'); `keep` fills empty places in order; a line
+  with no empty place is not kept, and the next request says so. When a place has opened since the last request, the request says
+  so ("A new place has opened since last time."); beyond that, what to keep is up to them: nothing says what, and the engine puts
+  nothing there itself.
 - **Places.** At coming of age: one place for each line passed on in childhood (life/birth_and_death.md: care), and one more.
   Then the scheduler opens the rest **evenly over adult life**, from coming of age to the end of the lifespan, up to `most`:
   places = start + floor((most - start) x x), x = (days since coming of age) / (days from coming of age to the end of the

@@ -15,7 +15,7 @@ from cybertron2.engine.here import Refused, show
 # `when` (only in a world with roads). The prompt's verb list and the reply schema are generated from it.
 VERB = {
     "gather": {"args": '{"what", "at"?: place, "for"?: party}', "cost": "craft", "doc": "take from the land: {crafts}"},
-    "work": {"args": '{"what", "at"?: place or building, "item"?: the seed to sow (grain, rye, beans: always say which), or the beast to slaughter (cow, ox, bull, calf), "for"?: party}',
+    "work": {"args": '{"what", "at"?: place or building, "item"?: the seed to sow (grain, rye, beans: always say which), the beast to slaughter (cow, ox, bull, calf), or food to give a child you care for (with "qty"), "pass"?: with care, a sentence for the child to keep, "for"?: party}',
              "cost": "craft", "doc": "{crafts}"},
     "make": {"args": '{"what", "qty"?: times, "for"?: party}', "cost": "craft",
              "doc": "a recipe; the inputs come from what you carry, then from stores here you may take from: {crafts}"},
@@ -1063,13 +1063,31 @@ def _care(here, mind, a):
         who = young[0]
     if who not in young:
         raise Refused(f"there is no child called {x!r} here" + (f"; the children here: {', '.join(young)}" if young else ""))
+    gift, bits = {"by": here.name}, []                                         # food from one's hands, and a sentence passed on (D4-64)
+    item = a.get("item")
+    if item:
+        if item not in ITEMS or not float(ITEMS[item]["food"]):
+            raise Refused(f"{item!r} is not food")
+        have = float(here.carried().get(item, 0.0))
+        if have <= 1e-9:
+            raise Refused(f"you carry no {item}")
+        qty = min(have, float(a.get("qty") or have))
+        gift.update(item=item, qty=qty)
+        bits.append(f"you mean to give {who} {show(qty)} {item} tonight")
+    said = " ".join(str(a.get("pass") or "").split())
+    if said:
+        gift["pass"] = said
+        bits.append(f"you passed on to {who}: “{said}”")
     t = here.today()
     t.setdefault("care", {})[who] = t.setdefault("care", {}).get(who, 0) + 1
     t.setdefault("care_by", {}).setdefault(who, [])
     if here.name not in t["care_by"][who]:
         t["care_by"][who].append(here.name)
     here.record("work", "care", who)
-    return f"You looked after {who} (fed, minded and kept warm)."
+    if len(gift) > 1:
+        gifts = t.setdefault("care_gift", {}).setdefault(who, [])
+        gifts[:] = [g for g in gifts if g["by"] != here.name] + [gift]
+    return f"You looked after {who} (fed, minded and kept warm)" + ("; " + "; ".join(bits) if bits else "") + "."
 
 
 def _name(here, mind, a, party):

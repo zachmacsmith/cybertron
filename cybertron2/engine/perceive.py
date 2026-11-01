@@ -69,11 +69,16 @@ def seed_knowledge(w) -> None:
         for hid, h in w.s["herds"].items():                                     # start (livestock.md "What agents see")
             if mine & {c["claimant"] for c in w.claims_on(("herd", hid))} and h.get("parcel") in w.s["parcels"]:
                 remember_beasts(w, name, hid, "known")
-        for c in w.spec.get("customs") or []:                                   # seeded custom (D2-30: markets), as local knowledge;
-            if c.get("households") and not {w.household_of(name), a.get("born_line")} & set(c["households"]):   # or a household's own
+        from cybertron2.engine import life as LF, memory as MEM
+        for c in w.spec.get("customs") or []:                                   # customs are lines kept for good (D4-64), seeded to
+            if c.get("households") and not {w.household_of(name), a.get("born_line")} & set(c["households"]):   # those alive now
                 continue
             if c.get("nodes") in (None, "all") or home in c["nodes"]:
-                m["seeded"].append(c["text"])
+                MEM.seed_line(w, name, c["text"], "a custom", c.get("fixed"))
+        for x in ((w.spec.get("agents") or {}).get(name) or {}).get("kept") or []:   # one's own seeded lines
+            MEM.seed_line(w, name, x if isinstance(x, str) else x.get("text"), "seeded", isinstance(x, dict) and x.get("fixed"))
+        if a.get("stage") not in LF.MINOR and a.get("born") is not None:          # grown already: places counted from its coming of age
+            MEM.come_of_age(w, name, int(a["born"]) + sum(n for st, n in LF.spans(LF.lifespan(w)) if st in LF.MINOR))
         dist = {home: 0}
         todo = [home]
         hidden = {nid for nid, n in w.s["nodes"].items() if n.get("unexplored") and nid != home}     # D4-47

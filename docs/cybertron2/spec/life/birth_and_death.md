@@ -26,7 +26,7 @@ life/life_stages.md (D4-19).
 - D2-146: more units spent trying raise the chance, with diminishing returns.
 - D2-148: a child's menial work is set by the household head's standing order.
 - D4-64: whoever cares for a child may pass on a sentence with the care, which becomes a line the child keeps for good; if several
-  care that day, whoever gives the most food passes theirs on; each line passed on adds a place to the child's long-term memory,
+  care that day, whoever gives the most food passes theirs on, and the child eats all the food of the largest care; each line passed on adds a place to the child's long-term memory,
   up to a limit (information/memory.md).
 - D2-149: old age is tuned to a life expectancy under each health regime; disease adds later (OPEN L-9).
 - D2-152: any two people of opposite sex at the same node can try for a child if both choose; a partnership is not required.
@@ -82,11 +82,13 @@ life/life_stages.md (D4-19).
 - **Care counts** on a day if someone did the care work for that child at its place that day; for now it bears on survival only
   (D2-150). Health and learning from care come later (OPEN L-26).
 - **Passing on** (D4-64): with the care a carer may give the child food from its own hands and pass on a sentence:
-  `work {what: care, at: <child>, food?: qty, pass?: "a sentence"}`. Each carer who cares for the child is told so in the morning,
-  with what the child holds so far ("Helewise holds 2 lines: ..., ...; 2 more can be added"). The sentence is the carer's choice:
-  a custom, a line of its own, or new words. One line a child a day: if several pass one on, the one who gave the most food that
-  day passes theirs on and the others' are dropped (a tie by a keyed draw, D2-70). Each line passed on adds a place, up to the
-  limit (`memory.kept.childhood`); past it, a line is not kept and the carer is told.
+  `work {what: care, at: <child>, item?: a food, qty?, pass?: "a sentence"}`. Each carer of the household's young is told so in the
+  morning, with what each child holds so far ("Helewise holds to keep for good: ... (2 more can be added)"). The sentence is the
+  carer's choice: a custom, a line of its own, or new words. At nightfall, before anyone eats: of those who cared for the child that
+  day and are with it, the one giving the most food (in meals, from what it still carries) gives **all** of it, and the child eats
+  it all that night; the others keep theirs. Of those who passed a sentence on, the one giving the most food has theirs kept as the
+  child's line, and the others' are dropped (a tie by a keyed draw, D2-70); each is told in its night. Each line passed on adds a
+  place, up to the limit (`memory.kept.childhood`); past it, a line is not kept and the carer is told.
 
 **The cost dial** (D2-145, D2-151), a world setting:
 

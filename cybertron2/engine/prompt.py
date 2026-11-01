@@ -24,7 +24,7 @@ SCHEMA = {
             "method": {"type": "string"}, "on trouble": {"type": "string"}, "stop at": {"type": "string"}, "gather": {"type": "boolean"},
             "searching": {"type": "string"}, "meeting": {"type": "string"}, "lead": {"type": "string"},
             "with": {"type": "string"}, "units": {"type": "number"}, "heir": {"type": "string"}, "head": {"type": "string"},
-            "text": {"type": "string"}},
+            "text": {"type": "string"}, "pass": {"type": "string"}},
             "required": ["do"]}},
         "say": {"type": "array", "items": {"type": "object", "properties": {"to": {"type": "string"}, "text": {"type": "string"}},
                                             "required": ["to", "text"]}},
@@ -43,6 +43,8 @@ SCHEMA = {
         "open": {"type": "array", "items": {"type": "string"}},
         "look_up": {"type": "array", "items": {"type": "string"}},
         "memory": {"type": "string"},
+        "keep": {"type": "array", "items": {"type": "string"}},
+        "drop": {"type": "array", "items": {"type": "integer"}},
     },
     "required": ["why", "actions"],
 }
@@ -150,7 +152,7 @@ REPLY_LINES = """Reply with JSON:
 - "note": [{"title", "text"}] write or replace a private note (up to 8, about 150 words each); "pin": a title to show every morning;
   "forget": [titles].
 - "open": [note titles] and "look_up": [crafts]: shown to you before the day's work, when you may change your plan.
-- "memory": only when asked for at the end of a stretch of days."""
+- "memory", "keep", "drop": only when asked for at the end of a stretch of days."""
 
 
 def _kin_lines(mind) -> list:
@@ -485,6 +487,13 @@ def _family_lines(here, mind) -> list:
         need = life["dial"]["infant_care"]
         out.append(f"Looking after a child is work: work {{what: care, at: <the child>}}, a unit; a baby needs {need} a day or it may "
                    "not live, and it eats from its household's store or the hands of its family beside it.")
+        out.append('While caring for a child you may give it food from your hands, "item" and "qty" (whoever gives the most food that '
+                   'day feeds it all of theirs), and pass on something for it to keep for good, "pass": "a sentence" (of those who '
+                   'pass something on, the one giving the most food is kept).')
+        for x in young:                                                         # what each holds so far (D4-64)
+            k = here.kept_of(x)
+            held = "; ".join(f"“{t}” ({src})" for t, src in k["lines"]) or "nothing yet"
+            out.append(f"{x} holds to keep for good: {held}" + (f" ({k['room']} more can be added)." if k["room"] else " (no more can be added)."))
         order = life.get("order")
         out.append("The household's children are set to " + (KN.label(order["what"]) if order else "no work") + " each day"
                    + (" (the head sets it: order)" if mind.head != mind.name else " (you set it: order)") + ".")
@@ -564,6 +573,9 @@ def _memory_sections(mind) -> list:
     rewrite = getattr(mind, "memory_mode", "append") == "rewrite"
     mem = mind.store.get("seeded", []) + ([] if rewrite else mind.store["lasting"])
     L = ["## What you remember\n" + "\n".join(f"- {x}" for x in mem)] if mem else []
+    kept = (mind.store.get("kept") or {}).get("lines") or []                  # kept for good, word for word (D4-64)
+    if kept:
+        L.append("## Kept for good\n" + "\n".join(f"- {x['text']}" for x in kept))
     if rewrite:
         text = (mind.store.get("memory") or {}).get("text")
         if text:
@@ -618,7 +630,7 @@ def memory_prompt(mind, did: list, night: list, span: str) -> str:
     if night:
         L.append("In the night: " + " ".join(night))
     L.append(f"This is the end of a stretch of days ({span}). Tomorrow you start afresh: you will keep what you write now, your notes, "
-             "and what you have always remembered, but not the detail of these days. In \"memory\", write in your own words what you "
+             "what you keep for good and what you have always remembered, but not the detail of these days. In \"memory\", write in your own words what you "
              "want to remember of them (at most 150 words): what happened, what was agreed or promised, who owes what, what you mean "
              "to do. Leave \"actions\" empty. Reply with JSON only.")
     return "\n\n".join(L)

@@ -48,6 +48,7 @@ def night(w) -> dict:
         if sleepers:
             rec["hearth"][bid] = {"sleepers": len(sleepers), "lit": lit, "warm": round(warm, 2)}
     fires = open_fires(w, today, where, rec)                                  # fires in the open, shared by 4 (D2-159)
+    rec["care"] = LF.care_gifts(w, today)                                       # the largest care's food, and what is passed on (D4-64)
     tents = {}                                                                  # a tent sleeps two (D2-68): who shares whose
     for name in w.living():
         a = s["people"][name]
@@ -85,6 +86,8 @@ def night(w) -> dict:
             need = min(need, float(p["ration"]) * float(road["fed"][name]))
         mult, extra = LF.ration_factor(w, name)                                 # an infant, a child, a pregnancy (D2-141, D2-145)
         need = need * mult + extra
+        if name in rec["care"]["fed"]:                                         # it eats all the largest care gave it (D4-64)
+            need = max(need, rec["care"]["fed"][name])
         place = w.place_of(("person", name))
         stores = [a["hands"]]
         if place in s["nodes"]:

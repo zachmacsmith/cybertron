@@ -27,8 +27,9 @@ def test_each_household_holds_its_own_way():
     w = world()
     for hh, words in (("Thorne", "land well kept"), ("Webb", "as strong as its children"), ("Hunt", "the wood beyond the wood")):
         for n in w.members(hh):
-            seeded = " ".join(w.s["mind"][n]["seeded"])
-            assert words in seeded                                   # (one married in also keeps the way of the house it was born in)
+            kept = " ".join(x["text"] for x in w.s["mind"][n]["kept"]["lines"])   # customs are lines kept for good (D4-64)
+            assert words in kept                                     # (one married in also keeps the way of the house it was born in)
+            assert words not in " ".join(w.s["mind"][n]["seeded"])
 
 
 def test_firewood_is_had_in_ockley_and_its_woods_keep_it_at_about_two_thirds():

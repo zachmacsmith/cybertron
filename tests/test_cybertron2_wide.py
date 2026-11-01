@@ -34,7 +34,7 @@ def test_each_household_has_one_model_its_own_way_and_its_own_aim():
             if a["stage"] in ("infant", "child"):
                 continue
             assert a["model"] == models[hh]
-            assert words in " ".join(w.s["mind"][n]["seeded"])
+            assert words in " ".join(x["text"] for x in w.s["mind"][n]["kept"]["lines"])   # kept for good (D4-64)
     for hh in ("Cotter", "Fenwick"):                                   # the family households' aims say children plainly
         assert all("child" in w.spec["agents"][n]["aim"] for n in w.members(hh) if w.spec["agents"][n]["stage"] in ("adult", "youth"))
 

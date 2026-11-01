@@ -138,6 +138,15 @@ class Here:
                 "parents": list(a.get("parents") or []), "cared": dict(a.get("cared") or {}),
                 "grows": LF.grows_in(self._w, x)}
 
+    def kept_of(self, x) -> dict:
+        """What a child here holds to keep for good, as its carers know it (D4-64): {lines: [(text, source)], room}."""
+        if x not in self.people():
+            raise Refused(f"{x} is not here")
+        from cybertron2.engine import memory as MEM
+        k = MEM.kept(self._w, x)
+        return {"lines": [(l["text"], l["source"]) for l in k["lines"]],
+                "room": max(0, int(MEM.kept_settings(self._w)["childhood"]) - len(k["lines"]))}
+
     def children_on(self) -> bool:
         from cybertron2.engine import life as LF
         return LF.on(self._w)

@@ -103,7 +103,7 @@ function pretty(s) { try { return JSON.stringify(JSON.parse(s), null, 1); } catc
 
 // ---------------------------------------------------------------- the reply being built
 function initial(kind) {
-  const st = { why: "", actions: [], lists: {}, attend: "", look_up: [], pin: "", forget: "", open: "", memory: "" };
+  const st = { why: "", actions: [], lists: {}, attend: "", look_up: [], pin: "", forget: "", open: "", memory: "", keep: "", drop: "" };
   const last = ctx.turns.length ? ctx.turns[ctx.turns.length - 1] : null;
   if (kind === "talk" && last) {                       // "give your whole plan for the day again": start from the one before
     try { const r = JSON.parse(last.reply); st.why = r.why || ""; st.actions = (r.actions || []).map(a => ({ ...a })); } catch (e) {}
@@ -121,6 +121,10 @@ function reply() {
   if (state.pin.trim()) out.pin = state.pin.trim();
   for (const k of ["forget", "open"]) { const xs = state[k].split(",").map(x => x.trim()).filter(Boolean); if (xs.length) out[k] = xs; }
   if (state.memory.trim()) out.memory = state.memory;
+  const keep = state.keep.split("\n").map(x => x.trim()).filter(Boolean);       // kept for good (D4-64): one line each
+  if (keep.length) out.keep = keep;
+  const drop = state.drop.split(",").map(x => parseInt(x.trim(), 10)).filter(x => !isNaN(x));
+  if (drop.length) out.drop = drop;
   return out;
 }
 function clean(o) { const r = {}; for (const [k, v] of Object.entries(o)) if (v !== "" && v != null && !(typeof v === "number" && isNaN(v))) r[k] = v; return r; }
@@ -160,6 +164,10 @@ function renderForm(kind) {
   f.replaceChildren();
   if (rawMode) return renderRaw(f);
   if (kind === "memory" && P("memory")) f.append(memoryBox());
+  if (kind === "memory" && P("keep")) {                // kept for good: the lines and places are in the message on the left
+    f.append($("h3", { text: "Keep for good (one line each)" }), input({ type: "string" }, state.keep, v => { state.keep = v; preview(); }, true),
+      $("h3", { text: "Drop (the numbers of lines to forget, comma separated)" }), input({ type: "string" }, state.drop, v => { state.drop = v; preview(); }));
+  }
   f.append($("h3", { text: "Why" }), input({ type: "string" }, state.why, v => { state.why = v; preview(); }, true));
   if (kind !== "memory") {
     f.append($("h3", { text: "Actions, in order" }));
