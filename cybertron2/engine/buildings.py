@@ -480,3 +480,16 @@ def vaulted(b, goods) -> dict:
                 out[item] = out.get(item, 0.0) + take
         left = {i: q for i, q in left.items() if q > 1e-9}
     return out
+
+
+def stall_share(h, held, head) -> tuple:
+    """Beasts housed in winter (D2-45; 02zh §4): the share of a herd its holders' stalls on its parcel take, and the building."""
+    best, n = None, 0
+    for bid, b in sorted(held.items()):
+        if b.get("parcel") != h.get("parcel") or b.get("unfinished") or b.get("condition", 2) <= 0:
+            continue
+        k = int((b.get("fittings") or {}).get("stalls", 0))
+        if k:
+            n += k
+            best = best or bid
+    return (min(1.0, n / float(head)) if head > 0 else 0.0), best

@@ -264,6 +264,9 @@ def layout_lines(w, name) -> list:
         where += [height_words(height(w, pid))] if height(w, pid) != 1 else []      # a world that sets none: no words for them
         out.append(f"{names[pid]} ({what})" + (" lies " + ", ".join(where) if where else "")
                    + (f"; next to {_and(nb)}" if nb else "; set apart from the rest"))
+    for bid, b in sorted(w.s["buildings"].items()):                          # rich and grand: named in the overview (D2-171)
+        if b["node"] == node and not b.get("unfinished") and tier_words(b):
+            out.append(f"{tier_words(b)} on {names.get(b['parcel'], b['parcel'])}")
     for rid, other, end in road_ends(w, node):
         if not way_known(w, name, rid, node):
             continue
@@ -271,6 +274,17 @@ def layout_lines(w, name) -> list:
         to = w.s["nodes"][other]["name"] if w.knows_place(name, other) else w.s["roads"][rid].get("way", "an unexplored way")
         out.append(f"the way to {to} leaves from {where}" + (f", {side_words(end['side'])}" if end["side"] != "centre" else ""))
     return out
+
+
+def tier_words(b) -> str:
+    """A rich or grand building or monument, as it is named on arrival and in the village (D2-171): "" for plain and fine."""
+    from cybertron2.engine.data import MONUMENTS
+    t = b.get("tier") or "plain"
+    if t not in ("rich", "grand"):
+        return ""
+    what = MONUMENTS[b["monument"]]["label"][2:] if b.get("monument") else ("house" if (b.get("fittings") or {}).get("beds") else "building")
+    return f"{b['name']}, a grand {b['structure'] if not b.get('monument') else ''} {what}".replace("  ", " ") if t == "grand" \
+        else f"{b['name']}, a richly built {what}"
 
 
 def overview(w, node) -> list:
@@ -282,6 +296,9 @@ def overview(w, node) -> list:
         fit = [f for f in b["fittings"] if f in LAYOUT["seen"]]
         if fit:
             cands.append((3.0, f"{LAYOUT['seen'][fit[0]]} at {w.s['parcels'][b['parcel']]['name']}"))
+        rich = tier_words(b)
+        if rich:                                                               # rich and grand: named on arrival (D2-171)
+            cands.append((4.5 if b.get("tier") == "grand" else 4.0, f"{rich} on {w.s['parcels'][b['parcel']]['name']}"))
         if b.get("fire"):
             cands.append((1.5, f"smoke from {b['name']}"))
     for pid in parcels_of(w, node):

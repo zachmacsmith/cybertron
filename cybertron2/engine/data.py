@@ -165,6 +165,7 @@ FITTINGS = {
                     "needs": "millstones", "site": "water", "basic": False, "trade": "carpenter", "spaces": 0, "heavy": True,
                     "does": "a water mill: the river turns the millstones (D2-61)"},                                  # D2-166
     "stalls": {"label": "stalls", "materials": {"timber": 1}, "units": 1, "per": "stall", "basic": True, "spaces": 2, "heavy": True,
+               "fodder": 0.8, "dung": 1.5,
                "does": "beasts housed in winter, one a stall: less fodder, dung kept, not driven off without coming in"},   # D2-45
     "woodshed": {"label": "a woodshed", "materials": {"timber": 2}, "units": 1, "basic": True, "spaces": 0, "ground": 2,
                  "holds": {"timber": 40}, "does": "a lean-to against the building: 40 timber kept dry"},

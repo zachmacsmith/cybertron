@@ -740,8 +740,14 @@ def _works_words(wk) -> str:
     return f"work to make it {TIERS[wk['to']]['words']}"
 
 
+def _at_work(here, bid):
+    """Building work, writing: a day's work at the building (its parcel: presence, glimpses, the day's route)."""
+    here.today()["worked"].setdefault(here.name, []).append(bid)
+
+
 def _works_progress(here, mind, bid, started=False):
     """Work on a room, a rebuilding or a finer finish, two units an action (more with skill), until done; it counts when done."""
+    _at_work(here, bid)
     b = here.buildings()[bid]
     wk = dict(b["works"])
     done = round(2 * KN.skill(mind, wk.get("tech") or "small room") * here.yield_mult(), 2)
@@ -821,6 +827,7 @@ def _fitting(here, mind, a, party, what):
 
 def _fitting_work(here, mind, bid, what, lvl, started=False):
     """A fitting's work, two units an action (more with skill), until it is done; it counts only when finished (02zg)."""
+    _at_work(here, bid)
     f = FITTINGS[what]
     b = here.buildings()[bid]
     under = dict(b.get("fitting_work") or {})
@@ -849,6 +856,7 @@ def _fitting_work(here, mind, bid, what, lvl, started=False):
 
 
 def _build_work(here, mind, bid, lvl, started=False):
+    _at_work(here, bid)
     b = here.buildings()[bid]
     u = dict(b["unfinished"])
     done = round(2 * KN.skill(mind, u["blueprint"]) * here.yield_mult(), 2)
@@ -949,12 +957,13 @@ def _write(here, mind, a, party):
         if not text:
             raise Refused("say what to write (\"description\": text)")
         old = b.get("description") or {}
+        _at_work(here, bid)
         here.apply("set", ref=("building", bid), field="description",
                    value={"text": text, "by": here.name, "day": here.day, "was": old.get("text")})
         if old and old.get("by") != here.name:
             _changed(here, bid, b, f"the words describing {b['name']} have been changed")
         here.event("write", f"{here.name} was painting new words on {b['name']}", actor=here.name, about=[f"building:{bid}"],
-                   salience=0.6, tags=["building"], own=2.0)
+                   salience=0.6, tags=["building"], own=3.0)
         here.record("write", "description", party, site=bid)
         return f"You wrote on {b['name']}: “{text}”."
     text = BL.cap_text(a.get("text"), "line")
@@ -978,6 +987,7 @@ def _write(here, mind, a, party):
             _mason(mind)
         here.apply("wear", container=here.hands, item=tool, uses=float(LINES["carve_wear"]))
     old = next((x for x in lines if int(x["slot"]) == k), None)
+    _at_work(here, bid)
     lines = [x for x in lines if int(x["slot"]) != k] + [{"slot": k, "text": text, "by": here.name, "day": here.day, "how": how,
                                                           "was": old["text"] if old else None, "was_by": old["by"] if old else None}]
     here.apply("set", ref=("building", bid), field="lines", value=sorted(lines, key=lambda x: int(x["slot"])))
@@ -987,7 +997,7 @@ def _write(here, mind, a, party):
         _changed(here, bid, b, f"the line {spot} of {b['name']} has been " + ("painted over" if how == "paint" else "cut away")
                  + " and new words put there")
     here.event("write", f"{here.name} was {verb} words {spot} of {b['name']}", actor=here.name, about=[f"building:{bid}"],
-               salience=0.6 if not old else 0.8, tags=["building"], own=2.0)
+               salience=0.6 if not old else 0.8, tags=["building"], own=3.0)
     here.record("write", how, party, site=bid)
     return f"You {'painted' if how == 'paint' else 'carved'} {spot} of {b['name']}: “{text}”."
 
@@ -1004,12 +1014,13 @@ def _erase(here, mind, a, party):
         if tool is None:
             raise Refused("scratching out a carved line needs a tool in your hands")
         here.apply("wear", container=here.hands, item=tool, uses=float(LINES["carve_wear"]))
+    _at_work(here, bid)
     here.apply("set", ref=("building", bid), field="lines", value=[x for x in b["lines"] if int(x["slot"]) != k])
     spot = BL.spot_words(b, k)
     if ln.get("by") != here.name:
         _changed(here, bid, b, f"the line {spot} of {b['name']} has been scratched out")
     here.event("write", f"{here.name} was scratching out the words {spot} of {b['name']}", actor=here.name, about=[f"building:{bid}"],
-               salience=0.9, tags=["building"], own=2.0)
+               salience=0.9, tags=["building"], own=3.0)
     here.record("erase", ln.get("how"), party, site=bid, was=ln["text"], was_by=ln.get("by"))
     return f"You scratched out the line {spot} of {b['name']} (it said: “{ln['text']}”)."
 
