@@ -145,7 +145,8 @@ unfinished.
 
 ## What agents see
 
-Their house and its state ("the roof needs mending"); its floor, used and free; the buildings at their node by what they look like
+Each parcel's ground for buildings, used and free ("the Green: 5 houses, room for 2 more"; D2-164). Their house and its state
+("the roof needs mending"); its floor, used and free; the buildings at their node by what they look like
 and do ("a stone hall with a hearth"), who holds them as they know it, and the rooms they may enter.
 
 ## Open
@@ -158,4 +159,4 @@ and do ("a stone hall with a hearth"), who holds them as they know it, and the r
 [02i_buildings.md](../../../review/37_growth/02i_buildings.md), [02k §3](../../../review/37_growth/02k_fuses_and_gates.md);
 proposals/buildings.md, proposals/shelter.md.
 
-*Current as of 24 Oct 2026: H-5, D2-3, D2-9, D2-20, D2-45, D2-49, D2-56, D2-60, D2-61, D2-154, D2-155.*
+*Current as of 3 Nov 2026: H-5, D2-3, D2-9, D2-20, D2-45, D2-49, D2-56, D2-60, D2-61, D2-154, D2-155, D2-164.*
