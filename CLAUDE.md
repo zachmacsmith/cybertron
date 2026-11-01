@@ -28,6 +28,12 @@ resolution the state has; anything the engine does not decide (a position inside
 named as one and kept deterministic. Take data tables (covers, items, fittings, techniques) from the engine, never re-invent
 them. The c2viz grounding notes: `c2viz/ENGINE.md`.
 
+## Senses are written to a guide
+
+Before adding or changing what people can sense in cybertron2 (signs, bundles, noticing), read `docs/cybertron2/guides/senses.md`:
+what senses are for, what makes a good sign (grounded in state, worth acting on, a change not a standing fact, a bundle across
+senses, never an act or feeling the person did not choose), the checklist, and the measured evidence.
+
 ## cybertron2: where design work goes
 
 Everything about cybertron2 (code, spec, proposals, notes) lives on branch `wp/cybertron2`; other branches are for the old engine.
