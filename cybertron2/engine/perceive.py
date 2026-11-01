@@ -366,7 +366,10 @@ def evening(w, attend: dict, today: dict) -> dict:
         for f in F:                                                             # happened to one, or in one's house, in full
             if name not in f["concerns"] or not f.get("event") or f.get("actor") == name or f.get("dawn") and f["text"] in t["dawn"]:
                 continue
-            p = TH.spot_chance(w, name, here.node, None, 1.0, inside=[name]) if happened_to(w, name, f) else chance_of(w, name, f, tgt_raw, mind)
+            if f.get("kind") == "theft":                                       # its witnesses: seen when it was settled (D4-81)
+                p = 1.0
+            else:
+                p = TH.spot_chance(w, name, here.node, None, 1.0, inside=[name]) if happened_to(w, name, f) else chance_of(w, name, f, tgt_raw, mind)
             if rng.random() < p:
                 con.append(f)
         t["concerned"] = list(dict.fromkeys(f["text"] for f in con))           # the same line once
@@ -394,6 +397,8 @@ def evening(w, attend: dict, today: dict) -> dict:
                     continue                                                    # oneself
                 if rng.random() < chance_of(w, name, f, tgt_raw, mind):
                     cand.append((1.0 + f["salience"], f))
+                continue
+            if f.get("kind") == "theft":                                       # a theft: only its witnesses (above), never by chance
                 continue
             if f["id"] in seen or f.get("actor") == name or f.get("peek") or not _can_read(mind, f):
                 continue

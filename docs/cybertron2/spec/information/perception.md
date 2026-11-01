@@ -59,6 +59,12 @@ Per agent: what it knows of places, people and things, with when and how it lear
 
 The node in words, never as engine numbers; other places as they knew them, with how old the knowledge is.
 
+### Thefts (D4-81)
+
+The thief is named only to those who saw the theft when it happened (settle.py: those at home, watching the house, or by the rule
+nearby); no one else reads that line by chance afterwards. The house's people are not told: they find the loss by the store's signs
+(D4-74) and by its count when they are home. Who did it travels further only by speech.
+
 ### One's beasts as one last knew of them (D4-73)
 
 Each person keeps, per group of their household's beasts, what they last knew (how many, where, when). Seeing the household's beasts
@@ -73,4 +79,4 @@ lately".
 
 38.02; proposals/place.md, knowledge.md, seeing.md.
 
-*Current as of 2 Nov 2026: H-7, D2-4, D2-29, D2-85, D2-91, D2-102, D4-6, D4-33, D4-35, D4-47, D4-48, D4-50, D4-73, D4-75.*
+*Current as of 2 Nov 2026: H-7, D2-4, D2-29, D2-85, D2-91, D2-102, D4-6, D4-33, D4-35, D4-47, D4-48, D4-50, D4-73, D4-75, D4-81.*

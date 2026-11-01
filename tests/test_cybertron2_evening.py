@@ -245,3 +245,24 @@ def test_with_the_plan_made_at_the_hearth_the_morning_call_is_skipped_unless_nee
     called = [(d, a) for (d, a) in T if d > 0 and (d, a) not in skipped and a in ("Ivo", "Margery")]
     assert skipped or called                                                     # either way, a day was played
     assert R.run(None, out, mode="replay")["mismatches"] == []
+
+
+def test_the_thief_is_named_only_to_those_who_saw_and_the_house_finds_the_loss_by_its_signs():
+    from cybertron2.engine import perceive as PC, settle as ST
+    w = World(load_spec("cybertron2/specs/valley_s5.yaml"))
+    w.s["today"] = today = R.blank_today()
+    w.s["events"] = []
+    owners = [n for n in w.agents_acting() if "reed_house" in w.homes(n)]
+    for n in owners:
+        today["worked"][n] = ["somewhere"]                                       # all out at work: none at home
+    w.apply("move", "millbrook", src=w.s["buildings"]["reed_house"]["stock"], dst=w.hands("Hamo"), item="grain", qty=2) \
+        if False else None
+    today["thefts"].append({"by": "Hamo", "building": "reed_house", "item": "grain", "qty": 2})
+    ST.settle_thefts(w, today, {})
+    ev = [e for e in w.s["events"] if e["kind"] in ("theft", "loss")]
+    assert all(e["kind"] == "theft" for e in ev)                                  # no certain "missing" line for the owners
+    witnesses = set(ev[0]["concerns"]) if ev else set()
+    PC.evening(w, {}, today)
+    for n in owners:
+        named = [x for x in PC.store(w, n)["today"]["concerned"] + PC.store(w, n)["today"]["notice"] if "Hamo" in x]
+        assert bool(named) == (n in witnesses)                                    # the name only if one saw it
