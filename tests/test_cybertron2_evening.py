@@ -123,3 +123,14 @@ def test_setting_off_in_the_morning_arrives_by_nightfall_and_at_nightfall_arrive
     assert d0["Ivo"]["used"] == d0["Ivo"]["units"] and not any("firewood" in x for x in d0["Ivo"]["results"])
     assert d1["Ivo"]["at"] == "wenmoor" and d1["Margery"]["at"] == "holtwood"
     assert d1["Margery"]["units"] == d1["Ivo"]["units"] // 2
+
+
+def test_the_beast_to_slaughter_may_be_named_in_thing_when_tags_free_it():
+    w = _world(tags=True)
+    w.s["today"] = R.blank_today()
+    hid = next(iter(w.s["herds"]))
+    pid = w.s["herds"][hid]["parcel"]
+    bulls = int(w.s["herds"][hid]["bulls"])
+    out = V.do(Here(w, "Ivo"), Mind(w, "Ivo"), {"do": "work", "what": "slaughter", "at": w.s["parcels"][pid]["name"], "thing": "bull"})
+    assert out.startswith("You slaughtered a bull"), out
+    assert int(w.s["herds"][hid]["bulls"]) == bulls - 1

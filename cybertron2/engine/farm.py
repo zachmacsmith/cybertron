@@ -183,8 +183,9 @@ def act(here, mind, tech, key, place_name, out, m, tm, a) -> tuple:
 
 def _herd_on(here, key, a, role=None):
     hs = [hid for hid, h in here.herds().items() if h["parcel"] == key and head(h) > 0 and (role is None or int(h.get(role, 0)) > 0)]
-    want = a.get("thing")
-    pick = next((hid for hid in hs if want and str(want).lower() in (hid.lower(), here.herds()[hid]["name"].lower())), None)
+    want = str(a.get("thing") or "").strip().lower()
+    pick = next((hid for hid in hs if want and (want in (hid.lower(), here.herds()[hid]["name"].lower())
+                                                or want == str(here.herds()[hid].get("tag") or "").lower())), None)
     if not hs:
         raise Refused("there are no beasts there")
     return pick or hs[0]
@@ -399,7 +400,7 @@ def _reap(here, tech, key, place_name, out, mult, f, y):
 def _slaughter(here, key, out, a, y):
     hid = _herd_on(here, key, a)
     h = here.herds()[hid]
-    want = ROLE_OF.get(str(a.get("item") or "").lower().strip())
+    want = ROLE_OF.get(str(a.get("item") or "").lower().strip()) or ROLE_OF.get(str(a.get("thing") or "").lower().strip())
     role = want or next(r for r in ("young", "cows", "oxen", "bulls") if int(h.get(r, 0)) > 0)
     if int(h.get(role, 0)) <= 0:
         raise Refused(f"there is no {ROLE_WORD[role][0]} in {h['name']} ({herd_words(h)})")
