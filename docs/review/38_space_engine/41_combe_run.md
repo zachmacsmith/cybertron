@@ -180,5 +180,11 @@ $6.44 for 40 days (about 2.7 agents a day on average): $0.16 a day.
 4. The fertile window: with lifespan 96 and a couple born day -52, children are possible only until day 44; growth past one or two
    births needs younger adults, a second couple, or partners from outside (for Zach).
 5. The granary refusal wording and the zero hoe at Wenmoor (37.4, to check).
+6. **Correction (2 Nov):** the refusal shares above count one per result line, so an act refused five times in a row (shown "(x5)")
+   counts once. Counted per refused act, over results other than speech and notes: d1_duo 12.9%, h1_hollins 20.8%, h2_hollins
+   15.3% (old view); c1_combe 21.1%, c2_combe 19.1%, c3_combe_rich 15.9% (beliefs). Different worlds, no paired run: no
+   attribution to the view either way. What changed is the kind: under the belief view most refusals are the world's state met
+   unseen (no crop left, grass too short, no cow in milk, herd not there), the largest single cause the harvest overshoot (several
+   people each plan four reaps of a field that runs out at midday).
 
 *Current as of 2 Nov 2026 (c1_combe, c2_combe and c3_combe_rich complete).*
