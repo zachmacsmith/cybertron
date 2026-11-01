@@ -106,7 +106,7 @@ So a world can be a continent without building it all in detail.
 ## 2. The mesh
 
 - **Points:** about 150 m apart, Poisson-disc spaced, from a keyed draw. Each cell is about 2 ha, the land of one plot (a unit of
-  size). A 70 km region is about 220,000 cells; fine detail is made only where needed (§1c).
+  size). A 50 km region is about 110,000 cells; fine detail is made only where needed (§1c).
 - **Cells:** Voronoi cells, with neighbours from the Delaunay graph.
 - **Reproducibility:** every draw is keyed by (seed, layer, cell or feature), so a pin changes only what depends on it.
 
@@ -190,6 +190,10 @@ So a world can be a continent without building it all in detail.
    - least-cost paths between settlements over the mesh, costed by slope, cover and water;
    - rivers crossed only at fords: wide, shallow and slow;
    - later roads reuse earlier ones;
+   - roads join neighbouring places only, each about a day long (D2-182); a route between places further apart passes through
+     those between;
+   - where a day's road would cross wild land with no settlement, a stopping place is put on it: a hamlet where the site allows,
+     else a wild stop at a spring, a ford or a meadow (proposed); a two-day road only where the land gives nowhere to stop;
    - an edge's length is its travel time in days, with stretches and their terrain from the cells crossed;
    - landmarks where the route crosses a feature: a ford, a pass (a saddle), a narrows (a gorge), a spring near the way, a good
      place (a meadow, fruit trees);
@@ -260,7 +264,8 @@ The run journal freezes the yaml as now. The mesh travels with it for the visual
 | a clay vale's parcels carry heavy soil; a floodplain's fields carry high fertility and height class 0 |
 | "short of wood" gives that settlement the region's lowest wood flow per head |
 | every check in §7 has a failing example that it catches |
-| a 70 km region of 4 settlements generates in a few minutes at most, descriptions cached |
+| a 50 km region of 4 settlements generates in a few minutes at most, descriptions cached |
+| no road is longer than two days, and fewer than one road in five is two days |
 | the output runs in today's engine unchanged |
 
 ## Numbers (D2-181; all world settings)
@@ -268,9 +273,10 @@ The run journal freezes the yaml as now. The mesh travels with it for the visual
 | Number | Default |
 |---|---|
 | cell spacing | about 150 m (about 2 ha, a unit of size) |
-| region | about 70 km square, 4 settlements, temperate; a coast only where the macro layer or a pin puts one |
+| region | about 50 km square, 4 settlements, temperate; a coast only where the macro layer or a pin puts one (D2-182) |
 | a road day | about 25 to 30 km on a road, slower across country by terrain |
-| settlement spacing | at least a day's walk, unless pinned |
+| settlement spacing | about a day's walk, unless pinned |
+| road length | about one day; two days rare (a moor, a pass); longer journeys pass through places on the way (D2-182) |
 | a settlement's land | sized by its capacity target (D2-161), in rings outward; the rest is wild |
 | a wild node | at least about 10 km², more than half a day from a settlement |
 | parcels per node | 6 to 15 |
@@ -283,7 +289,7 @@ The run journal freezes the yaml as now. The mesh travels with it for the visual
 |---|---|---|
 | cells of about 2 ha | a unit of size is about 2 ha, the land of one plot of 16 seed (02z; D4-40, D2-59) | yes: one cell is one unit of size |
 | villages a day or more apart | travel binds trade between villages, so they need each other (scenario_design §1; D4-9; 02t: roads of 1 to 3 days, a forest a day out) | yes |
-| a region of 30 km (first proposed) | 02t's region has roads of up to 3 days (Coppergate to Ashwood) | **no:** 3 days is about 75 to 90 km, so the default is now about 70 km |
+| a region of 30 km (first proposed) | 02t's longest route is 3 days, but through Millford: its roads are 1 to 2 days | **adjusted (D2-182):** roads mostly a day, longer routes through places on the way; about 50 km for 4 settlements |
 | fields within about 2 km (first proposed) | the seeded villages hold about 25 to 30 units of size in all (Barleyfield: 28, about 56 ha, for about 16 people), and capacity is set at 60 to 70% of flows (D2-161) | **no:** 2 km round a village is about 1,250 ha. With no cost to distance inside a node, all of it would count, and food and fuel would stop binding. So a settlement's land is sized by its target, and the rest is wild |
 | wild nodes of at least 10 km², more than half a day out | 02t's Ashwood forest a day out; camps (D2-68) | yes |
 | 6 to 15 parcels per node | Barleyfield has 12; the overview must stay readable (D2-116) | yes |
