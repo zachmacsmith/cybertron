@@ -1,7 +1,8 @@
 # Proposal: the landscape generator (a world under the graph)
 
 **Status:**
-- **Decided in part (3 Nov):** the generator fills in around what a world file gives (D2-173).
+- **Decided in part (3 Nov):** the generator fills in around what a world file gives (D2-173); a mesh kept as ground truth
+  with the graph derived from it (D2-174); land-use rings as the default layout (D2-175).
 - **For discussion:** the world under the graph (§2 to §5), and the questions at the end.
 - Design only. Not to be built until Zach asks (README rule 10).
 
@@ -177,20 +178,130 @@ pins name:
 
 The generator fills in the rest around them, keyed per element in the same way.
 
+## 7. Where nodes come from: the world or the observer (discussion, 3 Nov)
+
+Zach: "the node being a property of the observer, not the world?" The extreme form: travel can go to any point, and each agent's
+node is what lies within a day's reach of where it stands.
+
+**What the node does today:**
+- who is together;
+- who hears speech to the town;
+- who can trade face to face;
+- the overview of a place;
+- the seat of an institution;
+- the scope of incidents and of the capacity check;
+- arrive-then-decide;
+- the names people know places by.
+
+**What an observer's node would break:**
+- **Co-presence:** reaches overlap without being equal, so A can be "here" for B while B is not for A.
+- **Speech to the town, and face-to-face offers:** they lose a shared audience.
+- **Names:** "Barleyfield" still needs to be one shared place, or people can't agree to meet there, claim there or remember it.
+- **The safeguards:** the bounded overview, arrive-then-decide and the checked worlds are built on fixed nodes.
+
+**Proposed middle:**
+- **Places are the world's.** The mesh's land is all in places: worked parcels, and wild land as large parcels, everywhere. They are
+  joined by links with travel times: about none inside a settlement, days along a road, slower across country.
+- **Reach is the observer's.** What one can get to and back from today is computed from where one stands, the links and one's means
+  of travel (L-33).
+- **A node is a derived label:** a settlement and the places within its day, used for:
+  - names;
+  - the overview;
+  - institutions' seats;
+  - the capacity check and incidents.
+
+  It never draws the line of who is present: that is the place (parcel, building).
+- **Off the graph, places appear where people go.** The whole land already exists in the mesh, so when someone sets off across
+  country in a new direction, the place they reach is derived from the mesh on demand, keyed so it is always the same place. It is
+  then an unexplored place made known (D4-47). Nothing is invented and nothing re-drawn.
+- **It reduces to today's worlds** while everyone stays on the roads. A hand-made world is the same graph, with links of about
+  nothing inside a node and days along an edge.
+
+**The cost:**
+- the engine's "same node" rules move to place and reach (L-33's refactor);
+- more, larger wild parcels to show.
+
+So: the generator outputs this general form now, with today's nodes derived from it. The engine keeps its node rules until that
+refactor is wanted.
+
+## 8. How much physics: only what bottoms out in leverage (discussion, 3 Nov)
+
+Zach: terrain matters for leverage (which land is most useful, where the best resources are), so complexity that does not end in
+tangible differences is not worth much.
+
+**What a full erosion and climate simulation would add:**
+- dendritic valleys and ridges that look carved;
+- floodplains and alluvial fans with deep soil;
+- sediment in rivers;
+- rain shadows and climate belts that follow the terrain.
+
+**What it would cost:**
+- **Time:** hydraulic erosion on a mesh of about 100,000 cells takes seconds to minutes in numpy, once per world, frozen. Time is
+  not the problem.
+- **Design and tuning:** many parameters, with outcomes hard to steer.
+- **Pins:** erosion moves terrain, so a pinned height or river can be worn away, and honouring pins gets much harder.
+- **Readability:** the causes of a valley become hard to trace.
+
+**What leverage needs from terrain:**
+- the best farmland concentrated and contested (silt-rich valley floors, fens worth draining);
+- crossings and passes as chokepoints;
+- resources unevenly spread (stone, ore, clay, old wood);
+- water reliable in some places and not others (springs, the water table);
+- distance trade-offs (near fields against far woods).
+
+**Proposed: cheap approximations** that give all of these and keep pins:
+- flow accumulation for rivers;
+- one incision pass, cutting valleys in proportion to flow;
+- rule-based soils: deep and rich where low and flat beside a large river, thin on slopes;
+- one wind sweep for moisture and a rain shadow.
+
+No erosion or climate simulation. And a **leverage check** on every generated world:
+- the share of the best land in a few places;
+- the chokepoints;
+- the spread of each resource;
+- which village needs which.
+
+That check, not realism, is the generator's measure of success.
+
+## 6. Prior work to build on
+
+From 37.2's knowledge, not checked against the sources on 3 Nov.
+
+| Generator | What it does | What to take | What to avoid |
+|---|---|---|---|
+| **Minecraft (1.18+)**, multi-noise | the biome is the nearest match on a few axes (continentalness, erosion, weirdness from which peaks and valleys come, temperature, humidity); every value keyed by coordinates | cover from a few axes; coordinate-keyed draws, so an edit stays local | rivers carved by noise, with no drainage |
+| **Red Blob Games, Polygonal Map Generation** (mapgen2, mapgen4) | a mesh of polygons; rivers downhill along its edges; moisture from water; a biome lookup; mapgen4 adds wind and rain shadow, and painted mountains and valleys filled in live | the mesh and hydrology layers; painting as the model for pins | |
+| **Azgaar's Fantasy Map Generator** (open source) | mesh, heightmap templates, climate, rivers, biomes, then cultures, states, towns placed by suitability, routes; each layer editable and regenerable alone | a layered pipeline regenerable layer by layer; settlement scoring; routes | its political layers are lore |
+| **Dwarf Fortress** | user-set fields (elevation, rainfall, temperature, drainage), erosion, then a simulated history | land first, history second (D4-21's society with a past) | rejecting and regenerating worlds that miss their parameters: a seed search |
+| **RimWorld** | biomes by per-biome scoring functions, not hard thresholds | scores let pins tilt a choice smoothly ("short of wood" lowers forest's score) | |
+| **Civilization map scripts** | balanced starting positions with guaranteed resources near | targets per settlement enforced by placement, not luck | |
+
+**Methods underneath:**
+- **Water:** depression filling (Priority-Flood, Barnes and others), then flow accumulation, as in GIS: rivers reach an outlet, and
+  lakes fill hollows.
+- **Biome tables:** the Whittaker diagram (temperature against rainfall); Holdridge life zones as a finer alternative.
+- **Terrain shape:** layered and domain-warped noise; ridged noise for mountains.
+- **Fill-in for discrete layouts:** constraint solvers (answer set programming for content generation, Smith and Mateas) and Wave
+  Function Collapse. For fields, pins act as control points the noise blends through.
+- **Settlement geography:** von Thünen's land-use rings; Christaller's central place theory (spacing, and which place becomes the
+  market); least-cost paths for roads.
+
 ## Open questions (for Zach)
 
-1. A mesh finer than parcels (about a hectare a cell) kept as ground truth, with nodes, parcels and roads derived from it (§2a,
-   §2e)?
-2. A node's parcels cover all its land, with wild land as a few large parcels that can be split when cleared or claimed (§2d)?
-3. Nodes at settlements and at wild places a road needs (a forest a day out, a pass), derived by rule (§2d)?
-4. Physics kept simple: noise, flow accumulation, rules and a biome table, with no erosion or climate simulation (§2b)?
-5. Land-use rings round settlements as the default layout, overridable (§2c)?
+1. ~~A mesh kept as ground truth~~: decided (D2-174).
+2. A node's parcels covering all its land, with wild land as large parcels split when cleared or claimed (§2d). Zach: to address
+   with 3.
+3. Places as the world's, reach as the observer's, nodes as a derived label, places appearing where people go off the graph (§7)?
+4. Cheap approximations and a leverage check in place of erosion and climate simulation (§8)?
+5. ~~Land-use rings as the default~~: decided (D2-175).
 
 ## History
 
 - 3 Nov: Zach: start with the generator; worlds highly configurable for land and people, arbitrary specifics filled in around,
   reproducibly, with no seed search; then pins win where physics allows, a vocabulary of descriptions, model-written descriptions
   frozen, land first (D2-173); then: what to explore, given a broader world with nodes as a compression of it. Written.
+- 3 Nov: Zach: a mesh as ground truth (D2-174); rings by default (D2-175); add the prior work (§6); is the node the observer's
+  or the world's (§7); what would erosion and climate simulation add, given that terrain matters for leverage (§8). Written.
 
 ## Sources
 
