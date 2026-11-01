@@ -8,13 +8,14 @@
 Beside the memory it rewrites each stretch (D4-61), an agent has a small number of places for lines it means to keep for good: a
 sentence each, kept word for word, shown at every opening, never reworded by the engine or by the rewrite. At the end of each
 stretch, with the memory request, it is shown its kept lines and how many places it has, and may put a new line into an empty
-place or empty a place. The number of places grows with age. Whether an emptied place can be refilled at once, or only from the
+place or empty a place. Places open over time, starting with one. Whether an emptied place can be refilled at once, or only from the
 next stretch, is tested (review 38.39).
 
 ## The proposal
 
-- **Places:** a number that grows with age on the memory's curve (D4-61: largest rises early, levelling off), for example 3 as a
-  youth to about 12 as an elder (calibrate).
+- **Places:** **one at first, and more opening over time** (Zach, 1 Nov), on the memory's curve (D4-61: largest rises early,
+  levelling off) up to about 12 for an elder (calibrate). With all places open at once, agents fill them in the first one or two
+  stretches and then hardly change them (38.39), so the first lines win.
 - **A line:** one sentence, at most about 25 words (cut beyond), in the agent's words.
 - **Shown:** under its own heading at every opening, before the memory; and at the end of each stretch, in the memory request,
   numbered, with the empty places shown as empty: "Kept for good (3 of 5 places): 1. ... 2. ... 3. ... 4. (empty) 5. (empty)".
@@ -64,6 +65,11 @@ spec/information/memory.md (D4-61's rule); cybertron2/engine/memory.py, prompt.p
 
 - 1 Nov 2026: proposed (37.4) at Zach's request, after 38.38 (how agents used their memory) and the churn count in d1_duo; a small
   live test of the two variants against the rewrite alone is review 38.39.
+
+- 1 Nov 2026: first test (38.39; Sonnet 5.5 and Opus 5.5, four places open from the start): places filled in the first one or two
+  stretches and then hardly moved (forgetting and replacing rare); under forget-now-add-later many new lines found no place
+  because agents added without forgetting. Zach: "they should definitely open up over time. they should start with just one, and
+  then get some more over time". Places now start at one; retested with places opening over time (38.39).
 
 ## Sources
 

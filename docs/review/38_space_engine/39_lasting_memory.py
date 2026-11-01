@@ -5,6 +5,8 @@ lines kept word for word, in three arms:
     none      the rewrite alone (control)
     replace   an emptied place can be filled at once ("forget" and "keep" in one reply, or "replace")
     later     an emptied place is free only from the next stretch
+  with --grow K: one place at first, one more every K stretches (Zach, 1 Nov: "they should start with just one, and then get
+  some more over time")
 
     PYTHONPATH=. python3 docs/review/38_space_engine/39_lasting_memory.py --agents Lucy Jory Gunnild Gilbert \
         --arms none replace later --places 4 --out /tmp/lasting.json
@@ -59,13 +61,19 @@ def cut_line(s):
     return " ".join(w[:LINE_WORDS])
 
 
-def play(agent, arm, model, backend, system, born, lifespan, n):
+def open_places(i, n, grow):
+    """Places open at stretch i (from 0): all n at once, or one at first and one more every `grow` stretches."""
+    return n if not grow else min(n, 1 + i // grow)
+
+
+def play(agent, arm, model, backend, system, born, lifespan, n, grow=0):
     from cybertron import llm
     memory, log = "", []
     places = [None] * n
     cooling = set()
     refused = 0
-    for st in H.stretches(agent):
+    for si, st in enumerate(H.stretches(agent)):
+        k = open_places(si, n, grow)
         b = M.budget_tokens(st["end"] - born, lifespan)
         words = int(round(b * 0.75 / 10.0)) * 10
         conv = H.conversation(st, memory)
@@ -81,7 +89,7 @@ def play(agent, arm, model, backend, system, born, lifespan, n):
                  "what you have always known, not the detail of these days.",
                  "## Your memory as it stands\n" + (memory or "(nothing yet)")]
         if arm != "none":
-            parts.append(kept_block(places, n) + (f"\n(Last time {refused} line{'s' if refused > 1 else ''} found no empty place and "
+            parts.append(kept_block(places, k) + (f"\nMore places open as you grow older." if grow and k < n else "") + (f"\n(Last time {refused} line{'s' if refused > 1 else ''} found no empty place and "
                                                   f"{'were' if refused > 1 else 'was'} not kept.)" if refused else ""))
         ask = M.PROMPTS["keep_change"].format(limit=M.limit(words)) + ' Write it in "memory".'
         if arm != "none":
@@ -101,27 +109,27 @@ def play(agent, arm, model, backend, system, born, lifespan, n):
             cooling = set()
             for k in out.get("forget") or []:
                 i = int(k) - 1
-                if 0 <= i < n and places[i]:
+                if 0 <= i < k and places[i]:
                     ev["forget"].append(places[i])
                     places[i] = None
                     if arm == "later":
                         cooling.add(i)
             for r in out.get("replace") or [] if arm == "replace" else []:
                 i = int(r.get("place", 0)) - 1
-                if 0 <= i < n:
+                if 0 <= i < k:
                     ev["replace"].append([places[i], cut_line(r.get("text"))])
                     places[i] = cut_line(r.get("text"))
             for line in out.get("keep") or []:
-                free = [i for i in range(n) if not places[i] and i not in cooling]
+                free = [i for i in range(k) if not places[i] and i not in cooling]
                 if free:
                     places[free[0]] = cut_line(line)
                     ev["keep"].append(cut_line(line))
                 else:
                     ev["refused"].append(cut_line(line))
         refused = len(ev["refused"])
-        log.append({"stretch": [st["start"], st["end"]], "budget_words": words, "written": len(new.split()), "memory": memory,
+        log.append({"open": k, "stretch": [st["start"], st["end"]], "budget_words": words, "written": len(new.split()), "memory": memory,
                     "places": list(places), "events": ev, "cost": (usage or {}).get("cc_equiv_usd")})
-    return {"agent": agent, "arm": arm, "model": model, "places": n, "log": log}
+    return {"agent": agent, "arm": arm, "model": model, "places": n, "grow": grow, "log": log}
 
 
 def main():
@@ -132,6 +140,7 @@ def main():
     ap.add_argument("--agents", nargs="+", default=["Lucy", "Jory", "Gunnild", "Gilbert"])
     ap.add_argument("--arms", nargs="+", default=["none", "replace", "later"])
     ap.add_argument("--places", type=int, default=4)
+    ap.add_argument("--grow", type=int, default=0, help="one place at first, one more every GROW stretches")
     ap.add_argument("--out", required=True)
     ap.add_argument("--workers", type=int, default=6)
     a = ap.parse_args()
@@ -141,7 +150,7 @@ def main():
     res = []
     with cf.ThreadPoolExecutor(a.workers) as ex:
         futs = {ex.submit(play, ag, arm, a.model, a.backend, run["systems"][ag], int(spec["agents"][ag]["born"]),
-                          int(spec.get("lifespan") or 64), a.places): (ag, arm) for ag, arm in jobs}
+                          int(spec.get("lifespan") or 64), a.places, a.grow): (ag, arm) for ag, arm in jobs}
         for f in cf.as_completed(futs):
             r = f.result()
             res.append(r)
