@@ -96,12 +96,19 @@ its replay.
 - **Food recalibrated.** The design's "about 1.3 times demand" was wrong: at a ration of 1 meal a day, 12 people need 360 meals in
   30 days, and the first file held about 180 (stores plus a 100-grain harvest), with no weapons, so hunting gives little. The
   Long Field now gives 200 (50 a plot, as in Hollins) and the Hall holds grain 120 and beans 30. Stores plus harvest are now about
-  290 meals, 0.8 of demand; the rest has to come from weeding, hunting (a crude weapon is 1 timber, open to all) and foraging.
+  290 meals (300 with the household changes below), 0.8 of demand; the rest has to come from weeding, hunting (a crude weapon is 1 timber, open to all) and foraging.
 - **The Green is size 1 and full** (24 of 24 spaces), not "size 2, about 40 of 48": anyone who builds new must clear ground or go
   to Gorse Bank. The hut cannot store the harvest (0 free spaces).
 - **The newcomers** hold grain 16 and beans 2 in hand and 4 beans in the camp (the camp store is 10 weight, D4-84), not grain 20.
 - **No plough team.** No herds are seeded, so the millstones' ox gate means the stones grind only once the wheel is hung.
 - The 20-day bot run (scripted players) had no errors and a clean replay; its bots wandered and slept out, and most starved.
+- **Household food, after a first live start (wb1_wenbridge_hungry, stopped at day 5, $4.53).** I had checked food for the village,
+  not by household. The Hearnes held 20 grain and 6 beans for four (about 4 days) against a harvest on day 5, and the Masons 8 grain
+  for two; Tom and Will Hearne died of hunger on the night of day 4 (three missed meals, then the hazard), Will having walked to
+  Holm Wood to find his father. Nobody asked the Hall for food; the Hearnes and newcomers offered work for grain, and Mary owned up
+  to taking the Arderns' hay. Now the Hearnes hold grain 40 and beans 10 (about 8 days) and the Masons grain 16 and beans 4 (about 7),
+  so each household reaches the harvest; the lord's surplus is unchanged. (An earlier start, wb1_wenbridge_aborted, stopped on day 1
+  for a schema fault: one who knew nobody got empty enums, fixed in prompt.py.)
 - The building test's beds check names the Hearne hut's missing bed as intended (`CROWDED` in test_cybertron2_buildings.py).
 
 *Current as of 2 Nov 2026 (world file built; live run wb1 started).*

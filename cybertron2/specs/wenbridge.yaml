@@ -246,8 +246,8 @@ buildings:
       hearth: 1
       bins: 1
     stock:
-      grain: 20
-      beans: 6
+      grain: 40
+      beans: 10
       straw: 4
       firewood: 20
   mason_cottage:
@@ -262,7 +262,8 @@ buildings:
       beds: 2
       fire ring: 1
     stock:
-      grain: 8
+      grain: 16
+      beans: 4
       stone: 10
   new_camp:
     name: the newcomers' camp

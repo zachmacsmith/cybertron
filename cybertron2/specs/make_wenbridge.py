@@ -60,9 +60,9 @@ def world():
                          "stock": {"grain": 10, "timber": 10, "firewood": 20}},
         "hearne_hut": {"name": "the Hearne hut", "parcel": "wb_green", "household": "Hearne", "structure": "wattle",
                        "rooms": [{"kind": "small room"}], "fittings": {"beds": 3, "hearth": 1, "bins": 1},
-                       "stock": {"grain": 20, "beans": 6, "straw": 4, "firewood": 20}},
+                       "stock": {"grain": 40, "beans": 10, "straw": 4, "firewood": 20}},
         "mason_cottage": {"name": "the Masons' cottage", "parcel": "wb_green", "household": "Mason", "structure": "wattle", "condition": 1,
-                          "rooms": [{"kind": "small room"}], "fittings": {"beds": 2, "fire ring": 1}, "stock": {"grain": 8, "stone": 10}},
+                          "rooms": [{"kind": "small room"}], "fittings": {"beds": 2, "fire ring": 1}, "stock": {"grain": 16, "beans": 4, "stone": 10}},
         "new_camp": {"name": "the newcomers' camp", "parcel": "wb_bank", "household": "Newcome", "structure": "camp", "size": 4,
                      "fittings": {"beds": 4, "fire ring": 1}, "lasts_until": 10, "stock": {"firewood": 6, "beans": 4}}}
     w["claims"] = []
