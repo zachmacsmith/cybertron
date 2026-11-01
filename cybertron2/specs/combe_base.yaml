@@ -85,8 +85,8 @@ incidents: []
 signs:
 - {day: 9, node: all, about: sky, sense: touch, text: "a white frost on the grass at dawn, the first of the year", salience: 0.6, tags: [season, farming]}
 lines:
-  Hobb: {place: Combe, acting: [2, 2], min_adults: 2, crafts: [sow, reap, hoe, weed, plough, milk, select seed], tools: {crude tool: 2},
+  Hobb: {place: Combe, acting: [4, 5], min_adults: 3, crafts: [sow, reap, hoe, weed, plough, milk, select seed], tools: {crude tool: 2},
          holdings: {coin: 4}}
-bounds: {acting: [2, 2], children_max: 1, youths_min: 0, per_min: 1, per_spread: 9}
+bounds: {acting: [4, 5], children_max: 1, youths_min: 0, per_min: 1, per_spread: 9}
 sim: {start: -100, fertility: 0.15, leave: 0.5}
 cast: {head: claude-opus-5-5, opus_extra: 0, middle: claude-sonnet-5-5, sonnet_extra: 1, rest: claude-sonnet-5-5, youth: claude-haiku-5-5}
