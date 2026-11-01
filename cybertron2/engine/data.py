@@ -205,7 +205,7 @@ SPACE = {
     "upgrade": 0.75,                  # 02zh §2: the new structure's materials for its rooms, less a quarter, and the work (proposed)
     "order": ["wattle", "timber", "stone"],
     "camp_floor": 4,                  # a camp's lean-to (D2-68): its ground on built ground or scrub
-    "camp_store": 15,                 # D4-84: what a lean-to keeps, in weight (a few days' food or fuel); its goods keep as in the open
+    "camp_store": 10,                 # D2-176, D4-84: what a lean-to keeps, in weight (a few days' food or fuel), under cover
     "monument_ground": 1,             # building_lines.md §2 (proposed): on built ground or scrub; none elsewhere
     "seed_free": 3,                   # D4-85: free floor a seeded building is given beyond its contents, unless its file says (`free`)
     "seed_keep_ground": 6,            # D4-85: ...only while its parcel keeps this much ground for building (a small room)

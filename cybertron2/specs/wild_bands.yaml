@@ -732,7 +732,7 @@ buildings:
       fire ring: 1
     lasts_until: 6
     stock:
-      dried meat: 8
+      dried meat: 3
       firewood: 1
       tent: 1
 agents:
@@ -755,7 +755,7 @@ agents:
       crude tool: 1
       crude weapon: 1
       bedroll: 1
-      dried meat: 3
+      dried meat: 4
     concerns:
     - food
     - shelter
@@ -782,7 +782,7 @@ agents:
       crude tool: 1
       crude weapon: 1
       bedroll: 1
-      dried meat: 3
+      dried meat: 4
     concerns:
     - food
     - shelter
@@ -809,7 +809,7 @@ agents:
       crude tool: 1
       crude weapon: 1
       bedroll: 1
-      dried meat: 3
+      dried meat: 4
     concerns:
     - food
     - shelter
@@ -836,7 +836,7 @@ agents:
       crude tool: 1
       crude weapon: 1
       bedroll: 1
-      dried meat: 3
+      dried meat: 4
     concerns:
     - food
     - shelter

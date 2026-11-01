@@ -74,7 +74,7 @@ def frontier():
             f"{nid}_brook": {"name": f"{name} Brook", "cover": "water", "size": 1, "side": "west", "height": 0, "text": "a quick brook"}}}
         buildings[f"{nid}_camp"] = {"name": f"the {short} camp", "parcel": f"{nid}_camp", "household": short, "structure": "camp", "size": 4,
                                     "fittings": {"beds": 4, "fire ring": 1}, "lasts_until": 14,
-                                    "stock": {"dried meat": 6, "firewood": 9}}         # a lean-to keeps little (D4-84)
+                                    "stock": {"dried meat": 4, "firewood": 6}}         # a lean-to keeps little (D2-176)
     for nid, name, kind in wilds:
         nodes[nid] = wild_node(nid, name, {"forest": "deep woods", "meadow": "open meadows", "hill": "high fells"}[kind], kind)
     ring = ["ashby", "e1", "e2", "bramley", "e3", "e4", "coldwell", "e5", "e6"]
@@ -147,13 +147,13 @@ def wild():
                 roads.append(road(grid[r][c], grid[r + 1][c], 1, "river valley"))
     buildings = {"band_camp": {"name": "the band's camp", "parcel": "w1_lea", "household": "Wolf", "structure": "camp", "size": 4,
                                "fittings": {"beds": 4, "fire ring": 1}, "lasts_until": 6,
-                               "stock": {"dried meat": 8, "firewood": 1, "tent": 1}}}          # a lean-to keeps little (D4-84)
+                               "stock": {"dried meat": 3, "firewood": 1, "tent": 1}}}          # a lean-to keeps little (D2-176)
     mem = ["Your people, the Wolf band, have never kept a house: you follow the game and the seasons from place to place.",
            "In the cold, game is hard to find and the greens die back: the old ones dried meat in the autumn and carried it.",
            "Elkmere's lea, Deepholt's woods and Birchlea are places you have camped before; there is more land beyond that no one of you "
            "has walked."]
     aim = "Keep the Wolf band fed, warm and growing through the year, wherever the land is best."
-    holdings = {"crude tool": 1, "crude weapon": 1, "bedroll": 1, "dried meat": 3}
+    holdings = {"crude tool": 1, "crude weapon": 1, "bedroll": 1, "dried meat": 4}
     agents = {}
     for who, sex, partner, model in (("Bran", "m", "Wren", "claude-opus-5-5"), ("Wren", "f", "Bran", "claude-sonnet-5-5"),
                                      ("Tam", "m", "Sorrel", "claude-sonnet-5-5"), ("Sorrel", "f", "Tam", "claude-haiku-5-5")):

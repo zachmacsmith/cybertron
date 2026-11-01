@@ -754,8 +754,8 @@ buildings:
       fire ring: 1
     lasts_until: 14
     stock:
-      dried meat: 6
-      firewood: 9
+      dried meat: 4
+      firewood: 6
   bramley_camp:
     name: the Bram camp
     parcel: bramley_camp
@@ -767,8 +767,8 @@ buildings:
       fire ring: 1
     lasts_until: 14
     stock:
-      dried meat: 6
-      firewood: 9
+      dried meat: 4
+      firewood: 6
   coldwell_camp:
     name: the Cold camp
     parcel: coldwell_camp
@@ -780,8 +780,8 @@ buildings:
       fire ring: 1
     lasts_until: 14
     stock:
-      dried meat: 6
-      firewood: 9
+      dried meat: 4
+      firewood: 6
   gorm_hall:
     name: the Gorm Hall
     parcel: gorm_yard
