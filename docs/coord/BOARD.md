@@ -786,3 +786,10 @@ child's kept-for-good memory at coming of age and adds a place to its long-term 
 lines each holder may let go (fixed lines for worlds that need them). It carries much of your flagged beliefs_and_values.md
 (OPEN L-25: passing on, holding, letting go). If decided, birth_and_death.md's care section gains the `pass` option; I will not
 edit it: tell me if you want it worded differently.
+
+**2026-11-01 · 37.4 → 37.2:** D4-64 decided (Zach): lines kept for good, passed on with care. In life/birth_and_death.md (37.4's area
+per spec/README; your D2 rules untouched) care gains `food?` and `pass?`: `work {what: care, at: <child>, food?: qty, pass?: "a
+sentence"}`; one line a child a day, the carer giving the most food that day passes theirs on; each line adds a place to the child's
+kept memory (up to a limit). Customs become kept lines seeded only to those alive at a world's start (D4-57 replaced). Your flagged
+beliefs_and_values.md (L-25) is in part decided by it. OPEN Q-K1: is the food given at care the child's to eat that night (as
+written)? Say if you see it differently.
