@@ -12,10 +12,11 @@ Each check is a heuristic read off what failed before (validated on the 48 publi
   needing about a quarter of their people carrying (Coppergate in r1 and w3, Hollins in h1 and h2) lost people.
 - households' runway: food in store a member against the days to their own harvest. Early missed meals came from the households
   that started with under two days' food (the Lowes and Hales, the Smiths, the Newcomes): it predicts missed meals, not deaths.
-- succession: someone a household leans on dies of age within the run (c2_combe).
+- succession: someone grown in a household is likely (25% or more, by the engine's hazard) to die in the run (c2_combe).
 - fuel, cooking and growth: fuel in store a hearth against the nights until its woods are worked; food that needs a fire against the
   fuel to cook it (w3: grain beside cold hearths); room to grow (c2_combe: births outran the land).
-Levels: `refuse` (the world should not run as it is) or `warn` (a designed hardship, or a risk to watch). Thresholds are data
+Levels: `refuse` (the world cannot feed or warm its people through the run even counting everything it holds) or `warn` (a
+risk to watch, or a designed hardship). Dependence is never refused: the carrying burden warns, and says `high` above 0.12. Thresholds are data
 (THRESHOLDS), first values from the runs, to calibrate.
 """
 from __future__ import annotations
@@ -33,8 +34,9 @@ from cybertron2.engine.data import ITEMS
 THRESHOLDS = {
     "region_share_refuse": 1.0,     # people / what the land keeps: above this, the region cannot feed itself in a year
     "region_share_warn": 0.85,
-    "burden_refuse": 0.12,          # carriers on the road a day / the village's people: every past village at 0.13 or more failed;
-    "burden_warn": 0.04,            # ... no past run had a short village that held, so below 0.13 is not yet calibrated (02zl)
+    "burden_high": 0.12,            # carriers on the road a day / the village's people: every past village at 0.13 or more failed;
+    "burden_warn": 0.04,            # ... no past run had a short village that held (02zl). A warning, never a refusal (Zach, 2 Nov:
+                                    # "some food specialisation and dependence is probably important, especially as societies scale")
     "runway_days": 3.0,             # a household with less food a member than this, and no harvest of its own sooner, will go hungry
     "runway_people_warn": 0.2,      # ... warn when such households hold this share of everyone (missed meals, not deaths: 02zl)
     "fuel_nights": 3.0,             # fuel in store a hearth, where the node has no wood of its own
@@ -208,7 +210,8 @@ def check(spec: dict) -> dict:
         carriers = weight * 2 * min(roads) / carry
         burdens[nid] = (carriers / len(folk), deficit, fuel_short, min(roads), in_run)
     worst = max((b[0] for b in burdens.values()), default=0.0)
-    out["carrying burden"] = {"level": "refuse" if worst > T["burden_refuse"] else "warn", "ok": worst <= T["burden_warn"],
+    out["carrying burden"] = {"level": "warn", "ok": worst <= T["burden_warn"],
+                              "high": worst > T["burden_high"],          # above every past village that failed: worth a look
                               "detail": {w.s["nodes"][k]["name"]: {"short_people": round(b[1], 1), "short_heat_a_day": round(b[2], 1),
                                                                      "road_days": b[3], "share_on_the_road": round(b[0], 2),
                                                                      "short_rations_a_day_in_the_run": round(b[4], 1)}
@@ -269,21 +272,38 @@ def check(spec: dict) -> dict:
     out["room to grow"] = {"level": "warn", "ok": not on or gshare <= 1.0,
                            "detail": f"{couples} couples; about {births:.0f} births in {days} days if they try often; the region would be "
                                      f"at {gshare:.2f} of its land" if on else "children off"}
-    # succession: someone the household leans on dies of age within the run (c2_combe: the head died on day 62 of 80, and the two
-    # he had fed starved within a week, on land that kept sixteen)
-    life = float(spec.get("lifespan", 32))
+    # succession: someone grown a household leans on likely dies in the run (c2_combe: the head turned elder on day 44, died on day
+    # 62 of 80, and the two he had fed starved within a week, on land that kept sixteen). The engine's own hazard (life._old_age,
+    # D2-149): an adult 0.001 a night; an elder 0.01, doubling every 20 days of old age (scaled to the lifespan)
+    from cybertron2.engine import life as LF
+    from cybertron2.engine.data import LIFE
+    L = LF.lifespan(w)
+    eld = LF.elder_from(L)
+    oa = LIFE["old_age"]
+    dbl = float(oa["doubling"]) * L / float(LIFE["lifespan"])
+
+    def p_die(n):
+        born = w.s["people"][n].get("born")
+        if born is None:
+            return 0.0
+        alive = 1.0
+        for d in range(w.d, w.d + days):
+            age = d - int(born)
+            q = float(oa["elder"]) * 2 ** (max(0, age - eld) / dbl) if age >= eld else float(oa["adult"])
+            alive *= 1 - min(1.0, q)
+        return 1 - alive
+
     ends = []
     for iid, inst in w.s["institutions"].items():
         if inst.get("kind") != "household":
             continue
-        grown = [n for n in inst["members"] if w.s["people"][n].get("stage") == "adult"]
-        dying = [n for n in grown if w.s["people"][n].get("born") is not None
-                 and float(w.s["people"][n]["born"]) + life <= w.d + days]
+        grown = [n for n in inst["members"] if w.s["people"][n].get("stage") in ("adult", "elder")]
+        risk = {n: p_die(n) for n in grown}
+        dying = [n for n, q in risk.items() if q >= 0.25]
         if dying and len(inst["members"]) > len(dying):
-            left = len(grown) - len(dying)
-            ends.append(f"{inst.get('name', iid)}: {', '.join(dying)} of {len(grown)} grown die of age in the run; {left} grown left"
-                        f" for {len(inst['members']) - len(dying)}")
-    out["succession"] = {"level": "warn", "ok": not ends, "detail": ends or "nobody a household leans on dies of age in the run"}
+            ends.append(f"{inst.get('name', iid)}: " + ", ".join(f"{n} ({risk[n]:.0%})" for n in dying)
+                        + f" likely to die in the run; {len(grown) - len(dying)} grown left for {len(inst['members']) - len(dying)}")
+    out["succession"] = {"level": "warn", "ok": not ends, "detail": ends or "nobody grown is likely to die in the run"}
     return out
 
 

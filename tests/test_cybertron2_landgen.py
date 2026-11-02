@@ -175,11 +175,12 @@ def _village(days=20, stock=None, fields=4, people=6, second=None):
             "nodes": nodes, "buildings": buildings, "agents": agents, "roads": roads}
 
 
-def test_economy_refuses_a_short_village_that_must_carry_its_food():
+def test_economy_warns_of_a_short_village_that_must_carry_its_food_but_never_refuses_it():
+    """Dependence is a warning, not a blocker (Zach, 2 Nov): flagged `high` above every past village that failed."""
     from cybertron2.landgen import economy as EC
     c = EC.check(_village(second=6))
-    assert c["carrying burden"]["level"] == "refuse" and not c["carrying burden"]["ok"]
-    assert "carrying burden" in EC.refused(c)
+    assert c["carrying burden"]["level"] == "warn" and not c["carrying burden"]["ok"] and c["carrying burden"]["high"]
+    assert "carrying burden" not in EC.refused(c)
 
 
 def test_economy_refuses_a_run_its_food_cannot_reach():
@@ -188,3 +189,24 @@ def test_economy_refuses_a_run_its_food_cannot_reach():
     assert "food over the run" in EC.refused(c)
     ok = EC.check(_village(days=4, stock={"grain": 60, "firewood": 40}, fields=4, people=6))
     assert "food over the run" not in EC.refused(ok)
+
+
+def test_rough_grazing_on_the_new_covers():
+    """D2-189 (L-41): heath, moor, fen and saltmarsh carry grass at a share of pasture's, and beasts may be driven there."""
+    from cybertron2.engine.world import World
+    from cybertron2.engine.data import PHYSICS
+    w = World({"name": "t", "seed": 1, "days": 2, "agents": {}, "nodes": {"a": {"name": "A", "parcels": {
+        "p": {"cover": "pasture", "size": 1, "adj": ["m"]}, "m": {"cover": "moor", "size": 1, "adj": ["p"]},
+        "h": {"cover": "heath", "size": 1}, "r": {"cover": "rock", "size": 1}}}}})
+    share = PHYSICS["cattle"]["grazing"]
+    g = {k: w.s["parcels"][k]["res"].get("grass", {}).get("K", 0.0) for k in ("p", "m", "h", "r")}
+    assert g["m"] == pytest.approx(g["p"] * share["moor"]) and g["h"] == pytest.approx(g["p"] * share["heath"]) and g["r"] == 0.0
+
+
+def test_a_world_files_own_features_and_configuration_params_are_used():
+    """`features:` and `configuration_params:` under generate: reach the land (once dropped as not being defaults)."""
+    conf = W._conf({"features": [{"kind": "ore", "name": "lode", "box": [0.1, 0.1, 0.3, 0.3]}],
+                    "configuration": "twin bays split by a spur", "configuration_params": {"spur": {"height": 999}}})
+    prims = M.primitives(conf)
+    assert any(p["kind"] == "ore" and p["name"] == "lode" for p in prims)
+    assert next(p for p in prims if p.get("name") == "spur")["height"] == 999

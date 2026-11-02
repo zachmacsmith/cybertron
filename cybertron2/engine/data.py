@@ -320,7 +320,7 @@ TECHNIQUES = {
                 "seasons": ["summer"], "units": 1, "gives": "hay", "tags": ["animals", "farming"]},
     # Cattle (D2-63, D4-41, D4-44, D4-45; 02o, calibrate)
     "herd": {"verb": "work", "label": "herding (watching the beasts)", "aliases": ["herding", "watch the herd", "tend the herd"], "basic": True,
-             "at": {"covers": ["pasture", "meadow", "field"]}, "draws": "herd", "yield": {"kind": "herd"}, "units": 1, "gives": "",
+             "at": {"covers": ["pasture", "meadow", "field", "heath", "moor", "fen", "saltmarsh"]}, "draws": "herd", "yield": {"kind": "herd"}, "units": 1, "gives": "",
              "tags": ["animals"]},
     "care": {"verb": "work", "label": "caring for a child (feeding, minding, keeping it warm)", "basic": True,
              "aliases": ["mind", "minding", "look after", "nurse", "tend the child"], "at": {"children": True}, "draws": "child",
@@ -343,11 +343,11 @@ TECHNIQUES = {
     "dung": {"verb": "gather", "label": "gathering dung", "aliases": ["gather dung", "collect dung"], "basic": True,
                     "at": {"covers": ["pasture", "meadow", "field"]}, "draws": "dung", "yield": {"kind": "fixed", "base": 5.0}, "units": 1,
                     "gives": "dung", "tags": ["animals", "farming"]},
-    "milk": {"verb": "work", "label": "milking (a cow in milk)", "aliases": ["milking"], "at": {"covers": ["pasture", "meadow", "field"]},
+    "milk": {"verb": "work", "label": "milking (a cow in milk)", "aliases": ["milking"], "at": {"covers": ["pasture", "meadow", "field", "heath", "moor", "fen", "saltmarsh"]},
              "draws": "herd", "yield": {"kind": "milk", "cows": 3, "each": 1.6}, "units": 1, "gives": "milk", "tags": ["food", "animals"],
              "trade": "herder"},
     "slaughter": {"verb": "work", "label": "slaughtering a beast", "aliases": ["butcher", "kill a cow"], "basic": True,
-                  "at": {"covers": ["pasture", "meadow", "field", "built"]}, "draws": "herd",
+                  "at": {"covers": ["pasture", "meadow", "field", "heath", "moor", "fen", "saltmarsh", "built"]}, "draws": "herd",
                   "yield": {"kind": "slaughter", "gives": {"cows": {"meat": 40, "hide": 2}, "oxen": {"meat": 50, "hide": 2},
                                                           "bulls": {"meat": 50, "hide": 2}, "young": {"meat": 10, "hide": 1}}},
                   "units": 2, "gives": "meat", "tags": ["food", "animals"]},
@@ -500,7 +500,9 @@ PHYSICS = {
                 # D2-59 (16 seed a plot), D4-38 (02l: harvest 3x the seed, +1.5 broken, weeding to +50% on a curve of tau 1.5 small
                 # plots = 8 units a plot), D4-39 (soil), D2-53 (failure 5%, 15% the same crop twice); calibrate
     "cattle": {"births": 0.7, "survive": 0.85, "in_milk_share": 0.6, "dung": 20.0, "grass_per_plot": 25.0, "grass_r": 0.32,
-               "stray": 0.2, "hungry_milk": 0.7, "starve_nights": 4},
+               "stray": 0.2, "hungry_milk": 0.7, "starve_nights": 4,
+               # D2-189 (L-41): grass on a cover, as a share of pasture's; rough grazing carries fewer head (calibrate)
+               "grazing": {"pasture": 1.0, "meadow": 1.0, "saltmarsh": 0.7, "fen": 0.5, "heath": 0.4, "moor": 0.3}},
                # 02o (calibrate): births a cow a year, a cow in milk 0.6 of the year, dung for 2 plots a head a year, 2 head a plot of
                # pasture in summer, an unwatched herd strays
     "repair": {"per": 4, "min": 2},           # D2-168: 1 timber (stone for stone) and 1 unit for every 4 spaces of floor, at least 2 and 2

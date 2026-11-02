@@ -508,7 +508,7 @@ def drive(here, a, party) -> str:
     to = here.parcel(a.get("to") or a.get("at") or "")
     if to is None:
         raise Refused(f"there is no place called {a.get('to')!r} here to drive them to")
-    if here.parcels()[to]["cover"] not in ("pasture", "meadow", "field", "scrub", "forest", "built"):
+    if here.parcels()[to]["cover"] not in ("pasture", "meadow", "field", "scrub", "forest", "built", "heath", "moor", "fen", "saltmarsh"):
         raise Refused(f"beasts cannot be kept on {here.parcels()[to]['name']}")
     if here.calendar()["season"] == "winter":                                  # housed in stalls: not driven off without coming in
         from cybertron2.engine import buildings as BL

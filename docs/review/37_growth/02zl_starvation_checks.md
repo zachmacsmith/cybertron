@@ -1,6 +1,6 @@
 # 02zl · Can a world feed its people? Past runs and the pre-run checks
 
-Current as of 2 Nov (37.2). Zach asked (2 Nov) for economic analyses of past runs, to find when the economics worked and when they
+Current as of 2 Nov (37.2), with D2-190: the carrying burden is a warning, never a refusal. Zach asked (2 Nov) for economic analyses of past runs, to find when the economics worked and when they
 failed, and for automatic checks a world must pass before a run so nobody starts bound to starve. This note covers what the runs
 show, the checks built from them (`cybertron2/landgen/economy.py`), how the checks score against the runs, and what the evidence
 cannot yet say. Nothing here is decided. The thresholds are first values for Zach to accept or change.
@@ -68,11 +68,12 @@ What separates the failures:
 ## 2. The checks
 
 `python -m cybertron2.landgen.economy <world.yaml>` runs the checks on any world with people, hand-made or generated. The generator
-runs them after it makes people. A refuse-level failure refuses a generated world unless the file allows it as a designed hardship:
+runs them after it makes people. Only a run whose food or heat cannot be covered even counting everything the world holds is refused;
+a file may still allow that as a designed hardship:
 
 ```yaml
 generate:
-  allow: [carrying burden]
+  allow: [food over the run]
 ```
 
 | Check | Level | What it compares |
@@ -80,7 +81,7 @@ generate:
 | region food, region heat | warn > 0.85 | people against what the land keeps for good (capacity.py) |
 | food over the run | refuse > 1.0, warn > 0.85 | the run's need (grown 1, young 0.6 a night) against store, crops ripening within the run, milk (1.6 a cow in milk a day), the wild's standing food, woods' forage, and fields past a year |
 | heat over the run | refuse only if even the woods standing fall short; warn if store plus flow fall short | hearths × (normal nights + cold nights × 4) against store, the woods' flow and their standing wood |
-| **carrying burden** | **refuse > 0.12, warn > 0.04** | per village: (yearly food short, as grain) + (the run's fuel short, as timber), carried both ways over its shortest road, by foot (10), pack (20) or pack ox (60), as a share of its people |
+| **carrying burden** | **warn > 0.04, marked `high` above 0.12 (D2-190: never a refusal)** | per village: (yearly food short, as grain) + (the run's fuel short, as timber), carried both ways over its shortest road, by foot (10), pack (20) or pack ox (60), as a share of its people |
 | households' runway | warn if households holding over 20% of people have < 3 days' food a member and no harvest sooner | the households' stores |
 | fuel | warn | hearths with under 3 nights' fuel and no woods in their village |
 | room to grow | warn | (people + projected births) against the land, where children are on |
@@ -142,12 +143,25 @@ What the checker says about the world files in `cybertron2/specs/`:
 
 ## 6. Open
 
-- **L-45:** calibrate the carrying burden with a ladder: one generated region at burdens 0, 0.04, 0.08 and 0.12, a fixed cast, and
+- **L-50:** calibrate the carrying burden with a ladder: one generated region at burdens 0, 0.04, 0.08 and 0.12, a fixed cast, and
   two replicates each. That is eight runs of about 20 days. The ladder would answer whether food dependence can work for these
   agents at all, and where it stops.
-- **L-44** (renumbered from 37.2's L-42; 37.4's L-42 is D4-93): the automated supply-chain checks remain later. Until then, generated
+- **L-49** (37.2's, first L-42 then L-44; both clashed with 37.4's numbers): the automated supply-chain checks remain later. Until then, generated
   worlds are checked by hand.
 - **Fuel to cook.** Food that needs a fire is counted at its cooked worth. A village with no fuel should count it raw (grain 0.2).
   The carrying burden counts the fuel short, but food over the run does not yet discount the food.
 - **Labour.** Neither the capacity nor these checks ask whether there are hands enough to work the land and gather the wild. The
   c2_combe and b1_wild failures suggest that is the next gap.
+
+## 7. After Zach's reading (2 Nov)
+
+- **D2-190: dependence is warned of, never refused.** "This should be a warning not a blocker. Some food specialisation and
+  dependence is probably important, especially as societies scale up."
+- The table in §3 scored the carrying burden as a refusal. As a warning flagged `high` above 0.12, it now separates the same runs,
+  but no world is refused for it.
+  - Refusals now come only from food or heat over the run, which catch m2_V and v3.
+  - wenbridge.yaml runs, with a high-burden warning.
+- **The succession check is rewritten on the engine's own hazard** (life._old_age, D2-149). `lifespan` is the age a person becomes
+  an elder, not the age of death; after it, death is a nightly chance doubling every 20 days. The check flags anyone grown with a
+  25% or greater chance of dying in the run. c2_combe: Ivo and Margery, 39% each.
+- **The ladder (L-50) is designed and generated, not run:** proposals/dependence_ladder.md.

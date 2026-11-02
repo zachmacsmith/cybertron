@@ -177,7 +177,8 @@ def table(root: str) -> list:
 
 def validate(root: str, rows: list) -> list:
     """The pre-run checks (cybertron2/landgen/economy.py) on each run's starting world, against what happened. A run that stopped
-    before half its planned days and did not fail is `cut short`: it says nothing either way (its full-length twin does)."""
+    before half its planned days and did not fail is `cut short`: it says nothing either way (its full-length twin does). A run
+    is flagged if refused or if its carrying burden is warned high (above every past failure's)."""
     import contextlib
     import io
     from cybertron2.landgen import economy as EC
@@ -195,7 +196,8 @@ def validate(root: str, rows: list) -> list:
         cut = r["verdict"] != "failed" and r["days_run"] < 0.5 * max(1, r["days"])
         ref = EC.refused(c)
         warn = [k for k, v in c.items() if not v["ok"] and v["level"] == "warn"]
-        call = "cut short" if cut else ("TP" if ref else "FN") if r["verdict"] == "failed" else ("FP" if ref else "TN")
+        flag = bool(ref) or bool(c["carrying burden"].get("high"))         # refused, or warned high (D2-190: dependence warns only)
+        call = "cut short" if cut else ("TP" if flag else "FN") if r["verdict"] == "failed" else ("FP" if flag else "TN")
         out.append({"run": r["run"], "verdict": r["verdict"], "call": call, "refused": ref, "warned": warn,
                     "burden": max((v["share_on_the_road"] for v in (c["carrying burden"]["detail"] or {}).values() if "share_on_the_road" in v), default=0.0)})
     return out

@@ -106,10 +106,11 @@ class World:
                        {"S": float(v.get("S", v.get("left", 0))), "K": float(v.get("K", v.get("S", v.get("left", 0)))), "r": 0.0}
                        for k, v in st.items() if k in RESOURCES}
                 res.update(woods)
-                if p["cover"] in ("pasture", "meadow") and "grass" not in res:            # grazing (D4-45; 02o: 2 head a plot)
-                    cp = self.p["cattle"]
-                    res["grass"] = {"S": float(cp["grass_per_plot"]) * int(p.get("size", 1)), "K": float(cp["grass_per_plot"]) * int(p.get("size", 1)),
-                                    "r": float(cp["grass_r"])}
+                cp = self.p["cattle"]
+                share = float((cp.get("grazing") or {"pasture": 1.0, "meadow": 1.0}).get(p["cover"], 0.0))
+                if share > 0 and "grass" not in res:            # grazing (D4-45; 02o: 2 head a plot); rough grazing less (D2-189)
+                    g_ = float(cp["grass_per_plot"]) * int(p.get("size", 1)) * share
+                    res["grass"] = {"S": g_, "K": g_, "r": float(cp["grass_r"])}
                 par = {"node": nid, "name": p.get("name", pid), "cover": p["cover"], "size": int(p.get("size", 1)),
                        "adj": list(p.get("adj") or []), "text": p.get("text", ""), "res": res, "crop": None,
                        "fertility": float(p.get("fertility", 1.0)), "broken": float(st.get("broken", 0.0)),

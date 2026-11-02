@@ -4,8 +4,9 @@ people come from generate.py, unchanged; descriptions are templates from facts, 
 run; the cells are saved beside the world.
 
 What the world file gives is pinned. Under `generate:`: seed, size_km, km, settlements, configuration, configuration_params,
-features (primitives), places ({name: pins}), require (design checks that refuse), allow (economic checks a designed hardship may
-fail: economy.py, review 02zl), and any default in vocab.DEFAULTS. Everything else
+features (primitives), places ({name: pins}; `food_share`/`heat_share` set a village's people against its land exactly), require
+(design checks that refuse), allow (economic checks a designed hardship may fail: economy.py, review 02zl), and any default in
+vocab.DEFAULTS. Everything else
 in the file (calendar, lifespan, children, cast, `base:`) is kept as written and is what the generated parts sit in (stage 1 §11j).
 """
 from __future__ import annotations
@@ -32,8 +33,8 @@ RES_R = {"plants": 0.3, "grass": 0.32, "game": 0.25}
 
 def _conf(gen: dict) -> dict:
     conf = dict(V.DEFAULTS)
-    conf.update({k: v for k, v in gen.items() if k in V.DEFAULTS})
-    return conf
+    conf.update({k: v for k, v in gen.items() if k in V.DEFAULTS or k in ("features", "configuration_params")})   # the shapes a
+    return conf                                                            # file adds or changes are not defaults (were dropped)
 
 
 def _base_settings(spec: dict, path: str | None) -> dict:
@@ -451,8 +452,10 @@ def checks(L, conf, gen, settlements, extra, roads, world, settings) -> dict:
     except Exception as e:                                                 # noqa: BLE001 (reported, not raised)
         caps = {"error": f"{type(e).__name__}: {e}"}
     want = {s.name: max(s.targets.values()) for s in settlements}        # the scarcest flow's target (D2-161, or the pin's)
-    small = {s.name for s in settlements if s.people <= 6}                 # a household alone: its least land (2 plots, a wood) rounds up
-    cap_ok = "error" not in caps and all((want[k] - 0.15 <= v or k in small) and v <= want[k] + 0.05 for k, v in caps.items())   # a little
+    small = {s.name for s in settlements if s.people <= 10}                # one or two households: a plot or a wood unit rounds their land
+                                                                           # up by a tenth or more (the lower bound only: too much land)
+    cap_ok = "error" not in caps and all((want[k] - max(0.15, 0.1 * want[k]) <= v or k in small)     # within a plot or so: a tenth of a
+                                         and v <= want[k] + max(0.05, 0.1 * want[k]) for k, v in caps.items())   # high target; a little
                                                                                                             # more slack below
     out["capacity"] = {"kind": "design", "ok": bool(cap_ok), "detail": caps}
     lacks = {}

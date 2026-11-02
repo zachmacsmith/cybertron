@@ -113,8 +113,9 @@ def _pin_mask(L: Land, pin: dict, name: str) -> np.ndarray:
         ok &= np.isfinite(d)
     for res in pin.get("resources") or []:                                 # "copper in the hills", "stone": the ore or the rock near
         src = L.ore if res == "copper" else np.isin(L.terrain, [P.TERRAIN_NAMES.index(t) for t in ("hills", "rock", "chalk down")])
-        _, d = P._spread(g, src, np.ones(g.shape), int(4.0 / g.km), how="near")
-        ok &= np.isfinite(d)
+        lim = 0.9 * float(L.conf["field_km"]) / g.km                      # within the land's reach, so the seam can be its own
+        _, d = P._spread(g, src, np.ones(g.shape), int(lim), how="near")   # (_spread's steps can chain several cells, so the
+        ok &= d <= lim                                                     # distance itself is the test: it was 4 km, and no mine)
     soil = pin.get("soil")                                                 # the vocabulary (stage 1 §11c)
     if soil in V.WORDS["soil"]:
         lo, hi = V.WORDS["soil"][soil]
@@ -276,23 +277,29 @@ def allocate(L: Land, conf: dict, base: dict, s: Settlement, claimed: np.ndarray
 
     hh = s.households
     take("built", max(1, math.ceil(hh / 3)), lambda rc: tn(rc) in V.BUILT_OK)
+    for res in s.pin.get("resources") or []:                                # a pinned seam or quarry first, as it cannot move: the nearest such ground
+        want = (lambda rc: bool(L.ore[rc])) if res == "copper" else (lambda rc: tn(rc) in ("hills", "rock", "chalk down"))
+        s.facts[f"mine_{res}"] = take("mine", 2, want)
+        if not s.facts[f"mine_{res}"]:                                       # a pin not met is refused, never dropped (D2-180)
+            raise Refused(f"{s.key}: its {res} is beyond the land it can work ({conf['field_km']} km)")
     keep_food = s.people / s.targets["food"]
     keep_heat = s.people / s.targets["heat"]
     waste_units = 2 + hh // 2
-    wild_food = waste_units * CAP.WILD
+    heat_need = keep_heat / CAP.PEOPLE_A_HEARTH * hearth_heat(base) / CAP.FIREWOOD_HEAT
+    units = max(1, math.ceil(heat_need / wood_flow("managed wood")))
+    # the wild food capacity.node counts is the woods' (WILD a unit of forest or scrub), so the fields are what the woods leave; the
+    # waste (heath, moor, fen) is not counted there and so not here (it was, and the woods were not: villages came out short of
+    # their target, and a food_share above 1 could not be met)
+    wild_food = units * CAP.WILD
     year = 4 * int((base.get("calendar") or {}).get("season_days", 6))   # a ration a day for the world's year (capacity.node)
-    plots = max(2, math.ceil((keep_food * year - wild_food) / (CAP.PLOT["grain"] - CAP.PLOT["seed"])))
+    exact = s.pin.get("food_share") is not None                         # a pinned share is met as near as a plot allows, not rounded up
+    plots = max(2, (round if exact else math.ceil)((keep_food * year - wild_food) / (CAP.PLOT["grain"] - CAP.PLOT["seed"])))
     s.facts["plots_wanted"] = plots
     s.facts["fields"] = take("field", plots, lambda rc: tn(rc) in V.FIELD_OK, key=lambda rc: cost[rc] - 2.0 * L.fert[rc])
     take("meadow", max(1, hh // 2), lambda rc: tn(rc) in V.MEADOW_OK or L.wet[rc] > 0.75)
     take("pasture", hh + 1, lambda rc: tn(rc) not in ("rock",))
-    heat_need = keep_heat / CAP.PEOPLE_A_HEARTH * hearth_heat(base) / CAP.FIREWOOD_HEAT
-    units = max(1, math.ceil(heat_need / wood_flow("managed wood")))
     s.facts["wood_wanted"] = units
     s.facts["woods"] = take("wood", units, lambda rc: L.cover[rc] == "forest" or tn(rc) in V.WOOD_OK)
-    for res in s.pin.get("resources") or []:                                # a pinned copper seam or quarry: the nearest such ground
-        want = (lambda rc: bool(L.ore[rc])) if res == "copper" else (lambda rc: tn(rc) in ("hills", "rock", "chalk down"))
-        s.facts[f"mine_{res}"] = take("mine", 2, want)
     s.facts["waste"] = take("waste", waste_units, lambda rc: tn(rc) in V.WASTE_COVER or L.cover[rc] in ("heath", "moor", "fen"))
     near_water = [rc for rc in order[:400] if (L.river[rc] >= 2 or L.lake[rc]) and not claimed[rc]]
     for rc in near_water[:2]:
@@ -469,6 +476,10 @@ def settle(L: Land, conf: dict, base: dict, places: dict) -> list:
                 heat = 0.4
             elif x == "food":
                 food = 0.45
+        if pin.get("food_share") is not None:                              # people / what its land feeds, exactly: above 1 a village
+            food = float(pin["food_share"])                                # that must buy food (L-50's ladder)
+        if pin.get("heat_share") is not None:
+            heat = float(pin["heat_share"])
         people = int((conf.get("_people") or {}).get(key) or hh * int(conf["household_size"]))   # the people generated, on a second pass
         s = Settlement(key, site, pin, hh, people, {"food": food, "heat": heat})
         land = allocate(L, conf, base, s, claimed)

@@ -1023,7 +1023,7 @@ def facts(here, add) -> None:
             if p.get("crop"):
                 emit(CROP, x, [f"parcel:{pid}"], parcel=pid)
             emit(FIELD, x, [f"parcel:{pid}"], parcel=pid)
-        if p["cover"] in ("pasture", "meadow") or (p["res"].get("dung") or {}).get("S", 0) > 5:
+        if p["cover"] in ("pasture", "meadow") or "grass" in p["res"] or (p["res"].get("dung") or {}).get("S", 0) > 5:   # D2-189
             emit(PASTURE, x, [f"parcel:{pid}"], parcel=pid)
     for hid, h in here.herds().items():
         if FM.head(h) > 0:

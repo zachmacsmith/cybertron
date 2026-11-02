@@ -34,6 +34,8 @@ unless someone finds it. One person can hold only so many head; beyond that a he
 - A herd is a count of animals of one kind held by an owner, on a parcel (holding: spec/world/holding.md). It grows only by breeding.
 - **Eating** (D4-45, D4-42): a herd grazes the parcel it is on; where there is no grazing (winter) it eats stored hay and straw;
   overgrazing wears the pasture, which recovers slowly.
+- **Rough grazing** (D2-189): heath, moor, fen and saltmarsh carry grass too, at a share of pasture's (saltmarsh 0.7, fen 0.5, heath
+  0.4, moor 0.3; calibrate), so a herd can be driven, herded, milked and slaughtered there; hay is cut only on pasture and meadow.
 - An ox with a harness pulls a plough (production.md) or a cart (transport.md); a horse with a saddle carries a rider.
 - Dung restores a field's fertility, by manuring or by grazing a fallow plot. Wild herds on grassland can be caught and tamed.
 
@@ -133,5 +135,5 @@ Fenn cows are in the Long Field, trampling the barley"); their fences and gates;
 [02g §2-2c](../../../review/37_growth/02g_resources_and_transport.md), [02l §5](../../../review/37_growth/02l_farming.md),
 [02o](../../../review/37_growth/02o_livestock.md); proposals/livestock.md, fences.md.
 
-*Current as of 24 Oct 2026: D2-6, D2-18, D2-23, D2-63, D2-117, D2-123 to D2-125, D2-127, D2-128, D2-130 to D2-132, D4-41, D4-42,
-D4-44, D4-45.*
+*Current as of 2 Nov 2026: D2-6, D2-18, D2-23, D2-63, D2-117, D2-123 to D2-125, D2-127, D2-128, D2-130 to D2-132, D2-189, D4-41,
+D4-42, D4-44, D4-45.*
