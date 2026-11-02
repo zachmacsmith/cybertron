@@ -15,6 +15,7 @@ import os
 import time
 from pathlib import Path
 
+from cybertron2.engine import forests as FO
 from cybertron2.engine import agreements as AG, fuse as FU, knowledge as KN, life as LF, night as N, perceive as PC, prompt as PR, roads as RD, settle as ST, verbs as V
 from cybertron2.engine import branch as BR, evening as EVN, journal as JN, memory as MEM, tags as TG, view as VW
 from cybertron2.engine.converse import Conversations
@@ -643,8 +644,10 @@ def night_lines(w, rec) -> dict:
             L.append("You died.")
         for b in w.homes(n):
             h = rec["hearth"].get(b)
-            if h and not h["lit"] and w.s["buildings"][b]["fittings"].get("hearth"):
-                L.append(f"{w.s['buildings'][b]['name']}'s fire went out: no timber in its store.")
+            if h and not h["lit"] and (b in (rec.get("fire_need") or {})):             # the fuel it lacked, named (D4-93)
+                need = rec["fire_need"][b]
+                L.append(f"{w.s['buildings'][b]['name']}'s fire could not be lit: not enough fuel in its store or its woodpile "
+                         f"(it needed {need:g} heat: {FO.fuel_words(need)}).")
             if b in rec["breaks"]:
                 L.append(f"{w.s['buildings'][b]['name']} took damage in the night.")
         out[n] = L
@@ -1069,7 +1072,7 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
             for f in files.values():
                 f.flush()
             J.commit(w.s, _runner(J, cost, conv, locals()))
-            print(f"day {day + 1}: alive {len(w.living())}, missed {rec['missed']}, deaths {rec['deaths']}, talked {len(talked)}, "
+            print(f"day {day + 1}: alive {len(w.living())}, missed {rec['missed']}, deaths {rec['deaths']}, answered {len(talked)}, "
                   f"agreements {len(rec['agreements_made'])}, taught {len(today['teach'])}, thefts {len(today['thefts'])}, "
                   + (f"born {[b['child'] for b in rec['life']['births']]}, " if rec["life"]["births"] else "") +
                   f"errors {len(errors)}, cost ${cost:.2f}", flush=True)

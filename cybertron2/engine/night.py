@@ -46,7 +46,7 @@ def night(w) -> dict:
             if b["structure"] == "camp":                                      # a camp's fire (D4-49), in the weather (D4-83)
                 heat = float(hp["camp"]) * weather_fuel(w)
             else:
-                heat = float(hp["cold" if cold else "normal"]) * max(1, hearths + rings)
+                heat = house_heat(p, b, cold)                                  # one room, one fire (D4-93)
             piles = [cid for cid, c in s["containers"].items() if c.get("kind") == "pile" and c.get("door") == bid and not c.get("hidden")]
             if any(FO.burn(w, b["node"], cid, heat) for cid in [b["stock"]] + piles):   # its store, then its woodpile at the door (D4-89)
                 lit = True
@@ -59,6 +59,8 @@ def night(w) -> dict:
                     warm = min(warm, 0.5)                                     # a fire ring half-warms a house in the cold
         if lit and b.get("fire_out") == w.d:
             warm = 0.0
+        if sleepers and not lit and any(b["fittings"].get(f_) for f_ in FIRE):
+            rec.setdefault("fire_need", {})[bid] = heat                       # what the fire wanted, for the night line (D4-93)
         w.apply("set", b["node"], ref=("building", bid), field="fire", value=lit)
         w.apply("set", b["node"], ref=("building", bid), field="warm", value=warm)
         if sleepers:
@@ -382,6 +384,14 @@ def open_fires(w, today, where, rec) -> set:
                 if fire_goes_out(w, ("open", n), False):                         # rain or wind took it in the night (D4-83)
                     rec.setdefault("fire_out", []).extend(by)
     return warmed
+
+
+def house_heat(p, b, cold) -> float:
+    """The heat a house's fire burns tonight (D2-157): one fire for its hearths, 1 a normal night and 4 a cold one for each hearth;
+    a fire ring alone counts as one; a ring beside a hearth adds nothing (D4-93: one room, one fire)."""
+    hp = p["heat"]
+    hearths, rings = int(b["fittings"].get("hearth") or 0), int(b["fittings"].get("fire ring") or 0)
+    return float(hp["cold" if cold else "normal"]) * max(1, hearths if hearths else rings)
 
 
 def weather_fuel(w) -> float:

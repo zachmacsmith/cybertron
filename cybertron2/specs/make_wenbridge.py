@@ -22,7 +22,10 @@ def world():
     w["nodes"] = {
         "wenbridge": {"name": "Wenbridge", "parcels": {
             "wb_green": {"name": "the Green", "cover": "built", "size": 1, "side": "centre", "height": 1,
-                         "text": "a trodden green with the village houses close round it", "adj": ["wb_field", "wb_bank", "wb_garth", "wb_hall"]},
+                         "text": "a trodden green with the village houses close round it", "adj": ["wb_field", "wb_bank", "wb_garth", "wb_hall", "wb_coppice"]},
+            "wb_coppice": {"name": "the Coppice", "cover": "forest", "size": 1, "side": "west", "height": 1,
+                           "text": "a hazel and ash coppice by the river, the village's firewood; nobody's",
+                           "state": {"wood": {"kind": "managed wood"}}},                      # the near fuel (38.49: wb2 had none)
             "wb_hall": {"name": "the Hall Garth", "cover": "built", "size": 2, "side": "north", "height": 2, "holder": "Ardern",
                         "text": "a walled yard before the lord's stone hall", "adj": ["wb_mead"]},
             "wb_garth": {"name": "Mill Garth", "cover": "built", "size": 1, "side": "west", "height": 0, "holder": "Ardern",

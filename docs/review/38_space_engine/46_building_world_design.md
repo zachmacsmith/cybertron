@@ -114,6 +114,8 @@ its replay.
   could not keep fuel. Now: the Hall holds grain 160, Wright 16, the Masons 24, the newcomers 12 each, the Long Field 240 (60 a
   plot): stores 215 meals and the harvest 170 to 210, about 1.1 of demand. With D4-89 to D4-92 (overflow stays the house's, heaps
   by bulk, the begun wheel shown, a fire burns its woodpile at the door). The paused run is runs/wb1_wenbridge_paused.
+- **The Coppice (after wb2):** a common managed wood of size 1 on the village node (dead wood 100, young growth 400, trees 600),
+  because wb2's only near fuel was Gorse Bank's scrub (about 70 heat against about 300 needed; 38.49).
 - The building test's beds check names the Hearne hut's missing bed as intended (`CROWDED` in test_cybertron2_buildings.py).
 
 *Current as of 2 Nov 2026 (world file built; live run wb1 started).*

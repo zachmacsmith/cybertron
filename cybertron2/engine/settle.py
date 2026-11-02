@@ -204,7 +204,10 @@ def settle_thefts(w, today, attend) -> None:
             if w.rng("steal-seen", w.d, x, st["by"]).random() < p:
                 seen.append(x)
         if seen:                                                            # who did it: known only to those who saw it (D4-81)
-            w.event(node, "theft", f"{st['by']} slipped into {b['name']} and came out with {st['qty']:g} {st['item']}", actor=st["by"],
+            what = (f"{st['by']} took {st['qty']:g} {st['item']} from what lay at the door of {b['name']}" if st.get("door")
+                    else f"{st['by']} slipped into {b['name']} and came out with {st['qty']:g} {st['item']}")   # D4-93
+            w.event(node, "theft", what, actor=st["by"],
                     about=[f"building:{st['building']}"], salience=0.9, tags=["danger", "food"], concerns=seen)
-            PC.store(w, st["by"])["today"]["heard"].append(f"You think you were seen coming out of {b['name']}.")
+            PC.store(w, st["by"])["today"]["heard"].append(f"You think you were seen at the door of {b['name']}." if st.get("door")
+                                                            else f"You think you were seen coming out of {b['name']}.")
         # the loss itself is found by those of the house as anything is: the store's signs (D4-74) and its count when they look

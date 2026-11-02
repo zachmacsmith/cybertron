@@ -103,3 +103,26 @@ def test_a_camps_fire_burns_its_woodpile_at_the_door_when_its_store_has_none():
     w.apply("create", "wenbridge", dst=cid, item="firewood", qty=20, why="test")
     rec = N.night(w)
     assert rec["hearth"]["new_camp"]["lit"] and w.goods(cid)["firewood"] < 20
+
+
+def test_a_hearth_and_a_ring_in_one_room_are_one_fire_and_the_prompt_says_what_it_burns():
+    from cybertron2.engine import night as N, prompt as PR
+    w = _w()
+    b = w.s["buildings"]["mason_cottage"]
+    b["fittings"] = {**b["fittings"], "hearth": 1, "fire ring": 1}
+    assert N.house_heat(w.p, b, cold=False) == 1.0 and N.house_heat(w.p, b, cold=True) == 4.0     # one room, one fire (D4-93)
+    assert N.house_heat(w.p, {"fittings": {"fire ring": 1}}, cold=False) == 1.0
+    assert PR._heat(Here(w, "Wat"), b) == 1.0
+
+
+def test_an_unlit_fire_names_the_fuel_it_lacked_and_a_theft_at_a_door_is_told_as_one():
+    from cybertron2.engine import night as N, run as RN
+    w = _w()
+    b = w.s["buildings"]["mason_cottage"]
+    w.apply("destroy", "wenbridge", src=b["stock"], item="firewood", qty=w.goods(b["stock"]).get("firewood", 0), why="test")
+    rec = N.night(w)
+    assert "mason_cottage" in rec.get("fire_need", {})
+    src = open("cybertron2/engine/run.py").read()
+    assert "fire could not be lit: not enough fuel in its store or its woodpile" in src and "no timber in its store" not in src
+    s = open("cybertron2/engine/settle.py").read()
+    assert "from what lay at the door of" in s

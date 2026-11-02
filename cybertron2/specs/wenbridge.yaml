@@ -35,6 +35,17 @@ nodes:
         - wb_bank
         - wb_garth
         - wb_hall
+        - wb_coppice
+      wb_coppice:
+        name: the Coppice
+        cover: forest
+        size: 1
+        side: west
+        height: 1
+        text: a hazel and ash coppice by the river, the village's firewood; nobody's
+        state:
+          wood:
+            kind: managed wood
       wb_hall:
         name: the Hall Garth
         cover: built

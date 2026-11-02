@@ -508,7 +508,8 @@ def _house_lines(here, mind) -> list:
                    + ("; two children share a bed, an infant its carer's" if any(here.person_stage(x) in ("child", "infant") for x in who) else "")
                    + ").")
         out.append(f"Its store: {stock} (food worth {show(food)} meals; those who eat from it eat about {len(who) + 1} a night"
-                   + (f", and the fire takes {here.p['heat']['cold' if here.cold() else 'normal']:g} heat ({FO.fuel_words(here.p['heat']['cold' if here.cold() else 'normal'])})" if b['fittings'].get('hearth') else "") + ").")
+                   + (f", and the fire takes {_heat(here, b):g} heat ({FO.fuel_words(_heat(here, b))})"
+                      if b['fittings'].get('hearth') or b['fittings'].get('fire ring') else "") + ").")
     return out
 
 
@@ -624,6 +625,12 @@ def turn_prompt(here, mind, opening=True) -> str:
         L.append("## Your notes\n" + "\n".join(nl))
     L.append("Plan your day. Reply with JSON only.")
     return "\n\n".join(L)
+
+
+def _heat(here, b) -> float:
+    """What its fire burns tonight, by the night's own rule (D4-93)."""
+    from cybertron2.engine import night as N
+    return N.house_heat(here.p, b, here.cold())
 
 
 def _who(here, x) -> str:

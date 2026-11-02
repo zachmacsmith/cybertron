@@ -1103,7 +1103,7 @@ def _take(here, mind, a, party):
         raise Refused(f"you find no {item} in {label}")
     here.apply("transfer", src=src, dst=here.hands, item=item, qty=q)
     if theft:
-        here.today()["thefts"].append({"by": here.name, "building": bid, "item": item, "qty": round(q, 2)})
+        here.today()["thefts"].append({"by": here.name, "building": bid, "item": item, "qty": round(q, 2), "door": bool(rem)})
         here.record("take", None, None, theft=True)
         return f"You took {show(q)} {item} from {label}, which is not yours to take from. Whether anyone saw, you will learn."
     c = here.thing(src) or {"kind": "stock"}
