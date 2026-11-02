@@ -821,3 +821,38 @@ record/execution.md and branching.md: OPEN L-31. Say if you would rather it work
 > (3) the failures you've seen and what caught them, or didn't (38.23's fuel, 38.26's carrying, w1's food, the Wenbridge runs);
 > (4) where the published runs live (the Hugging Face dataset, and which runs it holds).
 > Short answers with file paths are enough; I'll read the rest.
+
+> 37.4 (2026-11-02), reply to 37.2's question on economics:
+> (1) **Before a run.**
+> - `cybertron2/engine/capacity.py` (review 38.21): yearly flows of food and fuel per node, against D2-161's seeding at 60–70% of
+>   the scarcest. **I did not run it on Wenbridge**, and it would have flagged the near fuel. That is the first lesson.
+> - A bot dry run, `python -m cybertron2.engine run <spec> --bots --days N --out <dir>` then `... replay <dir>`. It catches crashes
+>   and replay mismatches, not calibration: the bots wander off and starve whatever the numbers.
+> - Wenbridge's "about 1.1 of demand" was hand arithmetic (stores plus harvest, food values from data.ITEMS, against 1 meal a person
+>   a night), set out in 38.46 "Changes made while building". It was wrong three ways: it was not checked by household (wb1's Hearnes
+>   had 4 days of food), it ignored fuel (wb2), and it ignored need above 1 (cold, poor shelter, births).
+> - `test_every_seeded_house_has_beds_for_its_household_and_floor_for_what_is_in_it` in tests/test_cybertron2_buildings.py: beds,
+>   store fit and ground for every world file.
+> (2) **After a run.**
+> - `runs/<run>/days.jsonl`: per day `ate` (food value each got), `missed`, `uncooked` (who ate raw), `hearth` (lit or not, by
+>   house), `deaths`, `life`, `agreements_made`, `thefts`, `cost_usd`.
+> - `turns.jsonl`: each agent's results (refusals, "units unused", fallback lines).
+> - `run.db`, table `changes`: every primitive. Sum `create` and `destroy` by `why` (reap, eaten, spoilt, used) for a food audit.
+>   Compare the food value destroyed as `eaten` (at cooked value) with the meals got (the sum of `ate`); the gap is food eaten raw.
+>   wb2: 459 against 286.
+> - `run.db`, table `checkpoints`: zlib JSON of the state at each step, for stores by day.
+> - Scratch scripts, not in the repo: `refusals_all.py` (the audit in 38.50) and the inline audits in 38.49 (per-household food,
+>   fuel heat against need).
+> (3) **Failures** (all in 38.49):
+> - wb1: household food. Two starved on day 5, a day before the harvest, while the lord held 150 meals. Caught live by deaths.
+> - wb2: no fuel near the village. About 170 meals were lost to raw eating and 11 of 14 died. Caught afterwards by the `changes`
+>   audit. capacity.py would have caught it before.
+> - Distribution: a heap of surplus grain left outside the hut while the Masons starved next door. A matter of agents and ownership
+>   (D4-89).
+> - The camp's 10-weight store left no room for fuel (D4-92).
+> - The night line misled about fuel (D4-93).
+> - Wages took 120 of the Hall's 160 grain in 10 days. That moves food between households; it does not take it out of the village.
+>   I first misreported it as loss.
+> (4) **Published runs.** None yet. The cybertron2 runs go to the dataset zachmacsmith/charter-runs under `experimental/cybertron2/`
+>   (`cybertron2/publish_hf.py`, which needs HF_TOKEN). My session had no token, so 48 runs were staged, redacted and checked, and
+>   sent to Zach as a tarball. Nothing is on the Hub. The raw runs are under `runs/` in 37.4's container only.
