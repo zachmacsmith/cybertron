@@ -15,6 +15,13 @@ Each check is a heuristic read off what failed before (validated on the 48 publi
 - succession: someone grown in a household is likely (25% or more, by the engine's hazard) to die in the run (c2_combe).
 - fuel, cooking and growth: fuel in store a hearth against the nights until its woods are worked; food that needs a fire against the
   fuel to cook it (w3: grain beside cold hearths); room to grow (c2_combe: births outran the land).
+**The carrying burden is incomplete (OPEN L-52, to revisit).** It assumes:
+- the short village carries everything itself, and the return trip is empty;
+- the transport is foot, pack or any ox, counted as one ox, with no harness check, and handcarts are ignored.
+
+A truer measure would be the share of the whole region's labour spent on transport, with whatever the world holds, and would
+report what an ox cart or a trader would change.
+
 Levels: `refuse` (the world cannot feed or warm its people through the run even counting everything it holds) or `warn` (a
 risk to watch, or a designed hardship). Dependence is never refused: the carrying burden warns, and says `high` above 0.12. Thresholds are data
 (THRESHOLDS), first values from the runs, to calibrate.

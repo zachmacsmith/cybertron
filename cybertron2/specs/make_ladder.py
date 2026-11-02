@@ -56,13 +56,14 @@ def no_oxen(world: dict) -> None:
             h["oxen"] = 0
 
 
-def make(rung: float, food_share: float | None):
+def make(rung: float, food_share: float | None, keep_oxen: bool = False):
     s = spec(food_share, rung)
     with contextlib.redirect_stdout(io.StringIO()):
         world, cells, report = W.generate(copy.deepcopy(s), people=True)
     if report["refused"]:
         return s, world, report, None
-    no_oxen(world)
+    if not keep_oxen:
+        no_oxen(world)
     with contextlib.redirect_stdout(io.StringIO()):
         c = EC.check({**world, "days": s["days"]})
     b = (c["carrying burden"]["detail"] or {}).get(SHORT, {}).get("share_on_the_road", 0.0)
@@ -97,7 +98,7 @@ def main():
     for f in os.listdir(OUT):
         if f.startswith("ladder_b") and f.endswith(".yaml"):
             os.remove(os.path.join(OUT, f))
-    rows = []
+    rows, top = [], None
     for rung in RUNGS:
         s, world, report, got = solve(rung)
         if got is not None:                                                # named by the burden it has, not the one asked for (plots
@@ -111,6 +112,7 @@ def main():
             rows.append((tag, rung, None, report["refused"]))
             continue
         b, c = got
+        top = (rung, s["generate"]["places"][SHORT].get("food_share"), tag)
         with open(os.path.join(OUT, f"{tag}.yaml"), "w") as f:
             f.write(f"# Generated from {tag}_gen.yaml (python cybertron2/specs/make_ladder.py): do not edit by hand.\n")
             yaml.safe_dump(world, f, sort_keys=False, width=140)
@@ -120,6 +122,29 @@ def main():
             key=lambda kv: str(kv[0])), "food_share": s["generate"]["places"][SHORT].get("food_share"),
             "capacity": {k: v["share"] for k, v in cap.items()},
             "warnings": [k for k, v in c.items() if not v["ok"]], "refused": EC.refused(c)}))
+    # the transport arm (Zach, 2 Nov): the top rung's land, with the copper village keeping its oxen. The same food short, carried
+    # by pack ox: if it holds where the rung on foot fails, transport is the lever; if both fail, it is coordination
+    rung, share, base_tag = top
+    s, world, report, got = make(rung, share, keep_oxen=True)
+    tag = s["name"] = world["name"] = f"{base_tag}_ox"
+    oxen = sum(int(h.get("oxen") or 0) for h in world.get("herds", {}).values() if h.get("parcel") in set(world["nodes"][SHORT]["parcels"]))
+    # a pack ox is led only with a harness in hand (verbs.travel `lead`, D2-136), and generated households hold none: the head of
+    # the household whose herd has the oxen is given one, or the arm would test nothing
+    owner = next((h["name"].split()[1] for h in world["herds"].values() if h.get("parcel") in set(world["nodes"][SHORT]["parcels"])
+                  and h.get("oxen")), None)
+    head = next((n for n, a in world["agents"].items() if a.get("household") == owner and a.get("role") == "head"), None) or next(
+        (n for n, a in world["agents"].items() if a.get("household") == owner and a.get("stage") == "adult"), None)
+    if head:
+        world["agents"][head].setdefault("holdings", {})["harness"] = 1
+    with open(os.path.join(OUT, f"{tag}_gen.yaml"), "w") as f:
+        f.write(f"# The dependence ladder's transport arm: {base_tag}'s land with the copper village keeping its oxen "
+                "(cybertron2/specs/make_ladder.py; proposals/dependence_ladder.md).\n")
+        yaml.safe_dump(s, f, sort_keys=False, width=140)
+    with open(os.path.join(OUT, f"{tag}.yaml"), "w") as f:
+        f.write(f"# Generated from {tag}_gen.yaml (python cybertron2/specs/make_ladder.py): do not edit by hand.\n")
+        yaml.safe_dump(world, f, sort_keys=False, width=140)
+    rows.append((tag, rung, got[0], {"oxen in the copper village": oxen, "harness to": head, "food_share": share,
+                                     "warnings": [k for k, v in got[1].items() if not v["ok"]], "refused": EC.refused(got[1])}))
     for r in rows:
         print(r)
     return rows

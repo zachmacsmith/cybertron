@@ -35,6 +35,7 @@ crafts and aims are identical in every rung (checked: the casts match exactly).
 | ladder_b04 | 1.16 | 0.04 |
 | ladder_b09 | 1.48 | 0.09 |
 | ladder_b15 | 2.05 | 0.15 (above every past failure) |
+| **ladder_b15_ox** | 2.05, the same land as b15 | 0.02 by the measure: Minehead keeps its 2 oxen, and the Cotters' head (Tobin) is given a harness |
 
 0.08 and 0.12 were asked for; fields come in whole plots, so a plot moves this village about 0.05, and the files are named by the
 burden they have.
@@ -49,6 +50,19 @@ burden they have.
   failed had none.
 - **Region food:** about 0.5 to 0.65 of what the land keeps, so the food exists.
 
+### The transport arm (added 2 Nov, Zach: "sure")
+
+ladder_b15_ox is b15's world, with the same food shortfall, but the copper village can carry by pack ox.
+- **Why the harness:** an ox is led as a pack ox only with a harness in hand (`travel {lead}`, D2-136), and generated households
+  hold none, so Tobin is given one.
+- **If b15_ox holds where b15 fails:** transport is the lever, and carts, caravans and traders (OPEN L-53) are what dependence at
+  scale needs.
+- **If both fail:** the agents are not organising deliveries at all, and the fix is coordination (standing agreements, a carrier's
+  role), not carriage.
+- **If both hold:** 0.15 on foot was not the line, and the past failures had another cause.
+
+Five worlds; two replicates each makes 10 runs.
+
 ## Running it (when Zach says go)
 
 ```
@@ -56,8 +70,8 @@ python cybertron2/specs/make_ladder.py         # regenerates cybertron2/specs/la
 python -m cybertron2.engine run cybertron2/specs/ladder/ladder_bNN.yaml --days 20 --out runs/ladder_bNN_rR
 ```
 
-- Two replicates each, so 8 runs. Rough cost: wb2 cost $17 for 14 people over 30 days. This cast is larger but mostly Haiku, so
-  about $15 to $20 a run, or $120 to $160 in all. That figure is a guess.
+- Two replicates each, so 10 runs. Rough cost: wb2 cost $17 for 14 people over 30 days. This cast is larger but mostly Haiku, so
+  about $15 to $20 a run, or $150 to $200 in all. That figure is a guess.
 - Read each run with `02zk_run_economics.py` and 37.4's `changes` audit:
   - missed meals and hunger deaths in Minehead, against the null arm;
   - grain moved into Minehead (agreements and gives);

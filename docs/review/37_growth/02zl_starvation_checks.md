@@ -165,3 +165,8 @@ What the checker says about the world files in `cybertron2/specs/`:
   an elder, not the age of death; after it, death is a nightly chance doubling every 20 days. The check flags anyone grown with a
   25% or greater chance of dying in the run. c2_combe: Ivo and Margery, 39% each.
 - **The ladder (L-50) is designed and generated, not run:** proposals/dependence_ladder.md.
+- **The carrying burden is flagged as incomplete (OPEN L-52; Zach, 2 Nov: "flag the measure as incomplete for now ... revisit it
+  later").** It assumes the short village does all the carrying on foot with empty return trips. It also counts any ox as one ox,
+  with no harness check, and ignores handcarts. With carts, traders or two-way trade, the same dependence costs a fraction of the
+  labour. Transport and traders are flagged for later (OPEN L-53, engine_gaps G-35).
+- **The ladder gains a transport arm,** ladder_b15_ox: the top rung's land with Minehead's oxen and a harness.
