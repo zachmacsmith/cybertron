@@ -95,7 +95,9 @@ does 2 units, more with skill, until its work is done).
 | a camp | 15 weight in all (D4-84) | the open rate; no bins |
 | outside | anything | the open (economy/goods.md: food much faster; timber wet in rain, no use as fuel until dried) |
 
-A building's stores cannot take more than its storage holds; what does not fit is refused, or left outside if put there.
+A building's stores cannot take more than its storage holds; what does not fit is refused, or left outside if put there. Goods
+left at its door stay the house's: those who may take from its store may take, use, eat and offer them, and anyone else taking
+them commits a theft (D4-89).
 **Check (02x):** a farm household of 4 at the harvest holds about 200 grain, beans, 16 timber and some tools; a cottage (6 spaces:
 4 beds, a hearth, bins) holds only 60 food, so a farm family needs a family house (12 spaces) or a cottage and a store room or a
 share of a granary. A cellar pays back in about 3 days on fresh meat and 9 on milk, but 27 on grain: grain keeps well when dry.
@@ -113,6 +115,9 @@ share of a granary. A cellar pays back in about 3 days on fresh meat and 9 on mi
 The build verb lists every blueprint and fitting the agent knows, with its full needs whether or not it has them now ("a small
 room: 8 timber (you have 2), 6 units of work; a house needs a room, beds and a hearth or fire ring"), and each building's floor:
 used and free ("Reed House: 12 spaces, 9 used: 6 beds, a hearth, bins, a hand mill; 3 free").
+
+A fitting begun shows on its building's line with the work left: "a water wheel and leat begun, its materials in (about 150
+units of work left)" (D4-91).
 
 ### What people write on buildings (D2-169)
 
@@ -171,4 +176,4 @@ and do ("a stone hall with a hearth"), who holds them as they know it, and the r
 [02i_buildings.md](../../../review/37_growth/02i_buildings.md), [02k §3](../../../review/37_growth/02k_fuses_and_gates.md);
 proposals/buildings.md, proposals/shelter.md.
 
-*Current as of 3 Nov 2026: H-5, D2-3, D2-9, D2-20, D2-45, D2-49, D2-56, D2-60, D2-61, D2-154, D2-155, D2-164, D2-165, D2-166, D2-167, D2-168, D2-169, D2-170, D2-171, D4-84, D4-85, D4-86.*
+*Current as of 3 Nov 2026: H-5, D2-3, D2-9, D2-20, D2-45, D2-49, D2-56, D2-60, D2-61, D2-154, D2-155, D2-164, D2-165, D2-166, D2-167, D2-168, D2-169, D2-170, D2-171, D4-84, D4-85, D4-86, D4-89, D4-91.*
