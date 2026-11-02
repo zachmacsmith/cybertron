@@ -76,7 +76,11 @@ for. But nothing new was finished. Food took over the second half of both runs.
   20 days, 4 people and a winter; Will and Kit later starved. From day 10 the village held about half of what it needed, so
   someone was going to starve wherever the grain lay. Keeping it was defensible. The Hearnes' mistake was timing: trading a little
   early for the Masons' stone and labour would have got them their granary.
-- **The next probe:** Tom's prompt without his written plan, in a world with a real surplus.
+- **The plan-removal probe (2 Nov):** Tom's prompt with his own notes, pins and yesterday's words taken out, 4 Sonnet replies; then
+  the same with 150 more grain at the hut door. 0 of 8 traded. Every reply planned timber for a granary. So it is not plan
+  carry-over: the frame comes from the situation itself (the hut full, grain exposed), and selling grain for what they need (timber,
+  stone, labour) does not come up, even with a large surplus and four standing bids from a hungry neighbour. A further probe would
+  show the offers with what accepting would give and cost each side, or try Opus on the surplus.
 
 ### Engine faults the run exposed (to fix)
 
