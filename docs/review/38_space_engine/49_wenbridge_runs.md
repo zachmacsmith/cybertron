@@ -101,6 +101,45 @@ for. But nothing new was finished. Food took over the second half of both runs.
 - **A labour market:** day wages in coin, Rob hired by Hugh, Piers paid in agreements.
 - **Burials and mourning were carried out:** Kit buried Margery at Holm Wood, and Tom and Ellen saw to Wat and Joan.
 
+## wb3: 10 days with a coppice and D4-93 ($10.70)
+
+The world is wb2's with two changes:
+- a common managed wood on the village node (the Coppice);
+- the fire fixes (D4-93: one room, one fire; the night line names the fuel; a theft at a door told as one).
+
+Births and weather follow seed 91 as before. Agnes, Joan and Wat's daughter, was born on day 10.
+
+| First 4 days | wb1 | wb2 | wb3 |
+|---|---|---|---|
+| Missed meals | 3 | 2 | 0 |
+| Meals eaten raw | 2 | 2 | 0 |
+| Building actions | 2 | 2 | 8 |
+| "Units left unused" lines | 34 | 37 | 13 |
+| Firewood and timber actions | 22 | 31 | 146 (about 45% of all work) |
+
+**Over 10 days:** 0 missed meals, 0 eaten raw, 9 agreements, 13 alive.
+
+**Built:**
+- **Newcome house** on Gorse Bank, a wattle small room with bins (Rob, days 3 to 5), the first new house in any Wenbridge run.
+- **The Masons' hearth and cellar** (Wat).
+- **The Hearne grain room** on Gorse Bank, a wattle small room (180 grain of room). It still stood empty at the end, with 55
+  grain lying at the hut door and 63 in hands.
+- **Tom's camp on Gorse Bank,** with a granary and a woodshed fitted.
+- **Wright's House** repaired.
+
+**The wheel:** from 150 to 104 units left, with Piers on a 5-day contract for 20 coin.
+
+**A stone market:** the Arderns bought stone from Wat at 2 to 3 for 2 to 3 grain or coin, and hired Joan and Rob for a day each.
+
+**Problems:**
+- **Wood is too easy and too large a share of work** (about 45% in the first days, against the 30% rule); much of it lay at full
+  doors. Next: a smaller coppice, or one held by a household so that fuel is traded.
+- **Fault: a camp takes a granary and a woodshed as fittings.** They do nothing, since the camp still keeps 10 weight. The build
+  should be refused, so materials are not wasted.
+- **The Hearnes again tried a granary on open ground, and a room on the full Green, and were refused.** They then built a grain
+  room, but had not moved the grain into it by day 10.
+- **The Hall's grain fell from 160 to 28,** in wages and purchases.
+
 ## Next
 
 - Fix faults 1 to 6.
