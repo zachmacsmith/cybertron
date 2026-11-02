@@ -68,6 +68,17 @@ A refusal says what stopped the act, and enough to choose differently, without t
 - **`pin`** takes a note by its title in any case, or by its text.
 - **A household's head or heir** cannot be one the namer knows is dead. Succession counts only the living either way.
 
+## Refused once, not tried again (D4-97)
+
+An act refused once is not tried again that day if the plan lists it again; the result says "(listed N times; tried once, not
+again)".
+
+## Building in stone is stone walling (D4-97)
+
+Stone rooms, storeys and upgrades, mending a stone building, carving in stone, and a mason's fitting one has not learned oneself
+are all stone walling (the `wall` technique), at one's walling level. Anyone who knew a mason's craft at the start of a world also
+knows walling.
+
 ## Using the store at home (D4-96)
 
 Acts that use goods (making, building, paying, and now giving to a person or leaving at a place) take them from one's hands first,
@@ -75,4 +86,4 @@ then from the stores at this place one may take from: the household's store, its
 what came from where: "You gave 3 grain to Ellen. (from the Hearne hut's store: 3 grain)". Away from home one has only what one
 carries.
 
-*Current as of 2 Nov 2026: D4-24, D4-29, D4-32, D4-35, D4-36, D4-37, D2-93, D2-94, D2-96, D2-111, D2-112, D4-76, D4-94, D4-95, D4-96.*
+*Current as of 2 Nov 2026: D4-24, D4-29, D4-32, D4-35, D4-36, D4-37, D2-93, D2-94, D2-96, D2-111, D2-112, D4-76, D4-94, D4-95, D4-96, D4-97.*

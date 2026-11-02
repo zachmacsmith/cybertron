@@ -1,6 +1,6 @@
 # Mills and ovens at scale: a few units that do a great deal
 
-**Status:** discussion (the direction is Zach's, 2 Nov; the numbers wait for him)
+**Status:** accepted: D4-97 (2 Nov); the upkeep moved to building_risks.md (L-48)
 **Owner:** 37.4 (the recipes as built); 37.2 owns production.md and goods.md, where the rule goes once decided
 
 ## Summary
@@ -51,3 +51,4 @@ a communal oven baked dozens of loaves a firing, on far less fuel a loaf than he
 ## Sources
 
 data.py TECHNIQUES (grind, mill, water mill, bread, oven bread), FITTINGS (oven, water wheel); D2-60, D2-61, D2-160, D2-166, D2-167.
+- 2 Nov 2026: accepted (D4-97). The numbers as proposed; an oven only in a stone building; a mill's toll by agreement. The upkeep (millstone dressing, the leat, oven relining) moved to building_risks.md: Zach, "risks and upkeep are very interlinked, because each clearing is just like a minor risk".

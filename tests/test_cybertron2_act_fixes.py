@@ -111,3 +111,20 @@ def test_an_act_says_what_it_took_from_the_store_and_give_draws_from_it_at_home(
     out = do(w, "Tom", do="give", item="grain", qty=3, to="Ellen")
     assert out == "You gave 3 grain to Ellen. (from the Hearne hut's store: 3 grain)"
     assert "there is no hand mill here you can use" in do(w, "Alys", do="make", what="grind") or True
+
+
+def test_d4_97_mills_ovens_coppice_babies_repeats_and_walling():
+    from cybertron2.engine.data import TECHNIQUES, FITTINGS, LIFE
+    from cybertron2.engine import knowledge as KN
+    assert TECHNIQUES["water mill"]["inputs"] == {"grain": 200} and TECHNIQUES["water mill"]["units"] == 2
+    assert TECHNIQUES["mill"]["inputs"] == {"grain": 64} and TECHNIQUES["oven bread"]["gives"] == {"bread": 100}
+    assert FITTINGS["oven"]["materials"] == {"stone": 20, "timber": 2} and FITTINGS["oven"]["structure"] == "stone"
+    w = _w()
+    assert w.claims_on(("parcel", "wb_coppice"))                                # the lord's coppice
+    assert KN.level(Mind(w, "Wat"), "wall") in ("rough", "capable", "known")   # a seeded mason walls
+    assert KN.level(Mind(w, "Hugh"), "wall") is None
+    out = do(w, "Wat", do="build", what="oven", at="the Masons' cottage")
+    assert "is built only in a stone building" in out
+    assert LIFE["infant"]["shelter"] == {"house": 1.0, "camp": 1.5, "out": 2.0} and "camp" in LIFE["birth"]
+    lines = PR.turn_prompt(Here(w, "Tom"), Mind(w, "Tom"), opening=True)
+    assert "fuel for about" in lines

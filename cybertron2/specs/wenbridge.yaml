@@ -42,7 +42,8 @@ nodes:
         size: 1
         side: west
         height: 1
-        text: a hazel and ash coppice by the river, the village's firewood; nobody's
+        holder: Ardern
+        text: the lord's hazel and ash coppice by the river; its dead wood anyone may gather
         state:
           wood:
             kind: managed wood

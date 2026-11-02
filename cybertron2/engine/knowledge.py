@@ -61,6 +61,11 @@ def seed(w, name, spec_agent) -> None:
     for tech, src in (spec_agent.get("aware_of") or {}).items():
         if tech in TECHNIQUES and not basic(tech):
             k.setdefault(tech, {"level": "aware", "skill": 0.6, "seen": 0, "wins": 0, "fails": 0, "source": src, "since": -1})
+    lv = ("rough", "capable", "known")                                         # a seeded mason walls (D4-97): worlds written before
+    mason = [r for t, r in k.items() if TECHNIQUES[t].get("trade") == "mason" and t != "wall" and r["level"] in lv]   # walling gated stone
+    if mason and "wall" not in k:
+        best = max(mason, key=lambda r: lv.index(r["level"]))
+        k["wall"] = {**best, "source": "from your upbringing", "since": -1}
 
 
 def seed_world(w) -> list:

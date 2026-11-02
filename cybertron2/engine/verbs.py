@@ -501,6 +501,8 @@ def _technique(here, mind, a, party, verb):
         word = f"You buried {c['of']} at {here.spot_name(c)}" + (" under a cairn of stones." if cairn else ".")
         thing = ("parcel", c["parcel"]) if c.get("parcel") else thing
     elif y["kind"] == "repair":                                              # by its size and structure (D2-168)
+        if here.buildings()[key]["structure"] == "stone":
+            _mason(mind)                                                       # mending stone is walling (D4-97)
         word = _repair(here, key, m)
         thing = ("building", key)
     elif y["kind"] == "clear_built":                                          # new ground for building (02zh §8)
@@ -583,12 +585,13 @@ UPGRADE = ("upgrade", "rebuild", "raise", "improve")
 
 
 def _mason(mind):
-    """Building in stone is a mason's work (D2-3): the best level one has at any mason's craft (a hearth, an oven, quarrying...)."""
-    lv = [KN.level(mind, t) for t, d in TECHNIQUES.items() if d.get("trade") == "mason" and d["verb"] != "modifier"]
-    lv = [x for x in lv if x in ("rough", "capable", "known")]
-    if not lv:
-        raise Refused("building in stone is a mason's work, and you know no mason's craft (a hearth, an oven, quarrying, walling)")
-    return max(lv, key=lambda x: ("rough", "capable", "known").index(x))
+    """Building in stone is stone walling (D2-3, D4-97): stone rooms, storeys and upgrades, mending stone, carving in stone, and a
+    mason's fitting one has not learned itself; the level is one's walling."""
+    lv = KN.level(mind, "wall")
+    if lv not in ("rough", "capable", "known"):
+        raise Refused("building in stone is stone walling, a mason's craft you have not learned (watch a mason, be taught, or have it "
+                      "explained)")
+    return lv
 
 
 def _lvl_for(mind, tech, structure=None):
@@ -881,6 +884,9 @@ def _fitting(here, mind, a, party, what):
     lvl = _lvl_for(mind, what)
     if f.get("needs") and not b["fittings"].get(f["needs"]):
         raise Refused(f"{f['label']} needs {FITTINGS[f['needs']]['label']} first")
+    if f.get("structure") and b["structure"] != f["structure"]:                # an oven only in stone, for its fire (D4-97)
+        raise Refused(f"{f['label']} is built only in a {f['structure']} building ({b['name']} is {b['structure']}): "
+                      f"build it in one, or raise one")
     if f.get("site") and not any(here.parcels()[x]["cover"] == f["site"] for x in [b["parcel"]] + here.parcels()[b["parcel"]]["adj"]
                                  if x in here.parcels()):
         raise Refused(f"{f['label']} needs a building by {f['site']}")

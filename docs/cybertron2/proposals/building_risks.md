@@ -50,6 +50,13 @@ season, cold, a parcel's height, structure, condition, use. Each can be guarded 
 5. Rats in stores, linked to the heap signs (D4-90).
 6. Damp fuel and the woodshed.
 
+### Upkeep, as risks (moved here from mill_and_oven_scale.md by D4-97)
+
+Upkeep and risk are one thing: each clearing or dressing is a small risk that comes due. Millstones are dressed after about 300 grain
+ground, or their flour goes coarse and their output falls. The leat is cleared each season, or the wheel stops. An oven is relined
+after about 10 firings, or it cracks. Each is a technique anyone may learn (dressing and relining are a mason's; clearing is crew
+work).
+
 ## Why
 
 Zach (2 Nov): "For each of the buildings / fittings, can you think about additional risks or occurrences etc. that we could add,

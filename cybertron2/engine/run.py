@@ -909,6 +909,7 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
             budget = {n: max(0, w.units_for(n) - spoke[n]) for n in names}
             used = {n: 0 for n in names}
             rep = {n: {} for n in names}
+            refused_sig = {}
             heavy = {}
             for i in range(max((len(p) for p in plans.values()), default=0)):
                 for n in order:
@@ -921,6 +922,10 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
                     if morning and used[n] > 0:                                # setting off in the morning: the day's first act (D4-67)
                         results[n].append("Refused: travel: to set off in the morning, make it your first act; to go after the day's "
                                           "work, set off at nightfall")
+                        continue
+                    sig = json.dumps(a, sort_keys=True, default=str)
+                    if sig in refused_sig.setdefault(n, {}):                    # refused once today: not tried again (D4-97)
+                        rep[n][refused_sig[n][sig]] = rep[n].get(refused_sig[n][sig], 1) + 1
                         continue
                     c = V.cost(here, a)
                     if used[n] + c > budget[n]:
@@ -938,8 +943,10 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
                         results[n].append(res)
                     elif res in results[n]:
                         rep[n][res] = rep[n].get(res, 1) + 1
+                        refused_sig[n][sig] = res
                     else:
                         results[n].append(res)
+                        refused_sig[n][sig] = res
             for n in order:                                                  # units left over: one's own fallback, in order (D4-76)
                 fb = [x for x in (replies[n].get("fallback") or []) if isinstance(x, dict)][:3]
                 if not fb or not w.s["people"][n]["alive"] or n in today["travel"] or n in heavy or n in today.get("travel_morning", {}):
@@ -980,7 +987,8 @@ def run(spec_path, out_dir, backend=None, days=None, workers=12, bots=False, see
                         if str(x.get("do", "")).lower() == "travel":
                             break
             for n in names:
-                results[n] = [f"{x} (x{rep[n][x]})" if x in rep[n] else x for x in results[n]]
+                results[n] = [(f"{x} (listed {rep[n][x]} times; tried once, not again)" if x.startswith("Refused") else f"{x} (x{rep[n][x]})")
+                              if x in rep[n] else x for x in results[n]]
                 if used[n] < budget[n]:
                     results[n].append(f"You left {budget[n] - used[n]} of your {budget[n]} units unused.")
             if today.get("travel_morning"):                                    # set off this morning: in by nightfall (D4-67)

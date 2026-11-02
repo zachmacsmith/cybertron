@@ -514,9 +514,13 @@ def _house_lines(here, mind) -> list:
                    + (f": too few, so {math.ceil(need - beds - 1e-9)} must sleep on the floor, as in a damaged house" if need > beds + 1e-9 else "")
                    + ("; two children share a bed, an infant its carer's" if any(here.person_stage(x) in ("child", "infant") for x in who) else "")
                    + ").")
+        fire = b['fittings'].get('hearth') or b['fittings'].get('fire ring')
+        pile = sum(FO.heat_of(c["goods"]) for c in here.things().values() if c.get("door") == bid and not c.get("hidden"))
+        heat = FO.heat_of(st) + pile                                             # its store and its woodpile (D4-92)
         out.append(f"Its store: {stock} (food worth {show(food)} meals; those who eat from it eat about {len(who) + 1} a night"
-                   + (f", and the fire takes {_heat(here, b):g} heat ({FO.fuel_words(_heat(here, b))})"
-                      if b['fittings'].get('hearth') or b['fittings'].get('fire ring') else "") + ").")
+                   + (f", and the fire takes {_heat(here, b):g} heat ({FO.fuel_words(_heat(here, b))}); fuel for about "
+                      f"{int(heat // max(_heat(here, b), 1e-9))} such nights" + (" with the woodpile at its door" if pile > 1e-9 else "")
+                      if fire else "") + ").")                                   # fuel shown as food is (D4-97; OPEN L-52)
     return out
 
 

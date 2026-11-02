@@ -167,6 +167,9 @@ cared for; the care option where a child is; the children's work; a child coming
 as each saw or was told it. A partner who has died is still named as one's partner until one has learned of the death; one is free
 to partner again at once (D4-88).
 
+A baby's night risk is multiplied by where it sleeps: a house 1, a camp 1.5, out 2 (calibrate); a birth in a camp is between
+housed and out (mother 0.04, infant 0.065) (D4-97).
+
 A baby sleeps where its mother sleeps when she is at the same place: in her bed, on the floor beside her, or out by her fire
 (D4-87, applying D4-86).
 
@@ -180,4 +183,4 @@ A baby sleeps where its mother sleeps when she is at the same place: in her bed,
 [proposals/children.md](../../proposals/children.md), [fertility.md](../../proposals/fertility.md), [life.md](../../proposals/life.md),
 [38.09](../../../review/38_space_engine/09_life_design.md); 02v_children_model.py.
 
-*Current as of 2 Nov 2026: D2-138 to D2-153, D2-162, D4-19, D4-20, D4-64, D4-87, D4-88.*
+*Current as of 2 Nov 2026: D2-138 to D2-153, D2-162, D4-19, D4-20, D4-64, D4-87, D4-88, D4-97.*

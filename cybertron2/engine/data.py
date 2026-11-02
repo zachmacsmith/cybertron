@@ -157,7 +157,8 @@ FITTINGS = {
                 "holds": {"grain": 300}, "does": "grain keeps longest, raised and dry (300)"},                         # D2-58, D2-155
     "fire ring": {"label": "a fire ring", "materials": {"stone": 1}, "units": 1, "basic": True, "fire": True, "spaces": 1,
                   "does": "a fire in the open for warmth and cooking (burns timber)"},                              # D2-68: a camp's fire
-    "oven": {"label": "a stone oven", "materials": {"stone": 6}, "units": 4, "basic": False, "trade": "mason", "spaces": 2,
+    "oven": {"label": "a stone oven", "materials": {"stone": 20, "timber": 2}, "units": 12, "basic": False, "trade": "mason", "spaces": 2,
+             "structure": "stone",                                                 # only in a stone building (D4-97)
              "does": "baking bread in batches"},                                                             # D2-60
     "anvil": {"label": "an anvil and bellows", "materials": {"stone": 6, "hide": 2, "timber": 1}, "units": 4, "needs": "hearth",
               "basic": False, "trade": "smith", "spaces": 2, "heavy": True, "does": "a smithy: smelting and smithing"},
@@ -364,10 +365,10 @@ TECHNIQUES = {
               "at": {"fittings": ["hand mill"]}, "inputs": {"grain": 3}, "units": 1, "gives": {"meal": 3}, "tags": ["food", "cooking"]},
               # D2-167: about 3 grain a unit, and meal makes porridge, not bread (calibrate)
     "mill": {"verb": "make", "label": "milling grain at dressed millstones turned by an ox", "aliases": ["milling", "ox mill"], "basic": True,
-             "at": {"fittings": ["millstones"]}, "animals": {"oxen": 1}, "inputs": {"grain": 16}, "units": 1, "gives": {"flour": 16},
+             "at": {"fittings": ["millstones"]}, "animals": {"oxen": 1}, "inputs": {"grain": 64}, "units": 2, "gives": {"flour": 64},   # D4-97
              "tags": ["food", "cooking"]},
     "water mill": {"verb": "make", "label": "milling grain at a water mill", "aliases": ["water milling"], "basic": True,
-                   "at": {"fittings": ["water wheel"]}, "inputs": {"grain": 40}, "units": 1, "gives": {"flour": 40}, "tags": ["food", "cooking"]},
+                   "at": {"fittings": ["water wheel"]}, "inputs": {"grain": 200}, "units": 2, "gives": {"flour": 200}, "tags": ["food", "cooking"]},   # D4-97
     "pack": {"verb": "make", "label": "making a pack", "aliases": ["backpack"], "basic": True, "inputs": {"hide": 1, "timber": 1},
              "units": 1, "gives": {"pack": 1}, "tags": ["travel"]},                                                    # recipes.md §2
     "handcart": {"verb": "make", "label": "making a handcart", "aliases": ["cart"], "inputs": {"timber": 6}, "tools": {"crude": 1.0, "copper": 1.0},
@@ -375,7 +376,7 @@ TECHNIQUES = {
     "bread": {"verb": "make", "label": "baking bread at a hearth", "aliases": ["baking", "bake"], "basic": True, "at": {"fittings": ["hearth"]},
               "inputs": {"flour": 10, "timber": 1}, "units": 1, "gives": {"bread": 10}, "tags": ["food", "cooking"]},          # D2-60
     "oven bread": {"verb": "make", "label": "baking bread in a stone oven", "aliases": ["oven baking"], "basic": True,
-                   "at": {"fittings": ["oven"]}, "inputs": {"flour": 40, "timber": 2}, "units": 2, "gives": {"bread": 40},
+                   "at": {"fittings": ["oven"]}, "inputs": {"flour": 100, "timber": 4}, "units": 3, "gives": {"bread": 100},   # one firing (D4-97)
                    "tags": ["food", "cooking"]},
     "dry meat": {"verb": "make", "label": "drying meat over a fire", "aliases": ["drying meat", "cure meat"], "basic": True,
                  "at": {"fittings": ["hearth", "fire ring"]}, "inputs": {"meat": 2}, "units": 1, "gives": {"dried meat": 1}, "tags": ["food", "cooking"]},
@@ -731,9 +732,11 @@ LIFE = {
     # D2-141, D2-162; days, late, signs scaled. late (the last day) and signs_from (the day after conception) follow from 2 days
     # (proposals/fertility.md Q5, to confirm)
     "pregnancy": {"days": 2, "food": 0.3, "late": 1, "late_units": 1, "road_loss": 0.05, "signs_from": 1},
-    "birth": {"housed": {"mother": 0.02, "infant": 0.03}, "out": {"mother": 0.06, "infant": 0.10}, "helped": 0.5},
+    "birth": {"housed": {"mother": 0.02, "infant": 0.03}, "camp": {"mother": 0.04, "infant": 0.065}, "out": {"mother": 0.06, "infant": 0.10},
+              "helped": 0.5},                                                   # a camp: partly housed, between (D4-97; calibrate)
     "gap": 1,                                                               # scaled (D2-162)
-    "infant": {"eats": 0.5, "dies": {"cared": 0.02, "not": 0.08}, "hungry": 2.0, "cold": 2.0, "weight": 2},
+    "infant": {"eats": 0.5, "dies": {"cared": 0.02, "not": 0.08}, "hungry": 2.0, "cold": 2.0, "weight": 2,
+               "shelter": {"house": 1.0, "camp": 1.5, "out": 2.0}},             # a baby's night by where it sleeps (D4-97; calibrate)
     "child": {"dies": 0.005, "unminded": 4.0},
     "dial": {"low": {"infant_care": 1, "child_eats": 0.7, "child_works": 1.0, "child_minding": 0},
              "high": {"infant_care": 3, "child_eats": 1.0, "child_works": 0.5, "child_minding": 1}},   # D2-145, D2-151

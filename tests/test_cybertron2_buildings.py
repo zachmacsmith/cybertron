@@ -19,6 +19,7 @@ def world(spec=None, **give):
     for t in ("medium room", "hall", "water wheel"):
         w.apply("learn", "combe", person="Ivo", tech=t, level="known", source="test")
     w.apply("learn", "combe", person="Ivo", tech="hearth", level="known", source="test")   # a mason's craft: Ivo is a mason
+    w.apply("learn", "combe", person="Ivo", tech="wall", level="known", source="test")     # and walls: he builds in stone (D4-97)
     for t in list(w.s["know"]["Ivo"]):
         w.s["know"]["Ivo"][t]["skill"] = 1.0
     return w
@@ -137,7 +138,7 @@ def test_an_added_room_costs_a_quarter_less_and_a_second_storey_is_refused_unles
     assert BL.floor(b) == 12 and BL.footprint(b) == 6                        # an upper floor takes no ground
     assert do(w2, "Ivo", do="build", what="small room", at="Tower", storey=2).startswith("Refused: build: storey 2")
     assert do(w2, "Margery", do="build", what="small room", at="the Green", structure="stone").startswith(
-        "Refused: build: building in stone is a mason's work")
+        "Refused: build: building in stone is stone walling")
 
 
 def test_upgrading_a_wattle_house_to_timber_keeps_its_beds_fittings_stores_and_lines():
@@ -308,7 +309,7 @@ def test_carving_in_stone_takes_six_units_and_a_mason_and_erasing_anothers_line_
     sb = house(w, "Stone House", ["small room"], structure="stone")
     a = {"do": "write", "at": "Stone House", "text": "Ivo cut this stone.", "how": "carve"}
     assert V.cost(Here(w, "Ivo"), a) == 6
-    assert do(w, "Margery", **a).startswith("Refused: write: building in stone is a mason's work")
+    assert do(w, "Margery", **a).startswith("Refused: write: building in stone is stone walling")
     assert do(w, "Ivo", **a).startswith("You carved over the door of Stone House")
     assert V.cost(Here(w, "Ivo"), {"do": "write", "at": "Stone House", "text": "x", "how": "paint"}) == 2
     e = {"do": "erase", "at": "Stone House", "line": "1"}
