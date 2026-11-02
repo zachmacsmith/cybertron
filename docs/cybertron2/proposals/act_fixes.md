@@ -34,7 +34,7 @@ and the world's constraints. These five were the faults and the worst misreading
 ## Affects
 
 verbs.py (_fire, _take, the move put, _fitting), things.py (find), agreements.py (parse_legs, leg_text), prompt.py (verb_lines);
-tests/test_cybertron2_act_fixes.py, two tests updated (the farm fire message; the cottage's grain); OPEN L-43.
+tests/test_cybertron2_act_fixes.py, two tests updated (the farm fire message; the cottage's grain); OPEN L-45.
 
 ## History
 

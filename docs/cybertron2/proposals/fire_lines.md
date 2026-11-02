@@ -39,7 +39,7 @@ Zach: "yes" to the fixes.
 ## Affects
 
 night.py, prompt.py, run.py, settle.py, verbs.py (the theft record notes a door); tests in test_cybertron2_heap_senses.py; OPEN
-L-42 for 37.2's heat spec.
+L-44 for 37.2's heat spec.
 
 ## History
 
