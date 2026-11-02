@@ -1,7 +1,7 @@
 // c2viz/js/region.js: the region's landscape built from the engine's land facts (ENGINE.md §9): places laid out by their roads, heights, woods, rivers at fords, peaks; the same landscape sampled close up.
 (function (X) {
   "use strict";
-  const { BIOMES, TERRAIN_LAND, geom, hstr, model, noise, rng, windPath } = X;
+  const { BIOMES, TERRAIN_LAND, parcelPlan, hstr, model, noise, rng, windPath } = X;
   // ---------------------------------------------------------------------------------------------------- the region's landscape
   // A presentation choice built from what the engine says about the land between places (ENGINE.md §9): each place stands at the
   // height of its parcels (or, where a world sets no heights, its rock and its name: a crag, a tor, a pass, a moor, a mere); each
@@ -13,11 +13,15 @@
   const REGION = new WeakMap(), PERDAY = 60, WORLD_SCALE = 0.5;
   const levelOf = (e) => e > 0.78 ? 5 : 1 + Math.max(0, Math.min(3, Math.floor((e - 0.2) / 0.15)));
                                                       // [height, forest, wet]
-  function regionPlan(V) {
-    let RP = REGION.get(V); if (RP) return RP;
-    if (V.land && X.groundPlan) { RP = X.groundPlan(V); REGION.set(V, RP); return RP; }   // a generated world: its ground truth (ground.js)
-    const M = model(V), ST = V.static, WL = ST.layout.world || {}, nids = Object.keys(ST.nodes).sort(), G = {};
-    for (const n of nids) G[n] = geom(V, n);
+  // ---------------------------------------------------------------------------------------------------- where places stand
+  // Each place's spot on the region's map, before anything else is laid: a generated world's sites (ground.js), else places laid
+  // out by their roads (layout.py), pulled together along them and pushed apart until their land clears.
+  const POS = new WeakMap();
+  function regionPos(V) {
+    let RS = POS.get(V); if (RS) return RS;
+    if (V.land && X.groundPos) { RS = X.groundPos(V); POS.set(V, RS); return RS; }
+    const ST = V.static, WL = ST.layout.world || {}, nids = Object.keys(ST.nodes).sort(), G = {};
+    for (const n of nids) G[n] = parcelPlan(V, n);
     const f = WORLD_SCALE, rad = (n) => G[n].land * f, rds = Object.entries(ST.roads).filter(([, r]) => r.a in G && r.b in G);
     const pos = {}; for (const n of nids) pos[n] = [(WL[n] || [500, 350])[0] * 1.6, (WL[n] || [500, 350])[1] * 1.6];
     for (let it = 0; it < 600; it++) {
@@ -30,6 +34,32 @@
     for (const n of nids) { const r = rad(n); x0 = Math.min(x0, pos[n][0] - r); y0 = Math.min(y0, pos[n][1] - r); x1 = Math.max(x1, pos[n][0] + r); y1 = Math.max(y1, pos[n][1] + r); }
     const MGN = 70, W = Math.max(420, Math.ceil(x1 - x0 + 2 * MGN)), H = Math.max(280, Math.ceil(y1 - y0 + 2 * MGN));
     const ox = W / 2 - (x0 + x1) / 2, oy = H / 2 - (y0 + y1) / 2; for (const n of nids) pos[n] = [pos[n][0] + ox, pos[n][1] + oy];
+    RS = { W, H, pos, G, nids, f, rad }; POS.set(V, RS); return RS;
+  }
+  // ---------------------------------------------------------------------------------------------------- where each road leaves a place
+  // One answer for both scales: the road's heading out of the place on the region's map (a generated world: its own cells, ground.js;
+  // else towards the other place), and where that heading meets the edge of the place's plan. The village's roads run to that point
+  // close up; on the region's map the road goes on from it.
+  function edgeOf(P0, dx, dy) {
+    const [mx, my] = P0.mid, x0 = 1, y0 = 1, x1 = P0.W - 2, y1 = P0.H - 2; let t = 1e9;
+    if (dx > 1e-9) t = Math.min(t, (x1 - mx) / dx); if (dx < -1e-9) t = Math.min(t, (x0 - mx) / dx);
+    if (dy > 1e-9) t = Math.min(t, (y1 - my) / dy); if (dy < -1e-9) t = Math.min(t, (y0 - my) / dy);
+    return [mx + dx * t, my + dy * t];
+  }
+  const OUT = new WeakMap();
+  function roadOut(V, nid, rid) {
+    let cache = OUT.get(V); if (!cache) OUT.set(V, cache = {}); const key = nid + "|" + rid; if (cache[key]) return cache[key];
+    let o = V.land && X.groundOut ? X.groundOut(V, nid, rid) : null;
+    if (!o) { const RS = regionPos(V), r = V.static.roads[rid], other = r.a === nid ? r.b : r.a, a = RS.pos[nid], b = RS.pos[other] || [a[0] + 1, a[1]];
+      const l = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1; o = { dir: [(b[0] - a[0]) / l, (b[1] - a[1]) / l] }; }
+    o.edge = edgeOf(parcelPlan(V, nid), o.dir[0], o.dir[1]);
+    return (cache[key] = o);
+  }
+  function regionPlan(V) {
+    let RP = REGION.get(V); if (RP) return RP;
+    if (V.land && X.groundPlan) { RP = X.groundPlan(V); REGION.set(V, RP); return RP; }   // a generated world: its ground truth (ground.js)
+    const M = model(V), ST = V.static, RS = regionPos(V), { W, H, pos, G, nids, f, rad } = RS;
+    const rds = Object.entries(ST.roads).filter(([, r]) => r.a in G && r.b in G);
     // the anchors: [x, y, sigma, height, forest, wet]
     const A = [], nodeE = {};
     for (const n of nids) {
@@ -48,7 +78,7 @@
     }
     const feats = [], paths = {}, sidx = {};                                                 // each road's way, its stretches on it
     const toW = (n, x, y) => [pos[n][0] + (x - G[n].mid[0]) * f, pos[n][1] + (y - G[n].mid[1]) * f];
-    const exitPt = (n, rid) => { const e = G[n].exits.find((q) => q.rid === rid); return e ? toW(n, e.fx, e.fy) : pos[n]; };
+    const exitPt = (n, rid) => { const e = roadOut(V, n, rid).edge; return toW(n, e[0], e[1]); };
     for (const [rid, r] of rds) {
       const A0 = exitPt(r.a, rid), B0 = exitPt(r.b, rid), way = paths[rid] = windPath(A0[0], A0[1], B0[0], B0[1], hstr(rid), 0.1);
       let i0 = way.findIndex(([x, y]) => Math.hypot(x - pos[r.a][0], y - pos[r.a][1]) > rad(r.a)); if (i0 < 0) i0 = 0;
@@ -120,7 +150,7 @@
   const NREL = new WeakMap();
   function nodeRelief(V, nid) {
     let cache = NREL.get(V); if (!cache) NREL.set(V, cache = {}); if (cache[nid]) return cache[nid];
-    const RP = regionPlan(V), G = geom(V, nid), W = G.W, H = G.H, f = RP.f, [px, py] = RP.pos[nid], M = model(V), nW = noise(M.seed ^ 2);
+    const RP = regionPlan(V), G = parcelPlan(V, nid), W = G.W, H = G.H, f = RP.f, [px, py] = RP.pos[nid], M = model(V), nW = noise(M.seed ^ 2);
     const E = new Float32Array(W * H), F = new Float32Array(W * H), Wt = new Float32Array(W * H), kind = new Uint8Array(W * H), level = new Int8Array(W * H), tint = new Uint32Array(W * H), wood = new Uint8Array(W * H);
     const at = (A, x, y) => A[Math.max(0, Math.min(RP.H - 1, y | 0)) * RP.W + Math.max(0, Math.min(RP.W - 1, x | 0))];
     const bil = (A, x, y) => { const x0 = Math.floor(x), y0 = Math.floor(y), fx = x - x0, fy = y - y0; return at(A, x0, y0) * (1 - fx) * (1 - fy) + at(A, x0 + 1, y0) * fx * (1 - fy) + at(A, x0, y0 + 1) * (1 - fx) * fy + at(A, x0 + 1, y0 + 1) * fx * fy; };
@@ -132,7 +162,7 @@
       level[i] = G.REG[i] >= 0 ? own : at(RP.level, wx, wy) === 0 ? 0 : levelOf(e);          // open water (a generated world's sea, lakes) as the region has it
       if (RP.ground) tint[i] = at(RP.tint, wx, wy);
       kind[i] = RP.ground ? at(RP.kind, wx, wy) : e > 0.78 ? 2 : e > 0.56 ? 1 : (Wt[i] > 0.55 && e < 0.35) ? 3 : 0;   // the ground truth's terrain, or as derived
-      wood[i] = nW(rx / 30, ry / 30, 3) < 0.2 + F[i] * 0.55 ? 1 : 0;
+      wood[i] = RP.ground ? at(RP.wood, wx, wy) : nW(rx / 30, ry / 30, 3) < 0.2 + F[i] * 0.55 ? 1 : 0;   // a generated world: the region's own woods
     }
     const rivers = RP.rivers.map((c) => ({ pid: null, pids: [], n: null, half: Math.max(2, c.half / f * 0.8), line: c.line.map(([x, y]) => [G.mid[0] + (x - px) / f, G.mid[1] + (y - py) / f]).filter(([x, y]) => x > -30 && y > -30 && x < W + 30 && y < H + 30) })).filter((c) => c.line.length > 2);
     return (cache[nid] = { E, F, Wt, kind, level, tint, wood, rivers, ground: !!RP.ground, tintW: RP.tintW });
@@ -152,5 +182,5 @@
       P.put(x + dx, y - h + k, c); } }
     for (let dx = -Math.round(w / 2); dx <= Math.round(w / 2); dx++) P.dark(x + dx, y, 0.2);
   }
-  Object.assign(X, { REGION, PERDAY, WORLD_SCALE, levelOf, regionPlan, NREL, nodeRelief, peaks, peak });
+  Object.assign(X, { REGION, PERDAY, WORLD_SCALE, levelOf, POS, regionPos, edgeOf, OUT, roadOut, regionPlan, NREL, nodeRelief, peaks, peak });
 })(C2X);

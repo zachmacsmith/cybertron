@@ -87,3 +87,15 @@ engine's state and imports nothing it changes.
   - Hand-made worlds render pixel-identical to before (5 views of w1).
   - Engine gaps G-32 (road cells not saved) and G-33 (a run does not carry its cells).
   - Test: twin bays generated, packed, every road matched.
+- 02 Nov 2026 18:07 UTC: roads laid in steps so the two scales agree (ENGINE.md §13), at Zach's report that close-up roads
+  tangled, crossed water, ended in elbows and left from a different side than on the region's map. The cause was two
+  independent drawings: the close-up headed for its end parcel's side, the region for the other place.
+  - One heading and exit point per road and place, from the region (`roadOut`).
+  - Inside a place, the cheapest way from the green through the parcel it leaves by to that exit: cheap along hedges and field
+    edges, dear through crops and woods, rivers crossed once, water gone round. Roads laid earlier are cheap, so later ones
+    join them.
+  - Smoothed, each road drawn only where it is its own; the region draws the same lines.
+  - `geom.js` is now the parcel plan alone; `village.js` lays roads, green and buildings on it.
+  - Close-ups of generated worlds take the region's woods.
+  - Audit over every place of twin bays and w1: exits identical at both scales; open water only where Wealdmere's roads skirt
+    the mere they leave by.

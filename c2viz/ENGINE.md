@@ -351,15 +351,16 @@ Two halves, so that every rule stays in the engine:
   only in stone; state from condition, unfinished, new, door; fittings as they show outside. The roof's form (gabled, hipped, a
   gable to the front) and the roofing where the structure allows a choice are presentation: each village leans to one, each
   house varies, by hash.
-- **Villages:** a green with a well in the middle of the built ground, every road running out from it through its end's parcel;
-  houses placed with their doors a few paces off a road, near the green, clear of roads and green; a house the built ground
-  cannot hold stands on open ground beside it (and says so).
+- **Villages:** a green with a well in the middle of the built ground, every road laid from it as §13 says; houses placed with
+  their doors a few paces off a road, near the green, clear of roads and green; a house the built ground cannot hold stands on
+  open ground beside it (and says so).
 - **Terraces:** the region's landscape height is cut into levels (the site's terraces: a lit lip, a cliff face down to the south,
   dark side edges, each level its own green), with a slow undulation under everything so a world that says little still has a
   few levels; each place stands level on its own ground; woods are masses of a slow noise over the landscape's forest; roads
   ramp over cliff faces and are edged. A place close up stands in the same landscape, sampled from the region's.
-- **Roads' ways:** a curve through a few waypoints set off to either side of the straight line (deterministic per road); on the
-  region's map each day's stretch, its landmarks and any river at a ford or bridge sit on that way.
+- **Roads' ways:** inside a place, laid as §13 says; between places on a world made by hand, a curve through a few waypoints set
+  off to either side of the straight line between the two places' exits (deterministic per road); on the region's map each day's
+  stretch, its landmarks and any river at a ford or bridge sit on that way.
 - **Height** (a word in the engine) as terraces and cliff faces: a parcel above its neighbours to the south shows a face.
 - **The region's map is a schematic at a fixed scale, explored by panning:** each place's plan at half its close-up scale (its
   houses drawn half as large again so a village stands out), roads about 60 pixels a day of travel beyond the two places' land,
@@ -437,4 +438,30 @@ file in cybertron2/specs by its name; cells whose parcels are not the run's are 
   shores broken at that scale.
 
 A world made by hand has no cells and is drawn as in §9; the renderer's output for one is unchanged, pixel for pixel.
+
+## 13. Roads, laid in steps so both scales agree (region.js roadOut, village.js)
+
+The engine says which places a road joins, how many days it is, and the parcel it leaves each place by (`roads.ends`); a generated
+world also has its cells. Everything else is presentation, laid in this order so the region's map and the close up are one drawing:
+
+1. **Where each place stands** on the region's map (region.js `regionPos`: a generated world's sites; else laid out by its roads).
+2. **Where each road leaves a place** (`roadOut`), one answer for both scales:
+   - its heading is where its own cells cross the edge of the place's drawing (a generated world), else towards the other place;
+   - its exit is where that heading meets the edge of the place's plan.
+3. **Its way inside the place** (village.js) is the cheapest way over the plan:
+   - it runs from the green (a place with no green: its open ground; a hidden way: its own parcel), through the parcel it leaves
+     by (by water: along that water's shore), to its exit;
+   - going is cheap on the green, on built ground and open grass, and along parcels' edges (hedges, field margins, the edges of
+     woods); it is dear across a crop, through a wood, over rock; a river is crossed where it is narrowest; open water (a lake,
+     a mere, the sea) is gone round;
+   - roads are laid one after another (open ways before hidden ones, tracks first, shorter first), and each makes its own
+     ground cheap for the next, so later roads join earlier ones at junctions instead of running beside or across them.
+4. **The way smoothed** (corners cut three times), and drawn only where it does not share another road's ground.
+5. **On the region's map**, the place's roads are those same lines at the region's scale. The road between places goes on from
+   the same exit, along its cells (a generated world) or its curve (a world made by hand).
+
+Checked on every place of twin bays and w1:
+- every exit is the same point at both scales;
+- no road crosses open water, except a few points where Wealdmere's two roads skirt the mere they leave by;
+- a few points cut a field's corner where a road must leave by that field.
 

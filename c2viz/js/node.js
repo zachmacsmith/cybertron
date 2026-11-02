@@ -12,9 +12,9 @@
     const n2 = noise(M.seed ^ 5), paint = paintRoad(P, occ, ctx.LV, W, H, ctx.face);
     for (const e of G.exits) {                                                                       // roads leaving, from their ends' parcels
       const r = ST.roads[e.rid], worn = ((d.roads[e.rid] || {}).ends || {})[nid]?.worn || 0, faint = e.end.hidden && worn < 0.8;
-      const way = e.way;
-      if (faint) paintPath(paint, way, 0, PAL.lane, (x, y) => ((x | 0) * 7 + (y | 0) * 3) % 10 < 3 + worn * 8);
-      else paintPath(paint, way, r && r.track ? 2 : 1, r && r.track ? PAL.road : PAL.lane);
+      for (const way of e.draw) {                                                                   // each stretch it does not share
+        if (faint) paintPath(paint, way, 0, PAL.lane, (x, y) => ((x | 0) * 7 + (y | 0) * 3) % 10 < 3 + worn * 8);
+        else paintPath(paint, way, r && r.track ? 2 : 1, r && r.track ? PAL.road : PAL.lane); }
       const lx = Math.max(10, Math.min(W - 10, e.tx)), ly = Math.max(8, Math.min(H - 8, e.ty)), to = ST.nodes[e.to];
       out.hotspots.push({ kind: "exit", id: e.rid, to: e.to, x: lx - 8, y: ly - 8, w: 16, h: 16, label: "→ " + (to?.name || e.to) + " · " + (r?.days ?? "?") + " day" + ((r?.days ?? 1) > 1 ? "s" : "") + (e.end.hidden ? (faint ? " (a hidden way)" : " (a worn path)") : "") });
     }

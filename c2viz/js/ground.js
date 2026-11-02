@@ -1,7 +1,7 @@
 // c2viz/js/ground.js: the region's landscape from a generated world's ground truth (viz.json `land`, c2viz/ground.py; ENGINE.md §12): height, sea and lakes, rivers, terrain, cover and the roads' own cells, in the same plan the derived landscape gives (region.js), so everything drawn on it is unchanged.
 (function (X) {
   "use strict";
-  const { BIOMES, TERRAIN_KIND, TERRAIN_TINT, WORLD_SCALE, geom, hstr, levelOf, model, noise, splinePath } = X;
+  const { BIOMES, TERRAIN_KIND, TERRAIN_TINT, WORLD_SCALE, edgeOf, parcelPlan, roadOut, hstr, levelOf, model, noise, splinePath } = X;
   // Presentation choices (ENGINE.md §12): PX pixels a cell (a cell is 150 m, so a 50 km window is 1336 px); heights in bands of
   // M_PER_E metres to the renderer's 0..1 (a terrace every 105 m); places drawn at the region's one scale (WORLD_SCALE of their close
   // up), much larger than their real few cells, at their real site, moved off open water only as far as their drawing needs.
@@ -18,11 +18,11 @@
   // a cell's point in pixels (the generator's jittered point, so lines through cells are not on a lattice)
   const cellPx = (Lg, r, c) => { const i = r * Lg.nx + c; return [(c + Lg.jx[i] / 100 + 0.5) * PX, (r + Lg.jy[i] / 100 + 0.5) * PX]; };
 
-  function groundPlan(V) {
-    const M = model(V), ST = V.static, LD = V.land, Lg = layers(V), nids = Object.keys(ST.nodes).sort(), G = {};
-    for (const n of nids) G[n] = geom(V, n);
-    const f = WORLD_SCALE, rad = (n) => G[n].land * f, nx = Lg.nx, ny = Lg.ny, W = nx * PX, H = ny * PX, N = W * H;
-    const n1 = noise(M.seed ^ 11), nA = noise(M.seed ^ 31), nW = noise(M.seed ^ 2);
+  // the ground per pixel: the cell under it (nearest, its edge broken by noise), heights bilinear, open water by its share
+  const BASE = new WeakMap();
+  function groundBase(V) {
+    let B = BASE.get(V); if (B) return B;
+    const M = model(V), Lg = layers(V), nx = Lg.nx, ny = Lg.ny, W = nx * PX, H = ny * PX, N = W * H, n1 = noise(M.seed ^ 11);
     // per pixel: the cell under it (nearest, its edge broken by noise so shores and woods are not squares), and heights bilinear
     const cellAt = new Int32Array(N), hm = new Float32Array(N), wm = new Uint8Array(N);
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
@@ -35,7 +35,15 @@
       const w_ = (k) => (Lg.water[k] & 3) ? 1 : 0, ws = w_(r0 * nx + c0) * (1 - tx) * (1 - ty) + w_(r0 * nx + c0 + 1) * tx * (1 - ty) + w_((r0 + 1) * nx + c0) * (1 - tx) * ty + w_((r0 + 1) * nx + c0 + 1) * tx * ty;
       wm[y * W + x] = ws + (n1(x / 6 + 3, y / 6, 2) - 0.5) * 0.5 > 0.5 ? 1 : 0;             // open water: its share between cells, a shore not a lattice
     }
-    const waterAt = (i) => wm[i];
+    B = { Lg, W, H, N, cellAt, hm, wm, n1 }; BASE.set(V, B); return B;
+  }
+  // places at their sites; one whose drawing would stand in open water is moved to the nearest ground that holds it
+  const GPOS = new WeakMap();
+  function groundPos(V) {
+    let RS = GPOS.get(V); if (RS) return RS;
+    const ST = V.static, LD = V.land, { Lg, W, H, wm } = groundBase(V), nx = Lg.nx, nids = Object.keys(ST.nodes).sort(), G = {};
+    for (const n of nids) G[n] = parcelPlan(V, n);
+    const f = WORLD_SCALE, rad = (n) => G[n].land * f, waterAt = (i) => wm[i];
     // places at their sites; one whose drawing would stand in open water is moved to the nearest ground that holds it
     const pos = {};
     for (const n of nids) {
@@ -47,6 +55,24 @@
       if (bc > 0.5) for (let dd = PX * 2; dd <= r * 2.5; dd += PX * 2) for (let a = 0; a < 16; a++) { const q = [p[0] + Math.cos(a / 16 * 6.283) * dd, p[1] + Math.sin(a / 16 * 6.283) * dd], c = wetShare(q[0], q[1]) * 10 + dd / r; if (c < bc) { bc = c; best = q; } }
       pos[n] = best;
     }
+    RS = { W, H, pos, G, nids, f, rad }; GPOS.set(V, RS); return RS;
+  }
+  // where a road leaves a place: the heading of its own cells (the generator's road rule) where they leave the place's drawing
+  function groundOut(V, nid, rid) {
+    const lr = (V.land.roads || {})[rid], r = V.static.roads[rid]; if (!lr || !r) return null;
+    const { Lg } = groundBase(V), RS = groundPos(V), p = RS.pos[nid], P0 = RS.G[nid], f = RS.f;
+    let pts = lr.cells.map(([rr, cc]) => cellPx(Lg, rr, cc)); if (r.b === nid) pts = pts.slice().reverse();
+    const at = (d) => pts.find((q) => Math.hypot(q[0] - p[0], q[1] - p[1]) >= d) || pts[pts.length - 1];
+    let d = RS.rad(nid) * 1.1, dir = [1, 0];
+    for (let k = 0; k < 3; k++) {                                                                   // the heading where it crosses the plan's edge
+      const q = at(d), l = Math.hypot(q[0] - p[0], q[1] - p[1]) || 1; dir = [(q[0] - p[0]) / l, (q[1] - p[1]) / l];
+      const e = edgeOf(P0, dir[0], dir[1]); d = Math.hypot(e[0] - P0.mid[0], e[1] - P0.mid[1]) * f;
+    }
+    return { dir, cells: pts, from: d };
+  }
+  function groundPlan(V) {
+    const M = model(V), ST = V.static, LD = V.land, { Lg, W, H, N, cellAt, hm, wm, n1 } = groundBase(V), { pos, G, nids, f, rad } = groundPos(V);
+    const nx = Lg.nx, ny = Lg.ny, nA = noise(M.seed ^ 31), nW = noise(M.seed ^ 2), waterAt = (i) => wm[i];
     // the fields the painter reads: height (E), forest (F), wet (Wt), the wild land's kind, terrace level (0 open water), tint, woods
     const E = new Float32Array(N), F = new Float32Array(N), Wt = new Float32Array(N), kind = new Uint8Array(N), level = new Int8Array(N), tint = new Uint32Array(N), wood = new Uint8Array(N);
     const tints = Lg.terrains.map((t) => parseInt((TERRAIN_TINT[t] || "#7cb444").slice(1), 16)), kinds = Lg.terrains.map((t) => TERRAIN_KIND[t] ?? 0);
@@ -85,15 +111,16 @@
         if (k2 !== cls && run.length) { run.push(p); flush(); run = [p]; cls = k2; } else run.push(p); });
       flush();
     }
-    // roads: their own cells (the generator's rule, recovered by c2viz/ground.py), from each end's exit of the drawing
+    // roads: their own cells (the generator's rule, recovered by c2viz/ground.py), from where each end's village roads reach the
+    // edge of its drawing (roadOut: the same point close up) on along the cells
     const paths = {}, sidx = {};
     const toW = (n, x, y) => [pos[n][0] + (x - G[n].mid[0]) * f, pos[n][1] + (y - G[n].mid[1]) * f];
-    const exitPt = (n, rid) => { const e = G[n].exits.find((q) => q.rid === rid); return e ? toW(n, e.fx, e.fy) : pos[n]; };
     for (const [rid, r] of Object.entries(ST.roads)) {
       const lr = (LD.roads || {})[rid]; if (!lr || !(r.a in G) || !(r.b in G)) continue;
-      const pts = lr.cells.map(([rr, cc]) => cellPx(Lg, rr, cc));
-      const out = (p) => Math.hypot(p[0] - pos[r.a][0], p[1] - pos[r.a][1]) > rad(r.a) * 1.05 && Math.hypot(p[0] - pos[r.b][0], p[1] - pos[r.b][1]) > rad(r.b) * 1.05;
-      const keep = pts.map((p, k) => [p, k]).filter(([p]) => out(p)), A0 = exitPt(r.a, rid), B0 = exitPt(r.b, rid);
+      const pts = lr.cells.map(([rr, cc]) => cellPx(Lg, rr, cc)), oa = roadOut(V, r.a, rid), ob = roadOut(V, r.b, rid);
+      const A0 = toW(r.a, oa.edge[0], oa.edge[1]), B0 = toW(r.b, ob.edge[0], ob.edge[1]);
+      const out = (p) => Math.hypot(p[0] - pos[r.a][0], p[1] - pos[r.a][1]) > (oa.from || rad(r.a)) * 1.08 && Math.hypot(p[0] - pos[r.b][0], p[1] - pos[r.b][1]) > (ob.from || rad(r.b)) * 1.08;
+      const keep = pts.map((p, k) => [p, k]).filter(([p]) => out(p));
       const way = splinePath([A0, ...keep.map(([p]) => p), B0]); paths[rid] = way;
       const b = lr.stretches || [];
       sidx[rid] = Array.from({ length: (r.stretches && r.stretches.length) || 1 }, (_, k) => {
@@ -102,5 +129,5 @@
     }
     return { W, H, pos, f, G, nids, A: [], feats: [], E, F, Wt, kind, level, cellNode, cellPar, rivers, rad, tint, tintW: 0.7, paths, sidx, wood, ground: true, PX };
   }
-  Object.assign(X, { groundPlan, groundLayers: layers, GROUND_PX: PX });
+  Object.assign(X, { groundBase, groundPos, groundOut, groundPlan, groundLayers: layers, GROUND_PX: PX });
 })(C2X);

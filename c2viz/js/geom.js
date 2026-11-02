@@ -1,7 +1,7 @@
-// c2viz/js/geom.js: each place's ground plan, a presentation choice read from its parcels' sizes, neighbours and sides (ENGINE.md §9): parcels, river courses, the green, the roads out, where each building stands.
+// c2viz/js/geom.js: each place's ground plan of parcels, a presentation choice read from their sizes, neighbours and sides (ENGINE.md §9): parcels and river courses. The roads, the green and the buildings are laid on it in village.js.
 (function (X) {
   "use strict";
-  const { STOPS, hstr, model, rng, shape, windPath } = X;
+  const { STOPS, hstr, model, rng } = X;
   // ---------------------------------------------------------------------------------------------------- a place's ground plan
   // Parcels have no coordinates; they have neighbours (`adj`), a side, a height and a size. The plan reads those and nothing else:
   //  - area: every unit of size is the same ground (UNIT pixels close up), so a field of 5 is five times a copse of 1;
@@ -15,7 +15,7 @@
   const SIDE = { north: [0, -1], south: [0, 1], east: [1, 0], west: [-1, 0], centre: [0, 0] };
   const fieldAngle = (pid) => ((hstr(pid) >>> 3) & 1 ? Math.PI / 2 : 0) + ((hstr(pid) >>> 5) % 7 - 3) * 0.07;
   const GEOM = new WeakMap();
-  function geom(V, nid) {
+  function parcelPlan(V, nid) {
     let cache = GEOM.get(V); if (!cache) GEOM.set(V, cache = {});
     if (cache[nid]) return cache[nid];
     const ST = V.static, M = model(V), N = M.nodes[nid], pids = N.pids, n = pids.length, R = rng(hstr(nid) ^ M.seed);
@@ -105,68 +105,10 @@
       line = line.slice(lo, hi + 1);
       courses.push({ pid: p, pids: chain.map((j) => pids[j]), line, half: Math.max(2.5, 2 + Math.sqrt(sz) * 2.2), n: 0 });
     });
-    // where each road leaves: from its end's parcels (roads.ends), towards its end's side, or towards the other place if the side is
-    // the centre; out to the edge of the map
-    const Lw = V.static.layout.world || {}, me0 = Lw[nid] || [500, 350], SIDEV = { north: [0, -1], south: [0, 1], east: [1, 0], west: [-1, 0] };
-    const exits = Object.entries(ST.roads).filter(([, r]) => r.a === nid || r.b === nid).map(([rid, r]) => {
-      const other = r.a === nid ? r.b : r.a, end = (r.ends || {})[nid] || { side: "centre", parcels: [], hidden: false };
-      let i = (end.parcels || []).map((p) => idx[p]).find((k) => k != null); if (i == null) i = pids.findIndex((p) => ST.parcels[p].cover === "built");
-      const [fx, fy] = i >= 0 ? centre[i] : [W / 2, H / 2], o = Lw[other] || [500, 350];
-      let [dx, dy] = SIDEV[end.side] || [o[0] - me0[0], o[1] - me0[1]]; const tw = ((hstr(rid) % 7) - 3) * 0.08, l = Math.hypot(dx, dy) || 1;
-      [dx, dy] = [(dx * Math.cos(tw) - dy * Math.sin(tw)) / l, (dx * Math.sin(tw) + dy * Math.cos(tw)) / l];
-      let t = 0; while (t < 4 * (W + H)) { const x = fx + dx * t, y = fy + dy * t; if (x < 1 || y < 1 || x > W - 2 || y > H - 2) break; t += 1; }
-      return { rid, to: other, end, fx, fy, tx: Math.max(-2, Math.min(W + 1, fx + dx * t)), ty: Math.max(-2, Math.min(H + 1, fy + dy * t)) };
-    });
-    // the village's green (a presentation choice): the middle of its built ground, where every road starts; houses line the roads
-    const bi = pids.findIndex((p) => ST.parcels[p].cover === "built");
-    const green = bi >= 0 && area[bi].length ? centre[bi].map(Math.round) : null, greenR = bi >= 0 ? Math.max(6, Math.min(12, Math.sqrt(area[bi].length) * 0.16)) : 0;
-    for (const e of exits) { const s0 = green ? windPath(green[0], green[1], e.fx, e.fy, hstr(e.rid + "|in"), 0.06) : []; e.way = s0.concat(windPath(e.fx, e.fy, e.tx, e.ty, hstr(e.rid + nid), 0.12)); }
-    const rd = new Int16Array(W * H).fill(999), rq = [];                                        // distance from the roads
-    for (const e of exits) for (const [x, y] of e.way) for (let a2 = 0; a2 <= 1; a2++) for (let b2 = 0; b2 <= 1; b2++) { const xx = (x | 0) + a2, yy = (y | 0) + b2; if (xx >= 0 && yy >= 0 && xx < W && yy < H && rd[yy * W + xx]) { rd[yy * W + xx] = 0; rq.push(yy * W + xx); } }
-    for (let k2 = 0; k2 < rq.length; k2++) { const i = rq[k2], x = i % W, y = (i / W) | 0; for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const xx = x + dx, yy = y + dy; if (xx < 0 || yy < 0 || xx >= W || yy >= H) continue; const j = yy * W + xx; if (rd[j] > rd[i] + 1) { rd[j] = rd[i] + 1; rq.push(j); } } }
-    // buildings: each on its parcel at its footprint (shape(): the spec's rooms), placed once for the run in the order they first
-    // stand: its door a few paces off a road, near the green, clear of the roads and the green; one that does not fit is shown
-    // overfull beside its parcel
-    const ever = {};
-    V.days.forEach((d, day) => { for (const [bid, b] of Object.entries(d.buildings)) if (b.node === nid) { const sh = shape(b, bid), e = ever[bid];
-      if (!e) ever[bid] = { day, b, w: sh.w, h: sh.h }; else { e.w = Math.max(e.w, sh.w); e.h = Math.max(e.h, sh.h); } } });
-    const taken = new Uint8Array(W * H), placeOf = {}, MG = 3;
-    const order = Object.keys(ever).sort((a, b) => ever[a].day - ever[b].day || (ever[b].w * ever[b].h) - (ever[a].w * ever[a].h) || (a < b ? -1 : 1));
-    for (const bid of order) {
-      const e = ever[bid]; let i = idx[e.b.parcel]; if (i == null) i = pids.findIndex((p) => ST.parcels[p].cover === "built"); if (i < 0) i = 0;
-      let [cx, cy] = centre[i]; const bR = rng(hstr(bid));
-      if ((e.b.fittings || {})["water wheel"]) {                                                   // its site is the water (FITTINGS site: water)
-        const wj = pids.findIndex((p, j) => ST.parcels[p].cover === "water" && (j === i || adj[i].has(j)));
-        if (wj >= 0) { let bd = 1e18; for (const [x, y] of area[i]) { const dd = (x - centre[wj][0]) ** 2 + (y - centre[wj][1]) ** 2; if (dd < bd) { bd = dd; cx = x; cy = y; } } }
-      }
-      const wheel = (e.b.fittings || {})["water wheel"], gc = !wheel && green && idx[e.b.parcel] === bi ? green : [cx, cy];
-      const front = (x, y) => { const yy = Math.min(H - 1, y + (e.h >> 1) + 3); return rd[yy * W + Math.max(0, Math.min(W - 1, x))]; };
-      const cand = area[i].filter(([x, y]) => (x + y) % 2 === 0).map(([x, y]) => [x, y, Math.sqrt((x - gc[0]) ** 2 + (y - gc[1]) ** 2) * (wheel ? 3 : 1) + Math.abs(Math.min(30, front(x, y)) - 4) * 6 + bR() * 12]).sort((p, q) => p[2] - q[2]);
-      let spot = null;
-      for (const [x, y] of cand) { const x0 = x - (e.w >> 1), y0 = y - (e.h >> 1); let ok = true;
-        for (let yy = y0; yy < y0 + e.h && ok; yy += 2) for (let xx = x0; xx < x0 + e.w; xx += 2) if (xx < 0 || yy < 0 || xx >= W || yy >= H || REG[yy * W + xx] !== i) { ok = false; break; }
-        for (let yy = y0 - 1; yy < y0 + e.h + 2 && ok; yy++) for (let xx = x0 - 1; xx < x0 + e.w + 1; xx++) if (xx >= 0 && yy >= 0 && xx < W && yy < H && (rd[yy * W + xx] < 2 || (green && Math.hypot(xx - green[0], yy - green[1]) < greenR + 2))) { ok = false; break; }
-        for (let yy = y0 - MG; yy < y0 + e.h + MG && ok; yy++) for (let xx = x0 - MG; xx < x0 + e.w + MG; xx++) if (xx >= 0 && yy >= 0 && xx < W && yy < H && taken[yy * W + xx]) { ok = false; break; }
-        if (ok) { spot = [x0, y0]; break; } }
-      const fits = !!spot;
-      if (!spot) {                                                                                  // overfull: on open ground beside its parcel, facing a road
-        const near = [];
-        for (let y = Math.max(0, gc[1] - 90 | 0); y < Math.min(H, gc[1] + 90); y += 2) for (let x = Math.max(0, gc[0] - 110 | 0); x < Math.min(W, gc[0] + 110); x += 2) if (REG[y * W + x] === -1) near.push([x, y, Math.hypot(x - gc[0], y - gc[1]) + Math.abs(Math.min(30, front(x, y)) - 4) * 6]);
-        near.sort((p, q) => p[2] - q[2]);
-        for (const [x, y] of near) { const x0 = x - (e.w >> 1), y0 = y - (e.h >> 1); let ok = x0 >= 0 && y0 >= 0 && x0 + e.w < W && y0 + e.h < H;
-          for (let yy = y0 - 1; yy < y0 + e.h + 2 && ok; yy++) for (let xx = x0 - 1; xx < x0 + e.w + 1; xx++) { const j = yy * W + xx; if (xx < 0 || yy < 0 || xx >= W || yy >= H) continue;
-            if ((REG[j] !== -1 && REG[j] !== i) || rd[j] < 2 || (green && Math.hypot(xx - green[0], yy - green[1]) < greenR + 2)) { ok = false; break; } }
-          for (let yy = y0 - MG; yy < y0 + e.h + MG && ok; yy++) for (let xx = x0 - MG; xx < x0 + e.w + MG; xx++) if (xx >= 0 && yy >= 0 && xx < W && yy < H && taken[yy * W + xx]) { ok = false; break; }
-          if (ok) { spot = [x0, y0]; break; } }
-      }
-      if (!spot) spot = [Math.round(cx - e.w / 2), Math.round(cy - e.h / 2)];
-      placeOf[bid] = { x: spot[0], y: spot[1], w: e.w, h: e.h, fits };
-      for (let yy = spot[1]; yy < spot[1] + e.h; yy++) for (let xx = spot[0]; xx < spot[0] + e.w; xx++) if (xx >= 0 && yy >= 0 && xx < W && yy < H) taken[yy * W + xx] = 1;
-    }
     let gx = 0, gy = 0, gs = 0; area.forEach((a) => { for (const [x, y] of a) { gx += x; gy += y; gs++; } }); if (gs) { gx /= gs; gy /= gs; } else { gx = W / 2; gy = H / 2; }
     let land = 0; area.forEach((a) => { for (const [x, y] of a) land = Math.max(land, Math.hypot(x - gx, y - gy)); });
-    const g = { W, H, REG, area, centre, adj, site, courses, placeOf, exits, green, greenR, mid: [gx, gy], land: land || 40, reg, inner };
+    const g = { W, H, REG, area, centre, adj, site, courses, mid: [gx, gy], land: land || 40, reg, inner, pids, idx, size, frame };
     cache[nid] = g; return g;
   }
-  Object.assign(X, { UNIT, MARGIN, JIT, SIDE, fieldAngle, GEOM, geom });
+  Object.assign(X, { UNIT, MARGIN, JIT, SIDE, fieldAngle, GEOM, parcelPlan });
 })(C2X);

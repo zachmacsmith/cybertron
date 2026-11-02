@@ -81,7 +81,7 @@ cybertron2 engine ── touch.py ──► source.py ─► extract.py ─► m
 | `schema.py` | the contract's version and `validate` |
 | `model.py` | the run to `viz.json` (orchestration and the CLI) |
 | `layout.py` | presentation positions: places by travel days; parcel sites by side and neighbours |
-| `js/` | the renderer, one module a concern, loaded in `js/MANIFEST` order: core, vocab, palette, sprites, buildings, model, roads, geom, land, plan, region, ground, node, day, world, api |
+| `js/` | the renderer, one module a concern, loaded in `js/MANIFEST` order: core, vocab, palette, sprites, buildings, model, roads, geom (parcels), land, region, ground, village (roads, green, buildings), plan, node, day, world, api |
 | `preview.html`, `build.py` | the preview page with the bundled renderer and the data inlined (`--js` writes the bundle alone) |
 | `tests/` | the checks above |
 

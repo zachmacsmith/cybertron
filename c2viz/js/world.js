@@ -1,7 +1,7 @@
 // c2viz/js/world.js: the region's map for a day.
 (function (X) {
   "use strict";
-  const { D, PAL, Px, drawBuilding, drawTrees, hstr, model, node, noise, paintLand, paintPath, paintRoad, peaks, person, personLabel, plan, regionPlan, rng, styleOf, verges, weatherOver } = X;
+  const { D, PAL, Px, drawBuilding, drawTrees, geom, hstr, model, node, noise, paintLand, paintPath, paintRoad, peaks, person, personLabel, plan, regionPlan, rng, styleOf, verges, weatherOver } = X;
   // ---------------------------------------------------------------------------------------------------- the region
   // each place's ground plan at one scale for all places (so a big place looks big), in its own territory; its buildings at their
   // footprint, smaller, its people as small figures, roads between places from their ends, travellers at the middle of the stretch
@@ -34,8 +34,8 @@
         else { P.put(x + 2, y - 2, "#e8e8e0"); P.put(x + 2, y - 1, "#a8a29a"); P.put(x + 3, y - 1, "#c8c4bc"); }
         out.hotspots.push({ kind: "landmark", id: rid + ":" + i + ":" + j, x: x - 2, y: y - 3, w: 6, h: 6, label: `${k} on day ${i + 1} of the road${c ? ` (${c})` : ""}` }); }));
     }
-    for (const n of nids) for (const e of G[n].exits) { const k0 = e.way.findIndex(([x, y]) => Math.hypot(x - e.fx, y - e.fy) < 1.5);   // the village's own ways
-      paintPath(paint, e.way.slice(0, k0 > 0 ? k0 : 0).map(([x, y]) => toWorld(n, x, y)), 0, PAL.lane); }
+    for (const n of nids) for (const e of geom(V, n).exits) for (const way of e.draw)                  // the village's own roads, as close up
+      paintPath(paint, way.map(([x, y]) => toWorld(n, x, y)), 0, PAL.lane);
     verges(P, occ, ctx.LV, W, H, 0.18);
     const items = [];
     for (const n of nids) {
