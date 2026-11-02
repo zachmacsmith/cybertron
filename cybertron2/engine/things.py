@@ -391,8 +391,10 @@ def find(w, name, where, item=None):
         if not c or c.get("node") != w.at(name):
             continue
         pname = w.s["parcels"].get(c.get("parcel"), {}).get("name", "").lower()
-        names = {pname, pname.removeprefix("the "), w.s["buildings"].get(c.get("in"), {}).get("name", "").lower()} - {""}
-        if low and low not in names and (c.get("of") or "").lower() not in low:
+        names = {pname, pname.removeprefix("the "), w.s["buildings"].get(c.get("in"), {}).get("name", "").lower(),
+                 w.s["buildings"].get(c.get("door"), {}).get("name", "").lower()} - {""}
+        said = low and (low in names or any(len(n) > 3 and n in low for n in names))   # a place or a door named within a phrase (D4-94)
+        if low and not said and (c.get("of") or "").lower() not in low:
             continue
         if item and c["goods"].get(item, 0.0) <= 1e-9:
             continue

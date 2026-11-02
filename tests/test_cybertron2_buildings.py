@@ -79,13 +79,10 @@ def test_a_farm_households_200_grain_does_not_fit_a_cottages_bins_and_fits_a_fam
     w = world(grain=200)
     house(w, "Cottage", ["small room"], fittings={"beds": 4, "hearth": 1, "bins": 1})
     r = do(w, "Ivo", do="move", item="grain", qty=200, to="store", at="Cottage")
-    assert r.startswith("Refused: move: Cottage cannot take 200 grain: the bins hold 60 food; 0 are in them; no floor is free"), r
-    assert do(w, "Ivo", do="move", item="grain", qty=60, to="store", at="Cottage").startswith("You put 60 grain")
-    r = do(w, "Ivo", do="move", item="grain", qty=2, to="store", at="Cottage")
-    assert "the bins hold 60 food; 60 are in them" in r
-    w.s["parcels"]["cb_green"]["size"] = 2
-    house(w, "Family House", ["medium room"], structure="timber", fittings={"beds": 4, "hearth": 1, "bins": 1, "granary": 1})
-    assert do(w, "Ivo", do="move", item="grain", qty=140, to="store", at="Family House").startswith("You put 140 grain")
+    assert r.startswith("You put 200 grain into Cottage (60 grain went into Cottage; it is full (the bins hold 60 food; 0 are in them; "
+                        "no floor is free"), r                                  # the rest at its door (D4-94)
+    door = [c for c in w.s["containers"].values() if c.get("kind") == "pile" and c.get("door")]
+    assert len(door) == 1 and abs(door[0]["goods"]["grain"] - 140) < 1e-6                 # the rest at the door, the house's (D4-89)
     w2 = world(grain=200)
     w2.s["parcels"]["cb_green"]["size"] = 2
     house(w2, "Family House", ["medium room"], structure="timber", fittings={"beds": 4, "hearth": 1, "bins": 1, "granary": 1})

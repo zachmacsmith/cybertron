@@ -298,3 +298,4 @@ Newest first. Ideas decided or rejected in conversation before 23 Oct are backfi
 | 2 Nov | A baby sleeps with its mother; a partner's death shown only once known (built, then written down) | retrospective, accepted: D4-87, D4-88 | [baby_and_partner_lines.md](baby_and_partner_lines.md) |
 | 2 Nov | How much lies there: heaps by bulk, counted when attended, kept by their house; a begun fitting shown (built, then written down) | retrospective, accepted: D4-89, D4-90, D4-91 | [heap_sizes.md](heap_sizes.md) |
 | 2 Nov | One room, one fire; the night line names the fuel it lacked; a theft at a door told as one (built, then written down) | retrospective, accepted: D4-93 | [fire_lines.md](fire_lines.md) |
+| 2 Nov | Acts made to work as they read: open fire by heat, take by tag in a phrase, move overflows, work-leg notes, camp fittings (built, then written down) | retrospective, accepted: D4-94 | [act_fixes.md](act_fixes.md) |

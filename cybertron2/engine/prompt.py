@@ -195,7 +195,14 @@ def verb_lines(here, mind) -> str:
             ("free" if n == 0 else f"{n} unit{'s' if n > 1 else ''}")
         args, doc = d["args"], d["doc"]
         args, doc = _verb_extra(here, v, args, doc)
-        out.append(f"- {v} {args}".rstrip() + f": {doc.replace('{crafts}', '; '.join(crafts))}".rstrip(": ") + f" ({cost})")
+        if v == "build":                                                       # rooms apart from fittings (D4-94)
+            known = [t for t in TECHNIQUES if TECHNIQUES[t]["verb"] == v and KN.level(mind, t) is not None]
+            fit = [_craft_note(t) for t in known if t in FITTINGS]
+            rest = [_craft_note(t) for t in known if t not in FITTINGS]
+            crafts = (["buildings and rooms: " + "; ".join(rest)] if rest else []) + \
+                     ([f"fittings, put inside a building you name in \"at\" (never on open ground; a camp takes only beds and a fire ring): "
+                       + "; ".join(fit)] if fit else [])
+        out.append(f"- {v} {args}".rstrip() + f": {doc.replace('{crafts}', '. '.join(crafts) if v == 'build' else '; '.join(crafts))}".rstrip(": ") + f" ({cost})")
         mods = MOD.lines(mind, v, place=True) + [x for t in TECHNIQUES if TECHNIQUES[t]["verb"] == v for x in MOD.lines(mind, v, t)]
         if mods:                                                               # the ways of doing it one knows (D2-93)
             out.append("  ways: " + "; ".join(dict.fromkeys(mods)))

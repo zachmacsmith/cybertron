@@ -40,5 +40,16 @@ A reply may give `fallback`: acts for units left over once the plan is done (an 
 They are done in order, again and again, until the units are used or none of them can be done. Free acts and travel are not taken as
 fallback.
 
+## Acts made to work as they read (D4-94)
 
-*Current as of 2 Nov 2026: D4-24, D4-29, D4-32, D4-35, D4-36, D4-37, D2-93, D2-94, D2-96, D2-111, D2-112, D4-76.*
+- **A fire in the open** (`fire`) takes 4 heat from what one carries, firewood first, as the night burns it (D2-157): 8 firewood or
+  2 timber. Its refusal says so.
+- **`take` from a thing** finds it by a tag anywhere in what one writes ("pack T7 at Gorse Bank"), or by its place or the door it
+  lies at named within a phrase. A tag that is not here, or that holds no such good, is refused as that.
+- **`move` into a full store** puts in what fits and leaves the rest at its door, as `give` does (D2-155, D4-89).
+- **A work leg** may say what the work is for, kept as a note on the agreement: "work 2 days on the water wheel". Payments may run
+  "every day".
+- **A camp takes only beds and a fire ring.** The build list shows buildings and rooms apart from fittings, which go inside a
+  building named in "at".
+
+*Current as of 2 Nov 2026: D4-24, D4-29, D4-32, D4-35, D4-36, D4-37, D2-93, D2-94, D2-96, D2-111, D2-112, D4-76, D4-94.*

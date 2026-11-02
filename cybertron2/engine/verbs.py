@@ -797,6 +797,8 @@ def _fitting(here, mind, a, party, what):
     if what in under:                                                          # carry on one under way: no more materials (02zg)
         return _fitting_work(here, mind, bid, what, lvl)
     camp = b["structure"] == "camp"
+    if camp and what not in ("beds", "fire ring"):                             # a lean-to keeps 10 weight: no stores, no hearth (D4-94)
+        raise Refused(f"{b['name']} is a camp: it takes only beds and a fire ring (a store or a hearth needs a building)")
     sp = int(f.get("spaces", 0)) - int(f.get("room", 0))                       # a vault brings its own room
     free = BL.free_floor(b, here.stock(bid)) if not camp else 99
     n = max(1, int(_qty(a.get("qty"), 1))) if f.get("per") else 1
@@ -1059,21 +1061,24 @@ def _move(here, mind, a, party):
     if have <= 1e-9:
         raise Refused(f"there is no {item} " + ("in your hands" if verb == "put" else f"in {b['name']}"))
     q = round(min(_qty(a.get("qty"), have), have), 6)
-    if verb == "put":                                                          # a store holds so much (D2-155)
-        room = BL.room_for(b, here.stock(bid), item)
-        if room + 1e-9 < q:
-            raise Refused(f"{b['name']} cannot take {show(q)} {item}: {BL.full_words(b, here.stock(bid), item)}"
-                          + (f" (room for {show(room)} more)" if room > 0.05 else ""))
+    full = _full_note(here, b["stock"], item, q) if verb == "put" else ""      # what does not fit lies at its door (D2-155, D4-94)
     here.apply("transfer", src=src, dst=dst, item=item, qty=q)
     here.event("store", f"{here.name} {verb} {item} {'into' if verb == 'put' else 'from'} {b['name']}", actor=here.name,
                about=[f"building:{bid}"], salience=0.1, tags=["food"] if ITEMS[item]["food"] else [])
-    return f"You {verb} {show(q)} {item} {'into' if verb == 'put' else 'from'} {b['name']} (it holds {show(here.stock(bid).get(item, 0.0))})."
+    return (f"You {verb} {show(q)} {item} {'into' if verb == 'put' else 'from'} {b['name']}" + full
+            + f" (it holds {show(here.stock(bid).get(item, 0.0))}).")
 
 
 def _take(here, mind, a, party):
     item = item_of(a.get("item"))
     src_name = str(a.get("from") or "")
     rem = here.find_thing(src_name, item)                        # what one knows lies here (D2-87: nobody's)
+    from cybertron2.engine import tags as TG
+    tag = TG.tag_in(src_name) if here.setting("tags") else None
+    if rem is None and tag and here.building(src_name) is None:              # a thing named by its tag: say why not (D4-94)
+        if not here.tagged_here(tag):
+            raise Refused(f"you know of nothing called {tag} here")
+        raise Refused(f"{tag} holds no {item}" if item else f"{tag} holds nothing")
     if rem is None and here.parcel(src_name) is not None and here.building(src_name) is None:
         rem = here.search_thing(src_name, item)                  # not known of: one looks, as it is seen or hidden (D4-70)
         if rem is None:
@@ -1463,12 +1468,15 @@ def _rest(here, mind, a, party):
 
 
 def _fire(here, mind, a, party):
-    """A fire in the open for one night (D4-49): cooking where one sleeps out, from carried timber."""
-    need, have = float(here.p["fuel"]["open"]), here.carried().get("timber", 0.0)
+    """A fire in the open for one night (D4-49): cooking where one sleeps out, from carried fuel by its heat, firewood first, as the
+    night burns it (D2-157; D4-94)."""
+    from cybertron2.engine import forests as FO
+    need, have = float(here.p["heat"]["open"]), FO.heat_of(here.carried())
     if have + 1e-9 < need:
-        raise Refused(f"a fire in the open takes {need:g} timber in your hands; you carry {show(have)}")
+        raise Refused(f"a fire in the open takes {need:g} heat from what you carry ({FO.fuel_words(need)}); "
+                      f"you carry {show(have)} heat of fuel")
     here.today().setdefault("fire", {})[here.name] = True
-    return f"You mean to light a fire tonight if you sleep out ({need:g} timber)."
+    return f"You mean to light a fire tonight if you sleep out ({need:g} heat: {FO.fuel_words(need)})."
 
 
 def _accept(here, mind, a, party):

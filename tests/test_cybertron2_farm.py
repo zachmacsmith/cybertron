@@ -396,7 +396,7 @@ def test_a_fire_in_the_open_cooks_for_two_timber_and_a_camp_burns_one():
     for k in list(hands):
         hands[k] = 0.0
     give(w, "Edric", grain=5, timber=1)
-    assert "takes 2 timber" in do(w, "Edric", do="fire")
+    assert "takes 4 heat from what you carry (8 firewood or 2 timber)" in do(w, "Edric", do="fire")   # D4-94
     give(w, "Edric", grain=5, timber=2.5)
     assert "fire tonight" in do(w, "Edric", do="fire")
     rec = N.night(w)

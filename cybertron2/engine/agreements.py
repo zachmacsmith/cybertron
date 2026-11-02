@@ -43,15 +43,18 @@ def parse_legs(text, day, cal=None) -> list:
     legs = []
     text = _season_days(str(text or ""), day, cal)
     for part in [x.strip() for x in text.replace(" and ", ",").split(",") if x.strip()]:
-        low = part.lower()
-        m = re.match(r"^(?:work|labour|labor)\s+(?:for\s+)?(\d+)\s+days?(?:\s+by\s+day\s+(\d+))?$", low)
-        if m:
-            legs.append({"work": int(m.group(1)), "done": 0, "by": int(m.group(2)) - 1 if m.group(2) else None})
+        low = re.sub(r"\bevery\s+day\b", "every 1 days", part.lower())     # "every day" (D4-94)
+        m = re.match(r"^(?:work|labour|labor)\s+(?:for\s+)?(\d+)\s+days?(?:\s+by\s+day\s+(\d+))?"
+                     r"(?:\s+((?:on|at|in|building|to|for)\s+.+?))?(?:\s+by\s+day\s+(\d+))?$", low)
+        if m:                                                                  # what the work is for: a note, as agreed (D4-94)
+            by = m.group(2) or m.group(4)
+            legs.append({"work": int(m.group(1)), "done": 0, "by": int(by) - 1 if by else None,
+                         **({"on": part[part.lower().index(m.group(3)):][:len(m.group(3))]} if m.group(3) else {})})
             continue
         m = re.match(r"^([\d.]+)\s+(.+?)(?:\s+by\s+day\s+(\d+)|\s+every\s+(\d+)\s+days?(?:\s+for\s+(\d+)\s+times?)?)?$", low)
         if not m:
             raise Refused(f"could not read {part!r}: write goods as '2 bread', a promise as '1 copper tool by day 10', payments as "
-                          f"'2 grain every 3 days for 4 times', work as 'work 2 days'")
+                          f"'2 grain every 3 days for 4 times', work as 'work 2 days' or 'work 2 days on the water wheel'")
         qty, item = float(m.group(1)), m.group(2).strip()
         from cybertron2.engine.verbs import item_of
         item = item_of(item)
@@ -71,7 +74,8 @@ def leg_text(leg, viewer=None, day=0, names=None) -> str:
     who = "you" if leg["from"] == viewer else fr
     whom = "you" if leg["to"] == viewer else to
     if "work" in leg:
-        return f"{who} work{'s' if who != 'you' else ''} {leg['work']} days for {whom} ({leg['done']} done)" + \
+        return f"{who} work{'s' if who != 'you' else ''} {leg['work']} days for {whom}" + (f", {leg['on']}" if leg.get("on") else "") \
+            + f" ({leg['done']} done)" + \
             (f", by day {leg['by'] + 1}" if leg.get("by") is not None else "")
     w = leg["when"]
     head = f"{who} give{'s' if who != 'you' else ''} {leg['qty']:g} {leg['item']} to {whom}"
