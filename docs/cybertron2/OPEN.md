@@ -3,6 +3,9 @@
 Each item has an owner (README "Who owns what") who resolves it, with Zach where it needs a decision. Resolved items move to
 [DECISIONS.md](DECISIONS.md) or into the spec, and are struck through here. Compiled 22 Oct 2026.
 
+**Numbering new rows (agreed 2 Nov, after three collisions):** "Flagged for later" rows are numbered in blocks: 37.4 takes L-60 to L-99, 37.2
+takes L-100 and up. Rows below L-60 keep their numbers.
+
 ## Conflicts between documents
 
 | # | Conflict | Where | Proposed resolution | Owner |
