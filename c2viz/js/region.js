@@ -137,6 +137,25 @@
       const down = run(1, 260), up = run(-1, 50);
       rivers.push({ pid: null, pids: [], n: null, half: 1.8, line: up.reverse().concat([[ft.x, ft.y]], down) });
     }
+    // a place's own river goes on beyond its drawing: from each end where it leaves the plan, on the way it was going, bending
+    // towards the nearest water ahead (another place's water, a marsh, a river already traced) or to the map's edge
+    for (const n of nids) for (const c of G[n].courses) {
+      const L0 = c.line; if (L0.length < 8) continue;
+      for (const [p, q] of [[L0[L0.length - 1], L0[L0.length - 7]], [L0[0], L0[6]]]) {
+        if (!(p[0] < 3 || p[1] < 3 || p[0] > G[n].W - 4 || p[1] > G[n].H - 4)) continue;       // ends inside the drawing: it stops there
+        const [x0, y0] = toW(n, p[0], p[1]), [xq, yq] = toW(n, q[0], q[1]), tR = rng(hstr(c.pid + "|on" + p[0]));
+        let x = x0, y = y0, hd = Math.atan2(y0 - yq, x0 - xq); const ux = Math.cos(hd), uy = Math.sin(hd);
+        let tgt = null, bd = 1e18; for (const [sx, sy] of sinks) { const v = (sx - x) * ux + (sy - y) * uy, dd = Math.hypot(sx - x, sy - y); if (v > 10 && dd < bd && dd > 20) { bd = dd; tgt = [sx, sy]; } }
+        for (const rv of rivers) for (const [rx, ry] of rv.line) { const v = (rx - x) * ux + (ry - y) * uy, dd = Math.hypot(rx - x, ry - y); if (v > 10 && dd < bd && dd > 12) { bd = dd; tgt = [rx, ry]; } }
+        const [tx, ty] = tgt || [x + ux * 600, y + uy * 600], line = [[x, y]];
+        for (let st = 0; st < 500; st++) { let dd = Math.atan2(ty - y, tx - x) - hd; dd = Math.atan2(Math.sin(dd), Math.cos(dd));
+          hd += Math.max(-0.1, Math.min(0.1, dd * 0.12)) + (tR() - 0.5) * 0.3; x += Math.cos(hd) * 1.5; y += Math.sin(hd) * 1.5;
+          if (x < 1 || y < 1 || x > W - 2 || y > H - 2 || Math.hypot(tx - x, ty - y) < 3) break;
+          if (nids.some((m) => m !== n && Math.hypot(x - pos[m][0], y - pos[m][1]) < rad(m) * 0.8)) break;   // into another place's land
+          line.push([x, y]); }
+        if (line.length > 2) rivers.push({ pid: null, pids: [], n: null, half: Math.max(1.2, c.half * f), line, of: c.pid });
+      }
+    }
     const tint = new Uint32Array(W * H), rgb = (h) => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
     const base = nids.map((n) => rgb(BIOMES[M.nodes[n].biome].grass[0][0]));
     for (let y = 0; y < H; y += 1) for (let x = 0; x < W; x += 1) { let sw = 0, r = 0, g = 0, b = 0;

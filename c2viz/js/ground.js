@@ -39,23 +39,28 @@
   }
   // places at their sites; one whose drawing would stand in open water is moved to the nearest ground that holds it
   const GPOS = new WeakMap();
-  function groundPos(V) {
-    let RS = GPOS.get(V); if (RS) return RS;
-    const ST = V.static, LD = V.land, { Lg, W, H, wm } = groundBase(V), nx = Lg.nx, nids = Object.keys(ST.nodes).sort(), G = {};
-    for (const n of nids) G[n] = parcelPlan(V, n);
-    const f = WORLD_SCALE, rad = (n) => G[n].land * f, waterAt = (i) => wm[i];
+  const SPOTS = new WeakMap();
+  function groundSpots(V) {                                                                    // where each place stands: needs no plan
+    let pos = SPOTS.get(V); if (pos) return pos;
+    const ST = V.static, LD = V.land, { Lg, W, H, wm } = groundBase(V), nx = Lg.nx, nids = Object.keys(ST.nodes).sort(), f = WORLD_SCALE, waterAt = (i) => wm[i];
     // places at their sites; one whose drawing would stand in open water is moved to the nearest ground that holds it
-    const pos = {};
+    pos = {};
     for (const n of nids) {
       const s = LD.sites[n]; let p;
       if (s) p = [(s[0] + 0.5) * PX, (s[1] + 0.5) * PX];
       else { let sx = 0, sy = 0, k = 0; Lg.place.forEach((v, i) => { if (v && ST.parcels[Lg.places[v]]?.node === n) { sx += i % nx; sy += (i / nx) | 0; k++; } }); p = k ? [(sx / k + 0.5) * PX, (sy / k + 0.5) * PX] : [W / 2, H / 2]; }
-      const r = rad(n), wetShare = (cx, cy) => { let w = 0, t = 0; for (let a = 0; a < 24; a++) for (const q of [0.35, 0.7, 1.05]) { const x = Math.round(cx + Math.cos(a / 24 * 6.283) * r * q), y = Math.round(cy + Math.sin(a / 24 * 6.283) * r * q); if (x < 0 || y < 0 || x >= W || y >= H) { w++; t++; continue; } t++; if (waterAt(y * W + x)) w++; } return w / t; };
+      const r = X.landEstimate(V, n) * f, wetShare = (cx, cy) => { let w = 0, t = 0; for (let a = 0; a < 24; a++) for (const q of [0.35, 0.7, 1.05]) { const x = Math.round(cx + Math.cos(a / 24 * 6.283) * r * q), y = Math.round(cy + Math.sin(a / 24 * 6.283) * r * q); if (x < 0 || y < 0 || x >= W || y >= H) { w++; t++; continue; } t++; if (waterAt(y * W + x)) w++; } return w / t; };
       let best = p, bc = wetShare(p[0], p[1]) * 10;
       if (bc > 0.5) for (let dd = PX * 2; dd <= r * 2.5; dd += PX * 2) for (let a = 0; a < 16; a++) { const q = [p[0] + Math.cos(a / 16 * 6.283) * dd, p[1] + Math.sin(a / 16 * 6.283) * dd], c = wetShare(q[0], q[1]) * 10 + dd / r; if (c < bc) { bc = c; best = q; } }
       pos[n] = best;
     }
-    RS = { W, H, pos, G, nids, f, rad }; GPOS.set(V, RS); return RS;
+    SPOTS.set(V, pos); return pos;
+  }
+  function groundPos(V) {
+    let RS = GPOS.get(V); if (RS) return RS;
+    const { W, H } = groundBase(V), pos = groundSpots(V), nids = Object.keys(V.static.nodes).sort(), G = {}, f = WORLD_SCALE;
+    for (const n of nids) G[n] = parcelPlan(V, n);
+    RS = { W, H, pos, G, nids, f, rad: (n) => G[n].land * f }; GPOS.set(V, RS); return RS;
   }
   // where a road leaves a place: the heading of its own cells (the generator's road rule) where they leave the place's drawing
   function groundOut(V, nid, rid) {
@@ -129,5 +134,5 @@
     }
     return { W, H, pos, f, G, nids, A: [], feats: [], E, F, Wt, kind, level, cellNode, cellPar, rivers, rad, tint, tintW: 0.7, paths, sidx, wood, ground: true, PX };
   }
-  Object.assign(X, { groundBase, groundPos, groundOut, groundPlan, groundLayers: layers, GROUND_PX: PX });
+  Object.assign(X, { groundBase, groundSpots, groundPos, groundOut, groundPlan, groundLayers: layers, GROUND_PX: PX });
 })(C2X);

@@ -99,3 +99,15 @@ engine's state and imports nothing it changes.
   - Close-ups of generated worlds take the region's woods.
   - Audit over every place of twin bays and w1: exits identical at both scales; open water only where Wealdmere's roads skirt
     the mere they leave by.
+- 02 Nov 2026 18:45 UTC: waterways, lakes and woods, at Zach's questions. Waterways did not match:
+  - a generated world's river parcel ran in a direction guessed from its graph while the generator's river passed elsewhere
+    (Northby: 18 and 111 px apart);
+  - a hand-made world's village river stopped at the edge of its drawing on the region map (Wynford: 72 and 101 px short).
+
+  Now a river parcel lies on the generator's own river (its course is that river, in the plan's pixels), and a hand-made
+  world's village river goes on beyond its drawing; every one meets the region's river at 0 px.
+  - Round lakes and woods in hand-made worlds were c2viz's: parcels drawn as circles and rounded boxes; now lobed outlines.
+  - Found on the way: the area fitting oscillated, so a generated world's built parcel could end with none (Northby 0 px,
+    Welmere 19 against 2,600). It existed before today. Now damped, and every parcel of both worlds is within 7% of its size.
+  - The round shapes in generated land are the generator's (deep forest beyond a fixed 12 km of every settlement; radial
+    bumps for hills and lakes); measured, drawn as they are, and recorded as engine gap G-34.

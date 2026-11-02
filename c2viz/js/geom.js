@@ -14,6 +14,9 @@
   const JIT = { field: 2.5, built: 3, pasture: 5, meadow: 6, forest: 9, scrub: 8, rock: 7, water: 4 };
   const SIDE = { north: [0, -1], south: [0, 1], east: [1, 0], west: [-1, 0], centre: [0, 0] };
   const fieldAngle = (pid) => ((hstr(pid) >>> 3) & 1 ? Math.PI / 2 : 0) + ((hstr(pid) >>> 5) % 7 - 3) * 0.07;
+  // the radius a place's land will have, from its parcels' sizes alone (before its plan is laid): a generated world's place is
+  // moved off open water by this, so its plan and the region's map agree on where it stands
+  const landEstimate = (V, nid) => { let t = 0; for (const p of Object.values(V.static.parcels)) if (p.node === nid) t += Math.max(0.5, +p.size || 1) * UNIT / Math.PI; return 1.35 * Math.sqrt(t) || 40; };
   const GEOM = new WeakMap();
   function parcelPlan(V, nid) {
     let cache = GEOM.get(V); if (!cache) GEOM.set(V, cache = {});
@@ -24,6 +27,19 @@
     const adj = pids.map(() => new Set());
     pids.forEach((p, i) => (ST.parcels[p].adj || []).forEach((q) => { if (q in idx && idx[q] !== i) { adj[i].add(idx[q]); adj[idx[q]].add(i); } }));
     const tot = Math.sqrt(r.reduce((s, x) => s + x * x, 0)) || 40;
+    // a generated world's river parcel lies on the generator's own river through its cells (ground.js), relative to the place's site
+    const realRiver = pids.map((p) => null);
+    if (V.land && X.groundLayers && N.river.some(Boolean)) {
+      const Lg = X.groundLayers(V), PXg = X.GROUND_PX, f = X.WORLD_SCALE, s0 = V.land.sites[nid], nx = Lg.nx;
+      const spot = X.groundSpots ? X.groundSpots(V)[nid] : null;                                   // where the region has it (moved off water)
+      if (s0) { const sx = spot ? spot[0] : (s0[0] + 0.5) * PXg, sy = spot ? spot[1] : (s0[1] + 0.5) * PXg, near = {};
+        Lg.place.forEach((v, ci) => { if (!v) return; const k = idx[Lg.places[v]]; if (k == null || !N.river[k]) return; (near[k] = near[k] || new Set()).add(ci); });
+        for (const [k, cells] of Object.entries(near)) { let best = null, bn = 0;
+          for (const rv of V.land.rivers || []) { let m = 0; for (const [rr, cc] of rv.cells) for (let a = -2; a <= 2; a++) for (let b = -2; b <= 2; b++) if (cells.has((rr + a) * nx + cc + b)) m++;
+            if (m > bn) { bn = m; best = rv; } }
+          if (best) realRiver[k] = best.cells.map(([rr, cc]) => { const i_ = rr * nx + cc; return [((cc + Lg.jx[i_] / 100 + 0.5) * PXg - sx) / f, ((rr + Lg.jy[i_] / 100 + 0.5) * PXg - sy) / f]; }); } }
+    }
+    const nearOn = (line, x, y) => { let bd = 1e18, bp = null, bk = 0; line.forEach(([a, b], k) => { const dd = (a - x) ** 2 + (b - y) ** 2; if (dd < bd) { bd = dd; bp = [a, b]; bk = k; } }); return [bp, bk]; };
     // start from layout.py's sites (each on its side), then let the graph settle
     const pos = pids.map((p) => { const c = L.centre[p] || [500 + (R() - .5) * 300, 350 + (R() - .5) * 200]; return [(c[0] - 500) / 500 * tot * 1.3, (c[1] - 350) / 350 * tot * 0.9]; });
     for (let it = 0; it < 500; it++) {
@@ -37,11 +53,15 @@
       }
       for (let i = 0; i < n; i++) { const s = SIDE[ST.parcels[pids[i]].side] || SIDE.centre;
         pos[i][0] += (s[0] * tot * 0.9 - pos[i][0]) * (s[0] ? 0.01 : 0.003); pos[i][1] += (s[1] * tot * 0.7 - pos[i][1]) * (s[1] ? 0.01 : 0.003); }
+      if (realRiver.some(Boolean)) { let cx = 0, cy = 0, cs = 0; for (let i = 0; i < n; i++) { cx += pos[i][0] * size[i]; cy += pos[i][1] * size[i]; cs += size[i]; } cx /= cs; cy /= cs;
+        for (let i = 0; i < n; i++) if (realRiver[i]) { const [q] = nearOn(realRiver[i], pos[i][0] - cx, pos[i][1] - cy); pos[i][0] += (q[0] + cx - pos[i][0]) * 0.08; pos[i][1] += (q[1] + cy - pos[i][1]) * 0.08; } }
     }
     // the middle of the land, and each river's course: it runs past the middle, across the whole map
     let mx = 0, my = 0, ms = 0; pids.forEach((p, i) => { mx += pos[i][0] * size[i]; my += pos[i][1] * size[i]; ms += size[i]; }); mx /= ms; my /= ms;
     const dir = pids.map((p, i) => {
       if (!N.river[i]) return null;
+      if (realRiver[i]) { const L_ = realRiver[i], [, k] = nearOn(L_, pos[i][0] - mx, pos[i][1] - my), a_ = L_[Math.max(0, k - 6)], b_ = L_[Math.min(L_.length - 1, k + 6)], l_ = Math.hypot(b_[0] - a_[0], b_[1] - a_[1]) || 1;
+        return [(b_[0] - a_[0]) / l_, (b_[1] - a_[1]) / l_]; }
       const wn = [...adj[i]].filter((j) => N.river[j]);                                     // along a chain of water parcels
       let ux, uy;
       if (wn.length) { ux = pos[wn[0]][0] - pos[i][0]; uy = pos[wn[0]][1] - pos[i][1]; }
@@ -58,7 +78,11 @@
     const frame = pids.map((p, i) => dir[i] ? [dir[i][0], dir[i][1], STRETCH, 2] : ST.parcels[p].cover === "field" ? [Math.cos(fieldAngle(p)), Math.sin(fieldAngle(p)), 1.15, 5]
       : ST.parcels[p].cover === "built" ? [1, 0, 1.2, 3] : ST.parcels[p].cover === "water" ? null
       : [Math.cos((hstr(p) % 314) / 100), Math.sin((hstr(p) % 314) / 100), 1 + (hstr(p) % 30) / 100, 3]);
+    const LOBE = { water: 0.3, forest: 0.26, scrub: 0.22, rock: 0.2, pasture: 0.14, meadow: 0.14 };
+    const lobe = pids.map((p, i) => { const A = dir[i] ? 0 : LOBE[ST.parcels[p].cover] || 0, h = hstr(p + "|lobe"), ph = [h % 628, (h >>> 10) % 628, (h >>> 20) % 628].map((v) => v / 100);
+      return A ? (t) => 1 + A * (0.55 * Math.sin(2 * t + ph[0]) + 0.3 * Math.sin(3 * t + ph[1]) + 0.15 * Math.sin(5 * t + ph[2])) : null; });
     const pdist = (i, x, y) => { let dx = x - site[i][0], dy = y - site[i][1]; const F = frame[i];
+      if (lobe[i]) { const k = lobe[i](Math.atan2(dy, dx)); dx /= k; dy /= k; }
       if (!F) return dx * dx + dy * dy - wt[i];
       const a = Math.abs((dx * F[0] + dy * F[1]) / F[2]), b = Math.abs((-dx * F[1] + dy * F[0]) * F[2]), q = F[3];
       return q === 2 ? a * a + b * b - wt[i] : Math.pow(Math.pow(a, q) + Math.pow(b, q), 2 / q) - wt[i]; };
@@ -73,10 +97,12 @@
       return k;
     };
     // fit each parcel's ground to its size (a few rounds on a coarse grid)
-    for (let it = 0; it < 10; it++) {
+    // (damped: neighbours trade ground, so full steps swing a small parcel between all and nothing and it ends on whichever side)
+    for (let it = 0; it < 40; it++) {
       const area = new Float64Array(n);
-      for (let y = 0; y < H; y += 3) for (let x = 0; x < W; x += 3) { const k = which(x, y); if (k >= 0) area[k] += 9; }
-      for (let i = 0; i < n; i++) wt[i] *= Math.max(0.6, Math.min(1.7, Math.pow((size[i] * UNIT) / Math.max(30, area[i]), 0.8)));
+      for (let y = 1; y < H; y += 4) for (let x = 1; x < W; x += 4) { const k = which(x, y); if (k >= 0) area[k] += 16; }
+      const step = 0.5 * Math.pow(0.95, it);
+      for (let i = 0; i < n; i++) wt[i] *= Math.max(0.8, Math.min(1.3, Math.pow((size[i] * UNIT) / Math.max(30, area[i]), step)));
     }
     const REG = new Int16Array(W * H); for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) REG[y * W + x] = which(x, y);
     const area = pids.map(() => []); for (let i = 0; i < W * H; i++) if (REG[i] >= 0) area[REG[i]].push([i % W, (i / W) | 0]);
@@ -107,8 +133,10 @@
     });
     let gx = 0, gy = 0, gs = 0; area.forEach((a) => { for (const [x, y] of a) { gx += x; gy += y; gs++; } }); if (gs) { gx /= gs; gy /= gs; } else { gx = W / 2; gy = H / 2; }
     let land = 0; area.forEach((a) => { for (const [x, y] of a) land = Math.max(land, Math.hypot(x - gx, y - gy)); });
+    for (const c of courses) { const k = c.pids.map((p) => idx[p]).find((j) => realRiver[j]); if (k == null) continue;
+      c.line = realRiver[k].map(([a, b]) => [gx + a, gy + b]).filter(([x, y]) => x > -8 && y > -8 && x < W + 8 && y < H + 8); c.real = true; }
     const g = { W, H, REG, area, centre, adj, site, courses, mid: [gx, gy], land: land || 40, reg, inner, pids, idx, size, frame };
     cache[nid] = g; return g;
   }
-  Object.assign(X, { UNIT, MARGIN, JIT, SIDE, fieldAngle, GEOM, parcelPlan });
+  Object.assign(X, { UNIT, MARGIN, JIT, SIDE, fieldAngle, GEOM, landEstimate, parcelPlan });
 })(C2X);

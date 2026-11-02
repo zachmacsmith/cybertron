@@ -340,7 +340,10 @@ Two halves, so that every rule stays in the engine:
 
 - **The ground plan:** a parcel's area is its size × 2,600 close-up pixels (one scale for all covers, as the engine's units
   are); neighbours (`adj`) share a border, non-neighbours are kept apart with wild ground between; `side` pulls a parcel that
-  way; fields are squared off along their strips. A chain of water parcels is drawn as one river through them to the map's
+  way; fields are squared off along their strips; lakes, woods, scrub, rock and grass have uneven outlines (lobes by angle,
+  per parcel), never a circle. Each parcel's ground is fitted to its size in damped rounds (full steps made neighbours trade
+  ground back and forth, so a small parcel could end with none: generated worlds lost their built ground); every parcel of twin
+  bays and w1 is within 7% of its size. A chain of water parcels is drawn as one river through them to the map's
   edges. The wild country around a place is drawn by the place's character; it is not state.
 - **The space** (spec: about 5 m²) is drawn as 54 px² close up: built ground at its 24 spaces a unit would then be half covered
   by building when full, leaving lanes and yards.
@@ -437,7 +440,22 @@ file in cybertron2/specs by its name; cells whose parcels are not the run's are 
 - **Close up, a place stands in the same ground**, sampled from the region's: its sea and lakes, terrain and colour, and its
   shores broken at that scale.
 
-A world made by hand has no cells and is drawn as in §9; the renderer's output for one is unchanged, pixel for pixel.
+- **Rivers:** a river parcel lies on the generator's own river through its cells: the parcel is pulled onto that river in the
+  plan, runs along it, and its course is that river in the plan's pixels. So the parcel, its course and the region's river are
+  one line, and it reaches the region's river with no gap. A place is moved off open water by an estimate of its land's size,
+  made before its plan is laid, so the plan and the region agree on where it stands.
+
+A world made by hand has no cells and is drawn as in §9, but a place's own river goes on beyond its drawing on the region's
+map: from where it leaves the plan, on its heading, bending towards the nearest water ahead (another place's water, a marsh, a
+river already traced) or to the map's edge.
+
+**What is the generator's, not the drawing's:**
+- **Deep forest's edge is a circle:** woodland farther than `deep_forest_km` (12 km) from every settlement; its edge on twin
+  bays lies 12.28 ± 0.65 km from the nearest village.
+- **Hills, basins, lakes and fens are radial bumps** (`macro._bump`), bent by a warp of 3.5% of the window. So hills are
+  near-round domes, the pasture on them traces a circle, and lakes filling them are round.
+
+These are drawn as they are (engine_gaps G-34).
 
 ## 13. Roads, laid in steps so both scales agree (region.js roadOut, village.js)
 
