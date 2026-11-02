@@ -231,6 +231,7 @@ def shortfall(here, mind, tech, mult=1.0, at=None, extra=None) -> str:
     if not sites:
         need = t.get("at", {})
         what = need.get("covers") or [FITTINGS[f]["label"] for f in need.get("fittings", [])] or ["building"]
+        what = [x[2:] if x.startswith("a ") else x[3:] if x.startswith("an ") else x for x in what]   # "no hand mill", not "no a hand mill"
         return f"there is no {' or '.join(what)} here you can use"
     if at is not None and t.get("at"):
         if not any(s[1] == at for s in sites):

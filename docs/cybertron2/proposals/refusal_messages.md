@@ -1,6 +1,6 @@
 # What a refusal says
 
-**Status:** retrospective, accepted: D4-95 (2 Nov)
+**Status:** retrospective, accepted: D4-95, D4-96 (2 Nov)
 **Owner:** 37.4
 
 ## Summary
@@ -46,6 +46,7 @@ farm.py (herders and milkers by name), agreements.py (_pay), perceive.py (apply_
 ## History
 
 - 2 Nov 2026: built at Zach's request after the audit; written down the same session (retrospective).
+- 2 Nov 2026: D4-96 added. Zach asked that goods in the store be used automatically at home, with the agent told. Making, building and paying already drew on the stores, so `give` now does too, and every act says what it took from which store (verbs._top_up, _drew_words; a test in test_cybertron2_act_fixes.py; a package A test empties the store first).
 
 ## Sources
 

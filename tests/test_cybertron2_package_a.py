@@ -75,6 +75,10 @@ def test_hiding_untaught_is_twice_as_easy_to_see_and_a_buried_pack_is_almost_nev
     do(w, "Edric", do="give", item="coin", qty=10, to="Alder Copse", hidden="buried")
     cache = [c for c in w.s["containers"].values() if c["kind"] == "pile" and c.get("hidden") == "buried"][0]
     assert TH.chance(w, "Sibyl", cache) < 0.01
+    for cid in [c for c in w.takeable("Edric") if c != w.hands("Edric")]:          # at home the stores count too (D4-96): empty them
+        g = w.goods(cid).get("grain", 0.0)
+        if g > 0:
+            w.apply("destroy", w.s["containers"][cid].get("node") or "millbrook", src=cid, item="grain", qty=g, why="test")
     assert do(w, "Edric", do="hide", item="grain", qty=1, to="Alder Copse").startswith("Refused")      # nothing left to hide
 
 

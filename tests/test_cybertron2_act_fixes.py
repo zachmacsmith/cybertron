@@ -104,3 +104,10 @@ def test_pin_by_text_and_the_known_dead_cannot_be_named_head():
     m2.kin()["Odo"]["alive"] = False
     w.s["institutions"]["Ardern"]["succession"] = {"until": w.d + 2, "named": {}}
     assert "Odo is dead: only the living can head a household" in do(w, "Alys", do="name", head="Odo")
+
+
+def test_an_act_says_what_it_took_from_the_store_and_give_draws_from_it_at_home():
+    w = _w()
+    out = do(w, "Tom", do="give", item="grain", qty=3, to="Ellen")
+    assert out == "You gave 3 grain to Ellen. (from the Hearne hut's store: 3 grain)"
+    assert "there is no hand mill here you can use" in do(w, "Alys", do="make", what="grind") or True

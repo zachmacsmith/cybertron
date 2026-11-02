@@ -68,4 +68,11 @@ A refusal says what stopped the act, and enough to choose differently, without t
 - **`pin`** takes a note by its title in any case, or by its text.
 - **A household's head or heir** cannot be one the namer knows is dead. Succession counts only the living either way.
 
-*Current as of 2 Nov 2026: D4-24, D4-29, D4-32, D4-35, D4-36, D4-37, D2-93, D2-94, D2-96, D2-111, D2-112, D4-76, D4-94, D4-95.*
+## Using the store at home (D4-96)
+
+Acts that use goods (making, building, paying, and now giving to a person or leaving at a place) take them from one's hands first,
+then from the stores at this place one may take from: the household's store, its woodpile, what lies at its door. The result says
+what came from where: "You gave 3 grain to Ellen. (from the Hearne hut's store: 3 grain)". Away from home one has only what one
+carries.
+
+*Current as of 2 Nov 2026: D4-24, D4-29, D4-32, D4-35, D4-36, D4-37, D2-93, D2-94, D2-96, D2-111, D2-112, D4-76, D4-94, D4-95, D4-96.*

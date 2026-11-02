@@ -300,3 +300,4 @@ Newest first. Ideas decided or rejected in conversation before 23 Oct are backfi
 | 2 Nov | One room, one fire; the night line names the fuel it lacked; a theft at a door told as one (built, then written down) | retrospective, accepted: D4-93 | [fire_lines.md](fire_lines.md) |
 | 2 Nov | Acts made to work as they read: open fire by heat, take by tag in a phrase, move overflows, work-leg notes, camp fittings (built, then written down) | retrospective, accepted: D4-94 | [act_fixes.md](act_fixes.md) |
 | 2 Nov | What a refusal says: where a good is, who took it, how it is made, who did it, where here, who sets a door; pin by text; no known-dead head (built, then written down) | retrospective, accepted: D4-95 | [refusal_messages.md](refusal_messages.md) |
+| 2 Nov | Using the store at home: give draws on it too; every act says what it took from which store (built, then written down) | retrospective, accepted: D4-96 | [refusal_messages.md](refusal_messages.md) |

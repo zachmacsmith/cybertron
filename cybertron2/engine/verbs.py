@@ -167,8 +167,10 @@ def do(here, mind, a) -> str:
         if not verb_here(here, v):
             raise Refused(f"there is no {v} in this world")
         party = _party(here, a.get("for")) if a.get("for") and v in ("gather", "work", "make", "build", "give", "accept", "claim") else None
+        drew = _drew_reset(here)
         with here.cause(v, party):
-            return HANDLERS[v](here, mind, a, party)
+            out = HANDLERS[v](here, mind, a, party)
+        return out + _drew_words(here, drew)                                   # what it took from the stores (D4-96)
     except Refused as e:
         return f"Refused: {v or 'action'}: {e}"
 
@@ -293,6 +295,41 @@ def _store_name(here, cid) -> str:
     c = here.thing(cid) or {}
     door = here.buildings().get(c.get("door") or "", {}).get("name")
     return f"what lies at the door of {door}" if door else "what lies here"
+
+
+def _drew_reset(here) -> int:
+    """The mark in today's draws where this act starts."""
+    try:
+        return len(here.today().get("drawn") or [])
+    except KeyError:
+        return -1
+
+
+def _drew_words(here, start) -> str:
+    """' (from the Hearne hut's store: 10 flour, 1 timber)': what an act took from the stores rather than one's hands (D4-96)."""
+    if start < 0:
+        return ""
+    got = {}
+    for d in (here.today().get("drawn") or [])[start:]:
+        if d["by"] == here.name and not d.get("taken"):
+            got.setdefault(d["cid"], {}).setdefault(d["item"], 0.0)
+            got[d["cid"]][d["item"]] += d["qty"]
+    if not got:
+        return ""
+    return " (from " + "; ".join(f"{_store_name(here, c)}: " + ", ".join(f"{show(q)} {i}" for i, q in g.items()) for c, g in got.items()) + ")"
+
+
+def _top_up(here, item, q) -> None:
+    """Before giving from one's hands: take what is short from the stores here one may take from, as a craft does (D4-96)."""
+    short = q - here.carried().get(item, 0.0)
+    for cid in [c for c in here.takeable() if c != here.hands]:
+        if short <= 1e-9:
+            break
+        take = min(short, here.contents(cid).get(item, 0.0))
+        if take > 1e-9:
+            here.apply("transfer", src=cid, dst=here.hands, item=item, qty=round(take, 6))
+            _drawn(here, cid, item, take)
+            short -= take
 
 
 def _short_note(here, item) -> str:
@@ -1194,9 +1231,11 @@ def _give(here, mind, a, party):
         if party and party != here.name and party != here.household() and not here.works_for(party):
             raise Refused(f"'for' gives from that household's store, which is not yours: to give to {party}, give with 'to' instead")
         src = here.hands if not party or party == here.name else _out(here, party)
+        if src == here.hands:
+            _top_up(here, item, q)                                             # from the stores here one may use (D4-96)
         have = here.carried().get(item, 0.0) if src == here.hands else here.stock(src[len("stock:"):]).get(item, 0.0)
         if have + 1e-9 < q:
-            raise Refused(f"there is only {show(have)} {item} to give")
+            raise Refused(f"there is only {show(have)} {item} to give" + _short_note(here, item))
         here.apply("transfer", src=src, dst=here.hands_of(to), item=item, qty=q)
         here.event("give", f"{here.name} gave {q:g} {item} to {to}", actor=here.name, target=to, about=[f"person:{to}"], salience=0.35,
                    tags=["food"] if ITEMS[item]["food"] else [], concerns=[to])
@@ -1205,6 +1244,8 @@ def _give(here, mind, a, party):
     if party and party != here.name and party != here.household() and not here.works_for(party):
         raise Refused(f"'for' gives from that household's store, which is not yours")
     src = here.hands if not party or party == here.name else _out(here, party)      # from one's household's store (D2-37)
+    if src == here.hands and here.person(to_raw) is None and here.building(to_raw) is None:
+        _top_up(here, item, q)                                                 # left at a place: from the stores here too (D4-96)
     have = here.carried().get(item, 0.0) if src == here.hands else here.stock(src[len("stock:"):]).get(item, 0.0)
     if have + 1e-9 < q:
         raise Refused(f"you carry only {show(have)} {item}" if src == here.hands else f"there is only {show(have)} {item} in the store")
