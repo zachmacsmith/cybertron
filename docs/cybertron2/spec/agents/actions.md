@@ -52,4 +52,20 @@ fallback.
 - **A camp takes only beds and a fire ring.** The build list shows buildings and rooms apart from fittings, which go inside a
   building named in "at".
 
-*Current as of 2 Nov 2026: D4-24, D4-29, D4-32, D4-35, D4-36, D4-37, D2-93, D2-94, D2-96, D2-111, D2-112, D4-76, D4-94.*
+## What a refusal says (D4-95)
+
+A refusal says what stopped the act, and enough to choose differently, without telling what one has not sensed:
+- **A good not in hand** names where it is among the stores one may use ("the Hearne hut's store holds 10"). Work done for a
+  household puts what it gives straight into its store.
+- **A good short in a store** names who of those sharing it took some today ("Ellen took 4 from the store today").
+- **A good that is made** says how ("flour is made by milling grain at dressed millstones").
+- **Beasts already watched or milked today** name who did it.
+- **A craft not done at the place named** lists where here it is done, by the land's cover.
+- **A door one may not set** says who sets it (those who manage the building: its holder's head, and who of them is here).
+- **Work for, or an exchange for, a party with no one and no store here** says so, and what to do instead.
+- **"Picked bare" and "not ripe" stay as they are.** One who goes to a place and tries the work there sees the place by the rule,
+  as one who worked there does, so its signs can hint at when it will be ripe.
+- **`pin`** takes a note by its title in any case, or by its text.
+- **A household's head or heir** cannot be one the namer knows is dead. Succession counts only the living either way.
+
+*Current as of 2 Nov 2026: D4-24, D4-29, D4-32, D4-35, D4-36, D4-37, D2-93, D2-94, D2-96, D2-111, D2-112, D4-76, D4-94, D4-95.*

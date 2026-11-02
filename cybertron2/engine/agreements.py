@@ -194,8 +194,9 @@ def _pay(here, payer, frm, to, item, qty, extra=None):
     """Move goods from the payer's hands and stores it may take from (or the party's) to the payee here."""
     order = [here.hands_of(payer)] + ([extra] if extra else []) + [c for c in here.takeable(payer) if c != here.hands_of(payer) and c != extra]
     dst = here.hands_of(to) if to in here.people() else here.party_container(to)
-    if dst is None:
-        raise Refused(f"{to} has nowhere here to receive it")
+    if dst is None:                                                            # why, and what to do (D4-95)
+        raise Refused(f"{to} must receive goods here, but is not a person here and has no house or store here: accept for "
+                      f"yourself (leave out \"for\"), or make the exchange where they live")
     left = qty
     for cid in order:
         if left <= 1e-9:

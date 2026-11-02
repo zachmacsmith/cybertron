@@ -185,7 +185,8 @@ def ready(here, tech, kind, key) -> str:
                 if int(h.get("in_milk", 0)) <= 0:
                     return "no cow there is in milk"
                 if h["milked"]["day"] == here.day and h["milked"]["n"] >= int(h["in_milk"]):
-                    return f"the cows in milk have all been milked today ({h['in_milk']} of them)"
+                    by = h["milked"].get("by") or []
+                    return f"the cows in milk have all been milked today ({h['in_milk']} of them)" + (f", by {', '.join(by)}" if by else "")
             if y == "slaughter" and hs[0]["count"] <= 0:
                 return "there are no beasts left"
     if kind == "thing":
@@ -252,8 +253,10 @@ def shortfall(here, mind, tech, mult=1.0, at=None, extra=None) -> str:
         if not any(available(here, i, extra=extra) + 1e-9 >= round(n * mult, 2) for i, n in alts.items()):
             i, n = next(iter(alts.items()))
             more = "".join(f" or {round(n2 * mult, 2):g} {i2}" for i2, n2 in list(alts.items())[1:])
+            from cybertron2.engine.verbs import _short_note                    # who took it today; where it comes from (D4-95)
             return f"it needs {round(n * mult, 2):g} {i}{more}; you have " + " and ".join(
-                f"{available(here, i2, extra=extra):.1f} {i2}" if len(alts) > 1 else f"{available(here, i2, extra=extra):.1f}" for i2 in alts) + " to hand"
+                f"{available(here, i2, extra=extra):.1f} {i2}" if len(alts) > 1 else f"{available(here, i2, extra=extra):.1f}" for i2 in alts) \
+                + " to hand" + _short_note(here, i)
     if sites[0][0] != "anywhere":
         why = [ready(here, tech, k, key) for k, key, _ in sites]
         if all(why):

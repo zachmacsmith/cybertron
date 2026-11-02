@@ -221,7 +221,8 @@ def _out(here, party) -> str:
     if cid is None:
         if party == here.household():                                       # away from home: one carries it back oneself
             return here.hands
-        raise Refused(f"{party} has nothing here to put it into")
+        raise Refused(f"work done for {party} goes into their store, and they have no house or store here, and nobody of theirs "
+                      f"is here to take it: do it for yourself and carry it to them, or work where they live")      # D4-95
     return cid                                                              # putting into another's store is a gift (D4-23)
 
 
@@ -260,19 +261,58 @@ def _consume(here, needs: dict, mult=1.0, extra=None):
     for item, q in needs.items():                                            # all or nothing: check before taking any
         have = KN.available(here, item, extra=extra)
         if have + 1e-9 < q * mult:
-            raise Refused(f"it needs {q * mult:g} {item}; you have {show(have)} to hand")
+            raise Refused(f"it needs {q * mult:g} {item}; you have {show(have)} to hand" + _short_note(here, item))
     for item, q in needs.items():
         left = round(q * mult, 6)
         for cid in order:
             if left <= 1e-9:
                 break
-            have = here.carried().get(item, 0.0) if cid == here.hands else here.stock(cid[len("stock:"):]).get(item, 0.0)
+            have = here.contents(cid).get(item, 0.0)                         # hands, a store, or what lies at its door (D4-89)
             take = min(have, left)
             if take > 1e-9:
                 here.apply("destroy", src=cid, item=item, qty=take, why="used")
+                if cid != here.hands:
+                    _drawn(here, cid, item, take)
                 left -= take
         if left > 1e-6:
             raise Refused(f"it needs {q * mult:g} {item}")
+
+
+def _drawn(here, cid, item, q) -> None:
+    """Who drew what from a store today, so the next one who finds it gone is told by whom (D4-95)."""
+    try:
+        today = here.today()
+    except KeyError:                                                           # outside a day (a test, a tool): nothing to tell later
+        return
+    today.setdefault("drawn", []).append({"by": here.name, "cid": cid, "item": item, "qty": round(q, 2)})
+
+
+def _store_name(here, cid) -> str:
+    if cid.startswith("stock:"):
+        return f"{here.buildings()[cid[len('stock:'):]]['name']}'s store"
+    c = here.thing(cid) or {}
+    door = here.buildings().get(c.get("door") or "", {}).get("name")
+    return f"what lies at the door of {door}" if door else "what lies here"
+
+
+def _short_note(here, item) -> str:
+    """Why a good is short: who else drew it from the stores one shares today, and where it comes from (D4-95)."""
+    mine = set(here.takeable())
+    took = {}
+    try:
+        drawn = here.today().get("drawn") or []
+    except KeyError:
+        drawn = []
+    for d in drawn:
+        if d["item"] == item and d["cid"] in mine and d["by"] != here.name:
+            took[d["by"]] = took.get(d["by"], 0.0) + d["qty"]
+    out = ""
+    if took:
+        out += "; " + ", ".join(f"{who} took {show(q)} from the store today" for who, q in took.items())
+    src = next((t for t, d in TECHNIQUES.items() if isinstance(d.get("gives"), dict) and item in d["gives"] and d.get("inputs")), None)
+    if src:                                                                    # where it comes from: the recipe that makes it
+        out += f"; {item} is made by {KN.label(src)}"
+    return out
 
 
 def _skill_mult(here, mind, tech) -> float:
@@ -292,15 +332,25 @@ def _site(here, mind, tech, at):
         key = here.parcel(at) or here.building(at)
         if key is None:
             raise Refused(f"there is no place called {at!r} here")
+        where = [s for s in sites if s[0] == "parcel"]
         sites = [s for s in sites if s[1] == key]
-        if not sites:
-            raise Refused(f"{KN.label(tech)} is not done at {at}")
+        if not sites:                                                          # where here it is done, by the land (D4-95)
+            names = list(dict.fromkeys(here.parcels()[s[1]]["name"] for s in where if s[1] in here.parcels()))
+            raise Refused(f"{KN.label(tech)} is not done at {at}" + (f"; here it is done at {', '.join(names)}" if names else
+                                                                   "; there is nowhere here for it"))
     ok = [s for s in sites if not KN.ready(here, tech, s[0], s[1])]
     if not ok:
         why = KN.ready(here, tech, sites[0][0], sites[0][1]) if sites else f"there is nowhere here for {KN.label(tech)}"
         what = PC.LAND_DRAWS.get(TECHNIQUES[tech].get("draws"))
         if sites and what and sites[0][0] == "parcel" and ("picked bare" in why or "no standing timber" in why):
             PC.remember_land(mind, here.day, sites[0][1], what, "bare", "found")         # found out by trying (D4-50)
+        if at and sites and sites[0][0] == "parcel":                           # one went and tried: one sees the place (D4-95)
+            try:
+                w_ = here.today()["worked"].setdefault(here.name, [])
+                if sites[0][1] not in w_:
+                    w_.append(sites[0][1])
+            except KeyError:
+                pass
         raise Refused(why)
     return ok[0]
 
@@ -351,6 +401,10 @@ def _technique(here, mind, a, party, verb):
     kind, key, place_name = _site(here, mind, tech, a.get("at"))
     why = KN.shortfall(here, mind, tech, 1.0, key)
     if why:
+        if kind == "parcel":                                                   # one went and tried: one sees the place (D4-95)
+            w_ = here.today()["worked"].setdefault(here.name, [])
+            if key not in w_:
+                w_.append(key)
         raise Refused(why)
     out = _out(here, party)
     y = t["yield"]
@@ -1058,11 +1112,19 @@ def _move(here, mind, a, party):
         src, dst, verb, have = b["stock"], here.hands, "took", here.stock(bid).get(item, 0.0)
     else:
         src, dst, verb, have = here.hands, b["stock"], "put", here.carried().get(item, 0.0)
-    if have <= 1e-9:
-        raise Refused(f"there is no {item} " + ("in your hands" if verb == "put" else f"in {b['name']}"))
+    if have <= 1e-9:                                                           # where it is, or who took it (D4-95)
+        if verb == "put":
+            where = [(c, here.contents(c).get(item, 0.0)) for c in here.takeable() if c != here.hands]
+            where = [(c, q) for c, q in where if q > 1e-9]
+            raise Refused(f"there is no {item} in your hands" + (
+                "; " + ", ".join(f"{_store_name(here, c)} holds {show(q)}" for c, q in where)
+                + " (work done for your household puts what it gives straight into its store)" if where else _short_note(here, item)))
+        raise Refused(f"there is no {item} in {b['name']}" + _short_note(here, item))
     q = round(min(_qty(a.get("qty"), have), have), 6)
     full = _full_note(here, b["stock"], item, q) if verb == "put" else ""      # what does not fit lies at its door (D2-155, D4-94)
     here.apply("transfer", src=src, dst=dst, item=item, qty=q)
+    if verb == "took":
+        _drawn(here, src, item, q)
     here.event("store", f"{here.name} {verb} {item} {'into' if verb == 'put' else 'from'} {b['name']}", actor=here.name,
                about=[f"building:{bid}"], salience=0.1, tags=["food"] if ITEMS[item]["food"] else [])
     return (f"You {verb} {show(q)} {item} {'into' if verb == 'put' else 'from'} {b['name']}" + full
@@ -1105,8 +1167,10 @@ def _take(here, mind, a, party):
         have = here.stock(bid).get(item, 0.0)
     q = round(min(_qty(a.get("qty"), have), have), 6)
     if q <= 1e-9:
-        raise Refused(f"you find no {item} in {label}")
+        raise Refused(f"you find no {item} in {label}" + (_short_note(here, item) if not rem else ""))
     here.apply("transfer", src=src, dst=here.hands, item=item, qty=q)
+    if not rem:
+        _drawn(here, src, item, q)
     if theft:
         here.today()["thefts"].append({"by": here.name, "building": bid, "item": item, "qty": round(q, 2), "door": bool(rem)})
         here.record("take", None, None, theft=True)
@@ -1354,8 +1418,13 @@ def _set(here, mind, a, party):
     bid = here.building(a.get("at")) if a.get("at") else (here.homes_here() or [None])[0]
     if bid is None:
         raise Refused("say which building")
-    if "management" not in here.rights(("building", bid)):
-        raise Refused(f"you do not manage {here.buildings()[bid]['name']}")
+    if "management" not in here.rights(("building", bid)):                   # who does, by the claims (D4-95)
+        b = here.buildings()[bid]
+        who = [x for x in here.people() if "management" in here.rights(("building", bid), x)]
+        hh = here.households().get(b.get("household") or "", {}).get("name") if b.get("household") else None
+        raise Refused(f"only those who manage {b['name']} set its door: its holder's head"
+                      + (f" ({hh})" if hh else "") + (f"; here today: {', '.join(who)}" if who else "; none of them is here")
+                      + ". A member may use it but not bar or open it")
     to = str(a.get("to") or "").lower()
     if to not in ("open", "barred"):
         raise Refused('set {"thing": "door", "to": "open" or "barred"}')
@@ -1680,12 +1749,16 @@ def _name(here, mind, a, party):
         raise Refused("you belong to no household")
     members = here.institution(hh)["members"]
     pick = lambda x: next((m for m in members if m.lower() == str(x or "").strip().lower()), None)
+    dead = lambda x: (mind.kin().get(x) or {}).get("alive") is False             # dead, as one knows it (D4-95; the engine's
+                                                                                # succession counts only the living either way)
     if a.get("heir"):
         if here.head(hh) != here.name:
             raise Refused(f"only the head of {here.institution(hh)['name']} names its heir")
         who = pick(a["heir"])
         if who is None or who == here.name:
             raise Refused(f"{a['heir']!r} is not of your household")
+        if dead(who):
+            raise Refused(f"{who} is dead: only the living can head a household")
         here.apply("office", inst=hh, field="heir", value=who, by=here.name)
         return f"You named {who} to head {here.institution(hh)['name']} after you."
     if a.get("head"):
@@ -1697,6 +1770,8 @@ def _name(here, mind, a, party):
         who = pick(a["head"])
         if who is None:
             raise Refused(f"{a['head']!r} is not of your household")
+        if dead(who):
+            raise Refused(f"{who} is dead: only the living can head a household")
         here.apply("office", inst=hh, field="named", value=who, by=here.name)
         return f"You named {who} as the head of {here.institution(hh)['name']}; the one most named heads it."
     raise Refused('say "heir" or "head"' + (', or "thing" and "as" to name a group of beasts or a thing' if _tags(here) else ""))

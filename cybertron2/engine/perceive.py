@@ -705,6 +705,12 @@ def apply_notes(mind, reply) -> list:
     written = [str(n["title"]).strip()[:60] for n in (reply.get("note") or []) if isinstance(n, dict) and n.get("title")]
     if pin and str(pin) not in notes and len(written) == 1 and written[0] in notes:
         pin = written[0]
+    if pin and str(pin) not in notes:                                          # a note by its title in any case, or by its text (D4-95)
+        low = " ".join(str(pin).lower().split())
+        hit = [t for t in notes if t.lower() == low] or \
+              [t for t, x in notes.items() if len(low) >= 8 and (low in " ".join(x.lower().split()) or " ".join(x.lower().split()) in low)]
+        if hit:
+            pin = hit[0]
     if pin:
         if str(pin) in notes:
             mind.person["pinned"] = str(pin)

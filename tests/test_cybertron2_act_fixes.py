@@ -65,3 +65,42 @@ def test_a_camp_takes_only_beds_and_a_fire_ring_and_the_build_list_shows_fitting
     assert "is a camp: it takes only beds and a fire ring" in out
     lines = PR.verb_lines(Here(w, "Rob"), Mind(w, "Rob"))
     assert "buildings and rooms:" in lines and "fittings, put inside a building you name" in lines
+
+
+def test_refusals_say_the_next_step_who_did_it_where_it_is_and_why():
+    from cybertron2.engine import farm as FM
+    w = _w()
+    # where the good is, when it is not in hand
+    st = w.s["buildings"]["hearne_hut"]["stock"]
+    out = do(w, "Tom", do="move", item="beans", qty=2, to="store", at="the Hearne hut")
+    assert "there is no beans in your hands; the Hearne hut's store holds" in out and "straight into its store" in out
+    # who took it from the store today
+    do(w, "Ellen", do="move", item="beans", qty=w.goods(st)["beans"], to="hands", at="the Hearne hut")
+    out = do(w, "Tom", do="move", item="beans", qty=1, to="hands", at="the Hearne hut")
+    assert "Ellen took" in out and "from the store today" in out
+    # where it comes from
+    out = do(w, "Alys", do="make", what="bread")
+    assert "flour is made by" in out
+    # not done here: where it is done here
+    out = do(w, "Rob", do="gather", what="fell", at="the Long Field")
+    assert "felling timber is not done at the Long Field; here it is done at" in out and "the Coppice" in out
+    # the door: who manages it
+    out = do(w, "Alys", do="set", thing="door", to="barred", at="the Ardern Hall")
+    assert out.startswith("Refused: set: only those who manage the Ardern Hall set its door")
+    # a refused act at a place still puts one there to see it
+    out = do(w, "Tom", do="work", what="reap", at="the Long Field")              # not ripe on day 0: refused, but he was there
+    assert out.startswith("Refused") and "wb_field" in w.s["today"]["worked"].get("Tom", [])
+
+
+def test_pin_by_text_and_the_known_dead_cannot_be_named_head():
+    from cybertron2.engine import perceive as PC
+    w = _w()
+    m = Mind(w, "Tom")
+    m.person.setdefault("notes", {})["Harvest"] = "Reap the Long Field with the boys, then store it dry."
+    m.person["pinned"] = None
+    PC.apply_notes(m, {"pin": "Reap the Long Field with the boys"})
+    assert m.person.get("pinned") == "Harvest"
+    m2 = Mind(w, "Alys")
+    m2.kin()["Odo"]["alive"] = False
+    w.s["institutions"]["Ardern"]["succession"] = {"until": w.d + 2, "named": {}}
+    assert "Odo is dead: only the living can head a household" in do(w, "Alys", do="name", head="Odo")

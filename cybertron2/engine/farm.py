@@ -167,14 +167,16 @@ def act(here, mind, tech, key, place_name, out, m, tm, a) -> tuple:
         here.apply("set", ref=("herd", hid), field="watched", value=here.day)
         hd = here.herds()[hid].get("herders") or {}
         n = int(hd.get("n", 0)) + 1 if hd.get("day") == here.day else 1        # herders today: each holds about 30 head (D2-128)
-        here.apply("set", ref=("herd", hid), field="herders", value={"day": here.day, "n": n})
+        who = (list(hd.get("by") or []) if hd.get("day") == here.day else []) + [here.name]   # who, for the next one's refusal (D4-95)
+        here.apply("set", ref=("herd", hid), field="herders", value={"day": here.day, "n": n, "by": who})
         return 0.0, None, f"You watched {here.herds()[hid]['name']} on {place_name} today.", ("herd", hid)
     if k == "milk":
         hid = _herd_on(here, key, a, role="cows")
         h = here.herds()[hid]
         mk = h["milked"] if h["milked"]["day"] == here.day else {"day": here.day, "n": 0}
         n = min(int(y["cows"]), int(round(h.get("in_milk", 0.0))) - mk["n"])
-        here.apply("set", ref=("herd", hid), field="milked", value={"day": here.day, "n": mk["n"] + n})
+        here.apply("set", ref=("herd", hid), field="milked", value={"day": here.day, "n": mk["n"] + n,
+                                                                    "by": list(mk.get("by") or []) + [here.name]})
         return round(n * float(y["each"]) * m, 2), "milk", "", ("herd", hid)
     if k == "slaughter":
         return _slaughter(here, key, out, a, y)
@@ -483,10 +485,17 @@ def ready(here, tech, key) -> str:
         if y == "milk":
             n = sum(int(round(h.get("in_milk", 0.0))) - (h["milked"]["n"] if h["milked"]["day"] == here.day else 0) for h in hs)
             if n <= 0:
-                return "no cow there is in milk" if not any(h.get("in_milk", 0) >= 0.5 for h in hs) else "the cows in milk are milked today"
+                by = sorted({x for h in hs if h["milked"]["day"] == here.day for x in h["milked"].get("by") or []})
+                return "no cow there is in milk" if not any(h.get("in_milk", 0) >= 0.5 for h in hs) else \
+                    "the cows in milk are milked today" + (f": {_names(by)} milked them" if by else "")
         if y == "herd" and all(h.get("watched") == here.day and head(h) <= herd_capacity(here.p, h, here.day) for h in hs):
-            return "the beasts there are watched today"
+            by = sorted({x for h in hs if (h.get("herders") or {}).get("day") == here.day for x in (h["herders"].get("by") or [])})
+            return "the beasts there are watched today" + (f": {_names(by)} {'is' if len(by) == 1 else 'are'} watching them" if by else "")
     return ""
+
+
+def _names(xs) -> str:
+    return xs[0] if len(xs) == 1 else ", ".join(xs[:-1]) + " and " + xs[-1]
 
 
 def drive(here, a, party) -> str:
