@@ -362,9 +362,14 @@ def dawn(w) -> None:
             hid, pid = inc["herd"], inc["into"]
             h = w.s["herds"][hid]
             w.apply("set", node, ref=("herd", hid), field="parcel", value=pid)
-            c = w.s["parcels"][pid].get("crop")
-            if c and c.get("area_left", 0) > 1e-6:
-                w.apply("draw", node, parcel=pid, key="crop", qty=round(min(c["left"], float(inc.get("eats", 2))), 4))
+            from cybertron2.engine import farm as FM
+            par = w.s["parcels"][pid]
+            crops = [(hd, c) for hd, _, c in FM.standing(par) if c.get("area_left", 0) > 1e-6]
+            tot = sum(float(c["left"]) for _, c in crops)
+            for hd, c_ in crops:                                            # every holding's crop, by what stands (D2-172)
+                share = float(inc.get("eats", 2)) * (float(c_["left"]) / tot if tot > 1e-9 else 1.0 / len(crops))
+                w.apply("draw", node, parcel=pid, key="crop", qty=round(min(c_["left"], share), 4), **({"holder": hd} if hd is not None else {}))
+            c = FM.main_crop(par)
             holders = [m for m in w.living() if any(cl["claimant"] in (m, w.household_of(m)) for cl in w.claims_on(("parcel", pid)))]
             w.event(node, "stray", f"{h['name']} broke through into {w.s['parcels'][pid]['name']} at dawn and are trampling the "
                     f"{c.get('kind', 'crop') if c else 'ground'}", about=[f"parcel:{pid}"], salience=0.7, tags=["farming", "animals", "food"],

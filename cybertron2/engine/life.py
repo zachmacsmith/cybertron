@@ -519,6 +519,7 @@ def on_death(w, person) -> None:
     rule = ((w.s["institutions"].get(hh) or {}).get("rules") or {}).get("inheritance", "household")
     kids = sorted([n for n, x in w.s["people"].items() if x["alive"] and person in (x.get("parents") or []) and x["stage"] in ("adult", "elder", "youth")],
                   key=lambda n: w.s["people"][n].get("born") or 0)
+    fields = set()
     for cid, c in list(w.s["claims"].items()):
         if c["claimant"] != person or (c.get("until") is not None and c["until"] < w.d):
             continue
@@ -528,6 +529,33 @@ def on_death(w, person) -> None:
             heirs = kids
         else:
             heirs = [hh] if hh else kids[:1]
-        for x in heirs:
-            w._claim(tuple(c["thing"]), x, c["rights"], "inherited", by=person)
+        thing = tuple(c["thing"])
+        par = w.s["parcels"].get(thing[1]) if thing[0] == "parcel" else None
+        if par is not None and par["cover"] in ("field", "pasture", "meadow"):   # land passes in whole plots (D2-163)
+            for x, n, joint in plot_heirs(int(par["size"]) if c.get("plots") is None else int(c["plots"]), heirs, hh):
+                w._claim(thing, x, c["rights"], "inherited", by=person, plots=n if n < int(par["size"]) or c.get("plots") is not None else None,
+                         joint=joint)
+            fields.add(thing[1])
+        else:
+            for x in heirs:
+                w._claim(thing, x, c["rights"], "inherited", by=person)
         c["until"] = w.d - 1
+    from cybertron2.engine import farm as FM
+    for pid in sorted(fields):
+        FM.sync(w, pid, carry=True)                                             # the soil and the standing crop go with the plots
+
+
+def plot_heirs(n, heirs, hh=None) -> list:
+    """[(heir, plots, joint)]: n whole plots among heirs, eldest first (D2-163; spec/world/holding.md "Plots"). Where there are more
+    heirs than plots, the last plot is held jointly by the heirs left over (by the household, where they are of one; else in the
+    eldest of them's name, with the others named as joint holders)."""
+    k = len(heirs)
+    if k <= 1:
+        return [(h, n, None) for h in heirs]
+    if k <= n:
+        base, extra = divmod(n, k)
+        return [(h, base + (1 if i < extra else 0), None) for i, h in enumerate(heirs)]
+    out = [(h, 1, None) for h in heirs[:n - 1]]
+    rest = heirs[n - 1:]
+    out.append((hh if hh else rest[0], 1, list(rest)))
+    return out

@@ -13,6 +13,8 @@ force, an arbiter or an institution above both.
 - D4-23 (Zach, 22 Oct): everything in this file but "Wood".
 - D2-158: dead wood, and young growth on common land, are anyone's to gather; trees are their holder's.
 - D4-60: clearing new ground for fields.
+- D2-163: land is held in plot shares within a parcel.
+- D2-172: a field carries one crop for each holding on it.
 
 ## Mechanics
 
@@ -75,9 +77,48 @@ arbiter (an elder, a court) and live by the ruling, or an institution over both 
   return to scrub and forest.
 - **Clearing (D4-60):** a meadow or pasture (6 units of work a unit of size) or scrub (10) is cleared into a fallow field; a wood
   is felled to scrub first. Land nobody holds is held, once cleared, by whoever cleared it (grounds `cleared`).
-- **Plots are whole: never split. Holdings are divided.** Partible inheritance deals whole plots, eldest first; where there are
-  more heirs than plots, the rest is held jointly (by the household or the co-heirs) or the younger heirs get none. Fragmentation
-  and a landless class come from this, with no split primitive.
+- **Plots are whole: never split. Holdings are divided.** Fragmentation and a landless class come from this, with no split
+  primitive.
+- **Plot shares (D2-163):** a parcel is one place; what is held, divided among heirs, sold and disputed is a number of its plots. A
+  claim on a field, pasture or meadow may name a number of its plots (`plots: n`); a claim without one covers all of them. One
+  holder's claims on a parcel add up, to its plots at most.
+- **Overlaps are disputes (D2-163, D4-23):** claims on one parcel may come to more than its plots; both are recorded, neither is
+  refused. A claim of more plots than are unclaimed records whose plots it overlaps (the holder with the most plots there).
+- **Unclaimed plots** are the parcel's plots less what its claims cover, at least 0.
+- **Claiming (D2-163):** `claim {thing, plots?, for?}`: unclaimed plots are claimed like anything else; claiming plots others hold is
+  allowed, and seen as a dispute.
+- **Inheritance (D2-163, D2-143):** a holding passes in whole plots by the household's rule: eldest, all to one heir; partible, among
+  the heirs, eldest first (5 plots to 2 heirs: 3 and 2); where there are more heirs than plots, each of the first heirs takes one
+  plot and the last plot is held jointly by the rest (by the household where they are of it, with the co-heirs named as joint
+  holders, who have its rights). The soil and any crop standing go with the plots.
+- **Clearing (D4-60, D2-163)** claims all of the cleared parcel's plots.
+- **Pasture and meadow (D2-163)** are held in plots too; grazing and hay stay whole-parcel: any holder's herd grazes the whole
+  pasture.
+- **Fences (D2-130)** stay round the whole parcel.
+
+### A crop for each holding (D2-172)
+
+- **The record:** each holding on a field has one record: holder, plots, crop (kind, seed, broken share, weeding, sown day, sower,
+  failed), fertility, broken ground, last crop. The ground held whole (by the claims that cover all of it), or where nobody holds it
+  whole the unclaimed plots, is the field's own record. The crops on a field together cover no more than its plots.
+- **Sowing** (`work {what: sow, at, item, plots?, on?, for?}`) sows the sower's own (or the `for` party's) held plots that are
+  unsown, then the unclaimed plots, then stops; `plots` caps the act. Sowing plots another holds needs `on: <party>`: allowed, and
+  seen. A holding carries one crop: its unsown plots take only the crop already on it.
+- **Breaking, weeding, manuring, choosing seed and reaping** fall on one's own holding (the party's, one's own, one's
+  household's) where one has one with that work to do; else on the unclaimed plots; else, where exactly one holding has that work
+  to do, on it; else one names whose (`on`). Working another's holding is allowed and seen ("Ann was reaping at Long Field on the
+  Webbs' plots"), concerning that holding's people.
+- **Reaping another's holding** gives the grain to the reaper (a crop is nobody's until reaped).
+- **Fertility** is kept per holding: each crop's slot, fallow, grazing and dung act on its holding's soil. Plots moving between
+  holders take their soil with them (plots given up are pooled with their soil; plots gained are drawn from that pool first, then
+  from the unclaimed plots).
+- **A crop standing on plots that change hands by an agreement** stays with the holding that sowed it until reaped; a holder of the
+  whole who comes to hold part keeps the crop it had on the whole. On inheritance (and in a world file) the crop goes with the plots,
+  split by plots.
+- **Herds on a field** graze its stubble and fallow holding by holding, and trample every standing crop at the trampling rate (D2-123),
+  so the loss falls on the holdings by their plots.
+- **Signs** are per crop record and, on a field held in shares, name the holding: "the Reeds' barley in Long Field stands ripe",
+  "stubble in the Wynns' part of Long Field" (information/signs.md). A field held whole reads as before.
 - **Minimum viable is land per mouth, not a plot size:** the plots a household needs to feed itself through a year at its land's
   fertility and yield (37.2 calibrates). Agents see it in words ("your land can feed about 3 of your 5"). Below it, a household
   rents, works for others or leaves.
@@ -87,6 +128,10 @@ arbiter (an elder, a court) and live by the ruling, or an institution over both 
 One routed primitive, `transfer_claim {thing, rights, to, why}` (why: `inherited`, `granted`, `sold`, `let`, `seized`, `cleared`,
 `abandoned`), so institutions' laws can hook every change (37.3's grants and seizures, 37.1's inheritance). Recording a claim in a
 register is a separate act by the register's keeper.
+
+**Plots by agreement (D2-163):** an agreement's leg "2 plots of Long Field" moves n plots of a parcel from one party to another when
+the offer is taken (the giver's claims there give them up, newest first; the getter has a claim of n plots, grounds `bought`).
+Only a party that holds the plots, by one who may part with them (`alienation`), can give them.
 
 ### Wood (D2-158)
 
@@ -105,7 +150,10 @@ and memory, not a claim record.
 
 ## Data
 
-- `claims`: a list of claim records (above), each with an id.
+- `claims`: a list of claim records (above), each with an id; on a field, pasture or meadow, `plots` (none: all of them), and for a
+  dispute `of` and `over` (whose plots it overlaps, and how many); `joint`: co-heirs holding one share together (D2-163).
+- A field's records (D2-172): the parcel's own crop and soil (the ground held whole, or the unclaimed plots), `held_whole` (who
+  holds it whole), and `shares`: one record for each holding of part of it.
 - `registers`: per institution, the claim ids it records (its document).
 - Plots, buildings, lots and sites carry no holder field of their own: who holds them is read from the claims.
 
@@ -118,6 +166,10 @@ and memory, not a claim record.
 | land per mouth for viability | 37.2 | calibrate |
 
 ## What agents see
+
+A field's line (D2-163, D2-172): "Long Field (field; 6 plots; barley on 4 (Reeds 3, Webbs 1), beans on 1 (Coles), 1 fallow;
+held: Reeds 3, Webbs 2, Coles 1)"; a dispute: "the Wynns claim 2 of the Reeds' plots"; a field held whole keeps "held by the
+Reeds", with what stands on it ("barley on 5").
 
 In world terms, from what each knows: "The Long Field: the Alders' (Bram's grandfather cleared it; the village register agrees).
 The Wynns claim it too, since the flood moved the stream." "The upper pasture: the village's common; each household may graze four
@@ -133,4 +185,4 @@ beasts." "Your land can feed about 3 of your 5."
 The 37.4 conversation with Zach, 22 Oct; Schlager and Ostrom (1992) on bundles of rights; 37.2 02f §6.5 ("plots whole, holdings
 divided"); 37.1's inheritance (`wp/demography`); 37.3's tenures (`wp/inst-cross`); cybertron 1's D-37 (consent binds members).
 
-*Current as of 24 Oct 2026: D4-23, D2-158, D4-60.*
+*Current as of 3 Nov 2026: D4-23, D2-158, D4-60, D2-163, D2-172.*

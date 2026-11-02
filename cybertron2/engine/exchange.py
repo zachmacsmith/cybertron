@@ -21,7 +21,7 @@ import time
 import zlib
 from pathlib import Path
 
-from cybertron2.engine import journal as JN, views as VW
+from cybertron2.engine import farm as FM, journal as JN, views as VW
 
 FOLDER = "experimental/cybertron2"
 SQL_TYPES = {"TEXT": "string", "INTEGER": "int64", "REAL": "float64", "BLOB": "binary"}
@@ -119,7 +119,8 @@ def view_tables(run) -> dict:
                               "fire": b.get("fire"), "warm": b.get("warm"), "fittings": b.get("fittings")})
         for pid, p in w["parcels"].items():
             parcels.append({"day": day, "id": pid, "node": p.get("node"), "cover": p.get("cover"), "size": p.get("size"),
-                            "crop": (p.get("crop") or {}).get("kind"), "fertility": p.get("fertility"),
+                            "crop": (FM.main_crop(p) or {}).get("kind"),
+                            "fertility": FM.field_fertility(p) if p.get("cover") == "field" else p.get("fertility"),
                             "res": {k: r.get("S") for k, r in (p.get("res") or {}).items()}})
         for cl in (w.get("claims") or {}).values():
             claims.append({"day": day, "thing": cl.get("thing"), "claimant": cl.get("claimant"), "rights": cl.get("rights"),

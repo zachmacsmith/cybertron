@@ -5,7 +5,9 @@ State (World.s, plain JSON):
     day, seq
     nodes        {id: {name, text}}
     roads        {id: {a, b, days}}
-    parcels      {id: {node, name, cover, size, adj, text, res: {plants|game|wood|seam|quarry: {S, K, r}}, crop?, fertility}}
+    parcels      {id: {node, name, cover, size, adj, text, res: {plants|game|wood|seam|quarry: {S, K, r}}, crop?, fertility,
+                       shares?: [{holder, plots, crop, fertility, broken, last_crop, last_kind, fallow_since}]}}   (a field's holdings,
+                       D2-163, D2-172: farm.py; the parcel's own crop and soil are its unclaimed plots')
     buildings    {id: {node, parcel, name, structure, size (its floor), rooms [{kind, floor, storey}], fittings {name: n}, condition,
                        door, fire, stock (container id), tier, description, lines, changes, works?, mending?, monument?,
                        unfinished?: {blueprint, units_left, materials_left, by}}}       (buildings.py; review 02zh)
@@ -14,7 +16,8 @@ State (World.s, plain JSON):
     people       {name: {stage, sex, model, hunger, missed, frailty, attack, defence, wounded, alive, died, cause, hands, at,
                          transit, relations, notes, pinned, interests, messages, home_seen}}
     institutions {id: {kind, name, members, offices {head}, rules {admit, grant}}}
-    claims       {id: {thing: [kind, id], claimant, rights, grounds, since, until, by}}
+    claims       {id: {thing: [kind, id], claimant, rights, grounds, since, until, by, plots?, of?, over?, joint?}}   (plots: of a
+                       field, pasture or meadow, D2-163; none: all of them)
     offers       {id: {node, by, to, give, get, lots, taken, until, open}}
     agreements   {id: {parties, legs, node, day, witnesses, status}}
     know, mind   per person (knowledge.py, perceive.py)
@@ -178,12 +181,20 @@ class World:
                 if a.get("role") == "head":
                     s["institutions"][hh]["offices"]["head"] = name
         for c in spec.get("claims") or []:                                     # seeded claims (D4-21, D4-23)
-            self._claim(tuple(c["thing"]), c["claimant"], c.get("rights", "all"), c.get("grounds", "seeded"), since=-1)
+            self._claim(tuple(c["thing"]), c["claimant"], c.get("rights", "all"), c.get("grounds", "seeded"), since=-1,
+                        plots=c.get("plots"), of=c.get("of"), over=c.get("over"), joint=c.get("joint"))   # plots of a field (D2-163)
         for kind, table in (("parcel", {p: x for n in spec.get("nodes", {}).values() for p, x in (n.get("parcels") or {}).items()}),
                             ("herd", spec.get("herds") or {})):                 # `holder:` on a parcel or herd: a seeded claim
             for key, x in table.items():
                 if (x or {}).get("holder") and not self.claims_on((kind, key)):
                     self._claim((kind, key), x["holder"], "all", "seeded", since=-1)
+        from cybertron2.engine import farm as FM
+        for nd in spec["nodes"].values():                                      # a field's holdings, and its crops by holding (D2-163)
+            for pid, p in (nd.get("parcels") or {}).items():
+                if s["parcels"][pid]["cover"] == "field":
+                    FM.sync(self, pid, carry=True)                            # a seeded crop goes with the plots to a whole holder
+                    if (p.get("state") or {}).get("crops"):
+                        FM.seed_crops(self, pid, p["state"]["crops"])
         for bid, b in s["buildings"].items():                                  # a house claimed by its household unless given
             hh = (spec["buildings"][bid] or {}).get("household")
             if hh and not self.claims_on(("building", bid)):
@@ -487,11 +498,16 @@ class World:
         thing = tuple(thing)
         return [c for c in self.s["claims"].values() if tuple(c["thing"]) == thing and (c.get("until") is None or c["until"] >= self.d)]
 
-    def _claim(self, thing, claimant, rights, grounds, since=None, until=None, by=None):
+    def _claim(self, thing, claimant, rights, grounds, since=None, until=None, by=None, plots=None, **extra):
+        """A claim; on a field, pasture or meadow it may name a number of plots (D2-163; none: all of them), and `of`/`over` say
+        whose plots it overlaps (a dispute), `joint` who hold it together."""
         self.s["seq"] += 1
         cid = f"C{self.s['seq']}"
         self.s["claims"][cid] = {"thing": list(thing), "claimant": claimant, "rights": list(ALL_RIGHTS) if rights == "all" else list(rights),
                                  "grounds": grounds, "since": self.d if since is None else since, "until": until, "by": by}
+        if plots is not None:
+            self.s["claims"][cid]["plots"] = int(plots)
+        self.s["claims"][cid].update({k: v for k, v in extra.items() if v is not None})
         return cid
 
     def rights(self, name, thing) -> set:
@@ -500,7 +516,7 @@ class World:
         out = set()
         hh = self.household_of(name)
         for c in self.claims_on(thing):
-            if c["claimant"] in (name, "anyone"):
+            if c["claimant"] in (name, "anyone") or name in (c.get("joint") or ()):      # co-heirs hold together (D2-163)
                 out |= set(c["rights"])
             elif c["claimant"] == hh:
                 out |= set(c["rights"]) if self.head(hh) == name else set(c["rights"]) & set(MEMBER_RIGHTS)
@@ -610,9 +626,10 @@ def p_destroy(w, src, item, qty, why=""):
     return q
 
 
-def p_draw(w, parcel, key, qty):
+def p_draw(w, parcel, key, qty, holder=None):
     if key == "crop":                                                          # taken from the standing crop: its ground with it
-        c = w.s["parcels"][parcel]["crop"]
+        from cybertron2.engine import farm as FM
+        c = FM.record(w.s["parcels"][parcel], holder)["crop"]                  # a holding's crop (D2-172); none: the unclaimed plots'
         q = min(qty, c["left"])
         if c["left"] > 1e-9 and "area_left" in c:
             c["area_left"] = round(c["area_left"] * (1 - q / c["left"]), 6)
@@ -716,13 +733,59 @@ def p_found(w, person, name):
     return iid
 
 
-def p_claim(w, thing, claimant, rights, grounds, until=None, by=None):
-    return w._claim(tuple(thing), claimant, rights, grounds, until=until, by=by)
+def p_claim(w, thing, claimant, rights, grounds, until=None, by=None, plots=None, of=None, over=None, joint=None):
+    cid = w._claim(tuple(thing), claimant, rights, grounds, until=until, by=by, plots=plots, of=of, over=over, joint=joint)
+    if tuple(thing)[0] == "parcel":
+        from cybertron2.engine import farm as FM
+        FM.sync(w, thing[1])                                                   # the field's holdings follow (D2-163)
+    return cid
 
 
 def p_end_claim(w, claim):
     w.s["claims"][claim]["until"] = w.d - 1
+    thing = w.s["claims"][claim]["thing"]
+    if thing[0] == "parcel":
+        from cybertron2.engine import farm as FM
+        FM.sync(w, thing[1])
     return claim
+
+
+def p_set_share(w, parcel, holder, field, value):
+    """A field holding's record (D2-172): its crop, soil, broken ground; holder None is the unclaimed plots (the parcel's own)."""
+    from cybertron2.engine import farm as FM
+    FM.record(w.s["parcels"][parcel], holder)[field] = value
+    return value
+
+
+def p_shares(w, parcel, carry=False):
+    """A field's holdings brought in line with its claims (farm.sync)."""
+    from cybertron2.engine import farm as FM
+    FM.sync(w, parcel, carry)
+    return len(FM.shares(w.s["parcels"][parcel]))
+
+
+def p_plots(w, parcel, frm, to, n, why="sold"):
+    """n plots of a parcel move from one party to another (D2-163; an agreement's leg): the giver's claims there give them up, the
+    newest first (a claim of all the plots becomes one of the rest), and the getter has a claim of n plots; the soil goes with them
+    (farm.sync), a crop standing stays its sower's until reaped."""
+    size = int(w.s["parcels"][parcel]["size"])
+    left = int(n)
+    rights = sorted({r for c in w.claims_on(("parcel", parcel)) for r in c["rights"] if c["claimant"] == frm}, key=ALL_RIGHTS.index) or "all"
+    for cid, c in reversed([(k, c) for k, c in w.s["claims"].items() if tuple(c["thing"]) == ("parcel", parcel) and c["claimant"] == frm
+                            and (c.get("until") is None or c["until"] >= w.d) and c.get("grounds") != "granted"]):
+        if left <= 0:
+            break
+        have = size if c.get("plots") is None else int(c["plots"])
+        k = min(have, left)
+        if k >= have:
+            c["until"] = w.d - 1
+        else:
+            c["plots"] = have - k
+        left -= k
+    cid = w._claim(("parcel", parcel), to, rights, "bought" if why == "sold" else why, by=frm, plots=int(n) - left)
+    from cybertron2.engine import farm as FM
+    FM.sync(w, parcel)
+    return cid
 
 
 def p_depart(w, person, road, to):
@@ -970,6 +1033,9 @@ PRIMITIVES = {
     "found": (p_found, _r("person", "person")),
     "claim": (p_claim, lambda kw: [tuple(kw["thing"])] if kw["thing"][0] in ("parcel", "building", "herd") else []),
     "end_claim": (p_end_claim, lambda kw: []),
+    "set_share": (p_set_share, _r("parcel", "parcel")),
+    "shares": (p_shares, _r("parcel", "parcel")),
+    "plots": (p_plots, _r("parcel", "parcel")),
     "depart": (p_depart, _r("person", "person")),
     "arrive": (p_arrive, lambda kw: []),                                   # checked by arrival: the person is on the road
     "harm": (p_harm, _r("person", "person")),

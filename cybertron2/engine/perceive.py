@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from types import SimpleNamespace
 
-from cybertron2.engine import knowledge as KN, signs as SG
+from cybertron2.engine import farm as FM, knowledge as KN, signs as SG
 from cybertron2.engine.data import COVERS, EDIBLE, FITTINGS, ITEMS, NOTICING, RESOURCES, TECHNIQUES
 from cybertron2.engine.here import Here, Mind
 
@@ -125,7 +125,7 @@ def describe(view) -> str:
         here = [p for p in view.parcels().values() if p["cover"] == cover]
         if not here or cover == "built":
             continue
-        gives = sorted({k for p in here for k in p["res"] if k in ("game", "seam", "quarry")} | {p["crop"]["kind"] for p in here if p.get("crop")})
+        gives = sorted({k for p in here for k in p["res"] if k in ("game", "seam", "quarry")} | {c["kind"] for p in here for _, _, c in FM.standing(p)})
         words = {"game": "game", "seam": "a copper seam", "quarry": "stone"}
         size = sum(p["size"] for p in here)
         land.append(("much " if size >= 6 else "") + cv["words"] + (f" ({', '.join(words.get(g, g) for g in gives)})" if gives else ""))
@@ -136,7 +136,6 @@ def describe(view) -> str:
         bits.append(", ".join(FITTINGS[f]["label"] for f in fits))
     herds = [h for h in view.herds().values() if h["count"] > 0]
     if herds:
-        from cybertron2.engine import farm as FM
         bits.append(", ".join(f"{h['kind']} ({FM.herd_words(h)})" for h in herds))
     trades = view.born_trades()
     if trades:

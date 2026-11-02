@@ -96,7 +96,7 @@ def test_the_cold_kills_a_growing_crop_unless_hardy():
     clear(w, "brook_field")
     give(w, "Edric", grain=10, rye=10)
     do(w, "Edric", do="work", what="sow", at="Long Field", item="grain")
-    do(w, "Edric", do="work", what="sow", at="Brook Field", item="rye")
+    do(w, "Edric", do="work", what="sow", at="Brook Field", item="rye", on="the Hales")   # the Hales' field: named (D2-172)
     while w.calendar()["season"] != "winter":
         w.s["day"] += 1
     w.s["parcels"]["long_field"]["crop"]["ripe_day"] = w.d + 3
@@ -308,7 +308,8 @@ def test_a_hired_worker_puts_the_work_into_the_employers_store():
     assert "into Reed House" in do(w, "Simkin", do="work", what="reap", at="Long Field", **{"for": "the Reeds"})   # a gift of work
     w.s["parcels"]["brook_field"]["crop"] = None
     w.s["containers"][w.s["buildings"]["reed_house"]["stock"]]["goods"]["grain"] = 20.0
-    assert "no grain to sow" in do(w, "Simkin", do="work", what="sow", at="Brook Field", item="grain", **{"for": "the Reeds"})  # not their seed
+    assert "no grain to sow" in do(w, "Simkin", do="work", what="sow", at="Brook Field", item="grain", on="the Hales",
+                                   **{"for": "the Reeds"})  # not their seed (the Hales' field, so named: D2-172)
     w.s["agreements"]["A1"] = {"node": "millbrook", "day": w.d, "status": "open", "parties": ["Fenn", "Reed"],
                                "legs": [{"work": 1, "done": 0, "by": None, "from": "Fenn", "to": "Reed", "when": {}}]}
     r = do(w, "Simkin", do="work", what="reap", at="Long Field", **{"for": "the Reeds"})

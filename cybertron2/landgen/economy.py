@@ -35,7 +35,7 @@ import sys
 
 import yaml
 
-from cybertron2.engine import capacity as CAP
+from cybertron2.engine import capacity as CAP, farm as FM
 from cybertron2.engine.data import ITEMS
 
 THRESHOLDS = {
@@ -98,8 +98,8 @@ def run_balance(w, days: int, nid=None, folk=None) -> dict:
         folk = [n for n, a in w.s["people"].items() if a.get("alive", True)]
     pars = [p for p in w.s["parcels"].values() if nid is None or p["node"] == nid]
     need_food = _eaters(w, folk) * days
-    crops = sum(float((p.get("crop") or {}).get("left", 0.0)) for p in pars
-                if (p.get("crop") or {}).get("ripe_day") is not None and int(p["crop"]["ripe_day"]) <= w.d + days)
+    crops = sum(float(c.get("left", 0.0)) for p in pars for _, _, c in FM.standing(p)            # every holding's crop (D2-172)
+                if c.get("ripe_day") is not None and int(c["ripe_day"]) <= w.d + days)
     woods = sum(p["size"] for p in pars if p["cover"] in ("forest", "scrub"))
     fields = sum(p["size"] for p in pars if p["cover"] == "field")
     grain = float(ITEMS["grain"]["food"])
@@ -226,12 +226,12 @@ def check(spec: dict) -> dict:
     # households: food a member against their own first harvest
     first_ripe = {}
     for pid, par in w.s["parcels"].items():
-        crop = par.get("crop") or {}
-        holders = [c["claimant"] for c in w.claims_on(("parcel", pid))]
-        rd = crop.get("ripe_day")
-        for h in holders:
-            if rd is not None:
-                first_ripe[h] = min(first_ripe.get(h, 99), int(rd))
+        for hd, _, crop in FM.standing(par):                                  # each holding's crop is its holder's (D2-172)
+            holders = [hd] if hd is not None else [c["claimant"] for c in w.claims_on(("parcel", pid))]
+            rd = crop.get("ripe_day")
+            for h in holders:
+                if rd is not None:
+                    first_ripe[h] = min(first_ripe.get(h, 99), int(rd))
     short, short_people, runways = [], 0, {}
     for iid, inst in w.s["institutions"].items():
         if inst.get("kind") != "household" or not inst["members"]:
