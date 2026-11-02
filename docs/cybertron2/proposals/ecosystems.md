@@ -120,6 +120,48 @@ coast to steppe) needs continent-scale worlds: the macro window scanned across a
 land (stage 3) and perhaps plates (L-39). Until then a world is one zone with its local belts, which is enough for every contrast in
 §4.
 
+## 4c. A coarse planet, and a detailed window where the society lives (Zach, 2 Nov)
+
+Zach: "How hard would it be to generate a planet coarsely, and then some small selection of it in detail where I place the actual
+society". It is a well-trodden pattern (Azgaar's map generator, Experilous's planet generator, WorldEngine). The estimate is two to
+three weeks of build for a decent version, almost all of it design and tuning; the computing is trivial.
+
+| Part | How | Size |
+| --- | --- | --- |
+| a sphere mesh | an icosahedron subdivided about 6 times: about 40,000 cells of about 100 km; pure numpy (scipy is not installed) | S |
+| continents and relief | noise-shaped continents first; plates later, if ever (L-39) | S (M with plates) |
+| climate | temperature from latitude and height; wind in latitude bands (trade winds, westerlies, polar easterlies); moisture carried from the oceans along the wind, dropped on windward slopes, with rain shadows; currents by rule (warm along continents' east coasts, cold along west coasts in the subtropics) | M |
+| zones | each cell classified from temperature, rainfall and seasonality (Köppen) | S |
+| rivers | flow accumulation on the sphere | S |
+| **the handoff to the window** | pick a place; turn the coarse cells around it into what the window generator already takes (§ below) | M, and the hard part |
+
+**The handoff.** The coarse cells around the chosen place become the window's inputs:
+- its latitude and temperature;
+- its wind direction and moisture;
+- which side the coast is on;
+- where ranges cross;
+- where large rivers enter, and how big they are;
+- its climate zone.
+
+The cleanest form is primitives (coast, ridge, river, with their anchors), which `macro.py` already composes, so the window
+generator stays as it is and pins keep working. The alternative, upscaling the coarse heights with added noise, makes it hard to keep
+a river entering where the planet says.
+
+**What it would buy:**
+- **The climate stops being an authoring choice.** A world can say "a river valley near 35° on a west coast", or the planet can be
+  searched for a place that matches.
+- **There is something beyond the map's edge** for the frontier, migration and long-distance trade (05_frontier).
+- **Later:** several societies on one planet, and continent-scale worlds (stage 3).
+
+**What it does not buy on its own.** Agents feel a planet only through:
+- the window's zone, which means nothing without the ecosystem palettes (§4, §6);
+- the engine systems that make the zone's constraint bind (§4's last column).
+
+A zone chosen by name, with the existing macro layer, gives nearly the same window for a fraction of the work. So the planet comes
+after the ecosystem layer and the first non-temperate engine system, not before.
+
+**Status:** possible later. Recommended deferred until at least one zone beyond temperate has its engine system (§9).
+
 ## 5. Extremes, as axes
 
 It may be cleaner to explore by axis than by named biome. Each axis is a dial a world can turn, and each extreme pushes a different
@@ -219,3 +261,4 @@ The order to explore zones should therefore follow the engine systems, not the o
 2. Method C (palettes, templates, succession), or another?
 3. Which zones to explore first, given each needs its engine system?
 4. Should worlds be described as a zone plus dial settings (§5)?
+5. The coarse planet (§4c): now, or deferred until a second zone has its engine system?
