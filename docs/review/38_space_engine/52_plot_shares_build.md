@@ -114,4 +114,4 @@ field and good by good. The scripts are in the session scratchpad (`digest.py`).
 - Pasture and meadow claims hold plots and show in the line, but nothing uses the shares yet (grazing and hay stay whole-parcel, as
   the brief says).
 - `wp/cybertron2` on origin has moved on by 9 commits since this branch was cut, some in files changed here (knowledge, life,
-  prompt, run, verbs, OPEN.md): the merge needs care.
+  prompt, run, verbs, OPEN.md). A trial merge (`git merge-tree`) has no conflicts; the suite wants a rerun after merging.
