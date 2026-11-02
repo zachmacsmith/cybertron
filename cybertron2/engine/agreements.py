@@ -8,7 +8,8 @@ payee (D2-36, D2-39). Semantics follow cybertron 1's standing contracts (D2-35),
 yet (38.17 §9).
 
 Leg: {from, to, item, qty, when: {"now"} | {"by": day} | {"every": n, "times": k, "next": day}, paid, arrears} or a work leg
-{from, to, work: days, done, by: day?}.
+{from, to, work: days, done, by: day?}, or a land leg {from, to, plots: n, of: the parcel's name, parcel, when: {"now"}, paid}: n plots
+of a field, pasture or meadow change hands when the offer is taken (D2-163: the routed claim primitive, world.p_plots).
 """
 from __future__ import annotations
 
@@ -51,10 +52,15 @@ def parse_legs(text, day, cal=None) -> list:
             legs.append({"work": int(m.group(1)), "done": 0, "by": int(by) - 1 if by else None,
                          **({"on": part[part.lower().index(m.group(3)):][:len(m.group(3))]} if m.group(3) else {})})
             continue
+        m = re.match(r"^(\d+)\s+plots?\s+(?:of|in)\s+(.+)$", low)                 # land: "2 plots of Long Field" (D2-163)
+        if m:
+            legs.append({"plots": int(m.group(1)), "of": part[part.lower().index(m.group(2)):].strip(), "when": {"now": True}, "paid": 0})
+            continue
         m = re.match(r"^([\d.]+)\s+(.+?)(?:\s+by\s+day\s+(\d+)|\s+every\s+(\d+)\s+days?(?:\s+for\s+(\d+)\s+times?)?)?$", low)
         if not m:
             raise Refused(f"could not read {part!r}: write goods as '2 bread', a promise as '1 copper tool by day 10', payments as "
-                          f"'2 grain every 3 days for 4 times', work as 'work 2 days' or 'work 2 days on the water wheel'")
+                          f"'2 grain every 3 days for 4 times', work as 'work 2 days' or 'work 2 days on the water wheel', land as "
+                          f"'2 plots of Long Field'")
         qty, item = float(m.group(1)), m.group(2).strip()
         from cybertron2.engine.verbs import item_of
         item = item_of(item)
@@ -73,6 +79,9 @@ def leg_text(leg, viewer=None, day=0, names=None) -> str:
     fr, to = names.get(leg["from"], leg["from"]), names.get(leg["to"], leg["to"])
     who = "you" if leg["from"] == viewer else fr
     whom = "you" if leg["to"] == viewer else to
+    if "plots" in leg:
+        return f"{who} give{'s' if who != 'you' else ''} {leg['plots']} plot{'s' if leg['plots'] != 1 else ''} of {leg['of']} to {whom}, " \
+            + ("done" if leg["paid"] else "now")
     if "work" in leg:
         return f"{who} work{'s' if who != 'you' else ''} {leg['work']} days for {whom}" + (f", {leg['on']}" if leg.get("on") else "") \
             + f" ({leg['done']} done)" + \
@@ -89,11 +98,37 @@ def leg_text(leg, viewer=None, day=0, names=None) -> str:
     return f"{head}, {when}{arr}"
 
 
+def _land(here, legs) -> None:
+    """A land leg names a field, pasture or meadow here (D2-163); its id goes on the leg."""
+    from cybertron2.engine import farm as FM
+    for leg in legs:
+        if "plots" in leg:
+            pid = here.parcel(leg["of"])
+            if pid is None or here.parcels()[pid]["cover"] not in FM.LAND:
+                raise Refused(f"there is no field, pasture or meadow called {leg['of']!r} here")
+            leg["parcel"], leg["of"] = pid, here.parcels()[pid]["name"]
+
+
+def _plots_short(here, who, leg, n=1) -> str:
+    """'' if `who` holds the plots a land leg gives (and, being a household's, the person may part with them), else why not."""
+    from cybertron2.engine import farm as FM
+    par = here.parcels()[leg["parcel"]]
+    have = FM.holdings(here.claims(("parcel", leg["parcel"])), par["size"]).get(who, 0)
+    if have < leg["plots"] * n:
+        return f"{who} holds {have} plot{'s' if have != 1 else ''} of {par['name']}, not {leg['plots'] * n}"
+    return ""
+
+
 def _offer_goods(here, legs, party) -> str:
     """'' if the offerer has the goods due now, here (carried, or in stores it may take from, or its party's)."""
     from cybertron2.engine import knowledge as KN
     extra = here.party_container(party) if party else None
     for leg in legs:
+        if "plots" in leg:
+            why = _plots_short(here, party or here.name, leg)
+            if why or "alienation" not in here.rights(("parcel", leg["parcel"])):
+                return why or f"you may not part with {leg['of']}: only one who holds it with the right to sell may"
+            continue
         if "item" in leg and leg["when"].get("now") and KN.available(here, leg["item"], extra=extra) + 1e-9 < leg["qty"]:
             return f"you do not have {leg['qty']:g} {leg['item']} here"
     return ""
@@ -108,6 +143,7 @@ def make_offer(here, mind, o) -> str:
         raise Refused(f"{to_raw} is not here; an offer is made face to face")
     party = _party(here, o["for"]) if o.get("for") else None
     give, get = parse_legs(o.get("give"), here.day, here.calendar), parse_legs(o.get("get"), here.day, here.calendar)
+    _land(here, give + get)
     if not give and not get:
         raise Refused("an offer needs something given or got")
     why = _offer_goods(here, give, party)
@@ -132,6 +168,8 @@ def offer_text(here, oid) -> str:
 
 
 def _leg_short(leg) -> str:
+    if "plots" in leg:
+        return f"{leg['plots']} plot{'s' if leg['plots'] != 1 else ''} of {leg['of']}"
     if "work" in leg:
         return f"work {leg['work']} days"
     w = leg["when"]
@@ -164,21 +202,36 @@ def accept(here, mind, a, party) -> str:
     for leg in o["get"]:
         if "item" in leg and leg["when"].get("now") and KN.available(here, leg["item"], extra=src_me) + 1e-9 < leg["qty"] * lots:
             raise Refused(f"you have only {show(KN.available(here, leg['item'], extra=src_me))} {leg['item']} to hand; nothing was exchanged")
+        if "plots" in leg:
+            why = _plots_short(here, me, leg, lots)
+            if why or "alienation" not in here.rights(("parcel", leg["parcel"])):
+                raise Refused((why or f"you may not part with {leg['of']}") + "; nothing was exchanged")
+    for leg in o["give"]:
+        if "plots" in leg:
+            why = _plots_short(here, o.get("for") or by, leg, lots)
+            if why:
+                raise Refused(why + "; nothing was exchanged")
     giver, getter = o.get("for") or by, me
     legs = [{**leg, "from": giver, "to": getter} for leg in o["give"]] + [{**leg, "from": getter, "to": giver} for leg in o["get"]]
     for leg in legs:                                                        # lots multiply the goods
         if "qty" in leg:
             leg["qty"] = round(leg["qty"] * lots, 6)
+        if "plots" in leg:
+            leg["plots"] = int(leg["plots"]) * lots
     for leg in legs:                                                        # now-legs, both ways, at once
         if "item" in leg and leg["when"].get("now"):
             payer = by if leg["from"] == giver else here.name
             src_extra = src_them if leg["from"] == giver else src_me
             _pay(here, payer, leg["from"], leg["to"], leg["item"], leg["qty"], src_extra)
             leg["paid"] = 1
+    for leg in legs:                                                        # land, at once: the claim moves (D2-163)
+        if "plots" in leg:
+            here.apply("plots", parcel=leg["parcel"], frm=leg["from"], to=leg["to"], n=leg["plots"], why="sold")
+            leg["paid"] = 1
     here.apply("set", ref=("offer", oid), field="taken", value=o["taken"] + lots)
     if o["taken"] >= o["lots"]:
         here.apply("close_offer", offer=oid, why="taken")
-    open_legs = [l for l in legs if "work" in l or not l["when"].get("now")]
+    open_legs = [l for l in legs if "work" in l or ("plots" not in l and not l["when"].get("now"))]
     names = {by, here.name}
     aid = here.new_agreement({"parties": sorted({giver, getter}), "legs": legs, "witnesses": here.people(),
                               "status": "open" if open_legs else "done", "offer": oid, "made_by": sorted(names)})
