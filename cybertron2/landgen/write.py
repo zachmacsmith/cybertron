@@ -4,7 +4,8 @@ people come from generate.py, unchanged; descriptions are templates from facts, 
 run; the cells are saved beside the world.
 
 What the world file gives is pinned. Under `generate:`: seed, size_km, km, settlements, configuration, configuration_params,
-features (primitives), places ({name: pins}), require (design checks that refuse), and any default in vocab.DEFAULTS. Everything else
+features (primitives), places ({name: pins}), require (design checks that refuse), allow (economic checks a designed hardship may
+fail: economy.py, review 02zl), and any default in vocab.DEFAULTS. Everything else
 in the file (calendar, lifespan, children, cast, `base:`) is kept as written and is what the generated parts sit in (stage 1 §11j).
 """
 from __future__ import annotations
@@ -345,6 +346,14 @@ def _generate(spec: dict, path, people: bool, describe: bool, out_path, provisio
             if (b.get("fittings") or {}).get("beds") and n:
                 b["size"] = b["fittings"]["beds"] = max(4, n + 1)
                 b["stock"] = {"grain": 8 * n, "beans": 2 * n, "timber": 8, "firewood": 6 * n}
+        # the economic checks, on the world as it will run (review 02zl): a refuse-level failure refuses the world unless the file
+        # allows it as a designed hardship (`allow: [carrying burden]`); the rest are warnings in the report
+        from cybertron2.landgen import economy as EC
+        allowed = set(gen.get("allow") or [])
+        for k, v in EC.check(world).items():
+            report["checks"][f"economy: {k}"] = {"kind": "economy", "level": v["level"], "ok": v["ok"], "detail": v["detail"]}
+            if not v["ok"] and v["level"] == "refuse" and k not in allowed:
+                report["refused"].append(f"economy: {k}")
     cells = {"x": g.x, "y": g.y, "h": L.h, "sea": L.sea, "lake": L.lake, "slope": L.slope, "temp": L.temp, "moist": L.moist,
              "acc": L.acc, "river": L.river, "spring": L.spring, "wet": L.wet, "tex": L.tex, "fert": L.fert, "f": L.f, "c": L.c,
              "terrain": L.terrain, "terrain_names": np.array(P.TERRAIN_NAMES), "cover": L.cover.astype(str),

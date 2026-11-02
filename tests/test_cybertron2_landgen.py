@@ -141,3 +141,50 @@ def test_hidden_ways_are_known_to_a_few_and_capacity_holds_for_the_people_made()
     assert (not hidden) or 1 <= len(knowers) <= 2 * 2 * len(hidden)
     cap = r["checks"]["capacity, people as generated"]
     assert cap["ok"], cap
+
+
+def test_economic_checks_run_on_the_people_made_and_pass_a_generated_world():
+    w, c, r = W.generate(spec(households=[2, 2]), people=True)
+    econ = {k: v for k, v in r["checks"].items() if v["kind"] == "economy"}
+    assert "economy: food over the run" in econ and "economy: carrying burden" in econ
+    assert not [k for k in r["refused"] if k.startswith("economy")], r["refused"]
+
+
+def _village(days=20, stock=None, fields=4, people=6, second=None):
+    """A hand world: one village (and a second, short one if asked) for the economic checks."""
+    def parcels(prefix, n_fields):
+        out = {f"{prefix}_house": {"cover": "built", "size": 1, "adj": [f"{prefix}_f0"] if n_fields else []}}
+        for i in range(n_fields):
+            out[f"{prefix}_f{i}"] = {"cover": "field", "size": 1, "fertility": 1.0, "adj": [f"{prefix}_house"]}
+        return out
+    nodes = {"a": {"name": "Ash", "parcels": parcels("a", fields)}}
+    buildings = {"a_home": {"name": "the Ash house", "node": "a", "parcel": "a_house", "structure": "timber", "size": 8,
+                            "fittings": {"hearth": 1, "beds": 8}, "household": "h_ash",
+                            "stock": stock if stock is not None else {"grain": 60, "firewood": 40}}}
+    agents = {f"P{i}": {"stage": "adult", "sex": "m" if i % 2 else "f", "household": "h_ash", "home": "a_home", "at": "a"}
+              for i in range(people)}
+    roads = []
+    if second:
+        nodes["b"] = {"name": "Birch", "parcels": parcels("b", 0)}
+        buildings["b_home"] = {"name": "the Birch house", "node": "b", "parcel": "b_house", "structure": "timber", "size": 8,
+                               "fittings": {"hearth": 1, "beds": 8}, "household": "h_birch", "stock": {"grain": 10, "firewood": 20}}
+        agents.update({f"Q{i}": {"stage": "adult", "sex": "m", "household": "h_birch", "home": "b_home", "at": "b"}
+                       for i in range(second)})
+        roads = [["a", "b", 1, {}]]
+    return {"name": "t", "seed": 1, "days": days, "calendar": {"season": "summer", "day": 1, "season_days": 6},
+            "nodes": nodes, "buildings": buildings, "agents": agents, "roads": roads}
+
+
+def test_economy_refuses_a_short_village_that_must_carry_its_food():
+    from cybertron2.landgen import economy as EC
+    c = EC.check(_village(second=6))
+    assert c["carrying burden"]["level"] == "refuse" and not c["carrying burden"]["ok"]
+    assert "carrying burden" in EC.refused(c)
+
+
+def test_economy_refuses_a_run_its_food_cannot_reach():
+    from cybertron2.landgen import economy as EC
+    c = EC.check(_village(days=30, stock={"firewood": 40}, fields=0, people=6))
+    assert "food over the run" in EC.refused(c)
+    ok = EC.check(_village(days=4, stock={"grain": 60, "firewood": 40}, fields=4, people=6))
+    assert "food over the run" not in EC.refused(ok)
