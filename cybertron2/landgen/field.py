@@ -110,3 +110,54 @@ def box_mean(a: np.ndarray, radius: int) -> np.ndarray:
     k = 2 * radius + 1
     s = c[k:, k:] - c[:-k, k:] - c[k:, :-k] + c[:-k, :-k]
     return s / (k * k)
+
+
+def travel(g: Grid, sources: np.ndarray, cost: np.ndarray, limit: float = np.inf) -> np.ndarray:
+    """Least cost from any source cell to every cell (multi-source Dijkstra over the eight neighbours), `cost` a cell's cost a km
+    (hours a km for travel); np.inf where unreachable or past `limit`."""
+    import heapq
+    ny, nx = g.shape
+    C = cost.ravel()
+    out = np.full(ny * nx, np.inf)
+    heap = []
+    for i in np.flatnonzero(sources.ravel()):
+        out[i] = 0.0
+        heap.append((0.0, int(i)))
+    heapq.heapify(heap)
+    step = [(dr * nx + dc, dr, dc, d * g.km) for (dr, dc), d in zip(N8, D8)]
+    while heap:
+        t, i = heapq.heappop(heap)
+        if t > out[i] or t > limit:
+            continue
+        r, c = divmod(i, nx)
+        for off, dr, dc, dk in step:
+            rr, cc = r + dr, c + dc
+            if 0 <= rr < ny and 0 <= cc < nx:
+                j = i + off
+                nt = t + dk * 0.5 * (C[i] + C[j])
+                if nt < out[j]:
+                    out[j] = nt
+                    heapq.heappush(heap, (nt, j))
+    out[out > limit] = np.inf
+    return out.reshape(g.shape)
+
+
+def components(mask: np.ndarray) -> tuple[np.ndarray, int]:
+    """Label the eight-connected pieces of a mask: (labels, 0 outside; count)."""
+    lab = np.zeros(mask.shape, dtype=np.int32)
+    ny, nx = mask.shape
+    n = 0
+    for r0, c0 in zip(*np.nonzero(mask)):
+        if lab[r0, c0]:
+            continue
+        n += 1
+        lab[r0, c0] = n
+        st = [(r0, c0)]
+        while st:
+            r, c = st.pop()
+            for dr, dc in N8:
+                rr, cc = r + dr, c + dc
+                if 0 <= rr < ny and 0 <= cc < nx and mask[rr, cc] and not lab[rr, cc]:
+                    lab[rr, cc] = n
+                    st.append((rr, cc))
+    return lab, n

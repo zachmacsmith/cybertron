@@ -17,7 +17,7 @@ from cybertron2.engine.data import PHYSICS
 from cybertron2.landgen import field as F, keyed, physical as P, vocab as V
 from cybertron2.landgen.physical import Land
 
-FORBIDDEN = {"water", "rock", "fen", "moor", "saltmarsh", "deep forest"}
+FORBIDDEN = {"water", "rock", "fen", "moor", "saltmarsh"}
 
 
 class Refused(Exception):
@@ -39,6 +39,8 @@ class Parcel:
     soil: str = ""
     wood_kind: str | None = None
     facts: dict = dfield(default_factory=dict)
+    eco: str = ""                  # its ecosystem (ecology.py): the commonest among its cells
+    band: int = 0                  # a wood's depth: 1 edge, 2 interior, 3 core
 
 
 @dataclass
@@ -413,10 +415,20 @@ def parcels(L: Land, conf: dict, s: Settlement, land: dict) -> list:
         texs = [V.TEXTURE[int(L.tex[r, c])] for r, c in cs]
         p.soil = max(set(texs), key=texs.count)
         p.fertility = round(float(L.fert[rr, cc].mean()), 2)
+        ecos = [L.eco[r, c] for r, c in cs] if L.eco is not None else []
+        p.eco = max(set(ecos), key=ecos.count) if ecos else ""
+        from cybertron2.landgen import ecology as EC
+        waste = EC.ECOSYSTEMS.get(p.eco, ("scrub",))[0]                    # the waste as its ground has become (heath, moor, fen ...)
+        if waste in ("forest", "field", "built", "water", "meadow"):          # grassland waste is the common's rough grazing
+            waste = V.WASTE_COVER.get(p.terrain, "scrub")
         p.cover = {"built": "built", "field": "field", "meadow": "meadow", "pasture": "pasture", "wood": "forest", "water": "water",
-                   "waste": V.WASTE_COVER.get(p.terrain, "scrub"), "mine": "rock"}[use]
+                   "waste": waste, "mine": "rock"}[use]
         if use == "wood":
             p.wood_kind = "managed wood"                                   # a village's own wood is worked (coppiced), whatever its size
+            forests = [e for e in ecos if e in EC.FORESTS]
+            p.eco = max(set(forests), key=forests.count) if forests else EC.natural_forest(p.terrain)
+            bands = [int(L.band[r, c]) for r, c in cs if L.band is not None]
+            p.band = max(1, min(2, max(bands) if bands else 1))           # a village's wood is worked: edge or interior, never core
         if p.cover == "scrub":
             p.wood_kind = "scrub"
         p.facts = {"terrain": p.terrain, "soil": p.soil, "height_m": round(h), "slope": round(sl, 1), "wet": round(wet, 2),

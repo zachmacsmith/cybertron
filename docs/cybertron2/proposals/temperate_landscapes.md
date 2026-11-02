@@ -1,6 +1,6 @@
 # Proposal: landscapes that make sense, within one environmental envelope
 
-Status: **design, for Zach's decision; nothing to build yet**. Zach, 2 Nov: "select a subset of the most relevant parts of the
+Status: **built** (D2-191; Zach, 2 Nov: "build this out"); as built in §5, with what differs from the design. Zach, 2 Nov: "select a subset of the most relevant parts of the
 planet and larger terrain systems / ecosystems that we think would make sense, and then design within that for now ... rn the
 environments generated don't make a whole bunch of sense". Owner 37.2. It narrows ecosystems.md (the wide design, kept for later)
 to what the generator should do now, and answers the review of the generated worlds below. Current as of 2 Nov.
@@ -122,10 +122,66 @@ band of large woods (ecosystems.md §6), so a village can sit at a forest's edge
 About one to two weeks in all. The engine needs nothing new: every ecosystem still maps to today's covers, and its own properties
 (forest type, depth) are written as data the engine ignores until it reads them.
 
+## 5. As built (2 Nov)
+
+Measured on all 18 configurations × 3 seeds (54 worlds; `docs/review/37_growth/02zm_temperate_landscapes.png` shows six). Every
+landscape check passes on every world.
+
+| | Before | After |
+| --- | --- | --- |
+| lakes a world | 53 to 261 | 0 in river country; at most one mere in a fen world; 10 tarns in the upland world |
+| forest cover | 39 to 83% | 30% (the `settled` default); 60% frontier, 15% long settled |
+| fen with islands | 0% fen | 32 to 35% fen, reedbed, carr and wet grazing |
+| estuary (was delta) | no saltmarsh or floodplain | 16 to 17% fen and wet ground, about 1% saltmarsh along the estuary |
+| ring basin | a round lake, 32% of the map | a ragged ring of hills; the basin drains through its gorge |
+| laid rivers | near-straight | meander between their anchor points |
+
+**What was built, by file:**
+- **`landgen/ecology.py`** (new):
+  - the palette (20 ecosystems: five wood types, meadows and grasslands, heath, moor and bog, fen and reedbed, saltmarsh);
+  - the natural ecosystem from terrain and system;
+  - clearing by how long settled, by suitability and nearness in travel time, nearness stopping at a day;
+  - depth bands: edge under 0.4 km, interior, core from 1.5 km.
+- **`landgen/physical.py`:**
+  - hollows breached along the drainage (least-cost, along the filled surface's paths);
+  - lakes only where a system allows, at least 0.3 km², at most 8 per 1,000 km² of such land, the largest;
+  - a fen's floor just above the sea and not cut into valleys, its small streams sinking into the peat, its ground peat;
+  - laid rivers arriving with their size's water, their channels falling only downstream (no capture by a crossing valley) and
+    never below the sea inland;
+  - each cell's landscape system.
+- **`landgen/macro.py`:**
+  - a `system` primitive;
+  - ragged edges on every bump, landmass, basin, ring, inlet and box;
+  - fractal coasts;
+  - meandering laid rivers;
+  - tidal estuary banks.
+
+  It also fixes a bug: **east and north coasts had no sea at all.**
+- **`landgen/vocab.py`:**
+  - terrain is now the base environment only ("woodland" and "deep forest" are gone; "sandy heath" is "sandy ground"; peat
+    added);
+  - the configurations rebuilt within the envelope: new are "estuary and fens", "sand country" and "upland and moor"; delta and
+    rift wait;
+  - the promises each one is checked against;
+  - rough grazing reconciled with D2-189.
+- **Parcels:**
+  - each carries its `ecosystem`, and a wood its `depth`;
+  - a wood's game is scaled by its type and depth, its forage by depth (more at the edge), so the engine already feels them;
+  - a village's waste is what its ground has become (heath, moor, common grazing), not always scrub.
+- **New checks:** "makes its own landscape", "lakes where lakes belong", "wood share by how long settled".
+
+**Differs from the design:**
+- **Templates are rules, not explicit sequences.** Each system's palette is applied by conditions (height, wetness, the distance to
+  the sea) within the system. A catena laid as an explicit ordered sequence was not needed to pass every check, so it is not
+  built.
+- **Coasts are ragged by noise, not by alternating hard and soft rock.**
+- **Laid rivers meander, but none braids across a wide floodplain,** and floodplains are still narrow: hay meadow is under 1% of the
+  plain lowland. To tune.
+- **A system box's edge can still show** (the upland world's western edge), softened by noise.
+- **The fens keep faint traces of the drainage paths.**
+
+These are in OPEN L-100.
+
 ## Open questions (for Zach)
 
-1. The envelope: temperate oceanic, lowland to moor, settled, with the seven systems above. Anything to add or drop?
-2. Templates that guarantee their landscape, with a check for each configuration?
-3. "How long settled" as the dial for the land's state (wood share from about 15% to 70%)?
-4. Build it once decided: before the cheap ladder runs, or after? The ladder's world is plain lowland, and it would look different
-   (fewer lakes, less forest) but play the same.
+1. ~~The envelope~~, 2. ~~templates with a check~~, 3. ~~the settled dial~~, 4. ~~when to build~~: decided and built (D2-191).

@@ -11,6 +11,7 @@ import math
 
 import numpy as np
 
+from cybertron2.landgen import ecology as EC
 from cybertron2.landgen import field as F, keyed, physical as P, vocab as V
 from cybertron2.landgen.physical import Land
 from cybertron2.landgen.settle import Parcel, Settlement
@@ -83,9 +84,13 @@ def _wild_parcels(L: Land, key: str, cells: list, kind: str) -> list:
     """A wild node's parcels: a way in (a clearing or the scar's foot) and the wild itself (old forest, or rock with a seam)."""
     ps = []
     if kind == "forest":
-        ps.append(Parcel(f"{key}_0", "wild", "meadow", cells[:1], size=1, side="south", height=1, terrain="woodland", soil="loam"))
+        r, c = cells[0]
+        terr = P.TERRAIN_NAMES[int(L.terrain[r, c])]
+        ecos = [L.eco[rc] for rc in cells[1:7] if L.eco[rc] in EC.FORESTS] or ["oak-ash wood"]
+        ps.append(Parcel(f"{key}_0", "wild", "meadow", cells[:1], size=1, side="south", height=1, terrain=terr, soil="loam",
+                         eco="grassland"))
         ps.append(Parcel(f"{key}_1", "wild", "forest", cells[1:7], size=min(6, max(3, len(cells) - 1)), side="centre", height=2,
-                         terrain="deep forest", soil="loam", wood_kind="old forest"))
+                         terrain=terr, soil="loam", wood_kind="old forest", eco=max(set(ecos), key=ecos.count), band=3))
     else:
         ps.append(Parcel(f"{key}_0", "wild", "rock", cells[:2], size=2, side="centre", height=3, terrain="hills", soil="loam"))
         ps.append(Parcel(f"{key}_1", "wild", "scrub", cells[2:4], size=2, side="south", height=2, terrain="hills", soil="loam",
@@ -103,7 +108,7 @@ def wild_nodes(L: Land, conf: dict, settlements: list, H: np.ndarray, dists: dic
     near = np.minimum.reduce([d for d in dists.values()]) if dists else np.full(g.shape, np.inf)
     out = []
     taken = np.zeros(g.shape, dtype=bool)
-    for kind, mask in (("forest", L.terrain == P.TERRAIN_NAMES.index("deep forest")),
+    for kind, mask in (("forest", L.band == 3),                         # deep forest: the core of a large wood (ecology.depth)
                        ("hills", np.isin(L.terrain, [P.TERRAIN_NAMES.index("hills"), P.TERRAIN_NAMES.index("upland pasture")]))):
         big = F.box_mean(mask.astype(float), 10) > 0.6                     # the heart of a large area
         if kind == "hills" and L.ore.any():                                # hill country is entered where its ore is

@@ -50,13 +50,17 @@ def _base_settings(spec: dict, path: str | None) -> dict:
 def _state(p, seam: bool = False) -> dict:
     """A parcel's resources in the engine's form, per unit of size from the hand-made worlds (vocab.PER_UNIT, stage 1 §11b)."""
     st = {}
+    from cybertron2.landgen import ecology as EC
     for k, v in V.PER_UNIT.get(p.cover, {}).items():
+        if k == "plants" and p.cover == "forest":                          # forage by the wood's depth: more at the edge, less in the core
+            v = v * EC.PLANTS_BY_BAND.get(p.band, 1.0)
         K = round(v * p.size, 1)
         st[k] = {"K": K, "S": K, "r": RES_R[k]}
     if p.wood_kind:
         st["wood"] = {"kind": p.wood_kind}
     g = V.GAME_PER_UNIT.get(p.wood_kind or "")
     if g:
+        g = g * EC.GAME_BY_TYPE.get(p.eco, 1.0) * EC.GAME_BY_BAND.get(p.band, 1.0)   # game by the wood's type and depth
         K = round(g * p.size, 1)
         st["game"] = {"K": K, "S": K, "r": RES_R["game"]}
     if seam and p.cover == "rock":
@@ -68,7 +72,7 @@ def _words(p) -> dict:
     """A parcel's facts in words, as a model is given them to describe (no numbers; only what is there)."""
     f = p.facts
     out = {"what": _text(p, ""), "land": p.terrain, "soil": {"clay": "heavy clay", "sand": "light sand", "chalk": "thin chalk",
-                                                             "loam": "loam"}.get(p.soil, p.soil),
+                                                             "loam": "loam", "peat": "black peat"}.get(p.soil, p.soil),
            "lie": {0: "low by the water", 1: "on the level", 2: "on a slope", 3: "up on the tops"}[p.height],
            "size": "small" if p.size <= 2 else ("middling" if p.size <= 6 else "large")}
     wet = f.get("wet", 0)
@@ -84,18 +88,26 @@ def _words(p) -> dict:
         out["spring"] = "a spring rises here"
     if f.get("slope", 0) > 8:
         out["slope"] = "steep"
+    if p.eco:
+        from cybertron2.landgen import ecology as EC
+        out["growing"] = EC.ECOSYSTEMS.get(p.eco, ("", p.eco))[1]
+    if p.cover == "forest" and p.band:
+        out["depth"] = {1: "the wood's edge", 2: "inside the wood", 3: "deep in the forest"}[p.band]
     return out
 
 
 def _text(p, node_name: str) -> str:
     """A template description from a parcel's facts (the fallback when no model writes it, D2-179)."""
+    from cybertron2.landgen import ecology as EC
+    tree = EC.ECOSYSTEMS.get(p.eco, ("", ""))[1] if p.eco in EC.FORESTS else ""
     words = {"built": "houses round a trodden green", "field": "ploughland", "meadow": "hay meadow", "pasture": "grazing",
-             "forest": {"old forest": "old oak and beech, deep and dim", "copse": "a small copse of ash and hazel",
-                        "managed wood": "coppiced hazel under oak standards"}.get(p.wood_kind or "", "woodland"),
+             "forest": {"old forest": (tree or "old oak and beech") + (", deep and dim" if p.band == 3 else ", old and tall"),
+                        "copse": "a small copse of ash and hazel",
+                        "managed wood": "coppiced, " + (tree or "hazel under oak standards")}.get(p.wood_kind or "", tree or "woodland"),
              "heath": "heather and gorse on thin sand", "moor": "wet peaty moor", "fen": "reed and sedge over standing water",
              "saltmarsh": "salt grass and creeks", "scrub": "thorn and rough grass", "rock": "bare rock and scree",
              "water": "running water"}.get(p.cover, p.cover)
-    soil = {"clay": "heavy clay", "sand": "light sand", "chalk": "thin chalky soil", "loam": "good loam"}.get(p.soil, p.soil)
+    soil = {"clay": "heavy clay", "sand": "light sand", "chalk": "thin chalky soil", "loam": "good loam", "peat": "black peat"}.get(p.soil, p.soil)
     where = {0: "low by the water", 1: "", 2: "on the slope", 3: "up on the tops"}[p.height]
     bits = [words] + ([f"on {soil}"] if p.cover in ("field", "meadow", "pasture") else []) + ([where] if where else [])
     return ", ".join(bits)
@@ -230,13 +242,17 @@ def _generate(spec: dict, path, people: bool, describe: bool, out_path, provisio
             if st:
                 entry["state"] = st
             entry["terrain"], entry["soil"] = p.terrain, p.soil              # data for stage 2; the engine ignores them now
+            if p.eco:
+                entry["ecosystem"] = p.eco                                     # temperate_landscapes.md: data; its stocks already differ
+            if p.cover == "forest" and p.band:
+                entry["depth"] = {1: "edge", 2: "interior", 3: "core"}[p.band]
             pars[p.pid] = entry
         kind_words = {"village": f"a village of {s.households} households", "stop": "a stopping place on the road",
                       "wild": {"forest": "old forest, far from any village", "hills": "broken hill country, stony"}.get(s.facts.get("wild"), "wild country")}
         terr = max((p.terrain for p in s.parcels), key=[p.terrain for p in s.parcels].count) if s.parcels else ""
         where = {"river floodplain": "on the river flats", "river terrace": "on a terrace above the river", "clay vale": "in a clay vale",
-                 "lowland loam": "in rolling lowland", "sandy heath": "on the heath's edge", "chalk down": "under the downs",
-                 "woodland": "in the woods", "deep forest": "deep in the forest", "hills": "in the hills", "upland pasture": "up on the tops",
+                 "lowland loam": "in rolling lowland", "sandy ground": "on the sand country's edge", "chalk down": "under the downs",
+                 "hills": "in the hills", "upland pasture": "up on the tops",
                  "moor": "on the moor", "fen": "in the fens", "coast": "by the sea", "saltmarsh": "by the salt marshes"}.get(terr, "")
         node = {"name": s.name, "text": describer("node", {"kind": s.kind, "terrain": terr, "households": s.households},
                                                   " ".join(x for x in (kind_words.get(s.kind, s.kind), where) if x)), "parcels": pars}
@@ -358,6 +374,7 @@ def _generate(spec: dict, path, people: bool, describe: bool, out_path, provisio
     cells = {"x": g.x, "y": g.y, "h": L.h, "sea": L.sea, "lake": L.lake, "slope": L.slope, "temp": L.temp, "moist": L.moist,
              "acc": L.acc, "river": L.river, "spring": L.spring, "wet": L.wet, "tex": L.tex, "fert": L.fert, "f": L.f, "c": L.c,
              "terrain": L.terrain, "terrain_names": np.array(P.TERRAIN_NAMES), "cover": L.cover.astype(str),
+             "eco": L.eco.astype(str), "band": L.band, "system": L.system.astype(str),
              "place": _place_grid(g, allnodes)}
     report["_picture"] = {"cover_of": {rc: p.cover for s in allnodes for p in s.parcels for rc in p.cells},
                           "sites": [s.site for s in allnodes], "road_cells": pic["road_cells"]}
@@ -487,6 +504,49 @@ def checks(L, conf, gen, settlements, extra, roads, world, settings) -> dict:
     counts = {s.name: len(s.parcels) for s in settlements}
     out["parcels per node"] = {"kind": "design", "ok": all(plo <= n <= phi for n in counts.values()), "detail": counts}
     out["access gates"] = {"kind": "design", "ok": True, "detail": "the bot dry run checks them once the people exist (scenario_design)"}
+    out.update(landscape_checks(L, conf))
+    return out
+
+
+def landscape_checks(L, conf) -> dict:
+    """Does the land make sense (temperate_landscapes.md §3): the configuration makes its own landscape, lakes only where this
+    landscape makes them, and the wood share matches how long the region has been settled."""
+    from cybertron2.landgen import ecology as EC
+    tn = np.array(P.TERRAIN_NAMES, dtype=object)[L.terrain]
+    land = ~L.sea & (tn != "water") | L.lake
+    n = max(int(land.sum()), 1)
+    area = n * L.g.km ** 2
+    out = {}
+    got = {}
+    for key, want in V.PROMISES.get(conf.get("configuration") or "", {}).items():
+        kind, _, what = key.partition(":")
+        if kind == "eco":
+            v = float(np.isin(L.eco[land], what.split("|")).sum() / n)
+            got[key] = (round(v, 3), want, v >= want)
+        elif kind == "terrain":
+            v = float((tn[land] == what).sum() / n)
+            got[key] = (round(v, 3), want, v >= want)
+        elif kind == "system":
+            v = float((L.system[land] == what).sum() / n)
+            got[key] = (round(v, 3), want, v >= want)
+        elif kind == "band":
+            v = float((L.band[land] == int(what)).sum() / n)
+            got[key] = (round(v, 3), want, v >= want)
+        elif kind == "lake_share":
+            v = float(L.lake[land].sum() / n)
+            got[key] = (round(v, 3), want, v <= want)
+    out["makes its own landscape"] = {"kind": "design", "ok": all(x[2] for x in got.values()),
+                                      "detail": {k: f"{v[0]} ({'at least' if not k.startswith('lake') else 'at most'} {v[1]})"
+                                                 for k, v in got.items()} or "no promise for this configuration"}
+    lab, k = F.components(L.lake)
+    stray = sum(1 for i in range(1, k + 1) if not L.lake_ok[lab == i].mean() > 0.5)
+    per = stray / area * 1000
+    out["lakes where lakes belong"] = {"kind": "design", "ok": per <= V.PROMISE_ALL["lakes"],
+                                       "detail": f"{k} lakes; {stray} outside fen or upland systems ({per:.1f} a 1,000 km2)"}
+    target, share = getattr(L, "wood_target", None), getattr(L, "wood_share", None)
+    if target is not None:
+        out["wood share by how long settled"] = {"kind": "design", "ok": abs(share - target) <= 0.05,
+                                                 "detail": f"{share:.2f} of the land in wood (settled: {conf.get('settled')}, {target:.2f})"}
     return out
 
 

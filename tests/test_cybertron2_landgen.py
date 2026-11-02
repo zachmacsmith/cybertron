@@ -210,3 +210,41 @@ def test_a_world_files_own_features_and_configuration_params_are_used():
     prims = M.primitives(conf)
     assert any(p["kind"] == "ore" and p["name"] == "lode" for p in prims)
     assert next(p for p in prims if p.get("name") == "spur")["height"] == 999
+
+
+@pytest.mark.parametrize("side", ["west", "east", "south", "north"])
+def test_a_coast_on_any_side_has_sea_on_that_side(side):
+    conf = {**V.DEFAULTS, **SMALL, "features": [{"kind": "coast", "name": "coast", "side": side, "at": 0.15}]}
+    g = F.grid(3, conf["size_km"], conf["km"])
+    L = P.build(conf, g, M.primitives(conf))
+    edge = {"west": L.sea[:, :5], "east": L.sea[:, -5:], "south": L.sea[:5, :], "north": L.sea[-5:, :]}[side]
+    far = {"west": L.sea[:, -5:], "east": L.sea[:, :5], "south": L.sea[-5:, :], "north": L.sea[:5, :]}[side]
+    assert edge.mean() > 0.8 and far.mean() < 0.05
+
+
+def _full(configuration, seed=11, **gen):
+    return W.generate({"name": "t", "seed": seed, "days": 10, "calendar": {"season": "summer", "day": 3, "season_days": 6},
+                       "generate": {"seed": seed, "configuration": configuration, **gen}})
+
+
+@pytest.mark.parametrize("configuration", ["plain", "fen with islands", "estuary and fens", "upland and moor", "scarp and vale",
+                                           "basin in a ring of hills"])
+def test_each_landscape_makes_itself_and_drains(configuration):
+    """temperate_landscapes.md §3: a configuration makes its own landscape; lakes only where fens or uplands make them; the wood
+    share follows how long the region has been settled."""
+    _, _, r = _full(configuration)
+    for k in ("makes its own landscape", "lakes where lakes belong", "wood share by how long settled", "laid rivers run where laid"):
+        assert r["checks"][k]["ok"], (configuration, k, r["checks"][k]["detail"])
+
+
+def test_how_long_settled_sets_the_wood_and_deep_forest_is_a_woods_core():
+    from cybertron2.landgen import ecology as EC
+    shares = {}
+    for word in ("frontier", "long settled"):
+        _, _, r = _full("plain", settled=word)
+        L = r["_land"]
+        shares[word] = L.wood_share
+        if word == "frontier":
+            assert (L.band == 3).any()                                      # large woods have a core
+            assert ((L.band == 3) & ~np.isin(L.eco, EC.FORESTS)).sum() == 0
+    assert shares["frontier"] > 0.5 > 0.2 > shares["long settled"]

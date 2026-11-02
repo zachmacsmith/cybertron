@@ -26,7 +26,7 @@ generated:
 nodes:
   Minehead:
     name: Minehead
-    text: a village of 2 households in rolling lowland
+    text: a village of 2 households in a clay vale
     parcels:
       Minehead_0:
         name: the Street
@@ -37,26 +37,29 @@ nodes:
         text: houses round a trodden green
         adj:
         - Minehead_1
-        - Minehead_2
         - Minehead_3
         - Minehead_4
-        terrain: lowland loam
-        soil: loam
+        - Minehead_5
+        terrain: clay vale
+        soil: clay
+        ecosystem: grassland
       Minehead_1:
         name: Middle Field
         cover: field
         size: 2
         side: centre
         height: 1
-        text: ploughland, on good loam
+        text: ploughland, on heavy clay
         adj:
         - Minehead_0
-        - Minehead_2
         - Minehead_3
         - Minehead_4
-        fertility: 0.99
-        terrain: lowland loam
-        soil: loam
+        - Minehead_5
+        - Minehead_6
+        fertility: 1.08
+        terrain: clay vale
+        soil: clay
+        ecosystem: grassland
         holder: Cotter
         state:
           crop:
@@ -64,18 +67,14 @@ nodes:
             left: 96
             ripe_day: 5
       Minehead_2:
-        name: Minehead Meadow
+        name: Mill Meadow
         cover: meadow
         size: 1
         side: east
-        height: 1
-        text: hay meadow, on good loam
+        height: 0
+        text: hay meadow, on heavy clay, low by the water
         adj:
-        - Minehead_0
-        - Minehead_1
-        - Minehead_3
         - Minehead_4
-        - Minehead_7
         state:
           plants:
             K: 1.3
@@ -85,8 +84,9 @@ nodes:
             K: 27.0
             S: 27.0
             r: 0.32
-        terrain: lowland loam
-        soil: loam
+        terrain: clay vale
+        soil: clay
+        ecosystem: grassland
         holder: Hayward
       Minehead_3:
         name: Minehead Common
@@ -94,12 +94,12 @@ nodes:
         size: 3
         side: centre
         height: 1
-        text: grazing, on good loam
+        text: grazing, on heavy clay
         adj:
         - Minehead_0
         - Minehead_1
-        - Minehead_2
         - Minehead_4
+        - Minehead_5
         state:
           plants:
             K: 3.0
@@ -109,15 +109,16 @@ nodes:
             K: 90.0
             S: 90.0
             r: 0.32
-        terrain: lowland loam
-        soil: loam
+        terrain: clay vale
+        soil: clay
+        ecosystem: grassland
       Minehead_4:
         name: Middle Wood
         cover: forest
-        size: 3
+        size: 2
         side: centre
         height: 1
-        text: coppiced hazel under oak standards
+        text: coppiced, oak and ash over hazel
         adj:
         - Minehead_0
         - Minehead_1
@@ -125,77 +126,99 @@ nodes:
         - Minehead_3
         state:
           plants:
-            K: 3.6
-            S: 3.6
+            K: 2.9
+            S: 2.9
             r: 0.3
           wood:
             kind: managed wood
           game:
-            K: 3.9
-            S: 3.9
+            K: 2.1
+            S: 2.1
             r: 0.25
-        terrain: lowland loam
-        soil: loam
+        terrain: clay vale
+        soil: clay
+        ecosystem: oak-ash wood
+        depth: edge
       Minehead_5:
-        name: Minehead Heath
-        cover: heath
+        name: Minehead Copse
+        cover: forest
         size: 1
-        side: north
+        side: south
         height: 1
-        text: heather and gorse on thin sand
+        text: coppiced, oak and ash over hazel
         adj:
-        - Minehead_6
+        - Minehead_0
+        - Minehead_1
+        - Minehead_3
+        - Minehead_8
         state:
           plants:
-            K: 0.6
-            S: 0.6
+            K: 1.4
+            S: 1.4
             r: 0.3
-          grass:
-            K: 6.0
-            S: 6.0
-            r: 0.32
-        terrain: sandy heath
-        soil: sand
+          wood:
+            kind: managed wood
+          game:
+            K: 1.0
+            S: 1.0
+            r: 0.25
+        terrain: clay vale
+        soil: clay
+        ecosystem: oak-ash wood
+        depth: edge
       Minehead_6:
-        name: Furze Common
-        cover: heath
-        size: 2
-        side: north
-        height: 3
-        text: heather and gorse on thin sand, up on the tops
+        name: Cow Close
+        cover: pasture
+        size: 3
+        side: east
+        height: 1
+        text: grazing, on thin chalky soil
         adj:
-        - Minehead_5
+        - Minehead_1
         - Minehead_7
         state:
           plants:
-            K: 1.2
-            S: 1.2
+            K: 3.0
+            S: 3.0
             r: 0.3
           grass:
-            K: 12.0
-            S: 12.0
+            K: 90.0
+            S: 90.0
             r: 0.32
-        terrain: sandy heath
-        soil: sand
+        terrain: chalk down
+        soil: chalk
+        ecosystem: chalk grassland
       Minehead_7:
         name: the Crags
         cover: rock
         size: 2
-        side: north
+        side: south
         height: 1
         text: bare rock and scree
         adj:
-        - Minehead_2
         - Minehead_6
         state:
           seam:
             S: 60
             K: 60
-        terrain: lowland loam
-        soil: loam
+        terrain: clay vale
+        soil: clay
+        ecosystem: grassland
+      Minehead_8:
+        name: Minehead Water
+        cover: water
+        size: 2
+        side: west
+        height: 0
+        text: running water, low by the water
+        adj:
+        - Minehead_5
+        terrain: clay vale
+        soil: clay
+        ecosystem: grassland
   Barrow:
     name: Barrow
-    text: a village of 1 households in a clay vale
+    text: a village of 1 households on a terrace above the river
     parcels:
       Barrow_0:
         name: Barrow Green
@@ -209,22 +232,26 @@ nodes:
         - Barrow_2
         - Barrow_3
         - Barrow_4
-        terrain: clay vale
-        soil: clay
+        - Barrow_5
+        terrain: river terrace
+        soil: loam
+        ecosystem: grassland
       Barrow_1:
         name: Barrow Field
         cover: field
         size: 3
         side: centre
-        height: 1
-        text: ploughland, on heavy clay
+        height: 0
+        text: ploughland, on good loam, low by the water
         adj:
         - Barrow_0
         - Barrow_3
         - Barrow_4
-        fertility: 1.08
-        terrain: clay vale
-        soil: clay
+        - Barrow_5
+        fertility: 1.22
+        terrain: lowland loam
+        soil: loam
+        ecosystem: grassland
         holder: Bell
         state:
           crop:
@@ -235,12 +262,13 @@ nodes:
         name: Tame Meadow
         cover: meadow
         size: 1
-        side: north
-        height: 0
-        text: hay meadow, on heavy clay, low by the water
+        side: centre
+        height: 1
+        text: hay meadow, on good loam
         adj:
         - Barrow_0
-        - Barrow_6
+        - Barrow_3
+        - Barrow_5
         state:
           plants:
             K: 1.3
@@ -250,8 +278,9 @@ nodes:
             K: 27.0
             S: 27.0
             r: 0.32
-        terrain: river floodplain
-        soil: clay
+        terrain: river terrace
+        soil: loam
+        ecosystem: grassland
         holder: Bell
       Barrow_3:
         name: the Leaze
@@ -259,10 +288,11 @@ nodes:
         size: 2
         side: centre
         height: 1
-        text: grazing, on heavy clay
+        text: grazing, on good loam
         adj:
         - Barrow_0
         - Barrow_1
+        - Barrow_2
         state:
           plants:
             K: 2.0
@@ -272,63 +302,50 @@ nodes:
             K: 60.0
             S: 60.0
             r: 0.32
-        terrain: clay vale
-        soil: clay
+        terrain: river terrace
+        soil: loam
+        ecosystem: grassland
       Barrow_4:
         name: Barrow Copse
         cover: forest
         size: 1
-        side: centre
+        side: north
         height: 1
-        text: coppiced hazel under oak standards
+        text: coppiced, oak and ash over hazel
         adj:
         - Barrow_0
         - Barrow_1
         - Barrow_5
         state:
           plants:
-            K: 1.2
-            S: 1.2
+            K: 1.4
+            S: 1.4
             r: 0.3
           wood:
             kind: managed wood
           game:
-            K: 1.3
-            S: 1.3
+            K: 1.0
+            S: 1.0
             r: 0.25
-        terrain: clay vale
-        soil: clay
+        terrain: river terrace
+        soil: loam
+        ecosystem: oak-ash wood
+        depth: edge
       Barrow_5:
-        name: the Sedge
-        cover: fen
-        size: 2
-        side: west
-        height: 0
-        text: reed and sedge over standing water, low by the water
-        adj:
-        - Barrow_4
-        state:
-          plants:
-            K: 2.0
-            S: 2.0
-            r: 0.3
-          grass:
-            K: 20.0
-            S: 20.0
-            r: 0.32
-        terrain: fen
-        soil: clay
-      Barrow_6:
-        name: the Tame
+        name: the Brook
         cover: water
         size: 2
-        side: north
+        side: centre
         height: 0
         text: running water, low by the water
         adj:
+        - Barrow_0
+        - Barrow_1
         - Barrow_2
-        terrain: river floodplain
-        soil: clay
+        - Barrow_4
+        terrain: lowland loam
+        soil: loam
+        ecosystem: grassland
   Wheatley:
     name: Wheatley
     text: a village of 1 households in a clay vale
@@ -338,29 +355,33 @@ nodes:
         cover: built
         size: 1
         side: centre
-        height: 0
-        text: houses round a trodden green, low by the water
+        height: 1
+        text: houses round a trodden green
         adj:
         - Wheatley_1
         - Wheatley_2
         - Wheatley_3
+        - Wheatley_4
         terrain: clay vale
         soil: clay
+        ecosystem: grassland
       Wheatley_1:
-        name: Clay Field
+        name: Brook Field
         cover: field
         size: 6
-        side: centre
-        height: 1
-        text: ploughland, on heavy clay
+        side: east
+        height: 0
+        text: ploughland, on heavy clay, low by the water
         adj:
         - Wheatley_0
         - Wheatley_2
         - Wheatley_3
         - Wheatley_4
-        fertility: 1.09
-        terrain: clay vale
+        - Wheatley_5
+        fertility: 1.27
+        terrain: river floodplain
         soil: clay
+        ecosystem: hay meadow
         holder: Carter
         state:
           crop:
@@ -368,7 +389,7 @@ nodes:
             left: 288
             ripe_day: 5
       Wheatley_2:
-        name: Wheatley Meadow
+        name: Isel Meadow
         cover: meadow
         size: 1
         side: centre
@@ -377,7 +398,7 @@ nodes:
         adj:
         - Wheatley_0
         - Wheatley_1
-        - Wheatley_3
+        - Wheatley_4
         state:
           plants:
             K: 1.3
@@ -389,20 +410,18 @@ nodes:
             r: 0.32
         terrain: clay vale
         soil: clay
+        ecosystem: grassland
         holder: Carter
       Wheatley_3:
         name: the Common
         cover: pasture
         size: 2
-        side: centre
+        side: north
         height: 1
         text: grazing, on heavy clay
         adj:
         - Wheatley_0
         - Wheatley_1
-        - Wheatley_2
-        - Wheatley_4
-        - Wheatley_5
         state:
           plants:
             K: 2.0
@@ -414,124 +433,74 @@ nodes:
             r: 0.32
         terrain: clay vale
         soil: clay
+        ecosystem: grassland
       Wheatley_4:
         name: the Spinney
         cover: forest
         size: 2
         side: centre
         height: 1
-        text: coppiced hazel under oak standards
+        text: coppiced, oak and ash over hazel
         adj:
+        - Wheatley_0
         - Wheatley_1
-        - Wheatley_3
+        - Wheatley_2
         state:
           plants:
-            K: 2.4
-            S: 2.4
+            K: 2.9
+            S: 2.9
             r: 0.3
           wood:
             kind: managed wood
           game:
-            K: 2.6
-            S: 2.6
+            K: 2.1
+            S: 2.1
             r: 0.25
         terrain: clay vale
         soil: clay
+        ecosystem: oak-ash wood
+        depth: edge
       Wheatley_5:
-        name: the Carr
-        cover: fen
-        size: 1
-        side: north
+        name: the Isel
+        cover: water
+        size: 2
+        side: east
         height: 0
-        text: reed and sedge over standing water, low by the water
+        text: running water, low by the water
         adj:
-        - Wheatley_3
-        state:
-          plants:
-            K: 1.0
-            S: 1.0
-            r: 0.3
-          grass:
-            K: 10.0
-            S: 10.0
-            r: 0.32
-        terrain: fen
-        soil: sand
-  t1:
-    name: Hazelstead
-    text: a stopping place on the road deep in the forest
-    parcels:
-      t1_0:
-        name: the Ham
-        cover: meadow
-        size: 1
-        side: centre
-        height: 1
-        text: hay meadow, on good loam
-        adj: []
-        state:
-          plants:
-            K: 1.3
-            S: 1.3
-            r: 0.3
-          grass:
-            K: 27.0
-            S: 27.0
-            r: 0.32
-        terrain: deep forest
-        soil: loam
+        - Wheatley_1
+        terrain: river floodplain
+        soil: clay
+        ecosystem: wet grassland
 roads:
 - - Minehead
-  - Wheatley
+  - Barrow
   - 1
-  - terrain: woodland
-    way: the path under the trees
+  - terrain: plain
+    way: the open road
     ends:
       Minehead:
         parcels:
         - Minehead_3
         side: north
-      Wheatley:
-        parcels:
-        - Wheatley_1
-        side: north
-- - Minehead
-  - t1
-  - 1
-  - terrain: woodland
-    way: the path under the trees
-    ends:
-      Minehead:
-        parcels:
-        - Minehead_4
-        side: north
-      t1:
-        parcels:
-        - t1_0
-        side: north
-    stretches:
-      1:
-        landmarks:
-        - meadow
-- - t1
-  - Barrow
-  - 1
-  - terrain: woodland
-    way: the path under the trees
-    ends:
-      t1:
-        parcels:
-        - t1_0
-        side: north
       Barrow:
         parcels:
-        - Barrow_0
+        - Barrow_2
         side: north
-    stretches:
-      1:
-        landmarks:
-        - spring
-        - meadow
+- - Barrow
+  - Wheatley
+  - 1
+  - terrain: plain
+    way: the open road
+    ends:
+      Barrow:
+        parcels:
+        - Barrow_1
+        side: north
+      Wheatley:
+        parcels:
+        - Wheatley_3
+        side: north
 buildings:
   cotter_house:
     name: Cotter House
@@ -660,7 +629,7 @@ herds:
   hayward_cattle:
     name: the Hayward cows
     kind: cattle
-    parcel: Minehead_3
+    parcel: Minehead_6
     cows: 2
     young: 1
     in_milk: 1
@@ -790,6 +759,9 @@ agents:
       milk:
         level: known
         skill: 1.8
+      plough:
+        level: known
+        skill: 1.8
       quarry:
         level: known
         skill: 1.8
@@ -806,7 +778,6 @@ agents:
         level: known
         skill: 1.5
     aware_of:
-      plough: you have seen the Carters at it all your life
       smelt: you have seen the Cotters at it all your life
       copper tool: you have seen the Cotters at it all your life
       coin: you have seen the Cotters at it all your life
@@ -852,6 +823,9 @@ agents:
       milk:
         level: known
         skill: 1.75
+      plough:
+        level: known
+        skill: 1.75
       quarry:
         level: known
         skill: 1.75
@@ -868,7 +842,6 @@ agents:
         level: known
         skill: 1.48
     aware_of:
-      plough: you have seen the Carters at it all your life
       smelt: you have seen the Cotters at it all your life
       copper tool: you have seen the Cotters at it all your life
       coin: you have seen the Cotters at it all your life
@@ -1034,13 +1007,13 @@ agents:
     knows:
       hoe: capable
       milk: capable
+      plough: capable
       quarry: capable
       reap: capable
       select seed: capable
       sow: capable
       weed: capable
     aware_of:
-      plough: you have seen the Carters at it all your life
       smelt: you have seen the Cotters at it all your life
       copper tool: you have seen the Cotters at it all your life
       coin: you have seen the Cotters at it all your life
@@ -1083,13 +1056,13 @@ agents:
     knows:
       hoe: rough
       milk: rough
+      plough: rough
       quarry: rough
       reap: rough
       select seed: rough
       sow: rough
       weed: rough
     aware_of:
-      plough: you have seen the Carters at it all your life
       smelt: you have seen the Cotters at it all your life
       copper tool: you have seen the Cotters at it all your life
       coin: you have seen the Cotters at it all your life
@@ -1106,7 +1079,7 @@ agents:
     model: claude-haiku-5-5
     born_line: Hayward
     trade: ''
-    aim: Prove yourself to your family, and learn making a copper hand tool as the Cotters do it.
+    aim: Prove yourself to your family, and learn building a medium room as the Carters do it.
   Bennet:
     household: Bell
     born: -98
@@ -1170,7 +1143,7 @@ agents:
     model: claude-haiku-5-5
     born_line: Bell
     trade: sowing a field broadcast and reaping a crop
-    aim: Pass on what you know before your strength goes.
+    aim: See your grandchildren settled and provided for before you die.
   Petronel:
     household: Bell
     born: -90
@@ -1420,7 +1393,7 @@ agents:
     model: claude-haiku-5-5
     born_line: Carter
     trade: ''
-    aim: Prove yourself to your family, and learn striking coin as the Cotters do it.
+    aim: Prove yourself to your family, and learn smelting copper as the Cotters do it.
   Thomas:
     household: Carter
     born: -24
@@ -1470,7 +1443,7 @@ agents:
     model: claude-haiku-5-5
     born_line: Carter
     trade: ''
-    aim: Prove yourself to your family, and learn quarrying stone as the Haywards do it.
+    aim: Prove yourself to your family, and learn striking coin as the Cotters do it.
 tree:
 - name: Ralf
   sex: m

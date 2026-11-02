@@ -36,45 +36,49 @@ DEFAULTS = {
     "chalk_n": 0.35,
     "ore_belt": 0.82,             # ridged noise above this, in hill country, is an ore belt (copper)
     "road_day_hours": 8.0,        # a day on the road (stage 1 §11f)
-    "deep_forest_km": 12.0,       # woodland this far from any settlement is deep forest (stage 1 §11a: d > 15, scaled to 50 km)
+    "settled": "settled",         # how long the region has been settled: frontier, settled, long settled, or a wood share (0 to 1);
+                                  # sets how much of the wildwood is cleared (temperate_landscapes.md §3c)
+    "core_km": 1.5,               # a wood's core: this far inside its edge (deep forest is the core of any large wood)
+    "edge_km": 0.4,               # a wood's edge band
+    "lake_min_km2": 0.3,          # a hollow allowed a lake keeps it only if this large; smaller ones drain (a tarn, a mere)
+    "lakes_per_1000km2": 8.0,     # ... and at most this many, the largest, in the land that makes lakes (fens, uplands)
 }
+# the wood share of the land by how long settled (Domesday England about 15%; a frontier mostly wood)
+WOOD_SHARE = {"frontier": 0.6, "settled": 0.3, "long settled": 0.15}
+# how much nearness to a village decides what is cleared, against how good the land is: on a frontier only near villages; in long
+# settled land wherever the land is good (others beyond the window cleared it too)
+NEAR_WEIGHT = {"frontier": 2.5, "settled": 0.8, "long settled": 0.3}
 
 # ---------------------------------------------------------------------- terrains (generator.md §10, D2-183; stage 1 §11a)
 # Each terrain: conditions on a cell's context, as (weight, test). h height m, s slope degrees, m moisture 0-1, w wetness 0-1,
 # tex texture (0 sand, 1 loam, 2 clay, 3 chalk), f height above the nearest river m, river (a river's class 0-3 within 1.5 km),
 # c distance to the sea km. The best total wins; a test missed costs half its weight.
-SAND, LOAM, CLAY, CHALK = 0, 1, 2, 3
-TEXTURE = {SAND: "sand", LOAM: "loam", CLAY: "clay", CHALK: "chalk"}
+SAND, LOAM, CLAY, CHALK, PEAT = 0, 1, 2, 3, 4
+TEXTURE = {SAND: "sand", LOAM: "loam", CLAY: "clay", CHALK: "chalk", PEAT: "peat"}
 TERRAINS = {
     "river floodplain": [(2.0, lambda x: x.f < 2), (1.5, lambda x: x.near_river >= 2), (1.0, lambda x: x.s < 2)],
     "river terrace": [(1.5, lambda x: (x.f >= 2) & (x.f < 8)), (1.0, lambda x: x.near_river >= 1), (1.0, lambda x: x.s < 4),
                       (0.5, lambda x: (x.tex == LOAM) | (x.tex == SAND))],
     "clay vale": [(2.0, lambda x: x.tex == CLAY), (1.0, lambda x: x.h < 150), (0.5, lambda x: x.s < 5), (0.5, lambda x: x.m >= 0.4)],
     "lowland loam": [(1.5, lambda x: x.tex == LOAM), (1.0, lambda x: x.h < 200), (1.0, lambda x: x.s < 6)],
-    "sandy heath": [(2.0, lambda x: x.tex == SAND), (1.0, lambda x: x.m < 0.45)],
+    "sandy ground": [(2.0, lambda x: x.tex == SAND), (1.0, lambda x: x.m < 0.45)],
     "chalk down": [(2.5, lambda x: x.tex == CHALK), (0.5, lambda x: (x.h >= 80) & (x.h <= 300)), (0.5, lambda x: (x.s >= 2) & (x.s <= 15))],
-    "woodland": [(1.0, lambda x: x.m >= 0.5), (0.5, lambda x: x.s < 15), (0.5, lambda x: x.w < 0.7), (0.6, lambda x: x.wild > 0.3)],
     "hills": [(2.0, lambda x: ((x.h >= 250) & (x.h <= 600)) | (x.s >= 10))],
     "upland pasture": [(2.0, lambda x: x.h >= 450), (0.5, lambda x: x.s < 15)],
     "moor": [(1.0, lambda x: x.h >= 300), (1.0, lambda x: x.m >= 0.6), (1.0, lambda x: x.w >= 0.6)],
-    "fen": [(1.5, lambda x: x.h < 50), (2.0, lambda x: x.w >= 0.8), (1.0, lambda x: x.s < 1)],
+    "fen": [(1.5, lambda x: x.h < 50), (2.0, lambda x: x.w >= 0.8), (1.0, lambda x: x.s < 1), (4.0, lambda x: (x.fen > 0.5) & (x.w >= 0.6))],
     "coast": [(2.0, lambda x: x.c < 1), (1.0, lambda x: x.h < 20)],
     "saltmarsh": [(1.5, lambda x: x.c < 2), (1.5, lambda x: x.h < 3), (1.0, lambda x: x.w >= 0.7)],
     "rock": [(4.0, lambda x: x.s >= 30)],
 }
-# deep forest is woodland far from any settlement, decided after siting (stage 1 §11a)
-
-# natural cover before anyone settles, by terrain (stage 1 §3.6); the engine's covers and D2-185's four new ones
-NATURAL = {"river floodplain": "meadow", "river terrace": "pasture", "clay vale": "forest", "lowland loam": "forest",
-           "sandy heath": "heath", "chalk down": "pasture", "woodland": "forest", "deep forest": "forest", "hills": "pasture",
-           "upland pasture": "pasture", "moor": "moor", "fen": "fen", "coast": "pasture", "saltmarsh": "saltmarsh", "rock": "rock"}
+# woodland and deep forest are no longer terrains: they are ecosystems and a wood's depth (ecology.py; temperate_landscapes.md)
 
 # what a land use may become on each terrain (stage 1 §11b): fields only where they can grow; built ground where it can stand
-FIELD_OK = {"river floodplain", "river terrace", "clay vale", "lowland loam", "sandy heath", "chalk down", "hills", "coast"}
-BUILT_OK = {"river terrace", "lowland loam", "clay vale", "chalk down", "coast", "hills", "sandy heath"}
+FIELD_OK = {"river floodplain", "river terrace", "clay vale", "lowland loam", "sandy ground", "chalk down", "hills", "coast"}
+BUILT_OK = {"river terrace", "lowland loam", "clay vale", "chalk down", "coast", "hills", "sandy ground"}
 MEADOW_OK = {"river floodplain", "fen", "river terrace"}
-WOOD_OK = {"woodland", "deep forest", "clay vale", "lowland loam", "hills"}
-WASTE_COVER = {"sandy heath": "heath", "moor": "moor", "fen": "fen", "saltmarsh": "saltmarsh", "rock": "rock", "hills": "scrub",
+WOOD_OK = {"clay vale", "lowland loam", "hills", "river terrace", "chalk down", "sandy ground"}
+WASTE_COVER = {"sandy ground": "heath", "moor": "moor", "fen": "fen", "saltmarsh": "saltmarsh", "rock": "rock", "hills": "scrub",
                "upland pasture": "scrub", "chalk down": "scrub", "coast": "scrub"}
 
 # ---------------------------------------------------------------------- roads (stage 1 §11f)
@@ -93,10 +97,10 @@ PER_UNIT = {
     "pasture": {"plants": 1.0, "grass": 30.0},
     "meadow": {"plants": 1.3, "grass": 27.0},
     "scrub": {"plants": 1.0, "grass": 10.0},
-    "heath": {"plants": 0.6, "grass": 6.0},
-    "moor": {"plants": 0.5, "grass": 8.0},
-    "fen": {"plants": 1.0, "grass": 10.0},
-    "saltmarsh": {"plants": 0.5, "grass": 12.0},
+    "heath": {"plants": 0.6, "grass": 30.0 * 0.4},       # rough grazing at D2-189's share of pasture (data.PHYSICS cattle grazing)
+    "moor": {"plants": 0.5, "grass": 30.0 * 0.3},
+    "fen": {"plants": 1.0, "grass": 30.0 * 0.5},
+    "saltmarsh": {"plants": 0.5, "grass": 30.0 * 0.7},
     "forest": {"plants": 1.2},
 }
 GAME_PER_UNIT = {"managed wood": 1.3, "copse": 0.5, "old forest": 3.5}
@@ -138,48 +142,74 @@ CONFIGS = {
          "gap_width": 0.025, "gap_depth": 0.95},
         {"kind": "river", "name": "river", "through": [[1.0, 0.56], [0.5, 0.5], [0.0, 0.44]]}],
     "scarp and vale": [
+        {"kind": "system", "name": "downland", "system": "scarp and vale", "box": [0.0, 0.0, 1.0, 1.0]},
         {"kind": "scarp", "name": "scarp", "from": [0.0, 0.56], "to": [1.0, 0.56], "height": 170, "width": 0.03, "high": "north"},
         {"kind": "geology", "name": "downs", "texture": "chalk", "box": [0.0, 0.56, 1.0, 1.0]},
         {"kind": "geology", "name": "vale", "texture": "clay", "box": [0.0, 0.0, 1.0, 0.5]}],
     "plateau with few ascents": [
         {"kind": "plateau", "name": "plateau", "at": [0.5, 0.55], "r": 0.3, "height": 300, "edge": 0.025,
          "climbs": [0.1, 0.45, 0.78]}],
-    "fen with islands": [
-        {"kind": "fen", "name": "fen", "at": [0.5, 0.5], "r": 0.36},
-        {"kind": "massif", "name": "island_1", "at": [0.38, 0.6], "r": 0.05, "height": 18},
-        {"kind": "massif", "name": "island_2", "at": [0.62, 0.55], "r": 0.05, "height": 18},
-        {"kind": "massif", "name": "island_3", "at": [0.5, 0.36], "r": 0.05, "height": 18}],
+    "fen with islands": [                                              # a fen basin open to the sea, a river through it, low islands
+        {"kind": "coast", "name": "coast", "side": "east", "at": 0.08},
+        {"kind": "fen", "name": "fen", "at": [0.64, 0.5], "r": 0.36},
+        {"kind": "river", "name": "river", "through": [[0.0, 0.52], [0.36, 0.5], [0.7, 0.47], [1.0, 0.5]], "flow": "large"},
+        {"kind": "massif", "name": "island_1", "at": [0.55, 0.64], "r": 0.05, "height": 14},
+        {"kind": "massif", "name": "island_2", "at": [0.74, 0.56], "r": 0.05, "height": 14},
+        {"kind": "massif", "name": "island_3", "at": [0.62, 0.34], "r": 0.05, "height": 14}],
+    "estuary and fens": [                                              # a tidal estuary with fens round its head and saltmarsh along it
+        {"kind": "coast", "name": "coast", "side": "east", "at": 0.1},
+        {"kind": "inlet", "name": "estuary", "from": [1.0, 0.5], "to": [0.6, 0.52], "width": 0.035, "tidal": True},
+        {"kind": "fen", "name": "fens", "at": [0.62, 0.5], "r": 0.24},
+        {"kind": "river", "name": "river", "through": [[0.0, 0.46], [0.3, 0.5], [0.6, 0.52]], "flow": "large"}],
+    "sand country": [                                                  # sand and gravel ridges: birch and pine, heath where grazed
+        {"kind": "system", "name": "sands", "system": "sand country", "box": [0.25, 0.2, 0.85, 0.85]},
+        {"kind": "geology", "name": "sands", "texture": "sand", "box": [0.25, 0.2, 0.85, 0.85]},
+        {"kind": "massif", "name": "ridge", "at": [0.55, 0.55], "r": 0.25, "height": 70}],
+    "upland and moor": [                                               # hills rising to open moor, steep valleys, a few tarns
+        {"kind": "system", "name": "uplands", "system": "upland", "box": [0.3, 0.25, 1.0, 1.0]},
+        {"kind": "massif", "name": "moor", "at": [0.68, 0.66], "r": 0.34, "height": 560},
+        {"kind": "ridge", "name": "edge", "from": [0.3, 0.3], "to": [0.9, 0.95], "height": 180, "width": 0.08}],
     "confluence plain": [
         {"kind": "river", "name": "north_river", "through": [[0.0, 0.85], [0.3, 0.65], [0.5, 0.5]]},
         {"kind": "river", "name": "south_river", "through": [[0.0, 0.15], [0.3, 0.35], [0.5, 0.5]]},
         {"kind": "river", "name": "confluence", "through": [[0.5, 0.5], [0.75, 0.5], [1.0, 0.48]]}],
     "isthmus": [
         {"kind": "sea", "name": "sea"},
-        {"kind": "landmass", "name": "west_land", "at": [0.24, 0.5], "r": 0.22},
-        {"kind": "landmass", "name": "east_land", "at": [0.76, 0.5], "r": 0.22},
+        {"kind": "landmass", "name": "west_land", "at": [0.25, 0.5], "r": 0.27},
+        {"kind": "landmass", "name": "east_land", "at": [0.75, 0.5], "r": 0.27},
         {"kind": "landmass", "name": "neck", "from": [0.24, 0.5], "to": [0.76, 0.5], "r": 0.035}],
     "coastal strip under mountains": [
         {"kind": "coast", "name": "coast", "side": "west", "at": 0.14},
         {"kind": "ridge", "name": "mountains", "from": [0.4, 0.0], "to": [0.4, 1.0], "height": 560, "width": 0.1,
          "gaps": [0.3, 0.75], "gap_depth": 0.5}],
-    "basin in a ring of hills": [
-        {"kind": "ring", "name": "ring", "at": [0.5, 0.5], "r": 0.38, "height": 360, "width": 0.07, "gaps": [0.25]},
-        {"kind": "basin", "name": "basin", "at": [0.5, 0.5], "r": 0.3, "depth": 25}],
-    "rift": [
-        {"kind": "scarp", "name": "west_scarp", "from": [0.36, 0.0], "to": [0.36, 1.0], "height": 160, "width": 0.02, "high": "west"},
-        {"kind": "scarp", "name": "east_scarp", "from": [0.64, 0.0], "to": [0.64, 1.0], "height": 160, "width": 0.02, "high": "east"},
-        {"kind": "lake", "name": "north_lake", "at": [0.5, 0.72], "r": 0.06},
-        {"kind": "lake", "name": "south_lake", "at": [0.5, 0.3], "r": 0.07}],
+    "basin in a ring of hills": [                                      # a fertile basin draining out through a gorge in its ring
+        {"kind": "ring", "name": "ring", "at": [0.5, 0.5], "r": 0.38, "height": 360, "width": 0.07, "gaps": [0.25],
+         "gap_width": 0.03, "gap_depth": 0.97},
+        {"kind": "basin", "name": "basin", "at": [0.5, 0.5], "r": 0.3, "depth": 25},
+        {"kind": "river", "name": "basin_river", "through": [[0.42, 0.44], [0.5, 0.62], [0.5, 0.88], [0.5, 1.0]], "flow": "medium"}],
     "watershed divide": [
         {"kind": "ridge", "name": "divide", "from": [0.0, 0.5], "to": [1.0, 0.5], "height": 300, "width": 0.14}],
     "settled lowland and frontier": [
         {"kind": "wild", "name": "frontier", "box": [0.55, 0.0, 1.0, 1.0]},
         {"kind": "massif", "name": "frontier_hills", "at": [0.85, 0.6], "r": 0.2, "height": 160}],
-    "delta": [
-        {"kind": "coast", "name": "coast", "side": "south", "at": 0.15},
-        {"kind": "river", "name": "river", "through": [[0.5, 1.0], [0.48, 0.5], [0.5, 0.1]]},
-        {"kind": "fen", "name": "delta", "at": [0.5, 0.18], "r": 0.12}],
 }
 # waiting for later systems (D2-188): a tidal island (tides), a karst plateau (water as a need, L-23), a mountain lake above a valley
 # (floods), a fjord coast and an archipelago (water travel, L-38)
-WAITING = {"tidal island", "karst plateau", "mountain lake", "fjord coast", "archipelago"}
+WAITING = {"tidal island", "karst plateau", "mountain lake", "fjord coast", "archipelago",
+           "delta", "rift"}                 # outside the temperate envelope for now (temperate_landscapes.md §2)
+
+# what each configuration promises of its land, checked on every world made from it ("makes its own landscape",
+# temperate_landscapes.md §3a): `eco:a|b` the share of land in those ecosystems at least; `terrain:t`, `system:s` likewise;
+# `band:3` deep forest; `lakes` lakes a 1,000 km2 outside the systems that make them, at most; `lake_share` at most
+PROMISES = {
+    "scarp and vale": {"eco:chalk grassland|beech wood": 0.15, "terrain:clay vale": 0.15},
+    "fen with islands": {"eco:fen|reedbed|alder carr|wet grassland": 0.3},
+    "estuary and fens": {"eco:fen|reedbed|alder carr|wet grassland|saltmarsh": 0.12, "eco:saltmarsh": 0.003},
+    "sand country": {"eco:lowland heath|birch and pine wood": 0.25},
+    "upland and moor": {"eco:moor|blanket bog|hill pasture|upland oak wood": 0.3, "eco:moor|blanket bog": 0.05},
+    "basin in a ring of hills": {"lake_share": 0.03},
+    "settled lowland and frontier": {"band:3": 0.04},
+    "coast": {"system:coast": 0.02},
+    "isthmus": {"system:coast": 0.05},
+}
+PROMISE_ALL = {"lakes": 1.0}               # every world: river country drains

@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from cybertron2.landgen import vocab as V
+from cybertron2.landgen import field as F, vocab as V
 from cybertron2.landgen.field import Grid
 
 SIDES = {"west": (1.0, 0.0), "east": (-1.0, 0.0), "south": (0.0, 1.0), "north": (0.0, -1.0)}   # inward normals
@@ -39,19 +39,62 @@ def _bump(d, w):
     return np.exp(-0.5 * (d / max(w, 1e-6)) ** 2)
 
 
+SYSTEMS = ("river country", "scarp and vale", "sand country", "upland", "fen", "coast", "wildwood")   # temperate_landscapes.md §2
+
+
+def _ragged(g, key, d, r, amount=0.35):
+    """A distance stretched by noise, so a shape's edge is irregular, not a circle (G-34): features at about the shape's own size
+    and a third of it."""
+    sc = max(r * g.size_km, 1.0)
+    n = 0.7 * F.fbm(g.seed, f"ragged-{key}", g.x, g.y, sc * 0.9, octaves=3) + 0.3 * F.fbm(g.seed, f"ragged2-{key}", g.x, g.y, sc * 0.3, octaves=3)
+    return d / np.clip(1 + amount * n, 0.4, None)
+
+
+def _inbox(g, key, px, py, box, amount=0.03):
+    """Inside a box whose edges wander (noise at two scales), so a frontier or a geology belt never ends in a ruled line."""
+    x0, y0, x1, y1 = box
+    n = amount * (F.fbm(g.seed, f"box-{key}", g.x, g.y, 6.0, octaves=4) + 0.5 * F.fbm(g.seed, f"box2-{key}", g.x, g.y, 2.0, octaves=3))
+    m = amount * (F.fbm(g.seed, f"boy-{key}", g.x, g.y, 6.0, octaves=4) + 0.5 * F.fbm(g.seed, f"boy2-{key}", g.x, g.y, 2.0, octaves=3))
+    qx, qy = px + n, py + m
+    return (qx >= x0) & (qx <= x1) & (qy >= y0) & (qy <= y1)
+
+
+def _meander(g, key, pts, flow):
+    """A laid river's course: its anchor points kept, bends between them (noise along the course, across it), more for a bigger
+    river; returns points in window fractions."""
+    amp = {"large": 0.022, "medium": 0.016}.get(flow, 0.011)
+    out = []
+    for k, (a, b) in enumerate(zip(pts, pts[1:])):
+        (ax, ay), (bx, by) = a, b
+        L_ = max(np.hypot(bx - ax, by - ay), 1e-9)
+        nx_, ny_ = -(by - ay) / L_, (bx - ax) / L_
+        n = max(8, int(L_ * g.size_km / 0.4))
+        t = np.linspace(0, 1, n + 1)[:-1] if k < len(pts) - 2 else np.linspace(0, 1, n + 1)
+        along = (k + t) * 1.7
+        wob = (F.fbm(g.seed, f"meander-{key}", along * 6.0, np.zeros_like(along), 1.0, octaves=3)
+               + 0.4 * F.fbm(g.seed, f"meander2-{key}", along * 19.0, np.zeros_like(along), 1.0, octaves=2))
+        off = amp * wob * np.sin(np.pi * t) * min(1.0, L_ / 0.15)
+        out += [[float(ax + (bx - ax) * u + nx_ * o), float(ay + (by - ay) * u + ny_ * o)] for u, o in zip(t, off)]
+    return out
+
+
 def compose(g: Grid, prims: list) -> dict:
     """Fields from primitives, applied in order: land (0 sea to 1 land), height to add (m), texture by belt (-1 none), a wild
     preference (0 to 1), wetness and moisture boosts, rivers laid (polylines in km), lakes, and the anchors."""
     from cybertron2.landgen import field as F
-    warp = 0.035                                                           # shapes bent by noise, so no shape is a ruled line
-    px = g.x / g.size_km + warp * F.fbm(g.seed, "macro-wx", g.x, g.y, 9.0, octaves=3)
-    py = g.y / g.size_km + warp * F.fbm(g.seed, "macro-wy", g.x, g.y, 9.0, octaves=3)
+    warp = 0.05                                                            # shapes bent by noise at two scales, so no shape is a ruled
+    px = g.x / g.size_km + warp * (F.fbm(g.seed, "macro-wx", g.x, g.y, 12.0, octaves=3)        # line or a circle (G-34)
+                                   + 0.35 * F.fbm(g.seed, "macro-wx2", g.x, g.y, 3.5, octaves=3))
+    py = g.y / g.size_km + warp * (F.fbm(g.seed, "macro-wy", g.x, g.y, 12.0, octaves=3)
+                                   + 0.35 * F.fbm(g.seed, "macro-wy2", g.x, g.y, 3.5, octaves=3))
     rough = 0.7 + 0.6 * F.fbm(g.seed, "macro-ridged", g.x, g.y, 4.0, octaves=4, ridged=True)   # crests and saddles along a ridge
     land = np.ones(g.shape)
     add = np.zeros(g.shape)
     tex = np.full(g.shape, -1, dtype=int)
     wild, wet, moist, flat = np.zeros(g.shape), np.zeros(g.shape), np.zeros(g.shape), np.zeros(g.shape)
     ore = np.zeros(g.shape, dtype=bool)
+    systems = {k: np.zeros(g.shape) for k in SYSTEMS}
+    lake_ok = np.zeros(g.shape, dtype=bool)
     rivers, anchors = [], {}
     A = lambda name, key, pt: anchors.__setitem__(f"{name}.{key}" if key else name, [float(pt[0]), float(pt[1])])
     for p in prims:
@@ -61,13 +104,20 @@ def compose(g: Grid, prims: list) -> dict:
         elif k == "coast":
             nx_, ny_ = SIDES[p.get("side", "west")]
             at = float(p.get("at", 0.15))
-            dist = px * nx_ + py * ny_ + (1 - nx_ if nx_ < 0 else 0) + (1 - ny_ if ny_ < 0 else 0) - at   # signed, + inland
-            land = np.minimum(land, np.clip(0.5 + dist / 0.04, 0, 1))
+            dist = px * nx_ + py * ny_ + (1 if nx_ < 0 else 0) + (1 if ny_ < 0 else 0) - at   # signed, + inland (east and north
+                                                                           # coasts added 2 here, not 1, and so had no sea at all)
+            dist = dist + float(p.get("ragged", 0.035)) * (F.fbm(g.seed, f"coast-{nm}", g.x, g.y, 8.0, octaves=5, gain=0.6)
+                                                           + 0.5 * F.fbm(g.seed, f"coast2-{nm}", g.x, g.y, 2.5, octaves=3))   # headlands, bays
+            land = np.minimum(land, np.clip(0.5 + dist / 0.02, 0, 1))
             mid = {"west": [at, 0.5], "east": [1 - at, 0.5], "south": [0.5, at], "north": [0.5, 1 - at]}[p.get("side", "west")]
             A(nm, None, mid)
         elif k == "inlet":
             d, _ = _seg_dist(px, py, p["from"], p["to"])
+            d = _ragged(g, nm, d, p.get("width", 0.06), 0.3)
             land = np.minimum(land, np.clip((d - p.get("width", 0.06)) / 0.02 + 0.5, 0, 1))
+            if p.get("tidal"):                                             # an estuary: mudflats and saltmarsh along its banks
+                flat = np.maximum(flat, np.clip(1 - (d - p.get("width", 0.06) - 0.015) / 0.02, 0, 1))
+                wet = np.maximum(wet, 0.7 * np.clip(1 - (d - p.get("width", 0.06) - 0.015) / 0.02, 0, 1))
             (fx, fy), (tx, ty) = p["from"], p["to"]
             L_ = max(np.hypot(tx - fx, ty - fy), 1e-9)
             w_ = p.get("width", 0.06) + 0.02                                 # the shore just past the inlet's end
@@ -79,10 +129,11 @@ def compose(g: Grid, prims: list) -> dict:
             else:
                 d = np.hypot(px - p["at"][0], py - p["at"][1])
                 A(nm, None, p["at"])
+            d = _ragged(g, nm, d, p["r"], 0.4)
             land = np.maximum(land, np.clip((p["r"] - d) / 0.03 + 0.5, 0, 1))
         elif k in ("ridge", "ring"):
             if k == "ring":
-                rr = np.hypot(px - p["at"][0], py - p["at"][1])
+                rr = _ragged(g, nm, np.hypot(px - p["at"][0], py - p["at"][1]), p["r"], 0.22)   # a ragged ring, not a circle
                 d = np.abs(rr - p["r"])
                 t = (np.arctan2(py - p["at"][1], px - p["at"][0]) / (2 * np.pi)) % 1.0
             else:
@@ -103,8 +154,9 @@ def compose(g: Grid, prims: list) -> dict:
                     A(nm, "gate", pt)
             add += float(p["height"]) * prof * cut * rough
         elif k == "massif":
-            d = np.hypot(px - p["at"][0], py - p["at"][1])
-            add += float(p["height"]) * _bump(d, p["r"] / 2) * rough
+            d = _ragged(g, nm, np.hypot(px - p["at"][0], py - p["at"][1]), p["r"], 0.45)
+            spurs = 0.5 + 0.9 * F.fbm(g.seed, f"spurs-{nm}", g.x, g.y, max(p["r"] * g.size_km / 3, 1.0), octaves=4, ridged=True)
+            add += float(p["height"]) * _bump(d, p["r"] / 2) * rough * spurs          # a ridge with spurs, not a dome
             A(nm, None, p["at"])
         elif k == "plateau":
             d = np.hypot(px - p["at"][0], py - p["at"][1])
@@ -131,21 +183,22 @@ def compose(g: Grid, prims: list) -> dict:
             add += float(p["height"]) / (1 + np.exp(-sd / p.get("width", 0.02)))
             A(nm, "foot", [(ax + bx) / 2, (ay + by) / 2])
         elif k in ("basin", "lake", "fen"):
-            d = np.hypot(px - p["at"][0], py - p["at"][1])
+            d = _ragged(g, nm, np.hypot(px - p["at"][0], py - p["at"][1]), p["r"], 0.4)
             b = _bump(d, p["r"] / 1.6)
             if k == "basin":
                 add -= float(p.get("depth", 25)) * b
             elif k == "lake":
                 add -= 25.0 * b
                 wet += b
-            else:
-                flat = np.maximum(flat, b)
-                wet += 0.9 * b
+                lake_ok |= b > 0.3
+            else:                                                              # a fen: flat, wet peat, its own system
+                flat = np.maximum(flat, np.clip(1.6 * b, 0, 1))
+                wet += 0.95 * b
                 moist += 0.3 * b
+                systems["fen"] = np.maximum(systems["fen"], np.clip(1.5 * b, 0, 1))
             A(nm, None, p["at"])
         elif k == "geology":
-            x0, y0, x1, y1 = p["box"]
-            inside = (px >= x0) & (px <= x1) & (py >= y0) & (py <= y1)
+            inside = _inbox(g, nm, px, py, p["box"])
             code = {v: c for c, v in V.TEXTURE.items()}[p["texture"]]
             tex = np.where(inside, code, tex)
         elif k == "ore":                                                   # a belt of copper ore (stage 1 §11k: geology)
@@ -154,19 +207,34 @@ def compose(g: Grid, prims: list) -> dict:
             A(nm, None, [(x0 + x1) / 2, (y0 + y1) / 2])
         elif k == "wild":
             x0, y0, x1, y1 = p["box"]
-            inside = (px >= x0) & (px <= x1) & (py >= y0) & (py <= y1)
+            inside = _inbox(g, nm, px, py, p["box"], 0.05)
             wild = np.maximum(wild, inside.astype(float))
+            systems["wildwood"] = np.maximum(systems["wildwood"], inside.astype(float))
             moist += 0.15 * inside
             A(nm, None, [(x0 + x1) / 2, (y0 + y1) / 2])
+        elif k == "system":                                                # a landscape system over a box or round a point
+            if "box" in p:
+                inside = _inbox(g, nm, px, py, p["box"], 0.04).astype(float)
+            else:
+                inside = (_ragged(g, nm, np.hypot(px - p["at"][0], py - p["at"][1]), p["r"], 0.35) <= p["r"]).astype(float)
+            if p["system"] not in systems:
+                raise ValueError(f"unknown landscape system {p['system']!r}; known: {', '.join(SYSTEMS)}")
+            systems[p["system"]] = np.maximum(systems[p["system"]], inside)
+            if p["system"] in ("fen", "upland"):
+                lake_ok |= inside > 0.5
+            A(nm, None, p.get("at") or [(p["box"][0] + p["box"][2]) / 2, (p["box"][1] + p["box"][3]) / 2])
         elif k == "river":
             pts = [[float(a), float(b)] for a, b in p["through"]]
-            rivers.append({"name": nm, "through": [[a * g.size_km, b * g.size_km] for a, b in pts], "flow": p.get("flow", "large")})
+            course = _meander(g, nm, pts, p.get("flow", "large")) if p.get("meander", True) else pts
+            rivers.append({"name": nm, "through": [[a * g.size_km, b * g.size_km] for a, b in course], "flow": p.get("flow", "large"),
+                           "anchors": [[a * g.size_km, b * g.size_km] for a, b in pts]})
             A(nm, "source", pts[0]), A(nm, "mouth", pts[-1])
             for i, pt in enumerate(pts[1:-1]):
                 A(nm, f"point_{i + 1}", pt)
         else:
             raise ValueError(f"unknown primitive kind {k!r}")
-    return {"px": px, "py": py, "ore": ore, "land": land, "add": add, "tex": tex, "wild": np.clip(wild, 0, 1), "wet": np.clip(wet, 0, 1),
+    lake_ok |= systems["fen"] > 0.5
+    return {"px": px, "py": py, "ore": ore, "systems": systems, "lake_ok": lake_ok, "land": land, "add": add, "tex": tex, "wild": np.clip(wild, 0, 1), "wet": np.clip(wet, 0, 1),
             "moist": np.clip(moist, 0, 1), "flat": np.clip(flat, 0, 1), "rivers": rivers,
             "anchors": {k: [v[0] * g.size_km, v[1] * g.size_km] for k, v in anchors.items()}}
 
