@@ -17,13 +17,15 @@ def spec(**gen):
 
 @pytest.fixture(scope="module")
 def bays():
-    s = spec(configuration="twin bays split by a spur", places={"Northby": {"at": "north_bay.head"}, "Southby": {"at": "south_bay.head"}})
+    s = spec(configuration="twin bays split by a spur", spacing_km=8.0,      # the bays' heads are about 10 km apart in a 30 km world
+             places={"Northby": {"at": "north_bay.head"}, "Southby": {"at": "south_bay.head"}})
     return W.generate(s)
 
 
 def test_same_input_same_world(bays):
     world, cells, _ = bays
-    s = spec(configuration="twin bays split by a spur", places={"Northby": {"at": "north_bay.head"}, "Southby": {"at": "south_bay.head"}})
+    s = spec(configuration="twin bays split by a spur", spacing_km=8.0,
+             places={"Northby": {"at": "north_bay.head"}, "Southby": {"at": "south_bay.head"}})
     w2, c2, _ = W.generate(s)
     assert w2["nodes"] == world["nodes"] and w2["roads"] == world["roads"]
     assert np.array_equal(c2["h"], cells["h"])
@@ -120,3 +122,22 @@ def test_people_settle_and_the_world_runs_a_day():
     assert world.get("agents") and not report["refused"]
     w = World(copy.deepcopy(world))
     assert len(w.s["people"]) == len(world["agents"])
+
+
+def test_words_place_and_pin():
+    w, c, r = W.generate(spec(places={"Port": {"on": "sea"}}, settlements=2))       # "by the sea" with no sea: a coast is placed
+    assert c["sea"].any() and "Port" in w["nodes"]
+    w, c, r = W.generate(spec(places={"Home": {}, "Far": {"days_out": {"from": "Home", "days": 1}}}, settlements=3))
+    a, b = r["nodes"]["Home"]["site_km"], r["nodes"]["Far"]["site_km"]
+    assert 0.55 * 24 <= np.hypot(a[0] - b[0], a[1] - b[1]) <= 24 + 1e-6
+    w, c, r = W.generate(spec(places={"Rich": {"soil": "rich"}}, settlements=2))
+    assert all(p["fertility"] >= 1.2 for p in w["nodes"]["Rich"]["parcels"].values() if p["cover"] == "field")
+
+
+def test_hidden_ways_are_known_to_a_few_and_capacity_holds_for_the_people_made():
+    w, c, r = W.generate(spec(households=[2, 2]), people=True)
+    knowers = [n for n, a in w["agents"].items() if a.get("ways")]
+    hidden = [rd for rd in w["roads"] if any(e.get("hidden") for e in rd[3]["ends"].values())]
+    assert (not hidden) or 1 <= len(knowers) <= 2 * 2 * len(hidden)
+    cap = r["checks"]["capacity, people as generated"]
+    assert cap["ok"], cap

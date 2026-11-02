@@ -38,6 +38,7 @@ class Land:
     near_river: np.ndarray         # the largest river class within 1.5 km
     c: np.ndarray                  # distance to the sea, km (99 beyond 3 km)
     wild: np.ndarray               # the frontier's preference, 0 to 1
+    ore: np.ndarray                # bool: an ore belt (copper) in hill country (stage 1 §3.7)
     terrain: np.ndarray            # index into TERRAIN_NAMES
     cover: np.ndarray              # natural cover (str)
     anchors: dict
@@ -195,19 +196,24 @@ def build(conf: dict, g: Grid, prims: list) -> Land:
     _, cd = _spread(g, sea, np.ones(g.shape), 20, how="near")
     c = np.where(np.isfinite(cd), cd * g.km, 99.0)
     # soil: texture by belt, else by rules; depth by slope; fertility by texture, river silt, wetness, depth and height
-    n = F.fbm(g.seed, "geology", g.x, g.y, 6.0, octaves=3)
+    n = F.fbm(g.seed, "geology", g.x, g.y, 9.0, octaves=3)                  # regions of rock and soil under the land (a geology mask)
+    n2 = F.fbm(g.seed, "geology-chalk", g.x, g.y, 14.0, octaves=2)
     tex = np.full(g.shape, V.LOAM)
-    tex = np.where((h < 130) & (moist >= 0.5) & (n > 0.15), V.CLAY, tex)
-    tex = np.where((moist < 0.42) & (n < -0.2), V.SAND, tex)
+    tex = np.where((h < 160) & (moist >= 0.4) & (n > conf["clay_n"]), V.CLAY, tex)
+    tex = np.where(n < conf["sand_n"], V.SAND, tex)
+    tex = np.where((n2 > conf["chalk_n"]) & (h > 80) & (n >= conf["sand_n"]), V.CHALK, tex)
     tex = np.where(mf["tex"] >= 0, mf["tex"], tex)
     depth = np.clip(1 - slope / 25.0, 0.1, 1.0)
     base = np.select([tex == V.SAND, tex == V.CLAY, tex == V.CHALK], [0.7, 1.1, 0.75], 1.0)
     silt = np.where((f < 2) & (near >= 2), 1.25, 1.0)
     fert = base * silt * np.where(wet > 0.85, 0.8, 1.0) * (0.8 + 0.2 * depth) * (1 - np.clip((h - 300) / 600, 0, 0.5))
     land = Land(g, conf, h, sea, lake, slope, temp, moist, acc, recv, river.astype(int), spring, wet, tex.astype(int), depth,
-                np.round(fert, 3), f, near.astype(int), c, mf["wild"], np.zeros(g.shape, dtype=int), np.zeros(g.shape, dtype=object),
-                mf["anchors"], mf["rivers"])
+                np.round(fert, 3), f, near.astype(int), c, mf["wild"], np.zeros(g.shape, dtype=bool), np.zeros(g.shape, dtype=int),
+                np.zeros(g.shape, dtype=object), mf["anchors"], mf["rivers"])
     terrains(land)
+    hilly = np.isin(land.terrain, [TERRAIN_NAMES.index(t) for t in ("hills", "upland pasture", "rock")])
+    belt = F.fbm(g.seed, "ore", g.x, g.y, 5.0, octaves=3, ridged=True) > conf["ore_belt"]      # veins along ridged lines
+    land.ore = (hilly & belt) | (mf["ore"] & hilly) | (mf["ore"] & (land.slope > 4))
     return land
 
 

@@ -111,6 +111,25 @@ def _pin_mask(L: Land, pin: dict, name: str) -> np.ndarray:
     elif on == "lake":
         _, d = P._spread(g, L.lake, np.ones(g.shape), 4, how="near")
         ok &= np.isfinite(d)
+    for res in pin.get("resources") or []:                                 # "copper in the hills", "stone": the ore or the rock near
+        src = L.ore if res == "copper" else np.isin(L.terrain, [P.TERRAIN_NAMES.index(t) for t in ("hills", "rock", "chalk down")])
+        _, d = P._spread(g, src, np.ones(g.shape), int(4.0 / g.km), how="near")
+        ok &= np.isfinite(d)
+    soil = pin.get("soil")                                                 # the vocabulary (stage 1 §11c)
+    if soil in V.WORDS["soil"]:
+        lo, hi = V.WORDS["soil"][soil]
+        fert = F.box_mean(L.fert, 5)
+        ok &= (fert >= lo - 0.15) if soil == "rich" else (fert <= hi + 0.05)
+    land_ = ~(L.sea | L.lake)
+    for word in ("wet", "dry", "sheltered", "exposed"):
+        if pin.get(word) or word in (pin.get("is") or []):
+            if word in ("wet", "dry"):
+                mm = F.box_mean(L.moist, 6)
+                cut = np.percentile(mm[land_], 70 if word == "wet" else 30)
+                ok &= (mm >= cut) if word == "wet" else (mm <= cut)
+            else:
+                rel = L.h - F.box_mean(L.h, 15)                            # below its surroundings: a hollow; above: open ground
+                ok &= (rel <= -5) if word == "sheltered" else ((rel >= 5) & (L.h >= np.percentile(L.h[land_], 60)))
     for h in pin.get("has") or []:
         if h == "ford":
             _, d = P._spread(g, (L.river >= 1) & (L.river <= V.FORD_MAX), np.ones(g.shape), 4, how="near")
@@ -135,21 +154,56 @@ def choose_sites(L: Land, conf: dict, places: dict) -> list:
         nonlocal taken
         taken |= np.hypot(g.x - g.x[r, c], g.y - g.y[r, c]) < conf["spacing_km"]
 
-    for name, pin in places.items():
-        if pin.get("kind") == "wild":
-            continue
+    day_km = conf["road_day_hours"] * 3.0                                  # a day's walk, about 24 km on mixed ground
+    is_ = lambda pin, w: bool(pin.get(w) or w in (pin.get("is") or []))
+    first = {k: p for k, p in places.items() if p.get("kind") != "wild" and not is_(p, "at a crossroads") and not p.get("days_out")}
+    later = {k: p for k, p in places.items() if p.get("kind") != "wild" and k not in first}
+    site_of = {}
+
+    def place(name, pin, extra=None):
+        nonlocal taken
         m = _pin_mask(L, pin, name) & np.isfinite(score) & ~taken
+        if extra is not None:
+            m &= extra
         if not m.any():
             raise Refused(f"{name}: no site meets its pins {pin} at least {conf['spacing_km']} km from the others")
         idx = np.argmax(np.where(m, score, -np.inf))
-        take(*divmod(int(idx), g.nx), name)
-    n = int(conf["settlements"])
+        r, c = divmod(int(idx), g.nx)
+        take(r, c, name)
+        site_of[name] = (r, c)
+        if is_(pin, "remote"):                                             # at least two days from the rest: keep the others off
+            taken |= np.hypot(g.x - g.x[r, c], g.y - g.y[r, c]) < 2 * day_km * 0.75
+
+    for name, pin in first.items():
+        place(name, pin)
+    n = int(conf["settlements"]) - len(later)
     while len(sites) < n:
         free = np.isfinite(score) & ~taken
         if not free.any():
             break                                                          # the land holds no more at this spacing: the report says so
         idx = np.argmax(np.where(free, score, -np.inf))
         take(*divmod(int(idx), g.nx), f"s{len(sites) + 1}")
+    for name, pin in later.items():
+        extra = None
+        if pin.get("days_out"):                                            # `days_out: {from: Name, days: n}`
+            src = site_of.get(pin["days_out"]["from"])
+            if src is None:
+                raise Refused(f"{name}: days_out from {pin['days_out']['from']!r}, which is not a pinned place placed before it")
+            d = np.hypot(g.x - g.x[src], g.y - g.y[src])
+            days = float(pin["days_out"]["days"])
+            extra = (d >= 0.55 * days * day_km) & (d <= 1.0 * days * day_km)
+        if is_(pin, "at a crossroads") and sites:                          # where the others' roads would meet: the most central site
+            dsum = sum(np.hypot(g.x - g.x[s_], g.y - g.y[s_]) for s_ in sites)
+            central = dsum <= np.percentile(dsum[np.isfinite(score)], 25)
+            extra = central if extra is None else extra & central
+            nonlocal_taken = taken.copy()
+            taken = np.zeros(g.shape, dtype=bool)                          # a crossroads may stand nearer its neighbours
+            for s_ in sites:
+                taken |= np.hypot(g.x - g.x[s_], g.y - g.y[s_]) < 0.45 * conf["spacing_km"]
+            place(name, pin, extra)
+            taken |= nonlocal_taken
+            continue
+        place(name, pin, extra)
     return list(zip(keys, sites))
 
 
@@ -236,6 +290,9 @@ def allocate(L: Land, conf: dict, base: dict, s: Settlement, claimed: np.ndarray
     units = max(1, math.ceil(heat_need / wood_flow("managed wood")))
     s.facts["wood_wanted"] = units
     s.facts["woods"] = take("wood", units, lambda rc: L.cover[rc] == "forest" or tn(rc) in V.WOOD_OK)
+    for res in s.pin.get("resources") or []:                                # a pinned copper seam or quarry: the nearest such ground
+        want = (lambda rc: bool(L.ore[rc])) if res == "copper" else (lambda rc: tn(rc) in ("hills", "rock", "chalk down"))
+        s.facts[f"mine_{res}"] = take("mine", 2, want)
     s.facts["waste"] = take("waste", waste_units, lambda rc: tn(rc) in V.WASTE_COVER or L.cover[rc] in ("heath", "moor", "fen"))
     near_water = [rc for rc in order[:400] if (L.river[rc] >= 2 or L.lake[rc]) and not claimed[rc]]
     for rc in near_water[:2]:
@@ -266,7 +323,7 @@ def parcels(L: Land, conf: dict, s: Settlement, land: dict) -> list:
     most a node may have, the largest field split until there are at least the fewest (stage 1 §5, D2-116)."""
     lo, hi = conf["parcels"]
     groups = []
-    for use in ("built", "field", "meadow", "pasture", "wood", "waste", "water"):
+    for use in ("built", "field", "meadow", "pasture", "wood", "waste", "mine", "water"):
         for comp in _components({rc for rc, u in land.items() if u == use}):
             groups.append([use, comp])
 
@@ -283,7 +340,7 @@ def parcels(L: Land, conf: dict, s: Settlement, land: dict) -> list:
         that is not built ground or water."""
         order = sorted(range(len(groups)), key=lambda i: (len(groups[i][1]), groups[i][0], groups[i][1][0]))
         for i in order:
-            if groups[i][0] in ("built", "water"):
+            if groups[i][0] in ("built", "water", "mine"):
                 continue
             nb = neighbours(i)
             same = [j for j in nb if groups[j][0] == groups[i][0]]
@@ -350,13 +407,13 @@ def parcels(L: Land, conf: dict, s: Settlement, land: dict) -> list:
         p.soil = max(set(texs), key=texs.count)
         p.fertility = round(float(L.fert[rr, cc].mean()), 2)
         p.cover = {"built": "built", "field": "field", "meadow": "meadow", "pasture": "pasture", "wood": "forest", "water": "water",
-                   "waste": V.WASTE_COVER.get(p.terrain, "scrub")}[use]
+                   "waste": V.WASTE_COVER.get(p.terrain, "scrub"), "mine": "rock"}[use]
         if use == "wood":
             p.wood_kind = "managed wood"                                   # a village's own wood is worked (coppiced), whatever its size
         if p.cover == "scrub":
             p.wood_kind = "scrub"
         p.facts = {"terrain": p.terrain, "soil": p.soil, "height_m": round(h), "slope": round(sl, 1), "wet": round(wet, 2),
-                   "river": int(L.river[rr, cc].max()), "spring": bool(L.spring[rr, cc].any())}
+                   "river": int(L.river[rr, cc].max()), "spring": bool(L.spring[rr, cc].any()), "seam": bool(L.ore[rr, cc].any())}
         out.append(p)
     cell_of = {rc: i for i, p in enumerate(out) for rc in p.cells}
     adj = {i: set() for i in range(len(out))}
@@ -412,7 +469,8 @@ def settle(L: Land, conf: dict, base: dict, places: dict) -> list:
                 heat = 0.4
             elif x == "food":
                 food = 0.45
-        s = Settlement(key, site, pin, hh, hh * int(conf["household_size"]), {"food": food, "heat": heat})
+        people = int((conf.get("_people") or {}).get(key) or hh * int(conf["household_size"]))   # the people generated, on a second pass
+        s = Settlement(key, site, pin, hh, people, {"food": food, "heat": heat})
         land = allocate(L, conf, base, s, claimed)
         for rc in land:
             claimed[rc] = True

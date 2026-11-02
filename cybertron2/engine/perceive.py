@@ -75,6 +75,12 @@ def seed_knowledge(w) -> None:
                 continue
             if c.get("nodes") in (None, "all") or home in c["nodes"]:
                 MEM.seed_line(w, name, c["text"], "a custom", c.get("fixed"))
+        for wy in ((w.spec.get("agents") or {}).get(name) or {}).get("ways") or []:  # hidden ways one knows from the start (D2-187):
+            a_, b_ = wy["road"]                                                      # {road: [a, b], end: node}
+            rid = f"road:{a_}-{b_}" if f"road:{a_}-{b_}" in w.s["roads"] else f"road:{b_}-{a_}"
+            if rid in w.s["roads"]:
+                from cybertron2.engine import layout as LY
+                LY.learn_way(w, name, rid, wy["end"], "seeded")
         for x in ((w.spec.get("agents") or {}).get(name) or {}).get("kept") or []:   # one's own seeded lines
             MEM.seed_line(w, name, x if isinstance(x, str) else x.get("text"), "seeded", isinstance(x, dict) and x.get("fixed"))
         if a.get("stage") not in LF.MINOR and a.get("born") is not None:          # grown already: places counted from its coming of age

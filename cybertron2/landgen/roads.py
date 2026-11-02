@@ -106,6 +106,9 @@ def wild_nodes(L: Land, conf: dict, settlements: list, H: np.ndarray, dists: dic
     for kind, mask in (("forest", L.terrain == P.TERRAIN_NAMES.index("deep forest")),
                        ("hills", np.isin(L.terrain, [P.TERRAIN_NAMES.index("hills"), P.TERRAIN_NAMES.index("upland pasture")]))):
         big = F.box_mean(mask.astype(float), 10) > 0.6                     # the heart of a large area
+        if kind == "hills" and L.ore.any():                                # hill country is entered where its ore is
+            ore_near = F.box_mean(L.ore.astype(float), 6) > 0.02
+            big = big & ore_near if (big & ore_near).any() else big
         cand = big & np.isfinite(near) & (near >= conf["wild_node_hours"]) & (near <= 2.2 * conf["road_day_hours"]) & ~taken
         n = 0
         while cand.any() and n < conf["wild_nodes"] and len(out) < conf["wild_nodes"] * 2:
@@ -118,7 +121,7 @@ def wild_nodes(L: Land, conf: dict, settlements: list, H: np.ndarray, dists: dic
             cells = [(r, c)] + [(r + dr, c + dc) for dr, dc in F.N8 if 0 <= r + dr < g.ny and 0 <= c + dc < g.nx][:7]
             s = Settlement(key, (r, c), {}, 0, 0, {}, kind="wild")
             s.parcels = _wild_parcels(L, key, cells, kind)
-            s.facts = {"wild": kind, "seam": kind == "hills"}
+            s.facts = {"wild": kind, "seam": kind == "hills" and bool(L.ore[max(0, r - 6):r + 7, max(0, c - 6):c + 7].any())}
             out.append(s)
             taken |= np.hypot(g.x - g.x[r, c], g.y - g.y[r, c]) < 8.0
             cand &= ~taken

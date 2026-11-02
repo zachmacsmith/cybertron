@@ -51,6 +51,7 @@ def compose(g: Grid, prims: list) -> dict:
     add = np.zeros(g.shape)
     tex = np.full(g.shape, -1, dtype=int)
     wild, wet, moist, flat = np.zeros(g.shape), np.zeros(g.shape), np.zeros(g.shape), np.zeros(g.shape)
+    ore = np.zeros(g.shape, dtype=bool)
     rivers, anchors = [], {}
     A = lambda name, key, pt: anchors.__setitem__(f"{name}.{key}" if key else name, [float(pt[0]), float(pt[1])])
     for p in prims:
@@ -147,6 +148,10 @@ def compose(g: Grid, prims: list) -> dict:
             inside = (px >= x0) & (px <= x1) & (py >= y0) & (py <= y1)
             code = {v: c for c, v in V.TEXTURE.items()}[p["texture"]]
             tex = np.where(inside, code, tex)
+        elif k == "ore":                                                   # a belt of copper ore (stage 1 §11k: geology)
+            x0, y0, x1, y1 = p["box"]
+            ore |= (px >= x0) & (px <= x1) & (py >= y0) & (py <= y1)
+            A(nm, None, [(x0 + x1) / 2, (y0 + y1) / 2])
         elif k == "wild":
             x0, y0, x1, y1 = p["box"]
             inside = (px >= x0) & (px <= x1) & (py >= y0) & (py <= y1)
@@ -161,7 +166,7 @@ def compose(g: Grid, prims: list) -> dict:
                 A(nm, f"point_{i + 1}", pt)
         else:
             raise ValueError(f"unknown primitive kind {k!r}")
-    return {"px": px, "py": py, "land": land, "add": add, "tex": tex, "wild": np.clip(wild, 0, 1), "wet": np.clip(wet, 0, 1),
+    return {"px": px, "py": py, "ore": ore, "land": land, "add": add, "tex": tex, "wild": np.clip(wild, 0, 1), "wet": np.clip(wet, 0, 1),
             "moist": np.clip(moist, 0, 1), "flat": np.clip(flat, 0, 1), "rivers": rivers,
             "anchors": {k: [v[0] * g.size_km, v[1] * g.size_km] for k, v in anchors.items()}}
 

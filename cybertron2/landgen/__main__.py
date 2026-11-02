@@ -14,7 +14,9 @@ def main(argv=None) -> int:
     ap.add_argument("spec")
     ap.add_argument("--out", required=True)
     ap.add_argument("--people", action="store_true", help="settle households and people with generate.py")
-    ap.add_argument("--describe", action="store_true", help="descriptions written once by the model and frozen (D2-179)")
+    ap.add_argument("--describe", nargs="?", const=True, default=False, metavar="MODEL",
+                    help="descriptions written once by a model and frozen (D2-179): the model given, else the world's describe.model or "
+                         "its cast's middle model")
     ap.add_argument("--picture", help="a picture of the land (png)")
     args = ap.parse_args(argv)
     with open(args.spec) as f:

@@ -62,6 +62,29 @@ def _state(p, seam: bool = False) -> dict:
     return st
 
 
+def _words(p) -> dict:
+    """A parcel's facts in words, as a model is given them to describe (no numbers; only what is there)."""
+    f = p.facts
+    out = {"what": _text(p, ""), "land": p.terrain, "soil": {"clay": "heavy clay", "sand": "light sand", "chalk": "thin chalk",
+                                                             "loam": "loam"}.get(p.soil, p.soil),
+           "lie": {0: "low by the water", 1: "on the level", 2: "on a slope", 3: "up on the tops"}[p.height],
+           "size": "small" if p.size <= 2 else ("middling" if p.size <= 6 else "large")}
+    wet = f.get("wet", 0)
+    if wet > 0.75:
+        out["ground"] = "wet underfoot"
+    elif wet < 0.3:
+        out["ground"] = "dry"
+    if f.get("river", 0) >= 2:
+        out["water"] = "a river beside it"
+    elif f.get("river", 0) == 1:
+        out["water"] = "a brook running through it"
+    if f.get("spring"):
+        out["spring"] = "a spring rises here"
+    if f.get("slope", 0) > 8:
+        out["slope"] = "steep"
+    return out
+
+
 def _text(p, node_name: str) -> str:
     """A template description from a parcel's facts (the fallback when no model writes it, D2-179)."""
     words = {"built": "houses round a trodden green", "field": "ploughland", "meadow": "hay meadow", "pasture": "grazing",
@@ -97,8 +120,9 @@ class Describer:
             return self.cache[key]
         from cybertron import llm
         length = "one sentence of at most 25 words" if kind != "node" else "two or three short sentences"
-        system = ("You write short descriptions of places for a world of medieval villages, as a local would see them: plain, concrete, "
-                  "no names of people, no invented history, nothing the facts do not support.")
+        system = ("You write short descriptions of places for a world of medieval villages, as a local would see them: plain and "
+                  "concrete. Say only what is there: never mention what is absent, never give numbers or measurements, no names of "
+                  "people, no invented history, nothing the facts do not support.")
         user = f"Describe this {kind} in {length}. Facts: {json.dumps(facts, sort_keys=True)}"
         schema = {"type": "object", "properties": {"text": {"type": "string"}}, "required": ["text"]}
         try:
@@ -134,9 +158,25 @@ def _place_facts(L, s, roads) -> dict:
 
 
 def generate(spec: dict, path: str | None = None, people: bool = False, describe: bool = False, out_path: str | None = None) -> tuple[dict, dict, dict]:
-    """A world file with gaps in; (the complete world file, the cells as arrays, the report) out."""
+    """A world file with gaps in; (the complete world file, the cells as arrays, the report) out. With people, twice: the land is
+    sized first for households of the default size, then again for the people generate.py actually made (its tree depends on the
+    lines and the seed, not the land, so the people are the same both times: D2-161 holds for them)."""
+    if not people:
+        return _generate(spec, path, False, describe, out_path)
+    world, cells, report = _generate(spec, path, True, False, None, provisional=True)
+    if "capacity, people as generated" not in report["checks"]:
+        return world, cells, report                                        # refused on the first pass: the report says why
+    counts = {k: v["people"] for k, v in report["checks"]["capacity, people as generated"]["detail"].items()}
+    by_key = {v["name"]: k for k, v in report["nodes"].items()}
+    spec2 = copy.deepcopy(spec)
+    spec2.setdefault("generate", {})["_people"] = {by_key[n]: c for n, c in counts.items() if c}
+    return _generate(spec2, path, True, describe, out_path)
+
+
+def _generate(spec: dict, path, people: bool, describe: bool, out_path, provisional: bool = False) -> tuple[dict, dict, dict]:
     gen = dict(spec.get("generate") or {})
     conf = _conf(gen)
+    conf["_people"] = gen.get("_people") or {}
     seed = int(gen.get("seed", spec.get("seed", 1)))
     settings = _base_settings(spec, path)
     report = {"seed": seed, "pins": {}, "targets": {}, "checks": {}, "generated": [], "deviations": [
@@ -145,6 +185,15 @@ def generate(spec: dict, path: str | None = None, people: bool = False, describe
         "people: generate.py once for the region as it stands (no kin between villages yet: 37.4's, later)"]}
     g = F.grid(seed, conf["size_km"], conf["km"])
     prims = M.primitives(conf)
+    kinds = {p_["kind"] for p_ in prims}
+    pins = [dict(v or {}) for v in (gen.get("places") or {}).values()]
+    if any(p_.get("on") == "sea" or "by the sea" in (p_.get("is") or []) for p_ in pins) and not kinds & {"sea", "coast"}:
+        prims.append({"kind": "coast", "name": "coast", "side": gen.get("coast_side", "west"), "at": 0.12})   # words that place a shape
+    if any(p_.get("terrain") in ("hills", "upland pasture") or "in the hills" in (p_.get("is") or []) for p_ in pins) \
+            and not kinds & {"ridge", "massif", "plateau", "ring"}:
+        prims.append({"kind": "massif", "name": "hills", "at": [0.72, 0.62], "r": 0.22, "height": 340})
+    if any("on an island" in (p_.get("is") or []) for p_ in pins) and "sea" not in kinds:
+        prims = [{"kind": "sea", "name": "sea"}, {"kind": "landmass", "name": "island", "at": [0.5, 0.5], "r": 0.36}] + prims
     L = P.build(conf, g, prims)
     places = {k: dict(v or {}) for k, v in (gen.get("places") or {}).items()}
     settlements = ST.settle(L, conf, settings, places)
@@ -159,7 +208,7 @@ def generate(spec: dict, path: str | None = None, people: bool = False, describe
     model = None
     if describe:
         cast = settings.get("cast") or {}
-        model = (settings.get("describe") or {}).get("model") or cast.get("middle")
+        model = describe if isinstance(describe, str) else ((settings.get("describe") or {}).get("model") or cast.get("middle"))
     out_dir = os.path.dirname(out_path) if out_path else None
     describer = Describer(model, (settings.get("describe") or {}).get("backend"),
                           os.path.join(out_dir, os.path.basename(out_path).split(".")[0] + ".descriptions.json") if out_path else None)
@@ -169,12 +218,13 @@ def generate(spec: dict, path: str | None = None, people: bool = False, describe
         pars = {}
         for p in s.parcels:
             p.name = namer.parcel(s.name, p, river_name.get(s.key))
-            facts = {**p.facts, "cover": p.cover, "size": p.size, "side": p.side, "height": p.height}
+            facts = _words(p)
             entry = {"name": p.name, "cover": p.cover, "size": int(p.size), "side": p.side, "height": int(p.height),
                      "text": describer("parcel", facts, _text(p, s.name)), "adj": list(p.adj)}
             if p.cover == "field":
-                entry["fertility"] = float(p.fertility)
-            st = _state(p, seam=bool(s.facts.get("seam")))
+                lo_hi = V.WORDS["soil"].get(s.pin.get("soil", ""))           # `soil: rich | poor` sets the fields' fertility in range
+                entry["fertility"] = float(min(max(p.fertility, lo_hi[0]), lo_hi[1]) if lo_hi else p.fertility)
+            st = _state(p, seam=bool(s.facts.get("seam")) or (p.use == "mine" and bool(p.facts.get("seam"))))
             if st:
                 entry["state"] = st
             entry["terrain"], entry["soil"] = p.terrain, p.soil              # data for stage 2; the engine ignores them now
@@ -208,7 +258,7 @@ def generate(spec: dict, path: str | None = None, people: bool = False, describe
         pastures = sorted((p for p in s.parcels if p.cover == "pasture"), key=lambda p: -p.size)
         heavy = any(p.soil == "clay" for p in fields)
         trades = []
-        if near_seam.get(s.key):
+        if near_seam.get(s.key) or any(p.use == "mine" and p.facts.get("seam") for p in s.parcels):
             trades.append("smith")
         if any(p.cover in ("rock",) or p.terrain in ("hills", "chalk down") for p in s.parcels):
             trades.append("mason")
@@ -273,7 +323,8 @@ def generate(spec: dict, path: str | None = None, people: bool = False, describe
     report["anchors"] = {k: [round(v[0], 2), round(v[1], 2)] for k, v in L.anchors.items()}
     failed = [k for k, v in report["checks"].items() if v["kind"] == "physics" and not v["ok"]]
     required = set(gen.get("require") or []) | {"capacity", "access gates"}
-    failed += [k for k, v in report["checks"].items() if v["kind"] == "design" and not v["ok"] and k in required]
+    if not provisional:                                                    # a first pass, sized for planned people, refuses only on physics
+        failed += [k for k, v in report["checks"].items() if v["kind"] == "design" and not v["ok"] and k in required]
     report["refused"] = failed
     if people and not failed:
         from cybertron2.engine import generate as GEN
@@ -287,6 +338,8 @@ def generate(spec: dict, path: str | None = None, people: bool = False, describe
         members = {}
         for a in world.get("agents", {}).values():
             members[a.get("household")] = members.get(a.get("household"), 0) + 1
+        _seed_ways(world, settlements, seed)
+        report["checks"]["capacity, people as generated"] = _capacity_as_generated(world, settings, settlements)
         for b in world["buildings"].values():                              # a house holds its household: a bed each and one spare
             n = members.get(b.get("household"), 0)                         # (D4-86), and stores for a week or so (D2-13)
             if (b.get("fittings") or {}).get("beds") and n:
@@ -300,6 +353,43 @@ def generate(spec: dict, path: str | None = None, people: bool = False, describe
                           "sites": [s.site for s in allnodes], "road_cells": pic["road_cells"]}
     report["_land"] = L
     return world, cells, report
+
+
+def _seed_ways(world: dict, settlements: list, seed: int) -> None:
+    """Each hidden way known at the start to one or two grown people of the village at its end, those whose crafts would take them
+    there first (a hunter, a woodcutter), by keyed draws (D2-187)."""
+    keys = {s.key for s in settlements}
+    by_node = {}
+    for name, a in world.get("agents", {}).items():
+        if a.get("stage") in ("adult", "elder", "youth"):
+            house = next((b for b in world["buildings"].values() if b.get("household") == a.get("household")), None)
+            node = next((k for k, n in world["nodes"].items() if house and house["parcel"] in n["parcels"]), None)
+            if node:
+                by_node.setdefault(node, []).append(name)
+    for rd in world["roads"]:
+        for node, end in rd[3]["ends"].items():
+            if not end.get("hidden") or node not in keys or not by_node.get(node):
+                continue
+            rg = keyed.rng(seed, "ways", rd[0], rd[1], node)
+            folk = sorted(by_node[node], key=lambda n: (-int("hunt" in (world["agents"][n].get("knows") or {})), rg.random()))
+            for name in folk[: rg.choice([1, 2])]:
+                world["agents"][name].setdefault("ways", []).append({"road": [rd[0], rd[1]], "end": node})
+
+
+def _capacity_as_generated(world: dict, settings: dict, settlements: list) -> dict:
+    """The capacity check again, with the people generate.py actually made (D2-161): a warning if a village's people are far from
+    its land's target."""
+    from cybertron2.engine import capacity as CAP
+    from cybertron2.engine.world import World
+    w = World({**settings, **copy.deepcopy(world), "days": int(settings.get("days", 24))})
+    out = {}
+    for s in settlements:
+        people = sum(1 for n in w.s["people"] if w.homes(n) and w.s["buildings"][w.homes(n)[0]]["node"] == s.key)
+        cap = CAP.node(w, s.key)
+        out[s.name] = {"people": people, "share": round(people / max(1e-9, min(cap["food_people"], cap["heat_people"])), 2),
+                       "target": round(max(s.targets.values()), 2)}
+    ok = all(v["share"] <= v["target"] + 0.2 for v in out.values())
+    return {"kind": "design", "ok": ok, "detail": out}
 
 
 def _merged_for_people(world: dict, settings: dict) -> dict:
@@ -352,15 +442,17 @@ def checks(L, conf, gen, settlements, extra, roads, world, settings) -> dict:
     except Exception as e:                                                 # noqa: BLE001 (reported, not raised)
         caps = {"error": f"{type(e).__name__}: {e}"}
     want = {s.name: max(s.targets.values()) for s in settlements}        # the scarcest flow's target (D2-161, or the pin's)
-    cap_ok = "error" not in caps and all(want[k] - 0.15 <= v <= want[k] + 0.05 for k, v in caps.items())   # land rounds up: a little
+    small = {s.name for s in settlements if s.people <= 6}                 # a household alone: its least land (2 plots, a wood) rounds up
+    cap_ok = "error" not in caps and all((want[k] - 0.15 <= v or k in small) and v <= want[k] + 0.05 for k, v in caps.items())   # a little
                                                                                                             # more slack below
     out["capacity"] = {"kind": "design", "ok": bool(cap_ok), "detail": caps}
     lacks = {}
     for s in settlements:
         has_stone = any(p.cover == "rock" for p in s.parcels)
-        has_metal = False
+        has_metal = any(p.use == "mine" and p.facts.get("seam") for p in s.parcels)
         lacks[s.name] = [x for x, ok in (("stone", has_stone), ("metal", has_metal)) if not ok]
-    out["dependence"] = {"kind": "design", "ok": all(lacks.values()) and any(w.facts.get("seam") for w in extra), "detail": lacks}
+    metal = any(w.facts.get("seam") for w in extra) or any(p.use == "mine" and p.facts.get("seam") for s in settlements for p in s.parcels)
+    out["dependence"] = {"kind": "design", "ok": all(lacks.values()) and metal, "detail": lacks}
     keys = [s.key for s in settlements]
     adj = {}
     for rd in roads:

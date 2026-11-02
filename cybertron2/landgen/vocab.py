@@ -13,7 +13,7 @@ DEFAULTS = {
     "wind": "west",               # the prevailing wind (wet windward, rain shadow lee)
     "sea_level": 0.0,
     "base_m": 60.0,               # lowland height
-    "relief_m": 70.0,             # the noise's height range
+    "relief_m": 100.0,            # the noise's height range
     "temperature_c": 9.0,         # a year's mean at sea level
     "lapse_c_km": 6.5,
     "stream_km2": 1.5,            # area drained that starts a stream (a spring at its head)
@@ -31,6 +31,10 @@ DEFAULTS = {
     "wild_node_km2": 10.0,        # a wild area large enough for a node of its own (D2-181)
     "wild_node_hours": 4.0,       # ... and at least half a day from any settlement
     "wild_nodes": 1,              # of each kind (deep forest; hills), unless pinned
+    "clay_n": 0.12,               # geology: noise above this, low and moist enough, is clay; below sand_n is sand; chalk where a
+    "sand_n": -0.25,              # second, broader noise passes chalk_n on higher ground (stage 1 §3.4)
+    "chalk_n": 0.35,
+    "ore_belt": 0.82,             # ridged noise above this, in hill country, is an ore belt (copper)
     "road_day_hours": 8.0,        # a day on the road (stage 1 §11f)
     "deep_forest_km": 12.0,       # woodland this far from any settlement is deep forest (stage 1 §11a: d > 15, scaled to 50 km)
 }

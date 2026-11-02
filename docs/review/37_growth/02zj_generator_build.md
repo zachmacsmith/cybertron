@@ -88,3 +88,40 @@ The full cybertron2 suite passes: 262, 3 skipped.
 
 **What also needs tuning:** the terrain scores' thresholds. A plain lowland world is mostly lowland loam with some heath; that is
 plausible, but worth a look on more seeds and configurations.
+
+## Second pass (2 Nov), at Zach's request ("Do 1, 4, 5, 6. Then 2 and 7")
+
+1. **Descriptions written by a model** (D2-179). `--describe [MODEL]` takes the model on the command line, otherwise the world's
+   `describe.model` or its cast's middle model.
+   - **The model is given words, not numbers,** and is told never to mention what is absent.
+   - **On the example:** 43 descriptions written, none failed, about 3.5 minutes; cached by the hash of the facts, and frozen.
+2. **Ore belts.** Veins along ridged noise in hill country, and an `ore` primitive for a pinned belt.
+   - The hill wild node is entered where its ore is, and has a seam only if there is ore.
+   - A place may pin `resources: [copper]` or `[stone]`. It is then sited within 4 km of ore or stone, and gets a rock parcel
+     (with a seam for copper) and a smith.
+3. **Hidden ways known to a few** (D2-187). Each hidden way is known at the start to one or two grown people of the village at its
+   end, hunters first.
+   - This needed a small hook in the engine: perceive.seed_knowledge reads an agent's `ways: [{road, end}]`.
+4. **Capacity for the people as generated** (D2-161). With `--people` the generator runs twice:
+   - the land is sized first for households of the default size;
+   - then again for the people generate.py actually made (its tree depends on the lines and the seed, not the land, so the people
+     are the same).
+
+   On the example the villages now sit at 0.58 to 0.62 of their scarcest flow (they were 0.37 to 0.48).
+5. **The vocabulary**, adding:
+   - `soil: rich | poor` (site and fields' fertility);
+   - `wet` and `dry`;
+   - `sheltered` and `exposed`;
+   - `remote` (the others kept two days off);
+   - `at a crossroads` (the most central site);
+   - `days_out: {from, days}`;
+   - words that place a shape: `on: sea` with no sea places a coast, `terrain: hills` with no relief places hills, `is: [on an
+     island]` makes the land an island.
+6. **Terrain tuning.**
+   - **Soil:** regions from a broader geology mask (clay in low moist land, sand, natural chalk on higher ground), and more relief.
+   - **A plain world over three seeds** is now about 61% lowland loam, 15% clay vale, 6% chalk down, 6% river terrace, 5% water,
+     5% heath and 2% floodplain (it was 79% loam).
+   - **Capacity** in a provisional first pass refuses only on physics; tiny villages (a household alone) may sit below the target,
+     because their least land rounds up.
+
+Tests: 13 in test_cybertron2_landgen.py. The whole cybertron2 suite passes: 279, 3 skipped.
