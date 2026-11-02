@@ -306,7 +306,8 @@ def overview(w, node) -> list:
         houses = [b for b in w.s["buildings"].values() if b["parcel"] == pid and not b.get("unfinished")]
         if p["cover"] == "built" and houses:
             cands.append((2.5 + 0.1 * len(houses), f"{p['name']}, with {_count(len(houses), 'house')}"))
-        c = p.get("crop")
+        from cybertron2.engine import farm as FM
+        c = FM.main_crop(p)                                                    # the field's largest standing crop (D2-172)
         if c and c.get("area_left", 0) > 1e-6:
             stage = "ripe" if w.d >= int(c.get("ripe_day", 10 ** 9)) else ("green" if w.d - int(c.get("sown", w.d)) > 3 else "new sown")
             cands.append((1.0 + 0.2 * p["size"] + (1.0 if stage == "ripe" else 0.0), f"{c.get('kind', 'a crop')} {stage} on {p['name']}"))

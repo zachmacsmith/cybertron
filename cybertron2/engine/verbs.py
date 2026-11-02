@@ -15,7 +15,7 @@ from cybertron2.engine.here import Refused, show
 # `when` (only in a world with roads). The prompt's verb list and the reply schema are generated from it.
 VERB = {
     "gather": {"args": '{"what", "at"?: place, "for"?: party}', "cost": "craft", "doc": "take from the land: {crafts}"},
-    "work": {"args": '{"what", "at"?: place or building, "item"?: the seed to sow (grain, rye, beans: always say which), the beast to slaughter (cow, ox, bull, calf), or food to give a child you care for (with "qty"), "pass"?: with care, a sentence for the child to keep, "for"?: party}',
+    "work": {"args": '{"what", "at"?: place or building, "item"?: the seed to sow (grain, rye, beans: always say which), the beast to slaughter (cow, ox, bull, calf), or food to give a child you care for (with "qty"), "on"?: in a field held in shares, whose plots (a household or person; else your own, then the unclaimed plots), "plots"?: how many plots to sow at most, "pass"?: with care, a sentence for the child to keep, "for"?: party}',
              "cost": "craft", "doc": "{crafts}"},
     "make": {"args": '{"what", "qty"?: times, "for"?: party}', "cost": "craft",
              "doc": "a recipe; the inputs come from what you carry, then from stores here you may take from: {crafts}"},
@@ -44,7 +44,7 @@ VERB = {
     "admit": {"args": '{"person"}', "cost": 0, "doc": "take someone into your household, if they ask today (the head, or whoever your household allows)"},
     "leave_household": {"args": "", "cost": 0, "doc": "leave your household (you keep what you carry)"},
     "found": {"args": '{"name"}', "cost": 0, "doc": "start a household of your own, with you at its head"},
-    "claim": {"args": '{"thing": a field, building or herd here, "for"?: your household}', "cost": 0,
+    "claim": {"args": '{"thing": a field, building or herd here, "plots"?: of a field, pasture or meadow, how many of its plots (else all of them), "for"?: your household}', "cost": 0,
               "doc": "claim it as yours: others will know, and may agree or dispute it"},
     "drive": {"args": '{"thing": a herd here, "item"?: cows | oxen | bulls | calves | all, "qty"?, "to": a place here}', "cost": 1,
               "when": "herds", "doc": "move beasts to another place here (a bull kept apart from the cows does not breed)"},
@@ -356,7 +356,7 @@ def _skill_mult(here, mind, tech) -> float:
     return KN.skill(mind, tech) * here.yield_mult()                           # skill by practice (D2-52), and hunger
 
 
-def _site(here, mind, tech, at):
+def _site(here, mind, tech, at, a=None):
     sites = KN.where(here, tech)
     if sites and sites[0][0] == "thing":
         cid = _thing_site(here, at)
@@ -375,9 +375,9 @@ def _site(here, mind, tech, at):
             names = list(dict.fromkeys(here.parcels()[s[1]]["name"] for s in where if s[1] in here.parcels()))
             raise Refused(f"{KN.label(tech)} is not done at {at}" + (f"; here it is done at {', '.join(names)}" if names else
                                                                    "; there is nowhere here for it"))
-    ok = [s for s in sites if not KN.ready(here, tech, s[0], s[1])]
+    ok = [s for s in sites if not KN.ready(here, tech, s[0], s[1], a)]
     if not ok:
-        why = KN.ready(here, tech, sites[0][0], sites[0][1]) if sites else f"there is nowhere here for {KN.label(tech)}"
+        why = KN.ready(here, tech, sites[0][0], sites[0][1], a) if sites else f"there is nowhere here for {KN.label(tech)}"
         what = PC.LAND_DRAWS.get(TECHNIQUES[tech].get("draws"))
         if sites and what and sites[0][0] == "parcel" and ("picked bare" in why or "no standing timber" in why):
             PC.remember_land(mind, here.day, sites[0][1], what, "bare", "found")         # found out by trying (D4-50)
@@ -402,6 +402,11 @@ def _against(here, thing) -> str:
         return ""
     has = "withdrawal" in here.rights(thing)
     return f" (which {' and '.join(others)} {'also claim' if has else 'hold' + ('s' if len(others) == 1 else '')})"
+
+
+def _holding_people(here, holder) -> list:
+    """Those a holding is whose: the holder, or its household's members (D2-172)."""
+    return list(here.institution(holder)["members"]) if holder in here.households() else [holder]
 
 
 def _holders_people(here, thing) -> list:
@@ -435,8 +440,8 @@ def _technique(here, mind, a, party, verb):
     if not t.get("crew"):                                                     # crew work: anyone may dig, led by one who knows how
         _level(mind, tech)
     a = {**a, "_mods": MOD.resolve(here, mind, verb, a, tech=tech)}           # ways of doing it (D2-93)
-    kind, key, place_name = _site(here, mind, tech, a.get("at"))
-    why = KN.shortfall(here, mind, tech, 1.0, key)
+    kind, key, place_name = _site(here, mind, tech, a.get("at"), a)
+    why = KN.shortfall(here, mind, tech, 1.0, key, a=a)
     if why:
         if kind == "parcel":                                                   # one went and tried: one sees the place (D4-95)
             w_ = here.today()["worked"].setdefault(here.name, [])
@@ -452,6 +457,7 @@ def _technique(here, mind, a, party, verb):
     thing = (kind, key)
     note = _against(here, thing) if kind == "parcel" and t.get("draws") != "dead" else ""   # dead wood is anyone's (D2-158)
     got, gives, word, extra_got, suffix = 0.0, t.get("gives"), "", "", ""
+    holding = None
     if y["kind"] == "stock":
         r = here.parcels()[key]["res"][t["draws"]]
         want = y["base"] * r["S"] / r["K"] * m * tm
@@ -489,6 +495,9 @@ def _technique(here, mind, a, party, verb):
         got, g, word, thing = FM.act(here, mind, tech, key, place_name, out, m, tm, a)
         gives = g or gives
         note = _against(here, thing) if thing[0] in ("parcel", "herd") else note
+        if "_on" in a and FM.named(here.parcels()[key]):                       # a field held in shares: whose plots (D2-172)
+            note = FM.against(here, key, a["_on"])
+            holding = a["_on"]
         if word and not word.startswith("You"):
             suffix, word = word, ""                                             # a note to the plain result, below
     elif y["kind"] == "bury":                                                 # D2-96
@@ -522,7 +531,8 @@ def _technique(here, mind, a, party, verb):
     for_txt = f" for {here.households()[party]['name'] if party in here.households() else party}" if party and party != here.name else ""
     text = f"{here.name} was {KN.label(tech)} at {place_name}{for_txt}{note}"
     here.event("work", text, actor=here.name, about=[f"{thing[0]}:{thing[1]}"], salience=0.35 if note else 0.15, tags=t["tags"],
-               tech=tech, concerns=_holders_people(here, thing) if note else [])
+               tech=tech, concerns=(_holding_people(here, holding) if holding is not None else _holders_people(here, thing)) if note else [],
+               **({"holding": holding} if holding is not None else {}))
     here.record(verb, tech, party, site=key)
     if word:
         if y["kind"] == "slaughter":                                          # where the meat and hide went (D4-70)
@@ -1432,6 +1442,11 @@ def _claim(here, mind, a, party):
     if key is None:
         raise Refused(f"there is no field, building or herd called {x!r} here")
     claimant = party or here.name
+    plots = a.get("plots")
+    if plots not in (None, "") and kind == "parcel":                          # plots of a field, pasture or meadow (D2-163)
+        return _claim_plots(here, key, claimant, plots)
+    if plots not in (None, ""):
+        raise Refused("only a field, pasture or meadow is held in plots")
     here.apply("claim", thing=(kind, key), claimant=claimant, rights="all", grounds="claimed")
     name = {"parcel": here.parcels, "building": here.buildings, "herd": here.herds}[kind]()[key]["name"]
     own = {claimant, here.household(), "anyone"}
@@ -1442,6 +1457,39 @@ def _claim(here, mind, a, party):
     here.event("claim", f"{here.name} claimed {name}" + ("" if claimant == here.name else f" for {who}") + (f", which {', '.join(others)} also claim" if others else ""),
                actor=here.name, about=[f"{kind}:{key}"], salience=0.7 if others else 0.5, tags=["land"], concerns=_holders_people(here, (kind, key)))
     return f"You claimed {name}" + ("" if claimant == here.name else f" for {who}") + "." + (f" {', '.join(others)} claim it too: a dispute." if others else "")
+
+
+def _claim_plots(here, key, claimant, plots) -> str:
+    """A claim of n plots of a field, pasture or meadow (D2-163): of the unclaimed plots first; any more overlaps what others hold,
+    which is recorded as a dispute, never refused (D4-23). The overlap is counted against the holder with the most plots there."""
+    par = here.parcels()[key]
+    if par["cover"] not in FM.LAND:
+        raise Refused(f"{par['name']} is not held in plots; claim it whole")
+    try:
+        n = int(float(plots))
+    except (TypeError, ValueError):
+        raise Refused("plots must be a whole number")
+    size = int(par["size"])
+    if n < 1:
+        raise Refused("claim at least one plot")
+    n = min(n, size)
+    hold = FM.holdings(here.claims(("parcel", key)), size)
+    free = max(0, size - sum(hold.values()))
+    over = max(0, n - free)
+    mine = {claimant, here.household(), here.name}
+    others = sorted(((h, k) for h, k in hold.items() if h not in mine), key=lambda hk: -hk[1])
+    of = others[0][0] if over and others else None
+    over = min(over, hold.get(of, 0)) if of else 0
+    here.apply("claim", thing=("parcel", key), claimant=claimant, rights="all", grounds="claimed", plots=n,
+               **({"of": of, "over": over} if of else {}))
+    names = FM.names_of(here)
+    who = names.get(claimant, claimant)
+    what = f"{n} plot{'s' if n != 1 else ''} of {par['name']}"
+    clash = f", {over} of them {FM.possessive(names, of)}" if of else ""
+    here.event("claim", f"{here.name} claimed {what}" + ("" if claimant == here.name else f" for {who}") + clash, actor=here.name,
+               about=[f"parcel:{key}"], salience=0.7 if of else 0.5, tags=["land"], concerns=_holders_people(here, ("parcel", key)))
+    return (f"You claimed {what}" + ("" if claimant == here.name else f" for {who}") + "."
+            + (f" {over} of them {'is' if over == 1 else 'are'} {FM.possessive(names, of)}: a dispute." if of else ""))
 
 
 def _sleep(here, mind, a, party):
@@ -1633,7 +1681,7 @@ def _clear_built(here, pid, name, done, party) -> str:
         here.apply("set", ref=("parcel", pid), field="clearing_built", value=got)
         return f"You cleared ground for building at {name}: about {max(0, round(need - got, 1)):g} units of work left before it is built ground."
     cover = p["cover"]
-    for f, v in (("cover", "built"), ("clearing_built", None), ("clearing", None), ("was", cover), ("crop", None)):
+    for f, v in (("cover", "built"), ("clearing_built", None), ("clearing", None), ("was", cover), ("crop", None), ("shares", None)):
         here.apply("set", ref=("parcel", pid), field=f, value=v)
     if "grass" in p["res"]:
         here.apply("set_res", parcel=pid, key="grass", fields={"S": 0.0, "K": 0.0})
@@ -1666,7 +1714,9 @@ def _clear(here, pid, name, done, party) -> str:
     who = party or here.household() or here.name
     held = bool(here.claims(("parcel", pid)))
     if not held:
-        here.apply("claim", thing=("parcel", pid), claimant=who, rights="all", grounds="cleared")
+        here.apply("claim", thing=("parcel", pid), claimant=who, rights="all", grounds="cleared")   # all its plots (D2-163)
+    else:
+        here.apply("shares", parcel=pid)                                      # its holders' plots become field holdings
     here.event("work", f"{here.name} finished clearing {name}: it is a field now, ready to be sown", actor=here.name,
                about=[f"parcel:{pid}"], salience=0.6, tags=["farming", "building"])
     return f"You finished clearing {name}: it is a field now, ready to be broken and sown" + ("." if held else ", and yours: you cleared it.")

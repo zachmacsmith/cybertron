@@ -100,14 +100,13 @@ def value(w, h, pid) -> float:
     n = max(1, FM.head(h))
     hungry = int(h.get("hungry", 0)) > 0
     food = 0.0
-    c = par.get("crop")
-    if c and c.get("area_left", 0) > 1e-6:
-        food += float(c.get("left", 0.0)) * float(HERDS["trample"])
+    crops = [c for _, _, c in FM.standing(par) if c.get("area_left", 0) > 1e-6]  # every holding's crop (D2-172)
+    food += sum(float(c.get("left", 0.0)) for c in crops) * float(HERDS["trample"])
     g = par["res"].get("grass")
     if g and g["K"] > 0:
         food += max(0.0, g["S"] - 0.05 * g["K"]) / n
     v = min(1.0, food)
-    if c and c.get("area_left", 0) > 1e-6 and w.d >= int(c["ripe_day"]):
+    if any(w.d >= int(c["ripe_day"]) for c in crops):
         v += float(dr["ripe"]) * v                                             # a ripe crop pulls while there is much of it left
     if hungry and par["cover"] == "water":
         v += float(dr["water"])
@@ -117,8 +116,8 @@ def value(w, h, pid) -> float:
 def drawn(w, h) -> bool:
     """A ripe crop within reach pulls even a fed herd far (D2-123)."""
     reach = LY._layers(w, h["parcel"])
-    return any(d <= int(HERDS["steps"]["drawn"]) and (w.s["parcels"][q].get("crop") or {}).get("area_left", 0) > 1e-6
-               and w.d >= int(w.s["parcels"][q]["crop"]["ripe_day"]) and q != h["parcel"] for q, d in reach.items())
+    return any(d <= int(HERDS["steps"]["drawn"]) and q != h["parcel"] and any(
+        c.get("area_left", 0) > 1e-6 and w.d >= int(c["ripe_day"]) for _, _, c in FM.standing(w.s["parcels"][q])) for q, d in reach.items())
 
 
 def target(w, h, pid) -> str:
@@ -191,23 +190,29 @@ def home_at_dusk(w, hid, rec, rng) -> bool:
 
 
 def trample(w, hid, rec) -> float:
-    """In a field each head eats and tramples about 1% of the standing crop a day (D2-123): recorded with the herd and its holders."""
+    """In a field each head eats and tramples about 1% of the standing crop a day (D2-123): recorded with the herd and its holders.
+    On a field held in shares every holding's crop loses that share of what stands, so the loss falls by their plots (D2-172)."""
     h = w.s["herds"][hid]
-    par = w.s["parcels"][h["parcel"]]
-    c = par.get("crop")
-    if not c or c.get("area_left", 0) <= 1e-6 or c.get("left", 0) <= 1e-9:
-        return 0.0
-    q = round(float(c["left"]) * min(1.0, float(HERDS["trample"]) * FM.head(h)), 4)
-    if q <= 1e-9:
-        return 0.0
-    w.apply("draw", h["node"], parcel=h["parcel"], key="crop", qty=q)
-    c = dict(w.s["parcels"][h["parcel"]]["crop"])
+    pid = h["parcel"]
+    par = w.s["parcels"][pid]
+    total = 0.0
     holders = sorted({cl["claimant"] for cl in w.claims_on(("herd", hid))})
-    c["trampled"] = {"day": w.d, "by": hid, "holders": holders, "qty": round(float((c.get("trampled") or {}).get("qty", 0.0)) + q, 4)}
-    w.apply("set", h["node"], ref=("parcel", h["parcel"]), field="crop", value=c)
-    w.apply("set", h["node"], ref=("herd", hid), field="ate", value={"day": w.d, "q": q})    # what it ate there (farm._herds)
-    rec["herds"].append((hid, "trampled", h["parcel"], q))
-    return q
+    for hd, _, c in FM.standing(par):
+        if c.get("area_left", 0) <= 1e-6 or c.get("left", 0) <= 1e-9:
+            continue
+        q = round(float(c["left"]) * min(1.0, float(HERDS["trample"]) * FM.head(h)), 4)
+        if q <= 1e-9:
+            continue
+        w.apply("draw", h["node"], parcel=pid, key="crop", qty=q, **({"holder": hd} if hd is not None else {}))
+        c = dict(FM.record(par, hd)["crop"])
+        c["trampled"] = {"day": w.d, "by": hid, "holders": holders, "qty": round(float((c.get("trampled") or {}).get("qty", 0.0)) + q, 4)}
+        w.apply("set_share", h["node"], parcel=pid, holder=hd, field="crop", value=c)
+        total = round(total + q, 4)
+    if total <= 1e-9:
+        return 0.0
+    w.apply("set", h["node"], ref=("herd", hid), field="ate", value={"day": w.d, "q": total})    # what it ate there (farm._herds)
+    rec["herds"].append((hid, "trampled", pid, total))
+    return total
 
 
 # ---------------------------------------------------------------------- herds on a road (D2-124, D2-127)

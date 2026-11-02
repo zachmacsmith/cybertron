@@ -138,7 +138,7 @@ def where(here, tech) -> list:
     return out
 
 
-def ready(here, tech, kind, key) -> str:
+def ready(here, tech, kind, key, a=None) -> str:
     """'' if the site can be worked by this technique now, else why not (what it draws on, in its state)."""
     t = TECHNIQUES[tech]
     y = (t.get("yield") or {}).get("kind")
@@ -146,7 +146,7 @@ def ready(here, tech, kind, key) -> str:
         return f"{label(tech)} is done in {' and '.join(t['seasons'])}"
     if kind == "parcel" and y in ("sow", "break", "tend", "manure", "crop", "herd", "milk", "slaughter", "works", "select", "fence", "gate"):
         from cybertron2.engine import farm as FM
-        return FM.ready(here, tech, key)
+        return FM.ready(here, tech, key, a)                                  # on whose holding (D2-172)
     if kind == "parcel":
         p = here.parcels()[key]
         d = t.get("draws")
@@ -198,7 +198,8 @@ def ready(here, tech, kind, key) -> str:
         return ""
     if kind == "building" and y == "repair" and here.buildings()[key]["condition"] >= 2:
         return f"{here.buildings()[key]['name']} is sound"
-    if kind == "parcel" and y == "clear_built" and (here.parcels()[key].get("crop") or {}).get("left", 0) > 1e-9:
+    from cybertron2.engine import farm as FM
+    if kind == "parcel" and y == "clear_built" and any(c.get("left", 0) > 1e-9 for _, _, c in FM.standing(here.parcels()[key])):
         return f"{here.parcels()[key]['name']} has a crop standing in it"
     return ""
 
@@ -224,7 +225,7 @@ def inputs_words(needs: dict) -> str:
                      for item, q in (needs or {}).items())
 
 
-def shortfall(here, mind, tech, mult=1.0, at=None, extra=None) -> str:
+def shortfall(here, mind, tech, mult=1.0, at=None, extra=None, a=None) -> str:
     """'' if the technique can be done here now, else what is short."""
     t = TECHNIQUES[tech]
     sites = where(here, tech)
@@ -259,7 +260,7 @@ def shortfall(here, mind, tech, mult=1.0, at=None, extra=None) -> str:
                 f"{available(here, i2, extra=extra):.1f} {i2}" if len(alts) > 1 else f"{available(here, i2, extra=extra):.1f}" for i2 in alts) \
                 + " to hand" + _short_note(here, i)
     if sites[0][0] != "anywhere":
-        why = [ready(here, tech, k, key) for k, key, _ in sites]
+        why = [ready(here, tech, k, key, a) for k, key, _ in sites]
         if all(why):
             return why[0]
     return ""

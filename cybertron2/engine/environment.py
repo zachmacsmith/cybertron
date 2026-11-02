@@ -80,7 +80,8 @@ def _worked_techs(w, node, parcel) -> set:
 
 def crop_high(w, parcel) -> bool:
     p = w.s["parcels"][parcel]
-    c = p.get("crop")
+    from cybertron2.engine import farm as FM
+    c = FM.main_crop(p)                                                        # the field's largest standing crop (D2-172)
     if not c or c.get("area_left", 0) <= 1e-6 or p["cover"] != "field":
         return False
     sown, ripe = int(c.get("sown", c.get("day", 0)) or 0), int(c.get("ripe_day", 0))

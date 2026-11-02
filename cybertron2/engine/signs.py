@@ -7,6 +7,8 @@ the rooks at the barley and miss the thin soil, another the reverse. New states 
 
 A condition is a function of a context `x`: x.c (the crop, or None), x.p (the parcel), x.h (the herd), x.day, x.season, x.cold,
 x.worked (parcels worked on today), x.herds_on(pid), x.adj_crop (a neighbouring parcel with a crop standing), and helpers below.
+On a field held in shares (D2-163, D2-172) the context is one holding's: x.p is the field with that holding's crop and soil, x.the
+names its crop ("the Reeds' barley", or "the barley" on a field held whole), x.part its ground ("the Reeds' part of Long Field").
 """
 from __future__ import annotations
 
@@ -23,62 +25,62 @@ def _k(n) -> str:
 CROP = [
     # reaping today (D4-74): heard, seen; conditional: rain on the cut sheaves
     dict(when=lambda x: x.c is not None and x.pid in x.reaping, own=1.0, sense="sound", tags=["farming", "harvest"],
-         text=lambda x: f"the swish of sickles in the {x.c['kind']} in {x.nm}"),
+         text=lambda x: f"the swish of sickles in {x.the} in {x.nm}"),
     dict(when=lambda x: x.c is not None and x.pid in x.reaping, own=0.8, sense="sight", tags=["farming", "harvest"],
-         text=lambda x: f"the {x.c['kind']} in {x.nm} going down in swathes, sheaves laid in rows behind the sickles"),
+         text=lambda x: f"{x.the} in {x.nm} going down in swathes, sheaves laid in rows behind the sickles"),
     dict(when=lambda x: x.c is not None and x.pid in x.reaping and x.weather in ("rain", "heavy rain"), reach="near", own=0.8,
-         sense="sight", tags=["farming", "harvest", "food"], text=lambda x: f"wet sheaves lying in {x.nm}: the {x.c['kind']} cut in the rain"),
+         sense="sight", tags=["farming", "harvest", "food"], text=lambda x: f"wet sheaves lying in {x.nm}: {x.the} cut in the rain"),
     # growing
     dict(when=lambda x: x.growing and not x.failed, sense="sight", p=0.10, tags=["farming"],
-         text=lambda x: f"the {x.c['kind']} in {x.nm} {x.be} up in green rows"),
+         text=lambda x: f"{x.the} in {x.nm} {x.be} up in green rows"),
     dict(when=lambda x: x.growing and not x.failed, sense="sight", p=0.12, tags=["farming", "harvest"], knack="reap",
-         text=lambda x: f"you judge the {x.c['kind']} in {x.nm} will be fit to reap in about {_k(x.c['ripe_day'] - x.day)}"),
+         text=lambda x: f"you judge {x.the} in {x.nm} will be fit to reap in about {_k(x.c['ripe_day'] - x.day)}"),
     dict(when=lambda x: x.growing and not x.failed and x.weeds and x.day - x.c["sown"] >= 2, sense="sight", p=0.2,
-         tags=["farming"], knack="weed", text=lambda x: f"thistle and dock are coming up among the {x.c['kind']} in {x.nm}"),
+         tags=["farming"], knack="weed", text=lambda x: f"thistle and dock are coming up among {x.the} in {x.nm}"),
     dict(when=lambda x: x.growing and not x.failed and not x.weeds, sense="sight", p=0.08, tags=["farming"],
-         text=lambda x: f"{x.nm} is clean of weeds"),
+         text=lambda x: f"{x.part} is clean of weeds"),
     dict(when=lambda x: x.growing and not x.failed and x.progress < 0.25, sense="sight", p=0.08, tags=["farming"],
-         text=lambda x: f"the {x.c['kind']} in {x.nm} {x.be} just through, a green haze on the soil"),
+         text=lambda x: f"{x.the} in {x.nm} {x.be} just through, a green haze on the soil"),
     dict(when=lambda x: x.growing and not x.failed and x.c.get("crop") == "legumes" and 0.35 <= x.progress < 0.75 and not x.cold,
-         sense="sight", p=0.1, tags=["farming"], text=lambda x: f"the {x.c['kind']} in {x.nm} {x.be} in flower, bees working along the rows"),
+         sense="sight", p=0.1, tags=["farming"], text=lambda x: f"{x.the} in {x.nm} {x.be} in flower, bees working along the rows"),
     dict(when=lambda x: x.growing and not x.failed and x.c.get("crop") != "legumes" and x.progress >= 0.6, sense="sight", p=0.1,
-         tags=["farming"], text=lambda x: f"the {x.c['kind']} in {x.nm} {x.stands} high, the ears filling"),
+         tags=["farming"], text=lambda x: f"{x.the} in {x.nm} {x.stands} high, the ears filling"),
     dict(when=lambda x: x.growing and not x.failed and x.c.get("hardy") and x.cold, sense="sight", p=0.12, tags=["farming", "season"],
-         text=lambda x: f"the {x.c['kind']} in {x.nm} {x.stands} green through the frost"),
+         text=lambda x: f"{x.the} in {x.nm} {x.stands} green through the frost"),
     dict(when=lambda x: x.growing and x.c.get("crop") == x.p.get("last_crop"), sense="sight", p=0.1, tags=["farming"], knack="sow",
-         text=lambda x: f"the {x.c['kind']} in {x.nm} follows the same crop last year: the ground tires of it, and it fails more often"),
+         text=lambda x: f"{x.the} in {x.nm} follows the same crop last year: the ground tires of it, and it fails more often"),
     dict(when=lambda x: x.growing and not x.failed and x.c["broken"] >= 0.5 * x.c["area"], sense="sight", p=0.08,
-         tags=["farming"], knack="sow", text=lambda x: f"the {x.c['kind']} in {x.nm} {x.stands} thick and even"),
+         tags=["farming"], knack="sow", text=lambda x: f"{x.the} in {x.nm} {x.stands} thick and even"),
     dict(when=lambda x: x.growing and not x.failed and not x.c.get("hardy") and x.frost_first, sense="sight", p=0.3,
          tags=["farming", "season", "food"], knack="sow",
-         text=lambda x: f"the {x.c['kind']} in {x.nm} will not ripen before the frosts come"),
+         text=lambda x: f"{x.the} in {x.nm} will not ripen before the frosts come"),
     dict(when=lambda x: x.growing and x.failed, sense="sight", p=0.6, tags=["farming", "food"],
-         text=lambda x: f"the {x.c['kind']} in {x.nm} {x.be} withering, the leaves spotted and brown"),
+         text=lambda x: f"{x.the} in {x.nm} {x.be} withering, the leaves spotted and brown"),
     dict(when=lambda x: x.growing and x.failed and not x.cold, sense="smell", p=0.2, tags=["farming"],
          text=lambda x: f"a sour smell off {x.nm}"),
     # ripe
     dict(when=lambda x: x.ripe and not x.rotting, sense="sight", p=0.35, tags=["farming", "harvest", "food"],
-         text=lambda x: f"the {x.c['kind']} in {x.nm} {x.stands} ripe and ready for the sickle"),
+         text=lambda x: f"{x.the} in {x.nm} {x.stands} ripe and ready for the sickle"),
     dict(when=lambda x: x.ripe and not x.rotting and x.pid not in x.worked, sense="sound", p=0.3, tags=["farming", "harvest"],
          text=lambda x: f"rooks and pigeons are at the ripe {x.c['kind']} in {x.nm}, with nobody there to drive them off"),
     dict(when=lambda x: x.ripe and not x.rotting, sense="touch", p=0.2, tags=["farming", "harvest"], knack="reap",
-         text=lambda x: (f"the pods in {x.nm} rattle dry in the hand: the {x.c['kind']} {x.be} ready" if x.c.get("crop") == "legumes"
-                         else f"the ears in {x.nm} rub out hard in the hand: the {x.c['kind']} {x.be} ready")),
+         text=lambda x: (f"the pods in {x.nm} rattle dry in the hand: {x.the} {x.be} ready" if x.c.get("crop") == "legumes"
+                         else f"the ears in {x.nm} rub out hard in the hand: {x.the} {x.be} ready")),
     dict(when=lambda x: x.ripe and not x.rotting and x.weather in ("rain", "heavy rain", "gale"), sense="sound", p=0.25,
          tags=["farming", "harvest"], text=lambda x: f"{'wind' if x.weather == 'gale' else 'rain'} beating on the ripe {x.c['kind']} in {x.nm}: "
                                                       "it wants cutting"),
     dict(when=lambda x: x.ripe and not x.rotting and x.window_left <= 0, sense="sight", p=0.5, tags=["farming", "harvest", "food"],
-         knack="reap", text=lambda x: f"the {x.c['kind']} in {x.nm} cannot stand much longer: it must be cut tomorrow or lost"),
+         knack="reap", text=lambda x: f"{x.the} in {x.nm} cannot stand much longer: it must be cut tomorrow or lost"),
     dict(when=lambda x: x.c is not None and x.c.get("reaped") and x.c["area_left"] > 1e-6, sense="sight", p=0.25,
-         tags=["farming", "harvest"], text=lambda x: f"sheaves stooked in {x.nm}, the rest of the {x.c['kind']} still standing"),
+         tags=["farming", "harvest"], text=lambda x: f"sheaves stooked in {x.nm}, the rest of {x.the} still standing"),
     # rotting
     dict(when=lambda x: x.rotting, sense="sight", p=0.6, tags=["farming", "harvest", "food"],
-         text=lambda x: f"the {x.c['kind']} in {x.nm} {x.be} going over: "
+         text=lambda x: f"{x.the} in {x.nm} {x.be} going over: "
                         + ("pods splitting" if x.c.get("crop") == "legumes" else "ears shedding") + " and rotting in the field"),
     dict(when=lambda x: x.rotting and not x.cold, sense="smell", p=0.3, tags=["farming", "food"],
          text=lambda x: f"a smell of wet rot from {x.nm}"),
     dict(when=lambda x: x.rotting, sense="sight", p=0.25, tags=["farming"],
-         text=lambda x: f"half the {x.c['kind']} in {x.nm} lies flat, beaten down"),
+         text=lambda x: f"half {x.the} in {x.nm} lies flat, beaten down"),
 ]
 
 # ---------------------------------------------------------------------- the ground of a field with no crop, its soil and its works
@@ -197,7 +199,7 @@ TRAMPLED = [
          tags=["animals", "farming", "food"], text=lambda x: f"hoof-marks and flattened {x.c['kind']} in {x.nm}: beasts have been in it"),
     dict(when=lambda x: x.c and x.trampled_days is not None and x.trampled_days <= 1 and x.trampled_qty >= 5, own=0.8, sense="sight",
          p=0.7, tags=["animals", "farming", "food"], knack="reap",
-         text=lambda x: f"a good swathe of the {x.c['kind']} in {x.nm} is grazed off and trodden into the mud"),
+         text=lambda x: f"a good swathe of {x.the} in {x.nm} is grazed off and trodden into the mud"),
     dict(when=lambda x: x.c and x.trampled_days is not None and x.trampled_days <= 2, own=0.5, sense="sight", p=0.6, tags=["animals"],
          knack="herd", text=lambda x: f"dung and the tracks of cattle in {x.nm}, leading back toward {x.trampled_from}"),
 ]
@@ -792,8 +794,18 @@ PERSON = [
 ]
 
 
-def context(here, pid, h=None):
-    p = here.parcels()[pid]
+_MAIN = object()
+HOLDING_ROWS = frozenset(range(3, 10))           # FIELD rows about a holding's own ground and soil (the rest: the whole parcel)
+
+
+def context(here, pid, h=None, holder=_MAIN):
+    """A parcel's state for its signs; on a field, one holding's (default: the one standing for the field, farm.main_rec)."""
+    par = here.parcels()[pid]
+    if par["cover"] == "field":
+        holder = FM.main_rec(par)[0] if holder is _MAIN else holder
+        p = FM.view(par, holder)
+    else:
+        holder, p = None, par
     c = p.get("crop")
     f = here.p["farming"]
     cal = here.calendar()
@@ -810,11 +822,19 @@ def context(here, pid, h=None):
     worked_by = lambda techs: {s.split(":", 1)[1] for e in here.events() if e.get("kind") == "work" and e.get("tech") in techs   # noqa: E731
                                for s in e.get("about") or [] if s.startswith("parcel:")}
     x.ploughed, x.hoed, x.reaping, x.picks = worked_by({"plough"}), worked_by({"hoe"}), worked_by({"reap"}), worked_by({"quarry", "mine"})
-    standing = [here.parcels()[q]["name"] for q in p["adj"] if (here.parcels()[q].get("crop") or {}).get("area_left", 0) > 1e-6]
+    if FM.named(par):                                                          # a field in shares: the holding reaped (D2-172)
+        x.reaping = {pid} if any(e.get("kind") == "work" and e.get("tech") == "reap" and f"parcel:{pid}" in (e.get("about") or [])
+                                 and e.get("holding") == holder for e in here.events()) else set()
+    standing = [here.parcels()[q]["name"] for q in p["adj"]
+                if any(cq.get("area_left", 0) > 1e-6 for _, _, cq in FM.standing(here.parcels()[q]))]
     x.adj_crop = standing[0] if standing else None
     fc = p.get("fence") or {}                                                  # the parcel's own fence (livestock.md, D2-130)
     x.fenced = None if not fc.get("built") or int(fc.get("level", 0)) <= 0 or fc.get("gate") == "open" else (
         "whole" if int(fc["level"]) >= 2 else "gappy")
+    names = FM.names_of(here)
+    x.holder = holder
+    x.the = FM.the_crop(names, par, holder, c) if c else ""
+    x.part = FM.the_part(names, par, holder) if par["cover"] == "field" else p["name"]
     plural = bool(c) and str(c.get("kind", "")).endswith("s")
     x.be, x.stands = ("are", "stand") if plural else ("is", "stands")
     if c:
@@ -986,8 +1006,9 @@ def _herds_out(here, add) -> None:
     for pid, p in here.parcels().items():
         if p.get("fence"):
             spot_rows(here, FENCE, fence_context(w, pid), [f"parcel:{pid}"], here.node, pid, add)
-        if (p.get("crop") or {}).get("trampled"):
-            spot_rows(here, TRAMPLED, context(here, pid), [f"parcel:{pid}"], here.node, pid, add)
+        for hd, _, c in FM.standing(p):
+            if c.get("trampled"):
+                spot_rows(here, TRAMPLED, context(here, pid, holder=hd), [f"parcel:{pid}"], here.node, pid, add)
 
 
 def facts(here, add) -> None:
@@ -998,8 +1019,10 @@ def facts(here, add) -> None:
     w = here._w
     names = {id(SKY): "sky", id(WILD): "wild", id(CROP): "crop", id(FIELD): "field", id(PASTURE): "pasture", id(HERD): "herd", id(BUILDING): "building", id(PERSON): "person"}
 
-    def emit(rows, x, about, parcel=None, inside=(), everyone=False, concerns=()):
+    def emit(rows, x, about, parcel=None, inside=(), everyone=False, concerns=(), only=None):
         for i, row in enumerate(rows):
+            if only is not None and i not in only:
+                continue
             try:
                 ok = row["when"](x)
             except (KeyError, TypeError, ZeroDivisionError):
@@ -1020,9 +1043,17 @@ def facts(here, add) -> None:
         x = context(here, pid)
         emit(WILD, x, [f"parcel:{pid}"], parcel=pid)
         if p["cover"] == "field":
-            if p.get("crop"):
-                emit(CROP, x, [f"parcel:{pid}"], parcel=pid)
-            emit(FIELD, x, [f"parcel:{pid}"], parcel=pid)
+            for hd, _, _ in FM.standing(p):                                   # a crop for each holding (D2-172)
+                emit(CROP, context(here, pid, holder=hd), [f"parcel:{pid}"], parcel=pid)
+            if not FM.named(p):
+                emit(FIELD, x, [f"parcel:{pid}"], parcel=pid)
+            else:                                                              # the ground and soil of each holding in its own words
+                emit(FIELD, x, [f"parcel:{pid}"], parcel=pid, only=set(range(len(FIELD))) - HOLDING_ROWS)
+                for hd, _ in FM.records(p):
+                    if FM.plots_of(p, hd) > 0:
+                        xh = context(here, pid, holder=hd)
+                        xh.nm = xh.part
+                        emit(FIELD, xh, [f"parcel:{pid}"], parcel=pid, only=HOLDING_ROWS)
         if p["cover"] in ("pasture", "meadow") or "grass" in p["res"] or (p["res"].get("dung") or {}).get("S", 0) > 5:   # D2-189
             emit(PASTURE, x, [f"parcel:{pid}"], parcel=pid)
     for hid, h in here.herds().items():
@@ -1484,7 +1515,7 @@ def herd_context(w, hid):
     h = w.s["herds"][hid]
     par = w.s["parcels"][h["parcel"]] if h.get("parcel") in w.s["parcels"] else None
     home = w.s["parcels"].get(h.get("home")) or {}
-    c = (par or {}).get("crop") or {}
+    c = (FM.main_crop(par) if par else None) or {}
     in_crop = bool(c) and c.get("area_left", 0) > 1e-6
     holders = [cl["claimant"] for cl in w.claims_on(("herd", hid))]
     hh = {iid: x["name"] for iid, x in w.s["institutions"].items()}
@@ -1493,7 +1524,8 @@ def herd_context(w, hid):
     return SimpleNamespace(h=h, name=h["name"], base=h.get("base_name") or h["name"], words=FM.herd_words(h),
                            nm=(par or {}).get("name", ""), nm_cover=(par or {}).get("cover", ""), home=home.get("name", "their pasture"),
                            in_crop=in_crop, crop=c.get("kind", "crop"), ripe=in_crop and w.d >= int(c.get("ripe_day", 10 ** 9)),
-                           trampled=float((c.get("trampled") or {}).get("qty", 0.0)) if (c.get("trampled") or {}).get("by") == hid else 0.0,
+                           trampled=sum(float((cq.get("trampled") or {}).get("qty", 0.0)) for _, _, cq in FM.standing(par or {"cover": ""})
+                                        if (cq.get("trampled") or {}).get("by") == hid),
                            hungry=int(h.get("hungry", 0)) > 0, whose=(f"they are {whose}'s" if whose else ""),
                            strays=bool(h.get("split_of")), from_road=bool(h.get("strayed_in")),
                            gap=bool(hfc.get("built")) and 0 < int(hfc.get("level", 0)) < 2, gate_open=hfc.get("gate") == "open")

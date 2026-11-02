@@ -26,7 +26,7 @@ SCHEMA = {
             "with": {"type": "string"}, "units": {"type": "number"}, "heir": {"type": "string"}, "head": {"type": "string"},
             "text": {"type": "string"}, "pass": {"type": "string"}, "structure": {"type": "string"}, "how": {"type": "string"},
             "describe": {"type": "string"}, "description": {"type": "string"}, "line": {"type": "string"}, "storey": {"type": "number"},
-            "room": {"type": "string"}},
+            "room": {"type": "string"}, "on": {"type": "string"}, "plots": {"type": "number"}},
             "required": ["do"]}},
         "say": {"type": "array", "items": {"type": "object", "properties": {"to": {"type": "string"}, "text": {"type": "string"}},
                                             "required": ["to", "text"]}},
@@ -288,6 +288,23 @@ def _ground_words(here, pid, p) -> str:
     return p["cover"]
 
 
+def _share_words(here, pid, p) -> list:
+    """What stands on a field and who holds its plots (D2-163, D2-172): 'barley on 4 (Reeds 3, Webbs 1), beans on 1 (Coles), 1 fallow'
+    and 'held: Reeds 3, Webbs 2, Coles 1' (with disputes: 'the Wynns claim 2 of the Reeds' plots'). A parcel held whole keeps its
+    'held by' words."""
+    names = FM.names_of(here)
+    out = []
+    if p["cover"] == "field":
+        cw = FM.crop_words(names, p)
+        if cw:
+            out.append(cw)
+    if p["cover"] in FM.LAND:
+        hw = FM.held_words(names, p, here.claims(("parcel", pid)))
+        if hw:
+            out.append(hw)
+    return out
+
+
 def _place_lines(here, mind=None) -> list:
     out = []
     for pid, p in here.parcels().items():
@@ -298,9 +315,10 @@ def _place_lines(here, mind=None) -> list:
                        and (d.get("yield") or {}).get("ground", p.get("ground")) == p.get("ground")
                        and (mind is None or d.get("crew") or KN.level(mind, t) in ("rough", "capable", "known"))
                        and ((d.get("yield") or {}).get("kind") != "gate" or not FM.ready(here, t, pid))})   # a gate only where one is
-        held = _holders(here, ("parcel", pid))
-        bits = [_ground_words(here, pid, p)] + ([f"held by {held}"] if held else []) + ([_fence_words(p["fence"])] if p.get("fence") else []) \
-            + (["here one can " + ", ".join(what)] if what else [])
+        shares = _share_words(here, pid, p)
+        held = "" if any(x.startswith("held: ") for x in shares) else _holders(here, ("parcel", pid))
+        bits = [_ground_words(here, pid, p)] + shares + ([f"held by {held}"] if held else []) \
+            + ([_fence_words(p["fence"])] if p.get("fence") else []) + (["here one can " + ", ".join(what)] if what else [])
         bs = [b["name"] + (" (half built)" if b.get("unfinished") else "") for b in here.buildings().values() if b["parcel"] == pid]
         if bs:
             bits.append("buildings: " + ", ".join(bs))

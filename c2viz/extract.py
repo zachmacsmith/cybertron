@@ -33,8 +33,8 @@ def crop_stage(x, c) -> str:
 
 
 def parcel_day(w, h, pid) -> dict:
-    p = w.s["parcels"][pid]
     x = E.parcel_signs(h, pid)
+    p = x.p                                    # a field as its main holding shows it (the engine's plot shares: signs.context)
     size = max(1, int(p["size"]))
     out = {"cover": p["cover"], "was": p.get("was"), "fertility": r3(p.get("fertility", 1.0)),
            "soil": E.soil_word(float(p.get("fertility", 1.0))),
