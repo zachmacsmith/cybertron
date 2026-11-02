@@ -45,10 +45,12 @@
         const k = RL.kind[i], moor = n >= 0 && M.nodes[nids[n]].biome === "moor";
         if (k === 2) { P.put(x, y, v > 0.66 ? "#aaa59a" : v < 0.33 ? "#8a857a" : "#9a958a"); if (n3(x * 1.7, y * 1.7, 1) > 0.82) P.put(x, y, "#c4c0b4"); }
         else if (k === 1) { P.mix(x, y, moor ? "#8a7068" : "#8e9a58", moor ? 0.45 : 0.4); if (n3(x * 1.5, y * 1.5, 1) > 0.9) P.put(x, y, "#b8b4aa"); }
+        else if (k === 4) { P.put(x, y, RL.tint[i]); if (v > 0.62) P.light(x, y, .07); else if (v < 0.36) P.dark(x, y, .08);   // heath and moor
+          const hv = n3(x * 1.3 + 4, y * 1.3, 1); if (hv > 0.78) P.put(x, y, "#8a5a7a"); else if (hv < 0.12) P.put(x, y, "#6e7a3a"); }
         else if (k === 3) { P.put(x, y, RL.tint[i]); P.mix(x, y, "#6a8a5a", 0.45); const pv = n3(x / 12 + 3, y / 12, 2); if (pv > 0.7) P.put(x, y, pv > 0.76 ? "#4e7e94" : "#5a8aa0"); else if (pv > 0.64 && n3(x * 2, y * 2, 1) > 0.5) P.put(x, y, PAL.reed); }
         else { P.put(x, y, RL.tint[i]); if (v > 0.62) P.light(x, y, .06); else if (v < 0.36) P.dark(x, y, .06);
           const tg = [null, ["#8cc04c", "#9cd05a", "#7cb042"], ["#7cb444", "#8cc452", "#6ca43a"], ["#6ca63c", "#7cb64a", "#5c9632"], ["#8a9a52", "#9aaa5e", "#7a8a48"]][Math.min(4, l)];
-          if (tg) { P.put(x, y, tg[v > 0.62 ? 1 : v < 0.36 ? 2 : 0]); P.mix(x, y, RL.tint[i], 0.3); } if (moor) P.mix(x, y, "#8a6a7a", 0.3);
+          if (tg) { P.put(x, y, tg[v > 0.62 ? 1 : v < 0.36 ? 2 : 0]); P.mix(x, y, RL.tint[i], RL.tintW ?? 0.3); } if (moor && !RL.ground) P.mix(x, y, "#8a6a7a", 0.3);
           if (n3(x / 5 + 1, y / 5, 2) > 0.7) P.dark(x, y, 0.06); }
       }
       else if (!p && l > 0) { P.dark(x, y, 0.13 + 0.06 * (n2(x / 20, y / 20) > .5)); if (!small && n3(x * 1.9, y * 1.9, 1) > 0.8) P.dark(x, y, .16); }

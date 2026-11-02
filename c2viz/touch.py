@@ -103,6 +103,40 @@ def replay(w, prim, place, kw):
     return w.apply(prim, place, **kw)
 
 
+# ---------------------------------------------------------------------------------------------------- the generator's ground truth
+# A generated world (cybertron2/landgen, D2-173 to D2-188) keeps the cells it was drawn from beside its world file. Its road rule
+# is asked again to recover each road's cells, which the generator does not save (docs/engine_gaps.md).
+try:
+    from cybertron2.landgen import field as _LGF, roads as _LGR, vocab as _LGV
+except ImportError:                                                         # an engine from before the generator
+    _LGF = _LGR = _LGV = None
+
+
+def land_grid(seed, size_km, km, x, y):
+    ny, nx = x.shape
+    return _LGF.Grid(seed, size_km, km, ny, nx, x, y)
+
+
+def land_defaults() -> dict:
+    return dict(_LGV.DEFAULTS) if _LGV is not None and hasattr(_LGV, "DEFAULTS") else {}
+
+
+def road_fords(L):
+    return _LGR.fords(L)
+
+
+def road_hours(L, cov, ford):
+    return _LGR.hours_grid(L, cov, ford)
+
+
+def road_reach(L, H, src, limit):
+    return _LGR.dijkstra(L, H, src, limit)
+
+
+def road_path(prev, src, dst):
+    return _LGR.path_to(prev, src, dst)
+
+
 # ---------------------------------------------------------------------------------------------------- the contract with the engine
 TOUCHPOINTS = {
     "tables": ["ITEMS", "CLEARING", "BLUEPRINTS", "THINGS", "EVENT_EXTENT", "COVERS", "CROPS", "FITTINGS", "FENCES", "WEATHER", "LAYOUT", "TERRAIN",
@@ -121,6 +155,9 @@ def check(state: dict | None = None) -> list:
     missing = [f"data.{t}" for t in TOUCHPOINTS["tables"] if not hasattr(_DT, t)]
     missing += [f"{m.__name__}.{f}" for m, f in TOUCHPOINTS["functions"] if not hasattr(m, f)]
     missing += [f"World.{f}" for f in TOUCHPOINTS["world"] if not hasattr(_World, f)]
+    if _LGR is not None:                                                    # the generator's road rule and grid
+        missing += [f"landgen.{m.__name__.rsplit('.', 1)[-1]}.{f}" for m, fs in ((_LGR, ("fords", "hours_grid", "dijkstra", "path_to")),
+                                                                             (_LGF, ("Grid",)), (_LGV, ("DEFAULTS",))) for f in fs if not hasattr(m, f)]
     if state is not None:
         missing += [f"World.s[{k!r}]" for k in TOUCHPOINTS["state"] if k not in state and k != "today"]
     return missing

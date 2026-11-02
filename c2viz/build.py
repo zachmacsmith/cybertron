@@ -37,6 +37,7 @@ def main(argv=None):
     ap.add_argument("--viz")
     ap.add_argument("--out")
     ap.add_argument("--js", help="write only the bundled renderer to this file")
+    ap.add_argument("--land", help="the world's cells (.cells.npz) when not beside the run or its world file")
     a = ap.parse_args(argv)
     if a.js:
         Path(a.js).write_text(bundle())
@@ -45,7 +46,7 @@ def main(argv=None):
     if a.viz:
         viz = Path(a.viz)
     elif a.run:
-        viz = MD.build(a.run, days=a.days)
+        viz = MD.build(a.run, days=a.days, land=a.land)
     else:
         ap.error("a run directory or --viz")
     out = Path(a.out) if a.out else viz.with_name("map.html")

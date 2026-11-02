@@ -16,6 +16,9 @@
   const STAGE_PAL = { rotting: ["#a88a30", "#8a7028"], blighted: ["#a89c84", "#8f846e"], killed: ["#9aa0a0", "#868c8c"] };
   const TERRAIN_LAND = { plain: [0.3, 0, 0.1], farmland: [0.3, 0.1, 0.1], woodland: [0.38, 1, 0.2], marsh: [0.1, 0.25, 1], "river valley": [0.15, 0.2, 0.5],
     hills: [0.62, 0.2, 0.1], mountain: [0.88, 0.05, 0] };
+  // the landscape generator's terrains (landgen.physical.TERRAIN_NAMES): how the wild land looks (0 open, 1 hill, 2 mountain or bare rock,
+  // 3 wet, 4 heath); a terrain not listed is open land
+  const TERRAIN_KIND = { "sandy heath": 4, moor: 4, hills: 1, "upland pasture": 1, rock: 2, fen: 3, saltmarsh: 3 };
   const QUIET_EVENTS = ["speech", "work", "store", "make", "build", "give", "take", "trade"];   // events not marked on the map
-  Object.assign(X, { TECH_TOOL, toolFor, RIVER, LOTS, STOPS, FIRES, CROP_PAL, STAGE_PAL, TERRAIN_LAND, QUIET_EVENTS });
+  Object.assign(X, { TECH_TOOL, toolFor, RIVER, LOTS, STOPS, FIRES, CROP_PAL, STAGE_PAL, TERRAIN_LAND, TERRAIN_KIND, QUIET_EVENTS });
 })(C2X);

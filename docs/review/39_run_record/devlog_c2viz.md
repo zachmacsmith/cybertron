@@ -76,3 +76,14 @@ engine's state and imports nothing it changes.
   - `timeline.py`: routes for runs from before D4-62 by the engine's rule, marked `routes_derived`.
   - Built with the run's own engine, all 24 days' changes replay; today's engine refuses 29 transfers of that run (a stock rule
     changed since), which is why a legacy run is built on its own engine.
+- 02 Nov 2026 17:54 UTC: a generated world is drawn from its ground truth, at Zach's request. The landscape generator
+  (cybertron2/landgen, 37.2) keeps the cells a world was drawn from beside it.
+  - `ground.py` reads the cells (height, water, rivers, wetness, terrain, cover, parcel of each cell) and each site.
+  - Roads are recovered with the generator's own road rule; on twin bays all 6 leave by the world file's parcels.
+  - `js/ground.js` fills the region plan from these, so the painter, terraces, woods, peaks and villages are unchanged.
+    Places stand at their real sites, larger than life, moved off open water only as far as their drawing needs. Close-ups
+    take the same ground.
+  - Schema 2 (`land`, optional).
+  - Hand-made worlds render pixel-identical to before (5 views of w1).
+  - Engine gaps G-32 (road cells not saved) and G-33 (a run does not carry its cells).
+  - Test: twin bays generated, packed, every road matched.

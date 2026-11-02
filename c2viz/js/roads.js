@@ -14,6 +14,14 @@
         out.push([cr(p0[0], p1[0], p2[0], p3[0]), cr(p0[1], p1[1], p2[1], p3[1])]); } }
     out.push([x1, y1]); return out;
   }
+  // a curve through given points (Catmull-Rom), every 0.7 px: a line drawn through the cells of a road or a river
+  function splinePath(pts) {
+    const out = [];
+    for (let j = 0; j + 1 < pts.length; j++) { const p0 = pts[Math.max(0, j - 1)], p1 = pts[j], p2 = pts[j + 1], p3 = pts[Math.min(pts.length - 1, j + 2)], seg = Math.hypot(p2[0] - p1[0], p2[1] - p1[1]) || 1;
+      for (let q = 0; q < seg; q += 0.7) { const t = q / seg, t2 = t * t, t3 = t2 * t, cr = (a, b, c, d) => 0.5 * (2 * b + (-a + c) * t + (2 * a - 5 * b + 4 * c - d) * t2 + (-a + 3 * b - 3 * c + d) * t3);
+        out.push([cr(p0[0], p1[0], p2[0], p3[0]), cr(p0[1], p1[1], p2[1], p3[1])]); } }
+    if (pts.length) out.push(pts[pts.length - 1].slice()); return out;
+  }
   function paintPath(paint, pts, wide, col, keep) { for (const [x, y] of pts) { if (keep && !keep(x, y)) continue; for (let a = 0; a <= wide; a++) for (let b = 0; b <= wide; b++) paint(x + a, y + b, col); } }
   const paintRoad = (P, occ, LV, W, H, face) => (x, y, col) => { x |= 0; y |= 0; if (x < 0 || y < 0 || x >= W || y >= H) return; const i = y * W + x;
     P.put(x, y, LV[i] === 0 ? ((x + y) % 2 ? "#a0662f" : "#8a5a2a") : face && face[i] ? "#e6dcc4" : col); occ[i] = 3; };
@@ -31,5 +39,5 @@
       const w_ = +wide || 0; for (let a = 0; a <= w_; a++) for (let b = 0; b <= w_; b++) paint(x + a, y + b, col);
     }
   }
-  Object.assign(X, { windPath, paintPath, paintRoad, verges, wind });
+  Object.assign(X, { windPath, splinePath, paintPath, paintRoad, verges, wind });
 })(C2X);

@@ -21,6 +21,10 @@
     moor:      { grass: [["#8e8a5a", "#9a7a7a", "#7e7a50"], ["#867c56", "#946e78", "#76704c"], ["#7e7652", "#8a6670", "#6e6a48"]], trees: ["pine"], wild: 0.06 },
     meadow:    { grass: [["#8cc04c", "#9cd05a", "#7cb042"], ["#7cb444", "#8cc452", "#6ca43a"], ["#6ca63c", "#7cb64a", "#5c9632"]], trees: ["oak", "birch"], wild: 0.45 },
   };
+  // the ground's colour by the generator's terrain (a generated world's ground truth, ENGINE.md §12)
+  const TERRAIN_TINT = { "river floodplain": "#7cc04c", "river terrace": "#8cc452", "clay vale": "#6ca43a", "lowland loam": "#86ba48", "sandy heath": "#a89a5c",
+    "chalk down": "#a8c878", woodland: "#5f9a36", hills: "#8e9a58", "upland pasture": "#9aaa58", moor: "#8a7a5a", fen: "#6a9a6a", coast: "#d8c890",
+    saltmarsh: "#8aa080", rock: "#9a958a", "deep forest": "#4e8a30", water: "#3a7aa0" };
   function biomeOf(V, nid) {
     const share = {}; let tot = 0, hsum = 0;
     for (const p of Object.values(V.static.parcels)) if (p.node === nid) { const s = +p.size || 1; share[p.cover] = (share[p.cover] || 0) + s; tot += s; hsum += (p.height ?? 1) * s; }
@@ -40,5 +44,5 @@
   const looks = (name) => { const h = hstr(name); return { hair: HAIR[h % 8], skin: SKIN[(h >>> 3) % 6], clothes: CLOTHES[(h >>> 6) % 9], trousers: TROUSERS[(h >>> 10) % 4] }; };
   const ROOF = { timber: ["#c8553d", "#e07a5a", "#9a3a24"], stone: ["#7a7a86", "#9a9aa6", "#55555f"], wattle: ["#c8a050", "#e0bc68", "#9a7838"], camp: ["#a07a4a", "#c09a62", "#7a5a32"] };
   const WALL = { timber: "#f2e8d4", stone: "#d6d0c4", wattle: "#e8d4a8", camp: "#cdb48a" };
-  Object.assign(X, { PAL, BIOMES, biomeOf, HAIR, SKIN, CLOTHES, TROUSERS, looks, ROOF, WALL });
+  Object.assign(X, { PAL, BIOMES, TERRAIN_TINT, biomeOf, HAIR, SKIN, CLOTHES, TROUSERS, looks, ROOF, WALL });
 })(C2X);

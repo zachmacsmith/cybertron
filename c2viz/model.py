@@ -12,6 +12,7 @@ import argparse
 import json
 from pathlib import Path
 
+from c2viz import ground as GR
 from c2viz.extract import day_record
 from c2viz.layout import node_layout, world_layout
 from c2viz.schema import SCHEMA_VERSION, validate
@@ -40,7 +41,7 @@ def tables() -> dict:
     return E.tables() | {"spec": {"spaces": SPACES, "ground": GROUND, "rooms": ROOMS, "source": "economy/buildings.md D2-154, D2-155 (not yet in the engine)"}}
 
 
-def build(run, out=None, days=None, timelines=True) -> Path:
+def build(run, out=None, days=None, timelines=True, land=None) -> Path:
     R = open_run(run)
     want = R["days"] if days is None else [d for d in R["days"] if d < days]
     rooms = Rooms()
@@ -56,6 +57,12 @@ def build(run, out=None, days=None, timelines=True) -> Path:
     meta = {"name": R["spec"].get("name") or Path(run).name, "days": len(recs), "seed": R["seed"], "source": str(Path(run).resolve()),
             "people": people, "season_days": w0.season_len, "schema": SCHEMA_VERSION}
     viz = {"meta": meta, "tables": tables(), "static": st, "days": recs}
+    ground = GR.pack(run, R["spec"], st["roads"], land)                      # a generated world's ground truth (ENGINE.md §12)
+    if ground:
+        viz["land"] = ground
+        c = ground["roads_check"]
+        print(f"c2viz ground: {Path(ground['source']).name}, roads by the generator's rule {c['match']}/{c['roads']} leave by the world's parcels"
+              + (f" (not: {', '.join(c['unmatched'])})" if c["unmatched"] else ""))
     for problem in validate(viz):
         print("c2viz schema:", problem)
     out = Path(out) if out else Path(run) / "viz.json"
@@ -69,8 +76,9 @@ def main(argv=None):
     ap.add_argument("--out")
     ap.add_argument("--days", type=int)
     ap.add_argument("--no-timeline", action="store_true", help="only each day's end, not the day as it happened")
+    ap.add_argument("--land", help="the world's cells (.cells.npz) when not beside the run or its world file")
     a = ap.parse_args(argv)
-    p = build(a.run, a.out, a.days, not a.no_timeline)
+    p = build(a.run, a.out, a.days, not a.no_timeline, a.land)
     print(p, f"{p.stat().st_size // 1024} KB")
 
 

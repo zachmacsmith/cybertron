@@ -52,3 +52,21 @@ def test_the_renderer_modules_load_in_order():
         e = re.search(r"Object\.assign\(X, \{ ([^}]*) \}\);", src)
         defined |= {x.strip() for x in e.group(1).split(",")} if e else set()
     assert "api" in names[-1:]
+
+
+def test_a_generated_world_is_drawn_from_its_ground_truth(tmp_path):
+    """A generated world's cells are packed for the renderer, and every road recovered by the generator's own rule leaves by the
+    parcels the world file says (c2viz/ground.py)."""
+    import yaml
+    from c2viz import ground as GR
+    from cybertron2.landgen import write as LW
+    from cybertron2.engine.world import World
+    spec = yaml.safe_load((ROOT / "cybertron2/specs/twin_bays_gen.yaml").read_text())
+    world, cells, report = LW.generate(spec, str(ROOT / "cybertron2/specs/twin_bays_gen.yaml"))
+    LW.write(world, cells, report, str(tmp_path / "w.yaml"))
+    w = World({**world, "agents": world.get("agents") or {}})            # the land and roads; no people needed
+    land = GR.pack(tmp_path, world, w.s["roads"], tmp_path / "w.cells.npz")
+    assert land and land["roads_check"]["roads"] == len(w.s["roads"]) and land["roads_check"]["unmatched"] == []
+    assert set(land["sites"]) == set(w.s["nodes"]) and land["rivers"]
+    assert schema.validate({"meta": {k: 0 for k in schema.META}, "tables": {}, "static": {k: 0 for k in schema.STATIC}, "days": [],
+                            "land": land}) == []

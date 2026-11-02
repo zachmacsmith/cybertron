@@ -15,6 +15,7 @@
                                                       // [height, forest, wet]
   function regionPlan(V) {
     let RP = REGION.get(V); if (RP) return RP;
+    if (V.land && X.groundPlan) { RP = X.groundPlan(V); REGION.set(V, RP); return RP; }   // a generated world: its ground truth (ground.js)
     const M = model(V), ST = V.static, WL = ST.layout.world || {}, nids = Object.keys(ST.nodes).sort(), G = {};
     for (const n of nids) G[n] = geom(V, n);
     const f = WORLD_SCALE, rad = (n) => G[n].land * f, rds = Object.entries(ST.roads).filter(([, r]) => r.a in G && r.b in G);
@@ -127,11 +128,14 @@
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
       const i = y * W + x, rx = px + (x - G.mid[0]) * f, ry = py + (y - G.mid[1]) * f, e = bil(RP.E, rx, ry);
       E[i] = e; F[i] = bil(RP.F, rx, ry); Wt[i] = bil(RP.Wt, rx, ry); tint[i] = at(RP.tint, rx, ry);
-      level[i] = G.REG[i] >= 0 ? own : levelOf(e); kind[i] = e > 0.78 ? 2 : e > 0.56 ? 1 : (Wt[i] > 0.55 && e < 0.35) ? 3 : 0;
+      const wx = rx + (nW(x / 6 + 2, y / 6, 2) - 0.5) * 9 * f, wy = ry + (nW(x / 6, y / 6 + 2, 2) - 0.5) * 9 * f;   // shores broken at this scale
+      level[i] = G.REG[i] >= 0 ? own : at(RP.level, wx, wy) === 0 ? 0 : levelOf(e);          // open water (a generated world's sea, lakes) as the region has it
+      if (RP.ground) tint[i] = at(RP.tint, wx, wy);
+      kind[i] = RP.ground ? at(RP.kind, wx, wy) : e > 0.78 ? 2 : e > 0.56 ? 1 : (Wt[i] > 0.55 && e < 0.35) ? 3 : 0;   // the ground truth's terrain, or as derived
       wood[i] = nW(rx / 30, ry / 30, 3) < 0.2 + F[i] * 0.55 ? 1 : 0;
     }
     const rivers = RP.rivers.map((c) => ({ pid: null, pids: [], n: null, half: Math.max(2, c.half / f * 0.8), line: c.line.map(([x, y]) => [G.mid[0] + (x - px) / f, G.mid[1] + (y - py) / f]).filter(([x, y]) => x > -30 && y > -30 && x < W + 30 && y < H + 30) })).filter((c) => c.line.length > 2);
-    return (cache[nid] = { E, F, Wt, kind, level, tint, wood, rivers });
+    return (cache[nid] = { E, F, Wt, kind, level, tint, wood, rivers, ground: !!RP.ground, tintW: RP.tintW });
   }
   function peaks(P, RL, cellPar, occ, W, H, snowy, k) {                                          // peaks where the land is mountain
     const pk = [], sx = Math.round(9 * k), sy = Math.round(7 * k);

@@ -4,7 +4,7 @@
 changes to keep this contract; if the contract itself must change, `c2viz/schema.py` `SCHEMA_VERSION` goes up and this file says
 what changed. `schema.validate` checks a viz.json (the build prints any problem; the tests require none).
 
-Schema version: **1**.
+Schema version: **2** (2 added `land`, optional; nothing else changed).
 
 | Part | Holds | Built by |
 |---|---|---|
@@ -13,6 +13,7 @@ Schema version: **1**.
 | `static` | `nodes {id: {name, text, unexplored}}`, `parcels {id: {node, name, cover, size, side, height, adj, text, ground}}`, `roads {id: {a, b, days, track, way, terrain, stretches, ends {node: {side, parcels, hidden}}}}`, `layout {world, nodes}` (presentation positions, layout.py) | model.static |
 | `days[]` | one record a day, the state after its night (below) | extract.day_record |
 | `days[].timeline` | the day as it happened (below), when built with timelines | timeline.timeline |
+| `land` | a generated world's ground truth, when it has one (below) | ground.pack |
 
 ## A day
 
@@ -35,6 +36,28 @@ Schema version: **1**.
 (`actor`, `verb`, `for`, `tech`, `site`, `node`, `units`, `t0`, `t1` (presentation: units against the day's), `delta {parcels,
 buildings, herds, things, carried}`: the records an act changed, after it), `routes {name: [parcel]}` (the engine's, D4-62; `routes_derived` when the run predates the engine keeping them and the engine's rule was applied afterwards),
 `budget {name: units}`, `talk [{actor, place, kind, text}]`, `unreplayed` (changes that did not replay: 0 when all is well).
+
+## The ground truth (`land`)
+
+Only for a world made by the landscape generator (cybertron2/landgen), from the cells saved beside its world file (`.cells.npz`):
+
+- `source`, `by`, `seed`, `north` ("up": rows are flipped from the generator's northing);
+- `grid {nx, ny, km}`;
+- `layers`: little-endian base64 arrays of nx × ny, row by row:
+  - `h`: int16 decimetres;
+  - `cover`: u8, an index into `covers`;
+  - `terrain`: u8, an index into `terrains`;
+  - `river`: u8, class 0 to 3;
+  - `water`: u8 bits, 1 sea, 2 lake, 4 spring;
+  - `wet`: u8, 0 to 255;
+  - `place`: u16, an index into `places`, the parcel ids, 0 none;
+  - `jx`, `jy`: i1, each cell's point off its grid place in hundredths of a cell;
+- `sites {node: [col, row]}`;
+- `kinds {node: village|wild|stop}`;
+- `rivers [{cells [[row, col]], class []}]`: downstream along the flow;
+- `roads {road id: {cells, stretches (cell index where each day's stretch begins, and the end), matches_ends}}`: by the
+  generator's road rule;
+- `roads_check {roads, match, unmatched}`.
 
 ## Words the renderer knows
 

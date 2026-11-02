@@ -4,7 +4,7 @@ this; when the engine changes, the model changes to keep it, or SCHEMA_VERSION g
 """
 from __future__ import annotations
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2                       # 2: `land`, a generated world's ground truth (optional)
 
 TOP = {"meta": dict, "tables": dict, "static": dict, "days": list}
 META = ("name", "days", "seed", "people", "season_days", "schema")
@@ -18,6 +18,8 @@ THING = ("kind", "node", "parcel", "goods")
 PERSON = ("at", "alive", "stage", "hunger", "wounded", "homes", "spot", "carried")
 TIMELINE = ("from", "morning", "acts", "routes", "budget", "talk")
 ACT = ("actor", "verb", "t0", "t1", "delta")
+LAND = ("source", "grid", "layers", "sites", "rivers", "roads", "roads_check")
+LAYERS = ("h", "cover", "covers", "terrain", "terrains", "river", "water", "wet", "place", "places", "jx", "jy")
 
 
 def validate(viz: dict) -> list:
@@ -41,4 +43,10 @@ def validate(viz: dict) -> list:
             need(T, TIMELINE, f"{where} timeline")
             for a in T.get("acts", [])[:3]:
                 need(a, ACT, f"{where} act")
+    if "land" in viz:                                                       # optional: a generated world's ground truth
+        need(viz["land"], LAND, "land")
+        need(viz["land"].get("layers") or {}, LAYERS, "land layers")
+        g = viz["land"].get("grid") or {}
+        if not g.get("nx") or not g.get("ny"):
+            out.append("land: grid without nx, ny")
     return out

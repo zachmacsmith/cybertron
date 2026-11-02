@@ -375,6 +375,7 @@ Two halves, so that every rule stays in the engine:
   its kind follows from its height and wetness (low ground, slopes, hills, mountain with snow on the heights and in winter,
   marsh with pools and reeds), its colour is the places' characters blended by nearness, and it is shaded by its relief.
   Worlds that say little (region_s1: every road farmland, every height 1) get a landscape from little: mostly the names.
+  **A generated world is not drawn this way:** its landscape is the generator's ground truth (§12).
 
 ## 10. Audit of the first renderer (before this model), fixed in the rebuild
 
@@ -404,3 +405,36 @@ Two halves, so that every rule stays in the engine:
   (`World.units_for`), and ends after its own units; the walk along the route to its site takes the first part of the act's time
   (at most 0.45 of it, 0.03 of the day a parcel); the way home after the last act 0.1 of the day; talk before work, dusk from 0.9,
   night after 1 (the night's outcomes: beds from the night log, deaths, what was eaten). Each act's change lands when it ends.
+
+## 12. A generated world's ground truth (cybertron2/landgen; c2viz/ground.py, js/ground.js)
+
+A world made by the landscape generator (D2-173 to D2-188; docs/cybertron2/proposals/generator_stage1.md) is compressed from a
+mesh of cells: the parcels and roads of the world file are pieces of it, and the cells are kept beside the world file
+(`<world>.cells.npz`, with `<world>.report.json`). They are the land under the graph, so the region's map is drawn from them,
+not derived from the graph's words as in §9.
+
+**What is read (ground truth):** each cell's height, sea, lake, spring, river class, wetness, terrain (the generator's 16) and
+natural cover, and which parcel it is; each place's site (the report). **What is recovered by the generator's own rule:** each
+road's cells (landgen.roads: hours by cover and slope, fords, least-cost paths, from the end it was routed from), which the
+generator does not save (engine_gaps G-32), checked against the parcels the world file says each road leaves by; rivers as lines
+down each river cell's flow (its accumulated flow). **Where the cells come from:** `--land`, beside the run, or beside the world
+file in cybertron2/specs by its name; cells whose parcels are not the run's are refused. A run does not yet carry them (G-33).
+
+**Presentation choices:**
+- **Scale:** 4 px per cell. A cell is 150 m, so a 50 km window is a 1336 px map, and a larger window is a larger map.
+- **North is up.** The generator's y is northing.
+- **Heights** become the renderer's terraces at 700 m per unit of height, a step about every 105 m.
+- **The wild land's look** comes from its terrain: rock is mountain, with mountain also above about 440 m; hills and upland
+  pasture are hill; fen and saltmarsh are wet; sandy heath and moor are heath. Its colour comes from the terrain too
+  (palette.js TERRAIN_TINT), and woods stand where the cover is forest.
+- **Shores** are open water's share between cells, broken by noise, at both scales.
+- **Places are drawn at the region's one scale (§9), much larger than their real few cells, at their real site.** A place
+  whose drawing would stand in open water is moved to the nearest ground that holds it, and its drawing pushes back any water
+  left under it.
+- **Roads** are a curve through their cells, from each end's exit of the place's drawing. Each day's stretch is marked where
+  the generator's hours divide it.
+- **Close up, a place stands in the same ground**, sampled from the region's: its sea and lakes, terrain and colour, and its
+  shores broken at that scale.
+
+A world made by hand has no cells and is drawn as in §9; the renderer's output for one is unchanged, pixel for pixel.
+

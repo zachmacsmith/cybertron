@@ -39,6 +39,7 @@ Each scale returns hotspots (kind, id, box, label, info) so a page can label, ho
 ```
 python -m cybertron2.engine run cybertron2/specs/region_s1.yaml --out RUN --bots --days 14    # any run: it keeps its journal
 python -m c2viz.build RUN                                                                    # RUN/viz.json and RUN/map.html
+python -m c2viz.build RUN --land WORLD.cells.npz                                             # a generated world: drawn from its cells
 ```
 
 `map.html` is a bare preview: the map, labels, hover, day controls; click a place to go in, an exit to follow the road; in a
@@ -57,6 +58,8 @@ cybertron2 engine ── touch.py ──► source.py ─► extract.py ─► m
 - **The contract:** the renderer reads only `viz.json` (SCHEMA.md, `schema.py`); it never sees engine state.
 - **The engine's words** the renderer draws differently (techniques' tools, fittings that show a fire, river names, crop stages,
   road terrains, quiet events) are all in `js/vocab.js`; an unknown word is drawn plainly.
+- **A generated world's land** is read from the generator's cells by `ground.py` alone (`viz.json` `land`), and drawn by
+  `js/ground.js` into the same plan the derived landscape gives, so the rest of the renderer does not know which it has.
 - **The spec's end state** for buildings (rooms, spaces, ground) is in `spec_rooms.py` alone, until the engine stores rooms.
 - **When the engine changes:** run `python -m pytest c2viz/tests -q`. It checks the touchpoints, builds a short real run to the
   contract (every change must replay), and checks the renderer's modules load in order. Then fix, in this order: `touch.py`
@@ -71,11 +74,14 @@ cybertron2 engine ── touch.py ──► source.py ─► extract.py ─► m
 | `source.py` | the run journal: meta, steps, the world at a step, changes, speech |
 | `extract.py` | a day's records (parcels, buildings, herds, things, people, roads, events) |
 | `timeline.py` | a day as it happened: the work step's changes replayed through the engine, act by act |
+| `ground.py` | a generated world's ground truth (the generator's cells beside its world file): layers, sites, rivers, roads by the generator's rule (ENGINE.md §12) |
+| `legacy/` | runs from before the journal, replayed to one from their recorded replies |
+| `video/` | a walk-through video of a run |
 | `spec_rooms.py` | the spec's building model (rooms, spaces, ground), derived until the engine has it |
 | `schema.py` | the contract's version and `validate` |
 | `model.py` | the run to `viz.json` (orchestration and the CLI) |
 | `layout.py` | presentation positions: places by travel days; parcel sites by side and neighbours |
-| `js/` | the renderer, one module a concern, loaded in `js/MANIFEST` order: core, vocab, palette, sprites, buildings, model, roads, geom, land, plan, region, node, day, world, api |
+| `js/` | the renderer, one module a concern, loaded in `js/MANIFEST` order: core, vocab, palette, sprites, buildings, model, roads, geom, land, plan, region, ground, node, day, world, api |
 | `preview.html`, `build.py` | the preview page with the bundled renderer and the data inlined (`--js` writes the bundle alone) |
 | `tests/` | the checks above |
 
