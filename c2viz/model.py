@@ -70,15 +70,40 @@ def build(run, out=None, days=None, timelines=True, land=None) -> Path:
     return out
 
 
+def build_world(path, out=None, land=None) -> Path:
+    """A world that has not been run, drawn as its file makes it (dawn of day 0: the land, the houses, the people at home, the
+    herds), from the world file alone; a generated world with its ground truth (the cells beside it). No journal, no timeline."""
+    path = Path(path)
+    spec = E.load_spec(path)
+    w0 = E.fresh_world(spec)
+    rooms = Rooms()
+    rec = day_record(w0, rooms)
+    st = static(w0, w0.seed)
+    people = {n: {"household": w0.household_of(n), "model": p.get("model")} for n, p in w0.s["people"].items()}
+    meta = {"name": spec.get("name") or path.stem, "days": 1, "seed": w0.seed, "source": str(path.resolve()), "people": people,
+            "season_days": w0.season_len, "schema": SCHEMA_VERSION, "unrun": True}
+    viz = {"meta": meta, "tables": tables(), "static": st, "days": [rec]}
+    cells = Path(land) if land else path.with_name(path.stem + ".cells.npz")                # the generator writes it beside the world
+    ground = GR.pack(path.parent, spec, st["roads"], cells) if cells.exists() else None
+    if ground:
+        viz["land"] = ground
+    for problem in validate(viz):
+        print("c2viz schema:", problem)
+    out = Path(out) if out else path.with_suffix(".viz.json")
+    out.write_text(json.dumps(viz, separators=(",", ":"), default=str))
+    return out
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
-    ap.add_argument("run")
+    ap.add_argument("run", help="a run (its journal), or with --world a world file")
+    ap.add_argument("--world", action="store_true", help="draw a world file that has not been run (dawn of day 0)")
     ap.add_argument("--out")
     ap.add_argument("--days", type=int)
     ap.add_argument("--no-timeline", action="store_true", help="only each day's end, not the day as it happened")
     ap.add_argument("--land", help="the world's cells (.cells.npz) when not beside the run or its world file")
     a = ap.parse_args(argv)
-    p = build(a.run, a.out, a.days, not a.no_timeline, a.land)
+    p = build_world(a.run, a.out, a.land) if a.world else build(a.run, a.out, a.days, not a.no_timeline, a.land)
     print(p, f"{p.stat().st_size // 1024} KB")
 
 

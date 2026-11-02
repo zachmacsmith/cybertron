@@ -111,3 +111,10 @@ engine's state and imports nothing it changes.
     Welmere 19 against 2,600). It existed before today. Now damped, and every parcel of both worlds is within 7% of its size.
   - The round shapes in generated land are the generator's (deep forest beyond a fixed 12 km of every settlement; radial
     bumps for hills and lakes); measured, drawn as they are, and recorded as engine gap G-34.
+- 02 Nov 2026 19:20 UTC: worlds that have not been run can be drawn (`model.build_world`, `--world`): as the world file makes
+  them, at dawn of day 0, with a generated world's ground truth.
+  - 17 worlds generated, one per configuration the generator builds (gated valley refused at seed 3 by its own physics check;
+    seed 4 passes), varied in seed, size (45 to 60 km), villages (3 to 5) and season; none run.
+  - Every road of all 17 (119) recovered by the generator's rule leaves by the world file's parcels.
+  - Gallery in the scratchpad (index, a page per world, contact sheet). Ring basin's lake and the isthmus's two landmasses
+    show G-34's circles.

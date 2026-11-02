@@ -63,6 +63,17 @@ def node_view(w, nid):
     return NodeHere(w, nid)
 
 
+def load_spec(path) -> dict:
+    """A world file as the engine reads it (`base:` merged)."""
+    from cybertron2.engine.world import load_spec as _ls
+    return _ls(path)
+
+
+def fresh_world(spec) -> _World:
+    """A world as its file makes it, before its first day: nobody has acted."""
+    return _World(spec)
+
+
 # ---------------------------------------------------------------------------------------------------- what the engine computes
 parcel_signs = _SG.context                         # (here, pid): what a parcel is like, as its signs are derived
 building_signs = _SG.building_context              # (here, bid)

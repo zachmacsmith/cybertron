@@ -40,6 +40,7 @@ Each scale returns hotspots (kind, id, box, label, info) so a page can label, ho
 python -m cybertron2.engine run cybertron2/specs/region_s1.yaml --out RUN --bots --days 14    # any run: it keeps its journal
 python -m c2viz.build RUN                                                                    # RUN/viz.json and RUN/map.html
 python -m c2viz.build RUN --land WORLD.cells.npz                                             # a generated world: drawn from its cells
+python -m c2viz.model WORLD.yaml --world && python -m c2viz.build --viz WORLD.viz.json       # a world not run: as its file makes it (dawn of day 0)
 ```
 
 `map.html` is a bare preview: the map, labels, hover, day controls; click a place to go in, an exit to follow the road; in a
