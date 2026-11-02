@@ -520,7 +520,7 @@ def _house_lines(here, mind) -> list:
         out.append(f"Its store: {stock} (food worth {show(food)} meals; those who eat from it eat about {len(who) + 1} a night"
                    + (f", and the fire takes {_heat(here, b):g} heat ({FO.fuel_words(_heat(here, b))}); fuel for about "
                       f"{int(heat // max(_heat(here, b), 1e-9))} such nights" + (" with the woodpile at its door" if pile > 1e-9 else "")
-                      if fire else "") + ").")                                   # fuel shown as food is (D4-97; OPEN L-52)
+                      if fire else "") + ").")                                   # fuel shown as food is (D4-97; OPEN L-60)
     return out
 
 
