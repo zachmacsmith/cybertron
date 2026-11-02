@@ -16,70 +16,78 @@ makes the line worth knowing.
 
 A copper village (Minehead) with too little farmland, and two farming villages (Barrow and Wheatley) with food to spare. The
 farmers have no stone or metal, so dependence runs both ways: Minehead needs food, the farmers need what only Minehead makes.
+Wheatley sits between the other two: the junction, and the only way from Minehead to Barrow.
+
+The worlds differ only in Minehead's fields (and, in the oxen arm, its oxen). The seed, the land, the sites, the roads, the
+households, the people, their models, crafts and aims are identical in every world (checked: the casts match exactly).
+
+### The cheap ladder (generated; Zach, 2 Nov: "regenerate the cheaper ladder")
+
+`python cybertron2/specs/make_ladder.py` writes three worlds to cybertron2/specs/ladder/. They ask the main question first: can the
+agents sustain food trade at all, and does transport help?
 
 | | Minehead | Barrow | Wheatley |
 | --- | --- | --- | --- |
-| Households, people | 3, 8 | 2, 6 | 2, 7 (21 in all) |
-| Holds | the copper seam (a rock parcel) | farmland at 0.6 of capacity | farmland at 0.47 of capacity |
-| Trades | smelters (Cotters, copper tools); quarrymen (Haywards); builders (Bells) | farming | farming |
-| Roads | Wheatley, 1 day (a stopping place on it) | Wheatley, 1 day | both |
-
-Wheatley sits between the other two: the junction, and the only way from Minehead to Barrow.
-
-The rungs differ only in Minehead's fields. The seed, the land, the sites, the roads, the households, the people, their models,
-crafts and aims are identical in every rung (checked: the casts match exactly).
+| Households, people | 2, 7 | 1, 2 | 1, 4 (13 in all) |
+| Models | 2 Opus, 1 Sonnet, 4 Haiku | 1 Opus, 1 Haiku | 1 Opus, 1 Sonnet, 2 Haiku |
+| Holds | the copper seam (a rock parcel) | farmland at 0.42 of capacity | farmland at 0.42 of capacity |
 
 | World | Minehead's people against what its land feeds | Carrying burden |
 | --- | --- | --- |
-| ladder_b00 | 0.62 (self-sufficient: the null arm) | 0 |
-| ladder_b04 | 1.16 | 0.04 |
-| ladder_b09 | 1.48 | 0.09 |
-| ladder_b15 | 2.05 | 0.15 (above every past failure) |
-| **ladder_b15_ox** | 2.05, the same land as b15 | 0.02 by the measure: Minehead keeps its 2 oxen, and the Cotters' head (Tobin) is given a harness |
+| ladder_b00 | 0.61 (self-sufficient: the null arm) | 0 |
+| ladder_b13 | 1.79 | 0.13 on foot: the lowest past failure (wb1) |
+| ladder_b13_ox | 1.79, the same land as b13 | 0.02 by the measure: Minehead keeps its 2 oxen, and the head of the household that holds them is given a harness |
 
-0.08 and 0.12 were asked for; fields come in whole plots, so a plot moves this village about 0.05, and the files are named by the
-burden they have.
+- **The top rung lands at 0.13, not the 0.15 asked for.** Fields come in whole plots, so a plot moves this small village a few
+  hundredths, and the files are named by the burden they have.
+- **12 days**, from summer day 3, with 8-day seasons (winter from day 14). In past regional failures, missed meals began by day 1 to
+  3 and deaths by day 5 or 6; Minehead's harvest is on day 5.
+- **Children off**, so births don't confound. **Lifespan 96**, so few die of age; the succession check flags nobody.
+- **Opus at every village's head** (4: Minehead has two households); Sonnet and Haiku for the rest.
+- **One replicate each at first: 3 runs.**
+  - Cost by the published runs' records: about 13 people × 12 days × $0.15 to $0.20 a person-day, so roughly $25 to $30 a run and
+    $75 to $90 in all.
+  - That rate comes from the runs' `cost_usd`, which under the Claude Code backend may be a list-price figure. 37.4's Wenbridge
+    figures imply less.
+- **Its limit:** with one replicate it shows only a large effect, which way to look rather than where the line is.
 
-- **Settings:**
-  - 20 days, from summer day 3, with 8-day seasons (winter from day 14);
-  - children off, so births don't confound;
-  - lifespan 96, so few die of age; the succession check flags nobody.
-- **Models:** 7 Opus (every household head), 4 Sonnet (one per household, spread), 10 Haiku.
-- **No pack oxen in Minehead.** The copper village keeps its cows but its oxen are removed after generation (`make_ladder.no_oxen`).
-  An ox carries 60 to a person's 10, and with one the burden at the top rung falls from 0.15 to about 0.03. The villages that
-  failed had none.
-- **Region food:** about 0.5 to 0.65 of what the land keeps, so the food exists.
+### The full ladder (`--full`; generated on demand)
 
-### The transport arm (added 2 Nov, Zach: "sure")
+Four rungs (asked 0, 0.04, 0.08, 0.12; they land at 0, 0.04, 0.09, 0.15) and the oxen arm on the top rung:
+- 21 people (households 3, 2, 2) over 20 days;
+- 7 Opus, 4 Sonnet, 10 Haiku;
+- two replicates each, 10 runs, roughly $1,250 by the same records (about $0.30 a person-day at 20 days).
 
-ladder_b15_ox is b15's world, with the same food shortfall, but the copper village can carry by pack ox.
-- **Why the harness:** an ox is led as a pack ox only with a harness in hand (`travel {lead}`, D2-136), and generated households
-  hold none, so Tobin is given one.
-- **If b15_ox holds where b15 fails:** transport is the lever, and carts, caravans and traders (OPEN L-53) are what dependence at
-  scale needs.
-- **If both fail:** the agents are not organising deliveries at all, and the fix is coordination (standing agreements, a carrier's
-  role), not carriage.
-- **If both hold:** 0.15 on foot was not the line, and the past failures had another cause.
+It is worth running only once the cheap ladder shows something worth placing a line on.
 
-Five worlds; two replicates each makes 10 runs.
+### Both ladders
+
+- **No pack oxen in Minehead's rungs on foot.** The copper village keeps its cows, but its oxen are removed after generation
+  (`make_ladder.no_oxen`). An ox carries 60 to a person's 10, and the villages that failed had none.
+- **The oxen arm** keeps them and gives a harness to the head of the household that holds them. An ox is led as a pack ox only with
+  a harness in hand (`travel {lead}`, D2-136), and generated households hold none. What each outcome would mean:
+  - **It holds where the rung on foot fails:** transport is the lever, and carts, caravans and traders (OPEN L-53) are what
+    dependence at scale needs.
+  - **Both fail:** the agents are not organising deliveries at all, and the fix is coordination (standing agreements, a carrier's
+    role), not carriage.
+  - **Both hold:** that much carrying on foot was not the line, and the past failures had another cause.
+- **Region food:** about half of what the land keeps, so the food exists.
 
 ## Running it (when Zach says go)
 
 ```
-python cybertron2/specs/make_ladder.py         # regenerates cybertron2/specs/ladder/
-python -m cybertron2.engine run cybertron2/specs/ladder/ladder_bNN.yaml --days 20 --out runs/ladder_bNN_rR
+python cybertron2/specs/make_ladder.py         # the cheap ladder (or --full)
+python -m cybertron2.engine run cybertron2/specs/ladder/ladder_bNN.yaml --days 12 --out runs/ladder_bNN_rR
 ```
 
-- Two replicates each, so 10 runs. Rough cost: wb2 cost $17 for 14 people over 30 days. This cast is larger but mostly Haiku, so
-  about $15 to $20 a run, or $150 to $200 in all. That figure is a guess.
-- Read each run with `02zk_run_economics.py` and 37.4's `changes` audit:
-  - missed meals and hunger deaths in Minehead, against the null arm;
-  - grain moved into Minehead (agreements and gives);
-  - what went the other way (copper, tools, stone, coin);
-  - whether the junction village (Wheatley) took a cut.
-- A qualitative reading of the end state, as scenario_design asks.
+Read each run with `02zk_run_economics.py` and 37.4's `changes` audit:
+- missed meals and hunger deaths in Minehead, against the null arm;
+- grain moved into Minehead (agreements and gives);
+- what went the other way (copper, tools, stone, coin);
+- whether the junction village (Wheatley) took a cut;
+- a qualitative reading of the end state, as scenario_design asks.
 
-## What each result would mean
+## What the full ladder's results would mean
 
 - **Minehead holds at 0.09 and 0.15:** the agents can sustain dependence when both sides need each other. The past failures were
   about one-way dependence or worlds without something to sell, and the warning line moves up.
@@ -90,12 +98,14 @@ python -m cybertron2.engine run cybertron2/specs/ladder/ladder_bNN.yaml --days 2
 
 ## Known weaknesses
 
-- **The farmers' pull is weak within 20 days.** Copper tools raise yields by about half, but nothing forces a farmer to want them
+- **The farmers' pull is weak within 12 or 20 days.** Copper tools raise yields by about half, but nothing forces a farmer to want them
   before the harvest. Coin and aims carry most of the incentive. A stronger arm would give the farmers a need only Minehead meets,
   such as a broken plough share; that could come later if the first ladder fails on demand rather than carrying.
 - **There is one land.** A second seed would separate the rung from the geography (two seeds × four rungs × one replicate gives the
   same 8 runs).
-- **Two replicates are few** for a curve with 4 points. The ladder can show a step, not fit a threshold.
+- **Two replicates are few** for a curve with 4 points. The full ladder can show a step, not fit a threshold.
+- **The cheap ladder's farming villages are small** (2 and 4 people). Barrow's two may have little time to spare for carrying or
+  trading.
 
 ## Found while generating (fixed)
 

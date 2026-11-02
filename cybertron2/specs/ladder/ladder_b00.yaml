@@ -1,7 +1,7 @@
 # Generated from ladder_b00_gen.yaml (python cybertron2/specs/make_ladder.py): do not edit by hand.
 name: ladder_b00
 seed: 11
-days: 20
+days: 12
 calendar:
   season: summer
   day: 3
@@ -15,7 +15,7 @@ cast:
   middle: claude-sonnet-5-5
   rest: claude-haiku-5-5
   youth: claude-haiku-5-5
-  sonnet_extra: 4
+  sonnet_extra: 2
 generated:
   by: cybertron2.landgen
   seed: 11
@@ -26,7 +26,7 @@ generated:
 nodes:
   Minehead:
     name: Minehead
-    text: a village of 3 households in rolling lowland
+    text: a village of 2 households in rolling lowland
     parcels:
       Minehead_0:
         name: the Street
@@ -37,12 +37,13 @@ nodes:
         text: houses round a trodden green
         adj:
         - Minehead_1
+        - Minehead_3
         terrain: lowland loam
         soil: loam
       Minehead_1:
         name: Middle Field
         cover: field
-        size: 8
+        size: 7
         side: centre
         height: 1
         text: ploughland, on good loam
@@ -59,7 +60,7 @@ nodes:
         state:
           crop:
             kind: barley
-            left: 384
+            left: 336
             ripe_day: 5
       Minehead_2:
         name: Minehead Meadow
@@ -70,7 +71,6 @@ nodes:
         text: hay meadow, on good loam
         adj:
         - Minehead_1
-        - Minehead_4
         - Minehead_5
         state:
           plants:
@@ -87,247 +87,36 @@ nodes:
       Minehead_3:
         name: Minehead Common
         cover: pasture
-        size: 2
+        size: 3
         side: centre
         height: 1
         text: grazing, on good loam
         adj:
+        - Minehead_0
         - Minehead_1
-        - Minehead_5
-        - Minehead_8
+        - Minehead_4
         state:
           plants:
-            K: 2.0
-            S: 2.0
+            K: 3.0
+            S: 3.0
             r: 0.3
           grass:
-            K: 60.0
-            S: 60.0
+            K: 90.0
+            S: 90.0
             r: 0.32
         terrain: lowland loam
         soil: loam
       Minehead_4:
-        name: the Common
-        cover: pasture
-        size: 2
-        side: south
-        height: 1
-        text: grazing, on good loam
-        adj:
-        - Minehead_1
-        - Minehead_2
-        - Minehead_5
-        state:
-          plants:
-            K: 2.0
-            S: 2.0
-            r: 0.3
-          grass:
-            K: 60.0
-            S: 60.0
-            r: 0.32
-        terrain: lowland loam
-        soil: loam
-      Minehead_5:
-        name: Minehead Copse
+        name: North Wood
         cover: forest
-        size: 3
-        side: centre
+        size: 2
+        side: north
         height: 1
         text: coppiced hazel under oak standards
         adj:
         - Minehead_1
-        - Minehead_2
-        - Minehead_3
-        - Minehead_4
-        state:
-          plants:
-            K: 3.6
-            S: 3.6
-            r: 0.3
-          wood:
-            kind: managed wood
-          game:
-            K: 3.9
-            S: 3.9
-            r: 0.25
-        terrain: lowland loam
-        soil: loam
-      Minehead_6:
-        name: Furze Common
-        cover: heath
-        size: 1
-        side: north
-        height: 1
-        text: heather and gorse on thin sand
-        adj:
-        - Minehead_7
-        state:
-          plants:
-            K: 0.6
-            S: 0.6
-            r: 0.3
-          grass:
-            K: 6.0
-            S: 6.0
-            r: 0.32
-        terrain: sandy heath
-        soil: sand
-      Minehead_7:
-        name: the Heath
-        cover: heath
-        size: 2
-        side: north
-        height: 3
-        text: heather and gorse on thin sand, up on the tops
-        adj:
-        - Minehead_6
-        - Minehead_8
-        state:
-          plants:
-            K: 1.2
-            S: 1.2
-            r: 0.3
-          grass:
-            K: 12.0
-            S: 12.0
-            r: 0.32
-        terrain: sandy heath
-        soil: sand
-      Minehead_8:
-        name: the Scar
-        cover: rock
-        size: 2
-        side: north
-        height: 1
-        text: bare rock and scree
-        adj:
         - Minehead_3
         - Minehead_7
-        state:
-          seam:
-            S: 60
-            K: 60
-        terrain: lowland loam
-        soil: loam
-  Barrow:
-    name: Barrow
-    text: a village of 2 households in a clay vale
-    parcels:
-      Barrow_0:
-        name: Barrow Green
-        cover: built
-        size: 1
-        side: centre
-        height: 1
-        text: houses round a trodden green
-        adj:
-        - Barrow_1
-        - Barrow_3
-        - Barrow_4
-        - Barrow_5
-        terrain: clay vale
-        soil: clay
-      Barrow_1:
-        name: Barrow Field
-        cover: field
-        size: 4
-        side: centre
-        height: 1
-        text: ploughland, on heavy clay
-        adj:
-        - Barrow_0
-        - Barrow_3
-        - Barrow_4
-        - Barrow_5
-        - Barrow_8
-        fertility: 1.08
-        terrain: clay vale
-        soil: clay
-        holder: Carter
-        state:
-          crop:
-            kind: barley
-            left: 192
-            ripe_day: 5
-      Barrow_2:
-        name: Tame Meadow
-        cover: meadow
-        size: 1
-        side: north
-        height: 0
-        text: hay meadow, on heavy clay, low by the water
-        adj:
-        - Barrow_7
-        - Barrow_8
-        state:
-          plants:
-            K: 1.3
-            S: 1.3
-            r: 0.3
-          grass:
-            K: 27.0
-            S: 27.0
-            r: 0.32
-        terrain: river floodplain
-        soil: clay
-        holder: Dyer
-      Barrow_3:
-        name: the Leaze
-        cover: pasture
-        size: 1
-        side: centre
-        height: 1
-        text: grazing, on heavy clay
-        adj:
-        - Barrow_0
-        - Barrow_1
-        - Barrow_8
-        state:
-          plants:
-            K: 1.0
-            S: 1.0
-            r: 0.3
-          grass:
-            K: 30.0
-            S: 30.0
-            r: 0.32
-        terrain: clay vale
-        soil: clay
-      Barrow_4:
-        name: Middle Pasture
-        cover: pasture
-        size: 2
-        side: centre
-        height: 1
-        text: grazing, on heavy clay
-        adj:
-        - Barrow_0
-        - Barrow_1
-        - Barrow_5
-        state:
-          plants:
-            K: 2.0
-            S: 2.0
-            r: 0.3
-          grass:
-            K: 60.0
-            S: 60.0
-            r: 0.32
-        terrain: clay vale
-        soil: clay
-      Barrow_5:
-        name: Middle Wood
-        cover: forest
-        size: 2
-        side: centre
-        height: 1
-        text: coppiced hazel under oak standards
-        adj:
-        - Barrow_0
-        - Barrow_1
-        - Barrow_4
-        - Barrow_8
         state:
           plants:
             K: 2.4
@@ -339,30 +128,194 @@ nodes:
             K: 2.6
             S: 2.6
             r: 0.25
+        terrain: lowland loam
+        soil: loam
+      Minehead_5:
+        name: Minehead Copse
+        cover: forest
+        size: 1
+        side: south
+        height: 1
+        text: coppiced hazel under oak standards
+        adj:
+        - Minehead_1
+        - Minehead_2
+        state:
+          plants:
+            K: 1.2
+            S: 1.2
+            r: 0.3
+          wood:
+            kind: managed wood
+          game:
+            K: 1.3
+            S: 1.3
+            r: 0.25
+        terrain: lowland loam
+        soil: loam
+      Minehead_6:
+        name: Furze Common
+        cover: heath
+        size: 3
+        side: north
+        height: 3
+        text: heather and gorse on thin sand, up on the tops
+        adj:
+        - Minehead_7
+        state:
+          plants:
+            K: 1.8
+            S: 1.8
+            r: 0.3
+          grass:
+            K: 18.0
+            S: 18.0
+            r: 0.32
+        terrain: sandy heath
+        soil: sand
+      Minehead_7:
+        name: the Crags
+        cover: rock
+        size: 2
+        side: north
+        height: 1
+        text: bare rock and scree
+        adj:
+        - Minehead_4
+        - Minehead_6
+        state:
+          seam:
+            S: 60
+            K: 60
+        terrain: lowland loam
+        soil: loam
+  Barrow:
+    name: Barrow
+    text: a village of 1 households in a clay vale
+    parcels:
+      Barrow_0:
+        name: Barrow Green
+        cover: built
+        size: 1
+        side: centre
+        height: 1
+        text: houses round a trodden green
+        adj:
+        - Barrow_1
+        - Barrow_2
+        - Barrow_3
+        - Barrow_4
         terrain: clay vale
         soil: clay
-      Barrow_6:
-        name: Barrow Fen
-        cover: fen
+      Barrow_1:
+        name: Barrow Field
+        cover: field
         size: 3
+        side: centre
+        height: 1
+        text: ploughland, on heavy clay
+        adj:
+        - Barrow_0
+        - Barrow_3
+        - Barrow_4
+        fertility: 1.08
+        terrain: clay vale
+        soil: clay
+        holder: Bell
+        state:
+          crop:
+            kind: barley
+            left: 144
+            ripe_day: 5
+      Barrow_2:
+        name: Tame Meadow
+        cover: meadow
+        size: 1
+        side: north
+        height: 0
+        text: hay meadow, on heavy clay, low by the water
+        adj:
+        - Barrow_0
+        - Barrow_6
+        state:
+          plants:
+            K: 1.3
+            S: 1.3
+            r: 0.3
+          grass:
+            K: 27.0
+            S: 27.0
+            r: 0.32
+        terrain: river floodplain
+        soil: clay
+        holder: Bell
+      Barrow_3:
+        name: the Leaze
+        cover: pasture
+        size: 2
+        side: centre
+        height: 1
+        text: grazing, on heavy clay
+        adj:
+        - Barrow_0
+        - Barrow_1
+        state:
+          plants:
+            K: 2.0
+            S: 2.0
+            r: 0.3
+          grass:
+            K: 60.0
+            S: 60.0
+            r: 0.32
+        terrain: clay vale
+        soil: clay
+      Barrow_4:
+        name: Barrow Copse
+        cover: forest
+        size: 1
+        side: centre
+        height: 1
+        text: coppiced hazel under oak standards
+        adj:
+        - Barrow_0
+        - Barrow_1
+        - Barrow_5
+        state:
+          plants:
+            K: 1.2
+            S: 1.2
+            r: 0.3
+          wood:
+            kind: managed wood
+          game:
+            K: 1.3
+            S: 1.3
+            r: 0.25
+        terrain: clay vale
+        soil: clay
+      Barrow_5:
+        name: the Sedge
+        cover: fen
+        size: 2
         side: west
         height: 0
         text: reed and sedge over standing water, low by the water
         adj:
-        - Barrow_8
+        - Barrow_4
         state:
           plants:
-            K: 3.0
-            S: 3.0
+            K: 2.0
+            S: 2.0
             r: 0.3
           grass:
-            K: 30.0
-            S: 30.0
+            K: 20.0
+            S: 20.0
             r: 0.32
         terrain: fen
         soil: clay
-      Barrow_7:
-        name: Barrow Water
+      Barrow_6:
+        name: the Tame
         cover: water
         size: 2
         side: north
@@ -370,32 +323,11 @@ nodes:
         text: running water, low by the water
         adj:
         - Barrow_2
-        - Barrow_8
         terrain: river floodplain
         soil: clay
-      Barrow_8:
-        name: Clay Field
-        cover: field
-        size: 5
-        side: north
-        height: 0
-        text: ploughland, on heavy clay, low by the water
-        adj:
-        - Barrow_1
-        - Barrow_2
-        - Barrow_3
-        - Barrow_5
-        - Barrow_6
-        - Barrow_7
-        fertility: 1.35
-        terrain: clay vale
-        soil: clay
-        holder: Carter
-        state:
-          last_crop: fallow
   Wheatley:
     name: Wheatley
-    text: a village of 2 households in a clay vale
+    text: a village of 1 households in a clay vale
     parcels:
       Wheatley_0:
         name: Wheatley Green
@@ -408,14 +340,13 @@ nodes:
         - Wheatley_1
         - Wheatley_2
         - Wheatley_3
-        - Wheatley_7
         terrain: clay vale
         soil: clay
       Wheatley_1:
-        name: Brook Field
+        name: Clay Field
         cover: field
-        size: 5
-        side: west
+        size: 6
+        side: centre
         height: 1
         text: ploughland, on heavy clay
         adj:
@@ -423,15 +354,14 @@ nodes:
         - Wheatley_2
         - Wheatley_3
         - Wheatley_4
-        - Wheatley_7
-        fertility: 1.14
+        fertility: 1.09
         terrain: clay vale
         soil: clay
-        holder: Kemp
+        holder: Carter
         state:
           crop:
             kind: barley
-            left: 240
+            left: 288
             ripe_day: 5
       Wheatley_2:
         name: Wheatley Meadow
@@ -443,7 +373,7 @@ nodes:
         adj:
         - Wheatley_0
         - Wheatley_1
-        - Wheatley_7
+        - Wheatley_3
         state:
           plants:
             K: 1.3
@@ -455,66 +385,41 @@ nodes:
             r: 0.32
         terrain: clay vale
         soil: clay
-        holder: Holt
+        holder: Carter
       Wheatley_3:
-        name: South Pasture
+        name: the Common
         cover: pasture
-        size: 3
-        side: south
+        size: 2
+        side: centre
         height: 1
         text: grazing, on heavy clay
         adj:
         - Wheatley_0
         - Wheatley_1
+        - Wheatley_2
         - Wheatley_4
         - Wheatley_5
-        - Wheatley_7
         state:
           plants:
-            K: 3.0
-            S: 3.0
+            K: 2.0
+            S: 2.0
             r: 0.3
           grass:
-            K: 90.0
-            S: 90.0
+            K: 60.0
+            S: 60.0
             r: 0.32
         terrain: clay vale
         soil: clay
       Wheatley_4:
-        name: South Wood
+        name: Middle Wood
         cover: forest
-        size: 1
-        side: south
+        size: 2
+        side: centre
         height: 1
         text: coppiced hazel under oak standards
         adj:
         - Wheatley_1
         - Wheatley_3
-        - Wheatley_7
-        state:
-          plants:
-            K: 1.2
-            S: 1.2
-            r: 0.3
-          wood:
-            kind: managed wood
-          game:
-            K: 1.3
-            S: 1.3
-            r: 0.25
-        terrain: clay vale
-        soil: clay
-      Wheatley_5:
-        name: Wheatley Copse
-        cover: forest
-        size: 2
-        side: east
-        height: 1
-        text: coppiced hazel under oak standards
-        adj:
-        - Wheatley_3
-        - Wheatley_6
-        - Wheatley_7
         state:
           plants:
             K: 2.4
@@ -528,15 +433,15 @@ nodes:
             r: 0.25
         terrain: clay vale
         soil: clay
-      Wheatley_6:
-        name: Wheatley Fen
+      Wheatley_5:
+        name: the Carr
         cover: fen
         size: 1
         side: north
         height: 0
         text: reed and sedge over standing water, low by the water
         adj:
-        - Wheatley_5
+        - Wheatley_3
         state:
           plants:
             K: 1.0
@@ -548,26 +453,6 @@ nodes:
             r: 0.32
         terrain: fen
         soil: sand
-      Wheatley_7:
-        name: Wheatley Field
-        cover: field
-        size: 5
-        side: centre
-        height: 1
-        text: ploughland, on heavy clay
-        adj:
-        - Wheatley_0
-        - Wheatley_1
-        - Wheatley_2
-        - Wheatley_3
-        - Wheatley_4
-        - Wheatley_5
-        fertility: 1.09
-        terrain: clay vale
-        soil: clay
-        holder: Kemp
-        state:
-          last_crop: fallow
   t1:
     name: Hazelstead
     text: a stopping place on the road deep in the forest
@@ -604,7 +489,7 @@ roads:
         side: south
       Wheatley:
         parcels:
-        - Wheatley_7
+        - Wheatley_1
         side: north
 - - Minehead
   - t1
@@ -636,7 +521,7 @@ roads:
         side: north
       Barrow:
         parcels:
-        - Barrow_2
+        - Barrow_0
         side: north
     stretches:
       1:
@@ -675,31 +560,16 @@ buildings:
     parcel: Minehead_0
     household: Hayward
     structure: wattle
-    size: 4
+    size: 5
     fittings:
-      beds: 4
+      beds: 5
       hearth: 1
       bins: 1
     stock:
-      grain: 16
-      beans: 4
+      grain: 32
+      beans: 8
       timber: 8
-      firewood: 12
-  bell_house:
-    name: Bell House
-    parcel: Minehead_0
-    household: Bell
-    structure: wattle
-    size: 4
-    fittings:
-      beds: 4
-      hearth: 1
-      bins: 1
-    stock:
-      grain: 24
-      beans: 6
-      timber: 8
-      firewood: 18
+      firewood: 24
   cotter_byre:
     name: the Cotter Byre
     parcel: Minehead_0
@@ -714,10 +584,10 @@ buildings:
       dung: 10
       wooden plough: 1
       harness: 2
-  carter_house:
-    name: Carter House
+  bell_house:
+    name: Bell House
     parcel: Barrow_0
-    household: Carter
+    household: Bell
     structure: wattle
     size: 4
     fittings:
@@ -729,10 +599,24 @@ buildings:
       beans: 4
       timber: 8
       firewood: 12
-  dyer_house:
-    name: Dyer House
+  bell_byre:
+    name: the Bell Byre
     parcel: Barrow_0
-    household: Dyer
+    household: Bell
+    structure: wattle
+    size: 4
+    fittings:
+      bins: 1
+    stock:
+      hay: 20
+      straw: 10
+      dung: 10
+      wooden plough: 1
+      harness: 2
+  carter_house:
+    name: Carter House
+    parcel: Wheatley_0
+    household: Carter
     structure: wattle
     size: 5
     fittings:
@@ -746,52 +630,8 @@ buildings:
       firewood: 24
   carter_byre:
     name: the Carter Byre
-    parcel: Barrow_0
+    parcel: Wheatley_0
     household: Carter
-    structure: wattle
-    size: 4
-    fittings:
-      bins: 1
-    stock:
-      hay: 20
-      straw: 10
-      dung: 10
-      wooden plough: 1
-      harness: 2
-  kemp_house:
-    name: Kemp House
-    parcel: Wheatley_0
-    household: Kemp
-    structure: wattle
-    size: 4
-    fittings:
-      beds: 4
-      hearth: 1
-      bins: 1
-    stock:
-      grain: 24
-      beans: 6
-      timber: 8
-      firewood: 18
-  holt_house:
-    name: Holt House
-    parcel: Wheatley_0
-    household: Holt
-    structure: wattle
-    size: 5
-    fittings:
-      beds: 5
-      hearth: 1
-      bins: 1
-    stock:
-      grain: 32
-      beans: 8
-      timber: 8
-      firewood: 24
-  kemp_byre:
-    name: the Kemp Byre
-    parcel: Wheatley_0
-    household: Kemp
     structure: wattle
     size: 4
     fittings:
@@ -816,87 +656,58 @@ herds:
   hayward_cattle:
     name: the Hayward cows
     kind: cattle
-    parcel: Minehead_4
+    parcel: Minehead_3
     cows: 2
     young: 1
     in_milk: 1
     holder: Hayward
   bell_cattle:
-    name: the Bell cows
+    name: the Bell cattle
     kind: cattle
-    parcel: Minehead_4
+    parcel: Barrow_3
     cows: 2
+    oxen: 2
+    bulls: 1
     young: 1
     in_milk: 1
     holder: Bell
   carter_cattle:
     name: the Carter cattle
     kind: cattle
-    parcel: Barrow_4
+    parcel: Wheatley_3
     cows: 2
     oxen: 2
     bulls: 1
     young: 1
     in_milk: 1
     holder: Carter
-  dyer_cattle:
-    name: the Dyer cows
-    kind: cattle
-    parcel: Barrow_3
-    cows: 2
-    young: 1
-    in_milk: 1
-    holder: Dyer
-  kemp_cattle:
-    name: the Kemp cattle
-    kind: cattle
-    parcel: Wheatley_3
-    cows: 2
-    oxen: 2
-    bulls: 1
-    young: 1
-    in_milk: 1
-    holder: Kemp
-  holt_cattle:
-    name: the Holt cows
-    kind: cattle
-    parcel: Wheatley_3
-    cows: 2
-    young: 1
-    in_milk: 1
-    holder: Holt
 claims: []
 agents:
-  Tobin:
+  Isolde:
     household: Cotter
     born: -93
     stage: adult
-    sex: m
+    sex: f
     relations:
-      Drew: of the Hayward household
-      Tiffany: of the Hayward household
-      Godwin: of the Bell household
-      Alys: of the Bell household
-      Osric: your son
-      Orabel: of the Bell household
-      Olive: your daughter-in-law
-      Oliver: of the Carter household
-      Letice: of the Carter household
-      Alard: of the Dyer household
-      Denise: of the Dyer household
-      Ancel: of the Dyer household
-      Mabel: of the Dyer household
-      Otes: of the Kemp household
-      Rose: of the Kemp household
-      Adam: of the Holt household
-      Ursula: of the Holt household
-      Elena: of the Holt household
-      Felice: of the Kemp household
-      Philippa: of the Holt household
+      Gervase: of the Hayward household
+      Isabel: of the Hayward household
+      Idonea: your daughter
+      Wymarc: your daughter
+      Ivy: of the Hayward household
+      Oliver: of the Hayward household
+      Bennet: of the Bell household
+      Petronel: of the Bell household
+      Osric: of the Carter household; there is bad blood between your households since last winter, over a pig that went missing
+      Eva: of the Carter household
+      Piers: of the Carter household
+      Thomas: of the Carter household
     memories:
-    - 'Your line''s founders: Tobin and Lettice Cotter came to Minehead and built the first Cotter house.'
+    - 'Your line''s founders: Ralf and Isolde Cotter came to Minehead and built the first Cotter house.'
     - 'Hard winters you remember, when the frost came early and the stores ran out: 2 winters ago, last winter.'
-    - Wife Lettice died last winter (old age).
+    - Husband Ralf died last winter (old age).
+    - Daughter Wilmot married into Ashby, two days' walk away.
+    - Son Odo married into Ashby, two days' walk away.
+    - Last winter you and Osric came to blows over a pig that went missing; it was never settled.
     knows:
       coin:
         level: known
@@ -930,7 +741,7 @@ agents:
         skill: 1.5
     aware_of:
       quarry: you have seen the Haywards at it all your life
-      medium room: you have seen the Kemps at it all your life
+      medium room: you have seen the Carters at it all your life
     holdings:
       crude tool: 1
       coin: 2
@@ -939,71 +750,124 @@ agents:
     - smithing
     - farming
     - food
-    partner: Lettice
+    partner: Ralf
     role: head
     model: claude-opus-5-5
     born_line: Cotter
     trade: sowing a field broadcast and reaping a crop
-    aim: See the Cotter household through the winter, fed and warm.
-  Drew:
+    aim: See the Cotter household through the winter, fed and warm. You will not be shamed by Osric again.
+  Gervase:
     household: Hayward
-    born: -92
-    stage: adult
+    born: -96
+    stage: elder
     sex: m
     relations:
-      Tobin: of the Cotter household
-      Tiffany: your wife
-      Godwin: of the Bell household
-      Alys: of the Bell household
-      Osric: of the Cotter household
-      Orabel: of the Bell household
-      Olive: of the Cotter household
-      Oliver: of the Carter household
-      Letice: of the Carter household
-      Alard: of the Dyer household
-      Denise: of the Dyer household
-      Ancel: of the Dyer household; there is bad blood between your households since last winter, over a pig that went missing
-      Mabel: of the Dyer household
-      Otes: of the Kemp household
-      Rose: of the Kemp household
-      Adam: of the Holt household
-      Ursula: of the Holt household
-      Elena: of the Holt household
-      Felice: of the Kemp household
-      Philippa: of the Holt household
+      Isolde: of the Cotter household
+      Isabel: your wife
+      Idonea: of the Cotter household
+      Wymarc: of the Cotter household
+      Ivy: your daughter
+      Oliver: your son
+      Bennet: of the Bell household
+      Petronel: of the Bell household
+      Osric: of the Carter household
+      Eva: of the Carter household
+      Piers: of the Carter household
+      Thomas: of the Carter household
     memories:
-    - 'Your line''s founders: Drew and Tiffany Hayward came to Minehead and built the first Hayward house.'
+    - 'Your line''s founders: Gervase and Isabel Hayward came to Minehead and built the first Hayward house.'
     - 'Hard winters you remember, when the frost came early and the stores ran out: 2 winters ago, last winter.'
-    - Son Edric married into Ashby, two days' walk away.
-    - Last winter you and Ancel came to blows over a pig that went missing; it was never settled.
+    - Daughter Lucy married into Ashby, two days' walk away.
     knows:
       hoe:
         level: known
-        skill: 1.49
+        skill: 1.5
       milk:
         level: known
-        skill: 1.78
+        skill: 1.8
       quarry:
         level: known
-        skill: 1.78
+        skill: 1.8
       reap:
         level: known
-        skill: 1.49
+        skill: 1.5
       select seed:
         level: known
-        skill: 1.78
+        skill: 1.8
       sow:
         level: known
-        skill: 1.49
+        skill: 1.5
       weed:
         level: known
-        skill: 1.49
+        skill: 1.5
     aware_of:
-      plough: you have seen the Holts at it all your life
+      plough: you have seen the Carters at it all your life
       smelt: you have seen the Cotters at it all your life
       copper tool: you have seen the Cotters at it all your life
       coin: you have seen the Cotters at it all your life
-      medium room: you have seen the Kemps at it all your life
+      medium room: you have seen the Carters at it all your life
+    holdings: {}
+    concerns:
+    - farming
+    - food
+    - animals
+    - building
+    partner: Isabel
+    model: claude-haiku-5-5
+    born_line: Hayward
+    trade: sowing a field broadcast and reaping a crop
+    aim: See your grandchildren settled and provided for before you die.
+  Isabel:
+    household: Hayward
+    born: -90
+    stage: adult
+    sex: f
+    relations:
+      Isolde: of the Cotter household
+      Gervase: your husband
+      Idonea: of the Cotter household
+      Wymarc: of the Cotter household
+      Ivy: your daughter
+      Oliver: your son
+      Bennet: of the Bell household
+      Petronel: of the Bell household
+      Osric: of the Carter household
+      Eva: of the Carter household; you owe them 3 grain from last winter
+      Piers: of the Carter household
+      Thomas: of the Carter household
+    memories:
+    - 'Your line''s founders: Gervase and Isabel Hayward came to Minehead and built the first Hayward house.'
+    - 'Hard winters you remember, when the frost came early and the stores ran out: 2 winters ago, last winter.'
+    - Daughter Lucy married into Ashby, two days' walk away.
+    - Last winter Eva lent you 3 grain when your store ran low; you have not paid it back.
+    knows:
+      hoe:
+        level: known
+        skill: 1.48
+      milk:
+        level: known
+        skill: 1.75
+      quarry:
+        level: known
+        skill: 1.75
+      reap:
+        level: known
+        skill: 1.48
+      select seed:
+        level: known
+        skill: 1.75
+      sow:
+        level: known
+        skill: 1.48
+      weed:
+        level: known
+        skill: 1.48
+    aware_of:
+      plough: you have seen the Carters at it all your life
+      smelt: you have seen the Cotters at it all your life
+      copper tool: you have seen the Cotters at it all your life
+      coin: you have seen the Cotters at it all your life
+      medium room: you have seen the Carters at it all your life
     holdings:
       crude tool: 1
       coin: 2
@@ -1012,112 +876,255 @@ agents:
     - food
     - animals
     - building
-    partner: Tiffany
+    partner: Gervase
     role: head
     model: claude-opus-5-5
     born_line: Hayward
     trade: sowing a field broadcast and reaping a crop
-    aim: See the Hayward household through the winter, fed and warm. You will not be shamed by Ancel again.
-  Tiffany:
-    household: Hayward
-    born: -89
+    aim: See the Hayward household through the winter, fed and warm.
+  Idonea:
+    household: Cotter
+    born: -49
     stage: adult
     sex: f
     relations:
-      Tobin: of the Cotter household
-      Drew: your husband
-      Godwin: of the Bell household
-      Alys: of the Bell household
-      Osric: of the Cotter household
-      Orabel: of the Bell household
-      Olive: of the Cotter household
-      Oliver: of the Carter household
-      Letice: of the Carter household
-      Alard: of the Dyer household
-      Denise: of the Dyer household
-      Ancel: of the Dyer household
-      Mabel: of the Dyer household
-      Otes: of the Kemp household
-      Rose: of the Kemp household
-      Adam: of the Holt household
-      Ursula: of the Holt household
-      Elena: of the Holt household
-      Felice: of the Kemp household
-      Philippa: of the Holt household
+      Isolde: your mother
+      Gervase: of the Hayward household
+      Isabel: of the Hayward household
+      Wymarc: your sister
+      Ivy: of the Hayward household
+      Oliver: of the Hayward household
+      Bennet: of the Bell household
+      Petronel: of the Bell household
+      Osric: of the Carter household
+      Eva: of the Carter household
+      Piers: of the Carter household
+      Thomas: of the Carter household
     memories:
-    - 'Your line''s founders: Drew and Tiffany Hayward came to Minehead and built the first Hayward house.'
-    - 'Hard winters you remember, when the frost came early and the stores ran out: 2 winters ago, last winter.'
-    - Son Edric married into Ashby, two days' walk away.
+    - 'Your line''s founders: Ralf and Isolde Cotter came to Minehead and built the first Cotter house.'
+    - 'Hard winters you remember, when the frost came early and the stores ran out: last winter.'
+    - Father Ralf died last winter (old age).
+    - Sister Wilmot married into Ashby, two days' walk away.
+    - Brother Odo married into Ashby, two days' walk away.
     knows:
+      coin:
+        level: known
+        skill: 1.03
+      copper tool:
+        level: known
+        skill: 1.03
       hoe:
         level: known
-        skill: 1.46
+        skill: 1.11
       milk:
         level: known
-        skill: 1.73
-      quarry:
+        skill: 1.03
+      plough:
         level: known
-        skill: 1.73
+        skill: 1.03
       reap:
         level: known
-        skill: 1.46
+        skill: 1.11
       select seed:
         level: known
-        skill: 1.73
+        skill: 1.03
+      smelt:
+        level: known
+        skill: 1.03
       sow:
         level: known
-        skill: 1.46
+        skill: 1.11
       weed:
         level: known
-        skill: 1.46
+        skill: 1.11
     aware_of:
-      plough: you have seen the Holts at it all your life
+      quarry: you have seen the Haywards at it all your life
+      medium room: you have seen the Carters at it all your life
+    holdings: {}
+    concerns:
+    - craft
+    - smithing
+    - farming
+    - food
+    parents:
+    - Ralf
+    - Isolde
+    model: claude-sonnet-5-5
+    born_line: Cotter
+    trade: sowing a field broadcast and reaping a crop
+    aim: Keep your household fed and its house sound.
+  Wymarc:
+    household: Cotter
+    born: -33
+    stage: youth
+    sex: f
+    relations:
+      Isolde: your mother
+      Gervase: of the Hayward household
+      Isabel: of the Hayward household
+      Idonea: your sister
+      Ivy: of the Hayward household; your closest friend
+      Oliver: of the Hayward household
+      Bennet: of the Bell household
+      Petronel: of the Bell household
+      Osric: of the Carter household
+      Eva: of the Carter household
+      Piers: of the Carter household
+      Thomas: of the Carter household
+    memories:
+    - 'Your line''s founders: Ralf and Isolde Cotter came to Minehead and built the first Cotter house.'
+    - 'Hard winters you remember, when the frost came early and the stores ran out: last winter.'
+    - Father Ralf died last winter (old age).
+    - Sister Wilmot married into Ashby, two days' walk away.
+    - Brother Odo married into Ashby, two days' walk away.
+    knows:
+      coin: capable
+      copper tool: capable
+      hoe: capable
+      milk: capable
+      plough: capable
+      reap: capable
+      select seed: capable
+      smelt: capable
+      sow: capable
+      weed: capable
+    aware_of:
+      quarry: you have seen the Haywards at it all your life
+      medium room: you have seen the Carters at it all your life
+    holdings: {}
+    concerns:
+    - craft
+    - smithing
+    - farming
+    - food
+    parents:
+    - Ralf
+    - Isolde
+    model: claude-haiku-5-5
+    born_line: Cotter
+    trade: ''
+    aim: Prove yourself to your family, and learn building a medium room as the Bells do it.
+  Ivy:
+    household: Hayward
+    born: -33
+    stage: youth
+    sex: f
+    relations:
+      Isolde: of the Cotter household
+      Gervase: your father
+      Isabel: your mother
+      Idonea: of the Cotter household
+      Wymarc: of the Cotter household; a close friend
+      Oliver: your brother
+      Bennet: of the Bell household
+      Petronel: of the Bell household
+      Osric: of the Carter household
+      Eva: of the Carter household
+      Piers: of the Carter household; your closest friend
+      Thomas: of the Carter household
+    memories:
+    - 'Your line''s founders: Gervase and Isabel Hayward came to Minehead and built the first Hayward house.'
+    - 'Hard winters you remember, when the frost came early and the stores ran out: last winter.'
+    - Sister Lucy married into Ashby, two days' walk away.
+    knows:
+      hoe: capable
+      milk: capable
+      quarry: capable
+      reap: capable
+      select seed: capable
+      sow: capable
+      weed: capable
+    aware_of:
+      plough: you have seen the Carters at it all your life
       smelt: you have seen the Cotters at it all your life
       copper tool: you have seen the Cotters at it all your life
       coin: you have seen the Cotters at it all your life
-      medium room: you have seen the Kemps at it all your life
+      medium room: you have seen the Carters at it all your life
     holdings: {}
     concerns:
     - farming
     - food
     - animals
     - building
-    partner: Drew
-    model: claude-sonnet-5-5
+    parents:
+    - Gervase
+    - Isabel
+    model: claude-haiku-5-5
     born_line: Hayward
-    trade: sowing a field broadcast and reaping a crop
-    aim: Keep your household fed and its house sound.
-  Godwin:
+    trade: ''
+    aim: Prove yourself to your family, and learn smelting copper as the Cotters do it.
+  Oliver:
+    household: Hayward
+    born: -24
+    stage: youth
+    sex: m
+    relations:
+      Isolde: of the Cotter household
+      Gervase: your father
+      Isabel: your mother
+      Idonea: of the Cotter household
+      Wymarc: of the Cotter household
+      Ivy: your sister
+      Bennet: of the Bell household
+      Petronel: of the Bell household
+      Osric: of the Carter household
+      Eva: of the Carter household
+      Piers: of the Carter household; your closest friend
+      Thomas: of the Carter household; a close friend
+    memories:
+    - 'Your line''s founders: Gervase and Isabel Hayward came to Minehead and built the first Hayward house.'
+    - 'Hard winters you remember, when the frost came early and the stores ran out: last winter.'
+    - Sister Lucy married into Ashby, two days' walk away.
+    knows:
+      hoe: rough
+      milk: rough
+      quarry: rough
+      reap: rough
+      select seed: rough
+      sow: rough
+      weed: rough
+    aware_of:
+      plough: you have seen the Carters at it all your life
+      smelt: you have seen the Cotters at it all your life
+      copper tool: you have seen the Cotters at it all your life
+      coin: you have seen the Cotters at it all your life
+      medium room: you have seen the Carters at it all your life
+    holdings: {}
+    concerns:
+    - farming
+    - food
+    - animals
+    - building
+    parents:
+    - Gervase
+    - Isabel
+    model: claude-haiku-5-5
+    born_line: Hayward
+    trade: ''
+    aim: Prove yourself to your family, and learn making a copper hand tool as the Cotters do it.
+  Bennet:
     household: Bell
-    born: -101
+    born: -98
     stage: elder
     sex: m
     relations:
-      Tobin: of the Cotter household
-      Drew: of the Hayward household
-      Tiffany: of the Hayward household
-      Alys: your wife
-      Osric: of the Cotter household
-      Orabel: your daughter
-      Olive: of the Cotter household
-      Oliver: of the Carter household
-      Letice: of the Carter household
-      Alard: of the Dyer household
-      Denise: of the Dyer household
-      Ancel: of the Dyer household
-      Mabel: of the Dyer household
-      Otes: of the Kemp household
-      Rose: of the Kemp household
-      Adam: of the Holt household
-      Ursula: of the Holt household
-      Elena: of the Holt household
-      Felice: of the Kemp household
-      Philippa: of the Holt household
+      Isolde: of the Cotter household
+      Gervase: of the Hayward household
+      Isabel: of the Hayward household
+      Idonea: of the Cotter household
+      Wymarc: of the Cotter household
+      Ivy: of the Hayward household
+      Oliver: of the Hayward household
+      Petronel: your wife
+      Osric: of the Carter household
+      Eva: of the Carter household; you courted her once, before she married
+      Piers: of the Carter household
+      Thomas: of the Carter household
     memories:
-    - 'Your line''s founders: Godwin and Alys Bell came to Minehead and built the first Bell house.'
+    - 'Your line''s founders: Bennet and Petronel Bell came to Barrow and built the first Bell house.'
     - 'Hard winters you remember, when the frost came early and the stores ran out: 2 winters ago, last winter.'
-    - Daughter Cecily married into Ashby, two days' walk away.
-    - Son Thurstan married into Ashby, two days' walk away.
+    - Daughter Alys married into Ashby, two days' walk away.
+    - Son Drew married into Ashby, two days' walk away.
     knows:
       hoe:
         level: known
@@ -1128,6 +1135,9 @@ agents:
       milk:
         level: known
         skill: 1.8
+      plough:
+        level: known
+        skill: 1.8
       reap:
         level: known
         skill: 1.5
@@ -1141,7 +1151,6 @@ agents:
         level: known
         skill: 1.5
     aware_of:
-      plough: you have seen the Holts at it all your life
       smelt: you have seen the Cotters at it all your life
       copper tool: you have seen the Cotters at it all your life
       coin: you have seen the Cotters at it all your life
@@ -1152,66 +1161,61 @@ agents:
     - building
     - shelter
     - food
-    partner: Alys
+    partner: Petronel
     model: claude-haiku-5-5
     born_line: Bell
     trade: sowing a field broadcast and reaping a crop
-    aim: Keep the family's good name, and see that what is owed to it is paid.
-  Alys:
+    aim: Pass on what you know before your strength goes.
+  Petronel:
     household: Bell
-    born: -89
+    born: -90
     stage: adult
     sex: f
     relations:
-      Tobin: of the Cotter household
-      Drew: of the Hayward household
-      Tiffany: of the Hayward household
-      Godwin: your husband
-      Osric: of the Cotter household
-      Orabel: your daughter
-      Olive: of the Cotter household
-      Oliver: of the Carter household
-      Letice: of the Carter household
-      Alard: of the Dyer household; they owe you 3 grain from last winter
-      Denise: of the Dyer household
-      Ancel: of the Dyer household
-      Mabel: of the Dyer household
-      Otes: of the Kemp household
-      Rose: of the Kemp household
-      Adam: of the Holt household
-      Ursula: of the Holt household
-      Elena: of the Holt household
-      Felice: of the Kemp household
-      Philippa: of the Holt household
+      Isolde: of the Cotter household
+      Gervase: of the Hayward household
+      Isabel: of the Hayward household
+      Idonea: of the Cotter household
+      Wymarc: of the Cotter household
+      Ivy: of the Hayward household
+      Oliver: of the Hayward household
+      Bennet: your husband
+      Osric: of the Carter household; you owe them 3 grain from last winter
+      Eva: of the Carter household
+      Piers: of the Carter household
+      Thomas: of the Carter household
     memories:
-    - 'Your line''s founders: Godwin and Alys Bell came to Minehead and built the first Bell house.'
+    - 'Your line''s founders: Bennet and Petronel Bell came to Barrow and built the first Bell house.'
     - 'Hard winters you remember, when the frost came early and the stores ran out: 2 winters ago, last winter.'
-    - Daughter Cecily married into Ashby, two days' walk away.
-    - Son Thurstan married into Ashby, two days' walk away.
+    - Daughter Alys married into Ashby, two days' walk away.
+    - Son Drew married into Ashby, two days' walk away.
+    - Last winter Osric lent you 3 grain when your store ran low; you have not paid it back.
     knows:
       hoe:
         level: known
-        skill: 1.46
+        skill: 1.48
       medium room:
         level: known
-        skill: 1.73
+        skill: 1.75
       milk:
         level: known
-        skill: 1.73
+        skill: 1.75
+      plough:
+        level: known
+        skill: 1.75
       reap:
         level: known
-        skill: 1.46
+        skill: 1.48
       select seed:
         level: known
-        skill: 1.73
+        skill: 1.75
       sow:
         level: known
-        skill: 1.46
+        skill: 1.48
       weed:
         level: known
-        skill: 1.46
+        skill: 1.48
     aware_of:
-      plough: you have seen the Holts at it all your life
       smelt: you have seen the Cotters at it all your life
       copper tool: you have seen the Cotters at it all your life
       coin: you have seen the Cotters at it all your life
@@ -1224,850 +1228,43 @@ agents:
     - building
     - shelter
     - food
-    partner: Godwin
+    partner: Bennet
     role: head
     model: claude-opus-5-5
     born_line: Bell
     trade: sowing a field broadcast and reaping a crop
     aim: See the Bell household through the winter, fed and warm.
   Osric:
-    household: Cotter
-    born: -50
-    stage: adult
-    sex: m
-    relations:
-      Tobin: your father
-      Drew: of the Hayward household
-      Tiffany: of the Hayward household
-      Godwin: of the Bell household
-      Alys: of the Bell household
-      Orabel: of the Bell household
-      Olive: your wife
-      Oliver: of the Carter household
-      Letice: of the Carter household
-      Alard: of the Dyer household
-      Denise: of the Dyer household
-      Ancel: of the Dyer household
-      Mabel: of the Dyer household
-      Otes: of the Kemp household
-      Rose: of the Kemp household
-      Adam: of the Holt household
-      Ursula: of the Holt household
-      Elena: of the Holt household
-      Felice: of the Kemp household
-      Philippa: of the Holt household
-    memories:
-    - 'Your line''s founders: Tobin and Lettice Cotter came to Minehead and built the first Cotter house.'
-    - 'Hard winters you remember, when the frost came early and the stores ran out: last winter.'
-    - Mother Lettice died last winter (old age).
-    knows:
-      coin:
-        level: known
-        skill: 1.05
-      copper tool:
-        level: known
-        skill: 1.05
-      hoe:
-        level: known
-        skill: 1.12
-      milk:
-        level: known
-        skill: 1.05
-      plough:
-        level: known
-        skill: 1.05
-      reap:
-        level: known
-        skill: 1.12
-      select seed:
-        level: known
-        skill: 1.05
-      smelt:
-        level: known
-        skill: 1.05
-      sow:
-        level: known
-        skill: 1.12
-      weed:
-        level: known
-        skill: 1.12
-    aware_of:
-      quarry: you have seen the Haywards at it all your life
-      medium room: you have seen the Kemps at it all your life
-    holdings: {}
-    concerns:
-    - craft
-    - smithing
-    - farming
-    - food
-    parents:
-    - Tobin
-    - Lettice
-    partner: Olive
-    model: claude-sonnet-5-5
-    born_line: Cotter
-    trade: sowing a field broadcast and reaping a crop
-    aim: Keep your household fed and its house sound.
-  Orabel:
-    household: Bell
-    born: -40
-    stage: adult
-    sex: f
-    relations:
-      Tobin: of the Cotter household
-      Drew: of the Hayward household
-      Tiffany: of the Hayward household
-      Godwin: your father
-      Alys: your mother
-      Osric: of the Cotter household
-      Olive: of the Cotter household
-      Oliver: of the Carter household
-      Letice: of the Carter household
-      Alard: of the Dyer household
-      Denise: of the Dyer household
-      Ancel: of the Dyer household
-      Mabel: of the Dyer household
-      Otes: of the Kemp household
-      Rose: of the Kemp household
-      Adam: of the Holt household
-      Ursula: of the Holt household
-      Elena: of the Holt household; they owe you 2 grain from last winter
-      Felice: of the Kemp household
-      Philippa: of the Holt household
-    memories:
-    - 'Your line''s founders: Godwin and Alys Bell came to Minehead and built the first Bell house.'
-    - 'Hard winters you remember, when the frost came early and the stores ran out: last winter.'
-    - Sister Cecily married into Ashby, two days' walk away.
-    - Brother Thurstan married into Ashby, two days' walk away.
-    knows:
-      hoe:
-        level: known
-        skill: 1.04
-      medium room:
-        level: known
-        skill: 0.88
-      milk:
-        level: known
-        skill: 0.88
-      reap:
-        level: known
-        skill: 1.04
-      select seed:
-        level: known
-        skill: 0.88
-      sow:
-        level: known
-        skill: 1.04
-      weed:
-        level: known
-        skill: 1.04
-    aware_of:
-      plough: you have seen the Holts at it all your life
-      smelt: you have seen the Cotters at it all your life
-      copper tool: you have seen the Cotters at it all your life
-      coin: you have seen the Cotters at it all your life
-      quarry: you have seen the Haywards at it all your life
-    holdings: {}
-    concerns:
-    - farming
-    - building
-    - shelter
-    - food
-    parents:
-    - Godwin
-    - Alys
-    model: claude-haiku-5-5
-    born_line: Bell
-    trade: sowing a field broadcast and reaping a crop
-    aim: Keep your household fed and its house sound.
-  Olive:
-    household: Cotter
-    born: -47
-    stage: adult
-    sex: f
-    relations:
-      Tobin: your father-in-law
-      Drew: of the Hayward household
-      Tiffany: of the Hayward household
-      Godwin: of the Bell household
-      Alys: of the Bell household
-      Osric: your husband
-      Orabel: of the Bell household
-      Oliver: of the Carter household
-      Letice: of the Carter household
-      Alard: of the Dyer household
-      Denise: of the Dyer household
-      Ancel: of the Dyer household
-      Mabel: of the Dyer household
-      Otes: of the Kemp household
-      Rose: of the Kemp household
-      Adam: of the Holt household
-      Ursula: of the Holt household
-      Elena: of the Holt household
-      Felice: of the Kemp household
-      Philippa: of the Holt household
-    memories:
-    - 'Your line''s founders: Tobin and Lettice Cotter came to Minehead and built the first Cotter house.'
-    - 'Hard winters you remember, when the frost came early and the stores ran out: last winter.'
-    - Mother-in-law Lettice died last winter (old age).
-    knows:
-      coin:
-        level: known
-        skill: 1.0
-      copper tool:
-        level: known
-        skill: 1.0
-      hoe:
-        level: known
-        skill: 1.1
-      milk:
-        level: known
-        skill: 1.0
-      plough:
-        level: known
-        skill: 1.0
-      reap:
-        level: known
-        skill: 1.1
-      select seed:
-        level: known
-        skill: 1.0
-      smelt:
-        level: known
-        skill: 1.0
-      sow:
-        level: known
-        skill: 1.1
-      weed:
-        level: known
-        skill: 1.1
-    aware_of:
-      quarry: you have seen the Haywards at it all your life
-      medium room: you have seen the Kemps at it all your life
-    holdings: {}
-    concerns:
-    - craft
-    - smithing
-    - farming
-    - food
-    partner: Osric
-    model: claude-haiku-5-5
-    born_line: Cotter
-    trade: sowing a field broadcast and reaping a crop
-    aim: Keep your household fed and its house sound.
-  Oliver:
     household: Carter
-    born: -98
-    stage: elder
-    sex: m
-    relations:
-      Tobin: of the Cotter household
-      Drew: of the Hayward household
-      Tiffany: of the Hayward household
-      Godwin: of the Bell household
-      Alys: of the Bell household
-      Osric: of the Cotter household
-      Orabel: of the Bell household
-      Olive: of the Cotter household
-      Letice: your wife
-      Alard: of the Dyer household
-      Denise: of the Dyer household
-      Ancel: your son-in-law
-      Mabel: your daughter
-      Otes: of the Kemp household
-      Rose: of the Kemp household; you courted her once, before she married
-      Adam: of the Holt household
-      Ursula: of the Holt household
-      Elena: of the Holt household
-      Felice: of the Kemp household
-      Philippa: of the Holt household
-    memories:
-    - 'Your line''s founders: Oliver and Letice Carter came to Barrow and built the first Carter house.'
-    - 'Hard winters you remember, when the frost came early and the stores ran out: 2 winters ago, last winter.'
-    knows:
-      hoe:
-        level: known
-        skill: 1.5
-      medium room:
-        level: known
-        skill: 1.8
-      milk:
-        level: known
-        skill: 1.8
-      plough:
-        level: known
-        skill: 1.8
-      reap:
-        level: known
-        skill: 1.5
-      select seed:
-        level: known
-        skill: 1.8
-      sow:
-        level: known
-        skill: 1.5
-      weed:
-        level: known
-        skill: 1.5
-    aware_of:
-      smelt: you have seen the Cotters at it all your life
-      copper tool: you have seen the Cotters at it all your life
-      coin: you have seen the Cotters at it all your life
-      quarry: you have seen the Haywards at it all your life
-    holdings: {}
-    concerns:
-    - farming
-    - building
-    - shelter
-    - food
-    partner: Letice
-    model: claude-haiku-5-5
-    born_line: Carter
-    trade: sowing a field broadcast and reaping a crop
-    aim: See your grandchildren settled and provided for before you die.
-  Letice:
-    household: Carter
-    born: -92
-    stage: adult
-    sex: f
-    relations:
-      Tobin: of the Cotter household
-      Drew: of the Hayward household
-      Tiffany: of the Hayward household
-      Godwin: of the Bell household
-      Alys: of the Bell household
-      Osric: of the Cotter household
-      Orabel: of the Bell household
-      Olive: of the Cotter household
-      Oliver: your husband
-      Alard: of the Dyer household
-      Denise: of the Dyer household
-      Ancel: your son-in-law
-      Mabel: your daughter
-      Otes: of the Kemp household
-      Rose: of the Kemp household
-      Adam: of the Holt household
-      Ursula: of the Holt household
-      Elena: of the Holt household
-      Felice: of the Kemp household
-      Philippa: of the Holt household
-    memories:
-    - 'Your line''s founders: Oliver and Letice Carter came to Barrow and built the first Carter house.'
-    - 'Hard winters you remember, when the frost came early and the stores ran out: 2 winters ago, last winter.'
-    knows:
-      hoe:
-        level: known
-        skill: 1.49
-      medium room:
-        level: known
-        skill: 1.78
-      milk:
-        level: known
-        skill: 1.78
-      plough:
-        level: known
-        skill: 1.78
-      reap:
-        level: known
-        skill: 1.49
-      select seed:
-        level: known
-        skill: 1.78
-      sow:
-        level: known
-        skill: 1.49
-      weed:
-        level: known
-        skill: 1.49
-    aware_of:
-      smelt: you have seen the Cotters at it all your life
-      copper tool: you have seen the Cotters at it all your life
-      coin: you have seen the Cotters at it all your life
-      quarry: you have seen the Haywards at it all your life
-    holdings:
-      crude tool: 1
-      coin: 2
-    concerns:
-    - farming
-    - building
-    - shelter
-    - food
-    partner: Oliver
-    role: head
-    model: claude-opus-5-5
-    born_line: Carter
-    trade: sowing a field broadcast and reaping a crop
-    aim: See the Carter household through the winter, fed and warm.
-  Alard:
-    household: Dyer
-    born: -98
-    stage: elder
-    sex: m
-    relations:
-      Tobin: of the Cotter household
-      Drew: of the Hayward household
-      Tiffany: of the Hayward household
-      Godwin: of the Bell household
-      Alys: of the Bell household; you owe them 3 grain from last winter
-      Osric: of the Cotter household
-      Orabel: of the Bell household
-      Olive: of the Cotter household
-      Oliver: of the Carter household
-      Letice: of the Carter household
-      Denise: your wife
-      Ancel: your son
-      Mabel: your daughter-in-law
-      Otes: of the Kemp household
-      Rose: of the Kemp household
-      Adam: of the Holt household
-      Ursula: of the Holt household
-      Elena: of the Holt household
-      Felice: of the Kemp household
-      Philippa: of the Holt household
-    memories:
-    - 'Your line''s founders: Alard and Denise Dyer came to Barrow and built the first Dyer house.'
-    - 'Hard winters you remember, when the frost came early and the stores ran out: 2 winters ago, last winter.'
-    - Son Ralf married into Ashby, two days' walk away.
-    - Daughter Emma married into Ashby, two days' walk away.
-    - Last winter Alys lent you 3 grain when your store ran low; you have not paid it back.
-    knows:
-      hoe:
-        level: known
-        skill: 1.5
-      milk:
-        level: known
-        skill: 1.8
-      plough:
-        level: known
-        skill: 1.8
-      reap:
-        level: known
-        skill: 1.5
-      select seed:
-        level: known
-        skill: 1.8
-      sow:
-        level: known
-        skill: 1.5
-      weed:
-        level: known
-        skill: 1.5
-    aware_of:
-      smelt: you have seen the Cotters at it all your life
-      copper tool: you have seen the Cotters at it all your life
-      coin: you have seen the Cotters at it all your life
-      quarry: you have seen the Haywards at it all your life
-      medium room: you have seen the Kemps at it all your life
-    holdings: {}
-    concerns:
-    - farming
-    - food
-    - animals
-    - harvest
-    partner: Denise
-    model: claude-haiku-5-5
-    born_line: Dyer
-    trade: sowing a field broadcast and reaping a crop
-    aim: Live through one more winter, and be a burden to nobody.
-  Denise:
-    household: Dyer
-    born: -93
-    stage: adult
-    sex: f
-    relations:
-      Tobin: of the Cotter household
-      Drew: of the Hayward household
-      Tiffany: of the Hayward household
-      Godwin: of the Bell household
-      Alys: of the Bell household
-      Osric: of the Cotter household
-      Orabel: of the Bell household
-      Olive: of the Cotter household
-      Oliver: of the Carter household
-      Letice: of the Carter household
-      Alard: your husband
-      Ancel: your son
-      Mabel: your daughter-in-law
-      Otes: of the Kemp household
-      Rose: of the Kemp household
-      Adam: of the Holt household
-      Ursula: of the Holt household
-      Elena: of the Holt household
-      Felice: of the Kemp household
-      Philippa: of the Holt household
-    memories:
-    - 'Your line''s founders: Alard and Denise Dyer came to Barrow and built the first Dyer house.'
-    - 'Hard winters you remember, when the frost came early and the stores ran out: 2 winters ago, last winter.'
-    - Son Ralf married into Ashby, two days' walk away.
-    - Daughter Emma married into Ashby, two days' walk away.
-    knows:
-      hoe:
-        level: known
-        skill: 1.5
-      milk:
-        level: known
-        skill: 1.8
-      plough:
-        level: known
-        skill: 1.8
-      reap:
-        level: known
-        skill: 1.5
-      select seed:
-        level: known
-        skill: 1.8
-      sow:
-        level: known
-        skill: 1.5
-      weed:
-        level: known
-        skill: 1.5
-    aware_of:
-      smelt: you have seen the Cotters at it all your life
-      copper tool: you have seen the Cotters at it all your life
-      coin: you have seen the Cotters at it all your life
-      quarry: you have seen the Haywards at it all your life
-      medium room: you have seen the Kemps at it all your life
-    holdings: {}
-    concerns:
-    - farming
-    - food
-    - animals
-    - harvest
-    partner: Alard
-    model: claude-haiku-5-5
-    born_line: Dyer
-    trade: sowing a field broadcast and reaping a crop
-    aim: Keep your household fed and its house sound.
-  Ancel:
-    household: Dyer
-    born: -42
-    stage: adult
-    sex: m
-    relations:
-      Tobin: of the Cotter household
-      Drew: of the Hayward household; there is bad blood between your households since last winter, over a pig that went missing
-      Tiffany: of the Hayward household
-      Godwin: of the Bell household
-      Alys: of the Bell household
-      Osric: of the Cotter household
-      Orabel: of the Bell household
-      Olive: of the Cotter household
-      Oliver: your father-in-law
-      Letice: your mother-in-law
-      Alard: your father
-      Denise: your mother
-      Mabel: your wife
-      Otes: of the Kemp household
-      Rose: of the Kemp household
-      Adam: of the Holt household
-      Ursula: of the Holt household
-      Elena: of the Holt household
-      Felice: of the Kemp household
-      Philippa: of the Holt household
-    memories:
-    - 'Your line''s founders: Alard and Denise Dyer came to Barrow and built the first Dyer house.'
-    - 'Hard winters you remember, when the frost came early and the stores ran out: last winter.'
-    - Brother Ralf married into Ashby, two days' walk away.
-    - Sister Emma married into Ashby, two days' walk away.
-    - Last winter Drew struck you in a quarrel over a pig that went missing; you have not forgotten.
-    knows:
-      hoe:
-        level: known
-        skill: 1.05
-      milk:
-        level: known
-        skill: 0.9
-      plough:
-        level: known
-        skill: 0.9
-      reap:
-        level: known
-        skill: 1.05
-      select seed:
-        level: known
-        skill: 0.9
-      sow:
-        level: known
-        skill: 1.05
-      weed:
-        level: known
-        skill: 1.05
-    aware_of:
-      smelt: you have seen the Cotters at it all your life
-      copper tool: you have seen the Cotters at it all your life
-      coin: you have seen the Cotters at it all your life
-      quarry: you have seen the Haywards at it all your life
-      medium room: you have seen the Kemps at it all your life
-    holdings:
-      crude tool: 1
-      coin: 2
-    concerns:
-    - farming
-    - food
-    - animals
-    - harvest
-    parents:
-    - Alard
-    - Denise
-    partner: Mabel
-    role: head
-    model: claude-opus-5-5
-    born_line: Dyer
-    trade: sowing a field broadcast and reaping a crop
-    aim: See the Dyer household through the winter, fed and warm. You will not be shamed by Drew again.
-  Mabel:
-    household: Dyer
-    born: -40
-    stage: adult
-    sex: f
-    relations:
-      Tobin: of the Cotter household
-      Drew: of the Hayward household
-      Tiffany: of the Hayward household
-      Godwin: of the Bell household
-      Alys: of the Bell household
-      Osric: of the Cotter household
-      Orabel: of the Bell household
-      Olive: of the Cotter household
-      Oliver: your father
-      Letice: your mother
-      Alard: your father-in-law
-      Denise: your mother-in-law
-      Ancel: your husband
-      Otes: of the Kemp household
-      Rose: of the Kemp household
-      Adam: of the Holt household
-      Ursula: of the Holt household
-      Elena: of the Holt household
-      Felice: of the Kemp household
-      Philippa: of the Holt household
-    memories:
-    - 'Your line''s founders: Oliver and Letice Carter came to Barrow and built the first Carter house.'
-    - 'Hard winters you remember, when the frost came early and the stores ran out: last winter.'
-    knows:
-      hoe:
-        level: known
-        skill: 1.04
-      medium room:
-        level: known
-        skill: 0.88
-      milk:
-        level: known
-        skill: 0.88
-      plough:
-        level: known
-        skill: 0.88
-      reap:
-        level: known
-        skill: 1.04
-      select seed:
-        level: known
-        skill: 0.88
-      sow:
-        level: known
-        skill: 1.04
-      weed:
-        level: known
-        skill: 1.04
-    aware_of:
-      smelt: you have seen the Cotters at it all your life
-      copper tool: you have seen the Cotters at it all your life
-      coin: you have seen the Cotters at it all your life
-      quarry: you have seen the Haywards at it all your life
-    holdings: {}
-    concerns:
-    - farming
-    - building
-    - shelter
-    - food
-    parents:
-    - Oliver
-    - Letice
-    partner: Ancel
-    model: claude-sonnet-5-5
-    born_line: Carter
-    trade: sowing a field broadcast and reaping a crop
-    aim: Keep your household fed and its house sound.
-  Otes:
-    household: Kemp
-    born: -93
-    stage: adult
-    sex: m
-    relations:
-      Tobin: of the Cotter household
-      Drew: of the Hayward household
-      Tiffany: of the Hayward household
-      Godwin: of the Bell household
-      Alys: of the Bell household
-      Osric: of the Cotter household
-      Orabel: of the Bell household
-      Olive: of the Cotter household
-      Oliver: of the Carter household
-      Letice: of the Carter household
-      Alard: of the Dyer household
-      Denise: of the Dyer household
-      Ancel: of the Dyer household
-      Mabel: of the Dyer household
-      Rose: your wife
-      Adam: of the Holt household
-      Ursula: of the Holt household
-      Elena: of the Holt household
-      Felice: your daughter
-      Philippa: of the Holt household
-    memories:
-    - 'Your line''s founders: Otes and Rose Kemp came to Wheatley and built the first Kemp house.'
-    - 'Hard winters you remember, when the frost came early and the stores ran out: 2 winters ago, last winter.'
-    - Daughter Amice married into Ashby, two days' walk away.
-    knows:
-      hoe:
-        level: known
-        skill: 1.5
-      medium room:
-        level: known
-        skill: 1.8
-      milk:
-        level: known
-        skill: 1.8
-      plough:
-        level: known
-        skill: 1.8
-      reap:
-        level: known
-        skill: 1.5
-      select seed:
-        level: known
-        skill: 1.8
-      sow:
-        level: known
-        skill: 1.5
-      weed:
-        level: known
-        skill: 1.5
-    aware_of:
-      smelt: you have seen the Cotters at it all your life
-      copper tool: you have seen the Cotters at it all your life
-      coin: you have seen the Cotters at it all your life
-      quarry: you have seen the Haywards at it all your life
-    holdings:
-      crude tool: 1
-      coin: 2
-    concerns:
-    - farming
-    - building
-    - shelter
-    - food
-    partner: Rose
-    role: head
-    model: claude-opus-5-5
-    born_line: Kemp
-    trade: sowing a field broadcast and reaping a crop
-    aim: See the Kemp household through the winter, fed and warm.
-  Rose:
-    household: Kemp
-    born: -96
-    stage: elder
-    sex: f
-    relations:
-      Tobin: of the Cotter household
-      Drew: of the Hayward household
-      Tiffany: of the Hayward household
-      Godwin: of the Bell household
-      Alys: of the Bell household
-      Osric: of the Cotter household
-      Orabel: of the Bell household
-      Olive: of the Cotter household
-      Oliver: of the Carter household; he courted you once, before you married
-      Letice: of the Carter household
-      Alard: of the Dyer household
-      Denise: of the Dyer household
-      Ancel: of the Dyer household
-      Mabel: of the Dyer household
-      Otes: your husband
-      Adam: of the Holt household
-      Ursula: of the Holt household
-      Elena: of the Holt household
-      Felice: your daughter
-      Philippa: of the Holt household
-    memories:
-    - 'Your line''s founders: Otes and Rose Kemp came to Wheatley and built the first Kemp house.'
-    - 'Hard winters you remember, when the frost came early and the stores ran out: 2 winters ago, last winter.'
-    - Daughter Amice married into Ashby, two days' walk away.
-    knows:
-      hoe:
-        level: known
-        skill: 1.5
-      medium room:
-        level: known
-        skill: 1.8
-      milk:
-        level: known
-        skill: 1.8
-      plough:
-        level: known
-        skill: 1.8
-      reap:
-        level: known
-        skill: 1.5
-      select seed:
-        level: known
-        skill: 1.8
-      sow:
-        level: known
-        skill: 1.5
-      weed:
-        level: known
-        skill: 1.5
-    aware_of:
-      smelt: you have seen the Cotters at it all your life
-      copper tool: you have seen the Cotters at it all your life
-      coin: you have seen the Cotters at it all your life
-      quarry: you have seen the Haywards at it all your life
-    holdings: {}
-    concerns:
-    - farming
-    - building
-    - shelter
-    - food
-    partner: Otes
-    model: claude-haiku-5-5
-    born_line: Kemp
-    trade: sowing a field broadcast and reaping a crop
-    aim: Pass on what you know before your strength goes.
-  Adam:
-    household: Holt
     born: -90
     stage: adult
     sex: m
     relations:
-      Tobin: of the Cotter household
-      Drew: of the Hayward household
-      Tiffany: of the Hayward household
-      Godwin: of the Bell household
-      Alys: of the Bell household
-      Osric: of the Cotter household
-      Orabel: of the Bell household
-      Olive: of the Cotter household
-      Oliver: of the Carter household
-      Letice: of the Carter household
-      Alard: of the Dyer household
-      Denise: of the Dyer household
-      Ancel: of the Dyer household
-      Mabel: of the Dyer household
-      Otes: of the Kemp household
-      Rose: of the Kemp household
-      Ursula: your wife
-      Elena: your daughter
-      Felice: of the Kemp household
-      Philippa: your daughter
+      Isolde: of the Cotter household; there is bad blood between your households since last winter, over a pig that went missing
+      Gervase: of the Hayward household
+      Isabel: of the Hayward household
+      Idonea: of the Cotter household
+      Wymarc: of the Cotter household
+      Ivy: of the Hayward household
+      Oliver: of the Hayward household
+      Bennet: of the Bell household
+      Petronel: of the Bell household; they owe you 3 grain from last winter
+      Eva: your wife
+      Piers: your son
+      Thomas: your son
     memories:
-    - 'Your line''s founders: Adam and Ursula Holt came to Wheatley and built the first Holt house.'
+    - 'Your line''s founders: Osric and Eva Carter came to Wheatley and built the first Carter house.'
     - 'Hard winters you remember, when the frost came early and the stores ran out: 2 winters ago, last winter.'
-    - Daughter Gunnild married into Ashby, two days' walk away.
+    - Son Peter married into Ashby, two days' walk away.
+    - Son Aldric married into Ashby, two days' walk away.
+    - Last winter Isolde struck you in a quarrel over a pig that went missing; you have not forgotten.
     knows:
       hoe:
         level: known
         skill: 1.48
+      medium room:
+        level: known
+        skill: 1.75
       milk:
         level: known
         skill: 1.75
@@ -2091,217 +1288,68 @@ agents:
       copper tool: you have seen the Cotters at it all your life
       coin: you have seen the Cotters at it all your life
       quarry: you have seen the Haywards at it all your life
-      medium room: you have seen the Kemps at it all your life
     holdings:
       crude tool: 1
       coin: 2
     concerns:
     - farming
+    - building
+    - shelter
     - food
-    - animals
-    - harvest
-    partner: Ursula
+    partner: Eva
     role: head
     model: claude-opus-5-5
-    born_line: Holt
+    born_line: Carter
     trade: sowing a field broadcast and reaping a crop
-    aim: See the Holt household through the winter, fed and warm.
-  Ursula:
-    household: Holt
-    born: -87
+    aim: See the Carter household through the winter, fed and warm. You will not be shamed by Isolde again.
+  Eva:
+    household: Carter
+    born: -89
     stage: adult
     sex: f
     relations:
-      Tobin: of the Cotter household
-      Drew: of the Hayward household
-      Tiffany: of the Hayward household
-      Godwin: of the Bell household
-      Alys: of the Bell household
-      Osric: of the Cotter household
-      Orabel: of the Bell household
-      Olive: of the Cotter household
-      Oliver: of the Carter household
-      Letice: of the Carter household
-      Alard: of the Dyer household
-      Denise: of the Dyer household
-      Ancel: of the Dyer household
-      Mabel: of the Dyer household
-      Otes: of the Kemp household
-      Rose: of the Kemp household
-      Adam: your husband
-      Elena: your daughter
-      Felice: of the Kemp household
-      Philippa: your daughter
+      Isolde: of the Cotter household
+      Gervase: of the Hayward household
+      Isabel: of the Hayward household; they owe you 3 grain from last winter
+      Idonea: of the Cotter household
+      Wymarc: of the Cotter household
+      Ivy: of the Hayward household
+      Oliver: of the Hayward household
+      Bennet: of the Bell household; he courted you once, before you married
+      Petronel: of the Bell household
+      Osric: your husband
+      Piers: your son
+      Thomas: your son
     memories:
-    - 'Your line''s founders: Adam and Ursula Holt came to Wheatley and built the first Holt house.'
+    - 'Your line''s founders: Osric and Eva Carter came to Wheatley and built the first Carter house.'
     - 'Hard winters you remember, when the frost came early and the stores ran out: 2 winters ago, last winter.'
-    - Daughter Gunnild married into Ashby, two days' walk away.
+    - Son Peter married into Ashby, two days' walk away.
+    - Son Aldric married into Ashby, two days' walk away.
     knows:
       hoe:
         level: known
-        skill: 1.45
-      milk:
-        level: known
-        skill: 1.7
-      plough:
-        level: known
-        skill: 1.7
-      reap:
-        level: known
-        skill: 1.45
-      select seed:
-        level: known
-        skill: 1.7
-      sow:
-        level: known
-        skill: 1.45
-      weed:
-        level: known
-        skill: 1.45
-    aware_of:
-      smelt: you have seen the Cotters at it all your life
-      copper tool: you have seen the Cotters at it all your life
-      coin: you have seen the Cotters at it all your life
-      quarry: you have seen the Haywards at it all your life
-      medium room: you have seen the Kemps at it all your life
-    holdings: {}
-    concerns:
-    - farming
-    - food
-    - animals
-    - harvest
-    partner: Adam
-    model: claude-haiku-5-5
-    born_line: Holt
-    trade: sowing a field broadcast and reaping a crop
-    aim: Keep your household fed and its house sound.
-  Elena:
-    household: Holt
-    born: -43
-    stage: adult
-    sex: f
-    relations:
-      Tobin: of the Cotter household
-      Drew: of the Hayward household
-      Tiffany: of the Hayward household
-      Godwin: of the Bell household
-      Alys: of the Bell household
-      Osric: of the Cotter household
-      Orabel: of the Bell household; you owe them 2 grain from last winter
-      Olive: of the Cotter household
-      Oliver: of the Carter household
-      Letice: of the Carter household
-      Alard: of the Dyer household
-      Denise: of the Dyer household
-      Ancel: of the Dyer household
-      Mabel: of the Dyer household
-      Otes: of the Kemp household
-      Rose: of the Kemp household
-      Adam: your father
-      Ursula: your mother
-      Felice: of the Kemp household
-      Philippa: your sister
-    memories:
-    - 'Your line''s founders: Adam and Ursula Holt came to Wheatley and built the first Holt house.'
-    - 'Hard winters you remember, when the frost came early and the stores ran out: last winter.'
-    - Sister Gunnild married into Ashby, two days' walk away.
-    - Last winter Orabel lent you 2 grain when your store ran low; you have not paid it back.
-    knows:
-      hoe:
-        level: known
-        skill: 1.06
-      milk:
-        level: known
-        skill: 0.93
-      plough:
-        level: known
-        skill: 0.93
-      reap:
-        level: known
-        skill: 1.06
-      select seed:
-        level: known
-        skill: 0.93
-      sow:
-        level: known
-        skill: 1.06
-      weed:
-        level: known
-        skill: 1.06
-    aware_of:
-      smelt: you have seen the Cotters at it all your life
-      copper tool: you have seen the Cotters at it all your life
-      coin: you have seen the Cotters at it all your life
-      quarry: you have seen the Haywards at it all your life
-      medium room: you have seen the Kemps at it all your life
-    holdings: {}
-    concerns:
-    - farming
-    - food
-    - animals
-    - harvest
-    parents:
-    - Adam
-    - Ursula
-    model: claude-haiku-5-5
-    born_line: Holt
-    trade: sowing a field broadcast and reaping a crop
-    aim: Keep your household fed and its house sound; pay back Orabel what you owe, if you can.
-  Felice:
-    household: Kemp
-    born: -39
-    stage: adult
-    sex: f
-    relations:
-      Tobin: of the Cotter household
-      Drew: of the Hayward household
-      Tiffany: of the Hayward household
-      Godwin: of the Bell household
-      Alys: of the Bell household
-      Osric: of the Cotter household
-      Orabel: of the Bell household
-      Olive: of the Cotter household
-      Oliver: of the Carter household
-      Letice: of the Carter household
-      Alard: of the Dyer household
-      Denise: of the Dyer household
-      Ancel: of the Dyer household
-      Mabel: of the Dyer household
-      Otes: your father
-      Rose: your mother
-      Adam: of the Holt household
-      Ursula: of the Holt household
-      Elena: of the Holt household
-      Philippa: of the Holt household; a close friend
-    memories:
-    - 'Your line''s founders: Otes and Rose Kemp came to Wheatley and built the first Kemp house.'
-    - 'Hard winters you remember, when the frost came early and the stores ran out: last winter.'
-    - Sister Amice married into Ashby, two days' walk away.
-    knows:
-      hoe:
-        level: known
-        skill: 1.02
+        skill: 1.46
       medium room:
         level: known
-        skill: 0.85
+        skill: 1.73
       milk:
         level: known
-        skill: 0.85
+        skill: 1.73
       plough:
         level: known
-        skill: 0.85
+        skill: 1.73
       reap:
         level: known
-        skill: 1.02
+        skill: 1.46
       select seed:
         level: known
-        skill: 0.85
+        skill: 1.73
       sow:
         level: known
-        skill: 1.02
+        skill: 1.46
       weed:
         level: known
-        skill: 1.02
+        skill: 1.46
     aware_of:
       smelt: you have seen the Cotters at it all your life
       copper tool: you have seen the Cotters at it all your life
@@ -2313,45 +1361,37 @@ agents:
     - building
     - shelter
     - food
-    parents:
-    - Otes
-    - Rose
+    partner: Osric
     model: claude-sonnet-5-5
-    born_line: Kemp
+    born_line: Carter
     trade: sowing a field broadcast and reaping a crop
     aim: Keep your household fed and its house sound.
-  Philippa:
-    household: Holt
+  Piers:
+    household: Carter
     born: -30
     stage: youth
-    sex: f
+    sex: m
     relations:
-      Tobin: of the Cotter household
-      Drew: of the Hayward household
-      Tiffany: of the Hayward household
-      Godwin: of the Bell household
-      Alys: of the Bell household
-      Osric: of the Cotter household
-      Orabel: of the Bell household
-      Olive: of the Cotter household
-      Oliver: of the Carter household
-      Letice: of the Carter household
-      Alard: of the Dyer household
-      Denise: of the Dyer household
-      Ancel: of the Dyer household
-      Mabel: of the Dyer household
-      Otes: of the Kemp household
-      Rose: of the Kemp household
-      Adam: your father
-      Ursula: your mother
-      Elena: your sister
-      Felice: of the Kemp household; your closest friend
+      Isolde: of the Cotter household
+      Gervase: of the Hayward household
+      Isabel: of the Hayward household
+      Idonea: of the Cotter household
+      Wymarc: of the Cotter household
+      Ivy: of the Hayward household; a close friend
+      Oliver: of the Hayward household; a close friend
+      Bennet: of the Bell household
+      Petronel: of the Bell household
+      Osric: your father
+      Eva: your mother
+      Thomas: your brother
     memories:
-    - 'Your line''s founders: Adam and Ursula Holt came to Wheatley and built the first Holt house.'
+    - 'Your line''s founders: Osric and Eva Carter came to Wheatley and built the first Carter house.'
     - 'Hard winters you remember, when the frost came early and the stores ran out: last winter.'
-    - Sister Gunnild married into Ashby, two days' walk away.
+    - Brother Peter married into Ashby, two days' walk away.
+    - Brother Aldric married into Ashby, two days' walk away.
     knows:
       hoe: capable
+      medium room: capable
       milk: capable
       plough: capable
       reap: capable
@@ -2363,448 +1403,493 @@ agents:
       copper tool: you have seen the Cotters at it all your life
       coin: you have seen the Cotters at it all your life
       quarry: you have seen the Haywards at it all your life
-      medium room: you have seen the Kemps at it all your life
     holdings: {}
     concerns:
     - farming
+    - building
+    - shelter
     - food
-    - animals
-    - harvest
     parents:
-    - Adam
-    - Ursula
+    - Osric
+    - Eva
     model: claude-haiku-5-5
-    born_line: Holt
+    born_line: Carter
     trade: ''
-    aim: Prove yourself to your family, and learn building a medium room as the Bells do it.
+    aim: Prove yourself to your family, and learn striking coin as the Cotters do it.
+  Thomas:
+    household: Carter
+    born: -24
+    stage: youth
+    sex: m
+    relations:
+      Isolde: of the Cotter household
+      Gervase: of the Hayward household
+      Isabel: of the Hayward household
+      Idonea: of the Cotter household
+      Wymarc: of the Cotter household
+      Ivy: of the Hayward household
+      Oliver: of the Hayward household; your closest friend
+      Bennet: of the Bell household
+      Petronel: of the Bell household
+      Osric: your father
+      Eva: your mother
+      Piers: your brother
+    memories:
+    - 'Your line''s founders: Osric and Eva Carter came to Wheatley and built the first Carter house.'
+    - 'Hard winters you remember, when the frost came early and the stores ran out: last winter.'
+    - Brother Peter married into Ashby, two days' walk away.
+    - Brother Aldric married into Ashby, two days' walk away.
+    knows:
+      hoe: rough
+      medium room: rough
+      milk: rough
+      plough: rough
+      reap: rough
+      select seed: rough
+      sow: rough
+      weed: rough
+    aware_of:
+      smelt: you have seen the Cotters at it all your life
+      copper tool: you have seen the Cotters at it all your life
+      coin: you have seen the Cotters at it all your life
+      quarry: you have seen the Haywards at it all your life
+    holdings: {}
+    concerns:
+    - farming
+    - building
+    - shelter
+    - food
+    parents:
+    - Osric
+    - Eva
+    model: claude-haiku-5-5
+    born_line: Carter
+    trade: ''
+    aim: Prove yourself to your family, and learn quarrying stone as the Haywards do it.
 tree:
-- name: Tobin
+- name: Ralf
   sex: m
-  born: -93
-  died: null
-  cause: null
-  parents: []
-  partner: Lettice
-  line: Cotter
-  origin: null
-  children:
-  - Osric
-  left: null
-- name: Lettice
-  sex: f
   born: -96
   died: 0
   cause: old age
   parents: []
-  partner: Tobin
-  line: Cotter
-  origin: Ashby
-  children:
-  - Osric
-  left: null
-- name: Drew
-  sex: m
-  born: -92
-  died: null
-  cause: null
-  parents: []
-  partner: Tiffany
-  line: Hayward
-  origin: null
-  children:
-  - Edric
-  left: null
-- name: Tiffany
-  sex: f
-  born: -89
-  died: null
-  cause: null
-  parents: []
-  partner: Drew
-  line: Hayward
-  origin: Ashby
-  children:
-  - Edric
-  left: null
-- name: Godwin
-  sex: m
-  born: -101
-  died: null
-  cause: null
-  parents: []
-  partner: Alys
-  line: Bell
-  origin: null
-  children:
-  - Cecily
-  - Thurstan
-  - Orabel
-  left: null
-- name: Alys
-  sex: f
-  born: -89
-  died: null
-  cause: null
-  parents: []
-  partner: Godwin
-  line: Bell
-  origin: Ashby
-  children:
-  - Cecily
-  - Thurstan
-  - Orabel
-  left: null
-- name: Cecily
-  sex: f
-  born: -55
-  died: null
-  cause: null
-  parents:
-  - Godwin
-  - Alys
-  partner: null
-  line: Bell
-  origin: null
-  children: []
-  left: -21
-- name: Edric
-  sex: m
-  born: -52
-  died: null
-  cause: null
-  parents:
-  - Drew
-  - Tiffany
-  partner: null
-  line: Hayward
-  origin: null
-  children: []
-  left: -15
-- name: Osric
-  sex: m
-  born: -50
-  died: null
-  cause: null
-  parents:
-  - Tobin
-  - Lettice
-  partner: Olive
+  partner: Isolde
   line: Cotter
   origin: null
-  children: []
-  left: null
-- name: Thurstan
-  sex: m
-  born: -45
-  died: null
-  cause: null
-  parents:
-  - Godwin
-  - Alys
-  partner: null
-  line: Bell
-  origin: null
-  children: []
-  left: -9
-- name: Orabel
-  sex: f
-  born: -40
-  died: null
-  cause: null
-  parents:
-  - Godwin
-  - Alys
-  partner: null
-  line: Bell
-  origin: null
-  children: []
-  left: null
-- name: Olive
-  sex: f
-  born: -47
-  died: null
-  cause: null
-  parents: []
-  partner: Osric
-  line: Cotter
-  origin: Ashby
-  children: []
-  left: null
-  line_born: Cotter
-- name: Oliver
-  sex: m
-  born: -98
-  died: null
-  cause: null
-  parents: []
-  partner: Letice
-  line: Carter
-  origin: null
   children:
-  - Mabel
+  - Wilmot
+  - Odo
+  - Payn
+  - Idonea
+  - Cassandra
+  - Saer
+  - Wymarc
   left: null
-- name: Letice
-  sex: f
-  born: -92
-  died: null
-  cause: null
-  parents: []
-  partner: Oliver
-  line: Carter
-  origin: Ashby
-  children:
-  - Mabel
-  left: null
-- name: Alard
-  sex: m
-  born: -98
-  died: null
-  cause: null
-  parents: []
-  partner: Denise
-  line: Dyer
-  origin: null
-  children:
-  - Ralf
-  - Emma
-  - Ancel
-  - Ivo
-  left: null
-- name: Denise
+- name: Isolde
   sex: f
   born: -93
   died: null
   cause: null
   parents: []
-  partner: Alard
-  line: Dyer
+  partner: Ralf
+  line: Cotter
   origin: Ashby
   children:
-  - Ralf
-  - Emma
-  - Ancel
-  - Ivo
+  - Wilmot
+  - Odo
+  - Payn
+  - Idonea
+  - Cassandra
+  - Saer
+  - Wymarc
   left: null
-- name: Ralf
+- name: Gervase
   sex: m
-  born: -56
-  died: null
-  cause: null
-  parents:
-  - Alard
-  - Denise
-  partner: null
-  line: Dyer
-  origin: null
-  children: []
-  left: -24
-- name: Emma
-  sex: f
-  born: -50
-  died: null
-  cause: null
-  parents:
-  - Alard
-  - Denise
-  partner: null
-  line: Dyer
-  origin: null
-  children: []
-  left: -15
-- name: Ancel
-  sex: m
-  born: -42
-  died: null
-  cause: null
-  parents:
-  - Alard
-  - Denise
-  partner: Mabel
-  line: Dyer
-  origin: null
-  children: []
-  left: null
-- name: Mabel
-  sex: f
-  born: -40
-  died: null
-  cause: null
-  parents:
-  - Oliver
-  - Letice
-  partner: Ancel
-  line: Dyer
-  origin: null
-  children: []
-  left: null
-  line_born: Carter
-- name: Ivo
-  sex: m
-  born: -37
-  died: null
-  cause: null
-  parents:
-  - Alard
-  - Denise
-  partner: null
-  line: Dyer
-  origin: null
-  children: []
-  left: -2
-- name: Otes
-  sex: m
-  born: -93
-  died: null
-  cause: null
-  parents: []
-  partner: Rose
-  line: Kemp
-  origin: null
-  children:
-  - Amice
-  - Felice
-  left: null
-- name: Rose
-  sex: f
   born: -96
   died: null
   cause: null
   parents: []
-  partner: Otes
-  line: Kemp
-  origin: Ashby
+  partner: Isabel
+  line: Hayward
+  origin: null
   children:
-  - Amice
-  - Felice
+  - Lucy
+  - Ivy
+  - Oliver
   left: null
-- name: Adam
-  sex: m
+- name: Isabel
+  sex: f
   born: -90
   died: null
   cause: null
   parents: []
-  partner: Ursula
-  line: Holt
-  origin: null
+  partner: Gervase
+  line: Hayward
+  origin: Ashby
   children:
-  - Gunnild
-  - Elena
-  - Philippa
+  - Lucy
+  - Ivy
+  - Oliver
   left: null
-- name: Ursula
+- name: Wilmot
   sex: f
-  born: -87
+  born: -62
+  died: null
+  cause: null
+  parents:
+  - Ralf
+  - Isolde
+  partner: null
+  line: Cotter
+  origin: null
+  children: []
+  left: -12
+- name: Odo
+  sex: m
+  born: -57
+  died: null
+  cause: null
+  parents:
+  - Ralf
+  - Isolde
+  partner: null
+  line: Cotter
+  origin: null
+  children: []
+  left: -24
+- name: Payn
+  sex: m
+  born: -55
+  died: null
+  cause: null
+  parents:
+  - Ralf
+  - Isolde
+  partner: null
+  line: Cotter
+  origin: null
+  children: []
+  left: -21
+- name: Idonea
+  sex: f
+  born: -49
+  died: null
+  cause: null
+  parents:
+  - Ralf
+  - Isolde
+  partner: null
+  line: Cotter
+  origin: null
+  children: []
+  left: null
+- name: Cassandra
+  sex: f
+  born: -46
+  died: null
+  cause: null
+  parents:
+  - Ralf
+  - Isolde
+  partner: null
+  line: Cotter
+  origin: null
+  children: []
+  left: -8
+- name: Lucy
+  sex: f
+  born: -45
+  died: null
+  cause: null
+  parents:
+  - Gervase
+  - Isabel
+  partner: null
+  line: Hayward
+  origin: null
+  children: []
+  left: -6
+- name: Saer
+  sex: m
+  born: -43
+  died: null
+  cause: null
+  parents:
+  - Ralf
+  - Isolde
+  partner: null
+  line: Cotter
+  origin: null
+  children: []
+  left: -4
+- name: Wymarc
+  sex: f
+  born: -33
+  died: null
+  cause: null
+  parents:
+  - Ralf
+  - Isolde
+  partner: null
+  line: Cotter
+  origin: null
+  children: []
+  left: null
+- name: Ivy
+  sex: f
+  born: -33
+  died: null
+  cause: null
+  parents:
+  - Gervase
+  - Isabel
+  partner: null
+  line: Hayward
+  origin: null
+  children: []
+  left: null
+- name: Oliver
+  sex: m
+  born: -24
+  died: null
+  cause: null
+  parents:
+  - Gervase
+  - Isabel
+  partner: null
+  line: Hayward
+  origin: null
+  children: []
+  left: null
+- name: Bennet
+  sex: m
+  born: -98
   died: null
   cause: null
   parents: []
-  partner: Adam
-  line: Holt
+  partner: Petronel
+  line: Bell
+  origin: null
+  children:
+  - Alys
+  - Drew
+  - Joan
+  - Christian
+  - Daniel
+  left: null
+- name: Petronel
+  sex: f
+  born: -90
+  died: null
+  cause: null
+  parents: []
+  partner: Bennet
+  line: Bell
   origin: Ashby
   children:
-  - Gunnild
-  - Elena
-  - Philippa
+  - Alys
+  - Drew
+  - Joan
+  - Christian
+  - Daniel
   left: null
-- name: Amice
+- name: Alys
+  sex: f
+  born: -62
+  died: null
+  cause: null
+  parents:
+  - Bennet
+  - Petronel
+  partner: null
+  line: Bell
+  origin: null
+  children: []
+  left: -30
+- name: Drew
+  sex: m
+  born: -57
+  died: null
+  cause: null
+  parents:
+  - Bennet
+  - Petronel
+  partner: null
+  line: Bell
+  origin: null
+  children: []
+  left: -16
+- name: Joan
   sex: f
   born: -53
   died: null
   cause: null
   parents:
-  - Otes
-  - Rose
+  - Bennet
+  - Petronel
   partner: null
-  line: Kemp
+  line: Bell
   origin: null
   children: []
-  left: -16
-- name: Gunnild
+  left: -14
+- name: Christian
   sex: f
-  born: -52
+  born: -49
   died: null
   cause: null
   parents:
-  - Adam
-  - Ursula
+  - Bennet
+  - Petronel
   partner: null
-  line: Holt
+  line: Bell
   origin: null
   children: []
-  left: -15
-- name: Elena
-  sex: f
-  born: -43
+  left: -9
+- name: Daniel
+  sex: m
+  born: -46
   died: null
   cause: null
   parents:
-  - Adam
-  - Ursula
+  - Bennet
+  - Petronel
   partner: null
-  line: Holt
+  line: Bell
   origin: null
   children: []
+  left: -10
+- name: Osric
+  sex: m
+  born: -90
+  died: null
+  cause: null
+  parents: []
+  partner: Eva
+  line: Carter
+  origin: null
+  children:
+  - Peter
+  - Aldric
+  - Ursula
+  - Agnes
+  - Piers
+  - Thomas
   left: null
-- name: Felice
+- name: Eva
+  sex: f
+  born: -89
+  died: null
+  cause: null
+  parents: []
+  partner: Osric
+  line: Carter
+  origin: Ashby
+  children:
+  - Peter
+  - Aldric
+  - Ursula
+  - Agnes
+  - Piers
+  - Thomas
+  left: null
+- name: Peter
+  sex: m
+  born: -60
+  died: null
+  cause: null
+  parents:
+  - Osric
+  - Eva
+  partner: null
+  line: Carter
+  origin: null
+  children: []
+  left: -33
+- name: Aldric
+  sex: m
+  born: -55
+  died: null
+  cause: null
+  parents:
+  - Osric
+  - Eva
+  partner: null
+  line: Carter
+  origin: null
+  children: []
+  left: -21
+- name: Ursula
+  sex: f
+  born: -47
+  died: null
+  cause: null
+  parents:
+  - Osric
+  - Eva
+  partner: null
+  line: Carter
+  origin: null
+  children: []
+  left: -10
+- name: Agnes
   sex: f
   born: -39
   died: null
   cause: null
   parents:
-  - Otes
-  - Rose
+  - Osric
+  - Eva
   partner: null
-  line: Kemp
+  line: Carter
   origin: null
   children: []
-  left: null
-- name: Philippa
-  sex: f
+  left: 0
+- name: Piers
+  sex: m
   born: -30
   died: null
   cause: null
   parents:
-  - Adam
-  - Ursula
+  - Osric
+  - Eva
   partner: null
-  line: Holt
+  line: Carter
+  origin: null
+  children: []
+  left: null
+- name: Thomas
+  sex: m
+  born: -24
+  died: null
+  cause: null
+  parents:
+  - Osric
+  - Eva
+  partner: null
+  line: Carter
   origin: null
   children: []
   left: null
 history:
-- text: Tobin and Lettice Cotter came to Minehead and built the first Cotter house
+- text: Ralf and Isolde Cotter came to Minehead and built the first Cotter house
   who:
-  - Tobin
-  - Lettice
+  - Ralf
+  - Isolde
   day: -62
-- text: Drew and Tiffany Hayward came to Minehead and built the first Hayward house
+- text: Gervase and Isabel Hayward came to Minehead and built the first Hayward house
   who:
-  - Drew
-  - Tiffany
+  - Gervase
+  - Isabel
   day: -62
-- text: Godwin and Alys Bell came to Minehead and built the first Bell house
+- text: Bennet and Petronel Bell came to Barrow and built the first Bell house
   who:
-  - Godwin
-  - Alys
+  - Bennet
+  - Petronel
   day: -62
-- text: Oliver and Letice Carter came to Barrow and built the first Carter house
+- text: Osric and Eva Carter came to Wheatley and built the first Carter house
   who:
-  - Oliver
-  - Letice
-  day: -62
-- text: Alard and Denise Dyer came to Barrow and built the first Dyer house
-  who:
-  - Alard
-  - Denise
-  day: -62
-- text: Otes and Rose Kemp came to Wheatley and built the first Kemp house
-  who:
-  - Otes
-  - Rose
-  day: -62
-- text: Adam and Ursula Holt came to Wheatley and built the first Holt house
-  who:
-  - Adam
-  - Ursula
+  - Osric
+  - Eva
   day: -62
 - text: 'a hard winter: the frost came early and the stores ran out'
   kind: winter
@@ -2818,64 +1903,93 @@ history:
   kind: winter
   who: []
   day: -36
-- text: Ralf married into Ashby and left Barrow
+- text: Peter married into Ashby and left Wheatley
   kind: left
   who:
-  - Ralf
+  - Peter
+  day: -33
+- text: Alys married into Ashby and left Barrow
+  kind: left
+  who:
+  - Alys
+  day: -30
+- text: Odo married into Ashby and left Minehead
+  kind: left
+  who:
+  - Odo
   day: -24
-- text: Cecily married into Ashby and left Minehead
+- text: Payn married into Ashby and left Minehead
   kind: left
   who:
-  - Cecily
+  - Payn
   day: -21
-- text: Amice married into Ashby and left Wheatley
+- text: Aldric married into Ashby and left Wheatley
   kind: left
   who:
-  - Amice
+  - Aldric
+  day: -21
+- text: Drew married into Ashby and left Barrow
+  kind: left
+  who:
+  - Drew
   day: -16
-- text: Edric married into Ashby and left Minehead
+- text: Joan married into Ashby and left Barrow
   kind: left
   who:
-  - Edric
-  day: -15
-- text: Emma married into Ashby and left Barrow
+  - Joan
+  day: -14
+- text: Wilmot married into Ashby and left Minehead
   kind: left
   who:
-  - Emma
-  day: -15
-- text: Gunnild married into Ashby and left Wheatley
+  - Wilmot
+  day: -12
+- text: Daniel married into Ashby and left Barrow
   kind: left
   who:
-  - Gunnild
-  day: -15
-- text: Thurstan married into Ashby and left Minehead
+  - Daniel
+  day: -10
+- text: Ursula married into Ashby and left Wheatley
   kind: left
   who:
-  - Thurstan
+  - Ursula
+  day: -10
+- text: Christian married into Ashby and left Barrow
+  kind: left
+  who:
+  - Christian
   day: -9
+- text: Cassandra married into Ashby and left Minehead
+  kind: left
+  who:
+  - Cassandra
+  day: -8
+- text: Lucy married into Ashby and left Minehead
+  kind: left
+  who:
+  - Lucy
+  day: -6
+- text: Saer married into Ashby and left Minehead
+  kind: left
+  who:
+  - Saer
+  day: -4
 - text: 'a hard winter: the frost came early and the stores ran out'
   kind: winter
   who: []
   day: -3
-- text: Mabel of the Carters married Ancel Dyer
-  kind: marriage
-  who:
-  - Ancel
-  - Mabel
-  day: -3
-- text: Ivo married into Ashby and left Barrow
-  kind: left
-  who:
-  - Ivo
-  day: -2
-- text: Lettice died (old age)
+- text: Ralf died (old age)
   kind: death
   who:
-  - Lettice
+  - Ralf
+  day: 0
+- text: Agnes married into Ashby and left Wheatley
+  kind: left
+  who:
+  - Agnes
   day: 0
 - day: -12
-  text: Drew and Ancel came to blows over a pig that went missing
+  text: Isolde and Osric came to blows over a pig that went missing
   kind: feud
   who:
-  - Drew
-  - Ancel
+  - Isolde
+  - Osric
