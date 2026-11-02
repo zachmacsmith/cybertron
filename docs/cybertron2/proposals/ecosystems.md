@@ -1,6 +1,6 @@
 # Proposal: environments, ecosystems and how they cluster
 
-Status: **discussion** (Zach, 2 Nov: "what are all the different core environmental / terrain types we might want to explore ...
+Status: **discussion; the wide design, kept for later.** What the generator does now is narrowed to one envelope in [temperate_landscapes.md](temperate_landscapes.md) (Zach, 2 Nov: "design within certain environmental types"). (Zach, 2 Nov: "what are all the different core environmental / terrain types we might want to explore ...
 biomes should come in ecosystem clusters, no? What would be a good way to do this?"). Nothing decided, nothing to build. Current as
 of 2 Nov. Owner 37.2. It extends generator.md §7 (only physics that ends in leverage) and §10 (the temperate terrain catalogue).
 
