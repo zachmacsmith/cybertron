@@ -43,11 +43,20 @@ def _touched(w, kw, out) -> dict:
     return t
 
 
+def _rename(w, new, old) -> None:
+    """A thing made again on replay takes the next id of the world's counter, which events and other unjournaled steps also advance;
+    give it the id the run gave it, so later changes and the day's records find it."""
+    s = json.loads(json.dumps(w.s).replace(json.dumps(new), json.dumps(old)))
+    w.s.clear()
+    w.s.update(s)
+
+
 def timeline(R, d, rooms: Rooms) -> dict | None:
     """The day's work as it happened (the journal's changes in order, spec/record): the world just before the work step, then
     each act replayed through the engine's own primitives (World.apply), with what it changed. When in the day an act falls is a
     presentation choice (the engine has no clock inside a day): an act starts where the actor's earlier acts' units end, against
-    the units the actor had that day (World.units_for). Where each one went is the engine's route (layout.route, D4-62)."""
+    the units the actor had that day (World.units_for). Where each one went is the engine's route (layout.route, D4-62); for a run made before the engine kept routes, the same rule
+    is applied to the world at the end of the work step (as the engine does there) and the timeline says `routes_derived`."""
     steps = S.day_steps(R, d)
     if f"d{d}.work" not in steps:
         return None
@@ -56,12 +65,15 @@ def timeline(R, d, rooms: Rooms) -> dict | None:
     talk = S.speech(R, d)
     after = S.world_at(R, f"d{d}.work")
     routes = dict((after.s.get("today") or {}).get("route") or {})
+    derived = not routes and "route" not in (after.s.get("today") or {})          # a run from before the engine kept routes (D4-62)
+    if derived:
+        routes = {n: r for n in after.agents_acting() if len(r := E.route(after, n)) > 1}
     acted = [a for a in after.s["acts"] if a.get("day") == d]
     w = S.world_at(R, pre)
     budget = {n: max(1, w.units_for(n)) for n in w.agents_acting()}
     morning = day_record(w, rooms)
     groups, cur = [], None
-    for seq, prim, place, args, cause in rows:
+    for seq, prim, place, args, cause, result in rows:
         c = json.loads(cause) if cause else {}
         if c.get("within"):
             continue                                                            # made inside another primitive: replayed with it
@@ -69,7 +81,7 @@ def timeline(R, d, rooms: Rooms) -> dict | None:
         if cur is None or cur["key"] != key:
             cur = {"key": key, "rows": []}
             groups.append(cur)
-        cur["rows"].append((prim, place, json.loads(args)))
+        cur["rows"].append((prim, place, json.loads(args), json.loads(result) if result else None))
     queue = {}
     for a in acted:
         queue.setdefault(a["actor"], []).append(a)
@@ -77,12 +89,15 @@ def timeline(R, d, rooms: Rooms) -> dict | None:
     for g in groups:
         actor, verb, party = g["key"]
         touched = {"parcels": set(), "buildings": set(), "herds": set(), "things": set(), "people": set()}
-        for prim, place, kw in g["rows"]:
+        for prim, place, kw, was in g["rows"]:
             try:
                 out = E.replay(w, prim, place, kw)
             except Exception:                                                   # noqa: BLE001 (a change that will not replay is counted)
                 failed += 1
                 out = None
+            if isinstance(was, str) and isinstance(out, str) and out != was:
+                _rename(w, out, was)                                            # a made thing keeps the id the run gave it
+                out = was
             for k, v in _touched(w, kw, out).items():
                 touched[k] |= v
         rec = None
@@ -107,6 +122,6 @@ def timeline(R, d, rooms: Rooms) -> dict | None:
                      "node": (rec or {}).get("node") or (g["rows"][0][1] if g["rows"] else None), "units": u,
                      "t0": round(min(1.0, t0), 3), "t1": round(min(1.0, used[actor] / b), 3), "delta": delta})
     return {"from": pre, "morning": {k: morning[k] for k in ("parcels", "buildings", "herds", "things", "people")},
-            "acts": acts, "routes": routes, "budget": budget, "talk": talk, "unreplayed": failed}
+            "acts": acts, "routes": routes, "routes_derived": derived, "budget": budget, "talk": talk, "unreplayed": failed}
 
 

@@ -36,8 +36,8 @@ def day_steps(R, d) -> list:
 
 
 def changes(R, step) -> list:
-    """(seq, primitive, place, arguments, cause) of one step, in order."""
-    return _q(R, "SELECT seq, primitive, place, arguments, cause FROM changes WHERE step = ? ORDER BY seq", (step,))
+    """(seq, primitive, place, arguments, cause, result) of one step, in order."""
+    return _q(R, "SELECT seq, primitive, place, arguments, cause, result FROM changes WHERE step = ? ORDER BY seq", (step,))
 
 
 def speech(R, d) -> list:

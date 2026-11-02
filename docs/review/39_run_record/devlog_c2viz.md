@@ -66,3 +66,13 @@ engine's state and imports nothing it changes.
   fourteen modules (`js/`, explicit imports and exports, bundled in MANIFEST order), the engine's words it knows in `js/vocab.js`.
   Checked: the same viz.json for both runs and the same pixels for 17 views (hashes before and after); `c2viz/tests` (touchpoints,
   a 2-day run to the contract with every change replayed, module order) pass.
+- 02 Nov 2026 16:48 UTC: the real Wide Country run (w1_wide, Hub `zachmacsmith/charter-runs`, review 38.31) as a video. No
+  published run has a journal; w1 is the only Wide run, and only its days 1 to 24 are agents acting. `c2viz/legacy/`: the run's
+  spec replayed on 0408831 with every agent call answered by the reply the run recorded. Every result, plan and night line is
+  identical to the published ones on all 25 days, and so are the night records, except a lapsed offer's `closed` label (c1b9878).
+  So w1 ran on 13ccb2e, and the journal is a faithful reconstruction.
+  - `timeline.py`: a thing made again on replay keeps the id the run gave it. Events advance the id counter without being
+    changes, so a replayed `raise` took another id and later changes to it failed.
+  - `timeline.py`: routes for runs from before D4-62 by the engine's rule, marked `routes_derived`.
+  - Built with the run's own engine, all 24 days' changes replay; today's engine refuses 29 transfers of that run (a stock rule
+    changed since), which is why a legacy run is built on its own engine.

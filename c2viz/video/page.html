@@ -1,0 +1,54 @@
+<!doctype html><html><head><meta charset="utf-8"><style>body{margin:0;background:#000}canvas{display:block}</style></head>
+<body><canvas id="out" width="1920" height="1080"></canvas><canvas id="src" style="display:none"></canvas>
+<script src="c2pixel.js"></script><script src="viz.js"></script>
+<script>
+const out = document.getElementById("out"), src = document.getElementById("src"), O = out.getContext("2d");
+const W = out.width, H = out.height, BG = "#0b1016", INK = "#e8dcc0", DIM = "#a99c80", GOLD = "#e0b25a";
+window.sizes = () => { const r = {world: (() => { const x = C2Pixel.world(src, V, 0); return [x.width, x.height, x.focus]; })()};
+  for (const n in V.static.nodes) { const x = C2Pixel.node(src, V, n, 0); r[n] = [x.width, x.height, x.focus]; } return r; };
+
+function wrap(text, width, font) {
+  O.font = font; const words = String(text).split(/\s+/), lines = []; let cur = "";
+  for (const w of words) { const t = cur ? cur + " " + w : w; if (O.measureText(t).width > width && cur) { lines.push(cur); cur = w; } else cur = t; }
+  if (cur) lines.push(cur); return lines;
+}
+function box(x, y, w, h, a) { O.fillStyle = `rgba(8,11,16,${a == null ? 0.78 : a})`; O.fillRect(x, y, w, h); O.strokeStyle = "rgba(224,178,90,0.35)"; O.lineWidth = 2; O.strokeRect(x + 1, y + 1, w - 2, h - 2); }
+
+window.draw = (seg) => {
+  const r = seg.kind === "world" ? C2Pixel.world(src, V, seg.day)
+          : seg.t == null ? C2Pixel.node(src, V, seg.nid, seg.day) : C2Pixel.nodeAt(src, V, seg.nid, seg.day, seg.t);
+  const s = seg.scale, iw = src.width * s, ih = src.height * s;
+  const f = seg.focus || r.focus || [src.width / 2, src.height / 2];
+  let ox = W / 2 - f[0] * s, oy = (H - 40) / 2 - f[1] * s;
+  ox = iw <= W ? (W - iw) / 2 : Math.min(0, Math.max(W - iw, ox));
+  oy = ih <= H ? (H - ih) / 2 : Math.min(0, Math.max(H - ih, oy));
+  O.imageSmoothingEnabled = false; O.fillStyle = BG; O.fillRect(0, 0, W, H);
+  O.drawImage(src, 0, 0, src.width, src.height, Math.round(ox), Math.round(oy), iw, ih);
+  if (seg.kind === "world") for (const h of r.hotspots || []) if (h.kind === "node") {      // place names, as the preview labels them
+    O.font = "bold 20px 'DejaVu Sans Mono', monospace"; const t = h.label, w = O.measureText(t).width, x = Math.round(ox + h.cx * s - w / 2), y = Math.round(oy + h.cy * s + 4);
+    O.fillStyle = "rgba(8,11,16,0.7)"; O.fillRect(x - 6, y - 2, w + 12, 26); O.fillStyle = h.pop ? GOLD : INK; O.textBaseline = "top"; O.fillText(t, x, y); }
+  // title, top left
+  const tf = "bold 34px 'DejaVu Sans Mono', monospace", sf = "22px 'DejaVu Sans Mono', monospace";
+  O.font = tf; const tw = Math.max(O.measureText(seg.title).width, (O.font = sf, O.measureText(seg.sub || "").width)) + 48;
+  box(24, 24, tw, seg.sub ? 104 : 66);
+  O.font = tf; O.fillStyle = GOLD; O.textBaseline = "top"; O.fillText(seg.title, 48, 38);
+  if (seg.sub) { O.font = sf; O.fillStyle = INK; O.fillText(seg.sub, 48, 84); }
+  if (seg.clock) { O.font = "bold 24px 'DejaVu Sans Mono', monospace"; const cw = O.measureText(seg.clock).width + 40; box(W - cw - 24, 24, cw, 52); O.fillStyle = INK; O.fillText(seg.clock, W - cw - 4, 38); }
+  // lines and quote, bottom
+  const lf = "22px 'DejaVu Sans Mono', monospace", qf = "italic 24px 'DejaVu Serif', serif";
+  let rows = []; for (const l of seg.lines || []) rows.push(...wrap(l, W - 140, lf).map((t, i) => [i ? "   " + t : "· " + t, lf, INK]));
+  if (seg.quote) rows.push(...wrap(seg.quote, W - 140, qf).slice(0, 3).map((t) => [t, qf, GOLD]));
+  if (seg.foot) rows.push([seg.foot, "18px 'DejaVu Sans Mono', monospace", DIM]);
+  if (rows.length) { const h = rows.length * 32 + 28; box(24, H - h - 24, W - 48, h);
+    rows.forEach(([t, font, col], i) => { O.font = font; O.fillStyle = col; O.fillText(t, 56, H - h - 24 + 16 + i * 32); }); }
+  if (seg.fade) { O.fillStyle = `rgba(0,0,0,${seg.fade})`; O.fillRect(0, 0, W, H); }
+  return out.toDataURL("image/png");
+};
+window.card = (lines, fade) => {
+  O.fillStyle = BG; O.fillRect(0, 0, W, H); O.textBaseline = "top";
+  let y = H / 2 - lines.length * 26;
+  for (const [t, size, col] of lines) { O.font = `${size}px 'DejaVu Sans Mono', monospace`; O.fillStyle = col || INK; const w = O.measureText(t).width; O.fillText(t, (W - w) / 2, y); y += size * 1.6; }
+  if (fade) { O.fillStyle = `rgba(0,0,0,${fade})`; O.fillRect(0, 0, W, H); }
+  return out.toDataURL("image/png");
+};
+</script></body></html>

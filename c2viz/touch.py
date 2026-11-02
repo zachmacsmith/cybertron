@@ -6,7 +6,7 @@ the engine no longer has, and the tests run it.
 """
 from __future__ import annotations
 
-from cybertron2.engine import data as _DT, environment as _EV, farm as _FM, journal as _JN, life as _LF, roads as _RD, signs as _SG
+from cybertron2.engine import data as _DT, environment as _EV, farm as _FM, journal as _JN, layout as _LY, life as _LF, roads as _RD, signs as _SG
 from cybertron2.engine import things as _TH, verbs as _VB
 from cybertron2.engine.here import Here as _Here
 from cybertron2.engine.world import World as _World
@@ -91,6 +91,13 @@ def act_units(w, act) -> int:
     return int(tech["units"]) if tech else 1
 
 
+def route(w, name) -> list:
+    """One's day as a chain of parcels by the engine's rule (layout.route, D4-62), for a run made before the engine kept it; [] when
+    the engine has no such rule."""
+    fn = getattr(_LY, "route", None)
+    return list(fn(w, name)) if fn else []
+
+
 def replay(w, prim, place, kw):
     """One journaled change applied again, through the engine's own chokepoint."""
     return w.apply(prim, place, **kw)
@@ -103,7 +110,7 @@ TOUCHPOINTS = {
     "functions": [(_SG, "context"), (_SG, "building_context"), (_EV, "weather"), (_EV, "words"), (_EV, "wet"), (_EV, "snow_lying"), (_EV, "felled"),
                   (_EV, "smoky"), (_EV, "crop_high"), (_EV, "visibility"), (_FM, "soil_word"), (_FM, "head"), (_LF, "showing"), (_TH, "spot_of"),
                   (_TH, "at_node"), (_TH, "body_state"), (_TH, "rotting"), (_TH, "carcass_fresh"), (_TH, "KINDS"), (_RD, "position"), (_RD, "challenge"),
-                  (_VB, "verb_units"), (_VB, "VERB"), (_JN, "checkpoint")],
+                  (_VB, "verb_units"), (_VB, "VERB"), (_JN, "checkpoint"), (_LY, "route")],
     "world": ["apply", "calendar", "cold", "units_for", "agents_acting", "present", "holders", "household_of", "homes"],
     "state": ["parcels", "buildings", "herds", "containers", "people", "nodes", "roads", "events", "acts", "log", "today"],
 }

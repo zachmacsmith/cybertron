@@ -33,7 +33,7 @@ Schema version: **1**.
 
 `from` (the step replayed from), `morning {parcels, buildings, herds, things, people}` (records as above, before the work), `acts []`
 (`actor`, `verb`, `for`, `tech`, `site`, `node`, `units`, `t0`, `t1` (presentation: units against the day's), `delta {parcels,
-buildings, herds, things, carried}`: the records an act changed, after it), `routes {name: [parcel]}` (the engine's, D4-62),
+buildings, herds, things, carried}`: the records an act changed, after it), `routes {name: [parcel]}` (the engine's, D4-62; `routes_derived` when the run predates the engine keeping them and the engine's rule was applied afterwards),
 `budget {name: units}`, `talk [{actor, place, kind, text}]`, `unreplayed` (changes that did not replay: 0 when all is well).
 
 ## Words the renderer knows
