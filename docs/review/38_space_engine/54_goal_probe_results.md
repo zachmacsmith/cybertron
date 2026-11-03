@@ -54,9 +54,14 @@ version. Cost: about $14 for all 18 runs. Runs are `runs/gp_<world>_<version>`. 
      When Simon owned the excess they said "keep the timber ... and pay 3 grain for the excess. Please take no more ash without
      asking".
    - Taken from: they asked for an account, and none came.
-   - Why the Mires refused offers (all versions): coin is no use at Cragg ("Coin isn't useful to us yet"); copper is their main
-     asset; the offers were low or for things that do not exist (a copper tool); and the Hales ate from their store while bargaining.
-     They sold readily at 2 coin a copper. The salt-selling Fowlers sold every time.
+   - The Mires refused low offers and guarded their smelted copper. Coin is no use at Cragg ("Coin isn't useful to us yet");
+     copper is their main asset; the offers were often for things that do not exist (a copper tool); and the Hales ate from their
+     store while bargaining. But they sold when the price was good or the good cheap to them:
+     - memory: 2 ore, at Osbert's own counter-offer of 2 coin each ("offer ore ... at a better price than Walter's"), while
+       keeping the copper ("Keep the copper for now until winter needs are clear");
+     - scored and scored, high: copper at 2 coin a copper.
+
+     The salt-selling Fowlers sold every time.
 6. **The means, by version:**
    - none: asking;
    - memory: buying, and felling then offering;
