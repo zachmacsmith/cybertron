@@ -184,7 +184,10 @@
       wood[i] = RP.ground ? at(RP.wood, wx, wy) : nW(rx / 30, ry / 30, 3) < 0.2 + F[i] * 0.55 ? 1 : 0;   // a generated world: the region's own woods
     }
     const rivers = RP.rivers.map((c) => ({ pid: null, pids: [], n: null, half: Math.max(2, c.half / f * 0.8), line: c.line.map(([x, y]) => [G.mid[0] + (x - px) / f, G.mid[1] + (y - py) / f]).filter(([x, y]) => x > -30 && y > -30 && x < W + 30 && y < H + 30) })).filter((c) => c.line.length > 2);
-    return (cache[nid] = { E, F, Wt, kind, level, tint, wood, rivers, ground: !!RP.ground, tintW: RP.tintW });
+    let tree = null, temp = null;
+    if (RP.ground && RP.tree) { tree = new Uint8Array(W * H); temp = new Float32Array(W * H);
+      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const i = y * W + x, rx = px + (x - G.mid[0]) * f, ry = py + (y - G.mid[1]) * f; tree[i] = at(RP.tree, rx, ry); temp[i] = at(RP.temp, rx, ry); } }
+    return (cache[nid] = { E, F, Wt, kind, level, tint, wood, rivers, ground: !!RP.ground, tintW: RP.tintW, tree, temp, snowy: temp ? (i, s) => X.snowLies(temp[i], s) : null });
   }
   function peaks(P, RL, cellPar, occ, W, H, snowy, k) {                                          // peaks where the land is mountain
     const pk = [], sx = Math.round(9 * k), sy = Math.round(7 * k);

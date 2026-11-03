@@ -118,3 +118,10 @@ engine's state and imports nothing it changes.
   - Every road of all 17 (119) recovered by the generator's rule leaves by the world file's parcels.
   - Gallery in the scratchpad (index, a page per world, contact sheet). Ring basin's lake and the isthmus's two landmasses
     show G-34's circles.
+- 03 Nov 2026: the regenerated worlds (37.2's temperate landscapes, D2-191) drawn from their new layers.
+  - Each cell's ecosystem sets its colour, look and trees; a wood's depth thins its edge and darkens its core.
+  - Fixed my three faults: snow by the generator's temperature and the season (no summer snow); heather purple only in
+    flower; a place levelled and cleared under its drawing, not in a disc.
+  - 18 worlds (rift and delta now wait; estuary and fens, sand country, upland and moor added), all 113 roads matched.
+  - Measured against the first batch: wood 30% in 17 of 18 worlds (frontier 60%), was 36 to 86%; lowland lakes 0, were 27 to
+    153; fen with islands 16% fen, was 0.

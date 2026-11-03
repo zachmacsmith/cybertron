@@ -1,14 +1,18 @@
 // c2viz/js/land.js: painting the land from a day's record: ground by level and character, terraces, each parcel by its cover and stocks, fields by crop stage and shares, fences, weather, trees.
 (function (X) {
   "use strict";
-  const { BIOMES, CROP_PAL, D, PAL, STAGE_PAL, STOPS, fieldAngle, hstr, model, noise, rng, tree } = X;
+  const { BIOMES, CROP_PAL, D, PAL, STAGE_PAL, STOPS, TREES, fieldAngle, hstr, model, noise, rng, tree } = X;
+  // snow lying on the wild land by its year's mean temperature (a generated world's, °C) and the season: on cold high ground in
+  // winter, only the coldest tops in spring and autumn, none in summer short of permanent snow (a presentation rule, ENGINE.md §12)
+  const snowLies = (t, season) => season === "winter" ? t < 6 : season === "summer" ? t < -4 : t < 2;
   // paint the land from the day's record (c2viz/model.py): each parcel by its cover that day and its stocks (S/K), crops by the
   // engine's stage and their sown and reaped shares, works, fences, clearing; snow when it lies. `cellNode` and `cellPar` give, per
   // pixel, the place (an index into nids) and the parcel (an index into that place's parcels, -1 the wild); `sc` is pixels per
   // close-up pixel (1 close up, smaller on the region's map)
   function paintLand(P, V, day, W, H, nids, cellNode, cellPar, sc, R, occ, opts) {
     const M = model(V), d = D(V, day), season = (d.calendar || {}).season || "summer", snow = !!d.snow, sdays = V.meta.season_days || 6;
-    const n2 = noise(M.seed ^ 2), n3 = noise(M.seed ^ 3), small = sc < 0.5, RL = opts.relief || null;
+    const n2 = noise(M.seed ^ 2), n3 = noise(M.seed ^ 3), small = sc < 0.5, RL = opts.relief || null, cday = (d.calendar || {}).day || 1;
+    const flowering = (season === "summer" && cday > sdays / 2) || (season === "autumn" && cday <= sdays / 2);   // heather: late summer
     const LV = new Int8Array(W * H), at = (x, y) => (x < 0 || y < 0 || x >= W || y >= H) ? -1 : (y | 0) * W + (x | 0);
     const parcelOf = (i) => { const n = cellNode[i]; if (n < 0 || cellPar[i] < 0) return null; return M.nodes[nids[n]].pids[cellPar[i]]; };
     const cov = (pid) => (d.parcels[pid] || {}).cover || V.static.parcels[pid].cover;
@@ -46,11 +50,11 @@
         if (k === 2) { P.put(x, y, v > 0.66 ? "#aaa59a" : v < 0.33 ? "#8a857a" : "#9a958a"); if (n3(x * 1.7, y * 1.7, 1) > 0.82) P.put(x, y, "#c4c0b4"); }
         else if (k === 1) { P.mix(x, y, moor ? "#8a7068" : "#8e9a58", moor ? 0.45 : 0.4); if (n3(x * 1.5, y * 1.5, 1) > 0.9) P.put(x, y, "#b8b4aa"); }
         else if (k === 4) { P.put(x, y, RL.tint[i]); if (v > 0.62) P.light(x, y, .07); else if (v < 0.36) P.dark(x, y, .08);   // heath and moor
-          const hv = n3(x * 1.3 + 4, y * 1.3, 1); if (hv > 0.78) P.put(x, y, "#8a5a7a"); else if (hv < 0.12) P.put(x, y, "#6e7a3a"); }
+          const hv = n3(x * 1.3 + 4, y * 1.3, 1); if (hv > 0.78) P.put(x, y, flowering ? "#8a5a7a" : "#6e5a48"); else if (hv < 0.12) P.put(x, y, "#6e7a3a"); }
         else if (k === 3) { P.put(x, y, RL.tint[i]); P.mix(x, y, "#6a8a5a", 0.45); const pv = n3(x / 12 + 3, y / 12, 2); if (pv > 0.7) P.put(x, y, pv > 0.76 ? "#4e7e94" : "#5a8aa0"); else if (pv > 0.64 && n3(x * 2, y * 2, 1) > 0.5) P.put(x, y, PAL.reed); }
         else { P.put(x, y, RL.tint[i]); if (v > 0.62) P.light(x, y, .06); else if (v < 0.36) P.dark(x, y, .06);
           const tg = [null, ["#8cc04c", "#9cd05a", "#7cb042"], ["#7cb444", "#8cc452", "#6ca43a"], ["#6ca63c", "#7cb64a", "#5c9632"], ["#8a9a52", "#9aaa5e", "#7a8a48"]][Math.min(4, l)];
-          if (tg) { P.put(x, y, tg[v > 0.62 ? 1 : v < 0.36 ? 2 : 0]); P.mix(x, y, RL.tint[i], RL.tintW ?? 0.3); } if (moor && !RL.ground) P.mix(x, y, "#8a6a7a", 0.3);
+          if (tg) { P.put(x, y, tg[v > 0.62 ? 1 : v < 0.36 ? 2 : 0]); P.mix(x, y, RL.tint[i], RL.tintW ?? 0.3); } if (moor && !RL.ground) P.mix(x, y, flowering ? "#8a6a7a" : "#7e6e52", 0.3);
           if (n3(x / 5 + 1, y / 5, 2) > 0.7) P.dark(x, y, 0.06); }
       }
       else if (!p && l > 0) { P.dark(x, y, 0.13 + 0.06 * (n2(x / 20, y / 20) > .5)); if (!small && n3(x * 1.9, y * 1.9, 1) > 0.8) P.dark(x, y, .16); }
@@ -60,7 +64,8 @@
     if (RL) for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) {                              // the relief's light from the north-west
       const i = y * W + x; if (LV[i] <= 0) continue; const s = (RL.E[i - W - 1] - RL.E[i + W + 1]) * 3;
       if (s > 0) P.light(x, y, Math.min(0.2, s)); else P.dark(x, y, Math.min(0.32, -s));
-      if (RL.kind[i] === 2 && cellPar[i] < 0 && (RL.E[i] > 0.93 || season === "winter")) P.mix(x, y, PAL.snow[0], RL.E[i] > 0.93 ? 0.85 : 0.6);
+      const sn = RL.snowy ? RL.snowy(i, season) : RL.kind[i] === 2 && (season === "winter" || (season !== "summer" && RL.E[i] > 0.93));
+      if (sn && cellPar[i] < 0) P.mix(x, y, PAL.snow[0], RL.snowy ? 0.7 : RL.E[i] > 0.93 ? 0.85 : 0.6);
     }
     // terraces from height (a word in the engine; drawn as a step down to the south)
     const face = new Uint8Array(W * H), fh = RL ? 4 : 3;
@@ -127,8 +132,8 @@
       if (RL) { const k = RL.kind[i], fo = RL.F[i];
         if (k === 2 || (k === 3 && R() > 0.08)) continue;
         if (!RL.wood[i] && R() > 0.0015) continue;
-        trees.push([x, y, R() < 0.6 ? 2 : 3, LV[i] >= 4 || k === 1 ? "pine" : k === 3 ? "willow" : B.trees[(R() * B.trees.length) | 0] || "oak"]); continue; }
-      if (n2(x / z, y / z, 3) < 1 - wild) { if (!small && B === BIOMES.moor && R() < 0.15) { P.put(x, y, "#8a5a7a"); P.put(x + 1, y, "#9a6a8a"); } continue; }
+        trees.push([x, y, R() < 0.6 ? 2 : 3, RL.tree && RL.tree[i] ? TREES[RL.tree[i]] : LV[i] >= 4 || k === 1 ? "pine" : k === 3 ? "willow" : B.trees[(R() * B.trees.length) | 0] || "oak"]); continue; }
+      if (n2(x / z, y / z, 3) < 1 - wild) { if (!small && B === BIOMES.moor && flowering && R() < 0.15) { P.put(x, y, "#8a5a7a"); P.put(x + 1, y, "#9a6a8a"); } continue; }
       trees.push([x, y, small ? 1 : (R() < 0.6 ? 2 : 3), B.trees[(R() * B.trees.length) | 0] || "oak"]);
     }
     return { LV, area, trees, marks, season, snow, lv, at, parcelOf, wet, face };
@@ -187,5 +192,5 @@
       if (ok) tree(P, x, y, r, R, kind, ctx.season);
     }
   }
-  Object.assign(X, { paintLand, paintField, weatherOver, drawTrees });
+  Object.assign(X, { snowLies, paintLand, paintField, weatherOver, drawTrees });
 })(C2X);

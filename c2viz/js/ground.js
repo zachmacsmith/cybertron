@@ -1,7 +1,7 @@
 // c2viz/js/ground.js: the region's landscape from a generated world's ground truth (viz.json `land`, c2viz/ground.py; ENGINE.md §12): height, sea and lakes, rivers, terrain, cover and the roads' own cells, in the same plan the derived landscape gives (region.js), so everything drawn on it is unchanged.
 (function (X) {
   "use strict";
-  const { BIOMES, TERRAIN_KIND, TERRAIN_TINT, WORLD_SCALE, edgeOf, parcelPlan, roadOut, hstr, levelOf, model, noise, splinePath } = X;
+  const { BIOMES, ECO_KIND, ECO_TINT, ECO_TREE, TERRAIN_KIND, TERRAIN_TINT, TREES, snowLies, WORLD_SCALE, edgeOf, parcelPlan, roadOut, hstr, levelOf, model, noise, splinePath } = X;
   // Presentation choices (ENGINE.md §12): PX pixels a cell (a cell is 150 m, so a 50 km window is 1336 px); heights in bands of
   // M_PER_E metres to the renderer's 0..1 (a terrace every 105 m); places drawn at the region's one scale (WORLD_SCALE of their close
   // up), much larger than their real few cells, at their real site, moved off open water only as far as their drawing needs.
@@ -12,7 +12,8 @@
     const LD = V.land, Ly = LD.layers;
     Lg = { nx: LD.grid.nx, ny: LD.grid.ny, km: LD.grid.km, h: decode(Ly.h, Int16Array), cover: decode(Ly.cover, Uint8Array), covers: Ly.covers,
       terrain: decode(Ly.terrain, Uint8Array), terrains: Ly.terrains, river: decode(Ly.river, Uint8Array), water: decode(Ly.water, Uint8Array),
-      wet: decode(Ly.wet, Uint8Array), place: decode(Ly.place, Uint16Array), places: Ly.places, jx: decode(Ly.jx, Int8Array), jy: decode(Ly.jy, Int8Array) };
+      wet: decode(Ly.wet, Uint8Array), place: decode(Ly.place, Uint16Array), places: Ly.places, jx: decode(Ly.jx, Int8Array), jy: decode(Ly.jy, Int8Array),
+      temp: Ly.temp ? decode(Ly.temp, Int8Array) : null, eco: Ly.eco ? decode(Ly.eco, Uint8Array) : null, ecos: Ly.ecos || [], band: Ly.band ? decode(Ly.band, Uint8Array) : null };
     GROUND.set(V, Lg); return Lg;
   }
   // a cell's point in pixels (the generator's jittered point, so lines through cells are not on a lattice)
@@ -80,23 +81,26 @@
     const nx = Lg.nx, ny = Lg.ny, nA = noise(M.seed ^ 31), nW = noise(M.seed ^ 2), waterAt = (i) => wm[i];
     // the fields the painter reads: height (E), forest (F), wet (Wt), the wild land's kind, terrace level (0 open water), tint, woods
     const E = new Float32Array(N), F = new Float32Array(N), Wt = new Float32Array(N), kind = new Uint8Array(N), level = new Int8Array(N), tint = new Uint32Array(N), wood = new Uint8Array(N);
-    const tints = Lg.terrains.map((t) => parseInt((TERRAIN_TINT[t] || "#7cb444").slice(1), 16)), kinds = Lg.terrains.map((t) => TERRAIN_KIND[t] ?? 0);
-    const coverIx = (name) => Lg.covers.indexOf(name), FOREST = coverIx("forest"), HEATH = coverIx("heath"), DEEP = Lg.terrains.indexOf("deep forest");
+    const tree = new Uint8Array(N), temp = new Float32Array(N), hex = (h) => parseInt(h.slice(1), 16);
+    const tints = Lg.terrains.map((t) => hex(TERRAIN_TINT[t] || "#7cb444")), kinds = Lg.terrains.map((t) => TERRAIN_KIND[t] ?? 0);
+    // each ecosystem (newer cells, D2-191): its colour, its look, its trees; else the terrain's
+    const eTint = Lg.ecos.map((e) => ECO_TINT[e] ? hex(ECO_TINT[e]) : null), eKind = Lg.ecos.map((e) => ECO_KIND[e]), eTree = Lg.ecos.map((e) => (ECO_TREE[e] || []).map((k) => TREES.indexOf(k)));
+    const coverIx = (name) => Lg.covers.indexOf(name), FOREST = coverIx("forest"), HEATH = coverIx("heath"), DEEP = Lg.terrains.indexOf("deep forest"), nT = noise(M.seed ^ 13);
+    const DENSE = [0.92, 0.72, 0.92, 1.01];                                                       // a wood's edge thinner, its core unbroken
     for (let i = 0; i < N; i++) {
-      const ci = cellAt[i], x = i % W, y = (i / W) | 0, t = Lg.terrain[ci], cv = Lg.cover[ci];
+      const ci = cellAt[i], x = i % W, y = (i / W) | 0, t = Lg.terrain[ci], cv = Lg.cover[ci], ec = Lg.eco ? Lg.eco[ci] : 0, band = Lg.band ? Lg.band[ci] : 0;
       E[i] = 0.15 + Math.max(0, hm[i]) / M_PER_E;
       Wt[i] = Lg.wet[ci] / 255;
-      F[i] = cv === FOREST ? (t === DEEP ? 1.2 : 1) : 0;
-      kind[i] = E[i] > 0.78 ? 2 : (cv === HEATH && kinds[t] === 0) ? 4 : kinds[t];
-      tint[i] = tints[t];
-      wood[i] = cv === FOREST && nW(x / 14, y / 14, 3) < 0.92 ? 1 : 0;
+      temp[i] = Lg.temp ? Lg.temp[ci] / 4 : 9 - Math.max(0, hm[i]) * 0.0065;
+      F[i] = cv === FOREST ? (t === DEEP || band === 3 ? 1.25 : band === 1 ? 0.85 : 1) : 0;
+      const k0 = ec ? (eKind[ec] ?? 0) : (cv === HEATH && kinds[t] === 0) ? 4 : kinds[t];
+      kind[i] = k0 === 0 && cv !== FOREST && hm[i] > 650 ? 2 : k0;                                    // bare tops only well up
+      tint[i] = (ec && eTint[ec] != null) ? eTint[ec] : tints[t];
+      if (band === 3) tint[i] = ((tint[i] >> 16 & 255) * 0.85 << 16) | ((tint[i] >> 8 & 255) * 0.85 << 8) | ((tint[i] & 255) * 0.85);   // a wood's core, darker
+      wood[i] = cv === FOREST && nW(x / 14, y / 14, 3) < DENSE[band] ? 1 : 0;
+      if (wood[i] && ec && eTree[ec].length) tree[i] = eTree[ec][Math.floor(nT(x / 6, y / 6, 2) * eTree[ec].length * 0.999)];
       level[i] = waterAt(i) ? 0 : levelOf(E[i]);
     }
-    // a place stands level on its own ground, at its site's height; its drawing pushes back water it would stand in
-    for (const n of nids) { const r = rad(n), [px, py] = pos[n], e0 = E[Math.max(0, Math.min(H - 1, py | 0)) * W + Math.max(0, Math.min(W - 1, px | 0))];
-      for (let y = Math.max(0, py - r * 1.4 | 0); y < Math.min(H, py + r * 1.4); y++) for (let x = Math.max(0, px - r * 1.4 | 0); x < Math.min(W, px + r * 1.4); x++) {
-        const dd = Math.hypot(x - px, y - py) * (0.8 + 0.4 * nA(x / 25 + 3, y / 25, 2)), t = Math.max(0, Math.min(1, (r * 1.35 - dd) / (r * 0.4))); if (t <= 0) continue;
-        const i = y * W + x, sm = t * t * (3 - 2 * t); E[i] = E[i] * (1 - sm) + e0 * sm; if (sm > 0.5 || level[i] > 0) level[i] = levelOf(E[i]); } }
     // territories and the parcels of each place at its spot (as region.js)
     const cellNode = new Int16Array(N).fill(-1), cellPar = new Int16Array(N).fill(-1);
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
@@ -105,8 +109,16 @@
       cellNode[y * W + x] = best;
       const n = nids[best], g = G[n], lx = Math.round(g.mid[0] + (x - pos[n][0]) / f), ly = Math.round(g.mid[1] + (y - pos[n][1]) / f);
       if (lx >= 0 && ly >= 0 && lx < g.W && ly < g.H) cellPar[y * W + x] = g.REG[ly * g.W + lx];
-      if (Math.hypot(x - pos[n][0], y - pos[n][1]) < rad(n) * (0.95 + 0.4 * nA(x / 18 + 9, y / 18, 3))) { F[y * W + x] -= 0.35; wood[y * W + x] = 0; }   // open ground round a place, its edge ragged
     }
+    // a place stands level on its own drawing's ground (its parcels, and a little round them), at its site's height, its drawing
+    // pushing back any water under it; trees stand up to its edge, not in a ring round it
+    const LEV = 14, dist = new Uint8Array(N).fill(255), q = [];
+    for (let i = 0; i < N; i++) if (cellPar[i] >= 0) { dist[i] = 0; q.push(i); }
+    for (let k = 0; k < q.length; k++) { const i = q[k], x = i % W, d0 = dist[i]; if (d0 >= LEV) continue;
+      for (const j of [x > 0 ? i - 1 : -1, x < W - 1 ? i + 1 : -1, i - W, i + W]) if (j >= 0 && j < N && dist[j] > d0 + 1) { dist[j] = d0 + 1; q.push(j); } }
+    const e0 = {}; for (const n of nids) { const [px, py] = pos[n]; e0[n] = E[Math.max(0, Math.min(H - 1, py | 0)) * W + Math.max(0, Math.min(W - 1, px | 0))]; }
+    for (let i = 0; i < N; i++) { const d = dist[i]; if (d > LEV) continue; const n = nids[cellNode[i]], t = 1 - d / LEV, sm = t * t * (3 - 2 * t);
+      E[i] = E[i] * (1 - sm) + e0[n] * sm; if (sm > 0.5 || level[i] > 0) level[i] = levelOf(E[i]); if (d <= 2) { wood[i] = 0; F[i] = Math.min(F[i], 0.3); } }
     // rivers: the generator's river cells as lines, downstream along their flow, wider by class
     const HALF = [0, 0.9, 1.4, 2.2], rivers = [];
     for (const rv of LD.rivers || []) {
@@ -132,7 +144,7 @@
         const lo = b[k] ?? 0, hi = b[k + 1] ?? (pts.length - 1), mid = pts[Math.round((lo + hi) / 2)] || pts[0]; let bi = 0, bd = 1e18;
         way.forEach((q, j) => { const d2 = (q[0] - mid[0]) ** 2 + (q[1] - mid[1]) ** 2; if (d2 < bd) { bd = d2; bi = j; } }); return bi; });
     }
-    return { W, H, pos, f, G, nids, A: [], feats: [], E, F, Wt, kind, level, cellNode, cellPar, rivers, rad, tint, tintW: 0.7, paths, sidx, wood, ground: true, PX };
+    return { W, H, pos, f, G, nids, A: [], feats: [], E, F, Wt, kind, level, cellNode, cellPar, rivers, rad, tint, tintW: 0.7, paths, sidx, wood, tree, temp, snowy: (i, cal) => snowLies(temp[i], cal), ground: true, PX };
   }
   Object.assign(X, { groundBase, groundSpots, groundPos, groundOut, groundPlan, groundLayers: layers, GROUND_PX: PX });
 })(C2X);

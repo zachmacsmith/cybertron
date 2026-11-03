@@ -19,6 +19,12 @@
   // the landscape generator's terrains (landgen.physical.TERRAIN_NAMES): how the wild land looks (0 open, 1 hill, 2 mountain or bare rock,
   // 3 wet, 4 heath); a terrain not listed is open land
   const TERRAIN_KIND = { "sandy heath": 4, moor: 4, hills: 1, "upland pasture": 1, rock: 2, fen: 3, saltmarsh: 3 };
+  // the generator's ecosystems (landgen/ecology.py ECOSYSTEMS, D2-191): how the wild land looks (as TERRAIN_KIND) and which trees
+  // stand in a wood; an ecosystem not listed is open land with its terrain's colour
+  const ECO_KIND = { "lowland heath": 4, moor: 4, "blanket bog": 3, fen: 3, reedbed: 3, saltmarsh: 3, "bare rock": 2, "hill pasture": 1 };
+  const ECO_TREE = { "oak-ash wood": ["oak", "oak", "birch"], "beech wood": ["oak"], "alder carr": ["willow"], "birch and pine wood": ["pine", "birch"],
+    "upland oak wood": ["oak", "birch"] };
+  const TREES = ["", "oak", "pine", "birch", "willow"];
   const QUIET_EVENTS = ["speech", "work", "store", "make", "build", "give", "take", "trade"];   // events not marked on the map
-  Object.assign(X, { TECH_TOOL, toolFor, RIVER, LOTS, STOPS, FIRES, CROP_PAL, STAGE_PAL, TERRAIN_LAND, TERRAIN_KIND, QUIET_EVENTS });
+  Object.assign(X, { TECH_TOOL, toolFor, RIVER, LOTS, STOPS, FIRES, CROP_PAL, STAGE_PAL, TERRAIN_LAND, TERRAIN_KIND, ECO_KIND, ECO_TREE, TREES, QUIET_EVENTS });
 })(C2X);

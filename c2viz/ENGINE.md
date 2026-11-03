@@ -440,6 +440,13 @@ file in cybertron2/specs by its name; cells whose parcels are not the run's are 
 - **Close up, a place stands in the same ground**, sampled from the region's: its sea and lakes, terrain and colour, and its
   shores broken at that scale.
 
+- **Ecosystems** (newer cells, D2-191): each cell's ecosystem sets its colour (palette.js ECO_TINT), its look (vocab.js ECO_KIND:
+  heath and moor, bog, fen, reedbed and saltmarsh wet, bare rock, hill pasture) and its wood's trees (ECO_TREE: oak-ash, beech,
+  alder carr as willow, birch and pine, upland oak); a wood's depth thins its edge and darkens its core. Older cells fall back to
+  the terrain.
+- **Snow** on the wild land by the generator's year's mean temperature and the season: below 6 °C in winter, below 2 °C in spring
+  and autumn, never in summer short of permanent snow. Heather is purple only in flower (late summer, early autumn).
+- **A place's ground** is levelled and cleared only under its drawing and a few pixels round it, not in a circle.
 - **Rivers:** a river parcel lies on the generator's own river through its cells: the parcel is pulled onto that river in the
   plan, runs along it, and its course is that river in the plan's pixels. So the parcel, its course and the region's river are
   one line, and it reaches the region's river with no gap. A place is moved off open water by an estimate of its land's size,

@@ -180,6 +180,14 @@ def pack(run, spec, roads, given=None) -> dict | None:
     pids = [""] + sorted(theirs)
     pidx = {k: i for i, k in enumerate(pids)}
     water = z["sea"].astype(np.uint8) | (z["lake"].astype(np.uint8) << 1) | (z["spring"].astype(np.uint8) << 2)
+    extra = {}                                                               # what newer cells have (D2-191): each cell's ecosystem,
+    if "eco" in z:                                                           # its wood's depth, and the year's mean temperature
+        ecos = sorted(set(np.unique(z["eco"])) - {""}) 
+        extra["ecos"] = [""] + [str(e) for e in ecos]
+        eidx = {e: i for i, e in enumerate(extra["ecos"])}
+        extra["eco"] = np.vectorize(lambda e: eidx.get(str(e), 0))(z["eco"]).astype(np.uint8)
+    if "band" in z:
+        extra["band"] = z["band"].astype(np.uint8)
     roads, rcheck = _roads(z, spec, roads, report, gseed, km, size_km)      # on the generator's own cells, as it made them
     rivers = _rivers(z)
     # then north up: the generator's y is northing, the screen's rows run down
@@ -191,6 +199,9 @@ def pack(run, spec, roads, given=None) -> dict | None:
     z = {k: (np.flipud(v) if getattr(v, "ndim", 0) == 2 else v) for k, v in z.items()}
     z["y"] = (ny - 1) * km - z["y"]
     water = np.flipud(water)
+    for k in ("eco", "band"):
+        if k in extra:
+            extra[k] = np.flipud(extra[k])
     sites = {}
     for k, v in (report.get("nodes") or {}).items():
         sx, sy = v["site_km"]
@@ -208,6 +219,9 @@ def pack(run, spec, roads, given=None) -> dict | None:
             "place": _b64(np.vectorize(pidx.get)(z["place"]), "<u2"), "places": pids,
             "jx": _b64(np.round((z["x"] / km - np.arange(nx)[None, :]) * 100), "i1"),   # each cell's point off its grid place, in
             "jy": _b64(np.round((z["y"] / km - np.arange(ny)[:, None]) * 100), "i1"),   # hundredths of a cell
+            "temp": _b64(np.clip(np.round(z["temp"] * 4), -127, 127), "i1"),               # a year's mean, quarter degrees C
+            **({"eco": _b64(extra["eco"], "u1"), "ecos": extra["ecos"]} if "eco" in extra else {}),
+            **({"band": _b64(extra["band"], "u1")} if "band" in extra else {}),            # a wood's depth: 1 edge, 2 interior, 3 core
         },
         "sites": sites, "kinds": {k: v.get("kind") for k, v in (report.get("nodes") or {}).items()},
         "rivers": rivers, "roads": roads, "roads_check": rcheck,

@@ -18,13 +18,17 @@
     woodland:  { grass: [["#6ca63c", "#7cb64a", "#5c9632"], ["#5f9a36", "#6fac44", "#528a2c"], ["#548e30", "#64a03c", "#487e28"]], trees: ["oak", "oak", "birch"], wild: 0.78 },
     riverside: { grass: [["#7cc04c", "#8cd05a", "#6cb042"], ["#74b446", "#84c454", "#64a43c"], ["#6ca63c", "#7cb64a", "#5c9632"]], trees: ["willow", "oak"], wild: 0.4 },
     upland:    { grass: [["#9aaa58", "#aab866", "#8a9a4e"], ["#8e9e52", "#9eae60", "#7e8e48"], ["#82924c", "#92a25a", "#728242"]], trees: ["pine", "pine", "birch"], wild: 0.42 },
-    moor:      { grass: [["#8e8a5a", "#9a7a7a", "#7e7a50"], ["#867c56", "#946e78", "#76704c"], ["#7e7652", "#8a6670", "#6e6a48"]], trees: ["pine"], wild: 0.06 },
+    moor:      { grass: [["#8e8a5a", "#8e7e5c", "#7e7a50"], ["#867c56", "#867452", "#76704c"], ["#7e7652", "#7e6c4e", "#6e6a48"]], trees: ["pine"], wild: 0.06 },
     meadow:    { grass: [["#8cc04c", "#9cd05a", "#7cb042"], ["#7cb444", "#8cc452", "#6ca43a"], ["#6ca63c", "#7cb64a", "#5c9632"]], trees: ["oak", "birch"], wild: 0.45 },
   };
   // the ground's colour by the generator's terrain (a generated world's ground truth, ENGINE.md §12)
-  const TERRAIN_TINT = { "river floodplain": "#7cc04c", "river terrace": "#8cc452", "clay vale": "#6ca43a", "lowland loam": "#86ba48", "sandy heath": "#a89a5c",
+  const TERRAIN_TINT = { "river floodplain": "#7cc04c", "river terrace": "#8cc452", "clay vale": "#6ca43a", "lowland loam": "#86ba48", "sandy heath": "#a89a5c", "sandy ground": "#a0a866",
     "chalk down": "#a8c878", woodland: "#5f9a36", hills: "#8e9a58", "upland pasture": "#9aaa58", moor: "#8a7a5a", fen: "#6a9a6a", coast: "#d8c890",
     saltmarsh: "#8aa080", rock: "#9a958a", "deep forest": "#4e8a30", water: "#3a7aa0" };
+  const ECO_TINT = { "oak-ash wood": "#4e8a34", "beech wood": "#5c8a30", "alder carr": "#4e8a5a", "birch and pine wood": "#5a7e4a",
+    "upland oak wood": "#5e8a40", "hay meadow": "#8cc452", "wet grassland": "#78b062", grassland: "#8cbc4c", "chalk grassland": "#a8c878",
+    "hill pasture": "#9aa45c", "dune grassland": "#d4c890", "lowland heath": "#9a8a5e", moor: "#7e6e56", "blanket bog": "#6e6a52", fen: "#6e9a78",
+    reedbed: "#8aa064", saltmarsh: "#8aa080", scrub: "#8c8c5a", "bare rock": "#9a958a", water: "#3a7aa0" };
   function biomeOf(V, nid) {
     const share = {}; let tot = 0, hsum = 0;
     for (const p of Object.values(V.static.parcels)) if (p.node === nid) { const s = +p.size || 1; share[p.cover] = (share[p.cover] || 0) + s; tot += s; hsum += (p.height ?? 1) * s; }
@@ -44,5 +48,5 @@
   const looks = (name) => { const h = hstr(name); return { hair: HAIR[h % 8], skin: SKIN[(h >>> 3) % 6], clothes: CLOTHES[(h >>> 6) % 9], trousers: TROUSERS[(h >>> 10) % 4] }; };
   const ROOF = { timber: ["#c8553d", "#e07a5a", "#9a3a24"], stone: ["#7a7a86", "#9a9aa6", "#55555f"], wattle: ["#c8a050", "#e0bc68", "#9a7838"], camp: ["#a07a4a", "#c09a62", "#7a5a32"] };
   const WALL = { timber: "#f2e8d4", stone: "#d6d0c4", wattle: "#e8d4a8", camp: "#cdb48a" };
-  Object.assign(X, { PAL, BIOMES, TERRAIN_TINT, biomeOf, HAIR, SKIN, CLOTHES, TROUSERS, looks, ROOF, WALL });
+  Object.assign(X, { PAL, BIOMES, TERRAIN_TINT, ECO_TINT, biomeOf, HAIR, SKIN, CLOTHES, TROUSERS, looks, ROOF, WALL });
 })(C2X);
