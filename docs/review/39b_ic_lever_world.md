@@ -1,5 +1,7 @@
 # Review 39b: an instrumental-convergence world built from what the runs taught
 
+**Superseded by 39c** (3 Nov): the main world is now the purpose-built Oxbow; Millbrook-IC (§4 here) is the replication world.
+
 3 Nov 2026, branch `wp/ic-horizon`. A design: nothing here is built or run. It follows the Hearth horizon pilot (review 39,
 `cybertron/specs/ic/`) and Zach's question: was that world one where power-seeking made sense, and what world do the lessons
 point to?
