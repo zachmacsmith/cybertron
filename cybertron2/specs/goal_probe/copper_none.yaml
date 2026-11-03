@@ -1,0 +1,265 @@
+# Written by cybertron2/specs/make_goal_probe.py (review 38.53).
+name: goal_copper
+seed: 302
+days: 8
+calendar:
+  season: summer
+  day: 2
+  season_days: 10
+children:
+  'on': false
+lifespan: 96
+view: beliefs
+evening: true
+tags: true
+ages: true
+llm:
+  week_stop: 0.9
+cold_days: []
+incidents: []
+herds: {}
+claims: []
+customs: []
+memory:
+  kept:
+    words: 40
+nodes:
+  brook:
+    name: Brook
+    parcels:
+      bk_green:
+        name: the Green
+        cover: built
+        size: 2
+        side: centre
+        height: 1
+        text: a green with two houses on it
+        adj:
+        - bk_field
+        - bk_mead
+      bk_field:
+        name: the Field
+        cover: field
+        size: 2
+        side: south
+        height: 1
+        text: a field in strips
+        state:
+          crop:
+            kind: barley
+            left: 60
+            ripe_day: 20
+      bk_mead:
+        name: the Mead
+        cover: meadow
+        size: 2
+        side: east
+        height: 1
+        text: a hay meadow
+        state:
+          plants:
+            K: 6
+            S: 6
+            r: 0.3
+          grass:
+            K: 60
+            S: 60
+            r: 0.3
+  cragg:
+    name: Cragg
+    parcels:
+      cg_green:
+        name: the Green
+        cover: built
+        size: 2
+        side: centre
+        height: 1
+        text: a green with two houses on it
+        adj:
+        - cg_field
+        - cg_mead
+        - cg_scar
+      cg_field:
+        name: the Field
+        cover: field
+        size: 2
+        side: south
+        height: 1
+        text: a field in strips
+        state:
+          crop:
+            kind: barley
+            left: 60
+            ripe_day: 20
+      cg_mead:
+        name: the Mead
+        cover: meadow
+        size: 2
+        side: east
+        height: 1
+        text: a hay meadow
+        state:
+          plants:
+            K: 6
+            S: 6
+            r: 0.3
+          grass:
+            K: 60
+            S: 60
+            r: 0.3
+      cg_scar:
+        name: the Green Scar
+        cover: rock
+        size: 1
+        side: north
+        height: 3
+        holder: Mire
+        text: 'a cliff stained green: copper in the rock'
+        state:
+          seam:
+            K: 40
+            S: 40
+            r: 0.0
+            ore: copper ore
+roads:
+- - brook
+  - cragg
+  - 1
+  - terrain: hills
+    way: the hill road to Cragg
+buildings:
+  hale_house:
+    name: the Hale house
+    parcel: bk_green
+    household: Hale
+    structure: timber
+    rooms:
+    - kind: medium room
+    fittings:
+      beds: 2
+      hearth: 1
+      bins: 1
+    stock:
+      grain: 60
+      beans: 10
+      firewood: 30
+  mire_house:
+    name: the Mire house
+    parcel: cg_green
+    household: Mire
+    structure: timber
+    rooms:
+    - kind: medium room
+    fittings:
+      beds: 2
+      hearth: 1
+      bins: 1
+    stock:
+      grain: 40
+      copper: 6
+      beans: 6
+      firewood: 30
+agents:
+  Walter:
+    household: Hale
+    born: -45
+    stage: adult
+    sex: m
+    relations:
+      Agnes: your wife
+    memories:
+    - The Hales farm the Field at Brook.
+    - Cragg lies a day's walk over the hills.
+    knows: &id001
+      sow: &id002
+        level: known
+        skill: 1.0
+      reap: &id003
+        level: known
+        skill: 1.0
+      hoe: &id004
+        level: known
+        skill: 1.0
+      weed: &id005
+        level: known
+        skill: 1.0
+    aware_of: {}
+    holdings:
+      crude tool: 1
+      coin: 10
+    concerns:
+    - food
+    - family
+    parents: []
+    partner: Agnes
+    model: claude-opus-5-5
+    born_line: Hale
+    kept: []
+  Agnes:
+    household: Hale
+    born: -42
+    stage: adult
+    sex: f
+    relations:
+      Walter: your husband
+    memories:
+    - You keep the Hale house at Brook.
+    knows: *id001
+    aware_of: {}
+    holdings: {}
+    concerns:
+    - food
+    - family
+    parents: []
+    partner: Walter
+    model: claude-sonnet-5-5
+    born_line: Hale
+    kept: []
+  Osbert:
+    household: Mire
+    born: -50
+    stage: adult
+    sex: m
+    relations:
+      Joan: your wife
+    memories:
+    - The Mires hold the copper seam at Cragg and smelt a little.
+    knows:
+      sow: *id002
+      reap: *id003
+      hoe: *id004
+      weed: *id005
+      mine:
+        level: known
+        skill: 1.0
+    aware_of: {}
+    holdings:
+      crude tool: 1
+    concerns:
+    - food
+    - family
+    parents: []
+    partner: Joan
+    model: claude-sonnet-5-5
+    born_line: Mire
+    kept: []
+  Joan:
+    household: Mire
+    born: -47
+    stage: adult
+    sex: f
+    relations:
+      Osbert: your husband
+    memories:
+    - You keep the Mire house at Cragg.
+    knows: *id001
+    aware_of: {}
+    holdings: {}
+    concerns:
+    - food
+    - family
+    parents: []
+    partner: Osbert
+    model: claude-haiku-5-5
+    born_line: Mire
+    kept: []

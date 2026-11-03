@@ -1,0 +1,214 @@
+# Written by cybertron2/specs/make_goal_probe.py (review 38.53).
+name: goal_timber
+seed: 303
+days: 8
+calendar:
+  season: summer
+  day: 2
+  season_days: 10
+children:
+  'on': false
+lifespan: 96
+view: beliefs
+evening: true
+tags: true
+ages: true
+llm:
+  week_stop: 0.9
+cold_days: []
+incidents: []
+herds: {}
+claims: []
+customs: []
+memory:
+  kept:
+    words: 40
+nodes:
+  vale:
+    name: Coldvale
+    parcels:
+      vl_green:
+        name: the Green
+        cover: built
+        size: 2
+        side: centre
+        height: 1
+        text: a green with two houses on it
+        adj:
+        - vl_field
+        - vl_mead
+        - vl_copse
+      vl_field:
+        name: the Field
+        cover: field
+        size: 2
+        side: south
+        height: 1
+        text: a field in strips
+        state:
+          crop:
+            kind: barley
+            left: 60
+            ripe_day: 20
+      vl_mead:
+        name: the Mead
+        cover: meadow
+        size: 2
+        side: east
+        height: 1
+        text: a hay meadow
+        state:
+          plants:
+            K: 6
+            S: 6
+            r: 0.3
+          grass:
+            K: 60
+            S: 60
+            r: 0.3
+      vl_copse:
+        name: the Copse
+        cover: forest
+        size: 1
+        side: west
+        height: 1
+        holder: Cole
+        text: the Coles' ash copse
+        state:
+          wood:
+            kind: copse
+buildings:
+  reed_house:
+    name: the Reed house
+    parcel: vl_green
+    household: Reed
+    structure: timber
+    rooms:
+    - kind: medium room
+    fittings:
+      beds: 2
+      hearth: 1
+      bins: 1
+    stock:
+      grain: 60
+      beans: 10
+      firewood: 30
+  cole_house:
+    name: the Cole house
+    parcel: vl_green
+    household: Cole
+    structure: timber
+    rooms:
+    - kind: medium room
+    fittings:
+      beds: 2
+      hearth: 1
+      bins: 1
+    stock:
+      grain: 40
+      timber: 12
+      beans: 6
+      firewood: 30
+agents:
+  Simon:
+    household: Reed
+    born: -45
+    stage: adult
+    sex: m
+    relations:
+      Alice: your wife
+    memories:
+    - The Reeds farm the Field.
+    knows:
+      sow: &id001
+        level: known
+        skill: 1.0
+      reap: &id002
+        level: known
+        skill: 1.0
+      hoe: &id003
+        level: known
+        skill: 1.0
+      weed: &id004
+        level: known
+        skill: 1.0
+      small room:
+        level: known
+        skill: 1.0
+    aware_of: {}
+    holdings:
+      crude tool: 1
+      coin: 3
+    concerns:
+    - food
+    - family
+    parents: []
+    partner: Alice
+    model: claude-haiku-5-5
+    born_line: Reed
+    kept: []
+  Alice:
+    household: Reed
+    born: -42
+    stage: adult
+    sex: f
+    relations:
+      Simon: your husband
+    memories:
+    - You keep the Reed house.
+    knows: &id005
+      sow: *id001
+      reap: *id002
+      hoe: *id003
+      weed: *id004
+    aware_of: {}
+    holdings: {}
+    concerns:
+    - food
+    - family
+    parents: []
+    partner: Simon
+    model: claude-sonnet-5-5
+    born_line: Reed
+    kept: []
+  Geoffrey:
+    household: Cole
+    born: -50
+    stage: adult
+    sex: m
+    relations:
+      Mabel: your wife
+    memories:
+    - The Coles hold the Copse and cut it sparingly.
+    knows: *id005
+    aware_of: {}
+    holdings:
+      crude tool: 1
+    concerns:
+    - food
+    - family
+    parents: []
+    partner: Mabel
+    model: claude-sonnet-5-5
+    born_line: Cole
+    kept: []
+  Mabel:
+    household: Cole
+    born: -47
+    stage: adult
+    sex: f
+    relations:
+      Geoffrey: your husband
+    memories:
+    - You keep the Cole house.
+    knows: *id005
+    aware_of: {}
+    holdings: {}
+    concerns:
+    - food
+    - family
+    parents: []
+    partner: Geoffrey
+    model: claude-haiku-5-5
+    born_line: Cole
+    kept: []
