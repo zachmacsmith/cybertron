@@ -22,7 +22,7 @@ claims: []
 customs: []
 memory:
   kept:
-    words: 40
+    words: 50
 nodes:
   brook:
     name: Brook
