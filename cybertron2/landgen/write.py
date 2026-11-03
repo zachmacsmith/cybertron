@@ -26,8 +26,8 @@ SURNAMES = ["Reed", "Barrow", "Hale", "Cole", "Moor", "Webb", "Thorne", "Hunt", 
             "Rook", "Hobb", "Fletcher", "Cooper", "Carter", "Dyer", "Wright", "Brook", "Hayward", "Shepherd", "Gale", "Marsh", "Holt",
             "Ward", "Pike", "Crane", "Hart", "Lamb", "Kemp", "Sayer", "Tanner", "Fowler", "Mason", "Wood", "Field", "Croft"]
 FARMING = ["sow", "reap", "hoe", "weed", "milk", "select seed"]
-TRADES = {"smith": ["smelt", "copper tool", "coin"], "mason": ["quarry"], "carpenter": ["medium room"], "trapper": ["hunt"],
-          "miller": ["mill"]}
+TRADES = {"smith": ["mine", "smelt", "copper tool", "coin"],        # a smith near a seam mines it too (the dry run: none could)
+          "mason": ["quarry"], "carpenter": ["medium room"], "trapper": ["hunt"], "miller": ["mill"]}
 RES_R = {"plants": 0.3, "grass": 0.32, "game": 0.25}
 
 
@@ -63,6 +63,9 @@ def _state(p, seam: bool = False) -> dict:
         g = g * EC.GAME_BY_TYPE.get(p.eco, 1.0) * EC.GAME_BY_BAND.get(p.band, 1.0)   # game by the wood's type and depth
         K = round(g * p.size, 1)
         st["game"] = {"K": K, "S": K, "r": RES_R["game"]}
+    if p.cover == "rock":                                                  # stone to quarry wherever there is rock (the dry run: none)
+        K = float(V.QUARRY_PER_UNIT * p.size)
+        st["quarry"] = {"K": K, "S": K, "r": 0.0}
     if seam and p.cover == "rock":
         st["seam"] = dict(V.SEAM)
     return st
@@ -264,12 +267,14 @@ def _generate(spec: dict, path, people: bool, describe: bool, out_path, provisio
     surnames = list(SURNAMES)
     rg.shuffle(surnames)
     buildings, herds, lines = {}, {}, {}
-    near_seam = {}
+    near_seam, near_forest = {}, {}
     for rd in roads:
         a, b = rd[0], rd[1]
         for x, y in ((a, b), (b, a)):
             if any(w.key == y and w.facts.get("seam") for w in extra):
                 near_seam[x] = True
+            if any(w.key == y and w.facts.get("wild") == "forest" for w in extra):
+                near_forest[x] = True
     for s in settlements:
         built = next((p for p in s.parcels if p.cover == "built"), s.parcels[0])
         fields = [p for p in s.parcels if p.cover == "field"]
@@ -278,20 +283,23 @@ def _generate(spec: dict, path, people: bool, describe: bool, out_path, provisio
         trades = []
         if near_seam.get(s.key) or any(p.use == "mine" and p.facts.get("seam") for p in s.parcels):
             trades.append("smith")
-        if any(p.cover in ("rock",) or p.terrain in ("hills", "chalk down") for p in s.parcels):
-            trades.append("mason")
+        if any(p.cover in ("rock",) or p.terrain in ("hills", "chalk down") for p in s.parcels) or near_seam.get(s.key):
+            trades.append("mason")                                         # stone on its land, or in the hill country a day off
         if any(p.wood_kind == "managed wood" for p in s.parcels):
             trades.append("carpenter")
         if "mill site" in (s.pin.get("has") or []):
             trades.append("miller")
-        hh_lines = []
+        if near_forest.get(s.key):
+            trades.append("trapper")
+        by_hh = {i: [t for j, t in enumerate(trades) if j % max(1, s.households) == i] for i in range(s.households)}   # every trade
+        hh_lines = []                                                      # held by some household, two to one if need be
         for i in range(s.households):
             line = surnames.pop(0)
             hh_lines.append(line)
             crafts = list(FARMING) + (["plough"] if heavy or i == 0 else [])
-            trade = trades[i] if i < len(trades) else None
-            if trade:
-                crafts += TRADES[trade]
+            for trade in by_hh.get(i, []):
+                crafts += [c for c in TRADES[trade] if c not in crafts]
+            trade = "smith" if "smith" in by_hh.get(i, []) else (by_hh.get(i) or [None])[0]
             lines[line] = {"place": s.name, "acting": [1, 4], "min_adults": 1, "crafts": crafts, "tools": {"crude tool": 1},
                            "holdings": {"coin": 2}}
             buildings[f"{line.lower()}_house"] = {"name": f"{line} House", "parcel": built.pid, "household": line, "structure": "wattle",
@@ -401,6 +409,35 @@ def _seed_ways(world: dict, settlements: list, seed: int) -> None:
             folk = sorted(by_node[node], key=lambda n: (-int("hunt" in (world["agents"][n].get("knows") or {})), rg.random()))
             for name in folk[: rg.choice([1, 2])]:
                 world["agents"][name].setdefault("ways", []).append({"road": [rd[0], rd[1]], "end": node})
+    # a wild place is known from the start to the households whose trade uses it (D2-187): the miners the hill where the ore is,
+    # the trappers the forest; everyone else finds it as an unexplored way (D4-47)
+    def crafts_for(n):                                                     # the trades a wild place serves
+        out = set()
+        for p in n["parcels"].values():
+            if p.get("cover") == "rock":
+                out.add("quarry")
+                if (p.get("state") or {}).get("seam"):
+                    out.add("mine")
+            if p.get("cover") == "forest":
+                out.add("hunt")
+        return out
+
+    for rd in world["roads"]:
+        for wild, home in ((rd[0], rd[1]), (rd[1], rd[0])):
+            n = world["nodes"].get(wild)
+            if not n or not n.get("unexplored") or home not in keys:
+                continue
+            need = crafts_for(n)
+            houses = {world["agents"][x].get("household") for x in by_node.get(home, [])
+                      if need & set(world["agents"][x].get("knows") or {})}
+            knowers = [x for x in by_node.get(home, []) if world["agents"][x].get("household") in houses]
+            if not knowers:                                                 # no such trade: one or two who range furthest
+                rg = keyed.rng(seed, "wild-knowers", wild, home)
+                knowers = sorted(by_node.get(home, []), key=lambda x: rg.random())[: rg.choice([1, 2])]
+            for x in knowers:
+                pl = world["agents"][x].setdefault("places", [])
+                if wild not in pl:
+                    pl.append(wild)
 
 
 def _capacity_as_generated(world: dict, settings: dict, settlements: list) -> dict:

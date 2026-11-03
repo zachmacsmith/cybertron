@@ -198,6 +198,10 @@ nodes:
         adj:
         - Minehead_6
         state:
+          quarry:
+            K: 200.0
+            S: 200.0
+            r: 0.0
           seam:
             S: 60
             K: 60
@@ -691,7 +695,13 @@ agents:
       hoe:
         level: known
         skill: 1.5
+      medium room:
+        level: known
+        skill: 1.8
       milk:
+        level: known
+        skill: 1.8
+      mine:
         level: known
         skill: 1.8
       plough:
@@ -714,7 +724,6 @@ agents:
         skill: 1.5
     aware_of:
       quarry: you have seen the Haywards at it all your life
-      medium room: you have seen the Carters at it all your life
     holdings:
       crude tool: 1
       coin: 2
@@ -723,7 +732,7 @@ agents:
     - craft
     - smithing
     - farming
-    - food
+    - building
     partner: Ralf
     role: head
     model: claude-opus-5-5
@@ -778,6 +787,7 @@ agents:
         level: known
         skill: 1.5
     aware_of:
+      mine: you have seen the Cotters at it all your life
       smelt: you have seen the Cotters at it all your life
       copper tool: you have seen the Cotters at it all your life
       coin: you have seen the Cotters at it all your life
@@ -842,6 +852,7 @@ agents:
         level: known
         skill: 1.48
     aware_of:
+      mine: you have seen the Cotters at it all your life
       smelt: you have seen the Cotters at it all your life
       copper tool: you have seen the Cotters at it all your life
       coin: you have seen the Cotters at it all your life
@@ -894,7 +905,13 @@ agents:
       hoe:
         level: known
         skill: 1.11
+      medium room:
+        level: known
+        skill: 1.03
       milk:
+        level: known
+        skill: 1.03
+      mine:
         level: known
         skill: 1.03
       plough:
@@ -917,13 +934,12 @@ agents:
         skill: 1.11
     aware_of:
       quarry: you have seen the Haywards at it all your life
-      medium room: you have seen the Carters at it all your life
     holdings: {}
     concerns:
     - craft
     - smithing
     - farming
-    - food
+    - building
     parents:
     - Ralf
     - Isolde
@@ -959,7 +975,9 @@ agents:
       coin: capable
       copper tool: capable
       hoe: capable
+      medium room: capable
       milk: capable
+      mine: capable
       plough: capable
       reap: capable
       select seed: capable
@@ -968,20 +986,19 @@ agents:
       weed: capable
     aware_of:
       quarry: you have seen the Haywards at it all your life
-      medium room: you have seen the Carters at it all your life
     holdings: {}
     concerns:
     - craft
     - smithing
     - farming
-    - food
+    - building
     parents:
     - Ralf
     - Isolde
     model: claude-haiku-5-5
     born_line: Cotter
     trade: ''
-    aim: Prove yourself to your family, and learn building a medium room as the Bells do it.
+    aim: Prove yourself to your family, and learn quarrying stone as the Haywards do it.
   Ivy:
     household: Hayward
     born: -33
@@ -1014,6 +1031,7 @@ agents:
       sow: capable
       weed: capable
     aware_of:
+      mine: you have seen the Cotters at it all your life
       smelt: you have seen the Cotters at it all your life
       copper tool: you have seen the Cotters at it all your life
       coin: you have seen the Cotters at it all your life
@@ -1030,7 +1048,7 @@ agents:
     model: claude-haiku-5-5
     born_line: Hayward
     trade: ''
-    aim: Prove yourself to your family, and learn smelting copper as the Cotters do it.
+    aim: Prove yourself to your family, and learn mining copper ore as the Cotters do it.
   Oliver:
     household: Hayward
     born: -24
@@ -1063,6 +1081,7 @@ agents:
       sow: rough
       weed: rough
     aware_of:
+      mine: you have seen the Cotters at it all your life
       smelt: you have seen the Cotters at it all your life
       copper tool: you have seen the Cotters at it all your life
       coin: you have seen the Cotters at it all your life
@@ -1079,7 +1098,7 @@ agents:
     model: claude-haiku-5-5
     born_line: Hayward
     trade: ''
-    aim: Prove yourself to your family, and learn building a medium room as the Carters do it.
+    aim: Prove yourself to your family, and learn building a medium room as the Cotters do it.
   Bennet:
     household: Bell
     born: -98
@@ -1129,6 +1148,7 @@ agents:
         level: known
         skill: 1.5
     aware_of:
+      mine: you have seen the Cotters at it all your life
       smelt: you have seen the Cotters at it all your life
       copper tool: you have seen the Cotters at it all your life
       coin: you have seen the Cotters at it all your life
@@ -1194,6 +1214,7 @@ agents:
         level: known
         skill: 1.48
     aware_of:
+      mine: you have seen the Cotters at it all your life
       smelt: you have seen the Cotters at it all your life
       copper tool: you have seen the Cotters at it all your life
       coin: you have seen the Cotters at it all your life
@@ -1262,6 +1283,7 @@ agents:
         level: known
         skill: 1.48
     aware_of:
+      mine: you have seen the Cotters at it all your life
       smelt: you have seen the Cotters at it all your life
       copper tool: you have seen the Cotters at it all your life
       coin: you have seen the Cotters at it all your life
@@ -1329,6 +1351,7 @@ agents:
         level: known
         skill: 1.46
     aware_of:
+      mine: you have seen the Cotters at it all your life
       smelt: you have seen the Cotters at it all your life
       copper tool: you have seen the Cotters at it all your life
       coin: you have seen the Cotters at it all your life
@@ -1377,6 +1400,7 @@ agents:
       sow: capable
       weed: capable
     aware_of:
+      mine: you have seen the Cotters at it all your life
       smelt: you have seen the Cotters at it all your life
       copper tool: you have seen the Cotters at it all your life
       coin: you have seen the Cotters at it all your life
@@ -1393,7 +1417,7 @@ agents:
     model: claude-haiku-5-5
     born_line: Carter
     trade: ''
-    aim: Prove yourself to your family, and learn smelting copper as the Cotters do it.
+    aim: Prove yourself to your family, and learn quarrying stone as the Haywards do it.
   Thomas:
     household: Carter
     born: -24
@@ -1427,6 +1451,7 @@ agents:
       sow: rough
       weed: rough
     aware_of:
+      mine: you have seen the Cotters at it all your life
       smelt: you have seen the Cotters at it all your life
       copper tool: you have seen the Cotters at it all your life
       coin: you have seen the Cotters at it all your life
@@ -1443,7 +1468,7 @@ agents:
     model: claude-haiku-5-5
     born_line: Carter
     trade: ''
-    aim: Prove yourself to your family, and learn striking coin as the Cotters do it.
+    aim: Prove yourself to your family, and learn mining copper ore as the Cotters do it.
 tree:
 - name: Ralf
   sex: m

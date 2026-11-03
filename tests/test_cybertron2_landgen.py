@@ -248,3 +248,19 @@ def test_how_long_settled_sets_the_wood_and_deep_forest_is_a_woods_core():
             assert (L.band == 3).any()                                      # large woods have a core
             assert ((L.band == 3) & ~np.isin(L.eco, EC.FORESTS)).sum() == 0
     assert shares["frontier"] > 0.5 > 0.2 > shares["long settled"]
+
+
+def test_a_generated_world_has_no_gate_shut_for_everyone():
+    """The dry run's findings (review 02zn): every craft the land offers is known by someone (a smith near a seam mines it, a mason
+    near rock quarries it), rock holds stone, wild places are known to the households whose trade uses them, and every road opens."""
+    from cybertron2.landgen import gates as G
+    w, c, r = W.generate(spec(households=[2, 2]), people=True)
+    s = G.summary(G.probe(copy.deepcopy(w)))
+    assert not s["shut everywhere"] and not s["crashes"] and not s["roads refused"], s
+    rocks = [p for n in w["nodes"].values() for p in n["parcels"].values() if p["cover"] == "rock"]
+    assert all((p.get("state") or {}).get("quarry") for p in rocks)
+    if any((p.get("state") or {}).get("seam") for p in rocks):
+        assert any("mine" in (a.get("knows") or {}) for a in w["agents"].values())
+    for k, n in w["nodes"].items():
+        if n.get("unexplored"):
+            assert any(k in (a.get("places") or []) for a in w["agents"].values()), k

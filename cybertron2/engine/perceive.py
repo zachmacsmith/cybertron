@@ -88,6 +88,8 @@ def seed_knowledge(w) -> None:
         dist = {home: 0}
         todo = [home]
         hidden = {nid for nid, n in w.s["nodes"].items() if n.get("unexplored") and nid != home}     # D4-47
+        hidden -= set(((w.spec.get("agents") or {}).get(name) or {}).get("places") or [])   # D2-187: unexplored places one knows
+                                                                           # from the start (a smith the hill where the ore is)
         while todo:
             x = todo.pop(0)
             for r in w.s["roads"].values():

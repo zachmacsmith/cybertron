@@ -105,6 +105,7 @@ PER_UNIT = {
 }
 GAME_PER_UNIT = {"managed wood": 1.3, "copse": 0.5, "old forest": 3.5}
 SEAM = {"S": 60, "K": 60}          # copper ore in a seam (region_c's Coppergate size)
+QUARRY_PER_UNIT = 100              # stone in a rock parcel a unit of size (wenbridge's quarry: 200 in a parcel of size 1, finite)
 
 # ---------------------------------------------------------------------- the vocabulary (D2-173; stage 1 §11c)
 WORDS = {
