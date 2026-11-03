@@ -1,0 +1,10 @@
+interventions:
+- id: short_lives
+  at:
+    round: 0
+    phase: round_start
+  op: python
+  args:
+    code: "def apply(k, inst, rs):\n    k.w['life']['dies_at']['Bram'] = 14\n    k.w['life']['dies_at']['Ewan'] = 14\n    k.w['life']['dies_at']['Cela'] = 14\n    k.w['life']['dies_at']['Fay'] = 14\n  \
+      \  k.w['life']['dies_at']['Gil'] = 14\n    k.w['life']['dies_at']['Dara'] = 14\n    return {'focal_dies_at': 14}\n"
+  note: the focal agents leave at the end of round 15
