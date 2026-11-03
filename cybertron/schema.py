@@ -1900,6 +1900,8 @@ OPT_IN = {                                                              # path: 
     "context.failed_banner": ("bool", "", "review 33: the last turn's failed actions head the next turn (\"## FAILED in round N\")"),
     "context.aim_framing": ("bool", "", "review 36 lesson 13: the goal is the agent's aim in the world, not a score: no 'score', "
                             "'game', 'unused actions are wasted' or 'Scientists hold knowledge' wording in the system or turn prompt"),
+    "context.aim_wasted": ("bool", "", "review 39c (scenario_design §3): under aim_framing, the closing nudge keeps 'Any of your N "
+                           "actions you do not use are wasted, and so are unused messages'"),
     "channels.papers": ("bool", "", "review 33: papers instead of a square: submit {paper, text}, publish {submission}, decline "
                         "{submission, reason}; needs channels.v2 (preset: cybertron/specs/fragments/papers.yaml)"),
     "channels.unread_new": ("bool", "", "review 33: pull channels show unread and new-since-last-round counts; headlines skip the "
@@ -1916,7 +1918,7 @@ def _opt_in(spec) -> tuple:
         errs += PS.check(spec)
     elif PS.in_use(spec):
         errs += PS.check(spec)
-    for blk, names in (("context", ("identity", "failed_banner", "aim_framing")), ("channels", ("papers", "unread_new")),
+    for blk, names in (("context", ("identity", "failed_banner", "aim_framing", "aim_wasted")), ("channels", ("papers", "unread_new")),
                        ("agents", ("default_position",))):
         b = spec.get(blk)
         if not isinstance(b, dict) or not any(n in b for n in names):
