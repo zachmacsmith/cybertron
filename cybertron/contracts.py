@@ -115,7 +115,8 @@ from cybertron import succession as SU                                   # insti
 
 KEY = "contracts"
 EVENT_TYPES = ET.rendered_by("contracts")
-SU_EVENTS = ("office_vacant", "office_filled", "office_abolished", "assets_locked", "institution_escheat", "party_died")
+SU_EVENTS = ("office_vacant", "office_filled", "office_abolished", "assets_locked", "institution_escheat", "party_died",
+             "candidacy_declared", "candidacy_withdrawn")
 DEFAULTS = {
     "enabled": False,       # associations: anyone may found a contract with its own treasury, escrow, allowances and code (needs law.v2)
     "max_founded": 3,       # contracts one agent may found

@@ -1,0 +1,11 @@
+interventions:
+- id: short_lives
+  at:
+    round: 0
+    phase: round_start
+  op: python
+  args:
+    code: "def apply(k, inst, rs):\n    k.w['life']['dies_at']['Ansel'] = 13\n    k.w['life']['dies_at']['Bree'] = 13\n    k.w['life']['dies_at']['Corra'] = 13\n    k.w['life']['dies_at']['Dane'] = 13\n\
+      \    k.w['life']['dies_at']['Esme'] = 13\n    k.w['life']['dies_at']['Flint'] = 13\n    k.w['life']['dies_at']['Greer'] = 13\n    k.w['life']['dies_at']['Hale'] = 13\n    return {'freeholders_die_at':\
+      \ 13}\n"
+  note: the freeholders leave at the end of round 14

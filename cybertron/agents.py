@@ -395,6 +395,7 @@ def legacy_actions(inst: dict, a: dict) -> list:
     if not (sp.get("law") or {}).get("v2") or lvl < 2:
         absent |= {"appeal"}                                             # law.v2 (courts v2): appeal exists only in law.v2 worlds
     absent |= {"represent", "withdraw_case"}                             # review 31.07 #7, #9: never in the legacy prompt (frozen)
+    absent |= {"name_office_successor", "declare_candidacy", "withdraw_candidacy"}   # G-32 (review 39c): core-prompt worlds only
     from cybertron import life as LF
     absent |= LF.absent_actions(inst, a)                               # life: only where Life (or mortality) is on
     if not FT.on("contracts", inst):                                    # contracts (P4.3): their actions only when on
@@ -773,6 +774,8 @@ def state_view(k, aid: str) -> str:
         lines += part                                                   # credit, channels, projects ... media2 (features.TAILS order)
     from cybertron import institutions as _IN                              # established worlds: the offices held and their duties
     lines += _IN.office_lines(k, aid)                                    # (institutions.office_control; off: none)
+    from cybertron import succession as _SU                              # G-32: offices filled by declared candidates (none: nothing)
+    lines += _SU.candidacy_lines(k, aid)
     from cybertron import papers as _PP, positions as _PS                # review 33: positions' DUE items, papers' letters (each
     lines += _PS.state_lines(k, aid) + _PP.state_lines(k, aid)           # opt-in; none: nothing)
     return "\n".join(lines)

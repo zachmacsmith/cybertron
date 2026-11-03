@@ -550,6 +550,10 @@ E("assets_locked", "succession", "summary", "public", "event", "contracts", prim
   note="a dissolved institution with nobody to receive its holdings: goods and loans owed frozen, channels read-only")
 E("party_died", "succession", "summary", "public", "event", "contracts", primitive="leave",
   note="a contract member died: its party_death clause (end | estate | heirs) applies")
+E("candidacy_declared", "succession", "summary", "public", "event", "contracts", act="declare_candidacy",
+  note="G-32 (review 39c): a member stands for an office filled by declared candidates (fee paid to the institution): {office, fee, item}")
+E("candidacy_withdrawn", "succession", "summary", "public", "event", "contracts", act="withdraw_candidacy",
+  note="G-32: a member stops standing for an office: {office}")
 
 # subsistence (cybertron/subsistence.py, review 15 S1-S3; only with subsistence on)
 E("hunger", "subsistence", "record", "monitor", "silent", None, primitive="hunger",

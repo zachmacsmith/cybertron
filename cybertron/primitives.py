@@ -924,6 +924,8 @@ ACTION_PRIMITIVES = {
     "propose": ("propose",), "vote": ("cast_vote",), "veto": ("veto",), "name_successor": ("name_successor",), "patch": ("amend",),
     "amend": ("propose",),                                               # law.v2 (P3.4): the amend primitive applies when it passes
     "rule": ("rule",),
+    # G-32 (review 39c): candidacy is succession state (unrouted); the fee is a move
+    "declare_candidacy": ("move",), "withdraw_candidacy": OUTPUT, "name_office_successor": ("name_successor",),
     # force
     "forge": ("convert", "destroy"), "fortify": ("fortify",), "craft": ("convert",), "watch": ("fortify",), "attack": ("attack", "end_life"), "forge_dm": ("dm", "move"),
     # lineage

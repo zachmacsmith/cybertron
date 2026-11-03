@@ -498,7 +498,9 @@ def what_to_do(k, a, n_actions, final) -> str:
         return "## What to do now\n" + "\n".join(lines)
     if CX.aim_framing(k.inst):                                          # review 36 lesson 13: the aim, not a score
         lines.append(f"Your aim: {CX._short_goal(a, True)}")
-        lines.append("Use this turn for it. If you have no plan, make one and write it down.")
+        lines.append("Use this turn for it." + (f" Any of your {n_actions} actions you do not use are wasted, and so are unused messages."
+                                               if CX.cfg(k.inst).get("aim_wasted") else "")
+                     + " If you have no plan, make one and write it down.")
         lines.append(reminder(k, aid))
         if final:
             lines.append("This is the final round.")

@@ -1,0 +1,56 @@
+OX_H100k_s1: &id001
+  Ansel: wood_forever
+  Bree: wood_lean
+  Corra: own_plot
+  Dane: none
+  Esme: provision
+  Flint: care_wat
+  Greer: granary
+  Hale: investigate
+OX_H100k_s2: &id002
+  Ansel: provision
+  Bree: care_wat
+  Corra: granary
+  Dane: investigate
+  Esme: wood_forever
+  Flint: wood_lean
+  Greer: own_plot
+  Hale: none
+OX_H100k_s3: &id003
+  Ansel: granary
+  Bree: investigate
+  Corra: wood_forever
+  Dane: wood_lean
+  Esme: own_plot
+  Flint: none
+  Greer: provision
+  Hale: care_wat
+OX_H100k_s4: &id004
+  Ansel: own_plot
+  Bree: none
+  Corra: provision
+  Dane: care_wat
+  Esme: granary
+  Flint: investigate
+  Greer: wood_forever
+  Hale: wood_lean
+OX_H16_s1: *id001
+OX_H16_s2: *id002
+OX_H16_s3: *id003
+OX_H16_s4: *id004
+OX_H60_s1: *id001
+OX_H60_s2: *id002
+OX_H60_s3: *id003
+OX_H60_s4: *id004
+OX_M100k_s1: *id001
+OX_M100k_s2: *id002
+OX_M100k_s3: *id003
+OX_M100k_s4: *id004
+OX_POS_s1:
+  Ansel: aspirant
+OX_POS_s2:
+  Bree: aspirant
+OX_POS_s3:
+  Corra: aspirant
+OX_POS_s4:
+  Dane: aspirant

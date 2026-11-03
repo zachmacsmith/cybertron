@@ -71,7 +71,8 @@ ACT_RULES = ("election", "receiver", "none")                         # the Succe
 CAUSES = ("death", "exit", "expelled", "term", "removed")
 ESCHEAT = ("polity", "family", "members", "lock")                    # the Dissolution and Escheat Act's TO (lock: the residual)
 PARTY_DEATH = ("end", "estate", "heirs")
-RULE_PARAMS = {"designation": (), "hereditary": ("order",), "election": ("closes_in", "electorate"), "cooptation": ("closes_in", "electorate"),
+RULE_PARAMS = {"designation": (), "hereditary": ("order",), "election": ("closes_in", "electorate", "candidacy", "fee", "fee_item"),
+               "cooptation": ("closes_in", "electorate", "candidacy", "fee", "fee_item"),
                "seniority": ("among",), "lot": (), "none": ()}
 SUCCESSION_ACT = "Succession Act"
 ESCHEAT_ACT = "Dissolution and Escheat Act"
@@ -117,6 +118,10 @@ def check_clause(name, v) -> dict:
         raise L.LawError(f"offices.{name}.succession.among: members or officers")
     if "electorate" in v and not (isinstance(v["electorate"], str) and 0 < len(v["electorate"]) <= 64):
         raise L.LawError(f"offices.{name}.succession.electorate: the right whose holders vote (e.g. vote, or J0.council)")
+    if "candidacy" in v and v["candidacy"] not in ("declared",):
+        raise L.LawError(f"offices.{name}.succession.candidacy: \"declared\" (only members who declare a candidacy stand)")
+    if "fee" in v and (isinstance(v["fee"], bool) or not isinstance(v["fee"], (int, float)) or v["fee"] < 0):
+        raise L.LawError(f"offices.{name}.succession.fee: a number of {v.get('fee_item', 'penny')} to declare a candidacy")
     if "closes_in" in v:
         c = v["closes_in"]
         if isinstance(c, bool) or not isinstance(c, int) or not 1 <= c <= 5:
@@ -381,6 +386,20 @@ def choose(k, vac, clause, node) -> tuple:
         kids = sorted((c for c in LF.children(k, frm) if ok(c)), key=lambda c: (_born(k, c), c))
         if kids:
             out = kids[:max(1, _free(k, iid, name, o))] if clause.get("order") == "partition" else kids[:1]
+    elif rule in ("election", "cooptation") and clause.get("candidacy") == "declared":
+        cands = [a for a in declared(k, f"{iid}.{name}") if ok(a)]      # G-32: only declared candidates stand
+        voters = _electorate(k, iid, rule, clause.get("electorate"))
+        if not cands:
+            if vac["cause"] == "term" and ok(frm):                       # nobody stood: the holder stays for another term
+                return [frm], "unopposed"
+            return [], rule                                             # vacant; retried every round until someone declares
+        if len(cands) == 1 or not voters:
+            out = cands[:1]
+        else:
+            lid = o["law"]
+            bid = k.open_ballot(f"Elect the {o['title']} of {iid} (vacant: {frm}, {vac['cause']})", voters, cands, "plurality",
+                                int(clause.get("closes_in", 1)), None, None, lid)
+            return [], f"ballot:{bid}"
     elif rule in ("election", "cooptation"):
         cands = cands_()
         voters = _electorate(k, iid, rule, clause.get("electorate"))
@@ -422,6 +441,9 @@ def fill(k, vac, successors, rule, source) -> list:
             k.log("office_filled", s, {"institution": iid, "office": name, "right": f"{iid}.{name}", "successor": s, "rule": rule,
                                       "source": source, "from": vac["from"]}, vis="public")
             k.notify(s, f"You now hold the office {iid}.{name} ({rule}; it was {vac['from']}'s).")
+            c = state(k).get("candidates", {}).get(f"{iid}.{name}")
+            if c and s in c:                                            # a winner's candidacy is spent
+                c.remove(s)
     return got
 
 
@@ -444,6 +466,8 @@ def _settle(k, i, vac) -> None:
                                           "right": f"{vac['institution']}.{vac['office']}", "successor": s, "rule": "law",
                                           "source": "law", "from": vac["from"]}, vis="public")
             return
+    if clause.get("candidacy") == "declared":                           # G-32: one election for every open seat of the office
+        return _settle_declared(k, vac, o, clause, src)
     if _free(k, vac["institution"], vac["office"], o) <= 0 or len(IN.holders(k, vac["institution"], vac["office"])) > vac["left"]:
         vac["status"] = "closed"                                        # no seat free, or filled meanwhile (a law's grant)
         return
@@ -459,6 +483,74 @@ def _settle(k, i, vac) -> None:
     vac["rule"] = clause["rule"]
 
 
+def _group_fill(k, st, group, winners, rule, src) -> list:
+    """Fill the group's vacancies in order with winners; the rest are returned."""
+    left = list(group)
+    for w in winners:
+        if not left:
+            break
+        j = left[0]
+        if fill(k, st["vacancies"][j], [w], rule, src):
+            st["vacancies"][j]["status"] = "filled"
+            left.pop(0)
+    return left
+
+
+def _settle_declared(k, vac, o, clause, src) -> None:
+    """G-32: every open vacancy of this office is settled together. Declared, eligible candidates up to the number of seats take
+    them at once; more candidates than seats: one ballot (plurality for one seat, approval_top<n> for n). A seat nobody stands for:
+    a holder whose term ended stays; otherwise it stays vacant and is retried each round. Candidacies expire once every seat of the
+    election is filled, so each election is a fresh decision to stand."""
+    iid, name = vac["institution"], vac["office"]
+    right = f"{iid}.{name}"
+    st = state(k)
+    group = [j for j, v in enumerate(st["vacancies"]) if v["institution"] == iid and v["office"] == name
+             and v["status"] in ("open", "vacant")]
+    free = _free(k, iid, name, o)
+    for j in group[free:]:
+        st["vacancies"][j]["status"] = "closed"                         # more vacancies than free seats (a law filled one)
+    group = group[:free]
+    if not group:
+        return
+    cands = [a for a in declared(k, right) if eligible(k, iid, name, a)]
+    voters = _electorate(k, iid, clause["rule"], clause.get("electorate"))
+    n = len(group)
+    if len(cands) > n and voters:
+        bid = k.open_ballot(f"Elect {'the ' + o['title'] if n == 1 else str(n) + ' ' + o['title'] + 's'} of {iid} from the declared "
+                            f"candidates" + (f" (choose up to {n} names)" if n > 1 else ""), voters, cands,
+                            "plurality" if n == 1 else f"approval_top{n}", int(clause.get("closes_in", 1)), None, None, o["law"])
+        for j in group:
+            st["vacancies"][j]["status"] = "election"
+            st["vacancies"][j]["hooked"] = True
+        st["elections"][bid] = group
+        return
+    left = _group_fill(k, st, group, cands, "election", src)
+    if left:
+        _leftover(k, st, left, clause, src)
+    else:
+        expire(k, right)
+
+
+def _leftover(k, st, left, clause, src) -> None:
+    """Seats nobody won: a term-ended holder who is not a candidate stays; else the seat is vacant (retried each round).
+    Candidacies for the office expire once no seat is left vacant."""
+    still = 0
+    right = None
+    for j in left:
+        v = st["vacancies"][j]
+        right = f"{v['institution']}.{v['office']}"
+        if v["cause"] == "term" and eligible(k, v["institution"], v["office"], v["from"]) \
+                and v["from"] not in declared(k, right) and fill(k, v, [v["from"]], "unopposed", src):
+            v["status"] = "filled"
+        else:
+            v["status"] = "vacant"
+            v["rule"] = clause["rule"]
+            v["hooked"] = True
+            still += 1
+    if right and not still:
+        expire(k, right)
+
+
 def elections(k) -> None:
     """Ballots of succession elections that closed this round: the winner takes the office; no winner, the vacancy reopens."""
     st = state(k)
@@ -467,6 +559,22 @@ def elections(k) -> None:
         if b is None or b["status"] != "closed":
             continue
         del st["elections"][bid]
+        if isinstance(i, list):                                         # G-32: a declared-candidacy election for several seats
+            v0 = st["vacancies"][i[0]]
+            o = _office(k, v0["institution"], v0["office"])
+            res = b.get("result")
+            res = [x for x in (res if isinstance(res, list) else [res]) if isinstance(x, str)]
+            if o is None:
+                continue
+            src = rule_for(k, v0["institution"], o)[0]
+            winners = [x for x in res if eligible(k, v0["institution"], v0["office"], x)]
+            left = _group_fill(k, st, i, winners, "election", src)
+            for j in left:                                               # seats without a winner: a new ballot next round
+                st["vacancies"][j]["status"] = "open"
+                st["vacancies"][j]["hooked"] = True
+            if not left:
+                expire(k, f"{v0['institution']}.{v0['office']}")
+            continue
         vac = st["vacancies"][i]
         res = b.get("result")
         res = res[0] if isinstance(res, list) and res else res
@@ -494,6 +602,106 @@ def end_round(k) -> None:
                 _settle(k, i, vac)
 
 
+# ---------------------------------------------------------------------- G-32: opt-in candidacy (review 39c)
+def _clause_of(k, iid, name):
+    o = _office(k, iid, name)
+    return o, ((o or {}).get("succession") or {})
+
+
+def declared(k, right) -> list:
+    """The living members who declared a candidacy for right ("<iid>.<office>"), in the order they declared."""
+    c = (k.w.get(KEY) or {}).get("candidates", {}).get(right) or []
+    return [a for a in c if _alive(k, a)]
+
+
+def expire(k, right) -> None:
+    """Every candidacy for right ends (after its election is fully settled)."""
+    c = (k.w.get(KEY) or {}).get("candidates", {})
+    if c.get(right):
+        c[right] = []
+
+
+def candidacy_offices(k) -> list:
+    """(iid, name, office record, clause) of every office filled by declared candidates."""
+    from cybertron import institutions as IN
+    out = []
+    for iid, offs in (k.w.get(IN.OFFICES) or {}).items():
+        if IN.status(k, iid) == "dissolved":
+            continue
+        for name, o in offs.items():
+            cl = o.get("succession") or {}
+            if cl.get("candidacy") == "declared":
+                out.append((iid, name, o, cl))
+    return out
+
+
+def _may_stand(k, iid, name, aid) -> bool:
+    """Eligible now, or a holder whose term ends (it may stand again)."""
+    from cybertron import institutions as IN
+    if eligible(k, iid, name, aid):
+        return True
+    o = _office(k, iid, name) or {}
+    return _alive(k, aid) and IN.is_member(k, iid, aid) and any(h["holder"] == aid and h.get("term_end") is not None
+                                                                for h in o.get("holders") or ())
+
+
+def declare_candidacy(k, aid, office) -> str:
+    """aid stands for office (an election or cooptation with candidacy "declared"), paying the clause's fee into the
+    institution's treasury. Public: everyone sees who stands."""
+    from cybertron import lawlang as L
+    from cybertron import actions as A
+    right = str(office or "")
+    iid, _, name = right.partition(".")
+    o, cl = _clause_of(k, iid, name)
+    if o is None:
+        raise L.LawError(f"no office {right!r} (an office is \"<institution>.<office>\")")
+    if cl.get("candidacy") != "declared":
+        raise L.LawError(f"{right} is not filled by declared candidates")
+    if aid in declared(k, right):
+        raise L.LawError(f"you already stand for {right}")
+    if not _may_stand(k, iid, name, aid):
+        raise L.LawError(f"you may not stand for {right} (you must be a member of {iid} and not already hold it)")
+    fee, item = float(cl.get("fee") or 0), cl.get("fee_item", "penny")
+    if fee > 0:
+        A.pay_institution(k, aid, iid, item, fee, memo=f"candidacy fee: {right}")
+    state(k).setdefault("candidates", {}).setdefault(right, []).append(aid)
+    k.log("candidacy_declared", aid, {"office": right, "fee": fee, "item": item}, vis="public")
+    others = [a for a in declared(k, right) if a != aid]
+    return (f"You stand for {right}" + (f" (fee {fee:g} {item} paid to {iid})" if fee > 0 else "") + ". "
+            + (f"Also standing: {', '.join(others)}." if others else "Nobody else stands yet."))
+
+
+def withdraw_candidacy(k, aid, office) -> str:
+    from cybertron import lawlang as L
+    right = str(office or "")
+    c = (k.w.get(KEY) or {}).get("candidates", {}).get(right) or []
+    if aid not in c:
+        raise L.LawError(f"you do not stand for {right}")
+    c.remove(aid)
+    k.log("candidacy_withdrawn", aid, {"office": right}, vis="public")
+    return f"You no longer stand for {right} (the fee is not returned)."
+
+
+def candidacy_lines(k, aid) -> list:
+    """State lines: the offices filled by declared candidates, when their terms end, the fee, and who stands."""
+    if not on(k):
+        return []
+    out = []
+    for iid, name, o, cl in candidacy_offices(k):
+        right = f"{iid}.{name}"
+        ends = sorted({int(h["term_end"]) + 1 for h in o.get("holders") or () if h.get("term_end") is not None})
+        holders = [h["holder"] for h in o.get("holders") or ()]
+        when = (f"terms end after round {ends[0]}" if ends else
+                ("vacant now" if not holders else "filled when a holder leaves"))
+        who = declared(k, right)
+        fee = float(cl.get("fee") or 0)
+        mine = " You stand." if aid in who else ""
+        out.append(f"Office {right} ({o.get('title') or name}; held by {', '.join(holders) or 'nobody'}; {when}): only declared "
+                   f"candidates stand (declare_candidacy" + (f", fee {fee:g} {cl.get('fee_item', 'penny')}" if fee else "")
+                   + f"); standing: {', '.join(who) or 'nobody'}." + mine)
+    return out
+
+
 # ---------------------------------------------------------------------- designation (name_successor generalised)
 def designate(k, aid, office, agent) -> str:
     """aid names who succeeds it in an office it holds (the designation rule reads it; the latest naming counts). Private."""
@@ -513,6 +721,17 @@ def designate(k, aid, office, agent) -> str:
     rule = (IN.office(k, iid, name).get("succession") or {}).get("rule")
     return (f"{agent} is now your named successor as {right} (private)."
             + ("" if rule == "designation" else f" Note: {right}'s succession rule is {rule or 'set by polity law'}, not designation."))
+
+
+def act_name_successor(k, aid, office=None, agent=None) -> str:
+    """name_office_successor: designate for an office aid holds (office may be left out if it holds exactly one)."""
+    from cybertron import lawlang as L
+    held = held_offices(k, aid)
+    if office is None:
+        if len(held) != 1:
+            raise L.LawError("say which office: " + (", ".join(held) or "you hold none"))
+        office = held[0]
+    return designate(k, aid, office, agent)
 
 
 def held_offices(k, aid) -> list:
@@ -638,6 +857,10 @@ def render_event(k, e, tag, viewer=None):
         return f"{tag} The office {d['right']} is vacant ({d['from']}: {d['cause']})."
     if t == "office_filled":
         return f"{tag} {d['successor']} now holds {d['right']} ({d['rule']})."
+    if t == "candidacy_declared":
+        return f"{tag} {e.get('agent')} stands for {d['office']}."
+    if t == "candidacy_withdrawn":
+        return f"{tag} {e.get('agent')} no longer stands for {d['office']}."
     if t == "office_abolished":
         return f"{tag} The office {d['right']} is abolished (its law {d['law']} ended)."
     if t == "assets_locked":

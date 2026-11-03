@@ -826,6 +826,9 @@ def act_post(k, aid, text, channel=None, **kw):
                     raise _err("there is no square: public speech goes through the papers (" + (", ".join(PP.papers(k)) or "none")
                                + "): submit {\"paper\": \"<id>\", \"text\": \"...\"}, or post {\"channel\": \"<id>\", \"text\": \"...\"} in a "
                                "channel you may write in")
+                if not sq:                                              # no square at all (review 39c: channels only)
+                    raise _err("there is no square here: post in a channel you may write in (post {\"channel\": \"<id>\", "
+                               "\"text\": \"...\"}; read {} lists them; open_channel opens your own), or send private messages")
                 raise _err("name the square to post in (\"channel\"): " + (", ".join(mine) or "you are at no camp's square"))
             channel = mine[0]
         elif channel in (None, ""):

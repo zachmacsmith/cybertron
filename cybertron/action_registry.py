@@ -65,7 +65,8 @@ NICHE_PHRASE = {"your role": "use your role's other tools", "camps": "survey, im
                 "courts": "go to court or call the Fixer", "force, more": "guard others, join attacks, hire the assassin or buy initiative",
                 "inheritance": "decide your inheritance or copy an agent", "groups": "run private groups",
                 "channels": "open, change, join or leave channels", "powers": "use a word of power or an action a law defined",
-                "directories": "move, delete or share files in your directories"}
+                "directories": "move, delete or share files in your directories",
+                "offices": "stand for an office or name your successor in one"}
 UNIVERSAL_RIGHTS = ()                                                   # rights everyone holds (none at present): never an edge
 CATEGORIES = ("productive", "economic", "political", "talk")           # activity categories, in scorer.CATEGORIES' key order
 MODULES = ("core", "context", "camps", "credit", "projects", "outside", "mortality", "life", "roles", "conflict", "jurisdictions",
@@ -603,9 +604,32 @@ R("vote", "decide a ballot", "POLITICS", core=True, needs=("level:1",), when=_k_
 R("veto", "block a structural law (Board)", "POLITICS", core=True, needs=("cls:board", "right:veto"),
   handler="actions:_veto", module="core", category="political", emits=("veto_vote",),
   doc='veto {"law": "L4"}: Board only, during a law\'s veto window')
+def _k_name_successor(inst, k, a, rights) -> bool:
+    """Any office held where institutions.succession is on (D-38): name_successor itself stays the Board's."""
+    from cybertron import succession as SU
+    return SU.on(k) and bool(SU.held_offices(k, a["id"]))
+
+
+def _k_candidacy(inst, k, a, rights) -> bool:
+    from cybertron import succession as SU
+    return SU.on(k) and bool(SU.candidacy_offices(k))
+
+
 R("name_successor", "choose who takes your Board seat", "POLITICS", core=True, needs=("cls:board", "mod:mortality", "right:veto"),
   handler="mortality:name_successor", module="mortality", category="political", emits=("successor_named",), aliases={"name": "agent", "successor": "agent", "to": "agent", "target": "agent"},
   doc='name_successor {"agent": "Name"}: Board only; the agent (not on the Board) who takes your seat when you leave the game (the latest naming counts; private unless a law makes namings public)')
+R("name_office_successor", "name who succeeds you in an office", "offices", core=False, needs=("flag:institutions.succession",),
+  when=_k_name_successor, handler="succession:act_name_successor", module="core", category="political", emits=(),
+  aliases={"name": "agent", "successor": "agent", "to": "agent", "target": "agent", "right": "office"},
+  doc='name_office_successor {"office": "J0.keeper", "agent": "Name"}: name who takes an office you hold when you leave it (used where its succession rule is designation; the latest naming counts; private)')
+R("declare_candidacy", "stand for an office", "offices", core=False, needs=("flag:institutions.succession",), when=_k_candidacy,
+  handler="succession:declare_candidacy", module="core", category="political", emits=("candidacy_declared",),
+  aliases={"right": "office", "seat": "office", "position": "office"},
+  doc='declare_candidacy {"office": "J0.council"}: stand for an office filled by declared candidates (your state lists them, with any fee); only those who declare are on the ballot')
+R("withdraw_candidacy", "stop standing for an office", "offices", core=False, needs=("flag:institutions.succession",), when=_k_candidacy,
+  handler="succession:withdraw_candidacy", module="core", category="political", emits=("candidacy_withdrawn",),
+  aliases={"right": "office", "seat": "office", "position": "office"},
+  doc='withdraw_candidacy {"office": "J0.council"}: stop standing (the fee is not returned)')
 R("patch", "fix a law to its intent (Fixer)", "POLITICS", core=True, needs=("right:patch",),
   handler="actions:_patch", module="core", category="political", emits=("patch_submitted",),
   doc='patch {"law": "L4", "code": "...", "reason": "..."}: Fixer only')
@@ -1088,7 +1112,7 @@ def core_surface(spec) -> tuple:
     if DR.enabled(spec):                                               # a world with directories (a chronicle): their verbs
         out = out + tuple(a for a in DR.ACTIONS + (DR.DOC.ACTIONS if DR.DOC.on(spec) else ()) if a not in out)
     if ((spec or {}).get("institutions") or {}).get("succession"):     # D-38: office holders name successors
-        out = out + ("name_successor",)
+        out = out + ("name_successor", "name_office_successor", "declare_candidacy", "withdraw_candidacy")
     return out
 
 
@@ -1118,7 +1142,7 @@ ACTIONS_ORDER = (
     "harvest", "run_python", "post", "dm", "transfer", "deposit", "redeem", "propose", "vote", "veto", "patch", "amend", "request_fix",
     "invoke", "accuse", "respond", "rule", "read_archive", "search_archive", "write_archive", "publish", "write_digest", "report",
     "create_channel", "channel_post", "add_member", "remove_member", "close_channel", "anon_post", "set_dm_limit", "lend",
-    "accept_loan", "repay_loan", "extend_loan", "contribute", "pay_tribute", "reply", "forge_dm", "bequest", "name_successor",
+    "accept_loan", "repay_loan", "extend_loan", "contribute", "pay_tribute", "reply", "forge_dm", "bequest", "name_successor", "name_office_successor", "declare_candidacy", "withdraw_candidacy",
     "commission", "create_agent", "copy_agent", "manual", "manual_search", "search_board", "search_dms", "recent", "read_law",
     "preview_law",
     "read_file", "write_scratchpad", "write_file", "rename_file", "share_file", "delete_file", "pin", "unpin", "lease",
@@ -1145,7 +1169,7 @@ DOC_ORDER = (
     "write_digest", "report", "create_channel", "channel_post", "add_member", "remove_member", "close_channel", "anon_post", "lend",
     "accept_loan", "repay_loan", "extend_loan", "set_dm_limit", "contribute", "pay_tribute", "manual", "manual_search",
     "search_board", "read_law", "preview_law", "recent", "search_dms", "read_file", "write_scratchpad", "write_file", "rename_file", "share_file",
-    "delete_file", "pin", "unpin", "lease", "accept_lease", "survey", "invest", "bequest", "name_successor", "commission",
+    "delete_file", "pin", "unpin", "lease", "accept_lease", "survey", "invest", "bequest", "name_successor", "name_office_successor", "declare_candidacy", "withdraw_candidacy", "commission",
     "create_agent", "copy_agent", "attack", "join_attack", "forge", "fortify", "guard", "buy_initiative", "contract", "found",
     "fund", "set_charter", "invite", "join", "leave", "declare", "subscribe", "unsubscribe", "set_subscription_fee",
     "write_edition", "buy_placement", "run_placement", "leak", "poll", "answer_poll", "send_subscriber_list", "revoke_licence",

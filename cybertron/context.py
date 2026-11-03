@@ -1680,7 +1680,9 @@ def closing_block(k, a, n_actions, final) -> str:
         return sit + "\n\n" + nudge + ("\nThis is the final round." if final else "")
     if aim_framing(k.inst):                                             # review 36 lesson 13: the aim, not a score
         nudge = (f"## Before you act\nYour aim: {_short_goal(a, True)}\n"
-                 "Use this turn for it. If you have no plan, make one and write it down.\n" + memory_reminder(mem, scholar))
+                 "Use this turn for it." + (f" Any of your {n_actions} actions you do not use are wasted, and so are unused messages."
+                                           if cfg(k.inst).get("aim_wasted") else "")
+                 + " If you have no plan, make one and write it down.\n" + memory_reminder(mem, scholar))
         return sit + "\n\n" + nudge + ("\nThis is the final round." if final else "")
     nudge = (f"## Before you act\nYour goal: {_short_goal(a, True)}\n"
              f"Use this turn for it. Any of your {n_actions} actions you do not use are wasted, and so are unused messages. Think "
