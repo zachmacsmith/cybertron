@@ -82,9 +82,10 @@ Cost for all seven: $6.26.
    - **Fixed** in signs.py to the spec's value, with a test (test_cybertron2_sign_bundles.py). It makes the code match a rule already
      decided, so there is no new decision. The other herd rows (calves kicking 0.06, cows heavy with milk 0.10, the bull 0.12) are
      details with a lower base, as the guide allows, and are unchanged.
+   - **Next door raised** (D4-98, Zach): presence next door 0.1 → 0.3, so the herd is seen from the Green about 0.29 a day.
    - **Still open** (OPEN.md L-63): the place's layout names a crop but not a herd, though it lists "herd, slaughter" among what one
-     can do on Croft Pasture. And presence next door is 0.1, so a herd beside the Green is seen about 1 day in 10 from there.
-   - The seven runs were made before the fix. The untold run should be rerun to test whether they notice the cattle.
+     can do on Croft Pasture.
+   - The seven runs were made before the fix. All seven were rerun with the row fixed and next door still 0.1 (runs/gp_food2_*).
 2. **A household member could accept their own household's offer:** "Edith accepted Hugh's offer O8: work 2 days; 20 grain.
    Agreement A50 stays open: Ashby works 2 days for Ashby". It should be refused.
 

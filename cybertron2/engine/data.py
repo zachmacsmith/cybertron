@@ -612,8 +612,9 @@ EVENT_EXTENT = {
 }
 
 NOTICING = {
-    # presence: where the observer was and what it did, by what its work draws on (D2-85); passing through 0.3, next door 0.1 (D2-115)
-    "presence": {"game": 1.0, "plants": 0.7, "herd": 0.5, "work": 0.5, "about": 0.5, "crossing": 0.3, "next door": 0.1,
+    # presence: where the observer was and what it did, by what its work draws on (D2-85); passing through 0.3 (D2-115), next door 0.3
+    # (D4-98: was 0.1; a herd on the pasture beside one's house was seen about 1 day in 10)
+    "presence": {"game": 1.0, "plants": 0.7, "herd": 0.5, "work": 0.5, "about": 0.5, "crossing": 0.3, "next door": 0.3,
                  "elsewhere": 0.05, "road": 1.0},
     "next_door_min": 0.5,                                           # only things this conspicuous are seen from next door
     "elsewhere_min": 0.8,                                           # only things this conspicuous are seen from elsewhere at the node

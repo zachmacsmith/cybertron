@@ -36,7 +36,7 @@ kept apart from the change it signals.
   | the day | the beast going down, its blood over one's hands | touch | 2.0, the doer only | 1.0 for the doer |
   | the day, a herd still there | the herd uneasy at the smell of blood | sight | 0.38, herder's knack | 0.19 / 0 / 0 |
   | the day, a dog kept at the place | the dogs wild at the smell of blood (at the dog's house) | sound | 1.0 | by steps from the house |
-  | the day and the next | crows and kites over the leavings | sight | 0.9 | 0.45 / 0.09 / 0.05 (fog 0.14) |
+  | the day and the next | crows and kites over the leavings | sight | 0.9 | 0.45 / 0.27 / 0.05 (fog 0.14) |
   | the day and the next, snow lying | blood in the snow | sight | 0.9, near | 0.9 / 0 / 0 |
   | the next day, no snow | blood soaked into the ground (flies, if not frost) | sight | 0.8, near | 0.8 / 0 / 0 |
   | the next day, not frost | the smell of old blood and offal | smell | 0.6, near | 0.6 / 0 / 0 |
@@ -80,4 +80,4 @@ Per sign: day, place, sense, text, salience, what it bears on.
 
 devlog 37.4 #6; 38.04 §3.
 
-*Current as of 2 Nov 2026: D4-6, D4-35, D4-71, D4-72, D4-74, D4-75.*
+*Current as of 3 Nov 2026: D4-6, D4-35, D4-71, D4-72, D4-74, D4-75, D4-98 (next door 0.3).*

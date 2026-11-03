@@ -60,7 +60,7 @@ def test_a_body_in_the_open_is_seen_by_one_working_there_far_more_than_one_in_th
     assert do(w, "Edric", do="work", what="weed", at="Long Field").startswith("You weeded")
     open_ = TH.chance(w, "Edric", w.s["containers"][_body(w, "long_field")])
     wood = TH.chance(w, "Edric", w.s["containers"][_body(w, "alder_copse")])
-    assert open_ > 5 * wood                                                       # (the barley standing high halves the field's sight)
+    assert open_ > 2 * wood                     # (the barley standing high halves the field's sight; next door 0.3, D4-98)
 
 
 def test_hiding_untaught_is_twice_as_easy_to_see_and_a_buried_pack_is_almost_never_seen():

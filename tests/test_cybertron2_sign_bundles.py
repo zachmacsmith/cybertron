@@ -279,4 +279,4 @@ def test_a_herd_is_plain_to_those_with_it_and_seen_now_and_then_from_next_door()
     assert PC.chance_of(w, "Thomas", seen, focus=6.0) == 1.0                          # worked with: seen
     w.s["today"]["worked"] = {"Hugh": ["hf_green"]}
     w.s["today"]["route"] = {"Hugh": ["hf_green"]}
-    assert 0.05 < PC.chance_of(w, "Hugh", seen) < 0.2                                # next door: now and then
+    assert 0.2 < PC.chance_of(w, "Hugh", seen) < 0.4                                 # next door: most days in a week (D4-98)

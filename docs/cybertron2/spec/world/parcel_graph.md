@@ -39,7 +39,7 @@ Presence for the noticing rule (information/noticing.md):
 |---|---|
 | the one it works in | by its activity (hunting 1.0, foraging 0.7, herding 0.5, fixed work 0.5) |
 | each one on its route that it does not work (below) | crossing, 0.3 |
-| each one next to where it works | 0.1, for things of own conspicuousness 0.5 or more |
+| each one next to where it works | 0.3, for things of own conspicuousness 0.5 or more (D4-98) |
 | anywhere else at the node | 0.05, for things of 0.8 or more |
 
 **The route (D4-62):** one chain in the order of its acts: from where it slept (its house's parcel at this node, else the built
@@ -65,7 +65,8 @@ Per parcel: its neighbours (as now), side, height.
 
 | Parameter | Value | Status |
 |---|---|---|
-| presence along the way and next door | above | proposed; calibrate |
+| presence along the way | above | proposed; calibrate |
+| presence next door | 0.3 (D4-98) | decided; calibrate |
 | the arrival overview | 3 to 5 lines | proposed |
 
 ## What agents see
@@ -80,4 +81,4 @@ Per parcel: its neighbours (as now), side, height.
 
 [proposals/parcel_graph.md](../../proposals/parcel_graph.md); cybertron2/engine/world.py (`adj`).
 
-*Current as of 24 Oct 2026: D2-114, D2-115, D2-116, D4-62.*
+*Current as of 3 Nov 2026: D2-114, D2-115, D2-116, D4-62, D4-98.*

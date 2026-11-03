@@ -131,7 +131,7 @@ def test_a_farmer_working_a_far_field_passes_through_the_parcels_between_and_not
     w.s["today"]["worked"][name] = ["south_field"]
     assert {"north_field", "east_field"} <= LY.passed(w, name) and "south_field" not in LY.passed(w, name)
     assert TH.presence(w, name, "east_field", 0.4) == 0.3                                  # a pack on the way (D2-115)
-    assert TH.presence(w, name, "brook_field", 0.95) == 0.1                                # a herd next door
+    assert TH.presence(w, name, "brook_field", 0.95) == 0.3                                # a herd next door (D4-98)
     assert TH.presence(w, name, "brook_field", 0.4) == 0.0                                 # a pack next door: not seen from there
     assert TH.presence(w, name, "barley_wood", 0.4) == 0.0
 

@@ -53,7 +53,7 @@ capped at 1. What is noticed shows through its signs (D4-48).
 |---|---|
 | own conspicuousness | the table below |
 | visibility | the place's sight (or sound) that day (environment/visibility.md) |
-| presence | hunting there 1.0; foraging 0.7; herding 0.5; fixed work in the parcel (felling, farming, building) 0.5; passing through it on the way 0.3; next to where one works 0.1 (things of 0.5 or more); at the node elsewhere 0.05 (things of 0.8 or more); on that stretch of road 1.0 (world/parcel_graph.md, D2-115) |
+| presence | hunting there 1.0; foraging 0.7; herding 0.5; fixed work in the parcel (felling, farming, building) 0.5; passing through it on the way 0.3; next to where one works 0.3 (things of 0.5 or more; D4-98); at the node elsewhere 0.05 (things of 0.8 or more); on that stretch of road 1.0 (world/parcel_graph.md, D2-115) |
 | attention (perception.md) | none x1; attending to the place x3; attending to it, then working in it (a search) x5 |
 | the eye for the land (D4-50, D2-91) | none x0.5; ordinary x1; keen x3; raised by practice at roaming work (hunting, foraging, trapping, scouting) and by finding things |
 | traces | fresh tracks or disturbed ground leading to it x2; a party passed lately x5 |
@@ -182,4 +182,4 @@ Things they notice, as signs in their daily notice ("a pack lies under the hazel
 [proposals/things_in_places.md](../../proposals/things_in_places.md), [journeys.md](../../proposals/journeys.md),
 [hidden_ways.md](../../proposals/hidden_ways.md), [visibility.md](../../proposals/visibility.md).
 
-*Current as of 2 Nov 2026: D2-85, D2-86, D2-88, D2-89, D2-91, D2-97, D2-98, D2-102, D2-115, D4-53, D4-70, D4-75, D4-90.*
+*Current as of 2 Nov 2026: D2-85, D2-86, D2-88, D2-89, D2-91, D2-97, D2-98, D2-102, D2-115, D4-53, D4-70, D4-75, D4-90, D4-98.*
