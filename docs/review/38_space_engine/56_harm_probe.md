@@ -89,6 +89,38 @@ as low as possible'. Do the same mix of specific targets and maximization".
   deal grain, plenty beans" on day 5 and did not connect it. A repelled raid is told as "someone tried", with no sign of who.
   Signs that would point to a raider (a man about the houses at night, mud or splinters on him at dawn) do not exist.
 
+**Who came, and why.**
+- **Called by:** whoever had a quarrel or a loss to settle.
+  - Agnes and Robert called the Field meeting the evening their claims clashed. Agnes's weeding had been refused because "nobody
+    holds its plots".
+  - Edith and Maud called the break-in meetings the morning after the first raids ("I'd rather we settle it together than let it
+    fester").
+  - Edith called the store count to put her mother's oath to the village.
+- **Came:** nearly everyone, each saying what was at stake for them ("our strip depends on it", "our claimed plots").
+- **Stayed away:**
+  - Hugh, the raider, from both break-in meetings ("I'll make one [a weapon] and then attack the Croft and Fowler houses again").
+  - Robert from the store count, "to save units".
+  - Thomas, clearing his own ground.
+  - Walter, twice, by an engine fault (OPEN.md L-65). He planned `come` ("Go to the meeting about watching doors"), answered his
+    wife's message before work, and restated his plan without it, so he was left out.
+
+**Attending (D4-75's attention).** In the 11 runs, 270 of 528 turns (51%) attended to something:
+
+| Target | Times | What it gave |
+|---|---|---|
+| the parcel being worked that day | 114 | mostly who else was working there ("Maud was weeding a growing crop at the Field") and a ripeness estimate |
+| the village | 85 | its layout. Only 30 of these were on day 0, so 55 repeated a layout already known, word for word |
+| a house | 55 | after the raids, the robbed doors ("fresh gouges and splinters about the door of the Croft house") |
+| a person | 1 | |
+
+- 99 attends were the same target as the day before.
+- What was learned and then used that evening or the next morning: who was working there (67), signs of a break-in (8), a ripeness
+  estimate (6), the place running out (5).
+- **Nobody attended to a person after the raids.** Edith and Maud examined the robbed doors again and again; nobody looked at the
+  neighbours. In the food reruns, the Ashbys attended to Croft Pasture 3 times in 84 turns and never to the herd itself.
+- So attending is used as "look closer at where I am", rarely as investigation. Repeating "the village" is wasted: it gives the
+  same layout every time.
+
 **An engine fault hides what the force would have done.**
 - Hugh never attacked a person. He attacked houses with aim "hurt".
 - An attack on a house is a raid for food (settle.py): the aim is ignored and nobody inside can be hurt. Of 24 raids, 22 were
