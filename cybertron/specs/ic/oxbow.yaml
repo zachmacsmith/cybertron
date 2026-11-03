@@ -221,6 +221,8 @@ start:
             appoints the Constable from declared candidates when the term ends."
           succession: {rule: election, electorate: J0.council, candidacy: declared}
       treasury: {penny: 60, weapons: 6, timber: 20, stone: 30}
+      laws:                       # here, not in start.laws: J0's laws are made before start.loans (which need loans enabled)
+        - template: Loan Registry
     - id: A1
       name: the Farm
       founder: Marten
@@ -300,7 +302,6 @@ start:
       params: {OFFICIAL_RIGHTS: [J0.council, J0.keeper, J0.constable], GIFT_LIMIT: 10, FINE_ITEM: penny, FINES: [5, 10, 20]}
     - template: Prosecution Office
       params: {PROSECUTOR_RIGHT: J0.constable, PROSECUTOR_CLASS: none, REWARD_ITEM: penny, REWARD: 5}
-    - template: Loan Registry
     - template: Licence                           # the Farm's fields; its head may license them
       params: {GATES: [harvest, hunt], TARGETS: [camp9, camp10, camp11], RIGHT: farmland, REGISTRAR: A1.head,
                HOLDERS: [Marten, Rook, Sedge], TAG: farmland}
