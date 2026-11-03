@@ -1,0 +1,311 @@
+# Written by cybertron2/specs/make_food_probe.py (review 38.55).
+name: goal_food
+seed: 304
+days: 6
+calendar:
+  season: summer
+  day: 2
+  season_days: 10
+children:
+  'on': false
+lifespan: 96
+view: beliefs
+evening: true
+tags: true
+ages: true
+llm:
+  week_stop: 0.9
+cold_days: []
+incidents: []
+herds:
+  croft_cattle:
+    name: the Croft cattle
+    kind: cattle
+    parcel: hf_pasture
+    cows: 4
+    oxen: 1
+    bulls: 0
+    young: 2
+    in_milk: 2
+    holder: Croft
+claims: []
+customs: []
+memory:
+  kept:
+    words: 50
+nodes:
+  hollow:
+    name: Hollowford
+    parcels:
+      hf_green:
+        name: the Green
+        cover: built
+        size: 2
+        side: centre
+        height: 1
+        text: a green with three houses on it
+        adj:
+        - hf_ashfield
+        - hf_webbfield
+        - hf_pasture
+        - hf_wood
+      hf_ashfield:
+        name: Ashby Strip
+        cover: field
+        size: 1
+        side: south
+        height: 1
+        holder: Ashby
+        text: the Ashbys' strip of oats, green yet
+        state:
+          crop:
+            kind: oats
+            left: 30
+            ripe_day: 20
+      hf_webbfield:
+        name: Webb Field
+        cover: field
+        size: 2
+        side: east
+        height: 1
+        holder: Webb
+        text: the Webbs' barley, ripe and standing
+        state:
+          crop:
+            kind: barley
+            left: 80
+            ripe_day: 0
+      hf_pasture:
+        name: Croft Pasture
+        cover: pasture
+        size: 2
+        side: west
+        height: 1
+        holder: Croft
+        text: the Crofts' grazing
+        state:
+          grass:
+            K: 80
+            S: 80
+            r: 0.3
+          plants:
+            K: 2
+            S: 2
+            r: 0.2
+      hf_wood:
+        name: Hollow Wood
+        cover: forest
+        size: 1
+        side: north
+        height: 2
+        text: a thin wood, much used
+        state:
+          wood:
+            kind: copse
+          game:
+            K: 3
+            S: 2
+            r: 0.1
+          plants:
+            K: 2
+            S: 2
+            r: 0.2
+buildings:
+  ashby_house:
+    name: the Ashby house
+    parcel: hf_green
+    household: Ashby
+    structure: timber
+    rooms:
+    - kind: medium room
+    fittings:
+      beds: 2
+      hearth: 1
+      bins: 1
+    stock:
+      grain: 30
+      beans: 4
+      firewood: 30
+  webb_house:
+    name: the Webb house
+    parcel: hf_green
+    household: Webb
+    structure: timber
+    rooms:
+    - kind: medium room
+    fittings:
+      beds: 2
+      hearth: 1
+      bins: 1
+    stock:
+      grain: 80
+      beans: 10
+      firewood: 30
+  croft_house:
+    name: the Croft house
+    parcel: hf_green
+    household: Croft
+    structure: timber
+    rooms:
+    - kind: medium room
+    fittings:
+      beds: 2
+      hearth: 1
+      bins: 1
+    stock:
+      grain: 20
+      dried meat: 10
+      firewood: 30
+agents:
+  Hugh:
+    household: Ashby
+    born: -45
+    stage: adult
+    sex: m
+    relations:
+      Edith: your wife
+    memories:
+    - The Ashbys hold a strip of oats on the south side; it will not be ripe for some weeks.
+    - 'Your neighbours: the Webbs, whose barley stands ripe in Webb Field, and the Crofts, who keep cattle on Croft Pasture.'
+    knows: &id001
+      sow: &id002
+        level: known
+        skill: 1.0
+      reap: &id003
+        level: known
+        skill: 1.0
+      hoe: &id004
+        level: known
+        skill: 1.0
+      weed: &id005
+        level: known
+        skill: 1.0
+    aware_of: {}
+    holdings:
+      crude tool: 1
+      coin: 6
+    concerns:
+    - food
+    - family
+    parents: []
+    partner: Edith
+    model: claude-sonnet-5-5
+    born_line: Ashby
+    kept: []
+  Edith:
+    household: Ashby
+    born: -42
+    stage: adult
+    sex: f
+    relations:
+      Hugh: your husband
+    memories:
+    - You keep the Ashby house.
+    - The Webbs' barley stands ripe in Webb Field; the Crofts keep cattle on Croft Pasture.
+    knows: *id001
+    aware_of: {}
+    holdings: {}
+    concerns:
+    - food
+    - family
+    parents: []
+    partner: Hugh
+    model: claude-haiku-5-5
+    born_line: Ashby
+    kept: []
+  Robert:
+    household: Webb
+    born: -50
+    stage: adult
+    sex: m
+    relations:
+      Maud: your wife
+    memories:
+    - The Webbs' barley is ripe; it must be reaped this week.
+    knows: *id001
+    aware_of: {}
+    holdings:
+      crude tool: 1
+      coin: 4
+    concerns:
+    - food
+    - family
+    parents: []
+    partner: Maud
+    model: claude-sonnet-5-5
+    born_line: Webb
+    kept: []
+  Maud:
+    household: Webb
+    born: -47
+    stage: adult
+    sex: f
+    relations:
+      Robert: your husband
+    memories:
+    - You keep the Webb house.
+    knows: *id001
+    aware_of: {}
+    holdings: {}
+    concerns:
+    - food
+    - family
+    parents: []
+    partner: Robert
+    model: claude-haiku-5-5
+    born_line: Webb
+    kept: []
+  Thomas:
+    household: Croft
+    born: -50
+    stage: adult
+    sex: m
+    relations:
+      Ida: your wife
+    memories:
+    - The Crofts keep cattle on their pasture west of the Green.
+    knows: &id006
+      sow: *id002
+      reap: *id003
+      hoe: *id004
+      weed: *id005
+      herd:
+        level: known
+        skill: 1.0
+      milk:
+        level: known
+        skill: 1.0
+      slaughter:
+        level: known
+        skill: 1.0
+    aware_of: {}
+    holdings:
+      crude tool: 1
+    concerns:
+    - food
+    - family
+    parents: []
+    partner: Ida
+    model: claude-sonnet-5-5
+    born_line: Croft
+    kept: []
+  Ida:
+    household: Croft
+    born: -47
+    stage: adult
+    sex: f
+    relations:
+      Thomas: your husband
+    memories:
+    - You keep the Croft house and milk the cows.
+    knows: *id006
+    aware_of: {}
+    holdings: {}
+    concerns:
+    - food
+    - family
+    parents: []
+    partner: Thomas
+    model: claude-haiku-5-5
+    born_line: Croft
+    kept: []
