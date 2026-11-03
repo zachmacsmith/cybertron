@@ -151,7 +151,7 @@ PASTURE = [
 
 # ---------------------------------------------------------------------- a herd
 HERD = [
-    dict(when=lambda x: True, sense="sight", p=0.15, tags=["animals"],
+    dict(when=lambda x: True, own=0.95, sense="sight", tags=["animals"],                  # a herd: own 0.95 (noticing.md)
          text=lambda x: f"{x.h['name']} on {x.nm}: {FM.herd_words(x.h)}"),
     dict(when=lambda x: x.h.get("with") and x.h.get("pack"), sense="sight", p=0.5, tags=["animals", "travel"],
          text=lambda x: f"{x.h['name']} on a halter on {x.nm}, kept close by {x.h['with']}"),

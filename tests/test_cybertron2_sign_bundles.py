@@ -258,3 +258,25 @@ def test_a_burial_is_seen_and_heard_and_the_frozen_ground_felt_by_the_digger():
     assert _p(w, "Edric", _one(F, "hacked out")) == 1.0
     _at(w, "Hamo", ["mb_green"])                                                    # next door: the spade heard on frozen ground
     assert _p(w, "Hamo", _one(F, "scrape of a spade")) > 0.2
+
+
+def test_a_herd_is_plain_to_those_with_it_and_seen_now_and_then_from_next_door():
+    """A herd's own conspicuousness is 0.95 (noticing.md), with no lower base chance on its row (38.55: a leftover 0.15 hid the
+    Croft cattle from everyone, even those attending to them)."""
+    from cybertron2.engine import signs as SG
+    s = load_spec("cybertron2/specs/goal_probe/food_none.yaml")
+    s["weather"] = {d: "clear" for d in range(1, 8)}
+    w = World(s)
+    w.s["today"] = R.blank_today()
+    got = []
+    SG.facts(Here(w, "Hugh"), lambda about, text, p, tags, sense, **kw: got.append(dict(about=about, text=text, salience=p,
+                                                                                        tags=tags, sense=sense, **kw)))
+    seen = next(f for f in got if f["about"][0] == "herd:croft_cattle" and "cows" in f["text"])
+    assert seen["salience"] == 1.0 and seen["spot"]["own"] == 0.95
+    assert PC.chance_of(w, "Hugh", seen, attending=True) == 1.0                      # sought out: seen
+    w.s["today"]["worked"] = {"Thomas": ["hf_pasture"]}
+    w.s["today"]["route"] = {"Thomas": ["hf_pasture"]}
+    assert PC.chance_of(w, "Thomas", seen, focus=6.0) == 1.0                          # worked with: seen
+    w.s["today"]["worked"] = {"Hugh": ["hf_green"]}
+    w.s["today"]["route"] = {"Hugh": ["hf_green"]}
+    assert 0.05 < PC.chance_of(w, "Hugh", seen) < 0.2                                # next door: now and then

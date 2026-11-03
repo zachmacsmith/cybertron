@@ -66,7 +66,25 @@ Cost for all seven: $6.26.
    - The Ashbys knew of the cattle only from their seeded memory line. The untold run therefore tested what they can see more than
      what they notice; Edith's late "work 1 day for 1 milk" came from hearing the Crofts.
    - Even the Crofts know their own herd only through signs ("someone is out minding the Croft cattle (H1)").
-   - Cause to find: a herd's signs losing out in the daily notice, the reach of sight into the next parcel, or a herd that wandered.
+   - **Cause (found 3 Nov):** the herd's sighting row ("the Croft cattle (H1) on Croft Pasture: 4 cows, 1 ox, 2 calves") carried a
+     base chance of 0.15, a hand-set value left from the first sign bundles (before D4-75's one rule). noticing.md gives a herd own
+     0.95, with no lower base. The rule multiplied the two, so even someone attending to the herd saw it only 37% of the time:
+
+     | Who, where (clear day) | Before | After (own 0.95, base 1) |
+     |---|---|---|
+     | attending to the herd | 0.38 | 1.00 |
+     | working with it (herding, milking) | 0.45 | 1.00 |
+     | foraging on the pasture (Hugh, day 5) | 0.08 | 0.48 |
+     | on the Green, next door | 0.015 | 0.095 |
+     | on Webb Field, two steps off | 0.007 | 0.048 |
+
+     In rain each falls by about a fifth.
+   - **Fixed** in signs.py to the spec's value, with a test (test_cybertron2_sign_bundles.py). It makes the code match a rule already
+     decided, so there is no new decision. The other herd rows (calves kicking 0.06, cows heavy with milk 0.10, the bull 0.12) are
+     details with a lower base, as the guide allows, and are unchanged.
+   - **Still open** (OPEN.md L-63): the place's layout names a crop but not a herd, though it lists "herd, slaughter" among what one
+     can do on Croft Pasture. And presence next door is 0.1, so a herd beside the Green is seen about 1 day in 10 from there.
+   - The seven runs were made before the fix. The untold run should be rerun to test whether they notice the cattle.
 2. **A household member could accept their own household's offer:** "Edith accepted Hugh's offer O8: work 2 days; 20 grain.
    Agreement A50 stays open: Ashby works 2 days for Ashby". It should be refused.
 
@@ -78,4 +96,4 @@ Cost for all seven: $6.26.
 
 **Limits:** one run per cell, 6 days.
 
-*Current as of 3 Nov 2026.*
+*Current as of 3 Nov 2026 (the herd fault's cause and fix added).*
