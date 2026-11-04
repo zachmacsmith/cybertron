@@ -125,9 +125,13 @@ def cost(here, a) -> int:
     tech, a = _as_modified(tech, v, a)
     n = int(TECHNIQUES[tech]["units"])
     if TECHNIQUES[tech].get("units_by") == "bury":                            # by the ground and the cold (D2-96)
-        cid = _thing_site(here, a.get("at"))
-        if cid:
-            n = here.bury_units(cid, cairn=str(a.get("method", "")).lower() == "cairn")
+        cairn = str(a.get("method", "")).lower() == "cairn"
+        cid = _thing_site(here, a.get("at"), graves=cairn)
+        if cid and cairn:
+            n = here.bury_units(cid, cairn=True)
+        elif cid:                                                              # a grave is dug a share at a time, by anyone, over days
+            from cybertron2.engine import things as TH                         # (D4-99): an act puts in up to its units
+            n = max(1, min(n, here.grave_left(cid)))
     elif v == "make":
         n *= max(1, int(_qty(a.get("qty"), 1)))
     return n + MOD.units(a, v, tech)
@@ -143,10 +147,48 @@ def _as_modified(tech, verb, a):
     return tech, a
 
 
-def _thing_site(here, at):
-    """A body here by its person's name or its place's name (for burying)."""
+def _bury(here, cid, cairn, a) -> str:
+    """Burying (D2-96, D4-99). A cairn of stones (its stone and units) covers the body at once, or is raised over a grave already
+    dug. Otherwise the act digs: it puts in up to the act's units, as a share of the grave the ground wants now (soft, stony,
+    frozen), and the share keeps between days and adds up across diggers; the body is buried when the grave is whole."""
+    from cybertron2.engine import things as TH
+    c = here.thing(cid)
+    spot = here.spot_name(c)
+    if cairn:
+        _consume(here, a["_mods"].get("inputs") or {})
+        here.apply("set_thing", cid=cid, field="cairn", value=True)
+        here.apply("set_thing", cid=cid, field="cairn_day", value=here.day)   # for its signs
+        here.apply("set_thing", cid=cid, field="cairn_by", value=here.name)
+        if c.get("buried") is not None:
+            return f"You raised a cairn of stones over the grave of {c['of']} at {spot}."
+        here.apply("set_thing", cid=cid, field="buried", value=here.day)
+        here.apply("set_thing", cid=cid, field="grave", value=None)
+        return f"You buried {c['of']} at {spot} under a cairn of stones."
+    need = here.bury_units(cid)
+    g = dict(c.get("grave") or {})
+    put = max(1, min(int(TECHNIQUES["bury"]["units"]), here.grave_left(cid)))
+    done = min(1.0, round(float(g.get("done", 0.0)) + put / need, 6))
+    by = list(dict.fromkeys(list(g.get("by") or []) + [here.name]))
+    others = [x for x in by if x != here.name]
+    if done >= 1.0 - 1e-6:
+        here.apply("set_thing", cid=cid, field="buried", value=here.day)
+        here.apply("set_thing", cid=cid, field="cairn", value=False)
+        here.apply("set_thing", cid=cid, field="grave", value=None)
+        return (f"You finished the grave and buried {c['of']} at {spot}" + (f"; {', '.join(others)} dug it with you" if others else "")
+                + ". A cairn of stones can be raised over it later (3 stone).")
+    here.apply("set_thing", cid=cid, field="grave", value={"done": done, "by": by, "day": here.day, "began": g.get("began", here.day)})
+    left = here.grave_left(cid)
+    return (f"You dug at the grave of {c['of']} at {spot}: {TH.grave_words(done)} (about {left} more unit{'s' if left != 1 else ''} "
+            f"of digging{' in the frozen ground' if here.cold() else ''}). Anyone can help dig it, and the work keeps for another day.")
+
+
+def _thing_site(here, at, graves=False):
+    """A body here by its person's name or its place's name (for burying); with `graves`, a grave with no cairn yet as well (a
+    cairn raised after the burial, D4-99), an unburied body first."""
+    from cybertron2.engine import things as TH
     low = str(at or "").strip().lower()
-    for cid, c in here.bodies().items():
+    pool = list(here.bodies().items()) + (list(here.graves().items()) if graves else [])
+    for cid, c in pool:
         names = {c["of"].lower(), here.spot_name(c).lower(), here.spot_name(c).lower().removeprefix("the ")}
         pid = c.get("parcel")
         if pid in here.parcels():                                             # the ground it lies on, or a building on that ground
@@ -358,6 +400,19 @@ def _skill_mult(here, mind, tech) -> float:
 
 def _site(here, mind, tech, at, a=None):
     sites = KN.where(here, tech)
+    cairn = str((a or {}).get("method", "")).lower() == "cairn"
+    if (TECHNIQUES[tech].get("at") or {}).get("things") and cairn:          # a cairn over the unburied, or over a grave (D4-99)
+        cid = _thing_site(here, at, graves=True)
+        if cid is None:
+            from cybertron2.engine import things as TH
+            done = next((c for c in here.things().values() if c.get("body") and c.get("cairn")
+                         and str(at or "").strip().lower() in (c["of"].lower(), here.spot_name(c).lower())), None)
+            if done:
+                raise Refused(f"the grave of {done['of']} already has a cairn")
+            raise Refused(f"there is no body or grave here called {at!r}" if at else "there is no body or grave here")
+        c = here.thing(cid)
+        return "thing", cid, (f"the grave of {c['of']} at {here.spot_name(c)}" if c.get("buried") is not None
+                              else f"the body of {c['of']} at {here.spot_name(c)}")
     if sites and sites[0][0] == "thing":
         cid = _thing_site(here, at)
         if cid is None:
@@ -500,14 +555,9 @@ def _technique(here, mind, a, party, verb):
             holding = a["_on"]
         if word and not word.startswith("You"):
             suffix, word = word, ""                                             # a note to the plain result, below
-    elif y["kind"] == "bury":                                                 # D2-96
+    elif y["kind"] == "bury":                                                 # D2-96; a grave dug by many, over days (D4-99)
+        word = _bury(here, key, "method: cairn" in a["_mods"]["_used"], a)
         c = here.thing(key)
-        cairn = "method: cairn" in a["_mods"]["_used"]
-        if cairn:
-            _consume(here, a["_mods"].get("inputs") or {})
-        here.apply("set_thing", cid=key, field="buried", value=here.day)
-        here.apply("set_thing", cid=key, field="cairn", value=cairn)
-        word = f"You buried {c['of']} at {here.spot_name(c)}" + (" under a cairn of stones." if cairn else ".")
         thing = ("parcel", c["parcel"]) if c.get("parcel") else thing
     elif y["kind"] == "repair":                                              # by its size and structure (D2-168)
         if here.buildings()[key]["structure"] == "stone":

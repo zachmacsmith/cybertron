@@ -98,7 +98,7 @@ def test_give_to_someone_not_here_is_left_at_their_door_and_a_passer_by_can_take
     assert w.goods(w.s["buildings"]["reed_house"]["stock"]).get("grain", 0) >= 3
 
 
-def test_bury_is_offered_only_where_a_body_lies_and_frozen_ground_takes_six():
+def test_bury_is_offered_only_where_a_body_lies_and_frozen_ground_takes_six_shared_over_days():
     from cybertron2.engine import knowledge as KN
     w = world()
     can, near = KN.options(Here(w, "Edric"), Mind(w, "Edric"), limit=99)
@@ -108,8 +108,11 @@ def test_bury_is_offered_only_where_a_body_lies_and_frozen_ground_takes_six():
     assert any(x.startswith("work bury") for x in can)
     assert V.cost(Here(w, "Edric"), {"do": "work", "what": "bury", "at": "Hamo"}) == 2
     w.cold_days = {w.d}
-    assert V.cost(Here(w, "Edric"), {"do": "work", "what": "bury", "at": "Hamo"}) == 6
-    assert do(w, "Edric", do="work", what="bury", at="Hamo").startswith("You buried Hamo")
+    assert TH.grave_left(w, cid) == 6                                             # frozen ground: 6 units in all (D2-96)
+    assert V.cost(Here(w, "Edric"), {"do": "work", "what": "bury", "at": "Hamo"}) == 2   # an act puts in up to 2 (D4-99)
+    for _ in range(3):
+        out = do(w, "Edric", do="work", what="bury", at="Hamo")
+    assert out.startswith("You finished the grave and buried Hamo"), out
     assert w.s["containers"][cid]["buried"] == w.d and not TH.bodies(w, "millbrook")
 
 
@@ -282,3 +285,29 @@ def test_tracks_are_plain_in_snow_and_a_hunter_counts_them():
     texts = {r.get("knows"): r["text"](x) for _, r in SG.true_rows(SG.TRACE, x)}
     assert "plain in the snow" in texts[None] and "three people" in texts["hunt"]
     assert "three" not in " ".join(SG.roll(SG.TRACE, x, w.rng("t"), know=set()))
+
+
+def test_a_grave_is_dug_by_several_and_over_days_and_a_thaw_makes_the_rest_easier():
+    """D4-99: a grave is dug a share at a time; the share keeps between days and adds up across diggers; once the ground thaws what
+    is left is reckoned on soft ground; a cairn can be raised over the grave afterwards."""
+    w = world()
+    cid = _body(w, "long_field", "Hamo")
+    w.cold_days = {w.d, w.d + 1}
+    a, b = [n for n in w.living() if w.at(n) == "millbrook"][:2]
+    assert do(w, a, do="work", what="bury", at="Hamo").startswith("You dug at the grave of Hamo")
+    assert do(w, b, do="work", what="bury", at="Hamo").startswith("You dug at the grave of Hamo")
+    c = w.s["containers"][cid]
+    assert c.get("buried") is None and abs(TH.grave_done(c) - 4 / 6) < 1e-6 and set(c["grave"]["by"]) == {a, b}
+    assert TH.grave_left(w, cid) == 2
+    w.s["day"] += 1                                                               # the next day, still frozen: the work kept
+    w.s["today"] = R.blank_today()
+    assert TH.grave_left(w, cid) == 2
+    w.cold_days = set()                                                           # a thaw: a third of a soft grave is left
+    assert TH.grave_left(w, cid) == 1 and V.cost(Here(w, a), {"do": "work", "what": "bury", "at": "Hamo"}) == 1
+    out = do(w, a, do="work", what="bury", at="Hamo")
+    assert out.startswith("You finished the grave and buried Hamo") and b in out, out
+    assert do(w, a, do="work", what="bury", at="Hamo").startswith("Refused")
+    w.s["containers"][Here(w, b).hands]["goods"]["stone"] = 3
+    assert do(w, b, do="work", what="bury", at="Hamo", method="cairn").startswith("You raised a cairn of stones over the grave of Hamo")
+    assert w.s["containers"][cid]["cairn"] and w.s["containers"][Here(w, b).hands]["goods"]["stone"] < 1e-9
+    assert "already has a cairn" in do(w, b, do="work", what="bury", at="Hamo", method="cairn")

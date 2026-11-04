@@ -304,5 +304,6 @@ Newest first. Ideas decided or rejected in conversation before 23 Oct are backfi
 | 2 Nov | Levels of fire; camps built out with harder weather | deferred (L-46, L-47) | [fire_levels_and_camps.md](fire_levels_and_camps.md) |
 | 2 Nov | Mills and ovens at scale (numbers for Zach) | discussion | [mill_and_oven_scale.md](mill_and_oven_scale.md) |
 | 3 Nov | A herd seen at the spec's own; presence next door 0.3 | retrospective, accepted: D4-98 | [herd_seen_next_door.md](herd_seen_next_door.md) |
+| 4 Nov | Graves dug by many over days; a cairn after burial; an unfinished grave's signs | retrospective, accepted: D4-99 | [graves.md](graves.md) |
 | 2 Nov | What can happen to buildings and fittings, by weather and use | deferred (L-48) | [building_risks.md](building_risks.md) |
 | 2 Nov | Mills and ovens at scale; oven in stone; coppice held; fuel line; babies by shelter; refused acts not retried; stone walling | accepted: D4-97 | [mill_and_oven_scale.md](mill_and_oven_scale.md) |

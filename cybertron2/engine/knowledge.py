@@ -126,14 +126,17 @@ def skill_word(x, tech=None) -> str:
     return "ordinary" if word == "novice" and tech and basic(tech) else word
 
 
-def where(here, tech) -> list:
-    """The sites here where a technique can be done: [(kind, id, label)]."""
+def where(here, tech, graves=False) -> list:
+    """The sites here where a technique can be done: [(kind, id, label)]; with `graves`, graves without a cairn as well (D4-99)."""
     at = TECHNIQUES[tech].get("at")
     if not at:
         return [("anywhere", None, "anywhere")]
     out = []
     if at.get("things"):                                                       # work on a thing at a spot: the dead (D2-96)
-        return [("thing", cid, f"the body of {c['of']} at {here.spot_name(c)}") for cid, c in here.bodies().items()]
+        out = [("thing", cid, f"the body of {c['of']} at {here.spot_name(c)}") for cid, c in here.bodies().items()]
+        if graves:                                                             # a cairn over a grave already dug (D4-99)
+            out += [("thing", cid, f"the grave of {c['of']} at {here.spot_name(c)}") for cid, c in here.graves().items()]
+        return out
     for c in at.get("covers", []):
         out += [("parcel", pid, p["name"]) for pid, p in here.parcels().items() if p["cover"] == c]
     for f in at.get("fittings", []):
@@ -199,7 +202,10 @@ def ready(here, tech, kind, key, a=None) -> str:
         if not c or not c.get("body"):
             return "there is no body there"
         if c.get("buried") is not None:
-            return f"{c['of']} is already buried"
+            if str((a or {}).get("method", "")).lower() == "cairn":            # a cairn over the grave, after the burial (D4-99)
+                return f"the grave of {c['of']} already has a cairn" if c.get("cairn") else ""
+            return f"{c['of']} is already buried" + ("" if c.get("cairn") else "; a cairn of stones can still be raised over the grave "
+                                                      "(method cairn, 3 stone)")
         return ""
     if kind == "building" and y == "repair" and here.buildings()[key]["condition"] >= 2:
         return f"{here.buildings()[key]['name']} is sound"
@@ -233,7 +239,7 @@ def inputs_words(needs: dict) -> str:
 def shortfall(here, mind, tech, mult=1.0, at=None, extra=None, a=None) -> str:
     """'' if the technique can be done here now, else what is short."""
     t = TECHNIQUES[tech]
-    sites = where(here, tech)
+    sites = where(here, tech, graves=str((a or {}).get("method", "")).lower() == "cairn")
     if not sites:
         need = t.get("at", {})
         what = need.get("covers") or [FITTINGS[f]["label"] for f in need.get("fittings", [])] or ["building"]

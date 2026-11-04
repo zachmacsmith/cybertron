@@ -253,9 +253,10 @@ def test_a_burial_is_seen_and_heard_and_the_frozen_ground_felt_by_the_digger():
     cid = w.apply("new_thing", "millbrook", node="millbrook", parcel="mb_pasture", kind="remains", of="Odo", body=True, died=w.d)
     TH.remember(w, "Edric", cid, "saw", close=True)
     out = do(w, "Edric", do="work", what="bury", at="Odo")
-    assert out.startswith("You buried"), out
+    assert out.startswith("You dug at the grave of Odo"), out                     # frozen: 6 units, 2 an act (D4-99)
     F = _facts(w, "burial", who="Hamo")
     assert _p(w, "Edric", _one(F, "hacked out")) == 1.0
+    assert _p(w, "Edric", _one(F, "not deep enough yet")) == 1.0
     _at(w, "Hamo", ["mb_green"])                                                    # next door: the spade heard on frozen ground
     assert _p(w, "Hamo", _one(F, "scrape of a spade")) > 0.2
 
@@ -280,3 +281,22 @@ def test_a_herd_is_plain_to_those_with_it_and_seen_now_and_then_from_next_door()
     w.s["today"]["worked"] = {"Hugh": ["hf_green"]}
     w.s["today"]["route"] = {"Hugh": ["hf_green"]}
     assert 0.2 < PC.chance_of(w, "Hugh", seen) < 0.4                                 # next door: most days in a week (D4-98)
+
+
+
+def test_an_unfinished_grave_shows_how_far_it_is_dug_and_what_the_weather_has_done_to_it():
+    """D4-99: a grave begun beside a body is seen (how far dug), on a close look how much digging is left, frozen hard again or
+    holding water or snow when nobody dug it today, and as left alone after two days; a new cairn shows for two days."""
+    w = _world(cold=True)
+    w.apply("die", "millbrook", person="Odo", cause="old age")
+    do(w, "Edric", do="work", what="bury", at="Odo")
+    cid = next(k for k, v in w.s["containers"].items() if v.get("grave"))     # the body dying left (the one dug)
+    texts = lambda: [f["text"] for f in PC.facts(Here(w, "Hamo")) if f.get("thing") == cid]
+    t = texts()
+    assert any("a grave begun beside the body of Odo" in x and "about a third dug" in x for x in t)
+    assert any("wants about 4 more units of digging in this frozen ground" in x for x in t)
+    w.s["day"] += 2
+    w.s["today"] = R.blank_today()
+    t = texts()
+    assert any("frozen hard again" in x for x in t) and any("nobody has dug at the grave for Odo" in x for x in t)
+    assert "beside a grave about a third dug" in TH.describe(w, w.s["containers"][cid])

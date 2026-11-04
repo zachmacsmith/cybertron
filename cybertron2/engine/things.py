@@ -157,6 +157,9 @@ def _describe(w, c) -> str:
     st = body_state(w, c)
     if c.get("body") and c.get("buried") is not None:
         return f"a grave at {where}: {c['of']} lies buried there" + (" under a cairn" if c.get("cairn") else "")
+    if c.get("body") and grave_done(c) > 0:                                # a grave begun beside the body (D4-99)
+        return (f"the body of {c['of']} lies at {where}, beside a grave {grave_words(grave_done(c))}"
+                + (f", with {g} by it" if g else ""))
     if st == "fresh":
         return f"the body of {c['of']} lies at {where}" + (f", with {g} beside it" if g else "")
     if st == "days":
@@ -440,10 +443,37 @@ def bodies(w, node) -> dict:
     return {cid: c for cid, c in at_node(w, node).items() if c.get("body") and c.get("buried") is None}
 
 
+def graves(w, node) -> dict:
+    """Graves here with no cairn yet: a cairn of stones can be raised over them after the burial (D4-99)."""
+    return {cid: c for cid, c in at_node(w, node).items() if c.get("body") and c.get("buried") is not None and not c.get("cairn")}
+
+
+def grave_done(c) -> float:
+    """How much of a grave is dug, as a share of the whole (D4-99): the work keeps between days and anyone may add to it."""
+    return float((c.get("grave") or {}).get("done", 0.0))
+
+
+def grave_left(w, cid) -> int:
+    """Units of digging still wanted, by the ground and the cold now (D2-96): a grave begun in frost is easier once it thaws."""
+    import math
+    c = w.s["containers"][cid]
+    return max(0, math.ceil(round(bury_need(w, c) * (1.0 - grave_done(c)), 3) - 1e-6))
+
+
+def grave_words(done) -> str:
+    return ("barely begun, a scrape in the ground" if done < 0.2 else "about a third dug" if done < 0.45
+            else "about half dug, the spoil heaped beside it" if done < 0.6 else "two-thirds dug or more" if done < 0.85
+            else "nearly deep enough")
+
+
 def bury_units(w, cid, cairn=False) -> int:
     if cairn:
         return int(TECHNIQUES["method: cairn"]["units"])
-    c = w.s["containers"][cid]
+    return bury_need(w, w.s["containers"][cid])
+
+
+def bury_need(w, c) -> int:
+    """The units a whole grave wants here today: soft, stony or frozen ground (D2-96)."""
     b = w.p["bury"]
     if w.cold():
         return int(b["frozen"])

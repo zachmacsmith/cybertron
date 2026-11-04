@@ -471,14 +471,20 @@ BROKE = [
 # A burial (the day's bury acts at a parcel). Doer: the work of it (frozen ground, or the weight). Nearby: the digging seen and heard.
 # Lingering: the grave (THING). Conditional: frost.
 BURIAL = [
-    dict(when=lambda x: x.age == 0, who="others", own=1.0, sense="sight", tags=["death"],
+    dict(when=lambda x: x.age == 0 and x.dug, who="others", own=1.0, sense="sight", tags=["death"],
          text=lambda x: f"{x.by} digging a grave at {x.nm}"),
-    dict(when=lambda x: x.age == 0, who="others", own=0.8, sense="sound", tags=["death"],
+    dict(when=lambda x: x.age == 0 and x.dug, who="others", own=0.8, sense="sound", tags=["death"],
          text=lambda x: f"the scrape of a spade at {x.nm}" + (" on frozen ground" if x.cold else "")),
-    dict(when=lambda x: x.age == 0 and x.cold, who="doer", own=2.0, sense="touch", tags=["death"],
+    dict(when=lambda x: x.age == 0 and x.dug and x.cold, who="doer", own=2.0, sense="touch", tags=["death"],
          text=lambda x: "the ground was frozen: every spadeful had to be hacked out"),
-    dict(when=lambda x: x.age == 0 and not x.cold, who="doer", own=2.0, sense="touch", tags=["death"],
+    dict(when=lambda x: x.age == 0 and x.finished and not x.cold, who="doer", own=2.0, sense="touch", tags=["death"],
          text=lambda x: "the dead weight of the body as you lowered it, and the earth falling back over it"),
+    dict(when=lambda x: x.age == 0 and x.dug and not x.finished, who="doer", own=2.0, sense="touch", tags=["death"],     # D4-99
+         text=lambda x: "your back aches from the digging, and the grave is not deep enough yet"),
+    dict(when=lambda x: x.age == 0 and x.cairned, who="others", own=1.0, sense="sight", tags=["death"],
+         text=lambda x: f"{x.raisers} piling stones into a cairn at {x.nm}"),
+    dict(when=lambda x: x.age == 0 and x.cairned, who="others", own=0.6, sense="sound", tags=["death"],
+         text=lambda x: f"the knock of stone on stone at {x.nm}"),
 ]
 
 # Dogs at the place, heard where they are kept (a building with a dog): at a fight in the night, at a slaughter (SLAUGHTER_DOGS).
@@ -1148,6 +1154,22 @@ THING = [
          text=lambda x: f"flies crawl thick on the body of {x.of} {x.at}"),
     dict(when=lambda x: x.body == "days" and x.cold and x.outside, sense="touch", p=0.6, reach="near", tags=["death", "season"],
          text=lambda x: f"{x.of} lies frozen hard {x.at}: the frost has kept the body"),
+    # a grave begun beside the body (D4-99): how far it is dug, the frost that undoes it, water or snow in it, nobody at it
+    dict(when=lambda x: x.body and x.grave_done > 0, sense="sight", own=0.9, tags=["death"],
+         text=lambda x: f"a grave begun beside the body of {x.of} {x.at}: {x.grave_words}"),
+    dict(when=lambda x: x.body and x.grave_done > 0, sense="sight", own=0.9, reach="near", tags=["death"],
+         text=lambda x: f"the grave for {x.of} {x.at} wants about {x.grave_left} more unit{'s' if x.grave_left != 1 else ''} of digging"
+                        + (" in this frozen ground" if x.cold else "") + "; anyone may take a turn at it"),
+    dict(when=lambda x: x.body and x.grave_done > 0 and x.cold and x.grave_idle >= 1, sense="sight", own=0.7, reach="near",
+         tags=["death", "season"], text=lambda x: f"the half-dug grave {x.at} has frozen hard again: the spoil is set like stone"),
+    dict(when=lambda x: x.body and x.grave_done > 0 and x.snow and x.grave_idle >= 1, sense="sight", own=0.8, tags=["death", "season"],
+         text=lambda x: f"snow has drifted into the open grave {x.at}"),
+    dict(when=lambda x: x.body and x.grave_done > 0 and x.wet_now and not x.snow and x.grave_idle >= 1, sense="sight", own=0.7,
+         reach="near", tags=["death", "season"], text=lambda x: f"rainwater stands in the bottom of the open grave {x.at}"),
+    dict(when=lambda x: x.body and x.grave_done > 0 and x.grave_idle >= 2, sense="sight", own=0.6, tags=["death"],
+         text=lambda x: f"nobody has dug at the grave for {x.of} {x.at} for {x.grave_idle} days"),
+    dict(when=lambda x: x.grave and x.cairn and x.cairn_age <= 2, sense="sight", own=1.0, tags=["death"],
+         text=lambda x: f"a new cairn of stones over the grave of {x.of} {x.at}"),
     dict(when=lambda x: x.rot and x.body and x.dogs and x.outside, sense="sight", own=1.5, tags=["death"],
          text=lambda x: f"the dogs keep slinking off toward {x.where}, noses down"),
     # ---- bones
@@ -1507,6 +1529,13 @@ def thing_context(w, c):
                         snow_laid=EV.snow_lying(w, laid),
                         dogs=not on_road and any(b["node"] == c.get("node") and b["fittings"].get("dog") for b in w.s["buildings"].values()))
     x.warm = not x.cold
+    g = c.get("grave") or {}                                                   # a grave begun (D4-99)
+    x.grave_done = TH.grave_done(c) if c.get("body") and c.get("buried") is None else 0.0
+    x.grave_words = TH.grave_words(x.grave_done)
+    x.grave_left = max(0, __import__("math").ceil(round(TH.bury_need(w, c) * (1.0 - x.grave_done), 3) - 1e-6)) if x.grave_done else 0
+    x.grave_idle = w.d - int(g.get("day", w.d)) if g else 0
+    x.wet_now = EV.wet(w)
+    x.cairn_age = w.d - int(c["cairn_day"]) if c.get("cairn_day") is not None else 99
     return x
 
 
@@ -1667,7 +1696,15 @@ def _aftermath(here, add) -> None:
         diggers = sorted({e["actor"] for e in here.events() if e.get("kind") == "work" and e.get("tech") == "bury"
                           and f"parcel:{pid}" in (e.get("about") or []) and e.get("actor")})
         if diggers:
-            x = event_context(here, p["name"], here.day, by=" and ".join(diggers))
+            from cybertron2.engine import things as TH
+            here_bodies = [c for c in TH.at_node(here._w, here.node).values() if c.get("body") and c.get("parcel") == pid]
+            cairned = any(c.get("cairn_day") == here.day for c in here_bodies)
+            raisers = sorted({c.get("cairn_by") for c in here_bodies if c.get("cairn_day") == here.day and c.get("cairn_by")})
+            x = event_context(here, p["name"], here.day, by=" and ".join([d for d in diggers if d not in raisers] or diggers), cairned=cairned,
+                              raisers=" and ".join(raisers) or " and ".join(diggers),
+                              finished=any(c.get("buried") == here.day and c.get("cairn_day") != here.day for c in here_bodies),
+                              dug=any((c.get("grave") or {}).get("day") == here.day or (c.get("buried") == here.day
+                                      and c.get("cairn_day") != here.day) for c in here_bodies))
             spot_rows(here, BURIAL, x, sub, here.node, pid, add, name="burial",
                       who={"others": [m for m in people if m not in diggers], "doer": diggers})
     for bid, b in here.buildings().items():

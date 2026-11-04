@@ -63,9 +63,26 @@ use, eat and offer them as part of it; anyone else who takes them commits a thef
 - **Rot:** a rotting body or rotting food at a spot is a thing with a disease risk (environment/scheduler.md, D2-71), reaching what is
   near it: water (a well or stream downhill), food stored nearby, people working or living close. Disease itself waits (OPEN Q-16,
   L-9); until then rot has signs but no effect on health.
-- **Burying** (D2-96): `work {what: bury, at: <remains>}`, an option shown only where a body lies. About 2 units in soft ground, 4 in
-  stony ground, 6 or more in frozen ground; or a cairn (3 stone, 2 units). A burial ends the body's rot and signs; what it carried
-  stays with whoever took it, or is buried with it.
+- **Burying** (D2-96): `work {what: bury, at: <remains>}`, an option shown only where a body lies. A whole grave takes 2 units in soft
+  ground, 4 in stony ground, 6 in frozen ground; or a cairn (3 stone, 2 units). A burial ends the body's rot and signs; what it
+  carried stays with whoever took it, or is buried with it.
+- **A grave is dug over days, by many** (D4-99):
+  - each `bury` act puts in up to 2 units;
+  - what is dug is kept on the body as a share of the whole grave;
+  - the share keeps between days and adds up across everyone who digs;
+  - what is left is reckoned on the ground as it is that day, so a grave begun in frost is easier once the ground thaws;
+  - the body is buried when the grave is whole, and the result names those who dug it.
+- **A cairn after the burial** (D4-99): `work {what: bury, at: <the dead>, method: cairn}` over a grave without one: 3 stone and 2
+  units. Refused over a grave that already has a cairn.
+- **What an unfinished grave shows** (D4-99, by the noticing rule):
+  - the grave begun beside the body and how far it is dug (barely begun, about a third, about half, two-thirds or more, nearly deep
+    enough), own 0.9;
+  - on a close look, the digging still wanted;
+  - when no one dug it that day: frozen hard again in a frost (own 0.7, close), snow drifted into it (0.8), rainwater standing in it
+    (0.7, close);
+  - after two days untouched, that nobody has dug at it (0.6).
+  - While digging: the doer feels the grave "not deep enough yet"; others see who is digging and hear the spade.
+  - A cairn being raised is seen and heard; a new cairn shows for two days.
 
 ### Decay in the open (D2-87)
 
@@ -93,7 +110,8 @@ for remains whose they were and the day of death.
 |---|---|---|
 | hiding work | under brush 1 unit, buried 2 | proposed; calibrate |
 | a body's signs | "dead some days" about 10 days, then bones to the season's end | proposed; calibrate |
-| burying | 2 units soft, 4 stony, 6 or more frozen; a cairn 3 stone and 2 units | proposed; calibrate |
+| burying | 2 units soft, 4 stony, 6 frozen, for the whole grave; a cairn 3 stone and 2 units | proposed; calibrate |
+| a bury act's share of the work | up to 2 units (D4-99) | decided; calibrate |
 | a carcass fit to eat | about a day after the beast died | decided (D4-52) |
 | a carcass on a road | none 0.3, hidden 0.3 (own conspicuousness x 0.2), by the road 0.4 | proposed; calibrate |
 | meat in a carcass | slaughter's x 0.25 if it starved, x 0.5 otherwise; the whole hide | proposed; calibrate |
@@ -113,4 +131,4 @@ Things they notice where they are (information/noticing.md); the bury option whe
 [proposals/things_in_places.md](../../proposals/things_in_places.md), [verb_modifiers.md](../../proposals/verb_modifiers.md),
 [objects_in_world.md](../../proposals/objects_in_world.md).
 
-*Current as of 2 Nov 2026: D2-85, D2-87, D2-93, D2-95, D2-96, D2-111, D4-52, D4-89.*
+*Current as of 4 Nov 2026: D2-85, D2-87, D2-93, D2-95, D2-96, D2-111, D4-52, D4-89, D4-99.*

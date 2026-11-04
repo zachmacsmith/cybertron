@@ -372,6 +372,16 @@ class Here:
         from cybertron2.engine import things as TH
         return TH.bodies(self._w, self.node)
 
+    def grave_left(self, cid) -> int:
+        """Units of digging a grave still wants, by the ground and the cold now (D2-96, D4-99)."""
+        from cybertron2.engine import things as TH
+        return TH.grave_left(self._w, cid)
+
+    def graves(self) -> dict:
+        """Graves here with no cairn yet (D4-99)."""
+        from cybertron2.engine import things as TH
+        return TH.graves(self._w, self.node)
+
     def spot_name(self, c) -> str:
         from cybertron2.engine import things as TH
         return TH.parcel_name(self._w, c)
