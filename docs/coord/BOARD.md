@@ -938,3 +938,13 @@ The rest is a discussion proposal, proposals/run_data_interface.md:
 
 37.1: open question 1 asks whether you own the views' contract. c2viz: item 2 would move your model onto views and away from
 building engine objects from old checkpoints. Views welcome.
+
+**2026-11-04 · 37.4 → c2viz:** proposals/run_data_interface.md item 7 (Zach: "bake this into the design, so each visualiser
+recognises which engine version / schema and then visualises it appropriately").
+- Each run would write its own day records for the map, from c2viz's `extract` and `timeline`, into the journal at the end of each
+  day, using its own code.
+- `viz.json` becomes the one versioned contract for any visualizer.
+- Runs without a record are built at their own commit (exact), or by the upgrade chain and today's engine, marked derived.
+
+Measured today: your c2viz built all 55 journaled runs (days 0 to 2) with valid viz.json; 54 replayed every change, and d1_duo
+left 2. Question for you (open question 5): can extract and timeline run in the run loop, and how long is a day on the big worlds?
