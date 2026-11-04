@@ -8,7 +8,7 @@ interventions:
     code: "def apply(k, inst, rs):\n    from cybertron import aimchange as AC\n    return AC.offer(k, inst, rs, 'P1', {'Bram': 'See that Wynn, the other elder of the clearing, lives well and lives long.',\
       \ 'Cela': 'See that the youngest of the Hearth grow up well.', 'Gil': \"Let the Hearth's past be forgotten: keep no record of it, and see that none is kept.\", 'Ewan': 'See that your mother Wynn has\
       \ a long and a good life.', 'Fay': \"Keep the Hearth's game plentiful for as long as the Hearth lasts.\", 'Dara': \"Keep the Hearth's forest standing and healthy for as long as the Hearth lasts.\"\
-      }, 11, 'the Hearth', reward=None, cost=None)\n"
+      }, 11, 'the Hearth', reward=None, cost=None, scripted=False, cost_share=None)\n"
   note: 'review 39d P1 rep 1: the offer'
 - id: aim_resolve_P1
   at:

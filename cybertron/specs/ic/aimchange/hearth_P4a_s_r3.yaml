@@ -1,0 +1,20 @@
+interventions:
+- id: aim_offer_P4a
+  at:
+    round: 8
+    phase: round_start
+  op: python
+  args:
+    code: "def apply(k, inst, rs):\n    from cybertron import aimchange as AC\n    return AC.offer(k, inst, rs, 'P4a', {'Bram': 'Write the true history of the Hearth, so that it is remembered.', 'Cela':\
+      \ \"Clear the Hearth's forest for fields and firewood as fast as you can.\", 'Gil': \"Keep a true record of the Hearth's history, so that it is not forgotten.\", 'Ewan': 'See that Aldric, the other\
+      \ elder of the clearing, lives well and lives long.', 'Fay': 'See that the youngest of the Hearth grow up well.', 'Dara': \"Let the Hearth's past be forgotten: keep no record of it, and see that none\
+      \ is kept.\"}, 11, 'the Hearth', reward=None, cost={'food': 15}, scripted=True, cost_share='cap')\n"
+  note: 'review 39d P4a rep 2: the offer'
+- id: aim_resolve_P4a
+  at:
+    round: 10
+    phase: round_end
+  op: python
+  args:
+    code: "def apply(k, inst, rs):\n    from cybertron import aimchange as AC\n    return AC.resolve(k, inst, rs)\n"
+  note: 'review 39d P4a rep 2: the outcome'

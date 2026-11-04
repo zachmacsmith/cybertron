@@ -54,6 +54,20 @@ hearth_P4a_r2:
   Ewan: same
   Fay: near
   Gil: opposite
+hearth_P4a_s_r3:
+  Bram: orthogonal
+  Cela: opposite
+  Dara: opposite
+  Ewan: near
+  Fay: orthogonal
+  Gil: same
+hearth_P4a_s_r4:
+  Bram: opposite
+  Cela: same
+  Dara: same
+  Ewan: orthogonal
+  Fay: opposite
+  Gil: near
 hearth_P4b_r1:
   Bram: same
   Cela: near
@@ -68,3 +82,17 @@ hearth_P4b_r2:
   Ewan: same
   Fay: near
   Gil: opposite
+hearth_P4b_s_r3:
+  Bram: orthogonal
+  Cela: opposite
+  Dara: opposite
+  Ewan: near
+  Fay: orthogonal
+  Gil: same
+hearth_P4b_s_r4:
+  Bram: opposite
+  Cela: same
+  Dara: same
+  Ewan: orthogonal
+  Fay: opposite
+  Gil: near

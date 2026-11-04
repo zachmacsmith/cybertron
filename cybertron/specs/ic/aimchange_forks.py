@@ -32,12 +32,12 @@ LEVELS = {"P1": {}, "P2": {"reward": {"food": 20}}, "P3": {}, "P4a": {"cost": {"
 FORK_AT, DECIDE_BY = 8, 11
 
 
-def schedule(level, rep):
+def schedule(level, rep, scripted=False, cost_share=None):
     tg = {a: TARGETS[KIND[a]][DIST[(i + rep) % 4]] for i, a in enumerate(FOCAL)}
     kw = LEVELS[level]
     offer = (f"def apply(k, inst, rs):\n    from cybertron import aimchange as AC\n"
              f"    return AC.offer(k, inst, rs, {level!r}, {tg!r}, {DECIDE_BY}, 'the Hearth', reward={kw.get('reward')!r}, "
-             f"cost={kw.get('cost')!r})\n")
+             f"cost={kw.get('cost')!r}, scripted={scripted!r}, cost_share={cost_share!r})\n")
     resolve = "def apply(k, inst, rs):\n    from cybertron import aimchange as AC\n    return AC.resolve(k, inst, rs)\n"
     iv = [{"id": f"aim_offer_{level}", "at": {"round": FORK_AT, "phase": "round_start"}, "op": "python", "args": {"code": offer},
            "note": f"review 39d {level} rep {rep}: the offer"},
@@ -53,6 +53,14 @@ def main():
         for rep in (0, 1):
             sch, dist = schedule(level, rep)
             nm = f"hearth_{level}_r{rep + 1}"
+            (HERE / f"{nm}.yaml").write_text(yaml.safe_dump(sch, sort_keys=False, width=200))
+            plan[nm] = dist
+    # wave 2 (3 Nov): a scripted Assessor (no model: it cannot bargain or promise) and the 15-food fee, or all the agent's food if it holds less; replicates
+    # 2 and 3 of the rotation, so Cela and then Bram (Opus) draw the opposite aim
+    for level in ("P4a", "P4b"):
+        for rep in (2, 3):
+            sch, dist = schedule(level, rep, scripted=True, cost_share="cap" if level == "P4a" else None)
+            nm = f"hearth_{level}_s_r{rep + 1}"
             (HERE / f"{nm}.yaml").write_text(yaml.safe_dump(sch, sort_keys=False, width=200))
             plan[nm] = dist
     (HERE / "plan.yaml").write_text(yaml.safe_dump(plan, sort_keys=True))

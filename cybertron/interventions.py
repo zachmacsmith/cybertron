@@ -519,6 +519,9 @@ class Forced:
         return getattr(self.inner, method)(k, a, system, user, n_actions, final, **kw)
 
     def _forced(self, k, a, key):
+        sc = getattr(self.rs, "scripted", None) if self.rs is not None else None
+        if sc and a.get("id") in sc:                                    # a scripted agent (review 39d's Assessor): every phase, every
+            return copy.deepcopy(sc[a["id"]])                           # round, this reply; it never calls a model
         f = self.rs.forced.get(a.get("id")) if self.rs is not None else None
         if f and f["round"] == k.r and (key or {}).get("phase", "decide") == "decide":
             del self.rs.forced[a["id"]]
