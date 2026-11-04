@@ -97,6 +97,8 @@ class World:
         s = self.s = {"day": 0, "seq": 0, "nodes": {}, "roads": {}, "parcels": {}, "buildings": {}, "herds": {}, "containers": {},
                       "people": {}, "institutions": {}, "claims": {}, "offers": {}, "agreements": {}, "know": {}, "mind": {},
                       "events": [], "acts": [], "log": [], "left": []}
+        from cybertron2.engine.schema import WORLD_SCHEMA
+        s["world_schema"] = WORLD_SCHEMA                                   # the shape of this record (spec/core/world_schema.md, D4-100)
         for nid, n in spec["nodes"].items():
             s["nodes"][nid] = {"name": n["name"], "text": n.get("text", ""), "unexplored": bool(n.get("unexplored"))}      # D4-47
             for pid, p in (n.get("parcels") or {}).items():

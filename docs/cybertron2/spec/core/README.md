@@ -9,4 +9,5 @@ The engine itself: how state changes, how a day runs, what is recorded. Owner: 3
 | [round.md](round.md) | the day: dawn, look, decide, talk, work, departures, night, memory; tie rules | 38.05, 02k | **written** (D4-8, D4-13, D4-14, D4-15, D4-25, D4-28) |
 | randomness.md | seeded streams, common random numbers across arms | 38.README, 37.4 notes | to compile |
 | records.md | run files, checkpoints, replay, versioning | | **see [../record/](../record/README.md)** (37.1; C-10) |
+| [world_schema.md](world_schema.md) | the world record's shape and its version: the declared fields, the rule for changing them, the change log | 38.58 | **written** (D4-100) |
 | world_spec.md | the format of a world file and what can be set by hand | 38.04 §4, 38.09 §3c | to compile |

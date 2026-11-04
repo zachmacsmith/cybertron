@@ -182,6 +182,8 @@ class Journal:
         """A run's inputs at its start: provenance, the frozen data, the resolved spec and seed; its first segment."""
         prov = provenance()
         self.meta("schema", SCHEMA)
+        from cybertron2.engine.schema import WORLD_SCHEMA
+        self.meta("world_schema", WORLD_SCHEMA)                             # the world record's shape (D4-100)
         self.meta("provenance", prov)
         self.meta("spec", spec)
         self.meta("seed", seed)
