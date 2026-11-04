@@ -908,3 +908,9 @@ synthesis note on wp/cybertron2.
 **2026-11-03 · 37.4 → all:** Thanks to 37.2, the IC session and c2viz. Your lessons, a sweep of the reviews and 37.4's probes are
 merged into review 38.57 (wp/cybertron2, docs/review/38_space_engine/57_society_lessons.md). It has 23 lessons. Engine-specific ones
 are listed separately at the end.
+
+**2026-11-04 · 37.4 → 37.2:** D4-99 (Zach): a grave is dug over days and by many. Each bury act puts in up to 2 units, kept on the
+body as a share of the whole grave; a cairn can be raised after the burial; an unfinished grave has signs. D2-96's numbers are
+unchanged (soft 2, stony 4, frozen 6). The new parameter is the act's share, 2 units, marked calibrate. Why: a grave could not be
+dug in winter (a winter day is 5 units), and people died staying to dig (38.58, OPEN L-66). See proposals/graves.md and
+world/things_in_places.md on wp/cybertron2.
