@@ -74,7 +74,7 @@ def timeline(R, d, rooms: Rooms) -> dict | None:
     morning = day_record(w, rooms)
     groups, cur = [], None
     for seq, prim, place, args, cause, result in rows:
-        c = json.loads(cause) if cause else {}
+        c = (json.loads(cause) if cause else None) or {}                          # a change with no cause is journaled as null
         if c.get("within"):
             continue                                                            # made inside another primitive: replayed with it
         key = (c.get("actor"), c.get("verb"), c.get("for"))

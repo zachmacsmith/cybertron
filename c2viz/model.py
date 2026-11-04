@@ -81,7 +81,10 @@ class RunModel:
     def day(self, d, timelines=True) -> dict:
         rec = day_record(world_at(self.R, f"d{d}.memory"), self.rooms)
         if timelines:
-            rec["timeline"] = timeline(self.R, d, self.rooms)
+            try:
+                rec["timeline"] = timeline(self.R, d, self.rooms)
+            except Exception as e:                                          # noqa: BLE001 (the day's end is still shown, and says why)
+                rec["timeline"], rec["timeline_error"] = None, f"{type(e).__name__}: {e}"[:300]
         return rec
 
 
