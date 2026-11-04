@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Run explorer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;600&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root { --night: #1b2444; --night2: #202b50; --ink: #f6ead0; --muted: #9aa4c8; --gold: #e8c060; --rim: #c4507a; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--night); color: var(--ink); font: 15px/1.4 Nunito, system-ui, sans-serif; }
+  .px { font-family: "Pixelify Sans", ui-monospace, monospace; }
+  .top { display: flex; align-items: center; gap: 12px; padding: 10px 16px; flex-wrap: wrap; }
+  .top h1 { font: 600 22px "Pixelify Sans", monospace; margin: 0; }
+  .top .where { color: var(--gold); font: 16px "Pixelify Sans", monospace; }
+  .top button { background: var(--night2); color: var(--ink); border: 2px solid #3a4680; font: 14px "Pixelify Sans", monospace; padding: 4px 10px; cursor: pointer; box-shadow: 0 3px 0 #10162e; }
+  .top button:active { transform: translateY(2px); box-shadow: 0 1px 0 #10162e; }
+  .top input[type=range] { flex: 1; min-width: 160px; accent-color: var(--gold); }
+  .day { font: 16px "Pixelify Sans", monospace; min-width: 9em; }
+  .map { position: relative; margin: 0 16px 16px; border: 3px solid #10162e; box-shadow: 0 0 0 3px #3a4680; overflow: auto; max-height: calc(100vh - 78px); background: #10162e; }
+  .map.drag { cursor: grabbing; }
+  .stage { position: relative; }
+  .stage canvas { display: block; width: 100%; height: auto; image-rendering: pixelated; cursor: pointer; }
+  .hint { color: var(--muted); font-size: 13px; }
+  .lab { position: absolute; transform: translate(-50%, 0); font: 14px "Pixelify Sans", monospace; color: var(--ink); text-shadow: 2px 2px 0 #10162e, -1px -1px 0 #10162e;
+    white-space: nowrap; pointer-events: none; }
+  .lab.place { font-size: 17px; }
+  .lab small { display: block; font-size: 12px; color: var(--muted); text-align: center; }
+  .lab.exit { color: var(--gold); }
+  .mark { position: absolute; width: 14px; height: 14px; margin: -7px 0 0 -7px; border: 2px solid var(--rim); border-radius: 50%; pointer-events: none; animation: ping 1.4s ease-out infinite; }
+  @keyframes ping { from { transform: scale(.6); opacity: 1 } to { transform: scale(2.2); opacity: 0 } }
+  .home { color: var(--muted); text-decoration: none; font-size: 14px; } .home:hover { color: var(--gold); }
+  .load { color: var(--gold); font-size: 13px; } .load.err { color: #ff8a8a; }
+  .tip { position: fixed; pointer-events: none; background: #10162e; color: var(--ink); border: 2px solid #3a4680; padding: 4px 8px; font: 13px Nunito, sans-serif; max-width: 340px; display: none; z-index: 5; }
+</style>
+</head>
+<body>
+<div class="top">
+  <a href="./" class="home px" title="all runs">← runs</a><h1 id="title">Loading</h1><span class="where" id="where"></span>
+  <button id="back" hidden>← the world</button>
+  <button id="prev">◀</button><button id="play">▶</button><button id="next">▶|</button>
+  <span class="day" id="day"></span>
+  <input type="range" id="slider" min="0" value="0" aria-label="Day">
+  <span id="dayctl" hidden><button id="dayplay" title="play the day: talk, the work as it happened, dusk, night">☀ the day</button>
+  <input type="range" id="clock" min="-10" max="115" value="115" aria-label="Time of day" style="width:160px"></span>
+  <span class="hint" id="hint"></span><span class="load px" id="load"></span>
+</div>
+<div class="map" id="map"><div class="stage" id="stage"><canvas id="cv"></canvas></div></div>
+<div class="tip" id="tip"></div>
+<script src="c2pixel.js"></script>
+<script>
+"use strict";
+// a run's viz streamed from the site's server (c2viz/site/server.py): the head (the world, every building it ever had), then each day
+// as the engine's model builds it; a day can be explored as soon as it has come
+(async () => {
+const q0 = new URLSearchParams(location.search), RID = q0.get("id"), api = (p) => `api/run/${encodeURIComponent(RID)}/${p}`;
+const loadEl = document.getElementById("load"), say = (t, err) => { loadEl.textContent = t; loadEl.classList.toggle("err", !!err); };
+if (!RID) { say("no run chosen", true); return; }
+say("fetching the run and building its world…");
+const hr = await fetch(api("head")); if (!hr.ok) { say("could not load: " + ((await hr.json().catch(() => ({}))).error || hr.status), true); return; }
+const V = { ...(await hr.json()), days: [] }, ST = V.static, TOTAL = V.meta.days;
+document.title = V.meta.name + " · run explorer";
+const r0 = await fetch(api("day/0")); if (!r0.ok) { say("could not build day 1: " + ((await r0.json().catch(() => ({}))).error || r0.status), true); return; }
+V.days.push(await r0.json());
+const S = { day: 0, node: null, hot: [], playing: false, timer: null };
+const $ = (s) => document.querySelector(s), cv = $("#cv"), map = $("#map"), stage = $("#stage"), tip = $("#tip");
+$("#title").textContent = V.meta.name; $("#slider").max = V.days.length - 1;
+const q = new URLSearchParams(location.search);
+const wantDay = q.get("day") ? +q.get("day") - 1 : 0;
+if (q.get("node")) S.node = q.get("node");
+S.t = q.has("t") ? +q.get("t") : null; S.dayAnim = null;
+S.zoom = +q.get("z") || 5; S.zoomW = +q.get("zw") || 0; S.full = q.has("full");
+let shown = null;
+function render() {
+  const d = V.days[S.day], cal = d.calendar || {};
+  const tl = S.node && V.days[S.day].timeline;
+  const r = S.node ? (tl && S.t != null ? C2Pixel.nodeAt(cv, V, S.node, S.day, S.t) : C2Pixel.node(cv, V, S.node, S.day)) : C2Pixel.world(cv, V, S.day);
+  $("#dayctl").hidden = !tl; if (tl) $("#clock").value = Math.round((S.t ?? 1.15) * 100);
+  S.hot = r.hotspots;
+  // a place close up is drawn at a fixed pixel size and panned (drag, or scroll); the region fits the page
+  // both scales are drawn at a fixed pixel size and panned (drag, or scroll): a larger world is a larger map, not a smaller one
+  if (!S.zoomW) S.zoomW = Math.max(2, Math.min(4, Math.floor(map.clientWidth / r.width * 2) / 2));
+  stage.style.width = S.full ? "100%" : r.width * (S.node ? S.zoom : S.zoomW) + "px";
+  $("#hint").textContent = S.node ? "drag to pan · + / − to zoom · Esc for the region" : "drag to pan · + / − to zoom · click a place to go in";
+  if (shown !== (S.node || "")) { shown = S.node || ""; const z = S.node ? S.zoom : S.zoomW, fc = r.focus || [r.width / 2, r.height / 2];
+    map.scrollLeft = fc[0] * z - map.clientWidth / 2; map.scrollTop = fc[1] * z - map.clientHeight / 2; }
+  $("#day").textContent = `Day ${d.day + 1}${cal.season ? " · " + cal.season : ""}${r.phase ? " · " + r.phase : ""}`;
+  $("#slider").value = S.day; $("#back").hidden = !S.node; $("#where").textContent = S.node ? ST.nodes[S.node].name : `${Object.keys(ST.nodes).length} places`;
+  stage.querySelectorAll(".lab,.mark").forEach((e) => e.remove());
+  const k = 100 / r.width, kh = 100 / r.height;
+  const lab = (cls, x, y, html) => { const e = document.createElement("div"); e.className = "lab " + cls; e.style.left = x * k + "%"; e.style.top = y * kh + "%"; e.innerHTML = html;
+    const f = x / r.width; e.style.transform = f < .14 ? "translate(0,0)" : f > .86 ? "translate(-100%,0)" : "translate(-50%,0)"; stage.appendChild(e); };
+  for (const h of r.hotspots) {
+    if (h.kind === "node") lab("place", h.cx, h.cy, `${h.label}<small>${h.pop} here${h.unexplored ? " · not yet found" : ""}</small>`);
+    if (h.kind === "parcel") lab("", h.cx, h.cy - 4, h.label);
+    if (h.kind === "exit") lab("exit", h.x + h.w / 2, Math.min(r.height - 12, h.y + h.w), h.label);
+    if (h.kind === "event" || (h.kind === "node" && h.deaths)) { const e = document.createElement("div"); e.className = "mark"; e.style.left = (h.cx ?? h.x + h.w / 2) * k + "%"; e.style.top = (h.cy ?? h.y + h.h / 2) * kh + "%"; stage.appendChild(e); }
+  }
+}
+function at(e) {
+  const b = cv.getBoundingClientRect(), x = (e.clientX - b.left) * cv.width / b.width, y = (e.clientY - b.top) * cv.height / b.height;
+  const order = ["person", "event", "herd", "thing", "building", "exit", "node", "landmark", "road", "parcel"];
+  const hits = S.hot.filter((h) => x >= h.x - 1 && x <= h.x + h.w + 1 && y >= h.y - 1 && y <= h.y + h.h + 1);
+  hits.sort((a, b) => order.indexOf(a.kind) - order.indexOf(b.kind));
+  return hits[0];
+}
+let drag = null;
+map.addEventListener("mousedown", (e) => { drag = { x: e.clientX, y: e.clientY, sl: map.scrollLeft, st: map.scrollTop, moved: false }; });
+addEventListener("mousemove", (e) => { if (!drag) return; const dx = e.clientX - drag.x, dy = e.clientY - drag.y; if (Math.abs(dx) + Math.abs(dy) > 4) { drag.moved = true; map.classList.add("drag"); } map.scrollLeft = drag.sl - dx; map.scrollTop = drag.st - dy; });
+addEventListener("mouseup", () => { setTimeout(() => { drag = null; map.classList.remove("drag"); }, 0); });
+cv.addEventListener("mousemove", (e) => { const h = at(e); if (h) { tip.style.display = "block"; tip.innerHTML = ""; tip.textContent = h.label + (h.info ? " — " + h.info : ""); tip.style.left = e.clientX + 14 + "px"; tip.style.top = e.clientY + 12 + "px"; } else tip.style.display = "none"; });
+cv.addEventListener("mouseleave", () => (tip.style.display = "none"));
+cv.addEventListener("click", (e) => { if (drag && drag.moved) return; const h = at(e); if (!h) return; if (h.kind === "node") { S.node = h.id; render(); } else if (h.kind === "exit") { S.node = h.to; render(); } });
+const setDay = (i) => { S.day = Math.max(0, Math.min(V.days.length - 1, i)); render(); };
+function play(on) { S.playing = on; $("#play").textContent = on ? "❚❚" : "▶"; clearTimeout(S.timer); const t = () => { if (!S.playing) return; if (S.day >= V.days.length - 1) return play(false); setDay(S.day + 1); S.timer = setTimeout(t, 900); }; if (on) S.timer = setTimeout(t, 900); }
+$("#prev").onclick = () => { play(false); setDay(S.day - 1); }; $("#next").onclick = () => { play(false); setDay(S.day + 1); };
+$("#play").onclick = () => play(!S.playing); $("#slider").oninput = (e) => { play(false); setDay(+e.target.value); };
+$("#back").onclick = () => { S.node = null; render(); };
+// the day as it happened: talk, the work in the journal's order, dusk, night; then on to the next day if the days are playing
+function playDay(on) { S.dayAnim = on ? { last: performance.now() } : null; $("#dayplay").textContent = on ? "❚❚ the day" : "☀ the day";
+  if (!on) return; if (S.t == null || S.t >= 1.15) S.t = -0.1;
+  const step = (now) => { if (!S.dayAnim) return; const dt = Math.min(100, now - S.dayAnim.last); S.dayAnim.last = now; S.t += dt / 16000 * 1.25;
+    if (S.t >= 1.15) { if (S.playing && S.day < V.days.length - 1) { S.day++; S.t = -0.1; } else { S.t = 1.15; render(); return playDay(false); } }
+    render(); requestAnimationFrame(step); };
+  requestAnimationFrame(step); }
+$("#dayplay").onclick = () => playDay(!S.dayAnim);
+$("#clock").oninput = (e) => { playDay(false); S.t = +e.target.value / 100; render(); };
+document.addEventListener("keydown", (e) => { if (e.key === "ArrowRight") setDay(S.day + 1); else if (e.key === "ArrowLeft") setDay(S.day - 1); else if (e.key === "Escape") { S.node = null; render(); } else if (e.key === " ") { e.preventDefault(); play(!S.playing); }
+  else if (e.key === "+" || e.key === "=" || e.key === "-") { const k = S.node ? "zoom" : "zoomW", z0 = S[k], cx = (map.scrollLeft + map.clientWidth / 2) / z0, cy = (map.scrollTop + map.clientHeight / 2) / z0;
+    S[k] = Math.max(1, Math.min(10, z0 + (e.key === "-" ? -0.5 : 0.5))); render(); map.scrollLeft = cx * S[k] - map.clientWidth / 2; map.scrollTop = cy * S[k] - map.clientHeight / 2; } });
+render();
+// the rest of the days, in order; the slider grows as they come, and a day asked for in the link is shown when it arrives
+(async () => {
+  for (let d = 1; d < TOTAL; d++) {
+    say(`building day ${d + 1} of ${TOTAL}…`);
+    const r = await fetch(api("day/" + d)); if (!r.ok) { say(`day ${d + 1}: ` + ((await r.json().catch(() => ({}))).error || r.status), true); return; }
+    V.days.push(await r.json()); $("#slider").max = V.days.length - 1;
+    if (d === wantDay) setDay(d);
+  }
+  say(`${TOTAL} day${TOTAL === 1 ? "" : "s"}`);
+})();
+})();
+</script>
+</body>
+</html>

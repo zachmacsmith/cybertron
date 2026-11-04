@@ -97,7 +97,9 @@
     // stand: its door a few paces off a road, near the green, clear of the roads and the green; one that does not fit is shown
     // overfull beside its parcel
     const ever = {};
-    V.days.forEach((d, day) => { for (const [bid, b] of Object.entries(d.buildings)) if (b.node === nid) { const sh = shape(b, bid), e = ever[bid];
+    if (V.static.buildings_ever) for (const [bid, x] of Object.entries(V.static.buildings_ever)) { if (x.first.node !== nid) continue;  // the run's, from the model
+      const a = shape(x.first, bid), b = shape(x.last || x.first, bid); ever[bid] = { day: x.day, b: x.first, w: Math.max(a.w, b.w), h: Math.max(a.h, b.h) }; }
+    else V.days.forEach((d, day) => { for (const [bid, b] of Object.entries(d.buildings)) if (b.node === nid) { const sh = shape(b, bid), e = ever[bid];
       if (!e) ever[bid] = { day, b, w: sh.w, h: sh.h }; else { e.w = Math.max(e.w, sh.w); e.h = Math.max(e.h, sh.h); } } });
     const taken = new Uint8Array(W * H), placeOf = {}, MG = 3;
     const order = Object.keys(ever).sort((a, b) => ever[a].day - ever[b].day || (ever[b].w * ever[b].h) - (ever[a].w * ever[a].h) || (a < b ? -1 : 1));

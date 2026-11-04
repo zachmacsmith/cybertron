@@ -148,9 +148,10 @@
         let tgt = null, bd = 1e18; for (const [sx, sy] of sinks) { const v = (sx - x) * ux + (sy - y) * uy, dd = Math.hypot(sx - x, sy - y); if (v > 10 && dd < bd && dd > 20) { bd = dd; tgt = [sx, sy]; } }
         for (const rv of rivers) for (const [rx, ry] of rv.line) { const v = (rx - x) * ux + (ry - y) * uy, dd = Math.hypot(rx - x, ry - y); if (v > 10 && dd < bd && dd > 12) { bd = dd; tgt = [rx, ry]; } }
         const [tx, ty] = tgt || [x + ux * 600, y + uy * 600], line = [[x, y]];
-        for (let st = 0; st < 500; st++) { let dd = Math.atan2(ty - y, tx - x) - hd; dd = Math.atan2(Math.sin(dd), Math.cos(dd));
-          hd += Math.max(-0.1, Math.min(0.1, dd * 0.12)) + (tR() - 0.5) * 0.3; x += Math.cos(hd) * 1.5; y += Math.sin(hd) * 1.5;
-          if (x < 1 || y < 1 || x > W - 2 || y > H - 2 || Math.hypot(tx - x, ty - y) < 3) break;
+        let turned = 0;                                                                      // a river does not circle: it stops on reaching
+        for (let st = 0; st < 500; st++) { let dd = Math.atan2(ty - y, tx - x) - hd; dd = Math.atan2(Math.sin(dd), Math.cos(dd));   // the water, or
+          const dh = Math.max(-0.1, Math.min(0.1, dd * 0.12)) + (tR() - 0.5) * 0.3; hd += dh; turned += dh; x += Math.cos(hd) * 1.5; y += Math.sin(hd) * 1.5;   // once it has turned
+          if (x < 1 || y < 1 || x > W - 2 || y > H - 2 || Math.hypot(tx - x, ty - y) < 8 || Math.abs(turned) > 2.6) break;   // half round
           if (nids.some((m) => m !== n && Math.hypot(x - pos[m][0], y - pos[m][1]) < rad(m) * 0.8)) break;   // into another place's land
           line.push([x, y]); }
         if (line.length > 2) rivers.push({ pid: null, pids: [], n: null, half: Math.max(1.2, c.half * f), line, of: c.pid });

@@ -125,3 +125,11 @@ engine's state and imports nothing it changes.
   - 18 worlds (rift and delta now wait; estuary and fens, sand country, upland and moor added), all 113 roads matched.
   - Measured against the first batch: wood 30% in 17 of 18 worlds (frontier 60%), was 36 to 86%; lowland lakes 0, were 27 to
     153; fen with islands 16% fen, was 0.
+- 04 Nov 2026: the c2viz site (`c2viz/site/`), at Zach's request: browse runs and explore any of them as its days are built.
+  - Lists local journals and runs published with journals (the dataset and folder are flags). 55 are on the Hub now, at
+    3e449ed.
+  - A published run is fetched at a pinned revision and imported by the engine's importer. `model.RunModel` builds its head
+    (with every building the run ever had, so plans do not shift as days arrive), then each day, cached by journal and code.
+  - The page streams the days in. Checked: published c1_combe fetched, imported and its world shown in 6.5 s, all 40 days
+    built; local runs open; no page errors. The test says a run built in parts equals the whole.
+  - Fixed on the way: a village river continued on the region map could circle (combe).

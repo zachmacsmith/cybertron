@@ -70,3 +70,13 @@ def test_a_generated_world_is_drawn_from_its_ground_truth(tmp_path):
     assert set(land["sites"]) == set(w.s["nodes"]) and land["rivers"]
     assert schema.validate({"meta": {k: 0 for k in schema.META}, "tables": {}, "static": {k: 0 for k in schema.STATIC}, "days": [],
                             "land": land}) == []
+
+
+def test_the_site_builds_a_run_in_parts_the_same_as_whole(short_run):
+    """The site builds a run's head and each day on its own (model.RunModel); together they are the whole build."""
+    whole = json.loads(MD.build(short_run).read_text())
+    RM = MD.RunModel(short_run)
+    head = RM.head()
+    assert set(head["static"]["buildings_ever"]) >= {b for d in whole["days"] for b in d["buildings"]}
+    for d in RM.days:
+        assert json.dumps(RM.day(d), sort_keys=True, default=str) == json.dumps(whole["days"][d], sort_keys=True, default=str)

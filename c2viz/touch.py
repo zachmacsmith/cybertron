@@ -148,6 +148,23 @@ def road_path(prev, src, dst):
     return _LGR.path_to(prev, src, dst)
 
 
+# ---------------------------------------------------------------------------------------------------- published runs (the site)
+def import_run(src, out):
+    """A published run's journal tables (DIR/journal/*.parquet, manifest.json) made into its run.db, checked against the manifest."""
+    from cybertron2.engine import exchange as _EX
+    return _EX.import_(src, out)
+
+
+def published_folder() -> str:
+    from cybertron2.engine import exchange as _EX
+    return _EX.FOLDER
+
+
+def default_repo() -> str:
+    from cybertron import publish as _P
+    return _P.default_repo()
+
+
 # ---------------------------------------------------------------------------------------------------- the contract with the engine
 TOUCHPOINTS = {
     "tables": ["ITEMS", "CLEARING", "BLUEPRINTS", "THINGS", "EVENT_EXTENT", "COVERS", "CROPS", "FITTINGS", "FENCES", "WEATHER", "LAYOUT", "TERRAIN",

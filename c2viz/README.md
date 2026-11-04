@@ -43,6 +43,9 @@ python -m c2viz.build RUN --land WORLD.cells.npz                                
 python -m c2viz.model WORLD.yaml --world && python -m c2viz.build --viz WORLD.viz.json       # a world not run: as its file makes it (dawn of day 0)
 ```
 
+**The site** (`c2viz/site/`, its README): `python -m c2viz.site.server --runs DIR` lists every run with a journal, local or published
+to the dataset, and streams any of them in as its days are built.
+
 `map.html` is a bare preview: the map, labels, hover, day controls; click a place to go in, an exit to follow the road; in a
 place, drag to pan and +/- to zoom. Query: `?day=N&node=<id>&z=<zoom>` (`&full` fits a place to the page).
 

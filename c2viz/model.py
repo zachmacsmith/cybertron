@@ -41,27 +41,61 @@ def tables() -> dict:
     return E.tables() | {"spec": {"spaces": SPACES, "ground": GROUND, "rooms": ROOMS, "source": "economy/buildings.md D2-154, D2-155 (not yet in the engine)"}}
 
 
-def build(run, out=None, days=None, timelines=True, land=None) -> Path:
-    R = open_run(run)
-    want = R["days"] if days is None else [d for d in R["days"] if d < days]
-    rooms = Rooms()
-    w0 = world_at(R, "d0.dawn")
-    st = static(w0, R["seed"])
-    recs = []
-    for d in want:
-        rec = day_record(world_at(R, f"d{d}.memory"), rooms)
+class RunModel:
+    """One run's viz, in parts: the head (meta, tables, the static world, a generated world's ground truth, and every building the
+    run ever had, so a place's plan is the same whichever days are loaded) and each day on its own. The site builds a run's days
+    one at a time with this; `build` puts them all in one viz.json."""
+
+    def __init__(self, run, land=None):
+        self.run, self.land, self.R, self.rooms = run, land, open_run(run), Rooms()
+        self.days = list(self.R["days"])
+
+    def head(self) -> dict:
+        R = self.R
+        w0 = world_at(R, "d0.dawn")
+        st = static(w0, R["seed"])
+        st["buildings_ever"] = self.buildings_ever()
+        people = {n: {"household": w0.household_of(n), "model": p.get("model")} for n, p in w0.s["people"].items()}
+        meta = {"name": R["spec"].get("name") or Path(self.run).name, "days": len(self.days), "seed": R["seed"],
+                "source": str(Path(self.run).resolve()), "people": people, "season_days": w0.season_len, "schema": SCHEMA_VERSION}
+        out = {"meta": meta, "tables": tables(), "static": st}
+        ground = GR.pack(self.run, R["spec"], st["roads"], self.land)        # a generated world's ground truth (ENGINE.md §12)
+        if ground:
+            out["land"] = ground
+        return out
+
+    def buildings_ever(self) -> dict:
+        """Every building the run ever had: the day it first stood, its record then and at its last day (a place's plan places each
+        once for the whole run, at the larger of the two)."""
+        from c2viz.extract import building_day, node_view
+        ever = {}
+        for d in self.days:
+            w = world_at(self.R, f"d{d}.memory")
+            views = {}
+            for bid, b in w.s["buildings"].items():
+                rec = building_day(w, views.setdefault(b["node"], node_view(w, b["node"])), bid, self.rooms, {})
+                e = ever.setdefault(bid, {"day": d, "first": rec})
+                e["last"] = rec
+        return ever
+
+    def day(self, d, timelines=True) -> dict:
+        rec = day_record(world_at(self.R, f"d{d}.memory"), self.rooms)
         if timelines:
-            rec["timeline"] = timeline(R, d, rooms)
-        recs.append(rec)
-    people = {n: {"household": w0.household_of(n), "model": p.get("model")} for n, p in w0.s["people"].items()}
-    meta = {"name": R["spec"].get("name") or Path(run).name, "days": len(recs), "seed": R["seed"], "source": str(Path(run).resolve()),
-            "people": people, "season_days": w0.season_len, "schema": SCHEMA_VERSION}
-    viz = {"meta": meta, "tables": tables(), "static": st, "days": recs}
-    ground = GR.pack(run, R["spec"], st["roads"], land)                      # a generated world's ground truth (ENGINE.md §12)
-    if ground:
-        viz["land"] = ground
-        c = ground["roads_check"]
-        print(f"c2viz ground: {Path(ground['source']).name}, roads by the generator's rule {c['match']}/{c['roads']} leave by the world's parcels"
+            rec["timeline"] = timeline(self.R, d, self.rooms)
+        return rec
+
+
+def build(run, out=None, days=None, timelines=True, land=None) -> Path:
+    RM = RunModel(run, land)
+    if days is not None:
+        RM.days = [d for d in RM.days if d < days]
+    head = RM.head()
+    recs = [RM.day(d, timelines) for d in RM.days]
+    viz = {**head, "days": recs}
+    viz["meta"]["days"] = len(recs)
+    if "land" in viz:
+        c = viz["land"]["roads_check"]
+        print(f"c2viz ground: {Path(viz['land']['source']).name}, roads by the generator's rule {c['match']}/{c['roads']} leave by the world's parcels"
               + (f" (not: {', '.join(c['unmatched'])})" if c["unmatched"] else ""))
     for problem in validate(viz):
         print("c2viz schema:", problem)

@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Runs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;600&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root { --night: #1b2444; --night2: #202b50; --line: #3a4680; --deep: #10162e; --ink: #f6ead0; --muted: #9aa4c8; --gold: #e8c060; --hub: #7cc0c8; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--night); color: var(--ink); font: 15px/1.45 Nunito, system-ui, sans-serif; }
+  .px { font-family: "Pixelify Sans", ui-monospace, monospace; }
+  header { padding: 22px 16px 6px; max-width: 1200px; margin: 0 auto; }
+  h1 { font: 600 28px "Pixelify Sans", monospace; margin: 0 0 4px; }
+  .sub { color: var(--muted); max-width: 820px; margin: 0; }
+  .bar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; max-width: 1200px; margin: 14px auto 0; padding: 0 16px; }
+  .bar input[type=search] { flex: 1; min-width: 200px; background: var(--deep); color: var(--ink); border: 2px solid var(--line); padding: 7px 10px; font: 15px Nunito, sans-serif; }
+  .bar button { background: var(--night2); color: var(--ink); border: 2px solid var(--line); font: 14px "Pixelify Sans", monospace; padding: 6px 10px; cursor: pointer; box-shadow: 0 3px 0 var(--deep); }
+  .bar button[aria-pressed=true] { border-color: var(--gold); color: var(--gold); }
+  .note { color: var(--muted); font-size: 13px; max-width: 1200px; margin: 8px auto 0; padding: 0 16px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; max-width: 1200px; margin: 14px auto 40px; padding: 0 16px; }
+  .card { display: block; color: inherit; text-decoration: none; background: var(--night2); border: 2px solid var(--line); padding: 12px 14px; box-shadow: 0 4px 0 var(--deep); }
+  .card:hover, .card:focus-visible { border-color: var(--gold); outline: none; }
+  .t { font: 600 19px "Pixelify Sans", monospace; display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+  .src { font: 12px "Pixelify Sans", monospace; padding: 1px 6px; border: 1px solid currentColor; color: var(--muted); white-space: nowrap; }
+  .src.hub { color: var(--hub); }
+  .m { color: var(--muted); font-size: 13px; margin-top: 4px; }
+  .m b { color: var(--ink); font-weight: 700; }
+  .tag { display: inline-block; font-size: 12px; color: var(--gold); margin-right: 8px; }
+  .empty { color: var(--muted); max-width: 1200px; margin: 30px auto; padding: 0 16px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Runs</h1>
+  <p class="sub">Every run with a journal: those on this machine, and those published to the dataset. Choose one to explore it; its days
+    are built by the engine as you watch, and each can be explored as soon as it arrives. A run seen before opens at once.</p>
+</header>
+<div class="bar">
+  <input type="search" id="q" placeholder="Search by world or run" aria-label="Search runs">
+  <button id="all" aria-pressed="true">all</button><button id="local" aria-pressed="false">this machine</button><button id="hub" aria-pressed="false">published</button>
+</div>
+<div class="note" id="note"></div>
+<div class="grid" id="grid"></div>
+<div class="empty" id="empty" hidden></div>
+<script>
+"use strict";
+const $ = (s) => document.querySelector(s);
+let RUNS = [], SRC = "all";
+const esc = (t) => String(t ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const short = (m) => String(m).replace(/^claude-/, "").replace(/-(\d+)-(\d+)$/, " $1.$2");
+function draw() {
+  const q = $("#q").value.trim().toLowerCase();
+  const shown = RUNS.filter((r) => (SRC === "all" || r.source === SRC) && (!q || [r.title, r.name, r.id].join(" ").toLowerCase().includes(q)));
+  $("#grid").innerHTML = shown.map((r) => {
+    const days = r.source === "local" ? `<b>${r.days}</b> day${r.days === 1 ? "" : "s"}` : r.planned_days ? `planned <b>${r.planned_days}</b> days` : "";
+    const built = r.built && r.built.total ? (r.built.built >= r.built.total ? " · ready" : ` · ${r.built.built} of ${r.built.total} days built`) : "";
+    const models = (r.models || []).filter((m) => m !== "bot").map(short);
+    return `<a class="card" href="run.html?id=${encodeURIComponent(r.id)}">
+      <div class="t"><span>${esc(r.title)}</span><span class="src ${r.source}">${r.source === "hub" ? "published" : "this machine"}</span></div>
+      <div class="m">${esc(r.name)}${r.seed != null ? " · seed " + esc(r.seed) : ""}</div>
+      <div class="m">${days}${r.places ? ` · <b>${r.places}</b> places` : ""}${r.people ? ` · <b>${r.people}</b> people` : ""}${built}</div>
+      <div class="m">${r.generated ? '<span class="tag">generated world</span>' : ""}${models.length ? esc(models.join(", ")) : (r.models || []).includes("bot") ? "bots" : ""}</div>
+      ${r.error ? `<div class="m">could not read: ${esc(r.error)}</div>` : ""}</a>`;
+  }).join("");
+  $("#empty").hidden = shown.length > 0;
+  $("#empty").textContent = RUNS.length ? "No run matches." : "No runs found. Start the server with --runs DIR (folders with a run.db), or publish runs with their journals.";
+}
+for (const k of ["all", "local", "hub"]) $("#" + k).onclick = () => { SRC = k; for (const j of ["all", "local", "hub"]) $("#" + j).setAttribute("aria-pressed", String(j === k)); draw(); };
+$("#q").oninput = draw;
+fetch("api/runs").then((r) => r.json()).then((d) => {
+  RUNS = d.runs; const h = d.hub, nh = RUNS.filter((r) => r.source === "hub").length, nl = RUNS.length - nh;
+  $("#note").textContent = `${nl} on this machine · ` + (!h.enabled ? "published runs off" : h.error ? `published runs could not be read (${h.repo}): ${h.error}`
+    : `${nh} published with a journal in ${h.repo}/${h.folder}` + (h.revision ? ` at ${h.revision.slice(0, 8)}` : ""));
+  draw();
+}).catch((e) => { $("#note").textContent = "could not reach the server: " + e; });
+</script>
+</body>
+</html>
