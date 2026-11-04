@@ -31,10 +31,12 @@ export function chrome({ active = "", over = false, links = {} } = {}) {
     <nav class="nav" aria-label="Site">${nav.map(([h, t, k]) => `<a href="${h}"${k === active ? ' class="on" aria-current="page"' : ""}>${t}</a>`).join("")}
       <a class="ext" href="${GITHUB}">GitHub</a><a class="ext" href="${DATASET_URL}">Dataset</a></nav></div>`;
   document.body.prepend(head);
-  const note = document.createElement("div");
-  note.className = "archive-note";
-  note.innerHTML = `<div class="wrap">Cybertron 1 is complete (October 2026) and archived here as it was. Cybertron 2, with space, is in progress.</div>`;
-  head.append(note);
+  if (active !== "home") {                                         // the home hero has no room for it
+    const note = document.createElement("div");
+    note.className = "archive-note";
+    note.innerHTML = `<div class="wrap">Cybertron 1 is complete (October 2026) and archived here as it was. Cybertron 2, with space, is in progress.</div>`;
+    head.append(note);
+  }
 
   const foot = document.createElement("footer");
   foot.className = "site-foot";

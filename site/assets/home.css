@@ -5,7 +5,8 @@
 .hero-sky { position: absolute; left: 0; top: 0; height: 100%; }
 .hero-copy { position: relative; z-index: 2; padding-top: clamp(128px, 17vh, 170px); text-align: center; }
 .hero .label { color: var(--cloud0); text-shadow: 2px 2px 0 var(--ink); font-size: 16px; }
-.hero h1 { font-size: clamp(28px, 7.4vw, 92px); white-space: nowrap; font-weight: 700; line-height: 0.95; margin: 10px 0 18px; color: var(--cream);
+.hero h1 { font-size: clamp(28px, 8.6vw, 132px); white-space: nowrap; font-weight: 700; line-height: 0.95; margin: 10px 0 18px; color: var(--cream);
+  width: max-content; position: relative; left: 50%; transform: translateX(-50%);   /* wider than the column, centred on the page */
   text-shadow: 0.05em 0.05em 0 var(--ink); letter-spacing: 0.02em; }
 .tagline { font-size: 20px; line-height: 1.55; font-weight: 600; max-width: 34em; margin: 0 auto 26px; color: var(--cream);
   background: var(--sky0); padding: 12px 20px; box-shadow: 0 -4px 0 var(--sky0), 0 4px 0 var(--sky0), -4px 0 0 var(--sky0), 4px 0 0 var(--sky0); }
@@ -61,7 +62,7 @@
 .portrait svg { position: absolute; left: 6px; bottom: 4px; width: 72px; height: 72px; z-index: 1; }
 .story h3 { font-size: 21px; margin: 2px 0 6px; }
 .story .sub { font-size: 15px; line-height: 1.55; margin: 0; color: #d8d0c0; }
-.quote { position: relative; background: var(--cream); color: var(--ink); margin: 6px 4px 18px; padding: 14px 16px; font-size: 17px; line-height: 1.5;
+.quote { position: relative; background: var(--cream); color: var(--ink); margin: 24px 4px 18px; padding: 14px 16px; font-size: 17px; line-height: 1.5;
   font-weight: 600; box-shadow: 0 -4px 0 var(--cream), 0 4px 0 var(--cream), -4px 0 0 var(--cream), 4px 0 0 var(--cream); }
 .quote::before { content: ""; position: absolute; top: -12px; left: 34px; width: 8px; height: 8px; background: var(--cream);
   box-shadow: -4px 4px 0 var(--cream); }
