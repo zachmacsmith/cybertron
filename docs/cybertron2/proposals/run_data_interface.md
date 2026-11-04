@@ -18,7 +18,7 @@ The proposal fixes five contracts, each with a version number. Nothing reads aro
 | the journal's tables | 1 (`meta.schema`) | inputs, requests, responses, changes, events, checkpoints | almost never |
 | the world record's shape | 1 (`world_schema`, D4-100) | the fields of every table, the top level, the day's record | every engine change to state, with an upgrade step |
 | the view tables | proposed: 1 | the documented tables analyses and c2viz read | rarely; additions only within a version |
-| `viz.json` | 2 (c2viz/SCHEMA.md) | what the renderer reads | as now |
+| `viz.json` | 2 (c2viz/SCHEMA.md) | what any visualizer reads; written by the run itself (part 2, item 7) | additions within a version; a converter for each new version |
 | the side logs | proposed: 1 (`meta.log_format`) | turns, days, perception, memory, derived from the journal | never by hand |
 
 ## The proposal
@@ -68,7 +68,28 @@ The proposal fixes five contracts, each with a version number. Nothing reads aro
    - This costs compute only: no model calls.
 6. **Reading at the run's own commit,** for anything the upgrade chain cannot express: a git worktree at the run's `code_sha`,
    with the run's frozen data. It is exact, but slow. It is a fallback for checks, not for everyday reading.
-7. **Fields the tests miss.** At the end of every run the journal records any undeclared world fields in meta
+7. **Each run writes its own visual record** (added 4 Nov). The other items keep old runs readable; this keeps them drawn as their
+   own engine meant them.
+   - **The run writes it.** At the end of each day, the engine running the run computes the day's visual record: c2viz's per-day
+     record, from its `extract` and `timeline`. The journal stores it in a new table (`frames`).
+   - **Why the run, not the reader.** c2viz does more than read fields. It asks the engine where a person stands, what a parcel or
+     crop looks like, the route rule and the signs. A record made by the run's own code is right for that version by construction.
+     A record made later by today's code is not.
+   - **The record is the one contract for any visualizer** (the map, the site, videos), versioned as `viz.json` is now:
+     - within a version, fields are only added, and a missing field means absent;
+     - a breaking change makes a new version, with a converter from the old one;
+     - a renderer declares the versions it draws, and converts older ones as it loads them.
+   - **Runs without the record get one, by the best means available, and say which:**
+     - **exact:** the builder reads the run's code version (`provenance` in the journal), builds at that commit in a cached git
+       worktree, and stores the record;
+     - **approximate:** the upgrade chain and today's engine, marked `derived` and shown as such on the page, as routes inferred
+       for runs from before D4-62 are now;
+     - **pre-journal runs:** the legacy replay first (item 5), then the exact path.
+   - **Cost:** a little time each night, and about 100 KB of record a day, compressed.
+   - **Measured on 4 Nov.** Today's c2viz built all 55 journaled runs (days 0 to 2) with a valid `viz.json`. 54 replayed every
+     change; d1_duo (24 Oct) left 2 unreplayed. So it works now, by care in `touch.py` and because the engine has mostly added
+     fields. This item makes that hold by design.
+8. **Fields the tests miss.** At the end of every run the journal records any undeclared world fields in meta
    (`world_unknown_fields`). A live run then shows a field the bot tests never exercised.
 
 ## Why
@@ -106,7 +127,9 @@ What the audit found (38.58 sweep, and the 4 Nov publishing):
    changes between steps)? This affects storage, not the interface.
 4. Parquet (as published) or SQLite (`run.db`) as the long-term form? Proposed: SQLite while running, Parquet published, and
    import between them, as now.
-5. The order of work. Proposed:
+5. For the c2viz session: can `extract` and `timeline` run inside the run loop (they use only `touch`, so yes in principle), and how
+   long does a day take on the largest worlds?
+6. The order of work. Proposed:
    - item 7 and the views' versions (small);
    - item 2's new tables (`movements` first: c2viz needs it);
    - item 3;
@@ -123,6 +146,10 @@ What the audit found (38.58 sweep, and the 4 Nov publishing):
 
 ## History
 
+- 4 Nov (later): Zach: "Is there a way to bake this into the design, so each visualiser recognises which engine version / schema
+  and then visualises it appropriately?" Added item 7: each run writes its own visual record, a versioned contract for any
+  visualizer, with exact or labelled-approximate records for runs without one. The old item 7 is now item 8. Measured that today's
+  c2viz builds all 55 journaled runs.
 - 4 Nov: part 1 built at Zach's request (D4-100; retrospective): schema.py, the number in worlds and the journal's meta,
   spec/core/world_schema.md, tests/test_cybertron2_schema.py. Part 2 written for discussion.
 
