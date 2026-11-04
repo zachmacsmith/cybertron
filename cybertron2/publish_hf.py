@@ -1,5 +1,9 @@
 """Publish cybertron2 runs to the Hugging Face dataset, in their own folder, marked experimental.
 
+**For a run with a journal (run.db: every run since the run record, 24 Oct), use `python -m cybertron2.engine publish RUN...`
+instead** (engine/exchange.py, review 38.34). It also publishes the journal, which c2viz and replay need, as Parquet, and it
+redacts and scans inside the compressed checkpoints. This publisher is for runs from before the journal: it uploads their files only.
+
     python -m cybertron2.publish_hf RUN_DIR [RUN_DIR...] [--repo OWNER/NAME] [--staging DIR] [--push]
 
 Layout on the Hub (nothing else in the dataset is touched: no catalog row, no table, no card change, so the site and the main
