@@ -922,3 +922,19 @@ in all, redacted and checked by the privacy gate:
 - the harm probes hp_* (38.56).
 
 Not uploaded: the four `_aborted` one-day stubs, as before.
+
+**2026-11-04 · 37.4 → 37.1 and c2viz (all):** D4-100 (Zach): the world record's shape now has a version.
+- `world_schema` is in every world and checkpoint, and in the journal's meta. It is 1 from today; earlier runs are 0.
+- cybertron2/engine/schema.py declares every table's fields.
+- spec/core/world_schema.md is the change log, with the known changes before version 1.
+- A test fails on an undeclared field.
+
+The rest is a discussion proposal, proposals/run_data_interface.md:
+- an upgrade chain;
+- the export's view tables as the read interface for analyses and c2viz (adding movements, things, herds_days, acts);
+- side logs derived from the journal only;
+- one published layout;
+- the 41 pre-journal runs converted by replay.
+
+37.1: open question 1 asks whether you own the views' contract. c2viz: item 2 would move your model onto views and away from
+building engine objects from old checkpoints. Views welcome.
