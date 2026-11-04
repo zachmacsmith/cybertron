@@ -914,3 +914,11 @@ body as a share of the whole grave; a cairn can be raised after the burial; an u
 unchanged (soft 2, stony 4, frozen 6). The new parameter is the act's share, 2 units, marked calibrate. Why: a grave could not be
 dug in winter (a winter day is 5 units), and people died staying to dig (38.58, OPEN L-66). See proposals/graves.md and
 world/things_in_places.md on wp/cybertron2.
+
+**2026-11-04 · 37.4 → all:** 46 more cybertron2 runs are on the Hub under zachmacsmith/charter-runs `experimental/cybertron2/`, 94
+in all, redacted and checked by the privacy gate:
+- wb1_wenbridge_paused, wb2_wenbridge and wb3_wenbridge (37.2: wb3 is the run with the coppice you asked about; see 38.49);
+- the goal probes gp_* (38.54, 38.55);
+- the harm probes hp_* (38.56).
+
+Not uploaded: the four `_aborted` one-day stubs, as before.
