@@ -1,6 +1,12 @@
 # Proposal: the verbs, and what each agent is shown
 
-**Status:** ready for a decision (23 Oct; Zach likes the verb system; its principle is D4-24). **Owner:** 37.4. **Affects:** spec/agents/actions.md, information/prompts.md, conflict/,
+**Status:** partly accepted, mostly built (swept 5 Nov). Decided: the principle (D4-24); modifiers (D2-93, D2-94, D2-112);
+leaving and hiding as `give` (D2-111); `bury` as work (D2-96); `release` (D4-37); the fallback (D4-76); acts that work as they
+read, `take` by tag (D4-94); what a refusal says (D4-95); the store at home (D4-96); refused once, not tried again (D4-97 (7)).
+Built: the verb registry (verbs.py `VERB`, 38 verbs; the verb list, reply schema and play page are generated from it, D4-63).
+**The verb list itself was never decided**, and the built set has drifted from the 24 here (review 38.37 §7c); restoring it is
+agent_view.md point 4 (discussion). Still for Zach: the list, the rules against swelling and the coverage test (Open questions 1
+and 4). **Owner:** 37.4. **Affects:** spec/agents/actions.md, information/prompts.md, conflict/,
 institutions/, life/. Builds on [knowledge.md](knowledge.md) and 38.06 (every action of cybertron 1 and its fate).
 
 ## Summary
@@ -92,26 +98,26 @@ beacon). Nothing found so far needs a new verb.
 | Fight a person | `attack` (as built) | exists |
 | Take a house's food by force | `raid` (as built) | exists |
 | Defend people and houses at night | `guard` (as built) | exists |
-| Take without a fight | **`steal {goods, from}`**: only when nobody else is present at the place (everything else is witnessed, handoff §4); taking from a house needs its door unlocked or the lock broken (02i fittings) | missing |
-| Damage or burn a building, drive off a herd | `attack {target, aim: damage, burn or drive off}` (02g §5b) | proposed by 37.2 |
-| Escape | `travel` as a response before a fight is settled (at night, unsheltered) | via travel |
-| Give in | `give` what is demanded (a demand made in the talk step) | via give |
+| Take without a fight | **`steal {goods, from}`**: only when nobody else is present at the place (everything else is witnessed, handoff §4); taking from a house needs its door unlocked or the lock broken (02i fittings) | missing [built otherwise: `take` without the right is theft, seen or unseen, a barred door stops it (verbs.py `_take`, settle.py `settle_thefts`); who knows: D4-81; no `steal` verb] |
+| Damage or burn a building, drive off a herd | `attack {target, aim: damage, burn or drive off}` (02g §5b) | proposed by 37.2 [still open (5 Nov): `attack` takes aim rob or hurt only (verbs.py); burn orders in a node raid are decided (D2-51), not built (OPEN L-21, L-22); 37.2's area] |
+| Escape | `travel` as a response before a fight is settled (at night, unsheltered) | via travel [built otherwise: `flee` is a choice in the raid's urgent call (fuse.py, D2-81) and in a meeting on the road (roads.py, D2-110)] |
+| Give in | `give` what is demanded (a demand made in the talk step) | via give [built otherwise: `hand over` is a choice in the raid's urgent call (fuse.py, D2-81)] |
 | Fortify | `build` walls, gates, towers, locks (blueprints and fittings, techniques) | via build |
 | Arm | `make` weapons (recipes); carrying a weapon is holding it | via make |
-| Keep watch and raise the alarm | a guard detects early; the hue and cry wakes neighbours (02k fuse events) | proposed (02k) |
-| Hold someone | detention needs a locked room and a guard; ransom is an offer | later |
-| Muster a militia | an office's power (`collect` people as a duty) | with institutions |
+| Keep watch and raise the alarm | a guard detects early; the hue and cry wakes neighbours (02k fuse events) | proposed (02k) [built: `guard` counts as a watcher, `alarm` in the raid's call wakes those in the house, neighbours may hear by the rule (fuse.py; D2-81); the night watch's sleep and food (D2-21) not built] |
+| Hold someone | detention needs a locked room and a guard; ransom is an offer | later [still open (5 Nov): nothing decided or built; no locks exist] |
+| Muster a militia | an office's power (`collect` people as a duty) | with institutions [still open (5 Nov): no offices beyond a household's head (spec institutions/offices.md "to compile")] |
 
 ## Other gaps found in the same pass
 
 | Area | Missing | Proposed |
 |---|---|---|
-| Health | wounds exist, care does not | `work {what: tend wounds, at: person}` (healing and midwifery as methods) |
-| The dead | bodies lie where they fell | `work {what: bury, at: the body}` (a lasting memory to those present) |
-| Animals | herding, breeding, milking, yoking, riding, breaking | gathering and working methods on herds (37.2 livestock) |
-| Hiring | wages for work | an `offer` whose terms are work (a contract once institutions exist) |
-| Exploration | scouting an edge, mapping | `travel` and return, later a scouting method (37.5); a map is a document (`write`) |
-| Travel together | leaving as a party, escorting | `travel {to, with}` |
+| Health | wounds exist, care does not | `work {what: tend wounds, at: person}` (healing and midwifery as methods) [still open (5 Nov): no care technique in data.py; disease is OPEN Q-16] |
+| The dead | bodies lie where they fell | `work {what: bury, at: the body}` (a lasting memory to those present) [built: data.py `bury`, work on a body, D2-96; dug by many over days, a cairn, D4-99] |
+| Animals | herding, breeding, milking, yoking, riding, breaking | gathering and working methods on herds (37.2 livestock) [built in part: herd, milk, slaughter as work methods, `drive`, the led pack ox (D2-136, D4-58), a harness and the plough; breeding happens on its own (D4-44); riding not built] |
+| Hiring | wages for work | an `offer` whose terms are work (a contract once institutions exist) [built: work legs in offers (prompt.py "work 2 days"; D4-94); presets decided, D2-40] |
+| Exploration | scouting an edge, mapping | `travel` and return, later a scouting method (37.5); a map is a document (`write`) [built in part: unexplored places (D4-47), `searching` (D2-125); no scouting method or maps] |
+| Travel together | leaving as a party, escorting | `travel {to, with}` [built otherwise: those leaving the same day for the same place travel as one party (roads.py), and a party met on the road can be joined (D2-110); no `with` argument] |
 
 ## How it avoids confusion and bloat
 
@@ -120,15 +126,25 @@ beacon). Nothing found so far needs a new verb.
 - **Objects are local and known.** The agent sees only what is at its node, what it carries, what it knows, whom it can see.
 - **Refusals teach.** Every refusal names what is short or wrong ("pots need 2 fuel; you have 1"; "Torvald is not here"; "you have
   no kiln here"), at no cost.
-- **Names, not ids.** Objects are named as the agent sees them, with aliases and closest-match suggestions on a miss.
+- **Names, not ids.** Objects are named as the agent sees them, with aliases and closest-match suggestions on a miss. [built in
+  part: aliases and tags with names given (D4-68); offers and agreements still taken by id; no closest-match suggestion found in
+  the engine]
 - **Budgets and look-ups.** Lists are trimmed by priority; detail is a look-up away.
 
 ## Open questions
 
 1. The lean set of 24: anything to merge or split (for example `steal` into `move`, which would hide the act).
+   [still open (5 Nov): the list was never decided (spec agents/actions.md "Open"); built are 38 verbs (verbs.py `VERB`) plus the
+   night's and road's choice words; `steal` was folded into `take`, as built, not decided; restoring the grammar is agent_view.md
+   point 4, with 38.37 §7c's table of what folds where]
 2. `steal`: allowed only unseen? Detected later (a missing item noticed by its owner)?
+   [decided: D4-81 (only witnesses know the thief; the owners find the loss by the store's signs and count, D4-74); built:
+   settle.py `settle_thefts`, signs.py THEFT: a theft is allowed seen or unseen and is witnessed by the rule]
 3. Fleeing and yielding as reflexes (standing orders, later) or only as chosen actions?
+   [built: fuse.py, roads.py, D2-81, D2-110: chosen in the urgent call (defend, flee, hand over, alarm, stay; on the road flee
+   among the meeting's choices), and minor road trouble by the choice made at departure (D2-105); reflexes stay later (D4-16)]
 4. A coverage test: every mechanic in the spec reachable by some verb and object.
+   [still open (5 Nov): no such test in tests/test_cybertron2*.py, and the spec reports no verb count (rule 5)]
 
 ## History
 
@@ -145,6 +161,16 @@ beacon). Nothing found so far needs a new verb.
 
 - 23 Oct: in M1, `say` now has a scope (a building one has access to, or the town) and only `tell` and direct offers wake
   (D4-25); `build` dropped from M1 with the firing pit; no lend or return yet (38.14 §3.3: an omission of this proposal).
+  [built otherwise: a loan is an offer with a promised return ("1 copper tool by day 10", prompt.py offers, agreements.py); `build`
+  is back (verbs.py)]
+
+- 5 Nov: swept (37.4) against DECISIONS, the spec, OPEN.md and the engine. Mostly decided or built in pieces: the principle
+  (D4-24), the registry (verbs.py, 38 verbs; D4-63 builds the play page from it), modifiers (D2-93, D2-94, D2-112), `give` for
+  leaving and hiding (D2-111), `bury` (D2-96, D4-99), `release` (D4-37), the fallback (D4-76), `take` by tag (D4-94), refusals
+  (D4-95), the store at home (D4-96), refused once (D4-97); thefts by `take` (D4-81); fleeing and yielding as the urgent call's
+  choices (D2-81). Never decided: the list itself (38 built against 24 here; review 38.37 §7c), the rules against swelling (meet,
+  come, write and erase arrived with D4-77 and D2-169, with no count) and the coverage test (not built). Open questions: 1
+  decided, 1 built, 2 still open.
 
 ## Sources
 

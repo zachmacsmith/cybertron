@@ -20,8 +20,9 @@ node, used without travelling. If you could go there and be back before nightfal
 
 - **Presence is the node.** Who sees what, who can speak to whom in the talk step, and who can hand goods to whom are all "at the
   same node" (D4-2, D4-35).
-- **Sites** inside a node are parcels of land (one cover each: forest, field, pasture, meadow, water, scrub, rock, built ground) and
-  the buildings on built ground. Moving between sites costs no travel.
+- **Sites** inside a node are parcels of land (one cover each: forest, field, pasture, meadow, water, scrub, rock, built ground; and
+  heath, moor, fen and saltmarsh, D2-185) and the buildings on built ground or scrub (D2-154: 24 and 16 spaces a unit of size).
+  Moving between sites costs no travel.
 - **Clusters.** A larger settlement is several nodes joined by short edges, not one large node (D4-11).
 - **Unexplored nodes** (D4-47): a world marks some nodes unexplored; nobody is seeded with knowledge of them; they become known by
   going there or being told.

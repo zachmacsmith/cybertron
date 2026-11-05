@@ -1,6 +1,11 @@
 # Proposal: what an agent is shown each round, attention, and describing the world
 
-**Status:** discussion (23 Oct). **Owner:** 37.4. **Affects:** spec/information/perception.md, prompts.md, signs.md;
+**Status:** largely built, partly superseded (swept 5 Nov). Built: attention (one `attend` a day), what concerned one, the
+day's notice, glimpses and feeling watched (perceive.py), all under the one noticing rule (D4-53, D4-75), shown at the hearth
+(D4-82); observations as bundles of signs in templates (D4-48, D4-59, D4-74; signs.py). Superseded: chance by salience x
+relevance and the describer that picks facts (D4-53, D4-75); the memory bands (D4-27, D4-28); what is shown, by the
+belief-built message (D4-78) and agent_view.md. Rejected: deliberate misperception. Still open: the narrator, more attention
+for some, prices known, long rule text. **Owner:** 37.4. **Affects:** spec/information/perception.md, prompts.md, signs.md;
 core/round.md. Builds on 38.02 (perception as built), [knowledge.md](knowledge.md), [notes.md](notes.md), [verbs.md](verbs.md).
 
 ## Summary
@@ -45,6 +50,10 @@ day that may only rephrase given facts.
 | Notes | one free note | yes | one pinned note in full, titles of the rest (notes.md) | when it writes |
 | Talk step (if asked again) | messages to it, replies, opened notes, looked-up cards | no | yes (05 §1, notes.md) | when spoken to or when it opens something |
 
+[5 Nov: the memory rows are replaced by D4-27, D4-28, D4-61 and D4-64; with `view: beliefs` (D4-78, view.py) the morning message is
+built from beliefs and "Today you could" is dropped; the evening adds "What you saw today" (D4-82); the rest of this inventory's
+redesign continues in agent_view.md]
+
 ## 2. Attention: not everything everyone does
 
 At village scale (up to about 15-20 people, D4-11), showing every act of everyone is both unrealistic and too long. Proposed tiers:
@@ -56,13 +65,18 @@ At village scale (up to about 15-20 people, D4-11), showing every act of everyon
 | **Glimpse** | everyone else at the node | one short line about each of a few people (who is busy where: "Gil spent the day in the Deep Wood"), a sample drawn by the seed, most familiar people first |
 | **Attended** | the one thing the agent chose to pay attention to today | in detail (§3) |
 
+[built: perceive.py (concerned, notice, glimpse, attended); "always" superseded by D4-75: each tier takes its chance from the one
+noticing rule, a concerned line in full only when it happened to one or in one's house]
+
 **Attention is a free choice in the reply** (`attend {person | building | site | the land}`), one a day. It costs no work units;
 it is the agent deciding what to look at. Following someone all day (`watch`, a verb) costs units and teaches (knowledge §4c);
-attending only observes.
+attending only observes. [built: prompt.py `attend` (a person, building, parcel, herd, the sky, the place in general, the village,
+D2-116), attention x5 by the rule (D4-75); `watch` costs 4 units (data.py)]
 
 **Being watched may be felt.** When someone attends to a person, that person has a chance of noticing ("you had the feeling Brenna
 was watching you today"), higher if they are themselves attending to the watcher or to their own surroundings, lower in a crowd.
-This gives surveillance a cost and counterplay without new rules.
+This gives surveillance a cost and counterplay without new rules. [built: perceive.py, by the rule (D4-75): own 0.3, x2 when
+attending to the watcher, own 1 when the watcher works at one's side; "lower in a crowd" not built]
 
 ## 3. Observations: what the world can tell an observant agent
 
@@ -151,7 +165,9 @@ stranger, a cold hearth in the evening) or not, and each with an id. The describ
 Only the returned facts go into the agent's knowledge store, so the store and the text always agree, at no extra call. A template
 renderer does the same with relevance computed by the engine (facts tagged by what they bear on: food, shelter, a trade, danger, a
 named person, a claim, matched against the observer's state, skill and concerns); a model renderer judges relevance itself, which
-is where it can do better than a template.
+is where it can do better than a template. [superseded by D4-53, D4-75: the engine's noticing rule decides what each person
+notices, relevance only orders it (perceive.py `relevance`), and templates render all of it; the ids noticed are logged per person
+(perceive.py); no model describer is built]
 
 **Tracked: only what was perceived.** What an agent perceived goes into its knowledge store as dated beliefs (knowledge §7); what
 it was not given is never stored. So the record shows exactly who noticed what, when, and why (present, working, attending,
@@ -183,7 +199,8 @@ with the world, as data (D4-24), and can start small: a dozen kinds of thing, a 
 | ties | its kin, its land, its house |
 
 The chance of noticing is roughly salience times relevance: the most salient facts reach nearly everyone in range; low-salience
-ones reach only the agents they bear on.
+ones reach only the agents they bear on. [superseded by D4-53, D4-75: the chance is base x own x visibility x presence x attention
+x the eye; trade enters as a row's knack or an expert's reading (signs.py `knows`, `lay`)]
 
 **Signs for environmental shifts.** Every change from outside (an era, a season's severity, an incident, an event at a distant
 place: D4-4, D4-5) is defined with two parts: **its effects on the mechanisms** (regrowth, the cold, danger, yields) and **its signs**,
@@ -197,7 +214,9 @@ each with a sense, a salience, a range, a lead or lag, a reliability and relevan
 | a hard, cold wind from the north for days | high | everyone |
 
 For a city burning two days away: a glow on the horizon at night and smoke by day (high salience, seen from nodes within sight of
-it), named only by those who know the city; then travellers' news.
+it), named only by those who know the city; then travellers' news. [still open (5 Nov): the sky's and the weather's signs are
+built (signs.py, D4-48), but no era or distant event has signs, and signs that cross to the next node are decided (D2-74), not
+built (OPEN Q-18)]
 
 **Is there enough to notice?** For the daily notice, it depends on the world: quiet days give little and should; a world with
 seasons, incidents, eras and neighbours gives a steady trickle, which is what the environment design (D4-4 to D4-7) supplies. For
@@ -216,7 +235,8 @@ attending, each kind of target holds 5-15 facts once the fact rules exist (§3b)
 **narrator per node per day** (one cheap-model call for the whole node, not one per agent) rewrites the day's facts for that node
 in prose, given only the facts each agent may see, recorded with the run and replayed. A check compares each narrated sentence
 against the facts it was given (no new names, numbers or events). The narrator never decides what an agent learns: the engine
-does.
+does. [built: templates only (signs.py); still open (5 Nov): the narrator, never built or run since the tests of 23 Oct, and named
+in no decision]
 
 **Slight misreadings are acceptable** (Zach, 23 Oct): people mis-see things a little all the time, so a narrator's small
 stretches ("the north wind has frost in it") need not be caught. The check catches only what would mislead an agent into a wrong
@@ -228,19 +248,28 @@ wrong fact on purpose; false beliefs come only from what people say, rumour and 
 
 **Missing:**
 - **Relationships**: who these people are to me (kin, friend, rival, creditor, patron) and how things stand: from the seeded past
-  (D4-21) and what has happened since. A short "People you know" section, budgeted.
-- **Owed and asked**: debts, duties, errands, offers and requests to me, in one place.
-- **The body**: wounds, illness, exhaustion, stage of life.
-- **What I meant to do**: plans carry over only through notes; a standing plan line (the pinned note may be enough).
-- **Prices and terms known**, with their age.
-- **Attention and observations** (§2-3).
+  (D4-21) and what has happened since. A short "People you know" section, budgeted. [built in part: the seeded ties (kin, friends,
+  bad blood, old debts; generate.py, D4-21) are listed in the system text (prompt.py `_kin_lines`); what has happened since lives
+  in the agent's own memory (D4-61); budgets by closeness are agent_view.md point 7]
+- **Owed and asked**: debts, duties, errands, offers and requests to me, in one place. [built: "Agreements (what is owed, as you
+  know it)" and "Offers open here" (prompt.py, view.py); duties of office wait on offices]
+- **The body**: wounds, illness, exhaustion, stage of life. [built in part: hunger and "hurt" (prompt.py, view.py), age and what
+  lies ahead (D4-69); illness and exhaustion have no state (OPEN Q-16; overexertion deferred, Q-2)]
+- **What I meant to do**: plans carry over only through notes; a standing plan line (the pinned note may be enough). [superseded
+  by D4-26, D4-27 (one's past replies stay in context), D4-61 (the rewritten memory) and D4-64 (lines kept for good); the pinned
+  note is built]
+- **Prices and terms known**, with their age. [still open (5 Nov): D2-29 decides that prices are only what was witnessed or told;
+  no dated list of prices known is shown (checked prompt.py, view.py)]
+- **Attention and observations** (§2-3). [built: perceive.py, signs.py; D4-48, D4-75]
 
 **Should go or change:**
-- **The whole map in the system prompt**: only places the agent knows, as it knew them.
-- **Every act at the node**: replaced by the four tiers.
-- **The computed absence** ("not seen for N rounds"): already decided (D2-4).
-- **Long rule text in every prompt**: keep the short common knowledge, move detail to look-ups.
-- **Ids where names will do.**
+- **The whole map in the system prompt**: only places the agent knows, as it knew them. [built: "Other places, as you know them"
+  (prompt.py); an unexplored way by its look (D4-47)]
+- **Every act at the node**: replaced by the four tiers. [built: perceive.py, by the rule (D4-75)]
+- **The computed absence** ("not seen for N rounds"): already decided (D2-4). [decided: D2-4]
+- **Long rule text in every prompt**: keep the short common knowledge, move detail to look-ups. [still open (5 Nov): the system
+  text still carries the verb manual with every craft (about 14,000 characters, review 38.41); agent_view.md points 2 to 5]
+- **Ids where names will do.** [built in part: tags and names given (D4-68); offers and agreements are still named by id]
 
 ## 5b. A worked example (proposed; abridged)
 
@@ -276,10 +305,16 @@ wrong fact on purpose; false beliefs come only from what people say, rumour and 
 ## 6. Open questions
 
 1. How many people a glimpse covers, and how they are chosen (familiarity, salience, a seeded sample).
+   [built: perceive.py, D4-75: up to 3 a day (data.py `glimpse`), one's household first, then the rest in a seeded order, each seen
+   by the rule (a person at work own 2, noticing.md)]
 2. Whether attention is one target a day or a little more for some (an observant temperament, an office such as a watchman).
+   [still open (5 Nov): one `attend` a day is built for everyone (prompt.py); neither temperaments nor offices exist to give more]
 3. The chance of noticing being watched.
+   [built: perceive.py, D4-75: own 0.3 (data.py `felt_watched`), x2 when mutual; the value is not in noticing.md's table]
 4. Which observation facts come first (buildings' condition, people's state, signs, crops, tracks).
+   [decided: D4-48, D4-59, D4-74 (all of these as bundles, signs.py); OPEN Q-8 closed 2 Nov]
 5. Templates only for the first runs, the narrator as an experiment?
+   [built: templates only in every run so far (signs.py); still open (5 Nov): the narrator experiment, never run]
 
 ## History
 
@@ -351,6 +386,12 @@ wrong fact on purpose; false beliefs come only from what people say, rumour and 
   agent-written memory (D4-27, D4-28; spec/information/memory.md); attending one's own house allowed (38.13 §5).
 
 - 31 Oct 2026: everything shown, as built, inventoried with its origins and effects in review 38.37; redesign proposed in [agent_view.md](agent_view.md).
+- 5 Nov: swept (37.4) against DECISIONS, the spec (information/noticing.md, perception.md, prompts.md), OPEN.md and the engine
+  (perceive.py, signs.py, prompt.py, view.py). Built: attention, concerns, the daily notice, glimpses, feeling watched and
+  observations as templated bundles, under the one noticing rule (D4-53, D4-75), shown at the hearth (D4-82). Superseded: salience
+  x relevance and the describer that picks facts (D4-53, D4-75), the memory rows (D4-27, D4-28, D4-61), the morning message (D4-78,
+  with agent_view.md carrying the redesign). Open questions: 1 decided, 3 built (one with the narrator left), 1 still open; in §5,
+  prices known and long rule text are still open.
 
 ## Sources
 

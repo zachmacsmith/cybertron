@@ -73,7 +73,7 @@ arbiter (an elder, a court) and live by the ruling, or an institution over both 
 ### Plots
 
 - **Land at a node is counted in plots**, a fixed unit per world: about what one adult can work in a season. A node's land kind
-  sets how many arable plots it has and their fertility range (world/land.md); clearing and draining add plots; abandoned plots
+  sets how many arable plots it has and their fertility range (world/parcel_graph.md; land.md was never written); clearing and draining add plots; abandoned plots
   return to scrub and forest.
 - **Clearing (D4-60):** a meadow or pasture (6 units of work a unit of size) or scrub (10) is cleared into a fallow field; a wood
   is felled to scrub first. Land nobody holds is held, once cleared, by whoever cleared it (grounds `cleared`).
@@ -162,7 +162,7 @@ and memory, not a claim record.
 | Parameter | Value | Status |
 |---|---|---|
 | plot size (work per season) | about one adult's | proposed; 37.2 calibrates |
-| plots per node by land kind | world/land.md | proposed |
+| plots per node by land kind | world/parcel_graph.md (land.md was never written) | proposed |
 | land per mouth for viability | 37.2 | calibrate |
 
 ## What agents see

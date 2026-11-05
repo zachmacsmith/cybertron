@@ -25,8 +25,11 @@ another household, take up an empty house, or build one.
 
 ## Open
 
-- Who in a household may admit someone or grant use of its house; whether a host's welcome includes food; what becomes of an
-  emptied house: proposals/households.md.
+- What becomes of an emptied house, and households merging: proposals/households.md.
+- Built without a decision of their own, as recorded in proposals/households.md (5 Nov):
+  - who may admit or grant: a household rule, with a seeded default;
+  - a host's welcome may include food (`host` with `feed`, `grant what`).
+  These need a decision and their rules written here (OPEN Q-26).
 
 ## Sources
 

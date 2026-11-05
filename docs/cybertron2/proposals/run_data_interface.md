@@ -146,6 +146,8 @@ What the audit found (38.58 sweep, and the 4 Nov publishing):
 
 ## History
 
+- 5 Nov: swept (37.4): the Status line checked against DECISIONS.md (D4-100 is the latest decision; none touches part 2) and the
+  engine (cybertron2/engine/schema.py, tests/test_cybertron2_schema.py): current as written on 4 Nov, no change.
 - 4 Nov (later): Zach: "Is there a way to bake this into the design, so each visualiser recognises which engine version / schema
   and then visualises it appropriately?" Added item 7: each run writes its own visual record, a versioned contract for any
   visualizer, with exact or labelled-approximate records for runs without one. The old item 7 is now item 8. Measured that today's

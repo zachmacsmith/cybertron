@@ -1,6 +1,10 @@
 # Proposal: the senses across every system
 
-**Status:** discussion (23 Oct). **Owner:** 37.4 (information). **Affects:** spec/information/perception.md, cybertron2/engine/signs.py,
+**Status:** partly accepted, largely built (swept 5 Nov). Decided: one observer term, the eye for the land (D4-50, D2-91);
+the one noticing rule (D4-53, D4-75), which replaces relevance as a factor in the chance; much of §2's coverage through D4-59,
+D4-71, D4-74, D4-90, D4-91 and D4-99 (signs.py), written up for later work in guides/senses.md. Built: expert and lay readings,
+caps on lines a day. Still open: the observer terms beyond the eye and the knack (§1), and the rest of §2. **Owner:** 37.4
+(information). **Affects:** spec/information/perception.md, cybertron2/engine/signs.py,
 perceive.py; every system that has states (economy, conflict, life, environment, institutions).
 
 ## Summary
@@ -32,6 +36,12 @@ Today a sign's chance depends on the sign, attention to its subject, relevance (
 The same sign can come in **two readings**: the expert's ("the ears rub out hard: ready tomorrow") and the lay one ("the barley has
 turned gold"); who gets which follows knowledge.
 
+[5 Nov: of these terms, built: the eye (D4-50, D2-91; sight only, D4-75), the knack (perceive.py `knack`), where one spent the day
+as presence along the day's route (D4-62, D4-75) and attention x3 for what one worked on, one's household and house always read
+(D4-75); hunger, ties and concerns only order what is noticed (perceive.py `relevance`), not its chance. Still open (5 Nov): a
+sharpness per sense, age and stage, temperament, mood and body, knowledge needed to read a sign, company (none in things.py or
+perceive.py). D4-72 rules out signs of feelings the person did not choose]
+
 ### 2. Coverage by system
 
 | System | States with signs now | Missing, to build |
@@ -49,6 +59,14 @@ turned gold"); who gets which follows knowledge.
 | knowledge | seeing a technique done (watching) | a new tool in someone's hands; a building of a kind never seen; a recipe's smell (cheese, charcoal) |
 | institutions and law | none | a notice posted; a register kept; an officer's badge; a court gathering |
 | life | deaths as events | a birth; a sickbed; an old person failing; a child growing |
+
+[5 Nov: much of the "missing" column is built (signs.py): newer systems (D4-59: pregnancy, babies, led beasts, arrivals, failing
+elders, building work, firewood, felling, charcoal, scrub); events and their aftermath (D4-74: fights and raids in the night, a
+theft, a birth, calving, a burial, beasts driven, a house breaking or mended, food rotting, things made, sleeping out); slaughter
+(D4-71); weather on fires (D4-83); heaps by bulk (D4-90); a fitting begun (D4-91); graves (D4-99); tracks, ashes, bodies and
+travellers on the road. Dropped by D4-72: grief and someone avoiding someone (acts and feelings not chosen). Still open (5 Nov):
+locks, illness and tiredness (no such states), wild animals by kind (D2-95, later), trade's displays and prices overheard,
+boundary stones, institutions and law (none built), omens and the moon]
 
 ### 3. How to extend
 
@@ -71,8 +89,14 @@ parameter, so a run can turn them on one at a time and measure what they change.
 ## Open questions
 
 1. Which observer terms first (§1), and their sizes.
+   [still open (5 Nov): the eye was first (D4-50; none x0.5, ordinary x1, keen x3, noticing.md); no other term of §1 is decided
+   or built beyond the knack and presence]
 2. Expert and lay readings: one row with two texts, or two rows gated by knowledge?
+   [built: signs.py, two rows gated by knowledge (`knows: tech` for the expert, `lay: tech` for one who does not), on things at a
+   spot and the road; crop and herd rows use a knack instead; no decision names the form]
 3. A cap on signs per day per person, or let the chances do the work?
+   [built: perceive.py, both: the rule's chances, then caps (the day's notice up to 5, 7 when attending the place; the attended
+   subject up to 9; ambient and worked lines up to 4, noticing.md); the notice and attention caps are not in the spec]
 
 ## Affects
 
@@ -85,9 +109,16 @@ cows heavy with milk to milking (17 of 19). Signs about animals' condition are m
 calf 1 of 15, a pasture grazed bare 1 of 9 (Water Meadow grazed to the earth and the herd left on it). To try: clearer words that say
 what the sign means ("the cows are lowing: they are hungry"), and making such signs a concern of the herd's holders. Nobody attends
 to the sky or the place in general; season and weather signs reach them only in passing.
+[built in part: herd rows now say what they mean ("lowing and restless: they want feeding", signs.py), and the measured evidence on
+what is acted on is in guides/senses.md; still open (5 Nov): herd signs as a concern of the herd's holders (signs.py emits herd
+rows with no concerns)]
 
 ## History
 
+- 5 Nov: swept (37.4) against DECISIONS, the spec (information/noticing.md, signs.md, perception.md), guides/senses.md, OPEN.md
+  and the engine (perceive.py, signs.py, things.py). The worklist's coverage (§2) was largely carried out through other proposals
+  (more_signs.md, sign_bundles.md, slaughter_signs.md, heap_sizes.md: D4-59, D4-71, D4-74, D4-90) under the one noticing rule
+  (D4-53, D4-75); the observer terms beyond the eye stay open. Open questions: 2 built, 1 still open.
 - 23 Oct: one observer term decided for one system (D4-50): an eye for the land, drawn once per person, some with none, applied to
   how bare a place is; the signs' chances grow with bareness. The rest of §1 stays open.
 - 23 Oct: §4 added from the first runs (which signs are acted on, which ignored).
