@@ -19,6 +19,8 @@ charge).
 
 - **Sleeping out:** the night-out food rate and the cold (H-5, D4-12).
 - **Hosted:** a guest sleeps in a house whose holder (or a member of the household) welcomes it; it is sheltered as the household is.
+  `host {person, at?, feed?: true}` (as built): a bed if one is free, not the house's food; with `feed` the guest may also eat from
+  its store that night ("at the household's table"), seen as such.
 - **With gear or a camp** (D2-68):
 
   | Shelter | Made from (technique) | Weight | Lasts | Sleeps | A night out (winter) | The cold's fall |

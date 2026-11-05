@@ -118,7 +118,7 @@ condition, gate open. Per pasture: its grazing.
 | on the road | each head 0.15 a day (winter 0.3); the group gone 0.15 a day; a searcher x5 | proposed (D2-124); calibrate |
 | capacity; splitting | 10 a drover, 30 a herder, 6 unherded; 0.01 under, 0.1 x (head / capacity - 1) over, at most 0.6 | proposed (D2-128); calibrate |
 | share split off | a quarter x 2^z, z Laplace with a spread of one doubling, at most half | decided (D2-131) |
-| fences | above | proposed (D2-130); calibrate |
+| fences | above | decided (D2-130), numbers to calibrate |
 
 ## What agents see
 
