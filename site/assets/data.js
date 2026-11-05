@@ -6,9 +6,12 @@ import { villageCfg } from "./scene.js";
 export const DATASET_REV = "v0.17.2";
 export const HF = `https://huggingface.co/datasets/zachmacsmith/charter-runs/resolve/${DATASET_REV}`;
 export const DATA = new URLSearchParams(location.search).get("data") === "local" ? new URL("../_data", import.meta.url).href : HF;
+// The stories are curated text, not run data: read from the dataset's latest version, so publishing site/stories.yaml
+// (python -m cybertron publish --stories site/stories.yaml --push) updates them without a new release or a site deploy.
+export const STORIES_URL = DATA === HF ? "https://huggingface.co/datasets/zachmacsmith/charter-runs/resolve/main/stories.json" : `${DATA}/stories.json`;
 export const getJson = (url) => fetch(url).then((r) => { if (!r.ok) throw new Error(`${url}: ${r.status}`); return r.json(); });
 export const catalog = () => getJson(`${DATA}/catalog.json`).then((c) => c.runs || []);
-export const stories = () => getJson(`${DATA}/stories.json`).then((c) => c.stories || c || []);
+export const stories = () => getJson(STORIES_URL).then((c) => c.stories || c || []);
 export const viewerUrl = (row) => `${DATA}/${row.path}/viewer.json`;
 
 // A run's data for the run page. Published runs have viewer-core.json.gz (everything but the agents' private reasoning, ~1/10

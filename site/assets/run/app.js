@@ -11,9 +11,13 @@ import { chronicleView } from "./chronicle.js";
 import { peopleView } from "./people.js";
 import { squareView } from "./square.js";
 import { dataView } from "./dataview.js";
+import { villagerSvg } from "../core/villagers.js";
 
 const $ = (s, el = document) => el.querySelector(s);
 chrome({ active: "runs" });
+// the loader's three hopping villagers (a worker, a legislator, a scientist), until the run is ready
+$(".waking-loader .px3").innerHTML = [{ id: "Hal", cls: "worker" }, { id: "Bjorn", cls: "legislator" }, { id: "Soren", cls: "scientist" }]
+  .map((a) => villagerSvg(a, "happy", 48)).join("");
 
 // ------------------------------------------------------------------ load the run
 const params = new URLSearchParams(location.search);
@@ -22,7 +26,8 @@ const row = runs.find((r) => r.run_id === params.get("id")) || runs.find((r) => 
 if (!params.get("id")) history.replaceState(null, "", `?id=${encodeURIComponent(row.run_id)}${location.hash}`);
 let D;
 try { D = await loadRun(row); }
-catch (e) { $("#view").innerHTML = `<p class="wrap loading-run">This run's data could not be loaded (${esc(e.message)}). <a href="runs.html">All runs</a></p>`; throw e; }
+catch (e) { $("#view").innerHTML = `<p class="wrap loading-run">This run's data could not be loaded (${esc(e.message)}). <a href="runs.html">All runs</a></p>`;
+  document.body.classList.remove("waking"); throw e; }
 const S = prepare(D), F = runFacts(S, D);
 const LAST = S.lastRound, TOTAL = Math.max(S.rounds, LAST + 1);
 const R1 = (r) => r + 1;
@@ -180,3 +185,4 @@ addEventListener("scroll", () => {
   $("#runbar").classList.toggle("compact", scrollY > mast.offsetTop + mast.offsetHeight + 240);
 }, { passive: true });
 route();
+requestAnimationFrame(() => document.body.classList.remove("waking"));   // the first view is drawn: show the page, all of it at once

@@ -11,13 +11,14 @@ export const siteUrl = (p) => new URL("../" + p, import.meta.url).href;   // a p
 export { esc } from "./core/text.js";
 import { esc } from "./core/text.js";
 
-// the brand mark: a little red-roofed house with a lit window, 12 x 12
-const HOUSE = [".....RR.....", "....RRRR....", "...RRRRRR...", "..RRRRRRRR..", ".RRRRRRRRRR.", "rrrrrrrrrrrr",
-  ".WWWWWWWWWW.", ".WYYWWWWddW.", ".WYYWWWWddW.", ".WWWWWWWddW.", ".WWWWWWWddW.", ".WWWWWWWddW."];
-const HC = { R: "#c8553d", r: "#9a3a24", W: "#f0e8dc", Y: "#e8c060", d: "#6b4423" };
+// the brand mark: two towers of the town, stone with a shaded side, windows, battlements, one lit window and a door; 12 x 12
+// (site/favicon.svg is the same picture)
+const CASTLE = ["............", ".T.T.T......", ".TTTTs......", ".TwTws......", ".TYTTs......", ".TTTTs.T.T..",
+  ".TwTws.TTTs.", ".TTTTs.TwTs.", ".TTTTs.TTTs.", ".TwTws.TTTs.", ".TTDTs.TwTs.", ".TTDTs.TTTs."];
+const HC = { T: "#f0e8dc", s: "#c8b8a0", w: "#8a5a3a", Y: "#e8c060", D: "#6b4423" };
 export function brandMark(size = 32) {
   let r = "";
-  HOUSE.forEach((row, y) => [...row].forEach((ch, x) => { if (HC[ch]) r += `<rect x="${x}" y="${y}" width="1" height="1" fill="${HC[ch]}"/>`; }));
+  CASTLE.forEach((row, y) => [...row].forEach((ch, x) => { if (HC[ch]) r += `<rect x="${x}" y="${y}" width="1" height="1" fill="${HC[ch]}"/>`; }));
   return `<svg width="${size}" height="${size}" viewBox="0 0 12 12" shape-rendering="crispEdges" aria-hidden="true">${r}</svg>`;
 }
 
@@ -27,21 +28,15 @@ export function chrome({ active = "", over = false, links = {} } = {}) {
   const head = document.createElement("header");
   head.className = "site-head" + (over ? " over" : "");
   head.innerHTML = `<div class="wrap">
-    <a class="brand" href="${L.home}">${brandMark()}<span>Cybertron 1</span></a>
+    <a class="brand" href="${L.home}">${brandMark()}<span>Cybertron1</span></a>
     <nav class="nav" aria-label="Site">${nav.map(([h, t, k]) => `<a href="${h}"${k === active ? ' class="on" aria-current="page"' : ""}>${t}</a>`).join("")}
       <a class="ext" href="${GITHUB}">GitHub</a><a class="ext" href="${DATASET_URL}">Dataset</a></nav></div>`;
   document.body.prepend(head);
-  if (active !== "home") {                                         // the home hero has no room for it
-    const note = document.createElement("div");
-    note.className = "archive-note";
-    note.innerHTML = `<div class="wrap">Cybertron 1 is complete (October 2026) and archived here as it was. Cybertron 2, with space, is in progress.</div>`;
-    head.append(note);
-  }
 
   const foot = document.createElement("footer");
   foot.className = "site-foot";
   foot.innerHTML = `<div class="wrap">
-    <div class="about"><a class="brand" href="${L.home}">${brandMark(26)}<span>Cybertron 1</span></a>
+    <div class="about"><a class="brand" href="${L.home}">${brandMark(26)}<span>Cybertron1</span></a>
       <p>Small worlds for societies of Claude agents. They trade, scheme and write their own laws; we keep every word.</p></div>
     <div><h4>Explore</h4><ul><li><a href="${L.experiment}">The experiment</a></li><li><a href="${L.runs}">All runs</a></li><li><a href="${L.notes}">Notes</a></li></ul></div>
     <div><h4>Open</h4><ul><li><a href="${GITHUB}">Code (MIT)</a></li><li><a href="${DATASET_URL}">Data (CC BY 4.0)</a></li><li><a href="https://zachmacsmith.com">Zach Macsmith</a></li></ul></div>

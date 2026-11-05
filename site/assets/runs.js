@@ -199,10 +199,11 @@ function render() {
 // ------------------------------------------------------------------ cards
 function buildCards() {
   const host = $("#runs");
-  for (const r of RUNS) {
+  RUNS.forEach((r, i) => {
     const { row, fx } = r, href = `run.html?id=${encodeURIComponent(row.run_id)}`, rt = roundsText(row);
     const el = document.createElement("article");
-    el.className = "run" + (row.featured ? " featured" : "");
+    el.className = "run rise" + (row.featured ? " featured" : "");
+    el.style.setProperty("--i", Math.min(i, 8));                                    // the first screenful fades up in turn
     el.innerHTML = `
       <a class="map" href="${href}" tabindex="-1" aria-hidden="true">
         <canvas class="px" width="240" height="150"></canvas>
@@ -224,7 +225,7 @@ function buildCards() {
       </div>`;
     host.append(el);
     r.card = el;
-  }
+  });
   // draw villages only when they come near the screen, one per frame
   const io = new IntersectionObserver((ents) => {
     for (const e of ents) if (e.isIntersecting) { const r = RUNS.find((x) => x.card === e.target); r.visible = true; queueDraw(r); io.unobserve(e.target); }
@@ -300,7 +301,8 @@ function finish(r, out) {
   const cv = $("canvas", r.card);
   if (out.square) cv.style.objectPosition = `${(out.square[0] / out.width) * 100}% ${(out.square[1] / out.height) * 100}%`; // list view crops around the square
   addSpots(r, out);
-  $(".loading", r.card)?.remove();
+  const l = $(".loading", r.card);                                                 // the village shows through as it fades
+  if (l) { l.classList.add("gone"); setTimeout(() => l.remove(), 450); }
   r.card.classList.add("drawn");
 }
 function fail(r, e) {

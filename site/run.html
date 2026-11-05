@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Run · Cybertron 1</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="assets/base.css">
 <link rel="stylesheet" href="assets/run/shell.css">
 <link rel="stylesheet" href="assets/run/front.css">
@@ -11,7 +12,9 @@
 <link rel="stylesheet" href="assets/run/people.css">
 <link rel="stylesheet" href="assets/run/square.css">
 </head>
-<body class="night run-page">
+<body class="night run-page waking">
+<!-- while the run loads: one loader, and the page (masthead, bar, view) shows all at once when it is ready -->
+<div class="waking-loader" role="status"><div class="px3" aria-hidden="true"></div><span>Waking the village</span></div>
 <main id="main">
   <section class="run-mast">
     <canvas class="mast-bg pixel" aria-hidden="true"></canvas>
@@ -44,7 +47,7 @@
     </div>
   </div>
 
-  <div id="view"><p class="wrap loading-run">Waking the village…</p></div>
+  <div id="view"></div>
 </main>
 <div class="tip" id="tip" hidden></div>
 <script type="module" src="assets/run/app.js"></script>

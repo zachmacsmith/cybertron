@@ -3,14 +3,21 @@
 /* ------------------------------------------------------------------ hero */
 .hero { position: relative; overflow: hidden; height: min(92vh, 780px); min-height: 560px; background: var(--sky0); color: var(--cream); }
 .hero-sky { position: absolute; left: 0; top: 0; height: 100%; }
-.hero-copy { position: relative; z-index: 2; padding-top: clamp(128px, 17vh, 170px); text-align: center; }
+.hero-copy { position: relative; z-index: 2; padding-top: clamp(128px, 17vh, 170px); text-align: left; }
+/* in the open sky on the left: near the page's left edge rather than the column's, and the title as wide as the sky is there */
+.hero .hero-copy.wrap { max-width: none; margin: 0; padding-left: max(16px, 4vw); padding-right: 16px; }
 .hero .label { color: var(--cloud0); text-shadow: 2px 2px 0 var(--ink); font-size: 16px; }
-.hero h1 { font-size: clamp(28px, 8.6vw, 132px); white-space: nowrap; font-weight: 700; line-height: 0.95; margin: 10px 0 18px; color: var(--cream);
-  width: max-content; position: relative; left: 50%; transform: translateX(-50%);   /* wider than the column, centred on the page */
+.hero h1 { font-size: clamp(32px, 6.3vw, 116px); white-space: nowrap; font-weight: 700; line-height: 0.95; margin: 10px 0 14px; color: var(--cream);
   text-shadow: 0.05em 0.05em 0 var(--ink); letter-spacing: 0.02em; }
-.tagline { font-size: 20px; line-height: 1.55; font-weight: 600; max-width: 34em; margin: 0 auto 26px; color: var(--cream);
-  background: var(--sky0); padding: 12px 20px; box-shadow: 0 -4px 0 var(--sky0), 0 4px 0 var(--sky0), -4px 0 0 var(--sky0), 4px 0 0 var(--sky0); }
-.actions { display: flex; gap: 12px 16px; justify-content: center; flex-wrap: wrap; }
+/* one line of plain text under the title, no box: a hard dark edge keeps it readable on the sky */
+.tagline { margin: 0 0 26px; font-size: clamp(15px, 1.3vw, 19px); font-weight: 600; line-height: 1.4; color: var(--cream); white-space: nowrap;
+  text-shadow: 2px 2px 0 var(--ink), -1px -1px 0 var(--ink), 1px -1px 0 var(--ink), -1px 1px 0 var(--ink); }
+@media (max-width: 720px) { .tagline { white-space: normal; max-width: 30em; } }
+/* the second button: the sky's colour, turning to the clouds' when the mouse is over it */
+.hero .btn.navy:hover { background: var(--cloud1); color: var(--ink);
+  box-shadow: 0 calc(-1 * var(--px)) 0 0 var(--cloud1), 0 var(--px) 0 0 var(--cloud1), calc(-1 * var(--px)) 0 0 0 var(--cloud1),
+    var(--px) 0 0 0 var(--cloud1), 0 calc(2 * var(--px)) 0 0 var(--cloud2), var(--px) var(--px) 0 0 var(--cloud2); }
+.actions { display: flex; gap: 12px 16px; justify-content: flex-start; flex-wrap: wrap; }
 
 /* the cast on the foreground hill: one villager per class, placed by home.js in scene pixels */
 .hero-cast { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
@@ -32,7 +39,6 @@
   .hero { height: auto; min-height: 640px; }
   .hero-copy { padding-top: 232px; padding-bottom: 210px; }
   .hero .label { font-size: 14px; }
-  .tagline { font-size: 16px; padding: 10px 14px; }
   .villager .say { font-size: 13px; }
 }
 
@@ -68,8 +74,9 @@
   box-shadow: -4px 4px 0 var(--cream); }
 .story-foot { margin-top: auto; display: flex; justify-content: space-between; align-items: baseline; gap: 6px 14px; flex-wrap: wrap; font-size: 14px; }
 .story-foot cite { font-style: normal; color: #b8b6c8; }
-.story-foot a { font: 600 15px/1.3 var(--f-pixel); text-decoration: none; }
-.story-foot a:hover { text-decoration: underline; }
+.story-foot a { font: 600 15px/1.3 var(--f-pixel); text-decoration: none; display: flex; min-width: 0; max-width: 100%; }
+.story-foot .rn { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }   /* a long run name ends in "…", the arrow stays */
+.story-foot a:hover .rn { text-decoration: underline; }
 .car-dots { display: flex; gap: 8px; justify-content: center; margin-top: 4px; }
 .car-dots button { width: 12px; height: 12px; padding: 0; border: 0; background: var(--sand-shadow); cursor: pointer; }
 .car-dots button.on { background: var(--ink); }
@@ -82,6 +89,9 @@
 .run:hover { transform: translateY(-4px); }
 .run:hover h3 { color: var(--wheat); }
 .run .thumb { width: 100%; aspect-ratio: 16 / 10; background: #4e94a8; }
+canvas.thumb { opacity: 0; transition: opacity 0.6s; } canvas.thumb.drawn { opacity: 1; }          /* a village fades in once drawn */
+.hero-sky, .hero-cast { opacity: 0; transition: opacity 0.7s; } .hero-sky.shown, .hero-cast.shown { opacity: 1; }
+.story.ph-card { min-height: 300px; } .run.ph-card .thumb { background: #4e94a8; } .run.ph-card .body { padding: 16px 20px 22px; }
 .run .body { padding: 16px 20px 18px; display: flex; flex-direction: column; flex: 1; }
 .run h3 { font-size: 21px; margin: 6px 0 8px; color: var(--cream); }
 .run p { font-size: 15px; line-height: 1.55; margin: 0 0 14px; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
@@ -111,4 +121,4 @@
 .code .c { color: #9ccfe0; }
 .loading { color: inherit; opacity: 0.7; font-family: var(--f-pixel); }
 
-.hero h1.wordmark { font-weight: 400; letter-spacing: 0; }
+.hero h1.wordmark { font-weight: 700; letter-spacing: -0.01em; }   /* heavy, so the big pixel letters are not long and spindly */

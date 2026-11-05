@@ -123,11 +123,17 @@ code, pre { font-family: var(--f-mono); }
 /* page grounds */
 body.night { background: var(--sky0); color: var(--cream); }
 
-/* Cybertron 1 is archived: a slim note under the header on every page. */
-.archive-note { background: rgba(27, 36, 68, 0.85); color: var(--cream-dim); font-size: 14px; line-height: 1.4; text-align: center;
-  padding: 6px 0; border-top: 1px solid var(--far-shade); }
-
 /* The wordmark ("Cybertron 1") uses Press Start 2P: Pixelify Sans's capital C reads as an O. */
 .wordmark, .brand span { font-family: "Press Start 2P", var(--f-pixel); font-weight: 400; letter-spacing: 0; }
 .brand span { font-size: 18px; }
-.site-head .archive-note .wrap { justify-content: center; min-height: 0; padding-top: 0; padding-bottom: 0; }
+
+/* Graceful loading: what arrives after the page has opened fades up, each item a little after the one before (--i), instead
+   of popping in; while it is on its way, dim placeholder panels hold its place so nothing below jumps. */
+@keyframes rise-in { from { opacity: 0; transform: translateY(8px); } }
+@keyframes fade-in { from { opacity: 0; } }
+@keyframes ph-pulse { 50% { opacity: 0.5; } }
+.rise { animation: rise-in 0.45s ease-out both; animation-delay: calc(var(--i, 0) * 70ms); }
+.ph-card { pointer-events: none; animation: ph-pulse 1.6s ease-in-out infinite; }
+.ph-line { height: 12px; margin: 12px 0; background: rgba(246, 234, 208, 0.1); }
+.ph-line.big { height: 22px; width: 70%; margin-top: 4px; } .ph-line.short { width: 45%; }
+@media (prefers-reduced-motion: reduce) { .rise, .ph-card { animation: none; } }

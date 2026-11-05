@@ -2,7 +2,7 @@
 import { backdrop, village, villageCfg, PALETTE } from "./scene.js";
 import { villagerSvg } from "./core/villagers.js";
 import { chrome, esc, siteUrl } from "./chrome.js";
-import { DATA, fetchInstance, castCfg, pool } from "./data.js";
+import { DATA, STORIES_URL, fetchInstance, castCfg, pool } from "./data.js";
 
 const $ = (s, r = document) => r.querySelector(s);
 const parse = (v) => { if (typeof v !== "string") return v ?? null; try { return JSON.parse(v); } catch (e) { return null; } };
@@ -35,7 +35,8 @@ function drawHero() {
   const vw = hero.clientWidth, vh = hero.clientHeight, H = 150, s = vh / H, W = Math.ceil(vw / s), key = `${W}x${vh}`;
   if (key === lastKey) return;
   lastKey = key;
-  const P = backdrop(sky, "cybertron-home", { width: W, height: H, ground: "sand" });
+  // the mountains climb to the right and the picture keeps few lines across it, so the title has open sky on the left
+  const P = backdrop(sky, "cybertron-home", { width: W, height: H, ground: "sand", rise: 96, calm: true });
   sky.style.width = `${W * s}px`;
   // the hill line: the first sand pixel from the top in each column
   const top = (x) => { x = Math.max(0, Math.min(W - 1, Math.round(x))); for (let y = 60; y < H; y++) if (SAND.has(P.get(x, y))) return y; return H - 20; };
@@ -54,6 +55,7 @@ function drawHero() {
   }).join("");
 }
 drawHero();
+sky.classList.add("shown"); cast.classList.add("shown");
 let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(drawHero, 120); });
 
 // ------------------------------------------------------------------ experiment icons (tiny pixel maps)
@@ -78,7 +80,7 @@ document.querySelectorAll("[data-icon]").forEach((el) => {
 });
 
 // ------------------------------------------------------------------ data
-const [catalogR, storiesR] = await Promise.allSettled([fetch(`${DATA}/catalog.json`).then((r) => r.json()), fetch(`${DATA}/stories.json`).then((r) => r.json())]);
+const [catalogR, storiesR] = await Promise.allSettled([fetch(`${DATA}/catalog.json`).then((r) => r.json()), fetch(STORIES_URL).then((r) => r.json())]);
 const runs = catalogR.status === "fulfilled" ? catalogR.value.runs || [] : [];
 const byId = Object.fromEntries(runs.map((r) => [r.run_id, r]));
 const runHref = (id, hash = "") => siteUrl(`run.html?id=${encodeURIComponent(id)}${hash}`);
@@ -91,26 +93,36 @@ function storyCard(st, i) {
   const href = runHref(st.run_id, `#people/${encodeURIComponent(st.agent)}${st.round ? `@${st.round}` : ""}`);
   const mood = ["ok", "happy", "sad"].includes(st.mood) ? st.mood : "ok";
   const stars = [[10, 8], [58, 14], [30, 22], [70, 4]].map(([x, y]) => `<i class="star" style="left:${(x + i * 13) % 76}px;top:${y}px"></i>`).join("");
-  return `<article class="panel story" aria-roledescription="slide" aria-label="${i + 1}">
+  return `<article class="panel story rise" style="--i:${Math.min(i, 3)}" aria-roledescription="slide" aria-label="${i + 1}">
     <div class="story-top"><div class="portrait pixel">${stars}${villagerSvg({ id: st.agent, cls: st.class }, mood, 72)}</div>
       <div><h3>${esc(st.title)}</h3></div></div>
     <p class="sub">${esc(st.subtitle)}</p>
     <blockquote class="quote">“${esc(st.quote)}”</blockquote>
-    <div class="story-foot"><cite>${esc(who)}</cite><a href="${href}">${esc(run ? run.title : st.run_id)} →</a></div></article>`;
+    <div class="story-foot"><cite>${esc(who)}</cite><a href="${href}" title="${esc(run ? run.title : st.run_id)}"><span class="rn">${esc(run ? run.title : st.run_id)}</span><span aria-hidden="true">&nbsp;→</span></a></div></article>`;
 }
 (function stories() {
   const root = $("#stories");
   if (storiesR.status !== "fulfilled") { root.innerHTML = '<p class="loading">Stories could not be loaded.</p>'; return; }
+  // every story, in a fresh random order each visit; the carousel loops, so none comes round again until all have been shown
   const list = shuffle((storiesR.value.stories || []).filter((s) => s.title && s.quote && s.agent && s.run_id));
   if (!list.length) { root.innerHTML = '<p class="loading">No stories yet.</p>'; return; }
-  root.innerHTML = list.map(storyCard).join("");
-  const ctl = $("#car-ctl"), cards = [...root.children];
-  const pageBy = (dir) => { const w = cards[0].getBoundingClientRect().width + parseFloat(getComputedStyle(root).columnGap || 0);
-    const per = Math.max(1, Math.round(root.clientWidth / w));
-    const atEnd = root.scrollLeft + root.clientWidth >= root.scrollWidth - 4, atStart = root.scrollLeft <= 4;
-    if (dir > 0 && atEnd) root.scrollTo({ left: 0, behavior: "smooth" });
-    else if (dir < 0 && atStart) root.scrollTo({ left: root.scrollWidth, behavior: "smooth" });
-    else root.scrollBy({ left: dir * per * w, behavior: "smooth" }); };
+  root.innerHTML = list.map(storyCard).join(""); root.removeAttribute("aria-busy");
+  const ctl = $("#car-ctl");
+  // an endless loop, always moving the way you press: near the end, the cards already passed are moved round to the end (and
+  // the scroll shifted back by as much, so nothing visibly moves) before the next page slides in; going back does the reverse
+  const pageBy = (dir) => {
+    const w = root.children[0].getBoundingClientRect().width + parseFloat(getComputedStyle(root).columnGap || 0);
+    const per = Math.max(1, Math.round(root.clientWidth / w)), jump = (left) => { root.style.scrollSnapType = "none"; root.scrollLeft = left; root.style.scrollSnapType = ""; };
+    const at = root.scrollLeft;                     // measured first: the browser may itself shift the scroll when cards move
+    if (dir > 0 && at + root.clientWidth + per * w > root.scrollWidth - 4) {
+      for (let k = 0; k < per; k++) root.append(root.children[0]);
+      jump(at - per * w);
+    } else if (dir < 0 && at < per * w - 4) {
+      for (let k = 0; k < per; k++) root.prepend(root.children[root.children.length - 1]);
+      jump(at + per * w);
+    }
+    root.scrollBy({ left: dir * per * w, behavior: "smooth" });
+  };
   $("#prev").onclick = () => pageBy(-1);
   $("#next").onclick = () => pageBy(1);
   const fit = () => { ctl.hidden = root.scrollWidth <= root.clientWidth + 4; };
@@ -125,9 +137,10 @@ const limit = pool(3);
   const root = $("#runs");
   if (!runs.length) { root.innerHTML = '<p class="loading">Runs could not be loaded.</p>'; return; }
   const list = runs.filter((r) => r.featured).slice(0, 6);
-  root.innerHTML = list.map((r) => {
+  root.removeAttribute("aria-busy");
+  root.innerHTML = list.map((r, i) => {
     const models = (parse(r.models_list_json) || []).map(modelShort);
-    return `<a class="panel run" href="${runHref(r.run_id)}"><canvas class="thumb pixel" data-id="${esc(r.run_id)}" aria-hidden="true"></canvas>
+    return `<a class="panel run rise" style="--i:${i}" href="${runHref(r.run_id)}"><canvas class="thumb pixel" data-id="${esc(r.run_id)}" aria-hidden="true"></canvas>
       <div class="body"><div class="label">${esc(r.spec)}</div><h3>${esc(r.title)}</h3><p>${esc(r.description || "")}</p>
       <div class="facts"><span class="chip gold">${r.n_agents} agents</span><span class="chip">${r.rounds_played ?? r.rounds} rounds</span>${models.map((m) => `<span class="chip">${esc(m)}</span>`).join("")}</div></div></a>`;
   }).join("");
@@ -135,7 +148,7 @@ const limit = pool(3);
     const row = byId[cv.dataset.id];
     // each village from the run's real cast (its classes, Makers, camps and observer), read from the start of its viewer.json
     limit(() => fetchInstance(row)).then((inst) => castCfg(row, inst), () => villageCfg(row))
-      .then((cfg) => { try { village(cv, row.run_id, Object.assign(cfg, { width: 160, height: 100 })); } catch (e) { console.warn("village", row.run_id, e); } });
+      .then((cfg) => { try { village(cv, row.run_id, Object.assign(cfg, { width: 160, height: 100 })); cv.classList.add("drawn"); } catch (e) { console.warn("village", row.run_id, e); } });
   });
 })();
 

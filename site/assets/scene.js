@@ -44,27 +44,34 @@ export function tree(P, x, y, r, R) {
 export function backdrop(cv, seedStr, opts = {}) {
   const W = opts.width || 320, H = opts.height || 140, R = rng(hstr(seedStr)), n = noise(hstr(seedStr) ^ 7), P = Px(cv, W, H);
   const k = H / 140, bands = PALETTE.sky;
-  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const t = y / (95 * k) * 3; let b = Math.min(2, Math.floor(t)); if (t - b > 0.8 && b < 2 && (x + y) % 2) b++; P.put(x, y, bands[b]); }
+  // opts.calm: fewer lines across the picture: one sky colour instead of three bands, and clouds in a few banks, not a strip
+  const calm = !!opts.calm;
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const t = y / (95 * k) * 3; let b = calm ? 0 : Math.min(2, Math.floor(t)); if (!calm && t - b > 0.8 && b < 2 && (x + y) % 2) b++; P.put(x, y, bands[b]); }
   for (let i = 0; i < 110 * W / 320; i++) P.put(R() * W, R() * 80 * k, R() < 0.2 ? "#f6c8d8" : R() < 0.5 ? "#ffffff" : "#aab4d8");
   for (let i = 0; i < 8 * W / 320; i++) { const x = R() * W | 0, y = R() * 60 * k | 0; P.put(x, y, "#ffffff"); for (const [a, b] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) P.put(x + a, y + b, "#c8d0f0"); }
-  const ridge = (off, base, amp, lit, shade, rim, rim2, streak) => {
-    const h = (x) => base + (n(x / 55 + off, off) - 0.5) * amp + (n(x / 13 + off, off + 3) - 0.5) * amp * 0.25;
+  // opts.rise: a tilt to the whole range (px at 140 high): the mountains and clouds sink toward the ground on the left and
+  // climb on the right by up to rise / 2 each way, so the sky opens on the left; opts.streaks: how often a lit slope gets a
+  // streak down it (default 0.18)
+  const rise = (opts.rise || 0) * k, streaks = opts.streaks ?? 0.18, tilt = (x) => rise * (0.5 - (x / W) ** 1.2);
+  const ridge = (off, base, amp, lit, shade, rim, rim2, streak, lift = 1) => {
+    const h = (x) => base + tilt(x) * lift + (n(x / 55 + off, off) - 0.5) * amp + (n(x / 13 + off, off + 3) - 0.5) * amp * 0.25;
     for (let x = 0; x < W; x++) {
       const y0 = h(x) | 0, s = h(x - 1) - h(x);
       for (let y = y0; y < H; y++) P.put(x, y, s > 0 ? lit : shade);
-      if (s > 0.25) { P.put(x, y0, rim); P.put(x, y0 + 1, rim2); if (R() < 0.18) { let yy = y0 + 3, xx = x; for (let q = 0; q < 6 + R() * 10; q++) { P.put(xx, yy, streak); yy++; if (q % 2) xx++; } } }
+      if (s > 0.25) { P.put(x, y0, rim); P.put(x, y0 + 1, rim2); if (R() < streaks) { let yy = y0 + 3, xx = x; for (let q = 0; q < 6 + R() * 10; q++) { P.put(xx, yy, streak); yy++; if (q % 2) xx++; } } }
     }
   };
   ridge(0, 60 * k, 70 * k, PALETTE.farLit, PALETTE.farShade, PALETTE.rim, PALETTE.mauve, PALETTE.streak);
   const cy = 80 * k;
   for (let i = -10; i < W + 10; i += 6) {
-    const cx = i + R() * 5, cyy = cy + R() * 10 - 5, r = 5 + R() * 9;
-    for (let y = Math.floor(cyy - r); y < Math.min(cy + 7, cyy + r); y++) for (let x = Math.floor(cx - r); x < cx + r; x++) {
+    const cx = i + R() * 5, lift = (calm ? (n(i / 60, 21) - 0.5) * 30 * k : 0) + tilt(i) * 0.6, cyy = cy + lift + R() * 10 - 5, r = 5 + R() * 9;
+    if (calm && n(i / 45, 13) < 0.52) continue;                                       // calm: only where a bank of cloud lies
+    for (let y = Math.floor(cyy - r); y < Math.min(cy + lift + 7, cyy + r); y++) for (let x = Math.floor(cx - r); x < cx + r; x++) {
       if ((x - cx) ** 2 + (y - cyy) ** 2 > r * r) continue;
       P.put(x, y, y - (cyy - r) < 2.5 ? PALETTE.cloud[0] : y > cyy + r * 0.3 ? PALETTE.cloud[2] : PALETTE.cloud[1]);
     }
   }
-  ridge(40, 96 * k, 48 * k, PALETTE.nearLit, PALETTE.nearShade, PALETTE.rim2, "#7a3e78", "#3f3a7c");
+  ridge(40, 96 * k, 48 * k, PALETTE.nearLit, PALETTE.nearShade, PALETTE.rim2, "#7a3e78", "#3f3a7c", 0.55);
   const green = opts.ground ? opts.ground === "meadow" : R() < 0.5, g = green ? PALETTE.meadow : PALETTE.sand;
   const fh = (x) => 116 * k + (n(x / 70 + 100, 9) - 0.5) * 20 * k;
   for (let x = 0; x < W; x++) for (let y = fh(x) | 0; y < H; y++) { const v = n(x / 4, y / 3, 2); P.put(x, y, v > 0.62 ? g[2] : v < 0.38 ? g[1] : g[0]); }
