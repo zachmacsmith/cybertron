@@ -1,6 +1,8 @@
 # Proposal: private notes (what an agent keeps in mind)
 
-**Status:** discussion (23 Oct). **Owner:** 37.4. **Affects:** information/perception.md, information/prompts.md,
+**Status:** partly accepted: D4-95 (`pin` by a note's title in any case, or by its text); the rest built as proposed (8 notes of
+about 150 words, one pinned, titles shown, 2 opened in the talk step: perceive.py, run.py, prompt.py) but never decided, and in
+discussion. **Owner:** 37.4. **Affects:** information/perception.md, information/prompts.md,
 information/letters_and_documents.md, life/birth_and_death.md.
 
 ## Summary
@@ -23,6 +25,9 @@ document; they die with the agent. This is cybertron 1's scratchpad and files (`
 | Who can read | only the agent |
 | Death | lost, except what was told or written down |
 | Literacy | not needed: this is memory, not writing |
+
+[built: perceive.py (`note`, `pin`, `forget`, free), run.py and prompt.py (titles shown; opened notes shown in the talk step); `pin`
+by text, D4-95; no D-n records the rest, and no spec file holds it (spec/agents/actions.md has only `pin`)]
 
 **Notes against the other kinds of memory:**
 
@@ -58,9 +63,11 @@ knowledge has to reach someone else or outlast the writer, which is where instit
 
 ## Open questions
 
-1. How many notes and how long (8 and 150 words as a start).
-2. How many notes may be opened in one talk step (attention).
-3. Whether old notes fade (a memory that is never opened blurs), or stay exact.
+1. How many notes and how long (8 and 150 words as a start). [built: perceive.py, data.py PHYSICS `notes` (max 8, words 150), as
+   proposed; no decision (checked DECISIONS.md and spec/information/)]
+2. How many notes may be opened in one talk step (attention). [built: run.py, data.py `notes.open` 2, as proposed; no decision]
+3. Whether old notes fade (a memory that is never opened blurs), or stay exact. [still open (5 Nov): notes stay exact as built
+   (perceive.py); nothing on fading in DECISIONS.md, memory.py or spec/information/memory.md]
 
 ## History
 
@@ -76,6 +83,9 @@ knowledge has to reach someone else or outlast the writer, which is where instit
   Proposed revision, not built (it changes the rule): a pin that names no note writes it as one (title its first 60 characters,
   text the whole) and pins it, if there is room for another note; otherwise refused as now. The alternative is a clearer schema
   line ("pin: the title of a note you already keep") with no change of rule.
+- 5 Nov: swept (37.4): the notes are built as proposed (8, about 150 words, one pinned, 2 opened in the talk step) but no decision
+  records them; the 24 Oct revision was superseded by D4-95 (`pin` by a note's title in any case or its text, and by the one note
+  written that turn; a pin naming no note is still refused). Still open: whether notes fade, and a decision on the rest.
 
 ## Sources
 
