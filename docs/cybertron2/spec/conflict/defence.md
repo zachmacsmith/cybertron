@@ -49,10 +49,16 @@ and its keeper as they know them.
 ## Open
 
 - Overlapping events in depth (OPEN Q-19).
+- **The night watch (D2-21) is not built** (5 Nov). Two acts that sound like it are different:
+  - the engine's `watch` is a day spent working beside someone, to learn how they do things;
+  - the night act is `guard`, which costs no units: one stands guard over a house, and it adds to the defence (settle.py).
+  
+  Whether guarding at night becomes the watch (no sleep, eats more, detects first, may wake the others) is with Zach (37.2's review
+  02zo, A2).
 - Gate rules beyond the check (tokens, tolls, passes): proposals/gates.md.
 
 ## Sources
 
 proposals/attacks_and_walls.md, fuse_events.md, gates.md; 02k.
 
-*Current as of 24 Oct 2026: D2-5, D2-20, D2-21, D2-49, D2-50, D2-80 to D2-84.*
+*Current as of 5 Nov 2026: D2-5, D2-20, D2-21, D2-49, D2-50, D2-80 to D2-84 (the night watch's state noted).*

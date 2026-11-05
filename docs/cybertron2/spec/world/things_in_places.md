@@ -74,6 +74,9 @@ use, eat and offer them as part of it; anyone else who takes them commits a thef
   - the body is buried when the grave is whole, and the result names those who dug it.
 - **A cairn after the burial** (D4-99): `work {what: bury, at: <the dead>, method: cairn}` over a grave without one: 3 stone and 2
   units. Refused over a grave that already has a cairn.
+- **Two cairns.** This cairn over a grave is not the monument called a cairn (economy/buildings.md, data MONUMENTS `cairn`: 6
+  stone, 3 units, a building that carries lines). The grave's cairn is a mark on the grave. Whether the two should be one thing is
+  open (OPEN L-67).
 - **What an unfinished grave shows** (D4-99, by the noticing rule):
   - the grave begun beside the body and how far it is dug (barely begun, about a third, about half, two-thirds or more, nearly deep
     enough), own 0.9;

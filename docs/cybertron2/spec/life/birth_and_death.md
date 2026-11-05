@@ -177,10 +177,14 @@ A baby sleeps where its mother sleeps when she is at the same place: in her bed,
 
 - Care's effects on health and learning (OPEN L-26); beliefs and values passed to children (OPEN L-25).
 - Disease (OPEN L-9).
+- From proposals/fertility.md, open for Zach:
+  - §3, lifespan and family size;
+  - §4, soft limits: the young are vulnerable;
+  - §5, what a child costs: feeding binds only when the land is full.
 
 ## Sources
 
 [proposals/children.md](../../proposals/children.md), [fertility.md](../../proposals/fertility.md), [life.md](../../proposals/life.md),
 [38.09](../../../review/38_space_engine/09_life_design.md); 02v_children_model.py.
 
-*Current as of 2 Nov 2026: D2-138 to D2-153, D2-162, D4-19, D4-20, D4-64, D4-87, D4-88, D4-97.*
+*Current as of 5 Nov 2026: D2-138 to D2-153, D2-162, D4-19, D4-20, D4-64, D4-87, D4-88, D4-97 (Open list completed).*
