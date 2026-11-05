@@ -1,6 +1,7 @@
 # Proposal: law in cybertron2
 
-**Status:** discussion (23 Oct). **Owner:** 37.4, for review by 37.3 (who owns institutions acting on institutions) and 37.2 (laws
+**Status:** discussion (nothing decided or built beyond the principles of D4-23 (an institution's code may bind its own members)
+and D4-24 (clauses added as data); spec institutions/law.md still to compile). **Owner:** 37.4, for review by 37.3 (who owns institutions acting on institutions) and 37.2 (laws
 with a seat, a text, a reach and a proclamation: 02h §5). **Affects:** spec/institutions/law.md, membership.md, offices.md,
 contracts.md; information/letters_and_documents.md; agents/actions.md; core/architecture.md (hooks).
 
@@ -100,18 +101,27 @@ the hall), and a capture leaves witnesses and documents that others can contest.
 
 ## Open questions
 
-1. The first clause menu (which ten or so clauses).
+1. The first clause menu (which ten or so clauses). [still open (5 Nov): no clause menu and no law in the engine (agreements.py:
+   "cybertron2 has no law language yet"); not in DECISIONS; review 38.20 K1]
 2. Who may change a register, and with what witness (an office power; a register as a document that can be copied, stolen or
-   burned: 02h §3).
-3. How a clause's application is shown to those it binds (a due line, a notice) within the prompt budget.
+   burned: 02h §3). [still open (5 Nov): no registers or documents built; holding.md makes a register a document at a seat; the
+   only writing built is lines on buildings (D2-169, D2-170), which others can change at a cost; review 38.20 K2]
+3. How a clause's application is shown to those it binds (a due line, a notice) within the prompt budget. [still open (5 Nov): no
+   clauses to show; the nearest built is the prompt's "Agreements (what is owed, as you know it)" (prompt.py, view.py) for standing
+   agreements (D2-35, D2-39); review 38.20 K3]
 4. Courts: a judge as an office, elders, an assembly; how a case is brought and what a ruling can do (records only, or orders to
-   officers).
-5. Whether `law.code` worlds keep cybertron 1's full law language or a smaller one.
+   officers). [still open (5 Nov): no courts and no offices built beyond a household's head, whose succession is the household's
+   own rule (D2-143); review 38.20 K4]
+5. Whether `law.code` worlds keep cybertron 1's full law language or a smaller one. [still open (5 Nov): no `law.code` setting
+   and no law language in cybertron2 (checked engine/*.py and specs/); review 38.20 K5]
 
 ## History
 
 - 23 Oct: proposed (37.4, with Zach), after Zach asked whether cybertron 1's Python law still makes sense. Zach's point added the
   section on capture: records are real, so whoever controls them has the law on their side when challenged.
+- 5 Nov: swept (37.4): nothing in it is decided or built; the nearest built pieces are claims and inheritance (D4-23, D2-143),
+  standing agreements with work duties (D2-35 to D2-39) and lines written on buildings (D2-169). All five questions are still open
+  (review 38.20 K1 to K5).
 
 ## Sources
 

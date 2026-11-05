@@ -1,6 +1,8 @@
 # What an agent is shown: the world and its rules, not choices made for it
 
-**Status:** partly accepted: D4-78 (points 1 and 9, as a world setting); the rest in discussion
+**Status:** partly accepted: D4-78 (points 1 and 9, as the world setting `view: beliefs`, built in view.py); point 10's upbringing
+channel settled another way by D4-64 (lines passed on with care: proposals/lasting_memory.md); the rest (points 2 to 8: the system
+text, the verb grammar, budgets, the reply schema) in discussion
 **Owner:** 37.4
 
 ## Summary
@@ -58,8 +60,10 @@ conversations restart only at the end of a stretch. The inventory and evidence a
    budgeted. Held texts do nothing mechanical; what they change is what people do. Firmness, values and drift: proposals/
    beliefs_and_values.md (37.2, flagged for later, OPEN L-25). Found with it: a child born in a run gets no customs or history at
    all (`p_born` seeds an empty memory; only the mother's map is copied), so customs end with the seeded generation.
+   [decided: D4-64: a child keeps lines passed on with care (whoever gives the most food that day), and customs are seeded only to those alive at the start; built: life.py, memory.py]
 
-Open to test: whether the store's "food worth N meals; about K a night" stays (arithmetic on what one sees).
+Open to test: whether the store's "food worth N meals; about K a night" stays (arithmetic on what one sees). [still open (5 Nov):
+flagged for later as OPEN L-60 (Zach, 2 Nov: "surely they can do the math?"); D4-97 (5) added a fuel line beside it]
 
 ## Why
 
@@ -88,10 +92,13 @@ manual") and knowledge.md §4d (names in the system text, cards by look-up).
 ## Open questions
 
 1. The test (38.37 §7): arms A (as now), B (a fair menu), C (this), in the duo world; waste on refusals, the range of crafts used,
-   make and build, chains completed, Haiku's acts, the end state.
-2. Whether Haiku keeps a fair menu, whatever C shows for the others.
-3. The store's meals and nights line.
-4. Which crafts are basic.
+   make and build, chains completed, Haiku's acts, the end state. [still open (5 Nov): not run as three arms; Combe (review 38.41)
+   ran C alone against earlier runs' figures (daily message 2,002 characters against 6,604; refusals 7.4% against 6.5%)]
+2. Whether Haiku keeps a fair menu, whatever C shows for the others. [still open (5 Nov): no Haiku arm run; the menu stays in
+   worlds without `view: beliefs` (prompt.py); Haiku keeps D4-28's memory queue (memory.py `append_models`)]
+3. The store's meals and nights line. [still open (5 Nov): flagged for later, OPEN L-60; D4-97 (5) added the fuel line]
+4. Which crafts are basic. [still open (5 Nov): the basic set is D2-43's (55 of the 84 techniques in data.py are basic); whether to
+   shrink it is for Zach; not in DECISIONS]
 
 ## Affects
 
@@ -132,6 +139,10 @@ seeing.md §1, senses.md; cybertron2/engine/prompt.py, perceive.py, knowledge.py
 - 2 Nov 2026: the belief-built message, built 1 Nov at Zach's request, recorded as D4-78 (spec information/prompts.md) in a review of
   decisions not yet logged. Still in discussion: the system text (the verb manual and its tool multipliers), the verb grammar,
   texts as beliefs, budgets by closeness.
+- 5 Nov: swept (37.4): decided and built are the belief-built morning message (D4-78, view.py; points 1 and 9) and, for point 10's
+  upbringing, lines passed on with care (D4-64, life.py); writing is built only as lines on buildings (D2-169, D2-170). Still open:
+  the three-arm test, Haiku's menu, the store line (L-60), the basic set, and points 2 to 8 (the system text is still the verb
+  manual, review 38.41; the reply schema still lists known names, prompt.py); 38.40's taxonomy is not yet folded in.
 
 ## Sources
 

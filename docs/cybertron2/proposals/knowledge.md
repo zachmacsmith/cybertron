@@ -1,6 +1,10 @@
 # Proposal: what agents know they can do (actions, recipes, buildings)
 
-**Status:** discussion (23 Oct). **Owner:** 37.4 (information, agents); 37.2 for the content (recipes, skills, blueprints).
+**Status:** partly accepted: D4-24 (the principle: actions grow by data and agents learn them in the world), D4-33 (seeded
+knowledge of others' crafts is awareness), D2-43 (the basic set), D2-52 (skill by practice), D2-93 and D2-112 (modifiers learned
+like other know-how); the four levels, the paths and the cards built without a decision of their own (knowledge.py, settle.py,
+perceive.py, run.py); §2's and §4d's "Today you could" dropped where `view: beliefs` is set (D4-78; the redesign is
+agent_view.md); the rest in discussion. **Owner:** 37.4 (information, agents); 37.2 for the content (recipes, skills, blueprints).
 **Affects:** spec/agents/actions.md, information/perception.md, information/prompts.md, information/letters_and_documents.md,
 economy/production.md, economy/buildings.md, seeding/populations.md.
 
@@ -261,13 +265,25 @@ version of a quarrel. The engine never writes these and never checks them.
 
 ## Open questions
 
-1. The basic set everyone knows (37.2: which recipes are basic).
-2. How long teaching takes, and whether watching alone can teach (and after how many times).
-3. Whether written recipes need literacy (02h says yes) and how a recipe document looks.
-4. How awareness shows in the prompt (a line "you know of: ploughs (the smith at Millford)").
-5. Invention: later, or never?
+1. The basic set everyone knows (37.2: which recipes are basic). [decided: D2-43 (spec economy/production.md, "Basic techniques and
+   trades"); built: data.py TECHNIQUES `basic` (55 of 84); whether to shrink it is agent_view.md's question 4]
+2. How long teaching takes, and whether watching alone can teach (and after how many times). [built: teaching is one session when
+   a `teach` and a `learn` match the same day (settle.py; teacher 2 units, learner 2); watching gives a rough idea after 3 sightings,
+   a watched day counting 2, and never more (knowledge.py saw, perceive.py); no decision of its own (D4-24's principle)]
+3. Whether written recipes need literacy (02h says yes) and how a recipe document looks. [still open (5 Nov): no documents and no
+   reading built (spec information/letters_and_documents.md keeps literacy open, C-4); writing exists only as lines on buildings
+   (D2-169)]
+4. How awareness shows in the prompt (a line "you know of: ploughs (the smith at Millford)"). [built: knowledge.py crafts_lines,
+   in the system text: "You know of, but not how: ... (source)", and cards by level; showing craft by depth is proposed in
+   agent_view.md point 3]
+5. Invention: later, or never? [still open (5 Nov): not built, not in DECISIONS, and not in OPEN's flagged list; §6 ties it to the
+   frontier and eras (37.5)]
 6. The counts in §4c (sightings, days, successes per level; the cost and chance of trying), to calibrate in the first runs.
-7. Whether a technique has prerequisites (pottery before a kiln) or tiers within a trade.
+   [built as data, calibrate: data.py TRY (rough idea x1.7 inputs, 1 in 2; capable x1.3, 3 in 4), PHYSICS teach (skill share 0.3,
+   x2 for a youth) and watch (4 units); knowledge.py (3 sightings to a rough idea, 2 successes a level, a failure counting half);
+   no decision of its own; differs from §4c in the learner's units (2, not 4) and in watching never reaching capable]
+7. Whether a technique has prerequisites (pottery before a kiln) or tiers within a trade. [still open (5 Nov): techniques carry a
+   trade but no prerequisites (data.py TECHNIQUES); only fittings have one (`needs`: an anvil needs a hearth); not in DECISIONS]
 
 ## History
 
@@ -313,6 +329,10 @@ version of a quarrel. The engine never writes these and never checks them.
   revised yet.
 
 - 31 Oct 2026: §4d as built differs (cards in the system text, an unordered menu cut at 10, look-up unused: 0 of 324 in d1_duo); a redesign is proposed in [agent_view.md](agent_view.md) (review 38.37).
+- 5 Nov: swept (37.4): the principle (D4-24), seeded awareness (D4-33), the basic set (D2-43) and skill by practice (D2-52) are
+  decided; the four levels, mentions, `explain`, `watch`, `teach` and `learn`, trying, and refusals that name the shortfall are built
+  (counts as data, calibrate), with two differences from §4c (the learner spends 2 units; watching gives no more than a rough idea).
+  Still open: reading and literacy (no documents), invention, prerequisites; how knowledge is shown has moved to agent_view.md.
 
 ## Sources
 

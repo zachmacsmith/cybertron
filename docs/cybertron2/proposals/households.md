@@ -1,6 +1,8 @@
 # Households and dwellings: membership, use and home are data that agents change
 
-**Status:** partly accepted: D4-36 (the principle); the open questions remain. **Owner:** 37.4 (37.2: building costs; 37.1 when it joins: inheritance).
+**Status:** partly accepted: D4-36 (the principle), D4-66 (letting in, granting, admitting and asking to join as evening acts);
+built without decisions of their own: join, admit, leave_household, found, host, grant and revoke, claim, build (verbs.py,
+settle.py, world.py); the rest (an emptied house, merging households) in discussion. **Owner:** 37.4 (37.2: building costs; 37.1 when it joins: inheritance).
 
 ## Summary
 
@@ -64,11 +66,17 @@ With membership, use and home as data:
 ## Open questions
 
 - **Does a one-night `welcome` include a meal from the store,** or only shelter, with feeding a guest done by giving or by `grant`?
+  [built: verbs.py `host {person, at?, feed?: true}` and `grant {what: shelter | shelter and food}`: the host chooses whether the guest eats from the store; part of D4-34's hosting, no decision of its own]
 - **Who in a household may admit someone or grant use:** the head only, or any member? Should it be the household's own rule, with a
-  seeded default?
+  seeded default? [built: the household's own rule with a seeded default (world.py rules: `admit` by the head, `grant` by any
+  member; verbs.py _admit, world.py may_grant); no decision of its own; D4-66 makes both evening acts]
 - **An emptied house.** Does it stay held by the old household's claim, or become empty and open to occupation, and after how long?
-- **Joint households.** May two households merge into one?
-- **Building numbers.** The parts, materials and days for a small house: 37.2's `buildings.md`.
+  [still open (5 Nov): as built a house's claims stay with its household, or pass at a death by its inheritance rule (D2-143, life.py), however long it stands empty;
+  another's `claim` on it is recorded as a dispute (D4-23); nothing in DECISIONS, holding.md or the code makes a claim lapse]
+- **Joint households.** May two households merge into one? [still open (5 Nov): not built (`admit` takes one person at a time; no
+  merge act) and not in DECISIONS]
+- **Building numbers.** The parts, materials and days for a small house: 37.2's `buildings.md`. [decided: D2-154, D2-155, D2-166,
+  D2-168 (37.2; spec economy/buildings.md); built: buildings.py and the `build` verb]
 
 ## Affects
 
@@ -79,6 +87,11 @@ With membership, use and home as data:
 - `spec/agents/` (verbs: admit, leave, grant, withdraw, and the build verb).
 
 ## History
+
+- 5 Nov: swept (37.4): the principle is decided (D4-36) and built: join and admit (matched the same day, evening acts by
+  D4-66), leave_household, found, host (with or without food), grant and revoke (the proposal's `withdraw`), claiming an empty house,
+  and building (37.2's D2-154 to D2-168); home follows membership and claims (world.py homes). Still open: what becomes of an
+  emptied house, and merging households.
 
 - **23 Oct 2026.** Zach stated the principle (D4-36): joining, taking up an empty house and building one are all supported. Open questions unchanged.
 
