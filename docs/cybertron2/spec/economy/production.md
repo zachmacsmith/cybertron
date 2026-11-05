@@ -124,7 +124,7 @@ is in proposals.
 
 | Tool | Better at | What it alone can do |
 |---|---|---|
-| felling axe | felling | fells great trees (the great beams a hall for more than 25 needs) |
+| felling axe | felling | fells great trees (the great beams a hall for more than 25 needs); not built: no world has great trees yet (the forest is three stocks, D2-156) |
 | miner's pick | mining | works a deep seam |
 | scythe | cutting hay | one person cuts a pasture's hay inside the summer window |
 | mason's chisels | quarrying | dressed stone: millstones, arches, a third storey |
@@ -147,7 +147,7 @@ worn metal tool or blade.
 ### Skill by practice (D2-52)
 
 - Every kind of work, basic work included, has a skill per agent that rises with practice (days spent at that work) and fades
-  slowly without it; skill multiplies the yield of gathering and farming and cuts the work of making.
+  slowly without it; skill multiplies the yield of gathering and farming and cuts the work of making. (As built, skill rises with practice but does not fade: knowledge.py; fading is not built.)
 - An ordinary adult is about x1.0 at basic work, a master about x1.5. In farming a master's skill raises yield about x1.2 and
   cuts the work about x0.7 (D2-64). Seed selection, a learned technique, makes the sower's crops ripen about 15% sooner (D2-65). A learned trade (knowledge.md's levels: once "known") runs
   from about x0.5 for a novice to x2.0 for a master. Youth learn faster (D4-19). Seeded specialists start skilled (D4-21).
@@ -189,7 +189,7 @@ the soil in words ("tired", "good"), their seed in store, their tools and whethe
 
 ## Open
 
-- The plot unit against D4-23's definition: board, 23 Oct.
+- ~~The plot unit against D4-23's definition~~: settled by D4-40 and D2-59.
 - Recipes, production shapes, skills, workshops: proposals/resources_and_goods.md, proposals/economy_plan.md.
 
 ## Sources

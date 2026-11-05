@@ -1,7 +1,11 @@
 # Proposal: attacks, buildings and walls
 
 **Status:** partly accepted: D2-20 (three kinds of attack; walls multiply defenders), D2-21 (the watch), D2-22 (any party may raid
-a node); the numbers are discussion. **Owner:** 37.2 (author); combat and raids are 37.4's (conflict/), the costs of walls and
+a node), D2-49 to D2-51 (stone and the vault in fire; fire kills; burn orders), D2-83 and D2-118 (the fuse for riders and by
+structure); the numbers are discussion. Built: the raid on a building (settle.py: a fight against those inside, stone x2, a barred
+door x1.5) with its fuse by structure (data.py FUSE); `guard` counts as a watcher. Not built: the night watch's sleep and food, the
+node raid, setting fire (OPEN L-21), harm in a raid on a house (OPEN L-64). Still open: all 5 questions, in part (listed in Open
+questions), and riders (OPEN C-5). **Owner:** 37.2 (author); combat and raids are 37.4's (conflict/), the costs of walls and
 structures are 37.2's.
 
 ## Summary
@@ -32,6 +36,10 @@ harm contest, a household of four:
 | crude weapons | 3 crude | 62% | 32% | 11% | 90% |
 | crude weapons | 3 blades | 87% | 66% | 34% | 97% |
 | crude weapons | 12 blades | 99% | 97% | 89% | 100% |
+
+(5 Nov, as built: those asleep inside count x0.5 in any house, and the structure multiplies on top: stone x2, wattle and timber x1,
+a barred door x1.5. So a sleeping household behind a timber door is no stronger than the table's "no house"; only those woken by the
+fuse, or on guard, fight at full strength.)
 
 ### The watch (D2-21)
 
@@ -127,15 +135,24 @@ raid, is the deadly one (D2-50), and the watch is its counter.
 3. **Node raids only by riders or large parties** (37.2's proposal): rejected by Zach (D2-22). Any party may raid; a small one
    usually fails and a single rider may try at greater risk; the contest and the defences decide.
 4. **Riders who ride and strike in one round** as an exception to D4-8 (02g §5b): open, OPEN C-5; fuse events may make it
-   unnecessary.
+   unnecessary. (5 Nov: D2-83 gives riders a lower and shorter fuse, with no exception to D4-8; 38.51 §B recommends confirming
+   C-5 so; still for Zach. Horses are not built.)
 
 ## Open questions
 
-1. Break-in work by structure (units), and whether tools (a ram, iron) shorten it.
-2. The multipliers (x1 timber, x2 stone) and whether a village wall multiplies guards on it.
-3. The watch's food cost (x1.5 proposed).
-4. Exposure weights in a node raid.
-5. Setting fire (above): the catch chances, the bucket line's effect, the chance of waking, death 0.9 for those still inside.
+1. Break-in work by structure (units), and whether tools (a ram, iron) shorten it. — In part decided: the time a break-in gives
+   those inside is the fuse by structure (D2-118: wattle none, timber 1 act, stone 3; built, data.py FUSE). Still open: break-in
+   work in units (a raid is one `attack` of 3 units whatever the structure) and tools that shorten it; iron is later (D2-19, L-13).
+2. The multipliers (x1 timber, x2 stone) and whether a village wall multiplies guards on it. — Built: stone x2, wattle and timber
+   x1, a barred door x1.5, those asleep inside x0.5 (settle.py; spec conflict/defence.md: calibrate). Still open: the numbers, and
+   the village wall (not built; 02zh left walls and towers out).
+3. The watch's food cost (x1.5 proposed). — Still open: not built. `guard` (1 unit) counts as a watcher for detection (0.9) but
+   keeps its sleep and eats as usual; there is no night watch act (data.py: "the watch, D2-21, is not built"), and `watch` is the
+   learning act.
+4. Exposure weights in a node raid. — Still open: the node raid is not built; it waits on raiders as agents (OPEN L-22).
+5. Setting fire (above): the catch chances, the bucket line's effect, the chance of waking, death 0.9 for those still inside. —
+   Still open: flagged for later (OPEN L-21). D2-50 decided that fire kills, not the number; the waking chances are proposed in
+   spec conflict/fuse_events.md, the catch chances and the 0.9 in raids.md (calibrate).
 
 ## Affects
 
@@ -162,6 +179,10 @@ agents/actions.md (raid kinds, watch).
 - 23 Oct: Zach: when raiding a node, raiders should be able to decide in advance to burn places (D2-51); would it be effective?
   Added "Burning in a node raid": orders stated when the raid is planned; rough expected values; burning pays as cover, against
   stone, for denial and as a threat, not as plunder.
+
+- 5 Nov: Swept against DECISIONS, the spec and what is built (37.2): the raid on a building, its fuse by structure and `guard` as a
+  watcher are built; the watch's sleep and food, the node raid, fire and harm in a raid are not (L-21, L-22, L-64); all five
+  questions stay open, the first two in part.
 
 ## Sources
 

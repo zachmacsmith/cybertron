@@ -1,8 +1,13 @@
 # Proposal: recipes for the first worlds
 
-**Status:** discussion (23 Oct). **Owner:** 37.2 (the content); 37.4 owns the verbs and the technique record (verbs.md,
-knowledge.md), which these recipes are data for. **Affects:** spec/economy/production.md, goods.md, buildings.md; knowledge.md's
-basic set (37.2's open question there). **Model:** [02m_recipes_model.py](../../review/37_growth/02m_recipes_model.py).
+**Status:** largely accepted (swept 5 Nov): D2-41 to D2-48, D2-56, D2-60 to D2-62, D2-160, D2-166, D2-167, D4-97; its numbers are the
+engine's calibrate base (D4-43). Built (cybertron2/engine/data.py): gathering with tool factors by method, crude and copper tools,
+smelting, coin, pack, handcart, plough, harness, bread, mills, oven, cheese, dried meat, charcoal, eating raw, the fittings. Not
+built: making salt, salted meat, traps, blades, locks, saddle, carts, parchment and documents, the specialised tools, great trees.
+Still open: 2 questions (great trees; food's share of work). **Owner:** 37.2 (the content); 37.4 owns the verbs and the technique
+record (verbs.md, knowledge.md), which these recipes are data for. **Affects:** spec/economy/production.md, goods.md, buildings.md;
+knowledge.md's basic set (37.2's open question there). **Model:**
+[02m_recipes_model.py](../../review/37_growth/02m_recipes_model.py).
 
 ## Summary
 
@@ -252,7 +257,7 @@ A year's worth against a year's cost (capital written off over its life, plus up
   passes the pruning rule on two counts: it changes shelf life enough to move where things happen, and it creates a trade (salt
   in, cheese out).
 
-### 15. Specialised tools
+### 15. Specialised tools (decided: D2-48; not built)
 
 Above the base hand tool, a few **specialised tools**: each a known recipe (a master smith's technique, not basic), made at a
 smithy with more copper, **better at one method, longer-lived at it, and able to do one thing the base tool cannot**. At other work
@@ -276,19 +281,19 @@ it is no better than a crude tool.
 - **It gives smithing depth:** a novice smith makes hand tools; a master makes these (knowledge.md's levels), so a master's
   know-how is worth teaching and paying for.
 
-**Great trees: where they are and how agents see them (proposal, with 37.4, who owns land).** A forest site holds two stocks:
-ordinary timber, and **a few great trees** (old growth: old oaks in a woodland, very slow to come back, so effectively finite in a
-run). They appear in the forest's description ("the Deep Wood: thick, with a stand of old oaks"), as everything at a site does.
-Felling one takes the felling axe and two or three people for a day, and gives **a great beam**: very heavy (a cart and oxen to
-move it), used for a hall's span. Clearing or felling the stand ends it for generations (D4-4: an internal consequence). So
-the great hall depends on a woodland that still has old oaks, a woodsman with a felling axe, a master smith who made it, and oxen
-to haul the beam.
+**Great trees: where they are and how agents see them (proposal, with 37.4, who owns land; still open: Open question 2).** A forest
+site holds two stocks: ordinary timber, and **a few great trees** (old growth: old oaks in a woodland, very slow to come back, so
+effectively finite in a run). They appear in the forest's description ("the Deep Wood: thick, with a stand of old oaks"), as
+everything at a site does. Felling one takes the felling axe and two or three people for a day, and gives **a great beam**: very
+heavy (a cart and oxen to move it), used for a hall's span. Clearing or felling the stand ends it for generations (D4-4: an internal
+consequence). So the great hall depends on a woodland that still has old oaks, a woodsman with a felling axe, a master smith who made
+it, and oxen to haul the beam.
 
 **What it costs the design:** five more goods, each with one use, against the pruning rule (02g §1f). They pass it on one test
 only, but the important one: each creates a dependence (specialist on master smith) and an ability nobody else has. Five is enough;
 more (a dozen tool kinds) would add goods without adding new dependences.
 
-### 16. The food ladder: investment for upside (23 Oct, proposal; would replace D2-44's figures)
+### 16. The food ladder: investment for upside (23 Oct, proposal; decided: D2-60 to D2-62, D2-166, D2-167, D4-97)
 
 Zach: bread at 1.1 adds almost nothing; capital and labour should buy real upside, and farms must be able to eat without a mill.
 
@@ -330,9 +335,9 @@ work. Food per plot of land, against the default:
 
 Per unit of work the range is smaller: about 0.77 units a food by default against about 0.21 with everything (x3.7). **Each rung
 falls back when a link breaks:** the smith dies, the copper route is raided, the herd is driven off, the mill burns. That is the
-interlocking dependence scenario_design asks for. **The top rung is likely too high** because skill multiplies yield per plot as
-well as work; proposed: on farming, skill cuts the work and raises yield only a little (x1.1 at mastery), which keeps the land
-ceiling near x10.
+interlocking dependence scenario_design asks for. **The top rung is likely too high** because skill multiplies yield per plot as well
+as work; proposed: on farming, skill cuts the work and raises yield only a little (x1.1 at mastery), which keeps the land ceiling
+near x10 (superseded: D2-64 set x1.2 at mastery).
 
 **A mill you can grow (Zach, 23 Oct: the full mill is a lot; a cheap small mill that can be expanded).** Milling makes a grain
 worth 1.0 food instead of 0.7 eaten whole: 0.3 food a grain, about 0.16 units of growing work saved (more where land is short,
@@ -357,7 +362,7 @@ a few edges from its farms is fed by carts and cured food, as historically.
   quarry and the mason (stone, hearths, cellars, millstones), the scribe (documents), the ox (ploughing).
 - The cards fit 37.4's verbs and technique record with no new verb.
 
-### 17. Eating without a fire (24 Oct, proposal; amends how D2-60 is applied)
+### 17. Eating without a fire (24 Oct, proposal; amends how D2-60 is applied; decided: D2-160; built: data.py ITEMS `raw`)
 
 Today grain, rye, beans and flour are worth nothing without a lit fire, and fresh meat is worth its full 1.5 raw. Zach: some foods
 should be fully edible raw (they matter most when fuel runs low), some worth less raw, and some not edible raw at all. Proposed, each
@@ -393,11 +398,14 @@ need 2.7 of the world's years of that felling before the work the axe saves cove
 world setting, 16-60 days: D4-13), so 2.7 years is about 108 days, longer than a run of 20-30 days: for a household it never pays
 within a run. A full-time woodsman's 14 days is within one.
 
-1. **Tool effects by method** (§8) as the base level: the one hand tool good helps different kinds of work by different amounts
-   (felling x2, quarrying, mining, reaping and hay x1.5, foraging not at all), with the specialised tools above it?
+1. ~~**Tool effects by method** (§8) as the base level: the one hand tool good helps different kinds of work by different amounts
+   (felling x2, quarrying, mining, reaping and hay x1.5, foraging not at all), with the specialised tools above it?~~ Built as the
+   calibrate base (D4-43; data.py TECHNIQUES `tools` and `wear`); the specialised tools above it are decided (D2-48), not built.
 2. **Great trees and great beams** (§15): a separate small stock in woodland, seen in the forest's description, felled only with a
-   felling axe and a small crew, giving one very heavy beam (37.4: land and sites)?
-3. Food's share of work: the open calibration.
+   felling axe and a small crew, giving one very heavy beam (37.4: land and sites)? Still open: D2-48 and production.md say the
+   felling axe fells great trees, but no stock is decided; the forest built since is three stocks (D2-156), none of them great trees.
+3. Food's share of work: the open calibration. Still open (38.20 A10): the M1 runs had food at 85-90% of work on richer land (38.12),
+   not the 8-10% of 02n's sums; read it against the dependence ladder (L-50) and the 30% gate.
 
 ## History
 
@@ -431,6 +439,10 @@ within a run. A full-time woodsman's 14 days is within one.
 
 - 24 Oct: Zach: an open fire and a camp are the same fire, different shelter (D2-159); the forest and food changes accepted (D2-156 to
   D2-160); seeding below capacity (D2-161). Spec written.
+
+- 5 Nov: Swept against DECISIONS, the spec and what is built (37.2): tool effects by method built under D4-43; §16 and §17 decided
+  (D2-60 to D2-62, D2-160, D4-97); great trees and food's share still open; several decided goods (salt, traps, blades, locks,
+  documents, specialised tools) not built.
 
 ## Sources
 

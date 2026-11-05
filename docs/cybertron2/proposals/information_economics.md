@@ -1,8 +1,11 @@
 # Proposal: the economics of information
 
-**Status:** partly accepted: D2-7, D2-8 (the rest discussion; 23 Oct). **Owner:** 37.2 for the economics (materials, scribes, the
-price of a page, libraries and archives as buildings); 37.4 owns spec/information (channels, letters, speech: OPEN C-3, C-4); laws are
-in [law.md](law.md). **Affects:** spec/economy/goods.md, buildings.md; information/letters_and_documents.md and speech (37.4's).
+**Status:** partly accepted (swept 5 Nov): D2-7, D2-8; documents as goods on parchment (D2-24), each somewhere (D4-35). Built: speech
+at a node (D4-25, D4-30, D4-65; OPEN C-3 closed); lines written on buildings (D2-169, D2-170). Not built: parchment, documents,
+letters, boards, shelves, scribes. Still open: 5 questions (in Open questions); large worlds superseded by the generator. **Owner:**
+37.2 for the economics (materials, scribes, the price of a page, libraries and archives as buildings); 37.4 owns spec/information
+(channels, letters, speech: OPEN C-3, C-4); laws are in [law.md](law.md). **Affects:** spec/economy/goods.md, buildings.md;
+information/letters_and_documents.md and speech (37.4's).
 
 ## Summary
 
@@ -31,7 +34,7 @@ by practice and teaching; reading aloud for others is a service.
 A document has text, author, round, node, seal, copy-of (with copier and round) and condition. Acts: write, read, copy, seal, give,
 carry, store, post. Copies carry their provenance (cybertron 1's `documents.py`).
 
-### Speech at a node (D2-7; mechanism 37.4's, OPEN C-3)
+### Speech at a node (D2-7; mechanism 37.4's, OPEN C-3, closed 2 Nov: D4-25, D4-30, D4-65; built)
 
 The square (everyone at the node); rooms (everyone at the node with access to the building, several in a day); private messages to
 anyone at the node. Buildings become access to information.
@@ -81,6 +84,16 @@ post, the paper) is built from documents in places, and its power comes from who
 02h §9: documents as objects (2); channels as media in places (3, with 37.4); institutions as buildings with the two archives ported
 (6); large worlds (5); shelves counted in documents or pages (02i §8.5); whether wax tablets are worth a good.
 
+As of 5 Nov:
+- Documents as objects: still open in part. D2-24 and D4-35 make a document a good with a place; spec/information/
+  letters_and_documents.md keeps text, author, day, place; seals, copies and condition are undecided, and nothing is built.
+- Channels as media in places: still open (OPEN C-4, 37.4: letters and boards first).
+- Institutions as buildings with the two archives ported: still open; no decision, and the only institutions built are households.
+- ~~Large worlds~~: superseded by the generator (D2-173 to D2-191; D2-181's region of 4 settlements with wild land between) and
+  growth to towns (L-33); long runs with growth on are a run plan, not a design question.
+- Shelves counted in documents or pages: still open; shelves are not among the built fittings.
+- Wax tablets: still open; nothing needs them yet.
+
 ## History
 
 - 22 Oct: Zach: maps, parchment, writing and information matter most of the unlocks; how do channels, laws and libraries work in
@@ -89,6 +102,8 @@ post, the paper) is built from documents in places, and its power comes from who
 - 22 Oct: Zach: widespread channels should cost more; rumour first, then letters and centralised, delivered papers. 02h §4b; D2-8.
 - 22 Oct: Zach: telling merchants against giving them documents; the lawyer's and historian's archives. 02h §6b.
 - 22-23 Oct: 02j costed the page: the scribe's time dominates; the press is the jump.
+- 5 Nov: Swept against DECISIONS, the spec and what is built (37.2): speech decided and built (C-3 closed); large worlds superseded
+  by the generator; documents, channels, archives, shelves and wax tablets still open, and no writing material is built.
 
 ## Sources
 

@@ -1,6 +1,10 @@
 # Proposal: shelter
 
-**Status:** partly accepted: H-5, D2-10 (rest discussion). **Owner:** 37.2. **Affects:** spec/economy/buildings.md (houses,
+**Status:** partly accepted: H-5, D2-10; later decisions settle most of the rest: D2-9 and D2-154 (a house is rooms, beds and a
+hearth), D2-157 and D2-159 (fuel in heat; shelter and fire apart), D2-165 and D4-86 (beds), D2-168 (wear by structure, repair by
+size), D2-156 to D2-158 (forests). Built: the shelter table below as data (data.py PHYSICS `shelter`, `shelter_cold`; calibrate),
+breaks and repair, beds, hosting (`host`, D4-66). Not built: eviction, houses pledged or seized. Still open: 1 question (3,
+lodging, in part), listed in Open questions. **Owner:** 37.2. **Affects:** spec/economy/buildings.md (houses,
 upkeep, breaks, hearths), spec/agents (the ration multiplier; 37.4), spec/environment (cold rounds, storms; 37.4),
 spec/conflict/defence.md (stone and defence; 37.4).
 
@@ -20,6 +24,9 @@ timber and stone, and deforestation a slow trend.
 - **D2-10:** clothing is parked; shelter carries the cold.
 
 ### In discussion (02e)
+
+(5 Nov: the table is built as data at these numbers, to calibrate; "over the beds" is now one without a bed sleeping on the floor,
+D2-165, D4-86. The upkeep, breaks and costs in the list below are superseded: see question 1.)
 
 | Shelter state | When | Ration, normal round | Ration, cold round |
 |---|---|---|---|
@@ -55,11 +62,18 @@ timber and stone, and deforestation a slow trend.
 
 ## Open questions
 
-1. Rescaling 02e's per-round numbers to day rounds (D4-13).
-2. Whether beds are a soft limit (over them is "poorly housed"; recommended).
-3. Lodging for single agents (a spare bed for rent, or a lodging house).
+1. Rescaling 02e's per-round numbers to day rounds (D4-13). — Superseded: the engine runs in days, and the old numbers gave way to
+   D2-154's room costs and D2-166, D2-168's breaks a night by structure (0.02, 0.08 in the cold; wattle x1.5 to stone x0.4) with
+   repair by size, and D2-157's fuel in heat. A separate upkeep every 10 rounds was not kept: breaks carry it. Rates calibrate.
+2. Whether beds are a soft limit (over them is "poorly housed"; recommended). — Decided: D2-165, D4-86 (without a bed one sleeps
+   on the floor as in a damaged house); built (night.py).
+3. Lodging for single agents (a spare bed for rent, or a lodging house). — In part: a guest can be let in for the night (`host`,
+   D4-66; built); an inn is a building whose holder lets its beds on terms it sets (spec economy/lodging.md, D4-12); payment can be
+   any agreement's legs (D2-31). Still open: booking a bed or room for days (not built), and inns' terms (calibrate).
 4. **Deforestation:** five houses for 24 people would bring a node's forest to its floor in about 27 rounds at the old felling
-   rule; a managed woodlot (coppice) under rules on felling is the organised rung. To settle with 37.4's forest regrowth.
+   rule; a managed woodlot (coppice) under rules on felling is the organised rung. To settle with 37.4's forest regrowth. —
+   Decided: D2-156 to D2-158 (forests as three stocks at real sizes, turning to scrub under 40% of their trees; default rights);
+   built (forests.py, Package F); a coppice held by a household is seeded in Wenbridge (D4-97 (4)).
 
 ## History
 
@@ -69,6 +83,8 @@ timber and stone, and deforestation a slow trend.
 - 22 Oct: buildings from parts (D2-9) and storeys needing stone (D2-3) made the house a building of rooms and fittings.
 - 23 Oct: 02j costed the shelter ladder: the timber frame for ten is cheapest per person-night; stone's case is density,
   permanence and, after Zach's point on raids, defence (D2-20).
+- 5 Nov: Swept against DECISIONS, the spec and what is built (37.2): the shelter table, beds, breaks and repair, fuel and forests
+  are decided or built; questions 1, 2 and 4 are settled, lodging (3) is open in part.
 
 ## Sources
 

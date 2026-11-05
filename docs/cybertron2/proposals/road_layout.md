@@ -2,7 +2,11 @@
 
 > **Decided parts are in the spec:** spec/world/roads.md (23 Oct). This file keeps the reasoning, the history and what is still open.
 
-**Status:** partly accepted: D2-104 to D2-108 (23 Oct); waiting it out and the line between automatic and a call open. Design only. **Owner:** 37.2 (author); edges, places and travel
+**Status:** partly accepted: D2-104 to D2-110, D2-113, D2-121, D2-122. Built: stretches, landmarks, good places, the three
+tiers with choices at departure, waiting it out, experience (engine/roads.py, data.LANDMARKS and ROADS; spec world/roads.md); the
+generator lays stretches and landmarks from the land (landgen/roads.py). Later: building on landmarks (D2-108, OPEN L-5, L-34).
+Still open: 1 question (where the line falls between automatic and a call, built with the proposed thresholds; listed in Open
+questions). **Owner:** 37.2 (author); edges, places and travel
 are 37.4's (world/edges.md, layout.md, place.md), so this goes to them. **Affects:** spec/world/edges.md, generation.md;
 spec/environment/ (risks of things on roads); road_encounters.md, journeys.md, things_in_places.md, hidden_ways.md; OPEN Q-17
 (edge terrain), which this would replace.
@@ -67,7 +71,9 @@ Travel decides itself most of the time; decisions are needed only where somethin
 
 Even minor trouble keeps a small chance (proposed 0.1) of a call, so travel is not wholly mechanical.
 
-**Where the line falls between automatic and a call is open (Zach, 23 Oct: not yet sure).** Candidate factors, to explore:
+**Where the line falls between automatic and a call is open (Zach, 23 Oct: not yet sure).** *Built with the proposed
+line (death risk 0.05, half the load or herd, 0.1 for minor trouble, and only if noticed in time: data.ROADS "call"), marked
+proposed in the spec; not confirmed.* Candidate factors, to explore:
 
 | Side | Factor | Pushes toward a call when |
 |---|---|---|
@@ -137,7 +143,8 @@ landmarks in all.
 1. ~~Stretches and landmarks~~ decided: D2-104 (very simple; no landmarks behaves as now).
 2. ~~Which landmarks~~ decided: ford, bridge, pass, narrows, spring, and stopping points (D2-107).
 3. ~~How challenges are decided~~ decided: D2-105. Open: where the line falls between automatic and a call (§3: the event,
-   the agent, or both), and the 0.1 chance.
+   the agent, or both), and the 0.1 chance. — still open: experience is decided (D2-106) and the rest built as §3's one shape
+   (roads.py, data.ROADS), but Zach has not confirmed it.
 4. ~~Building on landmarks~~ later, flagged (D2-108, OPEN L-5).
 5. ~~OPEN Q-17~~ the edge's terrain is its stretches' default (D2-104).
 6. ~~Waiting it out~~ decided: D2-113.
@@ -159,6 +166,10 @@ landmarks in all.
 
 - 23 Oct: Zach: meadows and the like are not stopping points; passing them changes the traveller's state on arrival; stopping
   only by choice in advance, and only if known (D2-109). Waiting out a block: yes (D2-113). Spec written: spec/world/roads.md.
+
+- 5 Nov: Swept against DECISIONS, the spec and what is built (37.2): all but question 3 decided; stretches, landmarks, tiers,
+  waiting and the generator's landmarks built; the line for a call is built as proposed and still open. The causeway, ruin and
+  overlook in §1 are not in D2-107's first set.
 
 ## Sources
 

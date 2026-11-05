@@ -1,6 +1,6 @@
 # Proposal: landscapes that make sense, within one environmental envelope
 
-Status: **built** (D2-191; Zach, 2 Nov: "build this out"); as built in §5, with what differs from the design. Zach, 2 Nov: "select a subset of the most relevant parts of the
+**Status:** built (D2-191; Zach, 2 Nov: "build this out"); as built in §5, with what differs from the design. **Owner:** 37.2. Zach, 2 Nov: "select a subset of the most relevant parts of the
 planet and larger terrain systems / ecosystems that we think would make sense, and then design within that for now ... rn the
 environments generated don't make a whole bunch of sense". Owner 37.2. It narrows ecosystems.md (the wide design, kept for later)
 to what the generator should do now, and answers the review of the generated worlds below. Current as of 2 Nov.

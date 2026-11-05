@@ -1,7 +1,12 @@
 # Proposal: the environment over time (one scheduler for eras, years, spells, incidents and their signs)
 
-**Status:** partly accepted: D2-69 to D2-75 (23 Oct); the catalogue, disease and the details are discussion. Design only: nothing
-is to be built yet (Zach). **Owner:** 37.2, who now owns `spec/environment/` (D2-75); 37.4 builds.
+**Status:** partly accepted: D2-69 to D2-75 (23 Oct, §13), with the catalogue accepted in environment_catalogue.md (D2-76 to
+D2-79); compiled into spec/environment/scheduler.md. Built: only the day's weather within spells written by hand in the world
+file, lying snow and a high ford (D2-99; engine/environment.py), keyed draws (D2-70; `w.rng`), hand-listed incidents (a stray herd,
+a fire in a store, a death: engine/run.py `dawn`), a crop's keyed failure (D2-53, farm.py) and a gale's fallen wood (forests.py).
+Not built: eras, years and spells drawn by a scheduler, hazards, spreads, risks raised by neglect, fires and signs across edges. The
+scheduler itself is still design only (Zach, 23 Oct). Still open: 1 question (disease, Q6: OPEN Q-16), and the details (§3's
+hidden conditions, §8's data and interfaces, 02q's numbers to calibrate). **Owner:** 37.2, who now owns `spec/environment/` (D2-75); 37.4 builds.
 **Affects:** spec/environment/scheduler.md, calendar.md, climate_and_eras.md (to write), resources.md; information/signs.md,
 perception.md; world/land.md (land kinds' responses); life/ (illness); economy/production.md (crops, herds, forests); conflict/
 (fire); core/architecture.md (the scheduler's place in the day). **Model:**
@@ -223,7 +228,7 @@ A run of 20-30 days is about one year (D4-13). **An era of several years never c
    the era sets the odds but does not move. Its shift is felt across chapters or long runs.
 2. **Compressed eras** for long runs: dwell of one to three years (40-120 days).
 3. **A scripted shift** for experiments: an era change on a chosen day, the same in every arm.
-Proposed: 1 for the first worlds, 2 and 3 available as world settings.
+Proposed: 1 for the first worlds, 2 and 3 available as world settings. (Decided: D2-73.)
 
 ## 11. Risks attached to things (D2-71)
 
@@ -256,7 +261,7 @@ than from the weather. So risks are **data on kinds of things**, not only on the
 Zach: fires, and some things people experience, should cross between nodes, depending on the edge: a mountain ridge, a forest
 path and a long plain carry different things.
 
-**What the engine needs on an edge** (world/edges.md, 37.4: OPEN Q-17): its **terrain** along the way (open plain, farmland,
+**What the engine needs on an edge** (world/edges.md, 37.4: OPEN Q-17; closed 2 Nov: a road's stretches carry terrain and landmarks, world/roads.md, D2-104): its **terrain** along the way (open plain, farmland,
 woodland, marsh, hills, a ridge or pass, a river valley), its **length** (days, as now), whether it follows a **river**, and its
 **height change**. Generation already derives edges from terrain (D4-22), so these come from the same layers.
 
@@ -302,15 +307,15 @@ nodes as the edge's terrain allows (D2-74, §12). 6. Disease: to flesh out (OPEN
 
 ## Open questions (for Zach)
 
-1. The layers and the hazard formula as above?
-2. Paired uniforms keyed by kind, place and day, with exposure from local state (so arms can diverge where their states do)?
+1. The layers and the hazard formula as above? — decided: D2-69 (not built)
+2. Paired uniforms keyed by kind, place and day, with exposure from local state (so arms can diverge where their states do)? — decided: D2-70 (keyed draws built)
 3. The first catalogue (§6): which kinds for the first worlds? Proposed: drought, wet spell and flood, cold snap, storm, wildfire,
-   house fire, blight, fever, wolves, stray herd, windfalls; murrain with cattle.
-4. Eras as starting conditions in the first worlds (§10, option 1)?
+   house fire, blight, fever, wolves, stray herd, windfalls; murrain with cattle. — decided: D2-71, D2-77 (environment_catalogue.md §6)
+4. Eras as starting conditions in the first worlds (§10, option 1)? — decided: D2-73
 5. **Seen from afar:** smoke over a burning wood, or a beacon, is visible from the next node in life; D4-35 forbids seeing another
-   node. Allow a narrow class of distant signs (smoke, beacons, a flooding river's water arriving), or keep D4-35 strict?
-6. Fever's mortality and the sick's units (with 37.1); a healer later.
-7. Ownership of `spec/environment/`: 37.2 drafts and 37.4 compiles, or the area moves to 37.2?
+   node. Allow a narrow class of distant signs (smoke, beacons, a flooding river's water arriving), or keep D4-35 strict? — decided: D2-74 (not built: OPEN Q-18, 37.4)
+6. Fever's mortality and the sick's units (with 37.1); a healer later. — **still open** (OPEN Q-16, L-9)
+7. Ownership of `spec/environment/`: 37.2 drafts and 37.4 compiles, or the area moves to 37.2? — decided: D2-75
 
 ## History
 
@@ -325,6 +330,9 @@ nodes as the edge's terrain allows (D2-74, §12). 6. Disease: to flesh out (OPEN
 - 23 Oct: Zach answered §Open 1-7 (D2-69 to D2-75): risks attached to things and emerging from the systems (a mill breaking or
   flooding, a neglected house collapsing on its people); fires across edges; signs across edges set by the edge's terrain; disease
   to flesh out; the area moves to 37.2. Added §11-§13.
+
+- 5 Nov: Swept against DECISIONS, the spec and what is built (37.2): six of seven questions decided (D2-69 to D2-75), disease still
+  open (Q-16); only the day's weather, keyed draws and hand-listed incidents are built; the drawn scheduler is not. Status updated.
 
 ## Sources
 

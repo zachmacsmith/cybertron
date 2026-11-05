@@ -2,7 +2,11 @@
 
 > **Decided parts are in the spec:** spec/world/things_in_places.md, spec/information/noticing.md (23 Oct). This file keeps the reasoning, the history and what is still open.
 
-**Status:** partly accepted: D2-85 to D2-87 (23 Oct); roads' layout, hiding and decay still to explore. Design only. **Owner:** 37.2 (author); places, perception and the engine are 37.4's, and this
+**Status:** accepted: D2-85 to D2-88, D2-93, D2-95, D2-96, D2-102, D2-104, D2-111, with D4-52, D4-70, D4-75, D4-89, D4-90 and
+D4-99 since. Built: things at a spot on parcels and stretches, the noticing rule, give to a place and hiding, finds on the road,
+decay by item and condition, remains on the road, burial and graves (engine/things.py, roads.py, world.p_die, data.THINGS and
+DECAY; spec world/things_in_places.md, economy/goods.md "Decay"). Later: scavengers (OPEN L-2), disease (L-9, Q-16). Still open:
+no questions; the decay table and hiding numbers stay to calibrate (so marked in the spec). **Owner:** 37.2 (author); places, perception and the engine are 37.4's, and this
 extends their [objects_in_world.md](objects_in_world.md) and the movables of [layout.md](layout.md), so 37.4 may merge it there.
 **Affects:** spec/world/places.md, edges.md, holding.md; spec/information/perception.md, signs.md; spec/conflict/defence.md (fuse
 events on the road); cybertron2/engine (containers, `leave`, death, signs.py).
@@ -125,6 +129,8 @@ Q4).
 
 ## Engine gap found while writing this (for 37.4)
 
+*Fixed: `p_die` now leaves remains on the stretch where one falls, with what one carried (world.py).*
+
 `p_die` in cybertron2/engine/world.py makes remains only when the person dies at a node; a person who dies on the road loses what
 they carried (it is set to zero and put nowhere). That breaks D4-34 (goods are always in a container with a place). In the region
 run (38.23) people died on the road, some carrying grain. Until roads hold things, the smallest fix is remains on the road.
@@ -148,12 +154,15 @@ run (38.23) people died on the road, some carrying grain. Until roads hold thing
 
 1. ~~One noticing rule~~ decided: D2-85.
 2. Roads: one stretch per day, or a layout with landmarks (a pass, a bridge, a ford) like a node's parcels? To explore:
-   [road_layout.md](road_layout.md).
+   [road_layout.md](road_layout.md). — decided: both, stretches with landmarks (D2-104); built (roads.py).
 3. Hiding: a separate `hide`, or a modifier on `leave` that people know or learn? To explore:
-   [verb_modifiers.md](verb_modifiers.md).
+   [verb_modifiers.md](verb_modifiers.md). — decided: the `hidden` modifier on `give` to a place (D2-93, D2-111; `hide` is read
+   as that give); built (things.py).
 4. ~~A short call for a find on the road~~ decided: D2-86.
 5. ~~Left things held by nobody~~ decided: D2-87.
-6. Decay by item and condition, scavengers, rot and disease (§6): the table's numbers and conditions.
+6. Decay by item and condition, scavengers, rot and disease (§6): the table's numbers and conditions. — decided in part:
+   scavengers later (D2-95, OPEN L-2), rot and burial (D2-96; graves D4-99); the table built as §6 has it (data.DECAY), to
+   calibrate; disease waits (L-9, Q-16).
 
 ## History
 
@@ -172,6 +181,9 @@ run (38.23) people died on the road, some carrying grain. Until roads hold thing
   become `give` to a place with the `hidden` modifier (verb_modifiers.md §5); cover as the place's visibility (visibility.md).
 
 - 23 Oct: D2-102: conspicuousness is the thing's own x the place's sight (visibility.md).
+
+- 5 Nov: Swept against DECISIONS, the spec and what is built (37.2): every question decided or built; the road gap is fixed;
+  scavengers and disease are flagged for later; the numbers stay to calibrate.
 
 ## Sources
 

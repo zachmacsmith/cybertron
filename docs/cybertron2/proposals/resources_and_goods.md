@@ -1,6 +1,9 @@
 # Proposal: resources and goods
 
-**Status:** discussion (23 Oct); parts accepted: D2-10 (clothing parked), D2-19 (a short metal ladder first), D2-23 (the tool set).
+**Status:** largely accepted (swept 5 Nov): the lean set (D2-24), with charcoal a good again (D2-56) and the food goods added since
+(D2-41, D2-42, D2-47, D2-60, D2-62; firewood, D2-157); D2-10 (clothing parked), D2-19 (a short metal ladder first), D2-23 (the tool
+set). Built: data.py ITEMS, except documents, blades, locks, traps, saddle and carts; salt is an item with no source in any world.
+Undecided: the unlocks shortlist. Still open: 2 questions (salt's place; the hard tier).
 **Owner:** 37.2. **Affects:** spec/economy/goods.md, production.md; information/ (writing materials).
 
 ## Summary
@@ -39,8 +42,9 @@ of materials): that is why stone is in.
 | tools and blades | yield, fighting, hunting | made goods that wear out: the smith's trade (D2-23 splits them into hand tools, plough, carts, weapons, traps, harness, saddle) |
 | documents | writing | the unlock Zach rates highest |
 
-**Folded into recipes** (not goods of their own): charcoal, planks, lime, gravel, dressed stone, slate, leather. **Deferred:** pitch
-and boats; clay, pottery and bricks; fibre, rope and cloth; iron and tin; tannin ([economy_later.md](economy_later.md)).
+**Folded into recipes** (not goods of their own): charcoal (a good again: D2-56), planks, lime, gravel, dressed stone, slate,
+leather. **Deferred:** pitch and boats; clay, pottery and bricks; fibre, rope and cloth; iron and tin; tannin
+([economy_later.md](economy_later.md)).
 
 ### Unlocks: capabilities, not multipliers (02g §1d)
 
@@ -75,10 +79,15 @@ paths shows which jumps are large enough to shape a society and which are decora
 
 ## Open questions
 
-1. Whether copper tools exist at all, or copper serves only blades, fittings and coin (a calibration choice).
-2. Which metal route first worlds use, iron or none (D2-19 says short; which rung is open).
-3. Salt's place in the first region: at the pass's waypoint or in the hills (02g §7.5).
-4. The hard tier (iron, tin, silver, old-growth oak, wild horses, goods from beyond) and when each enters.
+1. ~~Whether copper tools exist at all, or copper serves only blades, fittings and coin (a calibration choice).~~ Decided: hand tools
+   graded crude then metal (D2-23), copper the metal (D2-24); built (data.py `copper tool`, felling x2).
+2. ~~Which metal route first worlds use, iron or none (D2-19 says short; which rung is open).~~ Decided: copper is the one rung
+   (D2-19, D2-24; production.md); iron and bronze wait (economy_later.md, OPEN L-13).
+3. Salt's place in the first region: at the pass's waypoint or in the hills (02g §7.5). Still open: D2-56 says how salt is made
+   (sun-dried on the shore, boiled at an inland spring), but no world has a shore or spring that makes it, no technique makes it, and
+   the 02t region (D2-137) has none; cheese needs it.
+4. The hard tier (iron, tin, silver, old-growth oak, wild horses, goods from beyond) and when each enters. Still open: iron is later
+   (L-13), old oak is recipes.md's open great trees, horses are decided (D2-6) and not built, and nothing says when.
 
 ## History
 
@@ -95,6 +104,8 @@ paths shows which jumps are large enough to shape a society and which are decora
   except for the numbers.
 - 23 Oct: tools by dependence (D2-23): hand tools with grades, plough, carts, weapons, traps, harness, saddle; armour, nets, boats
   and the seed drill to economy_later.md.
+- 5 Nov: Swept against DECISIONS, the spec and what is built (37.2): copper tools and the metal rung decided (D2-23, D2-24, D2-19);
+  charcoal back (D2-56); salt's place and the hard tier still open; salt has no source in any world.
 
 ## Sources
 

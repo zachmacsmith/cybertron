@@ -1,8 +1,10 @@
 # Proposal: buildings people make their own (descriptions and lines written on them)
 
 **Status:** decided in part (3 Nov): every building carries a description and lines its people write, anyone can read them, and
-others can change or deface them (D2-169); each line costs its own engraving (D2-170); extravagance comes in tiers (D2-171). The details below (lengths, costs, the monument, fine work) are proposed. Zach asked for it to be built with the building
-package (3 Nov): review 02zh. **Owner:** 37.2. **Affects:** spec/economy/buildings.md; information/noticing.md and memory.md
+others can change or deface them (D2-169); each line costs its own engraving (D2-170); extravagance comes in tiers (D2-171).
+Built with the building package (3 Nov; review 02zh §10, 38.45): the verbs, lengths and places, the costs, fading on wattle, the
+monument and the tiers, all at the numbers below (data.py LINES, MONUMENTS, TIERS; calibrate). Not yet seen in a run (38.49: no
+lines written). Still open: 1 question (4, whether a tier gives more than notice), listed in Open questions. **Owner:** 37.2. **Affects:** spec/economy/buildings.md; information/noticing.md and memory.md
 (37.4's: reading and keeping); letters_and_documents.md (writing as a later skill); proposals/law.md (a rule written at a seat);
 beliefs_and_values.md (OPEN L-25: passing on by exposure).
 
@@ -103,10 +105,15 @@ medieval village rather than a choice.
 
 ## Open questions (for Zach)
 
-1. Lengths and places (§1): about 25 words for a description, 30 for a line, and places by size (2, 4, 8; a monument 3)?
-3. Should painted lines wear with the building's breaks?
-4. The tiers: noticeability only, or also something more (visitors, standing)?
-5. The monument (§2): a post, a stone and a cairn at those costs?
+1. Lengths and places (§1): about 25 words for a description, 30 for a line, and places by size (2, 4, 8; a monument 3)? — Built
+   as proposed (02zh §10, which Zach asked to be built; data.py LINES); no decision row of its own; calibrate.
+3. Should painted lines wear with the building's breaks? — Built as proposed (02zh §10; night.py: one painted line on wattle fades
+   at each break).
+4. The tiers: noticeability only, or also something more (visitors, standing)? — Still open: D2-171 decided the cost and how far
+   each tier is noticed (built: signs.py, layout.py, roads.py); nothing decides whether a tier should give more, and no run has yet
+   shown anyone building finely.
+5. The monument (§2): a post, a stone and a cairn at those costs? — Built as proposed (02zh §10; data.py MONUMENTS). The cairn
+   raised over a grave (D4-99: 3 stone, 2 units) is a separate thing: a mark on the grave, with no lines.
 
 ## History
 
@@ -114,6 +121,8 @@ medieval village rather than a choice.
   themselves into"; then: every building, anyone can read, others can deface; write it up. D2-169. Written.
 - 3 Nov: Zach: a line costs extra to engrave (D2-170); extravagance in several tiers, each dearer (D2-171); build it with the
   building package (02zh).
+- 5 Nov: Swept against DECISIONS, the spec and what is built (37.2): everything here is built at the proposed numbers (02zh §10,
+  38.45); question 4 stays open; D4-99's grave cairn is not this file's monument cairn.
 
 ## Sources
 

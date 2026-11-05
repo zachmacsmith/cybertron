@@ -1,7 +1,12 @@
 # Proposal: the economy plan for cybertron2
 
-**Status:** discussion (23 Oct); the first region adopted by 37.4 as the target world (38.08 §1). **Owner:** 37.2. **Affects:** the
-build plan (37.4's milestone M4); spec/economy/ (all files); seeding/ (the first region, with 37.4); measurement/ (economic measures).
+**Status:** partly accepted and built (swept 5 Nov). The first region was adopted as the target world (38.08 §1), then replaced by
+02t's four villages (D2-137; cybertron2/specs/region.yaml, with the inn at Millford). Built in part: E1 (offers and agreements, D2-25
+to D2-40), E2 (skill by practice, D2-52; standing orders only for children, D2-148; the fallback, D4-76), E3 (farming, buildings,
+mills and ovens), E4 (pack, handcart and pack ox, D2-135, D2-136), E5 (copper coin, D2-28). Not built: ledgers, letters, consignment,
+tolls, ox carts (L-53). E6 is under way (the dependence ladder, L-50: designed, not run). Still open: 2 questions (3, and salt in 4).
+**Owner:** 37.2. **Affects:** the build plan (37.4's milestone M4); spec/economy/ (all files); seeding/ (the first region, with
+37.4); measurement/ (economic measures).
 
 ## Summary
 
@@ -83,11 +88,17 @@ deep layers, so the economy's depth must come from several nodes linked by carri
 
 ## Open questions
 
-1. Carrying capacities and weights (OPEN C-1: 02g's numbers proposed), calibrated so grain travels one edge at a profit, not three.
-2. Skill by practice (0.5 novice to 2.0 master, decay) and the automation rule (transfers and standing offers free, routine work
-   spends units, decisions never automated).
-3. The levers for a 2-2.5x organised advantage (02d §5b).
-4. Inns and hosts in the first region (02g §7.4); salt's place (02g §7.5).
+1. ~~Carrying capacities and weights (OPEN C-1: 02g's numbers proposed), calibrated so grain travels one edge at a profit, not
+   three.~~ Decided: D2-135 (C-1 resolved 24 Oct, 02u); built in data.py (pack, handcart, the pack ox of D2-136).
+2. ~~Skill by practice (0.5 novice to 2.0 master, decay) and the automation rule (transfers and standing offers free, routine work
+   spends units, decisions never automated).~~ Skill decided: D2-52 (D2-64 for farming); built (data.SKILL, knowledge.py), except
+   fading without practice, which the spec has and the engine does not. The automation rule in parts: offers cost no units (D2-25),
+   routine work by standing orders (D4-16) and the fallback (D4-76); no decision states the whole rule.
+3. The levers for a 2-2.5x organised advantage (02d §5b). Still open (38.20 C6 was never answered). Since then D2-55 (land binds, not
+   labour), the mill ladder (D2-61, D2-166, D2-167) and the master farmer (D2-64) each give part of it; no target is decided.
+4. ~~Inns and hosts in the first region (02g §7.4)~~ (decided with the region: D2-137, the Bell household's inn at Millford;
+   spec/economy/lodging.md); salt's place (02g §7.5): still open. No world has a source of salt: data.py has salt as an item, used
+   only by cheese, and no technique makes it.
 
 ## History
 
@@ -97,6 +108,8 @@ deep layers, so the economy's depth must come from several nodes linked by carri
 - 22 Oct: 02g extended it: resources, livestock, the transport ladder, inns, the society-scale layers.
 - 22 Oct: 37.4's build plan (38.08) adopted the first region as the target world and placed the economy at M4.
 - 23 Oct: 02l added farming to E3.
+- 5 Nov: Swept against DECISIONS, the spec and what is built (37.2): questions 1, 2 and the inn decided (D2-135, D2-52, D2-137); the
+  organised advantage and salt's place still open; the Status line records what of E1-E6 is built.
 
 ## Sources
 

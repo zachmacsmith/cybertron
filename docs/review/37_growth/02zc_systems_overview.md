@@ -10,7 +10,8 @@ removes, so it is not a guide to the present engine. Only h2 (41 days) and w1 (2
 
 ## 1. Weather and seasons
 
-- **What it does:** each day's weather is drawn within a spell for the season; it sets cold nights, rain, lying snow, and how far
+- **What it does** (as built: spells are written by hand in the world file; no scheduler draws eras, years or spells, 5 Nov): each
+  day's weather is drawn within a spell for the season; it sets cold nights, rain, lying snow, and how far
   sight and sound carry at each place. A year is 24 days in four 6-day seasons, and winter is cold.
 - **Leverage:** nobody controls it. It rewards whoever stored fuel and food before winter, and that converts into leverage over
   those who did not, through hosting, sale and credit.

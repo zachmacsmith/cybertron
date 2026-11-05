@@ -1,6 +1,12 @@
 # Proposal: what can happen (eras, weather, hazards that spread, and how people meet them)
 
-**Status:** partly accepted: D2-76 to D2-79 (23 Oct); disease deferred (OPEN Q-16). Design only. **Owner:** 37.2 (at Zach's request). A companion to
+**Status:** partly accepted: D2-76 to D2-79 (23 Oct), compiled into spec/environment/scheduler.md; disease deferred (OPEN
+Q-16, L-9); the later kinds flagged (OPEN L-20); outside agents with goals flagged (OPEN L-22). Built of the first-world set (§6):
+the house fire and the stray herd as hand-listed incidents (engine/run.py), and a crop's keyed failure (D2-53, farm.py); the day's
+weather is drawn (rain, fog, snow, gale: D2-99) and read by visibility, fords and fires in the open (D4-83), and a gale throws a
+little of a wood's trees as dead wood (a small windfall: data.FORESTS `gale`, forests.py); no other weather event of §2 does damage,
+and no spreading hazard, wolves or other windfall is built. Still open: 1 question (disease, Q4). Design only.
+**Owner:** 37.2 (at Zach's request). A companion to
 [environment.md](environment.md), which holds the scheduler that runs these. **Affects:** as environment.md.
 
 ## Summary
@@ -131,11 +137,11 @@ conditioned on the incident ("if your house burns, the members owe you 10 timber
 
 ## Open questions (for Zach)
 
-1. The four families of eras, one of each at a time?
-2. The weather list and the first-world set (§6)?
-3. The six spreading patterns as the scheduler's vocabulary (adjacency, contact, carriage, flow, track, place-bound)?
-4. Disease mortality and immunity (with 37.1); whether nursing reduces deaths; a healer later (economy_later.md: medicine).
-5. Windfalls' claims: the finder's, the holder's, or set by custom and law?
+1. The four families of eras, one of each at a time? — decided: D2-76
+2. The weather list and the first-world set (§6)? — decided: D2-77
+3. The six spreading patterns as the scheduler's vocabulary (adjacency, contact, carriage, flow, track, place-bound)? — decided: D2-78
+4. Disease mortality and immunity (with 37.1); whether nursing reduces deaths; a healer later (economy_later.md: medicine). — **still open** (OPEN Q-16, L-9)
+5. Windfalls' claims: the finder's, the holder's, or set by custom and law? — decided: D2-79
 
 ## Answers (23 Oct)
 
@@ -154,6 +160,9 @@ conditioned on the incident ("if your house burns, the members owe you 10 timber
   each with ways to prepare, respond and fight back. Written: this catalogue.
 
 - 23 Oct: Zach answered 1-5 (D2-76 to D2-79).
+
+- 5 Nov: Swept against DECISIONS, the spec and what is built (37.2): four of five questions decided (D2-76 to D2-79), disease still
+  open (Q-16); of the first-world set only the house fire, the stray herd (both by hand), crop failure and the gale's fallen wood are built. Status updated.
 
 ## Sources
 

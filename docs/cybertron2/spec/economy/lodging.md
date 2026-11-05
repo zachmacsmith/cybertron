@@ -28,7 +28,7 @@ charge).
   | tent | 3 hides, 2 timber poles, 2 units (leatherworker) | 6 | about 30 nights | 2 | about 1.2 (1.4) | none |
   | camp at a site (a lean-to and a fire ring) | 3 timber, 1 unit (basic); a fire burns 1 timber a night | none: it stays where built | about 10 nights, then decays | 4 | about 1.2 (1.5 with the fire lit) | none |
 
-  A camp's store holds 15 weight in all, kept as in the open (D4-84). A house's or a camp's fire burns the fuel in its store,
+  A camp's store holds about 10 weight in all, kept as in a house, under cover (D4-84, D2-176). A house's or a camp's fire burns the fuel in its store,
   then its woodpile at the door (goods at a door are the house's, D4-89), so a camp can keep its firewood outside (D4-92).
   Gear wears a night of its life each night used. A camp stays at its site after its builder leaves; anyone there may use or mend
   it (its holder, if any, may set who: world/holding.md).

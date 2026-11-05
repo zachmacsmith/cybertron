@@ -2,7 +2,10 @@
 
 > **Decided parts are in the spec:** spec/world/parcel_graph.md (24 Oct).
 
-**Status:** partly accepted: D2-114 to D2-116 (24 Oct); sides, heights and the overview's form to confirm. Design only.
+**Status:** accepted: D2-114 to D2-116 (24 Oct), amended by D4-62 (the day's route) and D4-98 (next door 0.3). Built: the graph,
+sides and heights, presence along the way, attending to the village and the overview on arrival (engine/layout.py,
+data.NOTICING; spec world/parcel_graph.md); the generator sets sides and heights from the land (landgen/settle.py). Still open:
+none of its own; the built choices wait on Zach's confirmation in OPEN Q-21 (13, 15).
 **Owner:** 37.2 (author); places, layout and perception are 37.4's ([layout.md](layout.md), [seeing.md](seeing.md)), so this goes to
 them. **Affects:** spec/world/places.md, generation.md; spec/information/noticing.md, perception.md, prompts.md; world/roads.md
 (road ends), livestock (wandering), environment (spread, flow).
@@ -66,9 +69,12 @@ later).
 
 ## Open questions
 
-1. Sides as centre and four directions; heights as four ranks?
-2. Presence along the way and next door as in §2?
-3. The village overview on arrival: 3 to 5 lines of the most noticeable things?
+1. Sides as centre and four directions; heights as four ranks? — built as proposed (spec world/parcel_graph.md; data.LAYOUT;
+   landgen/settle.py sets both from the mesh); no D-number names the ranks.
+2. Presence along the way and next door as in §2? — decided in part: next door 0.3, not 0.1 (D4-98); the route is one chain in the
+   order of one's acts, not out and back to each parcel (D4-62); crossing 0.3 and elsewhere 0.05 built (data.NOTICING).
+3. The village overview on arrival: 3 to 5 lines of the most noticeable things? — built (layout.overview, data.LAYOUT 3 to 5); its
+   sources are OPEN Q-21 (13), recommended for confirming (38.51 §B).
 
 ## History
 
@@ -76,6 +82,8 @@ later).
   the engine already has neighbours. Zach: the graph's shape should come from the environment and terrain; whoever acts senses the
   parcels it is in, nearby, or must pass through, without deciding movement; some way to attend to the village as a whole and
   learn how it fits together; a concise overview on arrival of noticeable things rather than positions (D2-114 to D2-116). Written.
+- 5 Nov: Swept against DECISIONS, the spec and what is built (37.2): all three questions built; next door and the route changed by
+  D4-98 and D4-62; the generator now makes sides and heights, so Q-21 (15) is out of date.
 
 ## Sources
 

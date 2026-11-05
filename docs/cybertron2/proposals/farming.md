@@ -1,8 +1,12 @@
 # Proposal: farming
 
-**Status:** partly accepted: D2-11 to D2-18 (rest discussion). **Owner:** 37.2. **Affects:** spec/economy/production.md (farming),
-spec/economy/goods.md (crops, seed), spec/economy/livestock.md (draught, dung), spec/world/holding.md and land (37.4: the plot unit,
-house lots, pasture), spec/seeding (farming under way at day 0).
+**Status:** largely accepted and built (swept 5 Nov): D2-11 to D2-18, D2-53, D2-54, D2-59, D2-64 to D2-67, D2-119, D2-129, D2-163,
+D2-172, D4-38 to D4-40. Built in cybertron2/engine/farm.py and data.py: the stages and soil, grain, winter grain and legumes, the
+failure draw, dibbling, field works at fixed penalties, seed selection, the master's yield, plot shares (38.52). Not built: the
+garden and hay as crops (hay is cut from pasture, D4-42). Irrigation later (D2-67, L-10). Still open: 2 questions (the absolute
+scale; the garden). **Owner:** 37.2. **Affects:** spec/economy/production.md (farming), spec/economy/goods.md (crops, seed),
+spec/economy/livestock.md (draught, dung), spec/world/holding.md and land (37.4: the plot unit, house lots, pasture), spec/seeding
+(farming under way at day 0).
 
 ## Summary
 
@@ -27,21 +31,23 @@ with about 30% less work per person than a household alone.
 | D2-17 | seed is kept back from each harvest |
 | D2-18 | the plough needs an ox, fodder takes land, dung keeps the soil; households need land to live on |
 
-### Still in discussion
+### Still in discussion (as of 23 Oct; 1, 2, 3 and 5 decided since, 4 still open)
 
-1. **Stages and their work** (02l §2): sow 0.5 a plot; break the soil with a hoe 3 or an ox plough 0.75 (+1.5x the seed); weeding up
-   to +50% on a saturating curve; manure 1 (needs dung); reap 1.5 with a sickle, 2.5 bare-handed; threshing folded into reaping.
-   Soil fertility multiplies the harvest; grain takes 15% of it, legumes, fallow, grazing and dung restore it toward a level.
-2. **Crops counted from the day sown, the cold as the limit** (02l §3): grain (about a quarter of the year), winter grain (survives
-   the cold), legumes (restore the soil, 60% of grain's food), garden (fast, spoils), hay (winter fodder). Growing the same crop
-   twice raises the chance it fails (5% to 15%).
-3. **The plot unit** rescaled to D4-23's definition (about what one adult can work in a season), with the hand method (hoe and
-   weeding) as the reference; the ox plough then lets one adult work about 1.5-2 plots.
-4. **A garden on the house lot,** worked with spare units.
-5. **Sowing takes work per unit of seed** (Zach, 23 Oct: an agent's units should sow only a finite amount, with tools improving
-   it). Proposal: sowing costs work per unit of seed, not per plot, so sowing densely costs more; a choice of **broadcasting** (fast,
-   wastes seed) or **dibbling** (about three times the work, about 40% less seed for the same harvest), which matters after a bad
-   harvest when seed is short (D2-17). The ox plough raises plots per adult; a seed drill comes much later (economy_later.md).
+1. **Stages and their work** (decided: D4-38, D4-39; built) (02l §2): sow 0.5 a plot; break the soil with a hoe 3 or an ox plough
+   0.75 (+1.5x the seed); weeding up to +50% on a saturating curve; manure 1 (needs dung); reap 1.5 with a sickle, 2.5 bare-handed;
+   threshing folded into reaping. Soil fertility multiplies the harvest; grain takes 15% of it, legumes, fallow, grazing and dung
+   restore it toward a level.
+2. **Crops counted from the day sown, the cold as the limit** (decided: D2-53; built except the garden and hay) (02l §3): grain
+   (about a quarter of the year), winter grain (survives the cold), legumes (restore the soil, 60% of grain's food), garden (fast,
+   spoils), hay (winter fodder). Growing the same crop twice raises the chance it fails (5% to 15%).
+3. **The plot unit** (decided: D4-40, D2-59) rescaled to D4-23's definition (about what one adult can work in a season), with the
+   hand method (hoe and weeding) as the reference; the ox plough then lets one adult work about 1.5-2 plots.
+4. **A garden on the house lot,** worked with spare units. (Still open.)
+5. **Sowing takes work per unit of seed** (decided: D2-54, D2-119, D2-129; built) (Zach, 23 Oct: an agent's units should sow only a
+   finite amount, with tools improving it). Proposal: sowing costs work per unit of seed, not per plot, so sowing densely costs more;
+   a choice of **broadcasting** (fast, wastes seed) or **dibbling** (about three times the work, about 40% less seed for the same
+   harvest), which matters after a bad harvest when seed is short (D2-17). The ox plough raises plots per adult; a seed drill comes
+   much later (economy_later.md).
 
 ### Raising what a plot can produce (23 Oct, discussion)
 
@@ -77,11 +83,13 @@ So ditches are for wet ground and terraces for hills, and neither is worth it on
 over more days than one run, so they test whether agents invest for their heirs; seeded worlds start with some plots improved.
 
 **What the works protect against does not exist yet (checked 23 Oct).** Neither the engine nor the spec has floods, droughts or crop
-disease: the scheduler (spec/environment/scheduler.md) names a flood only as an example of an incident kind, and none is defined;
-"a fever" appears only as a cause of death in generated family histories. The old engine's 5% blight was not ported. D2-53 says a
-crop sown twice running is likelier to fail, which needs a failure draw that does not exist. So ditches (wet years), terraces
-(erosion) and irrigation (dry spells) need **37.4's incidents and cycles first**: wet and dry spells by season and land kind
-(38.04's climate axes: a valley "suffers wet", grassland "suffers dry"), river floods, and a crop-failure (blight) draw.
+disease: the scheduler (spec/environment/scheduler.md) names a flood only as an example of an incident kind, and none is defined; "a
+fever" appears only as a cause of death in generated family histories. The old engine's 5% blight was not ported. D2-53 says a crop
+sown twice running is likelier to fail, which needs a failure draw that does not exist. So ditches (wet years), terraces (erosion)
+and irrigation (dry spells) need **37.4's incidents and cycles first**: wet and dry spells by season and land kind (38.04's climate
+axes: a valley "suffers wet", grassland "suffers dry"), river floods, and a crop-failure (blight) draw. (5 Nov: the failure draw is
+built, farm.py, 5% and 15% for the same crop twice; daily weather exists but no flood or dry spell acts on a plot, so D2-66's fixed
+penalties stand.)
 
 **Irrigation: what it does.** Crops need water while they grow. Proposed, with 37.4's weather: each growing day a plot is wet
 enough, dry, or flooded, from the season, the spell (dry or wet, drawn by the scheduler) and its land kind. A dry day cuts the
@@ -135,16 +143,23 @@ terms in agreements). That is the old engine's lesson (review 15 §2.7) carried 
 ## Open questions
 
 1. The absolute scale: at 02l's numbers the household rung feeds a person with about 10% of an adult's day before seed, milling,
-   storage, winter and children; target about 25-30%.
-2. Crop cycles as shares of the year or in days.
-3. Weeding as one stage on a curve or several tends.
-4. How lots, plots and pasture share a node's land (asked of 37.4 on the board, 23 Oct).
-5. Sowing per unit of seed, and broadcasting against dibbling.
+   storage, winter and children; target about 25-30%. Still open: D2-58 (grain spoils), D2-59 (the plot) and D2-167 (slow hand
+   grinding) raise the cost; runs have read higher (85-90% on richer land, 38.12), so it is a calibration to read from runs.
+2. ~~Crop cycles as shares of the year or in days.~~ Built as shares of the year (data.py CROPS `share`; production.md Parameters),
+   which follow the world's year length in days (D2-139); not a separate decision.
+3. ~~Weeding as one stage on a curve or several tends.~~ Decided: one stage on a saturating curve (D4-38); built (farming `weed_max`,
+   `weed_tau`).
+4. ~~How lots, plots and pasture share a node's land (asked of 37.4 on the board, 23 Oct).~~ Decided: D4-23, D2-154, D2-163, D2-164,
+   D2-172 (plot shares, built: 38.52), D2-175 (land use in rings); OPEN C-2 closed.
+5. ~~Sowing per unit of seed, and broadcasting against dibbling.~~ Decided: D2-54; dibbling taught, known by at least one person in
+   the world (D2-129); built (`method: dibble`).
 
 ## Decided since (23 Oct)
 
 - D2-53: crops from the sowing day, the cold as the limit (proposal 2 above). D2-54: sowing work per unit of seed; broadcast or
   dibble (proposal 5). The plot unit (3) is being rescaled in 02n; the garden (4) is still open.
+- Since: D4-38, D4-39 (stages, soil), D4-40 and D2-59 (the plot unit), D2-64 to D2-67 (skill, seed selection, field works, irrigation
+  later), D2-163 and D2-172 (plot shares). The garden (4) is still open (5 Nov).
 
 ## History
 
@@ -181,6 +196,9 @@ terms in agreements). That is the old engine's lesson (review 15 §2.7) carried 
 - 23 Oct: Zach: do floods and crop disease exist now (no: they need 37.4's incidents); flesh out irrigation and say what it does.
   Added: irrigation's effects through a plot's water each growing day, finite water and turns, the headgate's controller, upkeep,
   knowledge, what agents see, and the institutions.
+
+- 5 Nov: Swept against DECISIONS, the spec and what is built (37.2): the stages, crops, plot unit, weeding, sowing and land sharing
+  are decided and built; the absolute scale and the garden still open; the garden and hay crops of D2-53 are not built.
 
 ## Sources
 

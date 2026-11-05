@@ -58,7 +58,8 @@ floor as in a damaged house, and beds go eldest first.
   only in a stone building. Upper floors take no ground.
 - **Upgrading** a building's structure (wattle to timber, timber to stone): the new structure's materials for its rooms, less a
   quarter, and the work; the building keeps its rooms, fittings and stores; it counts as damaged while the work is under way.
-- **Defence and fire** by structure: conflict/defence.md (wattle x0.5, timber x1, stone x2, proposed) and D2-49.
+- **Defence and fire** by structure: conflict/defence.md (timber x1, stone x2; as built wattle counts x1 and a barred door x1.5, and
+  those asleep inside count x0.5: settle.py) and D2-49.
 
 ### Fittings (D2-154), their space and cost
 
@@ -92,7 +93,7 @@ does 2 units, more with skill, until its work is done).
 | a cellar | 40 food a space of footprint | x0.25 |
 | a woodshed | 40 timber | kept dry |
 | a vault | 30 weight a space | the house rate; does not burn |
-| a camp | 15 weight in all (D4-84) | the open rate; no bins |
+| a camp | about 10 weight in all (D4-84, D2-176) | the house rate (under cover); no bins |
 | outside | anything | the open (economy/goods.md: food much faster; timber wet in rain, no use as fuel until dried) |
 
 A building's stores cannot take more than its storage holds; what does not fit is refused, or left outside if put there. Goods
@@ -158,7 +159,7 @@ unfinished.
 | storage | above | decided (D2-155); calibrate |
 | stone structures' costs; bed's cost; an indoor fire ring half-warming; stalls; woodshed; vault; clearing; upgrading | above | proposed |
 | the shelter ration multipliers | 1.0, 1.2, 1.5; cold 1.0, 1.3, 1.5, 2.0 | calibrate |
-| defence multipliers by structure | wattle x0.5, timber x1, stone x2 | proposed; calibrate |
+| defence multipliers by structure | wattle x1, timber x1, stone x2; a barred door x1.5; asleep inside x0.5 | as built (settle.py); calibrate |
 
 ## What agents see
 

@@ -2,8 +2,9 @@
 
 ## Summary
 
-The goods decided so far, what each is for, and where it comes from. The full first-world set (about ten goods, chosen by a pruning
-rule) is still a proposal; this file lists only what decisions have fixed.
+The goods decided so far, what each is for, and where it comes from. The first-world set is decided (D2-24, with D2-56 and the food goods
+since); this file lists only what decisions have fixed. Decided but not yet built: blades, traps, locks, the saddle, carts, parchment and
+documents; salt is a good with no source in any world yet (making it, D2-56, is not built).
 
 ## Decided
 
@@ -32,7 +33,7 @@ rule) is still a proposal; this file lists only what decisions have fixed.
 | grain | reaping a field | eating; seed; fodder | D2-11, D2-17 |
 | livestock | breeding | draught, dung, riding (livestock.md) | D2-6, D2-18 |
 | stone | a quarry; a little fieldstone from fields | hearths, large and tall buildings, walls | D2-3, D2-20, D2-56 |
-| coin | (to decide: its metal) | payment | D2-1 |
+| coin | struck from copper (D2-28) | payment | D2-1, D2-28 |
 | tools, plough, harness, saddle, cart, weapons, traps | made (production.md) | production, transport, fighting | D2-23 |
 | timber | felling at a forest | fuel, building, carts, tools, fittings | D2-24 |
 | copper | mining a seam, then smelting | tools, blades, fittings, coin | D2-24 |

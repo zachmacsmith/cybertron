@@ -1,6 +1,10 @@
 # Proposal: the hidden state of places and things (shared variables that interact)
 
-**Status:** discussion (23 Oct). Design only. **Owner:** 37.2. A companion to [environment.md](environment.md) (the scheduler)
+**Status:** discussion (23 Oct); flagged for later as a whole (OPEN L-23, 24 Oct: water as a need and the land's hidden state,
+all six questions); none of it decided. Built since, in part: a river is a chain of water parcels in a node (spec/world/parcel_graph.md;
+landgen/settle.py); visibility is read each day from the land's state (D2-99, D2-103); soil fertility (D4-39), a wood's stocks and a
+building's condition exist. None of §10's new variables (water table, cleanness, damp, vermin, a herd's sickness, health, nutrition)
+and no need for water are built. Still open: 6 questions. Design only. **Owner:** 37.2. A companion to [environment.md](environment.md) (the scheduler)
 and [environment_catalogue.md](environment_catalogue.md) (what can happen). **Affects:** spec/environment/ (a new file:
 state.md), world/ (parcels, wells and waters: with 37.4), economy/ (buildings, livestock, production), life/ (health),
 information/ (signs). **Model:** [02q_environment_model.py](../../review/37_growth/02q_environment_model.py) ("a cascade").
@@ -237,13 +241,13 @@ About sixteen in all, chosen because each has a hazard that reads it and a sign:
 
 ## Open questions (for Zach)
 
-1. The carriers and layers of §7, including groundwater per node and the river as reaches joined downstream?
+1. The carriers and layers of §7, including groundwater per node and the river as reaches joined downstream? — **still open** (L-23); built in part: a river as water parcels in each node (spec/world/parcel_graph.md), and the generator's rivers drain across the region (D4-22, D2-191); no groundwater and no hidden state on a river
 2. Water as a need met by a source (well, spring, river) at a small daily cost by distance, drinking the source's cleanness; no
-   water item (§8)?
-3. Wells, latrines and middens as things people place (§8-§9), with the midden as manure?
-4. The first sixteen variables (§10)?
-5. Effects one step a day, damped and capped, with declared couplings (§3, §6)?
-6. Nutrition from a varied diet as a health factor (§7)?
+   water item (§8)? — **still open** (L-23); ecosystems.md §4 and §9 also wait on it
+3. Wells, latrines and middens as things people place (§8-§9), with the midden as manure? — **still open** (L-23); a well as a work on the land also waits on the generator's water (OPEN L-34)
+4. The first sixteen variables (§10)? — **still open** (L-23)
+5. Effects one step a day, damped and capped, with declared couplings (§3, §6)? — **still open** (L-23)
+6. Nutrition from a varied diet as a health factor (§7)? — **still open** (L-23); food values are data (D2-160), with no health from variety
 
 ## History
 
@@ -260,6 +264,9 @@ About sixteen in all, chosen because each has a hazard that reads it and a sign:
 
 - 23 Oct: visibility (proposals/visibility.md, D2-99) is read each day from these variables (vegetation, a standing crop, snow,
   smoke) and the region's wind and weather, not stored; smoke joins as a short-lived state near fires.
+
+- 5 Nov: Swept against DECISIONS, the spec and what is built (37.2): nothing here decided; all six questions parked in OPEN L-23;
+  rivers as water parcels and visibility from the land's state are built, none of the new variables. Status updated.
 
 ## Sources
 

@@ -1,10 +1,17 @@
 # Proposal: the landscape generator (a world under the graph)
 
-**Status:**
+**Status:** partly accepted: D2-173 to D2-175 here, D2-177 to D2-188 through stage 1, D2-189 to D2-191 since. Built: stage 1 at
+Zach's request (3 Nov; [generator_stage1.md](generator_stage1.md), review 02zj, cybertron2/landgen/), with the land rebuilt within
+one envelope by [temperate_landscapes.md](temperate_landscapes.md) (D2-191). Not built: §2e (the engine does not read the mesh in a
+run: D2-177). Still open: 4 questions, all deferred by Zach (3 Nov: build the generator without deciding them; OPEN L-33, L-35):
+wild land split when used (2, with 7), places and reach (3), roads only or across country (6), places finer with use (7). Listed in
+Open questions.
+
 - **Decided in part (3 Nov):** the generator fills in around what a world file gives (D2-173); a mesh kept as ground truth
   with the graph derived from it (D2-174); land-use rings as the default layout (D2-175).
-- **For discussion:** the world under the graph (§2 to §5), and the questions at the end.
-- Design only. Not to be built until Zach asks (README rule 10).
+- **For discussion:** the world under the graph (§2 to §5), and the questions at the end. *(5 Nov: §2 to §5 decided and built
+  through stage 1, except §2e.)*
+- Design only. Not to be built until Zach asks (README rule 10). *(Zach asked on 3 Nov; stage 1 built.)*
 
 **Owner:** 37.2, with 37.4. **Affects:**
 - spec/world/generation.md (37.4's: to be compiled from this when decided), places.md, parcel_graph.md, roads.md, edges.md;
@@ -125,6 +132,9 @@ reproducibly, without seed searches.
 
 ### 2e. Through a run
 
+*Not built: stage 1 writes today's world format plus the mesh, with no engine change (D2-177), so nothing in a run reads or
+changes the cells yet.*
+
 - **The mesh is kept as the ground truth.**
   - Felling and clearing change cells' cover, and the parcels follow.
   - Rivers and hills don't change.
@@ -179,6 +189,9 @@ pins name:
 The generator fills in the rest around them, keyed per element in the same way.
 
 ## 6. Where nodes come from: the world or the observer (discussion, 3 Nov)
+
+*Deferred by Zach, not decided: the generator was built without it; growth to towns is flagged (OPEN L-33), and distance inside a
+node is "not for now" (L-35).*
 
 Zach: "the node being a property of the observer, not the world?" The extreme form: travel can go to any point, and each agent's
 node is what lies within a day's reach of where it stands.
@@ -243,6 +256,9 @@ derived view; C would read the rest.
 
 ## 7. How much physics: only what bottoms out in leverage (discussion, 3 Nov)
 
+*Built as proposed in stage 1 (flow accumulation, one incision pass, rule-based soils, one wind sweep: 02zj); the leverage check is
+D2-180's design checks, with the supply-chain and junction checks flagged (OPEN L-49).*
+
 Zach: terrain matters for leverage (which land is most useful, where the best resources are), so complexity that does not end in
 tangible differences is not worth much.
 
@@ -281,6 +297,8 @@ No erosion or climate simulation. And a **leverage check** on every generated wo
 That check, not realism, is the generator's measure of success.
 
 ## 8. Places that get finer with use (discussion, 3 Nov)
+
+*Deferred by Zach, not decided: outlined for comparison only ("outline the split to look at"); the leaning below is 37.2's.*
 
 Zach: would the large wild places become finer grained when land is cleared and settled? And is splitting the right level of
 abstraction, or will it depend on too many edge cases? Three ways, outlined so they can be compared.
@@ -378,6 +396,9 @@ From 37.2's knowledge, not checked against the sources on 3 Nov.
 
 ## 10. The terrain catalogue (discussion, 3 Nov)
 
+*Decided: D2-183; revised by D2-191 (temperate_landscapes.md): terrain is now the base environment only ("woodland" and "deep
+forest" are gone from it; a wood's type and depth are its parcel's ecosystem), "sandy heath" is "sandy ground", and peat is added.*
+
 **Terrains and covers are different things.**
 - A **terrain** is what the land is: its soil, water, slope, exposure, resources and hazards. It comes from the physical layers.
 - A **cover** is what the land is used as now: field, pasture, forest, built ground and so on. It changes with work.
@@ -451,14 +472,17 @@ missing.
 
 1. ~~A mesh kept as ground truth~~: decided (D2-174).
 2. A node's parcels covering all its land, with wild land as large parcels split when cleared or claimed (§2d). Zach: to address
-   with 3.
+   with 3. — still open, deferred with 3 and 7; stage 1 makes wild nodes for large wild areas (D2-181) and holds land in plot
+   shares (D2-163), with no splitting.
 3. Places as the world's, reach as the observer's, nodes as a derived label, places appearing where people go off the graph (§6)?
-4. Cheap approximations and a leverage check in place of erosion and climate simulation (§7)?
+   — still open, deferred (OPEN L-33, L-35).
+4. Cheap approximations and a leverage check in place of erosion and climate simulation (§7)? — built so in stage 1 (02zj); the
+   checks are D2-180's, the supply-chain part flagged (L-49).
 5. ~~Land-use rings as the default~~: decided (D2-175).
-6. Roads only (A) or across country (C) (§6): not needed to build the generator.
-7. Places finer with use: split on use (8a), fine places grouped when shown (8b), or counts (8c)?
-8. The terrain catalogue (§10): the terrains, their parameters, and the new ones (terrace, clay vale, heath, downs, upland
-   summer pasture, saltmarsh)?
+6. Roads only (A) or across country (C) (§6): not needed to build the generator. — still open, deferred; today's engine is A.
+7. Places finer with use: split on use (8a), fine places grouped when shown (8b), or counts (8c)? — still open, deferred.
+8. ~~The terrain catalogue (§10): the terrains, their parameters, and the new ones (terrace, clay vale, heath, downs, upland
+   summer pasture, saltmarsh)?~~ decided: D2-183, revised by D2-191.
 
 ## History
 
@@ -471,6 +495,8 @@ missing.
   cleared; build the generator without deciding; outline the split to look at. Added §6's two ways and §8 (three ways, compared).
 - 3 Nov: Zach: which terrains, their parameters, what is missing, how they shape villages, regions and supply chains; then
   settle the catalogue and write stage 1 in full for review. Added §10; stage 1 in [generator_stage1.md](generator_stage1.md).
+- 5 Nov: Swept against DECISIONS, the spec and what is built (37.2): stage 1 is decided (D2-177 to D2-188) and built, and the land
+  rebuilt (D2-191); questions 4 and 8 settled; 2, 3, 6 and 7 deferred by Zach, still open.
 
 ## Sources
 

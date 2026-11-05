@@ -2,7 +2,11 @@
 
 > **Decided parts are in the spec:** spec/economy/buildings.md (24 Oct: space at every level, rooms, fittings, storage, structures).
 
-**Status:** partly accepted: D2-3, D2-9 (the numbers, the fitting list and the limits still discussion; 23 Oct). **Owner:** 37.2.
+**Status:** partly accepted: D2-3, D2-9 (23 Oct), then D2-45, D2-49, D2-154, D2-155, D2-166, D2-168 (numbers, fittings, storage,
+wear; to 3 Nov). Built with the building package (02zh; review 38.45): rooms, storeys, the fittings in data.py FITTINGS, storage, the
+vault, wear by structure. Superseded: the structure table and the cost curve below (by D2-154's rooms and D2-168). Not built:
+benches, shelves and a lock (a barred door stands in), room bookings. Still open: 3 questions, all waiting on later systems (documents,
+OPEN L-48; listed in Open questions). **Owner:** 37.2.
 **Affects:** spec/economy/buildings.md; world/ (lots, with 37.4: OPEN C-2); information/ (rooms as speech scopes); conflict/defence.md
 (walls).
 
@@ -78,9 +82,17 @@ give towns and villages different shapes for a reason: land is short in towns, s
 
 ## Open questions
 
-From 02i §8: the cost curve's exponent and the x0.8 for adjoining rooms; document capacity of shelves in documents or pages; fire
-spreading from forges and kilns to neighbouring rooms; whether lots are 37.4's slots by land kind (OPEN C-2: proposed yes); upkeep
-per fitting and per room.
+From 02i §8:
+- the cost curve's exponent and the x0.8 for adjoining rooms; — superseded by D2-154: rooms of 6, 12 and 30 spaces at set costs,
+  adjoining a quarter cheaper (built: data.py ROOMS, SPACE).
+- document capacity of shelves in documents or pages; — still open: no shelves and no documents are built; waits on documents
+  (spec information/letters_and_documents.md).
+- fire spreading from forges and kilns to neighbouring rooms; — still open, flagged for later: OPEN L-48 (house fires from hearths
+  and ovens) and L-21; 02zh left fire spreading out.
+- whether lots are 37.4's slots by land kind (OPEN C-2: proposed yes); — decided: D2-154 and D2-164 (ground in spaces by cover;
+  C-2 closed 2 Nov).
+- upkeep per fitting and per room. — Per building decided: D2-168 (wear by structure, repair by size; built). Per fitting still
+  open: the mills' and ovens' upkeep goes with the risks (D4-97 (2), OPEN L-48).
 
 ## History
 
@@ -99,6 +111,9 @@ per fitting and per room.
 
 - 24 Oct: Zach: fittings should take space by kind; parcel space to room space to fitting space; storage enough for families;
   a cheaper cellar. Decided D2-154, D2-155 (02x model); spec rewritten.
+
+- 5 Nov: Swept against DECISIONS, the spec and what is built (37.2): space, rooms, storeys, fittings, storage and wear are decided
+  (D2-154, D2-155, D2-166, D2-168) and built (38.45); of 02i §8's questions two are settled, three wait (documents, L-48).
 
 ## Sources
 

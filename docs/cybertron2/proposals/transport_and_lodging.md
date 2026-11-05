@@ -1,8 +1,12 @@
 # Proposal: transport and lodging
 
 **Status:** partly accepted: D4-9 (goods, letters and people cross only when carried), D4-12 (a night out costs 1.5 food; hosts and
-inns are part of the design), D2-4 (a death on the road is never announced); the ladder, capacities and danger numbers are
-discussion. **Owner:** 37.2 (author; the numbers); the mechanisms of carrying, travel and lodging are 37.4's.
+inns are part of the design), D2-4 (a death on the road is never announced), D2-68 (camps and portable shelter), D2-133 to D2-136
+(the pack ox, riders in a cart, capacities: C-1), D2-159 (shelter and fire), D4-84 (a camp keeps little). Built: capacities, the
+pack ox, the handcart, hosting, the inn as a building with beds (the Bell at Millford, specs/region.yaml), bedroll, tent and camp,
+bodies on the road found by the noticing rule. Later: the ox cart, several pack oxen, traders (OPEN L-53); wagons, boats, rail
+(economy_later.md, L-38). Still open: 3 questions (danger per edge, C-6, with its order; tracks and roads as edge works; listed in
+Open questions). **Owner:** 37.2 (author; the numbers); the mechanisms of carrying, travel and lodging are 37.4's.
 
 ## Summary
 
@@ -61,6 +65,8 @@ collection (the first post office), change horses for coaches, and know who trav
 
 ### Camps and portable shelter (23 Oct, discussion)
 
+*Decided: D2-68, with these numbers; built (spec economy/lodging.md).*
+
 For travel and for exploring new land (37.5's frontier). A night out without gear costs 1.5 food (2 in winter) and the cold's
 chance of waking starving (D4-12, H-5). Gear and camps cut that, at a weight and with wear:
 
@@ -96,11 +102,16 @@ chance of waking starving (D4-12, H-5). Gear and camps cut that, at a weight and
 
 ## Open questions
 
-1. C-1 (capacities) and C-6 (danger table as the scheduler's draws).
-2. Whether the danger numbers are in the right order (02g §7.2c).
-3. The first region's inn and host: an inn at Millford, a host at the pass (02f §4; 02g §7.4).
-4. The chance a later traveller finds a body (about 50% on a short edge proposed).
-5. Tracks and roads as edge works: cost, upkeep, who builds them.
+1. C-1 (capacities) and C-6 (danger table as the scheduler's draws). — C-1 decided: D2-135 (on foot 10, pack 20, pack ox 60,
+   handcart 40; the ox cart 300 to 400 when built). Still open: C-6; no danger per edge is built, only the landmarks' own risks
+   (a high ford, a snowed pass: roads.py).
+2. Whether the danger numbers are in the right order (02g §7.2c). — still open, with C-6.
+3. The first region's inn and host: an inn at Millford, a host at the pass (02f §4; 02g §7.4). — built in part: the Bell at
+   Millford (specs/region.yaml, 02t, D2-137); the Pass has no household, so no host there.
+4. The chance a later traveller finds a body (about 50% on a short edge proposed). — superseded: by the noticing rule (D2-85), a
+   body's own 0.9 x the stretch's sight x presence 1.0 on that stretch (roads.py, data.THINGS).
+5. Tracks and roads as edge works: cost, upkeep, who builds them. — still open: a road's track is world data (the handcart needs
+   one); building tracks waits with carts on tracks the generator lays (L-53) and works on landmarks (L-5, L-34).
 
 ## Affects
 
@@ -119,6 +130,9 @@ agents/work.md (carrying); life/ (deaths on the road).
 
 - 23 Oct: Zach: what should camps and portable shelters look like for travel and exploring? Added: bedroll, tent, a camp built
   at a site; weights, lives, food a night, paybacks; camps as wayside shelters and as the start of a settlement.
+
+- 5 Nov: Swept against DECISIONS, the spec and what is built (37.2): capacities, camps, the pack ox and riders decided and built;
+  the inn at Millford built; still open: danger per edge (C-6) and its order, and tracks as edge works.
 
 ## Sources
 

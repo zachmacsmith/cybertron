@@ -1,8 +1,18 @@
 # Proposal: environments, ecosystems and how they cluster
 
-Status: **discussion; the wide design, kept for later.** What the generator does now is narrowed to one envelope in [temperate_landscapes.md](temperate_landscapes.md) (Zach, 2 Nov: "design within certain environmental types"). (Zach, 2 Nov: "what are all the different core environmental / terrain types we might want to explore ...
-biomes should come in ecosystem clusters, no? What would be a good way to do this?"). Nothing decided, nothing to build. Current as
-of 2 Nov. Owner 37.2. It extends generator.md §7 (only physics that ends in leverage) and §10 (the temperate terrain catalogue).
+**Status:** discussion; the wide design, kept for later. Its narrowed part is decided and built as
+[temperate_landscapes.md](temperate_landscapes.md) (D2-191, 2 Nov): layers 2 to 4 (base environment, ecosystem, state by how long
+settled) and depth bands, within one temperate envelope and with no planet (landgen/ecology.py, physical.py, macro.py, vocab.py);
+§8 step 1 is done and step 2 begun (a wood's game by its type and depth, its forage by depth: landgen/write.py). §1 describes the
+generator before D2-191. Still open: 3 questions (Q3, Q4 in part, Q1's climate zone beyond the envelope); Q2 settled for the
+envelope, Q5 deferred by D2-191.
+**Owner:** 37.2.
+
+What the generator does now is narrowed to one envelope in [temperate_landscapes.md](temperate_landscapes.md) (Zach, 2 Nov: "design
+within certain environmental types"). (Zach, 2 Nov: "what are all the different core environmental / terrain types we might want to
+explore ... biomes should come in ecosystem clusters, no? What would be a good way to do this?"). ~~Nothing decided, nothing to
+build.~~ (The narrowed part: D2-191.) Current as of 2 Nov. Owner 37.2. It extends generator.md §7 (only physics that ends in
+leverage) and §10 (the temperate terrain catalogue).
 
 ## 1. The problem with what exists
 
@@ -257,8 +267,23 @@ The order to explore zones should therefore follow the engine systems, not the o
 ## Open questions (for Zach)
 
 1. The four layers (climate zone, base environment, ecosystem, state) with depth: is that the right split? And the zone set by
-   latitude, distance from the sea, wind and currents (§4b), with a zone by name as a shortcut?
-2. Method C (palettes, templates, succession), or another?
-3. Which zones to explore first, given each needs its engine system?
-4. Should worlds be described as a zone plus dial settings (§5)?
-5. The coarse planet (§4c): now, or deferred until a second zone has its engine system?
+   latitude, distance from the sea, wind and currents (§4b), with a zone by name as a shortcut? — the split and depth: decided and
+   built for the envelope (D2-191; landgen/ecology.py: base environment as terrain, 20 ecosystems, clearing by `settled`, edge,
+   interior and core); **still open:** the climate zone and how it is set, as D2-191 fixes one zone (temperate_landscapes.md §2)
+2. Method C (palettes, templates, succession), or another? — decided for the envelope (D2-191): palettes per landscape system,
+   built as rules by conditions rather than explicit template sequences (temperate_landscapes.md §5); explicit catenas only if the
+   rules stop sufficing (OPEN L-100); disturbance and succession into a mosaic not built beyond the engine's forest growth and scrub
+3. Which zones to explore first, given each needs its engine system? — **still open**; none beyond the envelope until its engine
+   system exists (D2-191; §9)
+4. Should worlds be described as a zone plus dial settings (§5)? — in part: within the envelope a world has dials (`settled`, the
+   prevailing `wind`: D2-191, landgen/vocab.py); **still open:** §5's other axes (variability between years and rare catastrophe
+   need the scheduler's years, not built)
+5. The coarse planet (§4c): now, or deferred until a second zone has its engine system? — ~~open~~ deferred by D2-191 (one envelope,
+   "no planet": temperate_landscapes.md §2), as §4c recommends
+
+## History
+
+- 2 Nov: Zach asked for the core environmental and terrain types and how biomes cluster, then for a coarse planet; written. The
+  same day he narrowed the generator to one envelope (temperate_landscapes.md, built: D2-191).
+- 5 Nov: Swept against DECISIONS, the spec and what is built (37.2): Q2 settled and Q5 deferred by D2-191, Q1 settled for the
+  envelope; the zone beyond it, which zone next and zone plus dials still open. Owner line and History added.

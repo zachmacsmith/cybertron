@@ -1,7 +1,10 @@
 # Proposal: fertility and replacement
 
-**Status:** decided in part (29 Oct): pregnancy 2 days, the gap after a birth 1 day, and the conception chance's cap 0.8 (D2-162).
-The rest (§3 to §5) is for discussion. **Owner:** 37.2. **Affects:** spec/life/birth_and_death.md, data.LIFE. Model:
+**Status:** decided in part (29 Oct): pregnancy 2 days, the gap after a birth 1 day, and the conception chance's cap 0.8 (D2-162);
+built (data.LIFE, life.py; spec/life/birth_and_death.md). Built as proposed, to confirm: Q5 (the last day lighter, signs from the
+day after conception: data.LIFE `late`, `signs_from`). Since then a baby's night risk by shelter and a birth in a camp (D4-97 (6))
+touch §4. Still open: Q1 to Q4 (§3 to §5; Q1 is also parked in OPEN L-27), and Q5's confirmation. **Owner:** 37.2.
+**Affects:** spec/life/birth_and_death.md, data.LIFE. Model:
 [02ze_fertility_model.py](../../review/37_growth/02ze_fertility_model.py).
 
 ## Summary
@@ -92,6 +95,8 @@ the same life slowed down. With them fixed in days, longer lives allow larger fa
 - an infant's risk rises when it is uncared for (0.02 to 0.08 a night), hungry (×2) or cold without a fire (×2);
 - a child's risk (0.005 a night) ignores hunger and cold altogether; only the high dial's minding raises it;
 - children also die of starvation like anyone else.
+- (Since 2 Nov, D4-97 (6): an infant's night risk is also multiplied by where it sleeps, a house 1, a camp 1.5, out 2, and a
+  birth in a camp is between housed and out: mother 0.04, infant 0.065. Not modelled in the tables below.)
 
 **Proposed ("vulnerable young"):**
 
@@ -166,11 +171,11 @@ checked in long runs:
 ## Open questions (for Zach)
 
 1. Pregnancy and the gap: keep them scaled with lifespan (D2-153), or fix them in days so long-lived worlds can have large families
-   (§3)?
-2. The vulnerable young (§4): adopt the proposed rates, with hunger and cold now bearing on children as well as infants?
-3. You wrote "youth": should youths (the agent stage) also be more vulnerable when hungry or cold, or only infants and children?
-4. A child's cost (§5): raise it at the household (a full ration, 2 units of infant care), or leave the limit to the land (D2-161)?
-5. Confirm what follows from a 2-day pregnancy (§2): the last day lighter, signs from the day after conception.
+   (§3)? — **still open**; parked for later in OPEN L-27 (long runs over several generations)
+2. The vulnerable young (§4): adopt the proposed rates, with hunger and cold now bearing on children as well as infants? — **still open**; D4-97 (6) added shelter for infants only, not these rates
+3. You wrote "youth": should youths (the agent stage) also be more vulnerable when hungry or cold, or only infants and children? — **still open**
+4. A child's cost (§5): raise it at the household (a full ration, 2 units of infant care), or leave the limit to the land (D2-161)? — **still open**; one run (38.42, Combe evening arm) had growth outrun its food after a blight, a hint that the land binds
+5. Confirm what follows from a 2-day pregnancy (§2): the last day lighter, signs from the day after conception. — built as proposed (data.LIFE, life.py; spec/life/birth_and_death.md marks it proposed); **to confirm**
 
 ## History
 
@@ -178,6 +183,10 @@ checked in long runs:
   any effort as built. Zach: "your 2, 1, 0.8 makes sense. 5 days was way too long"; limits should be softer (feeding the child, the
   young vulnerable) rather than hard waits; note replacement over lifespans against how often people try for later. Written;
   D2-162; OPEN L-27.
+
+- 5 Nov: Swept against DECISIONS, the spec and what is built (37.2): D2-162 and Q5's readings built; D4-97 (6) added shelter to an
+  infant's risk; Q1 to Q4 still open. Combe (38.41, 38.42: lifespan 96, scaled waits) gave 1 to 3 births in 40 days, capped by one
+  couple's fertile window and, in the evening arm, by food.
 
 ## Sources
 

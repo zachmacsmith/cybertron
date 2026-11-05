@@ -1,6 +1,9 @@
 # Proposal: how buildings fit the other systems (before Package E is built)
 
-**Status:** discussion (24 Oct). Package E (02y) is deferred until this is worked out (Zach). **Owner:** 37.2. **Affects:**
+**Status:** mostly settled. Package E (02y) was deferred until this was worked out (Zach, 24 Oct), then replaced by the building
+package (02zh), built 3 Nov (review 38.45). Decided and built: fuel (D2-156 to D2-159; Package F), beds (D2-165, D4-86), a hearth's
+reach (D2-159, D4-93). Still open: 2 questions (4 in part, building ground as a claim; 5, room bookings), listed in Open
+questions. **Owner:** 37.2. **Affects:**
 spec/economy/buildings.md and every file named below.
 
 ## Summary
@@ -97,12 +100,19 @@ are built of and what every hearth burns, and the worlds' woods are far too smal
 ## Open questions (for Zach)
 
 1. Fuel: now worked out as a system in [forests.md](forests.md). Size woods by kind (2a.1), split firewood from timber (2a.2), small woods with forests beyond and charcoal in hearths
-   (2a.3)?
+   (2a.3)? — Decided: D2-156 (woods as three stocks at real sizes by kind: old forest about 2,500 timber a unit of size, a managed
+   wood 600, a copse 300, not 2a.1's numbers; each world sets the push by its near woods), D2-157 (firewood apart from timber;
+   charcoal 6 heat, burning in a hearth), D2-158 (rights in woods), D2-161 (capacity checks count yearly flows). Built: forests.py
+   (Package F; OPEN Q-23).
 2. Beds for members, with infants sharing and two children a bed (2b)? **Answered 3 Nov: members need beds; seeded houses
-   start with them (D2-165); the sharing rules to confirm.**
-3. A hearth warming 12 spaces, fuel scaling with floor (2c)?
-4. Building ground as a claim, disputed by custom (2d)?
-5. Room bookings as an access leg in agreements, later (2f)?
+   start with them (D2-165); the sharing rules to confirm.** — Confirmed 2 Nov: D4-86; built (38.45 part 5; data.py PHYSICS beds).
+3. A hearth warming 12 spaces, fuel scaling with floor (2c)? — Decided: D2-159 (a hearth fully warms 12 spaces, a fire ring
+   half-warms 6) and D4-93 (each hearth burns its own heat; one room, one fire). Built: night.py warms by floor (OPEN Q-24 (9)).
+4. Building ground as a claim, disputed by custom (2d)? — In part: as built under D4-23, building on ground another holds is not
+   refused, and a new building is claimed with grounds `built`; clearing for building makes a claim with grounds `cleared` (02zh
+   §8, built). Still open: claiming part of a parcel's ground (spaces of it); D2-163's plot shares are for fields.
+5. Room bookings as an access leg in agreements, later (2f)? — Still open: not built (02zh, "Not in this package"); spec
+   economy/buildings.md lists it as open. Access stays per building (D4-30).
 
 ## History
 
@@ -114,6 +124,9 @@ are built of and what every hearth burns, and the worlds' woods are far too smal
 
 - 3 Nov: Zach: household members need beds, and houses start with them (D2-165). Calibration of every building and fitting:
   [02zf](../../review/37_growth/02zf_buildings_calibration.py).
+
+- 5 Nov: Swept against DECISIONS, the spec and what is built (37.2): fuel, beds and heating are decided and built; Package E
+  became 02zh, built 3 Nov, recording each building's parcel, structure and storeys (2g); questions 4 (in part) and 5 stay open.
 
 ## Sources
 

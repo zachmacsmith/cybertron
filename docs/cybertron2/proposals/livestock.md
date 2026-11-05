@@ -2,7 +2,11 @@
 
 > **Decided parts are in the spec:** spec/economy/livestock.md (24 Oct: wandering, roads, driving, splitting, fences round a parcel, gates). This file keeps the reasoning, the history and what is still open.
 
-**Status:** partly accepted: D2-6, D2-18 (rest discussion). **Owner:** 37.2 (numbers), with 37.4 (the mechanism is shared:
+**Status:** partly accepted: D2-6, D2-18, D2-23, D2-42, D2-63, D2-117, D2-123 to D2-125, D2-127, D2-128, D2-130 to D2-132,
+D2-136, D2-189, D4-41, D4-42, D4-44, D4-45, D4-54, D4-56, D4-58. Built: cattle with roles, herding, milking, slaughter, breeding,
+fodder, wandering on the node and on roads, driving, splitting, fences round a parcel and gates, the pack ox (engine/farm.py,
+herds.py; spec economy/livestock.md). Later: horses and other kinds (OPEN L-36), fences on borders, hedges, folds and wolves (L-24).
+Still open: 3 questions (02o's numbers to calibrate, dogs, the common herd; listed in Open questions). **Owner:** 37.2 (numbers), with 37.4 (the mechanism is shared:
 README "Who owns what"). **Affects:** spec/economy/livestock.md, spec/economy/production.md (draught, dung, fodder),
 spec/economy/transport.md (pack animals, carts, riders), spec/world (pasture; 37.4), spec/conflict/raids.md (herds driven off).
 
@@ -23,6 +27,10 @@ answer.
 
 ### In discussion (02g §2-2c, 02l §5)
 
+*Swept 5 Nov:* a herd, breeding (D4-44), winter (D4-42), herding and cattle's products (D2-42, D2-63) are decided and built at 02o's
+numbers, not this table's (data.PHYSICS cattle; slaughter 40 to 50 meat and 2 hides). Horses, saddles and mounted strength wait on
+L-36; catching wild herds is not built; raids drive off no herds (stalls keep them safe in winter, D2-45, as built).
+
 | Mechanic | Proposal |
 |---|---|
 | a herd | a count per owner (or held in common) at a node, grazing a pasture whose grass is stock-limited |
@@ -36,6 +44,10 @@ answer.
 | raids | herds can be driven off; riders make it easy (02k §3) |
 
 ## Fences, hedges and walls (23 Oct, discussion; for later)
+
+*Swept 5 Nov:* superseded in part by D2-126 and D2-130 (wood, then stone, round a parcel: built, herds.py) and D2-132 (gates); the
+numbers below are replaced by the spec's. Hedges, folds, wolves and fences on borders are later (OPEN L-24). The odds on an edge
+below are replaced by D2-124's drift.
 
 *37.4's [fences.md](fences.md) holds the mechanism (field works on parcels, the hamlet run's lost rye); this section is 37.2's numbers
 for it.*
@@ -107,7 +119,8 @@ at the level of parcels, which the engine already has (a herd is on a parcel in 
 
 ### Wandering, driving and splitting (24 Oct: D2-123 to D2-128)
 
-Revises the odds above. Proposed numbers, to confirm or calibrate:
+Revises the odds above. Proposed numbers, to confirm or calibrate. *Built 24 Oct as written (herds.py, data.HERDS), losses on the
+road by head; D2-124's row still calls by head or by group open.*
 
 - **On the node (D2-123):** a fed herd on good pasture moves 0 to 1 steps a day; hungry, or drawn by a ripe crop or water, up to about
   8 (enough to cross a village of 15 parcels). Each step picks the most attractive neighbour and crosses the border at its fence's
@@ -147,9 +160,14 @@ Revises the odds above. Proposed numbers, to confirm or calibrate:
 ## Open questions
 
 1. How pasture is represented: plots of a different cover, or a site with a grazing capacity (asked of 37.4 on the board, 23 Oct).
-2. Breeding, milk and herding numbers (dry runs).
-3. Whether dogs (02g §1d shortlist) are a third kind in the same system.
-4. Rules for a common herd: a law's clauses (proposals/law.md) or custom.
+   — built: pasture and meadow are parcel covers counted in plots, with grass a plot (data.PHYSICS cattle, farm.py; D4-45); the
+   waste covers graze at a share (D2-189).
+2. Breeding, milk and herding numbers (dry runs). — built at 02o's numbers (0.7 calves a cow a year, in milk 0.6 of the year, 1.6
+   milk a cow milked, herding 1 unit for up to 30 head), all marked calibrate. Still open: the calibration.
+3. Whether dogs (02g §1d shortlist) are a third kind in the same system. — still open: dogs exist only as a building's fitting that
+   hears a raid (fuse.py) and barks at blood (signs.py), not as beasts; L-36 names sheep, pigs and horses, not dogs.
+4. Rules for a common herd: a law's clauses (proposals/law.md) or custom. — still open: nothing decided or built; the engine
+   enforces only possession (D4-23), and customs are now lines people keep (D4-64).
 
 ## History
 
@@ -181,6 +199,8 @@ Revises the odds above. Proposed numbers, to confirm or calibrate:
 - 24 Oct: Zach decided D2-123 to D2-125, D2-127, D2-128, D2-130 to D2-132: herds wander far; lost on roads drifting a stretch a day,
   losses by head, found by noticing; driving a stretch or accompanying; capacity and splitting, the share split off peaked at a
   quarter; fences round a parcel (fenced or not) for now, borders later; gates automatic, opening one an act. Spec written.
+- 5 Nov: Swept against DECISIONS, the spec and what is built (37.2): the cattle system, wandering, roads, driving, splitting, fences
+  round a parcel and the pack ox are decided and built; still open: 02o's numbers to calibrate, dogs, the common herd.
 
 ## Sources
 

@@ -1,7 +1,8 @@
 # The dependence ladder (OPEN L-50)
 
-Status: **designed and generated, not run** (Zach, 2 Nov: "design but don't build yet. Like generate the worlds to see if the
-generator works, but don't run them"). The proposal is 37.2's; the runs would be 37.4's once Zach says go. Current as of 2 Nov.
+**Status:** designed and generated, not run (the cheap ladder: 3 worlds, regenerated 3 Nov). Zach, 2 Nov: "design but don't build
+yet. Like generate the worlds to see if the generator works, but don't run them". **Owner:** 37.2 (design); the runs would be
+37.4's once Zach says go. Current as of 3 Nov.
 
 ## The question
 
