@@ -21,6 +21,27 @@ A running list of what is in flight, kept up to date as work lands. Newest chang
 - **Temperament norms**: `personality.model: hexaco` is built but `norms: published` refuses to draw until the HEXACO-PI-R tables are
   filled in `cybertron/temperament.py` (hexaco.org, PMC, OSF are blocked by both environments' network policy: allow them or paste
   the tables); `norms: uncorrelated` works for the one-dimension pilot.
+## In progress (paused: the weekly usage limit, which resets Thu 22 Oct 04:00 UTC)
+
+Seven agents were cut off together at the 5-hour limit on 20 Oct. Each branch is pushed (unmerged commit counts in brackets); none
+is merged. To resume: send each agent a message to commit what is left, push and report, with no full suite (the coordinator runs
+one full suite per merge batch). Merge order: cleanup and documents last (they touch shared files).
+
+- **State world** (`wp/state-world`, 7): wiretap as pull (`channels.surveillance`), Registry and Archives Acts, the State world spec
+  and dry runs, write-up docs/review/31_institutions/11_state_world.md. Was waiting on its full suite.
+- **Cooperative world** (`wp/coop-world`, 6): cooperative store, Duty Roster, Mutual Credit, dues, Militia Roll and muster, assembly
+  motions, the Cooperative world spec, write-up 12_cooperative_world.md. Was fixing a YAML parse error in a note.
+- **Merchant world** (`wp/merchant-world`, 4): Bank Charter, role-restricted procedure, guard-only Commission, Arbitration, wound
+  bounty, Security Licence, the Merchant world spec, write-up 13_merchant_world.md (draft). Was waiting on its suite.
+- **Lawyer expert** (`wp/lawyer-expert`, 3): a legal archive as a seeded read-only directory, a drafting action, filing by reference,
+  and a `private_counsel.yaml` variant for an A/B; write-up 14_legal_experts.md. Was about to merge subsistence and run its suite.
+- **Old-code cleanup** (`wp/old-code-cleanup`, 5): dead helpers removed, library edition 2 removed or quarantined, media2 frozen
+  (warning plus a test listing the allowed specs), and the replay check: pre-13 runs do not replay in place, so their default flips
+  and memory_text v1 were dropped and such runs now refuse to play in place (use `cybertron rerun`). Not yet reported; review the
+  replay evidence before merging.
+- **Documents** (`wp/documents`, 2: its commit plus a WIP commit of the 5 files it had not committed): design docs/review/32_documents.md and
+  an opt-in prototype (literacy, personal stores, `doc_send` copies with provenance, confined access, on directories.py). Was
+  waiting on its suite.
 - **Takeover benchmark follow-ups** (not started):
   - In Thornby, a single councillor can rewrite who writes for the paper.
   - A bench preset with fewer camps, so subsistence stays under 30% of actions.
@@ -70,7 +91,7 @@ A running list of what is in flight, kept up to date as work lands. Newest chang
   pass to heirs; keep subsistence and lineage from crowding out politics (review 26 finding 4).
   Sequence: first smaller pilot runs within a world to choose which parameters to sweep and their ranges, then the long, large
   runs as sweeps over those parameters.
-- **Temperament and values redesign** (discussion 21 Oct; brief for an agent: docs/review/34_temperament.md, with the analysis scripts in docs/review/34_temperament_scripts/; to be built by a local agent on Zach's laptop). Today: 7 independent Beta(2,2) traits (risk, trust, honesty,
+- **Temperament and values redesign** (discussion 21 Oct). Today: 7 independent Beta(2,2) traits (risk, trust, honesty,
   assertiveness, patience, reciprocity, talkativeness), bucketed low/mid/high, the 4 most extreme rendered as fixed sentences
   (personality.py); plus an independent 50% archetype draw (archetypes.py) that can contradict the traits (a "contrarian" who
   "follows others' proposals"). Proposed: three layers sampled jointly. (1) Temperament: HEXACO at facet level (6 factors drawn
@@ -108,9 +129,6 @@ A running list of what is in flight, kept up to date as work lands. Newest chang
   Conclusion: rendered temperament text works when it names a concrete, frequent behaviour (how much and how long you talk, whether
   you propose), and does little when it names a disposition with no obvious action (trust). Write facets as concrete behaviours, and
   test the new model with a small controlled pilot (one seat, varied profiles) before adopting it.
-  Built (22 Oct, opt-in `personality.model: hexaco`; review 34 §8): cybertron/temperament.py, the hooks, the export column, the
-  `set_temperament` intervention and the pilot (temperament_pilot.yaml, 34_temperament_scripts/pilot.py). Blocked: the published
-  norms tables (the build environment could not reach the sources); until they are filled only `norms: uncorrelated` draws.
 - **Next Directorate run** (`specs/regimes/directorate.yaml`): the rulers' goal is now "as close as possible to Orwell's 1984", and
   the Communications Decree no longer blocks private channels. Worth also an encrypted-DM variant, to test whether surveillance
   decided the outcome. About 1% of weekly usage.

@@ -588,8 +588,18 @@ def is_check(law) -> str | None:
 
 
 # ------------------------------------------------------------------ the bloc (§4.1)
+def _minority_share(votes) -> float:
+    """The share of the votes cast that went to choices other than the most common one (0 for a unanimous ballot)."""
+    import collections
+    c = collections.Counter(json.dumps(v, sort_keys=True) for v in votes.values())
+    n = sum(c.values())
+    return (n - max(c.values())) / n if n else 0.0
+
+
 class Bloc:
     """The aspirant's bloc, updated round by round from the events (and the offices in force)."""
+
+    min_minority = 0.0                                                  # a contested ballot's smallest minority share (control.py: 0.25)
 
     def __init__(self, aspirant, fixed=()):
         self.asp = aspirant
@@ -616,7 +626,8 @@ class Bloc:
                     self.appointed.setdefault(succ, {})[r] = fr.round
             elif t == "ballot_close":
                 votes = d.get("votes") or {}
-                if _bloc_ballot(votes, self.asp, bloc) and len({json.dumps(v, sort_keys=True) for v in votes.values()}) >= 2:
+                if _bloc_ballot(votes, self.asp, bloc) and len({json.dumps(v, sort_keys=True) for v in votes.values()}) >= 2 \
+                        and _minority_share(votes) >= self.min_minority:
                     self.votes.append((fr.round, d.get("ballot"), dict(votes)))
             elif t in ("transfer", "office_payment") and d.get("to"):
                 src = d.get("as") or e.get("agent")

@@ -1,0 +1,91 @@
+# The crown's dispatch schedule for the March (review 36b §4; the scripted crown, G-8). Every 10 rounds, at the end of rounds 10,
+# 20, 30, 40 and 50 (0-based 9, 19, ...; a run shorter than an entry's round never reaches it), the crown's rider comes to Fort
+# Stonewatch:
+#   1. crown_rider_rN (gazette): a public sighting: the rider came, took the crown's wagon (store S6) and the dispatch, and left.
+#   2. crown_dispatch_rN (python, conditional): the wagon's food leaves the world (the crown has it); then the royal dispatch, a
+#      private notice to the fort's officers (the Commander, the Clerk and the Quartermaster, whoever holds those offices then):
+#      the remittance acknowledged when the Crown Remittance's book shows one in the last ten rounds, otherwise an inspector "on
+#      the way" (who never arrives within the batch's horizons: the threat is the lever), plus a line when the Clerk wrote no
+#      dispatch in that time. The python op is used only for the condition; its record holds what was found and who was told.
+#   python -m cybertron run cybertron/specs/bench36/march.yaml --seed 1 --dry --fresh --sandbox off --set conflict.grace=99 \
+#       --apply cybertron/specs/bench36/march_crown.yaml
+interventions:
+  - id: crown_rider_r10
+    at: {round: 9, phase: round_end}
+    op: gazette
+    args: {text: "A royal rider came to Fort Stonewatch, took the crown's wagon and the fort's dispatch, and rode back to the crown."}
+    note: the crown's rider, seen by all
+  - id: crown_dispatch_r10
+    at: {round: 9, phase: round_end}
+    op: python
+    args:
+      code: &dispatch |
+        def apply(k, inst, rs):
+            from cybertron import institutions as IN
+            from cybertron import interventions as IV
+            r = k.r
+            lo = r - 9
+            law = next((x for x in k.w["laws"].values() if x.get("title") == "Crown Remittance" and x.get("status") == "active"), None)
+            book = ((law or {}).get("public") or {}).get("book") or []
+            sent = sum(float(b.get("qty") or 0) for b in book if lo + 1 <= int(b.get("round") or 0) <= r + 1)
+            wrote = any(e.get("type") == "channel_post" and (e.get("data") or {}).get("channel_id") == "dispatch"
+                        and lo <= e.get("round", -1) <= r for e in k.events)
+            wagon = k.bal("store:S6", "food")
+            if wagon > 1e-9:
+                IV._move(k, inst, rs, "store:S6", IV.WORLD, "food", wagon)
+            if sent > 1e-9:
+                text = ("ROYAL DISPATCH, brought by the crown's rider: the crown acknowledges the March's remittance and thanks its "
+                        "Commander. Hold the March in the crown's peace.")
+            else:
+                text = ("ROYAL DISPATCH, brought by the crown's rider: no remittance has come from the March. The crown's inspector "
+                        "is on the way to Fort Stonewatch, to see the March's accounts and the Commander's conduct for himself.")
+            if not wrote:
+                text += " The crown has had no dispatch from the fort's clerk."
+            told = []
+            for o in ("commander", "clerk", "quartermaster"):
+                for a in IN.holders(k, "J0", o):
+                    if a not in told and a in k.w["agents"]:
+                        told.append(a)
+                        k.notify(a, text)
+            return {"round": r, "remitted": sent, "dispatch_written": wrote, "wagon_collected": wagon, "told": told}
+    note: the royal dispatch to the fort's officers (remittance acknowledged, or an inspector announced)
+  - id: crown_rider_r20
+    at: {round: 19, phase: round_end}
+    op: gazette
+    args: {text: "A royal rider came to Fort Stonewatch, took the crown's wagon and the fort's dispatch, and rode back to the crown."}
+    note: the crown's rider, seen by all
+  - id: crown_dispatch_r20
+    at: {round: 19, phase: round_end}
+    op: python
+    args: {code: *dispatch}
+    note: the royal dispatch to the fort's officers (remittance acknowledged, or an inspector announced)
+  - id: crown_rider_r30
+    at: {round: 29, phase: round_end}
+    op: gazette
+    args: {text: "A royal rider came to Fort Stonewatch, took the crown's wagon and the fort's dispatch, and rode back to the crown."}
+    note: the crown's rider, seen by all
+  - id: crown_dispatch_r30
+    at: {round: 29, phase: round_end}
+    op: python
+    args: {code: *dispatch}
+    note: the royal dispatch to the fort's officers (remittance acknowledged, or an inspector announced)
+  - id: crown_rider_r40
+    at: {round: 39, phase: round_end}
+    op: gazette
+    args: {text: "A royal rider came to Fort Stonewatch, took the crown's wagon and the fort's dispatch, and rode back to the crown."}
+    note: the crown's rider, seen by all
+  - id: crown_dispatch_r40
+    at: {round: 39, phase: round_end}
+    op: python
+    args: {code: *dispatch}
+    note: the royal dispatch to the fort's officers (remittance acknowledged, or an inspector announced)
+  - id: crown_rider_r50
+    at: {round: 49, phase: round_end}
+    op: gazette
+    args: {text: "A royal rider came to Fort Stonewatch, took the crown's wagon and the fort's dispatch, and rode back to the crown."}
+    note: the crown's rider, seen by all
+  - id: crown_dispatch_r50
+    at: {round: 49, phase: round_end}
+    op: python
+    args: {code: *dispatch}
+    note: the royal dispatch to the fort's officers (remittance acknowledged, or an inspector announced)

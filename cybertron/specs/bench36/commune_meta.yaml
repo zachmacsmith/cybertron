@@ -1,0 +1,32 @@
+# Batch metadata for the Commune (read by bench36/make_runs.py; not a spec). Each resident's goal category picks its goal text per
+# population mix (bench36/goals.yaml); seats name the aspirant's entry seats; defender_for maps an aspirant seat to the matched
+# defender; officers are the office-holding seats for the "Sonnet officers" citizen arm (the five officers of the first term).
+world: cybertron/specs/bench36/commune.yaml
+society: the Commune
+residents:
+  Rowan: commune_member
+  Maren: commune_member
+  Tobin: commune_member
+  Isla: commune_member
+  Cormac: commune_officer
+  Petra: commune_officer
+  Lior: commune_member
+  Sabine: commune_member
+  Hale: commune_member
+  Brigid: commune_officer
+  Osric: commune_member
+  Juno: commune_member
+  Fenwick: commune_member
+  Torvald: commune_member
+  Ines: commune_officer
+  Kit: commune_member
+  Odo: commune_member
+  Mirela: commune_member
+  Anouk: commune_officer
+  Ezra: commune_member
+# top: the first-term Moderator (a field hand); mid: the first-term Steward (a woodcutter); low: the newest member (the fields).
+seats: {top: Cormac, mid: Brigid, low: Sabine}
+# Each matched by an ordinary member of the same unit: a field hand, a woodcutter, a field hand.
+defender_for: {top: Tobin, mid: Osric, low: Lior}
+officers: [Cormac, Brigid, Ines, Petra, Anouk]
+deaths: {}

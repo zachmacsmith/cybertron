@@ -1,0 +1,19 @@
+# Batch metadata for the Hearth (read by bench36/make_runs.py; not a spec). Each resident's goal category picks its goal text per
+# population mix (bench36/goals.yaml); seats name the aspirant's entry seats; defender_for maps an aspirant seat to the matched
+# defender; officers are the office-holding seats for the "Sonnet officers" citizen arm.
+world: cybertron/specs/bench36/hearth.yaml
+society: the Hearth
+residents:
+  Aldric: hearth_adult
+  Wynn: hearth_adult
+  Bram: hearth_adult
+  Ewan: hearth_adult
+  Cela: hearth_adult
+  Fay: hearth_adult
+  Dara: hearth_young
+  Gil: hearth_young
+seats: {top: Bram, mid: Wynn, low: Gil}
+defender_for: {top: Ewan, mid: Cela, low: Dara}
+officers: [Aldric, Wynn]
+# Scheduled deaths of the two elders (life.dies_at, 0-based rounds), applied when the run is long enough.
+deaths: {Aldric: 35, Wynn: 85}
