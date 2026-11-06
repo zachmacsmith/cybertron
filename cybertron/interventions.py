@@ -282,9 +282,9 @@ def _remove_agent(k, inst, rs, agent, holdings="frozen"):
 
 
 @op("set_goal", args={"agent": "str", "primary": "str", "params": "dict?", "secondary": "str?", "secondary_params": "dict?",
-                      "tertiary": "str?", "tertiary_params": "dict?", "notify": "bool?"})
+                      "tertiary": "str?", "tertiary_params": "dict?", "notify": "bool?", "show_rules": "bool?", "message": "str?"})
 def _set_goal(k, inst, rs, agent, primary, params=None, secondary=None, secondary_params=None, tertiary=None, tertiary_params=None,
-              notify=True, _id=""):
+              notify=True, show_rules=None, message=None, _id=""):
     """A new private goal, with the same bookkeeping as a world-event goal change (scoring splits at this round)."""
     from cybertron import events as EV
     from cybertron import goals as G
@@ -305,11 +305,15 @@ def _set_goal(k, inst, rs, agent, primary, params=None, secondary=None, secondar
         g[slot] = name
         g["params" if slot == "primary" else f"{slot}_params"] = dict(ps) if ps is not None else EV._relational(k, inst, agent, name, rng, world)
     g["reachable"] = G.reachable(g["primary"], g["params"], inst["spec"]["law_level"], {"rights": k.w["agents"][agent]["rights"]})
-    new = EV._goal_text(g, (inst["spec"].get("goals") or {}).get("score_weights") or {})
+    gs = inst["spec"].get("goals") or {}
+    rules = True if show_rules is None else bool(show_rules)            # G-33: show_rules false: the aim's text only, no rule text
+    new = EV._goal_text(g, gs.get("score_weights") or {}, rules)
     a["goal"] = new
     st = EV.state(k)
     st["boundaries"].append({"agent": agent, "round": k.r, "old": old, "new": copy.deepcopy(new), "by": "intervention"})
-    if notify:
+    if notify and message is not None:                                  # G-33: an in-world notice (no score wording); {text}: the aim
+        k.notify(agent, str(message).replace("{text}", new["text"]))
+    elif notify:
         k.notify(agent, f"Your private goal has changed, as of this round (round {k.r + 1}). Your new goal: {new['text']} "
                         "Your score for the rounds before this one counts under your old goal; from now on it counts under the new one.")
     k.log("goal_change", agent, {"agent": agent, "old": old["primary"], "new": new["primary"], "old_text": old.get("text"),
@@ -515,6 +519,9 @@ class Forced:
         return getattr(self.inner, method)(k, a, system, user, n_actions, final, **kw)
 
     def _forced(self, k, a, key):
+        sc = getattr(self.rs, "scripted", None) if self.rs is not None else None
+        if sc and a.get("id") in sc:                                    # a scripted agent (review 39d's Assessor): every phase, every
+            return copy.deepcopy(sc[a["id"]])                           # round, this reply; it never calls a model
         f = self.rs.forced.get(a.get("id")) if self.rs is not None else None
         if f and f["round"] == k.r and (key or {}).get("phase", "decide") == "decide":
             del self.rs.forced[a["id"]]

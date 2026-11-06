@@ -130,7 +130,7 @@ def sandbox_for(dry, mode):
 
 
 def run_one(spec_name, sp, seed, dry, sandbox_mode, parent=None, quiet=False, fresh=False, live=None, notices=(), schedule=None,
-            allow_code_drift=False):
+            allow_code_drift=False, until=None):
     inst = generator.generate(sp, seed)
     tag = Path(spec_name).stem
     parent = parent or RUNS / tag
@@ -161,7 +161,8 @@ def run_one(spec_name, sp, seed, dry, sandbox_mode, parent=None, quiet=False, fr
     print(f"[{out.name}] {len(inst['agents'])} agents x {inst['rounds']} rounds, constitution {inst['constitution']}, "
           + (f"regime {inst['regime']['name']}, " if inst.get("regime") else "") +
           f"law level {inst['law_level']}, backend {backend}" + (" (resuming)" if resume else ""))
-    _play(inst, out, dry, seed, sandbox_mode, quiet, resume, live, notices, schedule=schedule, allow_code_drift=allow_code_drift)
+    _play(inst, out, dry, seed, sandbox_mode, quiet, resume, live, notices, schedule=schedule, allow_code_drift=allow_code_drift,
+          until=until)
     res = scorer.score(out)
     from cybertron import report
     report.build(out)
@@ -169,11 +170,11 @@ def run_one(spec_name, sp, seed, dry, sandbox_mode, parent=None, quiet=False, fr
 
 
 def _play(inst, out, dry, seed, sandbox_mode, quiet, resume, live=None, notices=(), instance_source=None, schedule=None,
-          allow_code_drift=False):
+          allow_code_drift=False, until=None):
     try:
         runner.run(inst, policy_for(inst["spec"], dry, seed), out, sandbox_for(dry, sandbox_mode),
                    log=(lambda *a: None) if quiet else print, resume=resume, live=live, notices=notices, dry=dry,
-                   instance_source=instance_source, schedule=schedule, allow_code_drift=allow_code_drift)
+                   instance_source=instance_source, schedule=schedule, allow_code_drift=allow_code_drift, until=until)
     except runner.RunStopped as e:
         print(f"[{out.name}] stopped: {e}\nContinue later with the same command, or: python -m cybertron resume {out}")
         raise SystemExit(2)
@@ -279,7 +280,7 @@ def cmd_run(a):
     sp = build_spec(a.spec, a.set, getattr(a, 'fast', False))
     live = {key: S.yaml.safe_load(v) for key, _, v in (x.partition("=") for x in getattr(a, "live", []) or [])}
     out, s = run_one(a.spec, sp, a.seed, a.dry, a.sandbox, fresh=a.fresh, live=live, notices=getattr(a, "notice", []) or [],
-                     schedule=load_schedules(getattr(a, "apply", None)))
+                     schedule=load_schedules(getattr(a, "apply", None)), until=getattr(a, "until", None))
     print(json.dumps(s, indent=1))
     print(f"run dir: {out}")
 
@@ -376,7 +377,10 @@ def main(argv=None):
                                                              "skip if complete, resume if not)")
 
     p = sub.add_parser("generate"); common(p); p.add_argument("--out"); p.set_defaults(fn=cmd_generate)
-    p = sub.add_parser("run"); common(p); p.set_defaults(fn=cmd_run)
+    p = sub.add_parser("run"); common(p)
+    p.add_argument("--until", type=int, default=None, help="stop (paused, resumable) after K rounds, e.g. a world told it has "
+                   "H rounds played only to K (review 25 §5, the stated-horizon experiments)")
+    p.set_defaults(fn=cmd_run)
     p = sub.add_parser("sweep"); common(p); p.add_argument("--seeds", type=int, default=3)
     p.add_argument("--vary", action="append", default=[], help="key=v1,v2 (repeatable; grid over all)"); p.set_defaults(fn=cmd_sweep)
     p = sub.add_parser("explore"); common(p); p.add_argument("--runs", type=int, default=8)

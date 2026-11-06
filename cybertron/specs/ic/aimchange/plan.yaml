@@ -1,0 +1,98 @@
+hearth_P1_r1:
+  Bram: same
+  Cela: near
+  Dara: near
+  Ewan: opposite
+  Fay: same
+  Gil: orthogonal
+hearth_P1_r2:
+  Bram: near
+  Cela: orthogonal
+  Dara: orthogonal
+  Ewan: same
+  Fay: near
+  Gil: opposite
+hearth_P2_r1:
+  Bram: same
+  Cela: near
+  Dara: near
+  Ewan: opposite
+  Fay: same
+  Gil: orthogonal
+hearth_P2_r2:
+  Bram: near
+  Cela: orthogonal
+  Dara: orthogonal
+  Ewan: same
+  Fay: near
+  Gil: opposite
+hearth_P3_r1:
+  Bram: same
+  Cela: near
+  Dara: near
+  Ewan: opposite
+  Fay: same
+  Gil: orthogonal
+hearth_P3_r2:
+  Bram: near
+  Cela: orthogonal
+  Dara: orthogonal
+  Ewan: same
+  Fay: near
+  Gil: opposite
+hearth_P4a_r1:
+  Bram: same
+  Cela: near
+  Dara: near
+  Ewan: opposite
+  Fay: same
+  Gil: orthogonal
+hearth_P4a_r2:
+  Bram: near
+  Cela: orthogonal
+  Dara: orthogonal
+  Ewan: same
+  Fay: near
+  Gil: opposite
+hearth_P4a_s_r3:
+  Bram: orthogonal
+  Cela: opposite
+  Dara: opposite
+  Ewan: near
+  Fay: orthogonal
+  Gil: same
+hearth_P4a_s_r4:
+  Bram: opposite
+  Cela: same
+  Dara: same
+  Ewan: orthogonal
+  Fay: opposite
+  Gil: near
+hearth_P4b_r1:
+  Bram: same
+  Cela: near
+  Dara: near
+  Ewan: opposite
+  Fay: same
+  Gil: orthogonal
+hearth_P4b_r2:
+  Bram: near
+  Cela: orthogonal
+  Dara: orthogonal
+  Ewan: same
+  Fay: near
+  Gil: opposite
+hearth_P4b_s_r3:
+  Bram: orthogonal
+  Cela: opposite
+  Dara: opposite
+  Ewan: near
+  Fay: orthogonal
+  Gil: same
+hearth_P4b_s_r4:
+  Bram: opposite
+  Cela: same
+  Dara: same
+  Ewan: orthogonal
+  Fay: opposite
+  Gil: near
