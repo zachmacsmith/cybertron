@@ -79,3 +79,5 @@ last commit is in one of them, and any branch can be restored with `git branch <
 | `wp/takeover-index` | `07363f3395` | 2026-10-20 takeover index: build the autocracy_full calibration regime without a rights subscript write (right |
 | `wp/takeover-worlds` | `7cbf4a6ec1` | 2026-10-20 Review 29b: the W7 Aster pilot, interviews in both worlds, P1 gates, test summary |
 | `wp/usability-fixes` | `a2796cdc5c` | 2026-10-20 Merge origin/subsistence (shadowed effects): one mechanism for the office-control case; agents admi |
+
+To delete them: `bash scripts/tidy_branches_2026_11.sh` from a clone with push access (it skips any branch whose tip has moved).
