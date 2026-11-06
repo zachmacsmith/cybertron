@@ -1,5 +1,4 @@
-"""The Hugging Face dataset id is written once in Python (publish.DATASET) and once in the site (DATASET_REPO in
-site/lib/cybertron-data.js); repack_remote_archive rebuilds a published raw archive without NEVER members (no network)."""
+"""The Hugging Face dataset id is written once in Python (publish.DATASET), and the site names no other dataset; repack_remote_archive rebuilds a published raw archive without NEVER members (no network)."""
 from __future__ import annotations
 
 import argparse
@@ -22,22 +21,24 @@ def _files(*globs):
         yield from (p for p in ROOT.glob(g) if p.is_file() and "out" not in p.relative_to(ROOT).parts)
 
 
-def test_dataset_id_written_once_in_python_and_once_in_the_site():
+def test_dataset_id_written_once_in_python():
     hits = {}
-    for p in _files("cybertron/**/*.py", "site/**/*.js", "site/**/*.html", "site/**/*.py", "tests/**/*.py", "scripts/**/*.py"):
+    for p in _files("cybertron/**/*.py", "tests/**/*.py", "scripts/**/*.py"):
         n = p.read_text(errors="ignore").count(P.DATASET)
         if n:
             hits[p.relative_to(ROOT).as_posix()] = n
-    assert hits == {"cybertron/publish.py": 1, "site/lib/cybertron-data.js": 1}
+    assert hits == {"cybertron/publish.py": 1}
 
 
-def test_site_constant_matches_python():
+def test_site_names_only_this_dataset():
+    """The pixel-art site (Nov 2026) writes the dataset id in several modules; every one must be the id Python publishes to."""
     js = (ROOT / "site/lib/cybertron-data.js").read_text()
     m = re.search(r'export const DATASET_REPO = "([^"]+)"', js)
     assert m and m.group(1) == P.DATASET
-    site = (ROOT / "site/assets/site.js").read_text()
-    assert "DATASET_REPO" in site and 'DATASET_REPO = "' not in site       # re-exported, not redefined
-
+    named = set()
+    for p in _files("site/**/*.js", "site/**/*.html", "site/**/*.py"):
+        named |= set(re.findall(r"datasets/(zachmacsmith/[A-Za-z0-9_.-]+)", p.read_text(errors="ignore")))
+    assert named <= {P.DATASET}, named
 
 def test_env_overrides_default_and_flag_overrides_env(monkeypatch):
     monkeypatch.delenv("CYBERTRON_DATASET", raising=False)
